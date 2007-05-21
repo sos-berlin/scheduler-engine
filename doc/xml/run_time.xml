@@ -111,7 +111,19 @@
         <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
-                    Das Attribut kann nur für Jobs, nicht für Aufträge angegeben werden.
+                    Hiermit wird bestimmt, ob ein laufender Task nach Ablauf einer Periode weitere Process-Schritte ausführen soll oder nicht.
+                    Per Default führt ein Job keine weiteren Process-Schritte mit Ablauf der Periode aus und wird beendet (let_run="no").
+                    <br/><br/>
+                    Für auftragsgesteuerte Jobs gilt: 
+                    <br/>
+                    Wenn ein auftragsgesteuerter Job eine Periode definiert (z.B. 12:00 - 14:00) und während dieser Periode ein Auftrag
+                    eintrifft, wird der Auftrag ausgeführt. Nach Beendigung der Ausführung entscheidet der Wert für idle_timeout, ob die 
+                    Task gestartet bleibt und mögliche weitere Aufträge entgegennimmt. Wenn die Task gestartet bleibt und einen Auftrag 
+                    entgegennimmt, wird der Wert für let_run geprüft.
+                    <br/>
+                    let_run="yes": Der Auftrag wird ausgeführt.
+                    <br/>
+                    let_run="no": Der Auftrag wird nur ausgeführt, wenn der Startzeitpunkt innerhalb der Periode des Jobs liegt.
                 </p>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
