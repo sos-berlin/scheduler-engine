@@ -55,7 +55,7 @@
     in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
 </p>
 
-<pre>…<i>installation path</i>…\bin\scheduler.exe -config=hallo_welt.xml</pre>
+<pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -config=hallo_welt.xml</pre>
 
 <p>
     Ein gestarteter Scheduler kann mit Ctrl-C abgebrochen werden.
