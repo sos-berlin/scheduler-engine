@@ -61,9 +61,10 @@
             <phrase id="ini.entry">Eintrag</phrase>
             <phrase id="ini.file.location_remark">
                 <p>
-                    Unter Windows sollte die Datei dort angelegt werden, wo Windows seine <code>.ini</code>-Dateien erwartet.
-                    Das ist normalerweise im Verzeichnis <code>C:\WINDOWS</code>.
-                    Sonst wird die Datei im Heimverzeichnis des Benutzers erwartet.
+                    Unter Windows sollte die Datei dort angelegt werden, wo Windows seine <code>.ini</code>-Dateien erwartet, z.B.
+                    <code>C:\WINDOWS</code> oder <code>C:\WINNT</code>.
+                    <br/>
+                    Unter Unix wird die Datei im Heimatverzeichnis des Benutzers erwartet.
                 </p>
             </phrase>
 
