@@ -19,8 +19,31 @@
         <scheduler_keyword keyword="sos.ini"/>
 
         <p>
-            Die Datei gilt für allgemeine Einstellungen, die neben dem Scheduler auch für andere Produkte gelten.
+            In der Datei sos.ini wird der SOS-Lizenzschlüssel eingetragen. 
+            <br/><br/>
+            Außerdem können hier allgemeine Einstellungen für Java oder Mail stehen.
+            Einstellungen für Java sind auch in der Datei 
+            <a href="factory_ini_java.xml"><code>factory.ini</code>, Abschnitt <code>[java]</code></a> möglich.
         </p>
+        
+        <p>
+            Beim Aufruf des Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="sos.ini"/> angeben, z.B.:
+            <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -sos.ini=C:/Programme/scheduler/config/sos.ini</pre>
+        </p>
+        <p>
+          Bei der Installation durch den Scheduler-Setup wird die Datei sos.ini im Verzeichnis
+          <pre>…<i>scheduler installation path</i>…\config</pre>
+          abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.
+        </p>        
+        <p>
+          Sollen Einstellungen aus sos.ini neben dem Scheduler auch für andere SOS-Produkte gelten, kann diese Ini-Datei zentral abgelegt werden.
+          <br/><br/>
+          Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gilt:
+
+        </p>        
+        
+        
+        
         <!--p>
             Den Pfad dieser Datei können Sie einstellen (vorrangige Einstellungen zuerst):
         </p>
