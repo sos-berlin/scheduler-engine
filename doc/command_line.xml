@@ -112,7 +112,7 @@
         </command_option>
 
 
-        <command_option name="ini" type="dateiname" title="Anderer Name für Datei factory.ini">
+        <command_option name="ini" type="dateiname" title="Anderer Pfad/ Name für Datei factory.ini">
             <description>
                 <p>
                     Wählt eine andere Datei für die Datei <a href="factory_ini.xml"><code>factory.ini</code></a> aus.
@@ -127,7 +127,7 @@
         </command_option>
 
 
-        <command_option name="sos.ini" type="dateiname" title="Anderer Name für Datei sos.ini">>
+        <command_option name="sos.ini" type="dateiname" title="Anderer Pfad/ Name für Datei sos.ini">>
             <description>
                 <p>
                     Wählt eine andere Datei für die Hostware-Konfiguration <a href="sos_ini.xml"><code>sos.ini</code></a> aus.
@@ -682,7 +682,7 @@
         <p>
             Der Scheduler kann durch einen einfachen Aufruf gestartet werden:
         </p>
-        <pre>C:\>…<i>installation path</i>…\bin\scheduler.exe …\my_scheduler_configuration.xml …</pre>
+        <pre>C:\>…<i>scheduler installation path</i>…\bin\scheduler.exe …\my_scheduler_configuration.xml …</pre>
         <pre>user@host:~>…<i>installation path</i>…/bin/scheduler …/my_scheduler_configuration.xml …</pre>
         <p>
             In der Regel müssen vorher noch einige Umgebungsvariablen gesetzt sein, siehe das Handbuch »Installation und Konfiguration«.
