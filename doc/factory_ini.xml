@@ -22,8 +22,18 @@
             Hinweis: Leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden und 
             überschreiben keine Einstellung der <scheduler_a href="konfiguration.xml">XML-Konfiguration</scheduler_a>.
         </p>
+
         <p>
-            Den Pfad dieser Datei können Sie mit der Option <scheduler_option name="ini"/> ändern.
+            Beim Aufruf des Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="ini"/> angeben, z.B.:
+            <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -ini=C:/Programme/scheduler/config/factory.ini</pre>
+        </p>
+        <p>
+          Bei der Installation durch den Scheduler-Setup wird die Datei factory.ini im Verzeichnis
+          <pre>…<i>scheduler installation path</i>…\config</pre>
+          abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.
+        </p>   
+        <p>
+          Falls beim Scheduler-Aufruf der Pfad zur Datei factory.ini nicht angegeben wird, gilt:
         </p>
         
     </description>
