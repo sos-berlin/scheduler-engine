@@ -21,20 +21,17 @@
 <h2>1.&#160; Anforderung</h2>
 <p>Jeder Joblauf soll verzeichnet werden. Festgehalten werden</p>
 <ul>
-<li>Satzkennung, das ist die Jobnummer, eindeutig für den Spooler-Lauf oder die
-Datenbank</li>
-<li>Spooler-Id</li>
+<li>Satzkennung: ID der für einen Job gestarteten Task, eindeutig für den Spooler-Lauf oder die Datenbank</li>
+<li>Scheduler-ID</li>
 <li>Jobname</li>
 <li>Startzeit</li>
 <li>Endzeit (falls erreicht)</li>
-<li>Ein Anlass des Starts (es kann mehrere geben. Es wird der möglicherweise
-wichtigste Anlass genommen)</li>
-<li>Parameter, in XML</li>
+<li>Anlass des Starts (falls es mehrere Start-Anlässe gibt, wird der möglicherweise wichtigste Anlass genommen)</li>
+<li>Parameter (in XML)</li>
 <li>Anzahl Jobschritte (Anzahl der spooler_process-Aufrufe)</li>
 <li>Fehlerflag</li>
 <li>Fehlercode und Fehlertext</li>
-<li>Jobprotokoll (nur, wenn Protokoll in eine Datenbank geschrieben wird, und
-nur auf Anforderung)</li>
+<li>Jobprotokoll (nur, wenn Protokoll in eine Datenbank geschrieben wird, nur auf Anforderung)</li>
 <li>Extra Felder</li>
 </ul>
 <p>An der TCP-Schnittstelle sind Auszüge der Historie lesbar.</p>
@@ -47,14 +44,14 @@ nur auf Anforderung)</li>
 <td width="13%">
 id
 </td>
-<td width="87%">Eindeutige Kennung des Jobs (Tabellenschlüssel)</td>
+<td width="87%">Eindeutige Kennung der Task (Tabellenschlüssel)</td>
 </tr>
 <tr>
 <td width="13%">spooler_id</td>
-<td width="87%">Spooler-Id</td>
+<td width="87%">Scheduler-ID</td>
 </tr>
 <tr>
-<td width="13%">jobname</td>
+<td width="13%">job_name</td>
 <td width="87%">Jobname</td>
 </tr>
 <tr>
@@ -103,26 +100,24 @@ werden.</p>
 eine Datei fortgeschrieben. Die Datenfelder werden durch Tabulator getrennt.
 Beim Start eines Jobs wird ein Satz geschrieben, der beim Ende mit den
 vollständigen Daten überschrieben wird.</p>
-<p>Dateiname ist <i> log_dir</i><font class="mono">/history.</font><i>spoolerid</i><font class="mono">.job.</font><i>jobname</i><font class="mono">.txt</font></p>
-<p>Die Datei wird beim Spooler-Start neu angelegt. Eine bereits vorhandene Datei
+<p>Dateiname ist <i> log_dir</i><font class="mono">/history.</font><i>scheduler_id</i><font class="mono">.job.</font><i>jobname</i><font class="mono">.txt</font></p>
+<p>Die Datei wird beim Scheduler-Start neu angelegt. Eine bereits vorhandene Datei
 kann zurvor umbenannt und auch komprimiert werden.</p>
-<p> Der Spooler
-schreibt in die erste Zeile die Spaltennamen.</p>
+<p> Der Scheduler schreibt in die erste Zeile die Spaltennamen.</p>
 <p>Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrückt.</p>
 <p>Jedes Feld hat für 1024 Zeichen Platz. Längere Einträge werden
 abschnitten.</p>
 <p class="zwischentitel">Archivierung</p>
-<p>Beim Start des Spoolers werden die Historien der Jobs überschrieben. Die
-vorhandenen Historien können aber mit dem Eintrag spooler_history in der
-factory.ini archiviert werden</p>
+<p>Beim Start des Schedulers werden die Historien der Jobs überschrieben. 
+Die vorhandenen Historien können aber mit dem Eintrag history_archive in der factory.ini archiviert werden:</p>
 <pre>[spooler]
 history_archive = yes|<u>no</u>|gzip
 
 [Job <i>jobname</i>]
 history_archive = yes|no|gzip</pre>
-<p><font class="mono">spooler_history=yes</font>&#160; benennt die Datei um.
+<p><font class="mono">history_archive=yes</font>&#160; benennt die Datei um.
 Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergänzt.</p>
-<p><font class="mono">spooler_history=gzip&#160;</font> komprimiert die Datei
+<p><font class="mono">history_archive=gzip&#160;</font> komprimiert die Datei
 mit zlib (gzip) von Jean-loup Gailly [<a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a>].
 Der Dateiname wird außer um den Zeitstempel um die Endung <font class="mono">.gz</font>
 ergänzt. Die Datei kann mit gzip dekomprimiert werden. Sie lässt sich auch mit
@@ -130,20 +125,17 @@ der Hostware mit &quot;<font class="mono">nl | gzip | history.gz</font>&quot;
 lesen.</p>
 <h3>2.2&#160; Datenbank</h3>
 
-<p>Alle Daten werden in eine Tabelle geschrieben. Das Jobprotokoll wird in ein
-Blob geschrieben.&#160;</p>
+<p>Alle Daten werden in eine Tabelle geschrieben. Das Jobprotokoll wird in ein Blob geschrieben.&#160;</p>
 
 <p>
-Die Tabellename ist <font class="mono">spooler_history</font>. Wenn die Datei
-nicht vorhanden ist, wird sie als Datenbank angelegt. Wenn die Tabelle <font class="mono">spooler_history
-</font>nicht vorhanden ist, wird sie angelegt (das gilt nur für
-Microsoft-Access-Datenbanken).</p>
+Die Tabellename ist <font class="mono">SCHEDULER_HISTORY</font>. 
+Wenn die Datei nicht vorhanden ist, wird sie als Datenbank angelegt. 
+Wenn die Tabelle <font class="mono">SCHEDULER_HISTORY</font>nicht vorhanden ist, wird sie angelegt (das gilt nur für Microsoft-Access-Datenbanken).
+</p>
 
-<p>In der Tabelle <font class="mono">spooler_variables</font> wird in einem
-Eintrag die nächste freie Jobnummer gehalten.</p>
+<p>In der Tabelle <font class="mono">SCHEDULER_VARIABLES</font> wird in einem Eintrag die nächste freie Jobnummer gehalten.</p>
 
-<p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt,
-aber db gesetzt ist.&#160;</p>
+<p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt, aber db gesetzt ist.&#160;</p>
 
 <pre>[spooler]
 db = spooler.mdb                 <i>(dasselbe wie nächste Zeile)</i>
@@ -155,8 +147,8 @@ db = odbc -db=spooler</pre>
 <p class="zwischentitel">need_db</p>
 
 <p>Mit dem Eintrag <font class="mono">need_db=no</font> kann eingestellt werden,
-dass der Spooler auch anlaufen soll, wenn die Datenbank sich nicht öffnen
-lässt. Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;</p>
+dass der Scheduler auch starten soll, wenn die Datenbank sich nicht öffnen lässt. 
+Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;</p>
 
 <pre>[spooler]
 db = odbc -db=spooler
@@ -165,38 +157,38 @@ need_db = no</pre>
 <p>Wenn mit <font class="mono">db=</font> nur ein Datenbankdateiname und<font class="mono">
 log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
 nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
-der Spooler nicht.</p>
+der Scheduler nicht.</p>
 
 <p class="zwischentitel">Microsoft-Access-Datenbank wird automatisch angelegt</p>
 
 <p>Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
-ist, stellt der Spooler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
+ist, stellt der Scheduler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
 voran.&#160;Damit wird eine Microsoft-Access-Datenbank automatisch angelegt (s. Dateityp
 ODBC).</p>
 
-<p>In der Datenbank werden die Tabellen <font class="mono">spooler_history</font>
-und <font class="mono">spooler_variables</font> verwendet. Sie werden bei Bedarf
+<p>In der Datenbank werden die Tabellen <font class="mono">SCHEDULER_HISTORY</font>
+und <font class="mono">SCHEDULER_VARIABLES</font> verwendet. Sie werden bei Bedarf
 eingerichtet, wobei die SQL-Syntax von Microsoft Access verwendet wird. Die
-Tabellennamen können in der factory.ini eingestellt werden:</p>
+Tabellennamen können in der Konfigurationsdatei factory.ini eingestellt werden:</p>
 
 <pre>[spooler]
-db_history_table   = <i>tabellenname</i> | <u>spooler_history</u>
-db_variables_table = <i>tabellenname</i> | <u>spooler_variables</u></pre>
+db_history_table   = <i>tabellenname</i> | <u>SCHEDULER_HISTORY</u>
+db_variables_table = <i>tabellenname</i> | <u>SCHEDULER_VARIABLES</u></pre>
 
-<p class="zwischentitel">Satz für Spooler-Start</p>
+<p class="zwischentitel">Satz für Scheduler-Start</p>
 
-<p>Der Spooler schreibt beim Start einen Satz mit einer eigenen Id in die
-Historie. Beim Beenden trägt er in diesen Satz die Zeit ein, so dass ein Satz
-mit Start- und Endezeit des Spoolers vorliegt. Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;</p>
+<p>Der Scheduler schreibt beim Start einen Satz mit einer eigenen ID in die
+Historie. Beim Beenden trägt er in diesem Satz die Zeit ein, so dass ein Satz
+mit Start- und Endezeit des Schedulers vorliegt. Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;</p>
 
 <h3>2.3&#160; Konfiguration in der factory.ini</h3>
 
-<p>In der <font class="mono"> factory.ini</font>  lassen sich einstellen:</p>
+<p>In der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> lassen sich einstellen:</p>
 
 <pre>[spooler]
 db                 = <i>datenbank</i>
-db_history_table   = spooler_history
-db_variables_table = spooler_variables
+db_history_table   = SCHEDULER_HISTORY
+db_variables_table = SCHEDULER_VARIABLES
 history            = no|<u>yes</u>
 history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>...
 history_on_process = yes|1|2
