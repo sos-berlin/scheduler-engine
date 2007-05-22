@@ -14,7 +14,7 @@
 <scheduler_keyword keyword="Historie"/>
 
 <p>
-    Der Scheduler kann mit einer Datenbank betrieben werden. Das hat folgende Zwecke:
+    Der Scheduler kann mit und ohne Datenbank betrieben werden. Der Betrieb mit Datenbank hat folgende Vorteile:
 </p>
 
 <dl>
