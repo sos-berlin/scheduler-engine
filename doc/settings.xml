@@ -355,8 +355,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         <description>
             <p>
                 Der Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt.
-                Die Option <scheduler_option name="log-dir"/> muss gesetzt sein oder der Scheduler schreibt die Datei nicht.
-                In diese Datei wird, wenn der <code>history=yes</code> gesetzt ist und der Scheduler keine Datenbank verwendet,
+                Die Option <scheduler_option name="log-dir"/> muss gesetzt sein - andernfalls schreibt der Scheduler die Datei nicht.
+                In diese Datei wird, wenn die Option <code>history=yes</code> gesetzt ist und der Scheduler keine Datenbank verwendet,
                 für jede gelaufende Task ein Satz geschrieben.
             </p>
         </description>
