@@ -2516,7 +2516,7 @@ void Spooler::abort_immediately_after_distribution_error( const string& debug_te
 
 void Spooler::run_check_ctrl_c()
 {
-    if( ctrl_c_pressed != ctrl_c_pressed_handled )
+    while( ctrl_c_pressed_handled < ctrl_c_pressed )
     {
 #       ifdef Z_WINDOWS
             string signal_text = "ctrl-C";
@@ -2526,11 +2526,11 @@ void Spooler::run_check_ctrl_c()
 
 
     
-        switch( ctrl_c_pressed )
+        switch( ctrl_c_pressed_handled + 1 )
         {
             case 1:
             {
-                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Stopping Scheduler" ); 
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed_handled + 1, "Stopping Scheduler" ); 
                 _log->warn( m );
                 if( !_log_to_stderr &&  !is_daemon )  cerr << m << endl;
 
@@ -2541,27 +2541,30 @@ void Spooler::run_check_ctrl_c()
                 }
 
                 set_ctrl_c_handler( true );
+                ctrl_c_pressed_handled = 1;
                 break;
             }
 
             case 2:
             {
-                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Killing all processes" );
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed_handled + 1, "Killing all processes" );
                 _log->warn( m );
                 if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
                 kill_all_processes();
                 set_ctrl_c_handler( true );
+                ctrl_c_pressed_handled = 2;
                 break;
             }
 
             case 3:
             {
-                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed, "Ignoring running tasks" );
+                string m = message_string( "SCHEDULER-263", signal_text, ctrl_c_pressed_handled + 1, "Ignoring running tasks" );
                 _log->warn( m );
                 if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
                 _spooler->_shutdown_ignore_running_tasks = true;
+                ctrl_c_pressed_handled = 3;
                 break;
             }
 
@@ -2573,10 +2576,11 @@ void Spooler::run_check_ctrl_c()
                 if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
                 abort_now();
+                ctrl_c_pressed_handled = 4;
             }
         }
 
-        ctrl_c_pressed_handled = ctrl_c_pressed;
+        //ctrl_c_pressed_handled = ctrl_c_pressed;
     }
 }
 

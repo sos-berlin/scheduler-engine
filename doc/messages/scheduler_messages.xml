@@ -3817,15 +3817,21 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-872" weight="warn" object="Job_chain_group">
+        <message code="SCHEDULER-872" weight="info" object="Job_chain_group">
             <text xml:lang="en">
-                <title><p1>job_chain</p1> added</title>
+                <title>This job chain group contains job chain <p1>job_chains</p1></title>
             </text>
         </message>
 
-        <message code="SCHEDULER-873" weight="warn" object="Job_chain_group">
+        <message code="SCHEDULER-873" weight="info" object="Job_chain_group">
             <text xml:lang="en">
-                <title><p1>job_chain</p1> removed</title>
+                <title>'<p1>job_chain</p1>' removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-874" weight="info" object="Job_chain_group">
+            <text xml:lang="en">
+                <title>Job chain group has been removed</title>
             </text>
         </message>
     </messages>

@@ -437,8 +437,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-869", "Process class has been replaced" },
     { "SCHEDULER-870", "Process class has been added" },
     { "SCHEDULER-871", "Closing process class before $1" },
-    { "SCHEDULER-872", "$1 added" },
-    { "SCHEDULER-873", "$1 removed" },
+    { "SCHEDULER-872", "This job chain group contains job chain $1" },
+    { "SCHEDULER-873", "'$1' removed" },
+    { "SCHEDULER-874", "Job chain group has been removed" },
     {}
 };
 } //namespace sos

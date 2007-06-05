@@ -47,12 +47,13 @@ struct Job_chain_group : Object, Scheduler_object
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
     void                        finish                      ();
     int                         size                        () const                                { return _job_chain_set.size(); }
+    void                        on_group_added              ();
     string                      obj_name                    () const;
 
   private:
     friend struct               Job_chain_groups;
 
-    void                        add_job_chain               ( Job_chain* );
+    void                        add_job_chain               ( Job_chain*, bool check_ids = true );
     void                        remove_job_chain            ( Job_chain* );
 
 
@@ -1214,7 +1215,7 @@ Job_chain::Job_chain( Spooler* spooler )
 
 Job_chain::~Job_chain()
 {
-    Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOGI2( "joacim", obj_name() << "." << __FUNCTION__ << "\n" );
 
     try
     {
@@ -1237,7 +1238,6 @@ void Job_chain::close()
 
     Z_FOR_EACH( Chain, _chain, it )
     {
-        int SICHERSTELLEN_DASS_JOBCHAIN_FREIGEGEN_WIRD;
         Job_chain_node* node = *it;
         node->close();
     }
@@ -1538,6 +1538,9 @@ Job_chain_node* Job_chain::add_job_chain_node( const string& nested_job_chain_pa
     Job_chain* nested_job_chain = order_subsystem()->job_chain( nested_job_chain_path );
     if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
 
+    int MEHRFACHE_VERSCHACHTELUNG_VERHINDERN;
+    // Bei mehrfacher Verschachtelung die Job_chain_groups prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
+
     if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << nested_job_chain_path << "->" << nested_job_chain_path );
     if( state.is_null_or_empty_string() )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
 
@@ -1671,6 +1674,7 @@ void Job_chain::finish()
     if( job_chain_group->size() > 0 )    // Die verschachtelten Jobketten
     {
         job_chain_group->connect_job_chain( this );
+        job_chain_group->finish();
         order_subsystem()->job_chain_groups()->add_group( job_chain_group );
     }
 
@@ -2312,7 +2316,7 @@ void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
 
     Job_chain_set a_job_chains = a->connected_job_chains();
 
-    if( a_job_chains.size() < a_group->_job_chain_set.size() )
+    if( a_job_chains != a_group->_job_chain_set )
     {
         ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group( _order_subsystem->_spooler ) );
 
@@ -2323,31 +2327,40 @@ void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
             if( a_job_chains.find( job_chain ) == a_job_chains.end() )
             {
                 a_group->remove_job_chain( job_chain );
-                b_group->add_job_chain( job_chain );        // Der Aufruf prüft die Eindeutigkeit der Auftragskennung. Das ist überflüssig.
+
+                if( job_chain != a )
+                {
+                    b_group->add_job_chain( job_chain, false );
+                }
             }
         }
 
-        assert( a_job_chains.size() == a_group->_job_chain_set.size() );
-        assert( b_group->size() >= 1 );
-
+        assert( a_job_chains == a_group->_job_chain_set );
+        
         if( a_group->size() <= 1 )
         {
-            if( a_group->size() == 1 )
+            if( a_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
             {
                 Job_chain* jc = *b_group->_job_chain_set.begin();
-                jc->set_job_chain_group( NULL );                // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+                jc->set_job_chain_group( NULL );                
             }
 
             remove_group( a_group );
         }
                 
-        if( b_group->size() == 1 ) 
+        if( b_group->size() <= 1 )
         {
-            Job_chain* jc = *b_group->_job_chain_set.begin();
-            jc->set_job_chain_group( NULL );                    // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+            if( b_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+            {
+                Job_chain* jc = *b_group->_job_chain_set.begin();
+                jc->set_job_chain_group( NULL );                    
+            }
         }
         else
+        {
+            b_group->finish();
             add_group( b_group );
+        }
     }
 }
 
@@ -2357,13 +2370,13 @@ void Job_chain_groups::add_group( Job_chain_group* group )
 {
     assert( group->_index == 0 );
 
-    job_chain_group->finish();
-
     int index = 1;
     for(; index < _group_array.size()  &&  _group_array[ index ]; index++ );
     group->_index = index;
     if( index == _group_array.size() )  _group_array.push_back( group );
                                   else  _group_array[ index ] = group;
+
+    group->on_group_added();
 }
 
 //-------------------------------------------------------------------Job_chain_groups::remove_group
@@ -2371,6 +2384,8 @@ void Job_chain_groups::add_group( Job_chain_group* group )
 void Job_chain_groups::remove_group( Job_chain_group* group )
 {
     assert( _group_array[ group->_index ] == group );
+
+    group->log()->info( message_string( "SCHEDULER-874" ) );
 
     int index = group->_index;
     group->_index = 0;
@@ -2385,6 +2400,25 @@ Job_chain_group::Job_chain_group( Scheduler* scheduler )
     _zero_(this+1)
 {
     _log->set_prefix( obj_name() );
+}
+
+//------------------------------------------------------------------Job_chain_group::on_group_added
+    
+void Job_chain_group::on_group_added()
+{
+    _log->set_prefix( obj_name() );
+
+    S job_chains_string;
+
+    Z_FOR_EACH( Job_chain_set, _job_chain_set, it )
+    {
+        Job_chain* job_chain = *it;
+        
+        if( !job_chains_string.empty() )  job_chains_string << ", ";
+        job_chains_string << '\'' << job_chain->path() << '\'';
+    }
+
+    log()->info( message_string( "SCHEDULER-872", job_chains_string ) );
 }
 
 //---------------------------------------------------------------Job_chain_group::connect_job_chain
@@ -2434,12 +2468,13 @@ void Job_chain_group::finish()
 
 //-------------------------------------------------------------------Job_chain_group::add_job_chain
 
-void Job_chain_group::add_job_chain( Job_chain* job_chain )
+void Job_chain_group::add_job_chain( Job_chain* job_chain, bool check_ids )
 {
-    //Z_DEBUG( assert( !job_chain->job_chain_group() ) );
+    if( check_ids )
+    {
+        check_for_unique_order_ids_of( job_chain );
+    }
 
-    //job_chain->set_job_chain_group( this );
-    check_for_unique_order_ids_of( job_chain );
     _job_chain_set.insert( job_chain );
 }
 
@@ -2482,6 +2517,8 @@ void Job_chain_group::remove_job_chain( Job_chain* job_chain )
 
     job_chain->set_job_chain_group( NULL );
     _job_chain_set.erase( job_chain );
+
+    log()->info( message_string( "SCHEDULER-873", job_chain->obj_name() ) );
 }
 
 //------------------------------------------------------------------------Job_chain_group::obj_name
