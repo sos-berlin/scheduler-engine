@@ -31,6 +31,7 @@ struct Scheduler_object
         type_java_subsystem,
         type_job,
         type_job_chain,
+        type_job_chain_group,
         type_job_subsystem,
         type_lock,
         type_lock_holder,

@@ -37,9 +37,9 @@ const string order_select_database_columns              = "`id`, `priority`, `st
 
 //----------------------------------------------------------------------------------Job_chain_group
 
-struct Job_chain_group : Object
+struct Job_chain_group : Object, Scheduler_object
 {
-                                Job_chain_group             ()                                      : _index(0) {}
+                                Job_chain_group             ( Scheduler* );
 
     void                        connect_job_chain           ( Job_chain* );
   //void                        disconnect_job_chain        ( Job_chain* );
@@ -47,6 +47,7 @@ struct Job_chain_group : Object
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
     void                        finish                      ();
     int                         size                        () const                                { return _job_chain_set.size(); }
+    string                      obj_name                    () const;
 
   private:
     friend struct               Job_chain_groups;
@@ -55,6 +56,7 @@ struct Job_chain_group : Object
     void                        remove_job_chain            ( Job_chain* );
 
 
+    Fill_zero                  _zero_;
     int                        _index;                      // this == Job_chain_groups::_group_array[ index ]
     Job_chain_set              _job_chain_set;
 };
@@ -63,7 +65,7 @@ struct Job_chain_group : Object
 
 struct Job_chain_groups
 {
-                                Job_chain_groups            ();
+                                Job_chain_groups            ( Order_subsystem* );
 
     void                        add_group                   ( Job_chain_group* );
     void                        remove_group                ( Job_chain_group* );
@@ -71,6 +73,7 @@ struct Job_chain_groups
     void                        disconnect_job_chains       ( Job_chain* a, Job_chain* b );
 
   private:
+    Order_subsystem*                _order_subsystem;
     vector< ptr<Job_chain_group> >  _group_array;           // [0] unbenutzt, Lücken sind NULL
 };
 
@@ -459,7 +462,8 @@ Order_subsystem_interface::Order_subsystem_interface( Scheduler* scheduler )
 Order_subsystem::Order_subsystem( Spooler* spooler )
 :
     Order_subsystem_interface( spooler ),
-    _zero_(this+1)
+    _zero_(this+1),
+    _job_chain_groups(this)
 {
 }
 
@@ -1602,7 +1606,7 @@ Job_chain_node* Job_chain::add_end_node( const Order::State& state )
 
 void Job_chain::finish()
 {
-    ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group );
+    ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group( _spooler ) );
 
 
     if( _state != s_under_construction )  return;
@@ -1667,7 +1671,6 @@ void Job_chain::finish()
     if( job_chain_group->size() > 0 )    // Die verschachtelten Jobketten
     {
         job_chain_group->connect_job_chain( this );
-        job_chain_group->finish();
         order_subsystem()->job_chain_groups()->add_group( job_chain_group );
     }
 
@@ -2242,7 +2245,9 @@ Order_subsystem* Job_chain::order_subsystem() const
 
 //---------------------------------------------------------------Job_chain_groups::Job_chain_groups
 
-Job_chain_groups::Job_chain_groups()
+Job_chain_groups::Job_chain_groups( Order_subsystem* order_subsystem )
+:
+    _order_subsystem(order_subsystem)
 {
     _group_array.push_back( NULL );    // Index 0 benutzen wir nicht
 }
@@ -2309,7 +2314,7 @@ void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
 
     if( a_job_chains.size() < a_group->_job_chain_set.size() )
     {
-        ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group );
+        ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group( _order_subsystem->_spooler ) );
 
         for( Job_chain_set::iterator it = a_group->_job_chain_set.begin(); it != a_group->_job_chain_set.end(); )
         {
@@ -2339,7 +2344,7 @@ void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
         if( b_group->size() == 1 ) 
         {
             Job_chain* jc = *b_group->_job_chain_set.begin();
-            jc->set_job_chain_group( NULL );                // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+            jc->set_job_chain_group( NULL );                    // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
         }
         else
             add_group( b_group );
@@ -2350,6 +2355,10 @@ void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
 
 void Job_chain_groups::add_group( Job_chain_group* group )
 {
+    assert( group->_index == 0 );
+
+    job_chain_group->finish();
+
     int index = 1;
     for(; index < _group_array.size()  &&  _group_array[ index ]; index++ );
     group->_index = index;
@@ -2366,6 +2375,16 @@ void Job_chain_groups::remove_group( Job_chain_group* group )
     int index = group->_index;
     group->_index = 0;
     _group_array[ index ] = NULL;
+}
+
+//-----------------------------------------------------------------Hob_chain_group::Job_chain_group
+
+Job_chain_group::Job_chain_group( Scheduler* scheduler )
+: 
+    Scheduler_object( scheduler, this, type_job_chain_group ), 
+    _zero_(this+1)
+{
+    _log->set_prefix( obj_name() );
 }
 
 //---------------------------------------------------------------Job_chain_group::connect_job_chain
@@ -2463,6 +2482,19 @@ void Job_chain_group::remove_job_chain( Job_chain* job_chain )
 
     job_chain->set_job_chain_group( NULL );
     _job_chain_set.erase( job_chain );
+}
+
+//------------------------------------------------------------------------Job_chain_group::obj_name
+
+string Job_chain_group::obj_name() const
+{
+    S result;
+
+    result << "Job_chain_group";
+    if( _index )  result << " " << _index;
+            else  result << " (new)";
+
+    return result;
 }
 
 //------------------------------------------------------------------Job_chain::connected_job_chains

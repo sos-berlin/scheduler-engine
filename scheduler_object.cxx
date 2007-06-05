@@ -27,6 +27,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_java_subsystem:               return "Java_subsystem";
         case type_job:                          return "Job";
         case type_job_chain:                    return "Job_chain";
+        case type_job_chain_group:              return "Job_chain_group";
         case type_job_subsystem:                return "Job_subsystem";
         case type_lock:                         return "Lock";
         case type_lock_holder:                  return "Lock.Holder";

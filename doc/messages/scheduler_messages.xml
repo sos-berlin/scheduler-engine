@@ -3816,6 +3816,18 @@
                 <title>Closing process class before <p1>process</p1></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-872" weight="warn" object="Job_chain_group">
+            <text xml:lang="en">
+                <title><p1>job_chain</p1> added</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-873" weight="warn" object="Job_chain_group">
+            <text xml:lang="en">
+                <title><p1>job_chain</p1> removed</title>
+            </text>
+        </message>
     </messages>
     
 </messages>
