@@ -45,6 +45,8 @@ struct Job_chain_group : Object, Scheduler_object
   //void                        disconnect_job_chain        ( Job_chain* );
     void                        check_for_unique_order_ids_of( Job_chain* ) const;
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
+    Order*                      order_or_null               ( const string& order_id ) const;
+    bool                        has_order_id                ( const string& order_id ) const        { return job_chain_by_order_id_or_null( order_id ) != NULL; }
     void                        finish                      ();
     int                         size                        () const                                { return _job_chain_set.size(); }
     void                        on_group_added              ();
@@ -1538,8 +1540,11 @@ Job_chain_node* Job_chain::add_job_chain_node( const string& nested_job_chain_pa
     Job_chain* nested_job_chain = order_subsystem()->job_chain( nested_job_chain_path );
     if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
 
-    int MEHRFACHE_VERSCHACHTELUNG_VERHINDERN;
-    // Bei mehrfacher Verschachtelung die Job_chain_groups prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
+    Z_FOR_EACH( Chain, nested_job_chain->_chain, it )   // Nur einfache Verschachtelung ist erlaubt
+    {
+        if( (*it)->_nested_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412", obj_name() );
+        // Bei mehrfacher Verschachtelung die Job_chain_groups prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
+    }
 
     if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << nested_job_chain_path << "->" << nested_job_chain_path );
     if( state.is_null_or_empty_string() )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
@@ -1813,9 +1818,18 @@ void Job_chain::add_order( Order* order )
     assert( !order->_is_distributed || _is_distributed );
     if( state() != s_running  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
     if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
-    
-    if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path() );
 
+
+    if( _job_chain_group )
+    {
+        if( Job_chain* in_job_chain = _job_chain_group->job_chain_by_order_id_or_null( order->string_id() ) )
+            z::throw_xc( "SCHEDULER-186", order->obj_name(), in_job_chain->path() );
+    }
+    else
+    {
+        if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path() );
+    }
+    
 
     set_visible( true );
 
@@ -2495,15 +2509,37 @@ Job_chain* Job_chain_group::job_chain_by_order_id_or_null( const string& order_i
 {
     Job_chain* result = NULL;
 
+    if( Order* order = order_or_null( order_id ) )
+    {
+        result = order->job_chain();
+    }
+
+    //Z_FOR_EACH_CONST( Job_chain_set, _job_chain_set, it )
+    //{
+    //    Job_chain* job_chain = *it;
+
+    //    if( job_chain->has_order_id( (Read_transaction*)NULL, order_id ) )
+    //    {
+    //        result = job_chain;
+    //        break;
+    //    }
+    //}
+
+    return result;
+}
+
+//-------------------------------------------------------------------Job_chain_group::order_or_null
+
+Order* Job_chain_group::order_or_null( const string& order_id ) const
+{
+    Order* result = NULL;
+
     Z_FOR_EACH_CONST( Job_chain_set, _job_chain_set, it )
     {
         Job_chain* job_chain = *it;
 
-        if( job_chain->has_order_id( (Read_transaction*)NULL, order_id ) )
-        {
-            result = job_chain;
-            break;
-        }
+        result = job_chain->order_or_null( order_id );
+        if( result )  break;
     }
 
     return result;
@@ -5104,7 +5140,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
     {
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            is_new = !job_chain->has_order_id( &ta, id() );
+            is_new = job_chain->_job_chain_group? !job_chain->_job_chain_group->has_order_id( string_id() ) 
+                                                : !job_chain->has_order_id( &ta, id() );
         }
         catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
     }
@@ -5126,7 +5163,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
 
         if( node->_nested_job_chain )   // Verschachtelte Jobkette?
         {
-            if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich
+            if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich (sollte nicht passieren, wird schon vorher geprüft)
 
             _outer_job_chain_path  = job_chain->path();
             _outer_job_chain_state = _state;
@@ -5179,7 +5216,8 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
     }
     else
     {
-        if( ptr<Order> other_order = job_chain->order_or_null( id() ) )  // Nicht aus der Datenbank gelesen
+        if( ptr<Order> other_order = job_chain->_job_chain_group? job_chain->_job_chain_group->order_or_null( string_id() )
+                                                                : job_chain->order_or_null( id() ) )  // Nicht aus der Datenbank gelesen
         {
             other_order->remove_from_job_chain();
             place_in_job_chain( job_chain );

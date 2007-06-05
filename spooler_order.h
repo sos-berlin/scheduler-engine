@@ -503,8 +503,8 @@ struct Job_chain : Com_job_chain,
     void                        add_order               ( Order* );
     void                        remove_order            ( Order* );
 
-    ptr<Order>                  order                   ( const Order::Id& id );
-    ptr<Order>                  order_or_null           ( const Order::Id& id );
+    ptr<Order>                  order                   ( const Order::Id& );
+    ptr<Order>                  order_or_null           ( const Order::Id& );
 
     bool                        has_order_id            ( Read_transaction*, const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186

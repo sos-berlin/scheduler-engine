@@ -3831,7 +3831,7 @@
 
         <message code="SCHEDULER-874" weight="info" object="Job_chain_group">
             <text xml:lang="en">
-                <title>Job chain group has been removed</title>
+                <title>This job chain group has been removed</title>
             </text>
         </message>
     </messages>
