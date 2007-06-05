@@ -1161,12 +1161,16 @@ void Spooler::send_cmd()
 
     memset( &addr, 0, sizeof addr );
     addr.sin_family = PF_INET;
-    int i = inet_addr( "127.0.0.1" );
-    memcpy( &addr.sin_addr, &i, 4 );                        
+    //int i = inet_addr( "127.0.0.1" );
+    //memcpy( &addr.sin_addr, &i, 4 );                        
+    Ip_address ip = _ip_address;
+    if( !ip )  ip = Ip_address( 127, 0, 0, 1 );
+    addr.sin_addr = ip.as_in_addr();
     addr.sin_port = htons( _tcp_port );
+    string ip_string = S() << ip.as_string() << ":" << _tcp_port;
 
     int ret = connect( sock, (sockaddr*)&addr, sizeof addr );
-    if( ret == -1 )  z::throw_socket( socket_errno(), "connect" );
+    if( ret == -1 )  z::throw_socket( socket_errno(), "connect", ip_string.c_str() );
 
     const char* p     = _send_cmd.data();
     const char* p_end = p + _send_cmd.length();
@@ -2924,13 +2928,16 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
         _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
+
+        if( _send_cmd != "" )  
+        { 
+            send_cmd();  
+            stop(); 
+            return 0; 
+        }
+
+
         update_console_title();
-
-        //_module._dont_remote = true;                _scheduler_script
-        //if( _module.set() )  _module.init();
-
-        if( _send_cmd != "" )  { send_cmd();  stop(); return 0; }
-
         start();
 
         if( !_shutdown_cmd )

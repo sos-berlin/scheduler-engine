@@ -2,10 +2,6 @@
 /*
     Hier sind implementiert
 
-    Spooler::add_job_chain
-    Spooler::job_chain
-    Spooler::xml_from_job_chains
-
     Job_chain
     Order
     Order_queue
@@ -15,6 +11,7 @@
 #include "spooler.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/xml.h"
+
 
 using stdext::hash_set;
 using stdext::hash_map;
@@ -37,6 +34,45 @@ const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
 const string default_end_state_name                     = "<END_STATE>";
 const string order_select_database_columns              = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
+
+//----------------------------------------------------------------------------------Job_chain_group
+
+struct Job_chain_group : Object
+{
+                                Job_chain_group             ()                                      : _index(0) {}
+
+    void                        connect_job_chain           ( Job_chain* );
+  //void                        disconnect_job_chain        ( Job_chain* );
+    void                        check_for_unique_order_ids_of( Job_chain* ) const;
+    Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
+    void                        finish                      ();
+    int                         size                        () const                                { return _job_chain_set.size(); }
+
+  private:
+    friend struct               Job_chain_groups;
+
+    void                        add_job_chain               ( Job_chain* );
+    void                        remove_job_chain            ( Job_chain* );
+
+
+    int                        _index;                      // this == Job_chain_groups::_group_array[ index ]
+    Job_chain_set              _job_chain_set;
+};
+
+//---------------------------------------------------------------------------------Job_chain_groups
+
+struct Job_chain_groups
+{
+                                Job_chain_groups            ();
+
+    void                        add_group                   ( Job_chain_group* );
+    void                        remove_group                ( Job_chain_group* );
+
+    void                        disconnect_job_chains       ( Job_chain* a, Job_chain* b );
+
+  private:
+    vector< ptr<Job_chain_group> >  _group_array;           // [0] unbenutzt, Lücken sind NULL
+};
 
 //----------------------------------------------------------------------------------Order_subsystem
 
@@ -62,15 +98,16 @@ struct Order_subsystem : Order_subsystem_interface
     void                        check_exception             ();
 
     void                        request_order               ();
-    ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags );
-    ptr<Order>              try_load_order_from_database    ( Transaction*, const string& job_chain_name, const Order::Id&, Load_order_flags );
+    ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags );
+    ptr<Order>              try_load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags );
 
-    Job_chain*                  job_chain                   ( const string& name );
-    Job_chain*                  job_chain_or_null           ( const string& name );
+    Job_chain*                  job_chain                   ( const string& path );
+    Job_chain*                  job_chain_or_null           ( const string& path );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
+    Job_chain_groups*           job_chain_groups            ()                                      { return &_job_chain_groups; }
 
 
     // Privat
@@ -81,8 +118,8 @@ struct Order_subsystem : Order_subsystem_interface
     bool                        are_orders_distributed      ();
     bool                        is_job_in_any_job_chain     ( Job* );
     bool                        is_job_in_any_distributed_job_chain( Job* );
-    string                      job_chain_db_where_condition( const string& job_chain_name );
-    string                      order_db_where_condition    ( const string& job_chain_name, const string& order_id );
+    string                      job_chain_db_where_condition( const string& job_chain_path );
+    string                      order_db_where_condition    ( const string& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
     void                        count_finished_orders       ();
     int                         job_chain_map_version       () const                                { return _job_chain_map_version; }
@@ -93,6 +130,7 @@ struct Order_subsystem : Order_subsystem_interface
     Job_chain_map              _job_chain_map;
     int                        _job_chain_map_version;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
   //long32                     _next_free_order_id;
+    Job_chain_groups           _job_chain_groups;
 
   private:
     ptr<Database_order_detector> _database_order_detector;
@@ -571,9 +609,9 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
 
             try
             {
-                string job_chain_name = record.as_string( "job_chain" );
+                string job_chain_path = record.as_string( "job_chain" );
 
-                ptr<Order> order = new Order( _spooler, record, job_chain_name );
+                ptr<Order> order = new Order( _spooler, record, job_chain_path );
                 order->load_order_xml_blob( &ta );
                 
                 if( order->run_time() )
@@ -592,7 +630,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
     {
         job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
-        string lname = lcase( job_chain->name() );
+        string lname = lcase( job_chain->path() );
         if( _job_chain_map.find( lname ) != _job_chain_map.end() )  z::throw_xc( "SCHEDULER-160", lname );
 
         _job_chain_map[lname] = job_chain;
@@ -680,11 +718,11 @@ void Order_subsystem::load_job_chains_from_xml( const xml::Element_ptr& element 
 
 //---------------------------------------------------------------Order_subsystem::job_chain_or_null
 
-Job_chain* Order_subsystem::job_chain_or_null( const string& name )
+Job_chain* Order_subsystem::job_chain_or_null( const string& path )
 {
     Job_chain* result = NULL;
 
-    string lname = lcase( name );
+    string lname = lcase( path );
 
     Job_chain_map::iterator it = _job_chain_map.find( lname );
     if( it == _job_chain_map.end() )  result = NULL;
@@ -695,10 +733,10 @@ Job_chain* Order_subsystem::job_chain_or_null( const string& name )
 
 //-----------------------------------------------------------------------Order_subsystem::job_chain
 
-Job_chain* Order_subsystem::job_chain( const string& name )
+Job_chain* Order_subsystem::job_chain( const string& path )
 {
-    Job_chain* result = job_chain_or_null( name );
-    if( !result )  z::throw_xc( "SCHEDULER-161", name );
+    Job_chain* result = job_chain_or_null( path );
+    if( !result )  z::throw_xc( "SCHEDULER-161", path );
 
     return result;
 }
@@ -736,18 +774,18 @@ bool Order_subsystem::is_job_in_any_distributed_job_chain( Job* job )
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
 
-ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transaction, const string& job_chain_name, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transaction, const string& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
-    ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_name, order_id, flag );
+    ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_path, order_id, flag );
 
-    if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_name );
+    if( !result )  z::throw_xc( "SCHEDULER-162", order_id.as_string(), job_chain_path );
 
     return result;
 }
 
 //----------------------------------------------------Order_subsystem::try_load_order_from_database
 
-ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_transaction, const string& job_chain_name, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_transaction, const string& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
     ptr<Order> result;
 
@@ -757,7 +795,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         select_sql <<  "select " << order_select_database_columns << ", `occupying_cluster_member_id`"
                        "  from " << _spooler->_orders_tablename;
         if( flag & lo_lock )  select_sql << " %update_lock";
-        select_sql << "  where " << order_db_where_condition( job_chain_name, order_id.as_string() );
+        select_sql << "  where " << order_db_where_condition( job_chain_path, order_id.as_string() );
 
         if( flag & lo_blacklisted )  select_sql << " and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
                                else  select_sql << " and `distributed_next_time` is not null";
@@ -767,7 +805,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         if( !result_set.eof() )
         {
             Record record = result_set.get_record();
-            result = new Order( _spooler, record, job_chain_name );
+            result = new Order( _spooler, record, job_chain_path );
             result->set_distributed();
             if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
 
@@ -816,23 +854,23 @@ void Order_subsystem::check_exception()
 
 //--------------------------------------------------------Order_subsystem::order_db_where_condition
 
-string Order_subsystem::order_db_where_condition( const string& job_chain_name, const string& order_id )
+string Order_subsystem::order_db_where_condition( const string& job_chain_path, const string& order_id )
 {
     S result;
 
-    result << job_chain_db_where_condition( job_chain_name ) << " and `id`="  << sql::quoted( order_id );
+    result << job_chain_db_where_condition( job_chain_path ) << " and `id`="  << sql::quoted( order_id );
 
     return result;
 }
 
 //----------------------------------------------------Order_subsystem::job_chain_db_where_condition
 
-string Order_subsystem::job_chain_db_where_condition( const string& job_chain_name )
+string Order_subsystem::job_chain_db_where_condition( const string& job_chain_path )
 {
     S result;
 
     result << "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-         " and `job_chain`="  << sql::quoted( job_chain_name );
+         " and `job_chain`="  << sql::quoted( job_chain_path );
 
     return result;
 }
@@ -938,6 +976,26 @@ void Order_sources::start()
 //    return result;
 //}
 
+//----------------------------------------------------------------------------Job_chain_node::close
+
+void Job_chain_node::close()
+{
+    ptr<Job_chain> my_job_chain     = _job_chain;
+    ptr<Job_chain> nested_job_chain = _nested_job_chain;
+
+    // Zirkel auflösen:
+    _job_chain  = NULL;
+    _next_node  = NULL;
+    _error_node = NULL;
+
+    _nested_job_chain = NULL;
+
+    if( my_job_chain  &&  nested_job_chain )
+    {
+        my_job_chain->order_subsystem()->job_chain_groups()->disconnect_job_chains( my_job_chain, nested_job_chain );
+    }
+}
+
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
 xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
@@ -946,10 +1004,10 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
 
     xml::Element_ptr element;
 
-    if( _job_chain_name != "" )
+    if( _nested_job_chain_path != "" )
     {
         element = document.createElement( "job_chain_node.job_chain" );
-        element.setAttribute( "job_chain", _job_chain_name );
+        element.setAttribute( "job_chain", _nested_job_chain_path );
     }
     else
     {
@@ -1102,6 +1160,13 @@ void Job_chain_node::set_action( const string& action_string )
     }
 }
 
+//---------------------------------------------------Job_chain_node::on_releasing_referenced_object
+
+void Job_chain_node::on_releasing_referenced_object( const reference< Job_chain_node, Job_chain >& ref )
+{
+    _job_chain->log()->warn( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );
+}
+
 //----------------------------------------------------------------------Job_chain_node::execute_xml
 
 xml::Element_ptr Job_chain_node::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
@@ -1117,6 +1182,15 @@ xml::Element_ptr Job_chain_node::execute_xml( Command_processor* command_process
     }
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
+}
+
+//-------------------------------------------------------------------------Job_chain_node::obj_name
+
+string Job_chain_node::obj_name() const
+{
+    S result;
+    result << "Job_chain_node " << _job_chain->path() << ":" << _state;
+    return result;
 }
 
 //-----------------------------------------------------------------------------Job_chain::Job_chain
@@ -1136,6 +1210,8 @@ Job_chain::Job_chain( Spooler* spooler )
 
 Job_chain::~Job_chain()
 {
+    Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
+
     try
     {
         close();
@@ -1154,6 +1230,13 @@ void Job_chain::close()
     _blacklist_map.clear();
     _order_sources.close();
     set_state( s_closed );
+
+    Z_FOR_EACH( Chain, _chain, it )
+    {
+        int SICHERSTELLEN_DASS_JOBCHAIN_FREIGEGEN_WIRD;
+        Job_chain_node* node = *it;
+        node->close();
+    }
 }
 
 //----------------------------------------------------------------------------Job_chain::state_name
@@ -1213,7 +1296,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             if( e.nodeName_is( "job_chain_node" ) )
             {
                 string job_name       = e.getAttribute( "job" );
-                string job_chain_name = e.getAttribute( "job_chain" );
+                string job_chain_path = e.getAttribute( "job_chain" );
                 string state          = e.getAttribute( "state" );
 
                 bool can_be_not_initialized = true;
@@ -1444,19 +1527,19 @@ Job_chain_node* Job_chain::add_job_node( Job* job, const Order::State& state_, c
 
 //--------------------------------------------------------------------Job_chain::add_job_chain_node
 
-Job_chain_node* Job_chain::add_job_chain_node( const string& job_chain_name, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
+Job_chain_node* Job_chain::add_job_chain_node( const string& nested_job_chain_path, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
 {
     if( _is_distributed )  z::throw_xc( "SCHEDULER-413" );
 
-    Job_chain* job_chain = order_subsystem()->job_chain( job_chain_name );
-    if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
+    Job_chain* nested_job_chain = order_subsystem()->job_chain( nested_job_chain_path );
+    if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
 
-    if( job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << job_chain_name << "->" << job_chain_name );
+    if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << nested_job_chain_path << "->" << nested_job_chain_path );
     if( state.is_null_or_empty_string() )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
 
     Job_chain_node* result = add_node( state, next_state, error_state );
 
-    result->_job_chain_name = job_chain_name;
+    result->_nested_job_chain_path = nested_job_chain_path;
 
     return result;
 }
@@ -1471,7 +1554,7 @@ Job_chain_node* Job_chain::add_node( const Order::State& state, const Order::Sta
     if( !next_state.is_missing() )  Order::check_state( next_state );
     if( !error_state.is_missing() )  Order::check_state( error_state );
 
-    if( node_from_state_or_null( state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( state ), name() );
+    if( node_from_state_or_null( state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( state ), path() );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
@@ -1519,61 +1602,89 @@ Job_chain_node* Job_chain::add_end_node( const Order::State& state )
 
 void Job_chain::finish()
 {
-    //THREAD_LOCK( _lock )
-    {
-        if( _state != s_under_construction )  return;
+    ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group );
 
-        if( !_chain.empty() )
+
+    if( _state != s_under_construction )  return;
+
+    if( !_chain.empty() )
+    {
+        Job_chain_node* node = *_chain.rbegin();
+        if( node->_job  &&  node->_next_state.is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
+    }
+
+    for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+    {
+        Job_chain_node* node = *it;
+        Chain::iterator next = it;  next++;
+
+        if( node->_nested_job_chain_path != "" )
         {
-            Job_chain_node* n = *_chain.rbegin();
-            if( n->_job  &&  n->_next_state.is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
+            Job_chain* nested_job_chain = order_subsystem()->job_chain( node->_nested_job_chain_path );    // Sicherstellen, dass Jobkette bekannt ist
+            job_chain_group->connect_job_chain( nested_job_chain );
         }
+
+        if( node->is_file_order_sink() )
+        {
+            // _next_state und _error_state unverändert lassen
+        }
+        else
+        {
+            if( node->_next_state.is_missing()  &&  next != _chain.end()  &&  ( node->_job || node->_nested_job_chain_path != "" ) )
+                node->_next_state = (*next)->_state;
+
+            if( !node->_next_state.is_missing() )  node->_next_node  = node_from_state( node->_next_state );
+                                             else  node->_next_state = empty_variant;
+
+            if( !node->_error_state.is_missing() )  node->_error_node  = node_from_state( node->_error_state );
+                                              else  node->_error_state = empty_variant;
+        }
+    }
+
+    for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+    {
+        Job_chain_node* node = *it;
+        check_job_chain_node( node );
+    }
+
+    _order_sources.finish();
+
+
+    /// Jetzt kann nichts mehr schiefgehen. Keine Exception ab hier! ///
+
+
+    for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+    {
+        Job_chain_node* node = *it;
+
+        if( node->_nested_job_chain_path != "" )
+        {
+            node->_nested_job_chain = order_subsystem()->job_chain( node->_nested_job_chain_path );
+        }
+    }
+
+
+    if( job_chain_group->size() > 0 )    // Die verschachtelten Jobketten
+    {
+        job_chain_group->connect_job_chain( this );
+        job_chain_group->finish();
+        order_subsystem()->job_chain_groups()->add_group( job_chain_group );
+    }
+
+
+    if( zschimmer::Log_ptr log = "" )
+    {
+        log << "Job_chain " << _name << " finished:\n";
 
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
             Job_chain_node* n = *it;
-            Chain::iterator next = it;  next++;
 
-            if( n->is_file_order_sink() )
-            {
-                // _next_state und _error_state unverändert lassen
-            }
-            else
-            {
-                if( n->_next_state.is_missing()  &&  next != _chain.end()  &&  ( n->_job || n->_job_chain_name != "" ) )
-                    n->_next_state = (*next)->_state;
-
-                if( !n->_next_state.is_missing() )  n->_next_node  = node_from_state( n->_next_state );
-                                              else  n->_next_state = empty_variant;
-
-                if( !n->_error_state.is_missing() )  n->_error_node  = node_from_state( n->_error_state );
-                                               else  n->_error_state = empty_variant;
-            }
-
-        }
-
-        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
-        {
-            Job_chain_node* node = *it;
-            check_job_chain_node( node );
-        }
-
-        _order_sources.finish();
-
-        if( zschimmer::Log_ptr log = "" )
-        {
-            log << "Job_chain " << _name << " finished:\n";
-
-            for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
-            {
-                Job_chain_node* n = *it;
-
-                log << "    job=" << ( n->_job? n->_job->_name : "(end)" );
-                log << " state=" << n->_state;
-                log << " next="  << n->_next_state;
-                log << " error=" << n->_error_state;
-                log << '\n';
-            }
+            log << "    job=" << ( n->_job? n->_job->_name : "(end)" );
+            log << " state=" << n->_state;
+            log << " next="  << n->_next_state;
+            log << " error=" << n->_error_state;
+            log << '\n';
         }
     }
 }
@@ -1614,7 +1725,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
         }
     }
 
-    z::throw_xc( "SCHEDULER-152", job->name(), name() );
+    z::throw_xc( "SCHEDULER-152", job->name(), path() );
     return NULL;
 }
 
@@ -1640,7 +1751,7 @@ Job_chain_node* Job_chain::referenced_node_from_state( const Order::State& state
 Job_chain_node* Job_chain::node_from_state( const Order::State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
-    if( !result )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(state) );
+    if( !result )  z::throw_xc( "SCHEDULER-149", path(), debug_string_from_variant(state) );
     return result;
 }
 
@@ -1696,7 +1807,7 @@ void Job_chain::add_order( Order* order )
     if( state() != s_running  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
     if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
     
-    if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
+    if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path() );
 
 
     set_visible( true );
@@ -1708,11 +1819,11 @@ void Job_chain::add_order( Order* order )
         order->set_state2( node->_state );
     }
 
-    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(order->_state) );
+    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->_job )  z::throw_xc( "SCHEDULER-149", path(), debug_string_from_variant(order->_state) );
     if( node->_job )  assert( node->_job->order_queue() );
 
     order->_job_chain      = this;
-    order->_job_chain_name = name();
+    order->_job_chain_path = path();
     order->_removed_from_job_chain_name = "";
     order->_log->set_prefix( order->obj_name() );
 
@@ -1729,7 +1840,7 @@ void Job_chain::add_order( Order* order )
 
 void Job_chain::remove_order( Order* order )
 {
-    assert( order->_job_chain_name == _name );
+    assert( order->_job_chain_path == _name );
     assert( order->_job_chain == this );
 
     ptr<Order> hold_order = order;   // Halten
@@ -1751,7 +1862,7 @@ void Job_chain::remove_order( Order* order )
     }
 
     order->_job_chain      = NULL;
-    order->_job_chain_name = "";
+    order->_job_chain_path = "";
     order->_log->set_prefix( obj_name() );
 
     unregister_order( order );
@@ -1822,7 +1933,7 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 {
     string order_id = record.as_string( "id" );
 
-    ptr<Order> order = new Order( _spooler, record, name() );
+    ptr<Order> order = new Order( _spooler, record, path() );
     order->load_blobs( ta );
 
     if( record.as_string( "distributed_next_time" ) != "" )
@@ -2080,6 +2191,8 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
 
 void Job_chain::remove()
 {
+    if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Job_chain_node,Job_chain>::string_referenced_by() );
+
     if( _state < s_running )  z::throw_xc( "SCHEDULER-151" );
 
     remove_all_pending_orders( true );
@@ -2125,6 +2238,277 @@ string Job_chain::db_where_condition() const
 Order_subsystem* Job_chain::order_subsystem() const
 {
     return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
+}
+
+//---------------------------------------------------------------Job_chain_groups::Job_chain_groups
+
+Job_chain_groups::Job_chain_groups()
+{
+    _group_array.push_back( NULL );    // Index 0 benutzen wir nicht
+}
+
+//-------------------------------------------------------Job_chain_groups::add_job_chain_connection
+
+//void Job_chain_groups::add_job_chain_connection( Job_chain* a, Job_chain* b )
+//{
+//    Job_chain_group* a_group = a->job_chain_group();
+//    Job_chain_group* b_group = b->job_chain_group();
+//
+//    // a_group nimmt alle Jobketten aus b_group auf
+//
+//    if( a_group  &&  b_group )
+//    {
+//        if( a_group != b_group )
+//        {
+//            Z_FOR_EACH( Job_chain_set, b_group->_job_chain_set, it )
+//            {
+//                Job_chain* bb = *it;
+//
+//                b_group->remove_job_chain( bb );
+//                a_group->add_job_chain( bb );
+//            }
+//
+//            remove_group( b_group );
+//        }
+//    }
+//    else
+//    if( a_group )
+//    {
+//        // b ist noch in keiner Gruppe
+//        a_group->add_job_chain( b );
+//    }
+//    else
+//    if( b_group )
+//    {
+//        // a ist noch in keiner Gruppe
+//        b_group->add_job_chain( a );
+//    }
+//    else
+//    {
+//        // a und b sind beide nicht in einer Gruppe
+//
+//        ptr<Job_chain_group> new_group = Z_NEW( Job_chain_group );
+//        
+//        new_group->add_job_chain( a );
+//        new_group->add_job_chain( b );
+//
+//        add_group( new_group );
+//    }
+//}
+
+//----------------------------------------------------------Job_chain_groups::disconnect_job_chains
+
+void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
+{
+    Job_chain_group* a_group = a->job_chain_group();
+
+    assert( a_group  &&  a_group == b->job_chain_group() );
+
+
+    Job_chain_set a_job_chains = a->connected_job_chains();
+
+    if( a_job_chains.size() < a_group->_job_chain_set.size() )
+    {
+        ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group );
+
+        for( Job_chain_set::iterator it = a_group->_job_chain_set.begin(); it != a_group->_job_chain_set.end(); )
+        {
+            Job_chain* job_chain = *it++;
+
+            if( a_job_chains.find( job_chain ) == a_job_chains.end() )
+            {
+                a_group->remove_job_chain( job_chain );
+                b_group->add_job_chain( job_chain );        // Der Aufruf prüft die Eindeutigkeit der Auftragskennung. Das ist überflüssig.
+            }
+        }
+
+        assert( a_job_chains.size() == a_group->_job_chain_set.size() );
+        assert( b_group->size() >= 1 );
+
+        if( a_group->size() <= 1 )
+        {
+            if( a_group->size() == 1 )
+            {
+                Job_chain* jc = *b_group->_job_chain_set.begin();
+                jc->set_job_chain_group( NULL );                // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+            }
+
+            remove_group( a_group );
+        }
+                
+        if( b_group->size() == 1 ) 
+        {
+            Job_chain* jc = *b_group->_job_chain_set.begin();
+            jc->set_job_chain_group( NULL );                // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+        }
+        else
+            add_group( b_group );
+    }
+}
+
+//----------------------------------------------------------------------Job_chain_groups::add_group
+
+void Job_chain_groups::add_group( Job_chain_group* group )
+{
+    int index = 1;
+    for(; index < _group_array.size()  &&  _group_array[ index ]; index++ );
+    group->_index = index;
+    if( index == _group_array.size() )  _group_array.push_back( group );
+                                  else  _group_array[ index ] = group;
+}
+
+//-------------------------------------------------------------------Job_chain_groups::remove_group
+
+void Job_chain_groups::remove_group( Job_chain_group* group )
+{
+    assert( _group_array[ group->_index ] == group );
+
+    int index = group->_index;
+    group->_index = 0;
+    _group_array[ index ] = NULL;
+}
+
+//---------------------------------------------------------------Job_chain_group::connect_job_chain
+
+void Job_chain_group::connect_job_chain( Job_chain* job_chain )
+{
+    add_job_chain( job_chain );
+
+    if( Job_chain_group* group = job_chain->job_chain_group() )
+    {
+        Z_FOR_EACH( Job_chain_set, group->_job_chain_set, it )
+        {
+            Job_chain* jc = *it;
+            add_job_chain( jc );
+        }
+    }
+
+    //Job_chain_set job_chain_set = job_chain->connected_job_chains();
+
+    //Z_FOR_EACH( Job_chain_set, job_chain_set, it )
+    //{
+    //    Job_chain* jc = *it;
+
+    //    if( _job_chain_set.find( jc ) != _job_chain_set.end() )
+    //    {
+    //        add_job_chain( jc );    // Exception, wenn doppelte Auftragskennung
+    //    }
+    //}
+}
+
+//--------------------------------------------------------------------------Job_chain_group::finish
+
+void Job_chain_group::finish()
+{
+    Z_FOR_EACH( Job_chain_set, _job_chain_set, it )
+    {
+        Job_chain* job_chain = *it;
+        
+        if( Job_chain_group* old_job_chain_group = job_chain->job_chain_group() )
+        {
+            old_job_chain_group->remove_job_chain( job_chain );
+        }
+
+        job_chain->set_job_chain_group( this );
+    }
+}
+
+//-------------------------------------------------------------------Job_chain_group::add_job_chain
+
+void Job_chain_group::add_job_chain( Job_chain* job_chain )
+{
+    //Z_DEBUG( assert( !job_chain->job_chain_group() ) );
+
+    //job_chain->set_job_chain_group( this );
+    check_for_unique_order_ids_of( job_chain );
+    _job_chain_set.insert( job_chain );
+}
+
+//---------------------------------------------------Job_chain_group::check_for_unique_order_ids_of
+
+void Job_chain_group::check_for_unique_order_ids_of( Job_chain* job_chain ) const
+{
+    Z_FOR_EACH( Job_chain::Order_map, job_chain->_order_map, it )
+    {
+        if( Job_chain* other_job_chain = job_chain_by_order_id_or_null( it->first ) )
+            z::throw_xc( "SCHEDULER-426", it->first, job_chain, other_job_chain );
+    }
+}
+
+//---------------------------------------------------Job_chain_group::job_chain_by_order_id_or_null
+
+Job_chain* Job_chain_group::job_chain_by_order_id_or_null( const string& order_id ) const
+{
+    Job_chain* result = NULL;
+
+    Z_FOR_EACH_CONST( Job_chain_set, _job_chain_set, it )
+    {
+        Job_chain* job_chain = *it;
+
+        if( job_chain->has_order_id( (Read_transaction*)NULL, order_id ) )
+        {
+            result = job_chain;
+            break;
+        }
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------Job_chain_group::remove_job_chain
+
+void Job_chain_group::remove_job_chain( Job_chain* job_chain )
+{
+    Z_DEBUG( assert( job_chain->job_chain_group() == this ) );
+
+    job_chain->set_job_chain_group( NULL );
+    _job_chain_set.erase( job_chain );
+}
+
+//------------------------------------------------------------------Job_chain::connected_job_chains
+
+Job_chain_set Job_chain::connected_job_chains()
+{
+    Job_chain_set result;
+    get_connected_job_chains( &result );
+    return result;
+}
+
+//--------------------------------------------------------------Job_chain::get_connected_job_chains
+
+void Job_chain::get_connected_job_chains( Job_chain_set* result )
+{
+    // Eine sicherere Implementierung würde auf die Rekursion verzichten.
+    // Mit sehr stark verschachtelten Jobketten (>1000?) wäre die Rekursion zu heftig.
+
+
+    // Alle untergeordneten Jobketten aufnehmen
+
+    Z_FOR_EACH( Chain, _chain, it )  
+    {
+        Job_chain_node* node = *it;
+
+        if( node->_nested_job_chain  &&  result->find( node->_nested_job_chain ) == result->end() )  
+        {
+            result->insert( node->_nested_job_chain );
+            node->_nested_job_chain->get_connected_job_chains( result );
+        }
+    }
+
+
+    // Alle übergeordneten Jobketten aufnehmen
+
+    Z_FOR_EACH( Reference_register, _reference_register, it )
+    {
+        Job_chain_node* node      = (*it)->referer();
+        Job_chain*      job_chain = node->_job_chain;
+
+        if( result->find( job_chain ) == result->end() )  
+        {
+            result->insert( job_chain );
+            job_chain->get_connected_job_chains( result );
+        }
+    }
 }
 
 //-------------------------------------------------------------------------Order_queue::Order_queue
@@ -2234,10 +2618,10 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
                         try
                         {
-                            string job_chain_name              = record.as_string( "job_chain" );
+                            string job_chain_path              = record.as_string( "job_chain" );
                             string occupying_cluster_member_id = record.as_string( "occupying_cluster_member_id" );
 
-                            ptr<Order> order = new Order( _spooler, record, job_chain_name );
+                            ptr<Order> order = new Order( _spooler, record, job_chain_path );
 
                             order->load_order_xml_blob( &ta );
                             if( show.is_set( show_payload  ) )  order->load_payload_blob( &ta );
@@ -2678,7 +3062,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
             
                 order->_is_distributed = true;
                 
-                Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_name );
+                Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
                 assert( job_chain->_is_distributed );
 
                 bool ok = order->db_occupy_for_processing();
@@ -2785,7 +3169,7 @@ string Order_queue::db_where_expression_for_job_chain( const Job_chain* job_chai
     S    result;
     bool is_in_job_chain = false;
 
-    result << "(`job_chain`="  << sql::quoted( job_chain->name() ) << " and `state` in (";
+    result << "(`job_chain`="  << sql::quoted( job_chain->path() ) << " and `state` in (";
 
     Z_FOR_EACH_CONST( Job_chain::Chain, job_chain->_chain, n )
     {
@@ -2854,7 +3238,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Record& record, const string& job_chain_name )
+Order::Order( Spooler* spooler, const Record& record, const string& job_chain_path )
 :
     Com_order(this),
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
@@ -2862,7 +3246,7 @@ Order::Order( Spooler* spooler, const Record& record, const string& job_chain_na
 {
     init();
 
-    _job_chain_name = job_chain_name;
+    _job_chain_path = job_chain_path;
 
     set_id      ( record.as_string( "id"         ) );   _id_locked = true;
     _state      = record.as_string( "state"      );
@@ -3201,7 +3585,7 @@ void Order::db_show_occupation( Log_level log_level )
 void Order::db_insert()
 {
     bool ok = db_try_insert();
-    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name, "in database" );
+    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, "in database" );
 }
 
 //-------------------------f----------------------------------------------------Order::db_try_insert
@@ -3262,7 +3646,7 @@ bool Order::db_try_insert()
         sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_orders_tablename );
         
         insert[ "ordering"      ] = ordering;
-        insert[ "job_chain"     ] = _job_chain_name;
+        insert[ "job_chain"     ] = _job_chain_path;
         insert[ "id"            ] = id().as_string();
         insert[ "spooler_id"    ] = _spooler->id_for_db();
         insert[ "title"         ] = title()                     , _title_modified      = false;
@@ -3400,7 +3784,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         }
 
 
-        //if( _job_chain_name == "" )
+        //if( _job_chain_path == "" )
         if( delet )
         {
             for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
@@ -3522,7 +3906,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
 
     try
     {
-        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_name, _id, Order_subsystem::lo_lock ) )
+        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_path, _id, Order_subsystem::lo_lock ) )
         {
             if( modified_order->_is_replacement )
             {
@@ -3646,10 +4030,10 @@ sql::Where_clause Order::db_where_clause()
 
 void Order::db_fill_where_clause( sql::Where_clause* where )
 {
-    assert( _job_chain_name != "" );
+    assert( _job_chain_path != "" );
 
     where->and_where_condition( "spooler_id", _spooler->id_for_db() );
-    where->and_where_condition( "job_chain" , _job_chain_name       );
+    where->and_where_condition( "job_chain" , _job_chain_path       );
     where->and_where_condition( "id"        , id().as_string()      );
 }
 
@@ -3671,7 +4055,7 @@ Database* Order::db()
 
 void Order::open_log()
 {
-    if( _job_chain_name != ""  &&  _spooler->_order_history_with_log  &&  !string_begins_with( _spooler->log_directory(), "*" ) )
+    if( _job_chain_path != ""  &&  _spooler->_order_history_with_log  &&  !string_begins_with( _spooler->log_directory(), "*" ) )
     {
         string name = _id.as_string();
         
@@ -3689,7 +4073,7 @@ void Order::open_log()
             }
         }
 
-        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_name + "." + name + ".log" );      // Jobprotokoll
+        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_path + "." + name + ".log" );      // Jobprotokoll
         _log->set_remove_after_close( true );
         _log->open();
     }
@@ -3831,11 +4215,11 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         if( e.nodeName_is( "order.job_chain_stack" ) )
         {
             xml::Element_ptr e2 = e.select_element_strict( "order.job_chain_stack.entry" );
-            _outer_job_chain_name  = e2.getAttribute( "job_chain", _outer_job_chain_name );
+            _outer_job_chain_path  = e2.getAttribute( "job_chain", _outer_job_chain_path );
             _outer_job_chain_state = e2.getAttribute( "state" );
 
             // Nicht prüfen, weil Äußere Jobkette später definiert werden kann
-            //order_subsystem()->job_chain( _outer_job_chain_name )->node_from_state( _outer_job_chain_state );   // Prüfen
+            //order_subsystem()->job_chain( _outer_job_chain_path )->node_from_state( _outer_job_chain_state );   // Prüfen
         }
     }
 
@@ -3872,7 +4256,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         element.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( Job_chain* job_chain = this->job_chain_for_api() )
-        element.setAttribute( "job_chain" , job_chain->name() );
+        element.setAttribute( "job_chain" , job_chain->path() );
 
         if( _replaced_by )
         element.setAttribute( "replaced"  , "yes" );
@@ -3905,7 +4289,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         if( _log->opened() )
         element.setAttribute( "log_file"  , _log->filename() );
 
-        if( _is_in_database  &&  _job_chain_name != ""  &&  !_job_chain )
+        if( _is_in_database  &&  _job_chain_path != ""  &&  !_job_chain )
         element.setAttribute( "in_database_only", "yes" );
 
         if( show.is_set( show_payload )  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
@@ -3986,11 +4370,11 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( start_time()     )  element.setAttribute( "start_time", start_time().as_string() );
     if( end_time()       )  element.setAttribute( "end_time"  , end_time  ().as_string() );
 
-    if( _outer_job_chain_name != "" )
+    if( _outer_job_chain_path != "" )
     {
         xml::Element_ptr e  = element.append_new_element( "order.job_chain_stack" );
         xml::Element_ptr e2 = e.append_new_element( "order.job_chain_stack.entry" );
-        e2.setAttribute( "job_chain", _outer_job_chain_name );
+        e2.setAttribute( "job_chain", _outer_job_chain_path );
         e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
     }
     
@@ -4029,7 +4413,7 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
                     setback_element = NULL;
                 }
 
-                if( _job_chain_name != "" )  e.setAttribute( "job_chain", _job_chain_name );
+                if( _job_chain_path != "" )  e.setAttribute( "job_chain", _job_chain_path );
                 e.setAttribute( "order", string_id() );
             }
         }
@@ -4043,7 +4427,7 @@ void Order::print_xml_child_elements_for_event( String_stream* s, Scheduler_even
     *s << "<order";
     
     if( _job_chain )
-    *s << " job_chain=\"" << xml::encode_attribute_value( _job_chain_name )      << '"';
+    *s << " job_chain=\"" << xml::encode_attribute_value( _job_chain_path )      << '"';
     *s << " id=\""        << xml::encode_attribute_value( string_id() )          << '"';
 
     if( _title != "" )
@@ -4570,7 +4954,7 @@ void Order::add_to_order_queue( Order_queue* order_queue )
     {
         if( _task )  _moved = true;
 
-        if( _job_chain_name != "" )  remove_from_job_chain();
+        if( _job_chain_path != "" )  remove_from_job_chain();
         _removed_from_job_chain_name = "";
 
         if( _id.vt == VT_EMPTY )  set_default_id();
@@ -4589,7 +4973,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
     if( !_end_time )  _end_time = Time::now();
 
-    if( _job_chain_name != "" )
+    if( _job_chain_path != "" )
     {
         if( _job_chain || _is_in_database )     // Nur Protokollieren, wenn wirklich etwas entfernt wird, aus Jobkette im Speicher oder Datenbank (_is_distributed)
         {
@@ -4611,7 +4995,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     
 
     _job_chain = NULL;
-    _job_chain_name = "";
+    _job_chain_path = "";
 
     if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
 }
@@ -4620,7 +5004,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
 void Order::remove_from_job_chain_stack()
 {
-    _outer_job_chain_name = "";
+    _outer_job_chain_path = "";
     _outer_job_chain_state.clear();
 }
 
@@ -4629,7 +5013,7 @@ void Order::remove_from_job_chain_stack()
 void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option )
 {
     bool ok = try_place_in_job_chain( job_chain, job_chain_stack_option );
-    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->name() );
+    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->path() );
 }
 
 //----------------------------------------------------------------------Order::try_place_in_job_chain
@@ -4660,7 +5044,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
     {
         ptr<Order> hold_me = this;   // Halten für remove_from_job_chain()
         
-        if( _job_chain_name != "" )  remove_from_job_chain( job_chain_stack_option );
+        if( _job_chain_path != "" )  remove_from_job_chain( job_chain_stack_option );
         assert( !_job_chain );
         
         if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
@@ -4671,13 +5055,13 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
 
         if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
 
-        if( node->_job_chain_name != "" )   // Verschachtelte Jobkette?
+        if( node->_nested_job_chain )   // Verschachtelte Jobkette?
         {
-            if( _outer_job_chain_name != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich
+            if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich
 
-            _outer_job_chain_name  = job_chain->name();
+            _outer_job_chain_path  = job_chain->path();
             _outer_job_chain_state = _state;
-            job_chain = order_subsystem()->job_chain( node->_job_chain_name );
+            job_chain = node->_nested_job_chain;
             _state = job_chain->first_node()->_state;     // Auftrag bekommt Zustand des ersten Jobs der Jobkette        
         }
 
@@ -4688,7 +5072,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
 
         if( !_is_distribution_inhibited  &&  job_chain->_is_distributed )  set_distributed();
 
-        _job_chain_name = job_chain->name();
+        _job_chain_path = job_chain->path();
         _removed_from_job_chain_name = "";
 
         //set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
@@ -4793,8 +5177,8 @@ bool Order::tip_own_job_for_new_distributed_order_state()
 Job_chain* Order::job_chain() const
 { 
     return _job_chain           ? _job_chain : 
-           _job_chain_name == ""? NULL 
-                                : order_subsystem()->job_chain( _job_chain_name );
+           _job_chain_path == ""? NULL 
+                                : order_subsystem()->job_chain( _job_chain_path );
 }
 
 //---------------------------------------------------------------------------------Order::job_chain
@@ -4803,7 +5187,7 @@ Job_chain* Order::job_chain_for_api() const
 { 
     return  _job_chain                        ? _job_chain :
             _removed_from_job_chain_name != ""? order_subsystem()->job_chain_or_null( _removed_from_job_chain_name ) :
-            _job_chain_name              != ""? order_subsystem()->job_chain_or_null( _job_chain_name ) 
+            _job_chain_path              != ""? order_subsystem()->job_chain_or_null( _job_chain_path ) 
                                               : NULL; 
 }
 
@@ -4910,7 +5294,7 @@ void Order::handle_end_state()
     bool reopen_log = false;
 
 
-    if( _outer_job_chain_name == "" )
+    if( _outer_job_chain_path == "" )
     {
         is_real_end_state = true;
     }
@@ -4920,7 +5304,7 @@ void Order::handle_end_state()
 
         try
         {
-            Job_chain*      outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_name );
+            Job_chain*      outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );
             Job_chain_node* outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
             State           next_outer_job_chain_state = _is_success_state? outer_job_chain_node->_next_state 
                                                                           : outer_job_chain_node->_error_state;
@@ -4928,9 +5312,9 @@ void Order::handle_end_state()
             Job_chain_node* next_outer_job_chain_node = outer_job_chain->node_from_state_or_null( next_outer_job_chain_state );
             
 
-            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_job_chain_name != "" )
+            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_nested_job_chain )
             {
-                Job_chain* next_job_chain = order_subsystem()->job_chain( next_outer_job_chain_node->_job_chain_name );
+                Job_chain* next_job_chain = next_outer_job_chain_node->_nested_job_chain;
 
                 _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
 
@@ -4943,7 +5327,7 @@ void Order::handle_end_state()
 
                 _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
                 place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-                _outer_job_chain_name = outer_job_chain->name();  // place_in_job_chain() hat's gelöscht
+                _outer_job_chain_path = outer_job_chain->path();  // place_in_job_chain() hat's gelöscht
             }
             else
             {
@@ -4978,12 +5362,12 @@ void Order::handle_end_state()
 
             try
             {
-                if( _outer_job_chain_name != "" )
+                if( _outer_job_chain_path != "" )
                 {
-                    string first_job_chain_name = order_subsystem()->job_chain( _outer_job_chain_name )->first_node()->_job_chain_name;
+                    Job_chain* first_job_chain = order_subsystem()->job_chain( _outer_job_chain_path )->first_node()->_nested_job_chain;
                     remove_from_job_chain( jc_leave_in_job_chain_stack );
                     set_state( _initial_state, next_start );
-                    place_in_job_chain( order_subsystem()->job_chain( first_job_chain_name ), jc_leave_in_job_chain_stack );
+                    place_in_job_chain( first_job_chain, jc_leave_in_job_chain_stack );
                 }
                 else
                 {
@@ -5235,7 +5619,7 @@ void Order::set_at( const Time& time )
 {
     assert_no_task( __FUNCTION__ );
     if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
-  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
+  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path );
 
     set_setback( time );
 }
@@ -5313,7 +5697,7 @@ void Order::on_before_modify_run_time()
     if( _is_distributed )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
   //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
   //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
-  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_name );
+  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path );
 }
 
 //-------------------------------------------------------------------Order::run_time_modified_event
@@ -5439,7 +5823,7 @@ string Order::obj_name() const
 
     //THREAD_LOCK( _lock )
     {
-        if( Job_chain* job_chain = this->job_chain_for_api() )  result += job_chain->name() + ":";
+        if( Job_chain* job_chain = this->job_chain_for_api() )  result += job_chain->path() + ":";
 
         result += debug_string_from_variant(_id);
         if( _title != "" )  result += " " + quoted_string( _title );
@@ -5447,6 +5831,7 @@ string Order::obj_name() const
 
     return result;
 }
+
 
 //-------------------------------------------------------------------------------------------------
 

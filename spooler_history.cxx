@@ -1500,7 +1500,7 @@ void Database::write_order_history( Order* order, Transaction* outer_transaction
             insert.set_table_name( _spooler->_order_history_tablename );
             
             insert[ "history_id" ] = history_id;
-            insert[ "job_chain"  ] = order->job_chain_name();
+            insert[ "job_chain"  ] = order->job_chain_path();
             insert[ "order_id"   ] = order->id().as_string();
             insert[ "title"      ] = order->title();
             insert[ "state"      ] = order->state().as_string();

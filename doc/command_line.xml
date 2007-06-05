@@ -580,6 +580,10 @@
                     auf demselben Rechner das XML-Kommando.
                     Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
                 </p>
+                <p>
+                    Das Kommando wird an die mit <scheduler_element name="config" attribute="ip_address"/> eingestellte IP-Adresse geschickt,
+                    oder, wenn diese fehlt, an 127.0.0.1.
+                </p>
             </description>
         </command_option>
     </command_options>

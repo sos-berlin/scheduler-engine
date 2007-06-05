@@ -2792,6 +2792,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     if( !_title.empty() )
     job_element.setAttribute( "title"     , _title                  );
 
+    job_element.setAttribute_optional( "process_class", _module->_process_class_path );
 
     if( _state != s_not_initialized )
     {

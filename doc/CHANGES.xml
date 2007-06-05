@@ -10,6 +10,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-05-26" version="2.0.175" subversion_revision="5049">
+        <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
+            <description>
+                <p>
+                    <scheduler_option name="send-cmd"/> berücksichtigt <scheduler_element name="config" attribute="ip_address"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2007-05-09" version="2.0.175" subversion_revision="5045">
         <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
             <description>

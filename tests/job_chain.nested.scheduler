@@ -26,13 +26,27 @@
 function spooler_process() 
 {               
     spooler_log.info( spooler_task.order.title );
-    return false;
+    return true;
 }
 
                 ]]>
                 </script>
             </job>
 
+            
+            <job name="ende" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler.job_chain( "job_chain.nested.scheduler" ).remove();
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
         </jobs>
         
             
@@ -49,6 +63,7 @@ function spooler_process()
 
             <job_chain name="job_chain.nested.scheduler.C">
                 <job_chain_node state="111" job="javascript"/>
+                <job_chain_node state="222" job="ende"/>
                 <job_chain_node state="finished"/>
             </job_chain>
 

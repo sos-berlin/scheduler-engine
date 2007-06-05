@@ -345,6 +345,7 @@
     <register_keyword_display><code>&lt;config&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
     <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
+    <register_entry register_file='command_line.xml#use_element__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
     <register_entry register_file='directory_watch.xml#use_element__config' register_title='Verzeichnisüberwachung'  register_keyword='config'/>
     <register_entry register_file='email.xml#use_element__config' register_title='eMail-Versand'  register_keyword='config'/>
     <register_entry register_file='http.xml#use_element__config' register_title='HTTP-Server und Web-Services'  register_keyword='config'/>

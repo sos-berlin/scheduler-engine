@@ -893,7 +893,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                     {
                         Transaction ta ( _spooler->_db ); 
 
-                        ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->name(), path, Order_subsystem_interface::lo_blacklisted_lock );
+                        ptr<Order> order = order_subsystem()->try_load_order_from_database( &ta, _job_chain->path(), path, Order_subsystem_interface::lo_blacklisted_lock );
                         if( order )
                         {
                             order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"

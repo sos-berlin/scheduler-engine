@@ -2643,6 +2643,24 @@
                 <title>Same Java class <p1/> with source code is used in <p2>job</p2></title>
             </text>
         </message-->
+        
+        <message code="SCHEDULER-424">
+            <text xml:lang="en">
+                <title>'<p1/>' is being removed before '<p2/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-425">
+            <text xml:lang="en">
+                <title>'<p1/>' cannot be removed, it is used by <p2>job_chains</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-426">
+            <text xml:lang="en">
+                <title>Job chain group cannot be set up, because of duplicate order id '<p1/>' in '<p2>job_chain</p2>' and '<p3>job_chain</p3>'</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
