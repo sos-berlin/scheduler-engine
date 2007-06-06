@@ -61,14 +61,29 @@
 
     <messages>
         <message level="error" code="SCHEDULER-415"/>
+        <message level="info"  code="SCHEDULER-426"/>
         <message level="info"  code="SCHEDULER-862"/>
         <message level="info"  code="SCHEDULER-863"/>
+        <message level="info"  code="SCHEDULER-872"/>
     </messages>
     
 
     <description>
         <p>
-            Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu.
+            Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu, der eine verschachtelte Jobkette bezeichnet.
+        </p>
+        <p>
+            Miteinander durch Verschachtelung verbundene Jobkettenn bilden eine Jobkettengruppe,
+            um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
+        </p>
+        <p>
+            Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab, 
+            wenn die Auftragskennung in der Jobkettengruppe bereits vergeben ist.
+        </p>
+        <p>
+            Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette, 
+            die derselben Jobkettengruppe angehört,
+            ersetzt.
         </p>
     </description>
 </xml_element>

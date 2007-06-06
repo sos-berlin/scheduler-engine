@@ -38,6 +38,10 @@
 
     <xml_answer element="ok"/>
 
+    <messages>
+        <message level="info"  code="SCHEDULER-873"/>
+        <message level="info"  code="SCHEDULER-874"/>
+    </messages>
 
     <example>
         <pre>&lt;remove_job_chain job_chain="my_job_chain" /></pre>

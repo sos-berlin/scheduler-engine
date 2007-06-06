@@ -48,6 +48,7 @@ struct Job_chain_group : Object, Scheduler_object
     Order*                      order_or_null               ( const string& order_id ) const;
     bool                        has_order_id                ( const string& order_id ) const        { return job_chain_by_order_id_or_null( order_id ) != NULL; }
     void                        finish                      ();
+    int                         index                       () const                                { return _index; }
     int                         size                        () const                                { return _job_chain_set.size(); }
     void                        on_group_added              ();
     string                      obj_name                    () const;
@@ -1398,6 +1399,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         element.setAttribute( "state" , state_name( state() ) );
         if( !_visible ) element.setAttribute( "visible", _visible );
         element.setAttribute( "orders_recoverable", _orders_recoverable );
+        if( _job_chain_group )  element.setAttribute( "job_chain_group", _job_chain_group->index() );
 
         if( _state >= s_running )
         {
@@ -5117,13 +5119,15 @@ void Order::remove_from_job_chain_stack()
 
 void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option )
 {
-    bool ok = try_place_in_job_chain( job_chain, job_chain_stack_option );
-    if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->path() );
+    bool exists_exception = true;
+    bool ok = try_place_in_job_chain( job_chain, job_chain_stack_option, exists_exception );
+    assert( ok );
+    //if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), job_chain->path() );
 }
 
 //----------------------------------------------------------------------Order::try_place_in_job_chain
 
-bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option )
+bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option, bool exists_exception )
 {
     bool is_new = true;
 
@@ -5138,12 +5142,21 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
     }
     else
     {
+        Job_chain* other_job_chain = job_chain;
+
+        if( job_chain->_job_chain_group )
+        {
+            Order* other_order = job_chain->_job_chain_group->order_or_null( string_id() );
+            is_new = !other_order  ||  other_order == this && _job_chain_path != job_chain->path();  // is_new, wenn Auftragskennung neu oder derselbe Auftrag nicht in job_chain ist.
+        }
+        else
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            is_new = job_chain->_job_chain_group? !job_chain->_job_chain_group->has_order_id( string_id() ) 
-                                                : !job_chain->has_order_id( &ta, id() );
+            is_new = !job_chain->has_order_id( &ta, id() );
         }
         catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
+
+        if( !is_new  &&  exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), other_job_chain->path() );
     }
 
     if( is_new )
@@ -5200,6 +5213,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
         }
     }
 
+    assert( !exists_exception || is_new );
     return is_new;
 }
 
@@ -5430,11 +5444,11 @@ void Order::handle_end_state()
                 _end_time = 0;
                 open_log();
 
-                _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
-
                 _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
                 place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
                 _outer_job_chain_path = outer_job_chain->path();  // place_in_job_chain() hat's gelöscht
+
+                _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
             }
             else
             {
@@ -5626,6 +5640,11 @@ void Order::postprocessing2( Job* last_job )
     //{
     //    if( !_is_on_blacklist )  close( Order::cls_remove_from_job_chain ); 
     //}
+
+    if( _removed_from_job_chain_name != "" )
+    {
+        close( Order::cls_dont_remove_from_job_chain );
+    }
 }
 
 //-----------------------------------------------------------------------------Order::set_suspended
@@ -5836,6 +5855,9 @@ void Order::set_run_time( const xml::Element_ptr& e )
 
 void Order::set_replacement( Order* replaced_order )
 {
+    // Bei verschachtelten Jobketten (in einer Job_chain_group verbunden) können die 
+    // zwei Aufträge in verschiedenen Jobketten sein.
+
     assert( !replaced_order->_replaced_by );
     assert( !replaced_order->_is_replacement );
 

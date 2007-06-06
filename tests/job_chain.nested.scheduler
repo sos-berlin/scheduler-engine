@@ -33,7 +33,46 @@ function spooler_process()
                 </script>
             </job>
 
-            
+
+            <job name="A.111" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( spooler_task.order.title );
+    
+    new ActiveXObject( "hostware.global" ).sleep( 5 );
+
+    var order = spooler.create_order();
+    order.id = 1;
+    order.title = "ERSATZ";
+    spooler.job_chain( "job_chain.nested.scheduler.C" ).add_or_replace_order( order );
+    
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+
+            <job name="B.111" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( spooler_task.order.title );
+    new ActiveXObject( "hostware.global" ).sleep( 15 );
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+
             <job name="ende" order="yes">
                 <script language="JavaScript">
                     <![CDATA[
@@ -52,13 +91,13 @@ function spooler_process()
             
         <job_chains>
             <job_chain name="job_chain.nested.scheduler.A">
-                <job_chain_node state="111" job="javascript" error_state="222"/>
+                <job_chain_node state="111" job="A.111" error_state="222"/>
                 <job_chain_node state="222" job="javascript" error_state="finished"/>
                 <job_chain_node state="finished"/>
             </job_chain>
 
             <job_chain name="job_chain.nested.scheduler.B">
-                <job_chain_node state="111" job="javascript"/>
+                <job_chain_node state="111" job="B.111"/>
             </job_chain>
 
             <job_chain name="job_chain.nested.scheduler.C">
@@ -82,7 +121,7 @@ function spooler_process()
 
         <commands>
             <add_order job_chain="job_chain.nested.scheduler" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
-            <add_order job_chain="job_chain.nested.scheduler.B" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
+            <!--add_order job_chain="job_chain.nested.scheduler.B" id="1" title="Wir haben einen Auftrag!" replace="yes"/-->
         </commands>
 
     </config>

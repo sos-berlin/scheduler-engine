@@ -195,7 +195,7 @@ struct Order : Com_order,
     enum Job_chain_stack_option { jc_remove_from_job_chain_stack, jc_leave_in_job_chain_stack };
     void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
-    bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
+    bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        remove_from_job_chain_stack();
     void                        remove_from_job         ();

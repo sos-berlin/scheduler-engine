@@ -10,8 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-05-26" version="2.0.175" subversion_revision="5049">
-        <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
+    <change date="2007-06-06" version="2.0.176" subversion_revision="5071">
+        <revision type="new" title="Aufträgskennungen werden in allen verschachtelten Jobketten auf Eindeutigkeit geprüft">
+            <description>
+                <p>
+                    Miteinander durch Verschachtelung verbundene Jobkettenn bilden eine Jobkettengruppe,
+                    um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
+                </p>
+                <p>
+                    Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab,
+                    wenn die Auftragskennung in der Jobkettengruppe bereits vergeben ist.
+                </p>
+                <p>
+                    Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette,
+                    die derselben Jobkettengruppe angehört,
+                    ersetzt.
+                </p>
+            </description>
+        </revision>
+        
+        <revision type="modification" title="-send-cmd= berücksichtigt -ip-address=">
             <description>
                 <p>
                     <scheduler_option name="send-cmd"/> berücksichtigt <scheduler_element name="config" attribute="ip_address"/>.
@@ -19,7 +37,7 @@
             </description>
         </revision>
     </change>
-    
+
     <change date="2007-05-09" version="2.0.175" subversion_revision="5045">
         <revision type="modification" title="MySQL-Tabellen werden für InnoDB angelegt">
             <description>

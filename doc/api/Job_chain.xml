@@ -313,6 +313,11 @@ sub xml_attribute
             Die Zustände der Aufträge müssen in der erneuerten Jobkette vorhanden sein. 
         </p>
     </description>
+    
+    <messages>
+        <message level="info"  code="SCHEDULER-873"/>
+        <message level="info"  code="SCHEDULER-874"/>
+    </messages>
 </method>
 
 
