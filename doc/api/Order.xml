@@ -306,7 +306,13 @@
             <scheduler_element name="delay_order_after_setback"/> oder
             <scheduler_method class="Job" property="delay_order_after_setback"/> 
             eingestellten Frist wiederholt.
-            Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung.
+            <!-- fs 2007-06-06 ... -->
+            Bei einer Wiederholung wird nur die Funktion <scheduler_method class="Job_impl" method="spooler_process"/> des Jobs wiederholt.
+            Wenn in <code>spooler_process()</code> die Funktion <code>order.setback()</code> aufgerufen wurde, bleibt der Rückgabewert von <code>spooler_process()</code> ohne Wirkung.
+            <!-- ... fs 2007-06-06 -->
+            
+            <!-- original: -->
+            <!-- Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung. -->
         </p>
         <p>
             Der Auftrag zählt aufeinander folgende Aufrufe dieser Methode,

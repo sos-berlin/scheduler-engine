@@ -22,6 +22,12 @@
                 <p>
                     Für die 1., 2. usw. aufeinanderfolgende Rückstellung desselben Auftrags
                     können verschiedene Fristen eingestellt werden.
+                    <!-- fs 2007-06-06 -->
+                    <br/>
+                    Gibt an, ab der wievielten Rückstellung
+                    des Auftrags dieses XML-Element gilt.<br/>
+                    Z.B. bei <code>setback_count=5</code>
+                    gilt das Element erst ab der 5. Rückstellung.
                 </p>
             </description>
         </xml_attribute>
