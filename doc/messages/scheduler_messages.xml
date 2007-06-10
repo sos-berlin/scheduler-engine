@@ -3819,15 +3819,15 @@
 
         <message code="SCHEDULER-872" weight="info" object="Job_chain_group">
             <text xml:lang="en">
-                <title>This Job_chain_group contains job chain <p1>job_chains</p1></title>
+                <title>This Job_chain_group contains Job_chain <p1>job_chains</p1></title>
             </text>
         </message>
 
-        <message code="SCHEDULER-873" weight="info" object="Job_chain_group">
+        <!--message code="SCHEDULER-873" weight="info" object="Job_chain_group">
             <text xml:lang="en">
                 <title>'<p1>job_chain</p1>' has been removed from Job_chain_group</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-874" weight="info" object="Job_chain_group">
             <text xml:lang="en">

@@ -113,6 +113,12 @@ function spooler_process()
                 <job_chain_node.end       state="finished"/>
             </job_chain>
 
+            <job_chain name="job_chain.nested.scheduler.2">
+                <job_chain_node.job_chain state="AAA" job_chain="job_chain.nested.scheduler.A"/>
+                <job_chain_node.job_chain state="BBB" job_chain="job_chain.nested.scheduler.B"/>
+                <job_chain_node.end       state="finished"/>
+            </job_chain>
+
             <!--job_chain name="job_chain.nested.scheduler.super">
                 <job_chain_node.job_chain state="super" job_chain="job_chain.nested.scheduler"/>
                 <job_chain_node.end       state="finished"/>

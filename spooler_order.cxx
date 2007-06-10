@@ -39,7 +39,7 @@ const string order_select_database_columns              = "`id`, `priority`, `st
 
 struct Job_chain_group : Object, Scheduler_object
 {
-                                Job_chain_group             ( Scheduler* );
+                                Job_chain_group             ( Order_subsystem* );
 
     void                        connect_job_chain           ( Job_chain* );
   //void                        disconnect_job_chain        ( Job_chain* );
@@ -71,10 +71,11 @@ struct Job_chain_groups
 {
                                 Job_chain_groups            ( Order_subsystem* );
 
-    void                        add_group                   ( Job_chain_group* );
+    void                        add_group                   ( Job_chain_group*, int index = 0 );
     void                        remove_group                ( Job_chain_group* );
 
-    void                        disconnect_job_chains       ( Job_chain* a, Job_chain* b );
+    void                        recompute_job_chain_groups  ( const Job_chain_set& disconnected_job_chains );
+  //void                        disconnect_job_chains       ( Job_chain* a, Job_chain* b );
 
   private:
     Order_subsystem*                _order_subsystem;
@@ -988,20 +989,20 @@ void Order_sources::start()
 
 void Job_chain_node::close()
 {
-    ptr<Job_chain> my_job_chain     = _job_chain;
-    ptr<Job_chain> nested_job_chain = _nested_job_chain;
+    Job_chain_set disconnected_job_chains;
+
+    if( _job_chain  &&  _nested_job_chain )  
+    {
+        disconnected_job_chains.insert( _job_chain );
+        disconnected_job_chains.insert( _nested_job_chain );
+        _nested_job_chain = NULL;
+        _job_chain->order_subsystem()->job_chain_groups()->recompute_job_chain_groups( disconnected_job_chains );
+    }
 
     // Zirkel auflösen:
     _job_chain  = NULL;
     _next_node  = NULL;
     _error_node = NULL;
-
-    _nested_job_chain = NULL;
-
-    if( my_job_chain  &&  nested_job_chain )
-    {
-        my_job_chain->order_subsystem()->job_chain_groups()->disconnect_job_chains( my_job_chain, nested_job_chain );
-    }
 }
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
@@ -1238,6 +1239,32 @@ void Job_chain::close()
     _blacklist_map.clear();
     _order_sources.close();
     set_state( s_closed );
+
+
+
+    // VERSCHACHTELTE JOBKETTEN TRENNEN UND JOBKETTENGRUPPEN NEU BERECHNEN
+
+    Job_chain_set disconnected_job_chains;
+    disconnected_job_chains.insert( this  );
+
+    Z_FOR_EACH( Chain, _chain, it )
+    {
+        Job_chain_node* node = *it;
+        if( node->_nested_job_chain )  
+        {
+            disconnected_job_chains.insert( node->_nested_job_chain );
+            node->_nested_job_chain = NULL;
+        }
+    }
+
+    if( disconnected_job_chains.size() >= 2 )
+    {
+        order_subsystem()->job_chain_groups()->recompute_job_chain_groups( disconnected_job_chains );
+    }
+    
+
+
+    // JOBKETTENKNOTEN SCHLIEßEN
 
     Z_FOR_EACH( Chain, _chain, it )
     {
@@ -1616,7 +1643,7 @@ Job_chain_node* Job_chain::add_end_node( const Order::State& state )
 
 void Job_chain::finish()
 {
-    ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group( _spooler ) );
+    ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group( order_subsystem() ) );
 
 
     if( _state != s_under_construction )  return;
@@ -2272,122 +2299,129 @@ Job_chain_groups::Job_chain_groups( Order_subsystem* order_subsystem )
     _group_array.push_back( NULL );    // Index 0 benutzen wir nicht
 }
 
-//-------------------------------------------------------Job_chain_groups::add_job_chain_connection
-
-//void Job_chain_groups::add_job_chain_connection( Job_chain* a, Job_chain* b )
-//{
-//    Job_chain_group* a_group = a->job_chain_group();
-//    Job_chain_group* b_group = b->job_chain_group();
-//
-//    // a_group nimmt alle Jobketten aus b_group auf
-//
-//    if( a_group  &&  b_group )
-//    {
-//        if( a_group != b_group )
-//        {
-//            Z_FOR_EACH( Job_chain_set, b_group->_job_chain_set, it )
-//            {
-//                Job_chain* bb = *it;
-//
-//                b_group->remove_job_chain( bb );
-//                a_group->add_job_chain( bb );
-//            }
-//
-//            remove_group( b_group );
-//        }
-//    }
-//    else
-//    if( a_group )
-//    {
-//        // b ist noch in keiner Gruppe
-//        a_group->add_job_chain( b );
-//    }
-//    else
-//    if( b_group )
-//    {
-//        // a ist noch in keiner Gruppe
-//        b_group->add_job_chain( a );
-//    }
-//    else
-//    {
-//        // a und b sind beide nicht in einer Gruppe
-//
-//        ptr<Job_chain_group> new_group = Z_NEW( Job_chain_group );
-//        
-//        new_group->add_job_chain( a );
-//        new_group->add_job_chain( b );
-//
-//        add_group( new_group );
-//    }
-//}
-
-//----------------------------------------------------------Job_chain_groups::disconnect_job_chains
-
-void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
+//-----------------------------------------------------Job_chain_groups::recompute_job_chain_groups
+    
+void Job_chain_groups::recompute_job_chain_groups( const Job_chain_set& disconnected_job_chains )
 {
-    Job_chain_group* a_group = a->job_chain_group();
-
-    assert( a_group  &&  a_group == b->job_chain_group() );
-
-
-    Job_chain_set a_job_chains = a->connected_job_chains();
-
-    if( a_job_chains != a_group->_job_chain_set )
+    if( !disconnected_job_chains.empty() )
     {
-        ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group( _order_subsystem->_spooler ) );
+        Job_chain_set    job_chains          = disconnected_job_chains;
+        Job_chain_group* old_job_chain_group = ( *disconnected_job_chains.begin() ) -> job_chain_group();
+        int              new_group_index     = old_job_chain_group->index();
 
-        for( Job_chain_set::iterator it = a_group->_job_chain_set.begin(); it != a_group->_job_chain_set.end(); )
+        while( !job_chains.empty() )
         {
-            Job_chain* job_chain = *it++;
+            Job_chain* job_chain = *job_chains.begin();
 
-            if( a_job_chains.find( job_chain ) == a_job_chains.end() )
+            Job_chain_set connected_job_chains = job_chain->connected_job_chains();
+
+            if( old_job_chain_group )
             {
-                a_group->remove_job_chain( job_chain );
+                if( connected_job_chains == job_chain->job_chain_group()->_job_chain_set )  break;  // Nur beim ersten Schleifendurchlauf, gilt für alle Jobketten
 
-                if( job_chain != a )
+                remove_group( old_job_chain_group );
+                old_job_chain_group = NULL;
+            }
+
+            if( connected_job_chains.size() == 1 )
+            {
+                job_chain->set_job_chain_group( NULL );
+                job_chains.erase( job_chain );
+            }
+            else
+            {
+                assert( connected_job_chains.size() > 1 );
+
+                ptr<Job_chain_group> job_chain_group = Z_NEW( Job_chain_group( _order_subsystem ) );
+                add_group( job_chain_group, new_group_index );
+                new_group_index = 0;
+
+                Z_FOR_EACH_CONST( Job_chain_set, connected_job_chains, it2 )
                 {
-                    b_group->add_job_chain( job_chain, false );
+                    Job_chain* jc = *it2;
+                    jc->set_job_chain_group( job_chain_group );
+                    job_chains.erase( jc );
                 }
             }
-        }
-
-        assert( a_job_chains == a_group->_job_chain_set );
-        
-        if( a_group->size() <= 1 )
-        {
-            if( a_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
-            {
-                Job_chain* jc = *b_group->_job_chain_set.begin();
-                jc->set_job_chain_group( NULL );                
-            }
-
-            remove_group( a_group );
-        }
-                
-        if( b_group->size() <= 1 )
-        {
-            if( b_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
-            {
-                Job_chain* jc = *b_group->_job_chain_set.begin();
-                jc->set_job_chain_group( NULL );                    
-            }
-        }
-        else
-        {
-            b_group->finish();
-            add_group( b_group );
         }
     }
 }
 
+//----------------------------------------------------------Job_chain_groups::disconnect_job_chains
+
+//void Job_chain_groups::disconnect_job_chains( Job_chain* a, Job_chain* b )
+//{
+//    Job_chain_group* a_group = a->job_chain_group();
+//
+//    assert( a_group  &&  a_group == b->job_chain_group() );
+//
+//
+//    Job_chain_set a_job_chains = a->connected_job_chains();
+//
+//    if( a_job_chains != a_group->_job_chain_set )
+//    {
+//        ptr<Job_chain_group> b_group = Z_NEW( Job_chain_group( _order_subsystem->_spooler ) );
+//
+//        for( Job_chain_set::iterator it = a_group->_job_chain_set.begin(); it != a_group->_job_chain_set.end(); )
+//        {
+//            Job_chain* job_chain = *it++;
+//
+//            if( a_job_chains.find( job_chain ) == a_job_chains.end() )
+//            {
+//                a_group->remove_job_chain( job_chain );
+//
+//                if( job_chain != a )
+//                {
+//                    b_group->add_job_chain( job_chain, false );
+//                }
+//            }
+//        }
+//
+//        assert( a_job_chains == a_group->_job_chain_set );
+//        
+//        if( a_group->size() <= 1 )
+//        {
+//            if( a_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+//            {
+//                Job_chain* jc = *b_group->_job_chain_set.begin();
+//                jc->set_job_chain_group( NULL );                
+//            }
+//
+//            remove_group( a_group );
+//        }
+//                
+//        if( b_group->size() <= 1 )
+//        {
+//            if( b_group->size() == 1 )                          // Eine Gruppe mit nur einer Jobkette ist keine Gruppe
+//            {
+//                Job_chain* jc = *b_group->_job_chain_set.begin();
+//                jc->set_job_chain_group( NULL );                    
+//            }
+//        }
+//        else
+//        {
+//            b_group->finish();
+//            add_group( b_group );
+//        }
+//    }
+//}
+
 //----------------------------------------------------------------------Job_chain_groups::add_group
 
-void Job_chain_groups::add_group( Job_chain_group* group )
+void Job_chain_groups::add_group( Job_chain_group* group, int index )
 {
     assert( group->_index == 0 );
 
-    int index = 1;
-    for(; index < _group_array.size()  &&  _group_array[ index ]; index++ );
+    if( index > 0 )
+    {
+        assert( index < _group_array.size()  &&  _group_array[ index ] == NULL );
+    }
+    else
+    {
+        index = 1;
+        for(; index < _group_array.size()  &&  _group_array[ index ]; index++ );
+    }
+
     group->_index = index;
     if( index == _group_array.size() )  _group_array.push_back( group );
                                   else  _group_array[ index ] = group;
@@ -2408,11 +2442,11 @@ void Job_chain_groups::remove_group( Job_chain_group* group )
     _group_array[ index ] = NULL;
 }
 
-//-----------------------------------------------------------------Hob_chain_group::Job_chain_group
+//-----------------------------------------------------------------Job_chain_group::Job_chain_group
 
-Job_chain_group::Job_chain_group( Scheduler* scheduler )
+Job_chain_group::Job_chain_group( Order_subsystem* order_subsystem )
 : 
-    Scheduler_object( scheduler, this, type_job_chain_group ), 
+    Scheduler_object( order_subsystem->_spooler, this, type_job_chain_group ), 
     _zero_(this+1)
 {
     _log->set_prefix( obj_name() );
@@ -2469,18 +2503,65 @@ void Job_chain_group::connect_job_chain( Job_chain* job_chain )
 
 void Job_chain_group::finish()
 {
+    //stdext::hash_set<Job_chain_group*> disconnected_job_chain_groups;
+    Job_chain_set disconnected_job_chains;      // Eine Jobkette aus jeder abgetrennten Jobkettengruppe
+
     Z_FOR_EACH( Job_chain_set, _job_chain_set, it )
     {
         Job_chain* job_chain = *it;
         
-        if( Job_chain_group* old_job_chain_group = job_chain->job_chain_group() )
+        Job_chain_group* previous_job_chain_group = job_chain->job_chain_group();
+        if( previous_job_chain_group != this )
         {
-            old_job_chain_group->remove_job_chain( job_chain );
-        }
+            if( previous_job_chain_group )
+            {
+                previous_job_chain_group->remove_job_chain( job_chain );
 
-        job_chain->set_job_chain_group( this );
+                if( previous_job_chain_group->size() == 1 )
+                {
+                    previous_job_chain_group->remove_job_chain( *previous_job_chain_group->_job_chain_set.begin() );
+                }
+
+                if( previous_job_chain_group->size() == 0 )
+                {
+                    order_subsystem()->job_chain_groups()->remove_group( previous_job_chain_group );
+                }
+                else
+                    disconnected_job_chains.insert( *previous_job_chain_group->_job_chain_set.begin() );      // Irgendeine Jobkette aus der Jobkettengruppe
+            }
+
+            job_chain->set_job_chain_group( this );
+        }
     }
+
+    order_subsystem()->job_chain_groups()->recompute_job_chain_groups( disconnected_job_chains );
 }
+
+
+//void Job_chain_group::finish()
+//{
+//    Z_FOR_EACH( Job_chain_set, _job_chain_set, it )
+//    {
+//        Job_chain* job_chain = *it;
+//        
+//        if( Job_chain_group* old_job_chain_group = job_chain->job_chain_group() )
+//        {
+//            old_job_chain_group->remove_job_chain( job_chain );
+//            
+//            if( old_job_chain_group->size() == 1 )
+//            {
+//                old_job_chain_group->remove_job_chain( *old_job_chain_group->_job_chain_set.begin() );
+//            }
+//
+//            if( old_job_chain_group->size() == 0 )
+//            {
+//                order_subsystem()->job_chain_groups()->remove_group( old_job_chain_group );
+//            }
+//        }
+//
+//        job_chain->set_job_chain_group( this );
+//    }
+//}
 
 //-------------------------------------------------------------------Job_chain_group::add_job_chain
 
@@ -2551,12 +2632,12 @@ Order* Job_chain_group::order_or_null( const string& order_id ) const
 
 void Job_chain_group::remove_job_chain( Job_chain* job_chain )
 {
-    Z_DEBUG( assert( job_chain->job_chain_group() == this ) );
+    Z_DEBUG_ONLY( assert( job_chain->job_chain_group() == this ) );
 
     job_chain->set_job_chain_group( NULL );
     _job_chain_set.erase( job_chain );
 
-    log()->info( message_string( "SCHEDULER-873", job_chain->obj_name() ) );
+    //log()->info( message_string( "SCHEDULER-873", job_chain->obj_name() ) );
 }
 
 //------------------------------------------------------------------------Job_chain_group::obj_name
@@ -2587,6 +2668,9 @@ void Job_chain::get_connected_job_chains( Job_chain_set* result )
 {
     // Eine sicherere Implementierung würde auf die Rekursion verzichten.
     // Mit sehr stark verschachtelten Jobketten (>1000?) wäre die Rekursion zu heftig.
+
+
+    result->insert( this );
 
 
     // Alle untergeordneten Jobketten aufnehmen
@@ -4060,7 +4144,12 @@ void Order::close_log_and_write_history()
 {
     _end_time = Time::now();
     _log->close_file();
-    if( _job_chain  &&  _is_in_database )  _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+    
+    if( _job_chain  &&  _spooler->_db  &&  _spooler->_db->opened() ) 
+    {
+        _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+    }
+
     _log->close();
 }
 
@@ -5480,27 +5569,30 @@ void Order::handle_end_state()
         if( next_start != Time::never  &&  _state != _initial_state )
         {
             _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+            
+            string first_nested_job_chain_path;
 
-            try
+            if( _outer_job_chain_path != "" )
             {
-                if( _outer_job_chain_path != "" )
-                {
-                    Job_chain* first_job_chain = order_subsystem()->job_chain( _outer_job_chain_path )->first_node()->_nested_job_chain;
-                    remove_from_job_chain( jc_leave_in_job_chain_stack );
-                    set_state( _initial_state, next_start );
-                    place_in_job_chain( first_job_chain, jc_leave_in_job_chain_stack );
-                }
-                else
-                {
-                    set_state( _initial_state, next_start );
-                }
+                first_nested_job_chain_path = order_subsystem()->job_chain( _outer_job_chain_path )->first_node()->_nested_job_chain_path;
+                remove_from_job_chain( jc_leave_in_job_chain_stack );
             }
-            catch( exception& x ) { _log->error( x.what() ); }
 
             close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
             _start_time = 0;
             _end_time = 0;
             open_log();
+
+            try
+            {
+                set_state( _initial_state, next_start );
+
+                if( first_nested_job_chain_path != "" )
+                {
+                    place_in_job_chain( order_subsystem()->job_chain( first_nested_job_chain_path ), jc_leave_in_job_chain_stack );
+                }
+            }
+            catch( exception& x ) { _log->error( x.what() ); }
         }
         else
         {

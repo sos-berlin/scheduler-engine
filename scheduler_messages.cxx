@@ -437,7 +437,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-869", "Process class has been replaced" },
     { "SCHEDULER-870", "Process class has been added" },
     { "SCHEDULER-871", "Closing process class before $1" },
-    { "SCHEDULER-872", "This Job_chain_group contains job chain $1" },
+    { "SCHEDULER-872", "This Job_chain_group contains Job_chain $1" },
     { "SCHEDULER-873", "'$1' has been removed from Job_chain_group" },
     { "SCHEDULER-874", "Job_chain_group has been removed" },
     {}
