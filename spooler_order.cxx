@@ -46,7 +46,7 @@ struct Order_id_space : Object, Scheduler_object
   //void                        disconnect_job_chain        ( Job_chain* );
     void                        check_for_unique_order_ids_of( Job_chain* ) const;
     Job_chain*                  job_chain_by_order_id_or_null( const string& order_id ) const;
-    Order*                      order_or_null               ( const string& order_id ) const;
+    ptr<Order>                  order_or_null               ( const string& order_id ) const;
     bool                        has_order_id                ( const string& order_id ) const        { return job_chain_by_order_id_or_null( order_id ) != NULL; }
     void                        complete_and_add            ();
     int                         index                       () const                                { return _index; }
@@ -2537,7 +2537,7 @@ Job_chain* Order_id_space::job_chain_by_order_id_or_null( const string& order_id
 
 //--------------------------------------------------------------------Order_id_space::order_or_null
 
-Order* Order_id_space::order_or_null( const string& order_id ) const
+ptr<Order> Order_id_space::order_or_null( const string& order_id ) const
 {
     Order* result = NULL;
 
