@@ -54,6 +54,9 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
                         
 .job_chain              { font-size: 10pt; background-color: #B0E0E6 }
 .job_chain_hover        { font-size: 10pt; background-color: #9fcacf }
+.job_chains_gap         { line-height: 8pt;  }
+
+.order_id_space         { color: #ff8000; }
 
 .lock                   { background-color: #F0F0F0 }
 .lock_locked            { color: #ff0000; }
