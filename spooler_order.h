@@ -9,9 +9,9 @@ namespace sos {
 namespace scheduler {
 
 struct Job_chain;
-struct Job_chain_group;
-struct Job_chain_groups;
+struct Order_id_space;
 struct Job_chain_node;
+struct Order_id_spaces;
 struct Order_queue;
 struct Order;
 struct Order_subsystem;
@@ -520,8 +520,8 @@ struct Job_chain : Com_job_chain,
 
     string                      db_where_condition      () const;
 
-    Job_chain_group*            job_chain_group         () const                                    { return _job_chain_group; }
-    void                    set_job_chain_group         ( Job_chain_group* g )                      { _job_chain_group = g; }
+    Order_id_space*             order_id_space          () const                                    { return _order_id_space; }
+    void                    set_order_id_space          ( Order_id_space* g )                       { _order_id_space = g; }
 
     void                    set_dom                     ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
@@ -529,7 +529,7 @@ struct Job_chain : Com_job_chain,
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     Order_subsystem*            order_subsystem         () const;
-    string                      obj_name                () const                                    { return "Job_chain " + _name; }
+    string                      obj_name                () const                                    { return "Job_chain " + path(); }
 
 
   private:
@@ -538,7 +538,7 @@ struct Job_chain : Com_job_chain,
     Fill_zero                  _zero_;
     string                     _name;
     State                      _state;
-    Job_chain_group*           _job_chain_group;
+    Order_id_space*            _order_id_space;
     bool                       _visible;
 
   public:
@@ -680,7 +680,7 @@ struct Order_subsystem_interface: Object, Subsystem
 
     virtual int                 finished_orders_count       () const                                = 0;
     virtual int                 job_chain_map_version       () const                                = 0;
-    virtual Job_chain_groups*   job_chain_groups            ()                                      = 0;
+    virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
 };
 
 
