@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-06-06" version="2.0.176" subversion_revision="5071">
+    <change date="2007-06-06" version="2.0.176" subversion_revision="5080">
         <revision type="new" title="Aufträgskennungen werden in allen verschachtelten Jobketten auf Eindeutigkeit geprüft">
             <description>
                 <p>
