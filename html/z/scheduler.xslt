@@ -841,6 +841,10 @@
                                 <b>
                                     <xsl:value-of select="@name"/>
                                 </b>
+                                <xsl:if test="@order_id_space">
+                                    <xsl:text> </xsl:text>
+                                    <span style="white-space: nowrap">(Order_id_space <xsl:value-of select="@order_id_space"/>)</span>
+                                </xsl:if>
                             </td>
 
                             <td>

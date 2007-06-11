@@ -559,6 +559,16 @@ struct Job_chain : Com_job_chain,
 
 };
 
+//------------------------------------------------------------------------Order_id_spaces_interface
+
+struct Order_id_spaces_interface
+{
+    virtual                    ~Order_id_spaces_interface   ()                                             {}
+
+    virtual bool                is_empty                    () const                                       = 0;
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
+};
+
 //--------------------------------------------------------------------------------Internal_priority
 /*
 struct Internal_priority
@@ -680,6 +690,7 @@ struct Order_subsystem_interface: Object, Subsystem
 
     virtual int                 finished_orders_count       () const                                = 0;
     virtual int                 job_chain_map_version       () const                                = 0;
+    virtual Order_id_spaces_interface* order_id_spaces_interface()                                  = 0;
     virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
 };
 

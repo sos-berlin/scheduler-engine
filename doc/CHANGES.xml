@@ -31,7 +31,15 @@
                 <scheduler_message level="info" code="SCHEDULER-873"/>
             </description>
         </revision>
-        
+
+        <revision type="modification" title="orders_recoverable='no' unterdrückt nicht mehr Auftragshistorie">
+            <description>
+                <p>
+                    <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="-send-cmd= berücksichtigt -ip-address=">
             <description>
                 <p>

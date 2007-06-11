@@ -145,8 +145,8 @@ function spooler_process()
 
         <commands>
             <add_order job_chain="job_chain.nested.scheduler" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
-            <remove_job_chain job_chain="job_chain.nested.scheduler.ce"/>
-            <remove_job_chain job_chain="job_chain.nested.scheduler.de"/>
+            <!--remove_job_chain job_chain="job_chain.nested.scheduler.ce"/-->
+            <!--remove_job_chain job_chain="job_chain.nested.scheduler.de"/-->
             <!--add_order job_chain="job_chain.nested.scheduler.B" id="1" title="Wir haben einen Auftrag!" replace="yes"/-->
         </commands>
 

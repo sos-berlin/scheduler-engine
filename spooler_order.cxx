@@ -54,6 +54,7 @@ struct Order_id_space : Object, Scheduler_object
     string                      path                        () const                                { return name(); }
     int                         size                        () const                                { return _job_chain_set.size(); }
     void                        on_order_id_space_added     ();
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
 
   private:
@@ -72,14 +73,18 @@ struct Order_id_space : Object, Scheduler_object
 
 //----------------------------------------------------------------------------------Order_id_spaces
 
-struct Order_id_spaces
+struct Order_id_spaces : Order_id_spaces_interface
 {
                                 Order_id_spaces             ( Order_subsystem* );
+                               ~Order_id_spaces             ()                                     {}
 
     void                        add_order_id_space          ( Order_id_space*, int index = 0 );
     void                        remove_order_id_space       ( Order_id_space*, Do_log = do_log );
 
     void                        recompute_order_id_spaces   ( const Job_chain_set& disconnected_job_chains );
+
+    bool                        is_empty                    () const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
   private:
     Order_subsystem*               _order_subsystem;
@@ -119,6 +124,7 @@ struct Order_subsystem : Order_subsystem_interface
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
+    Order_id_spaces_interface*  order_id_spaces_interface   ()                                      { return &_order_id_spaces; }
     Order_id_spaces*            order_id_spaces             ()                                      { return &_order_id_spaces; }
 
 
@@ -1428,8 +1434,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         element.setAttribute( "name"  , _name );
         element.setAttribute( "orders", order_count( &ta ) );
         element.setAttribute( "state" , state_name( state() ) );
-        if( !_visible ) element.setAttribute( "visible", _visible );
-        element.setAttribute( "orders_recoverable", _orders_recoverable );
+        if( !_visible ) element.setAttribute( "visible", _visible? "yes" : "no" );
+        element.setAttribute( "orders_recoverable", _orders_recoverable? "yes" : "no" );
         if( _order_id_space )  element.setAttribute( "order_id_space", _order_id_space->path() );
 
         if( _state >= s_running )
@@ -2328,7 +2334,7 @@ void Order_id_spaces::recompute_order_id_spaces( const Job_chain_set& disconnect
 
     Job_chain_set   job_chains                = disconnected_job_chains;
     Order_id_space* old_common_order_id_space = ( *disconnected_job_chains.begin() ) -> order_id_space();
-    int             order_id_space_index      = old_common_order_id_space->index();
+    int             order_id_space_index      = 0;
 
     while( !job_chains.empty() )
     {
@@ -2339,6 +2345,7 @@ void Order_id_spaces::recompute_order_id_spaces( const Job_chain_set& disconnect
         {
             if( connected_job_chains == old_common_order_id_space->_job_chain_set )  break;    // Nur beim ersten Schleifendurchlauf, gilt für alle Jobketten
             
+            order_id_space_index = old_common_order_id_space->index();
             remove_order_id_space( old_common_order_id_space );
             old_common_order_id_space = NULL;
         }
@@ -2407,6 +2414,32 @@ void Order_id_spaces::remove_order_id_space( Order_id_space* order_id_space, Do_
     _array[ index ] = NULL;
 }
 
+//------------------------------------------------------------------------Order_id_spaces::is_empty
+
+bool Order_id_spaces::is_empty() const
+{ 
+    for( int i = 1; i < _array.size(); i++ )  if( _array[ i ] )  return false;
+    return true;
+}
+
+//---------------------------------------------------------------------Order_id_spaces::dom_element
+
+xml::Element_ptr Order_id_spaces::dom_element( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr order_id_spaces_element = document.createElement( "order_id_spaces" );
+
+    if( show.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
+    {
+        for( int i = 0; i < _array.size(); i++ )
+        {
+            if( _array[ i ] )
+                order_id_spaces_element.appendChild( _array[ i ]->dom_element( document, show ) );
+        }
+    }
+
+    return order_id_spaces_element;
+}
+
 //-------------------------------------------------------------------Order_id_space::Order_id_space
 
 Order_id_space::Order_id_space( Order_subsystem* order_subsystem )
@@ -2470,7 +2503,12 @@ void Order_id_space::complete_and_add()
 
         if( previous_order_id_space != this )
         {
-            if( previous_order_id_space )  previous_order_id_spaces.insert( previous_order_id_space );
+            if( previous_order_id_space )  
+            {
+                previous_order_id_space->remove_job_chain( job_chain );
+                previous_order_id_spaces.insert( previous_order_id_space );
+            }
+
             job_chain->set_order_id_space( this );
         }
     }
@@ -2521,17 +2559,6 @@ Job_chain* Order_id_space::job_chain_by_order_id_or_null( const string& order_id
         result = order->job_chain();
     }
 
-    //Z_FOR_EACH_CONST( Job_chain_set, _job_chain_set, it )
-    //{
-    //    Job_chain* job_chain = *it;
-
-    //    if( job_chain->has_order_id( (Read_transaction*)NULL, order_id ) )
-    //    {
-    //        result = job_chain;
-    //        break;
-    //    }
-    //}
-
     return result;
 }
 
@@ -2562,6 +2589,25 @@ void Order_id_space::remove_job_chain( Job_chain* job_chain )
     _job_chain_set.erase( job_chain );
 
     //log()->info( message_string( "SCHEDULER-873", job_chain->obj_name() ) );
+}
+
+//----------------------------------------------------------------------Order_id_space::dom_element
+
+xml::Element_ptr Order_id_space::dom_element( const xml::Document_ptr& document, const Show_what& )
+{
+    xml::Element_ptr order_id_space_element = document.createElement( "order_id_space" );
+
+    order_id_space_element.setAttribute( "name" , name() );
+
+    Z_FOR_EACH( Job_chain_set, _job_chain_set, it )
+    {
+        Job_chain* job_chain = *it;
+
+        xml::Element_ptr job_chain_element = order_id_space_element.append_new_element( "job_chain" );
+        job_chain_element.setAttribute( "job_chain", job_chain->path() );
+    }
+
+    return order_id_space_element;
 }
 
 //-------------------------------------------------------------------------Order_id_space::obj_name
