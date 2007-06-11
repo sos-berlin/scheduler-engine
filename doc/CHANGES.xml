@@ -26,6 +26,9 @@
                     die derselben Jobkettengruppe angehört,
                     ersetzt.
                 </p>
+                <scheduler_message level="error" code="SCHEDULER-426"/>
+                <scheduler_message level="info" code="SCHEDULER-872"/>
+                <scheduler_message level="info" code="SCHEDULER-873"/>
             </description>
         </revision>
         

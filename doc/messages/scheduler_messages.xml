@@ -3819,7 +3819,7 @@
 
         <message code="SCHEDULER-872" weight="info" object="Job_chain">
             <text xml:lang="en">
-                <title>New Job_chain shares same <p1>Order_id_space</p1> with <p2>job_chains</p2></title>
+                <title>New Job_chain shares <p1>Order_id_space</p1> with <p2>job_chains</p2></title>
             </text>
         </message>
 
