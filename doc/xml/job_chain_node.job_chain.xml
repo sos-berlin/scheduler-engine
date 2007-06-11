@@ -61,10 +61,11 @@
 
     <messages>
         <message level="error" code="SCHEDULER-415"/>
-        <message level="info"  code="SCHEDULER-426"/>
+        <message level="error" code="SCHEDULER-426"/>
         <message level="info"  code="SCHEDULER-862"/>
         <message level="info"  code="SCHEDULER-863"/>
         <message level="info"  code="SCHEDULER-872"/>
+        <message level="info"  code="SCHEDULER-873"/>
     </messages>
     
 

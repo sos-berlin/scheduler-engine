@@ -2658,7 +2658,7 @@
 
         <message code="SCHEDULER-426">
             <text xml:lang="en">
-                <title>Order_id_space cannot be set up, because of duplicate order id '<p1/>' in '<p2>job_chain</p2>' and '<p3>job_chain</p3>'</title>
+                <title>'<p2>job_chain</p2>' and '<p3>job_chain</p3>' cannot be combined, because of duplicate order id '<p1/>'</title>
             </text>
         </message>
     </messages>
@@ -3819,19 +3819,13 @@
 
         <message code="SCHEDULER-872" weight="info" object="Job_chain">
             <text xml:lang="en">
-                <title>******* Added Job_chain shares same order_id_space='<p1/>' with <p2>job_chains</p2></title>
+                <title>New Job_chain shares same <p1>Order_id_space</p1> with <p2>job_chains</p2></title>
             </text>
         </message>
 
-        <!--message code="SCHEDULER-873" weight="info" object="Job_chain_group">
-            <text xml:lang="en">
-                <title>'<p1>job_chain</p1>' has been removed from Job_chain_group</title>
-            </text>
-        </message-->
-
         <message code="SCHEDULER-873" weight="info" object="Order_id_space">
             <text xml:lang="en">
-                <title>******* Order_id_space has been closed</title>
+                <title>Order_id_space has been closed</title>
             </text>
         </message>
     </messages>

@@ -287,7 +287,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-423", "There is no supervisor" },
     { "SCHEDULER-424", "'$1' is being removed before '$2'" },
     { "SCHEDULER-425", "'$1' cannot be removed, it is used by $2" },
-    { "SCHEDULER-426", "Order_id_space cannot be set up, because of duplicate order id '$1' in '$2' and '$3'" },
+    { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },
@@ -437,8 +437,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-869", "Process class has been replaced" },
     { "SCHEDULER-870", "Process class has been added" },
     { "SCHEDULER-871", "Closing process class before $1" },
-    { "SCHEDULER-872", "******* Added Job_chain shares same order_id_space='$1' with $2" },
-    { "SCHEDULER-873", "******* Order_id_space has been removed" },
+    { "SCHEDULER-872", "New Job_chain shares same $1 with $2" },
+    { "SCHEDULER-873", "Order_id_space has been closed" },
     {}
 };
 } //namespace sos
