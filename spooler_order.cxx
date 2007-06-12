@@ -2407,7 +2407,7 @@ void Order_id_spaces::remove_order_id_space( Order_id_space* order_id_space, Do_
 
     order_id_space->close();
 
-    if( do_log )  order_id_space->log()->info( message_string( "SCHEDULER-873" ) );
+    if( do_log )  order_id_space->log()->info( message_string( "SCHEDULER-873" ) );      DIE_MELDUNG_KOMMT_DOPPELT_UNTER_LINUX;
 
     int index = order_id_space->_index;
     order_id_space->_index = 0;
@@ -2587,8 +2587,6 @@ void Order_id_space::remove_job_chain( Job_chain* job_chain )
 
     job_chain->set_order_id_space( NULL );
     _job_chain_set.erase( job_chain );
-
-    //log()->info( message_string( "SCHEDULER-873", job_chain->obj_name() ) );
 }
 
 //----------------------------------------------------------------------Order_id_space::dom_element

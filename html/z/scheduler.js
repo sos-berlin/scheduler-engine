@@ -269,6 +269,7 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     var datetime = response.selectSingleNode( "/spooler/answer/@time" );
     if( datetime )  now = date_from_datetime( datetime.nodeValue );
 
+    this.add_datetime_attributes_for_xslt( response, now, "at"                    );
     this.add_datetime_attributes_for_xslt( response, now, "time"                  );
     this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
     this.add_datetime_attributes_for_xslt( response, now, "running_since"         );
@@ -361,7 +362,7 @@ Stylesheet.prototype.xml_transform = function( dom_document )
 function xslt_format_datetime( datetime )
 {
     if( !datetime )  return "";
-    return datetime.replace( /\.\d*$/, "" );
+    return datetime.replace( "T", " " ).replace( /\.\d*$/, "" );
     /*
     var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
 
@@ -513,6 +514,30 @@ function date_from_datetime( datetime )
                          datetime.length < 23? 0 : 1*datetime.substr( 20, 3 ) );
 
     return date;
+}
+
+//------------------------------------------------------------------------------------xslt_datetime
+
+function xslt_datetime( date )
+{
+    var yyyy = "" + date.getFullYear();
+
+    var mm = "" + ( date.getMonth() + 1 );
+    if( mm.length < 2 )  mm = "0" + mm;
+
+    var dd = "" + date.getDate();
+    if( dd.length < 2 )  dd = "0" + dd;
+
+    var HH = "" + date.getHours();
+    if( HH.length < 2 )  HH = "0" + HH;
+
+    var MM = "" + date.getMinutes();
+    if( MM.length < 2 )  MM = "0" + MM;
+
+    var SS = "" + date.getSeconds();
+    if( SS.length < 2 )  SS = "0" + SS;
+
+    return yyyy + "-" + mm + "-" + dd + "T" + HH + ":" + MM + ":" + SS;
 }
 
 //---------------------------------------------------------------------Scheduler_html_configuration

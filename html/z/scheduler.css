@@ -23,11 +23,16 @@ a.silent                { text-decoration: none; }
 .label                  { font-size: 8pt; white-space: nowrap }
 .mono                   { font-family: Lucida Console; }
 
+hr                      { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
+
 /* Job-Description */
 div.description         {}
 
-th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; font-size: 8pt; }
-th.head , td.head       { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; border-left: 1px solid black; font-size: 8pt; }
+th                      { text-align: left; padding-left: 2pt; padding-right: 2pt; font-weight: normal; font-size: 8pt; }
+td                      { text-align: left; }
+
+th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; }
+th.head , td.head       { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; border-left: 1px solid black; }
 
 td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
@@ -57,6 +62,7 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 .job_chains_gap         { line-height: 8pt;  }
 
 .order_id_space         { color: #ff8000; }
+hr.order_id_space       { color: #ff8000; background-color: #ff8000; }
 
 .lock                   { background-color: #F0F0F0 }
 .lock_locked            { color: #ff0000; }
@@ -65,6 +71,8 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
 .remote_scheduler       { background-color: #ffffa0; }
 .remote_scheduler_hover { background-color: #efef8f; }
+
+.calendar               { background-color: #ffe0c0; }
 
 a                       { text-decoration: underline; color: inherit; background-color: inherit; }
 a.no_underline          { text-decoration: none     ; color: inherit; background-color: inherit; }

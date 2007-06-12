@@ -150,8 +150,20 @@ function update_jobs_frame()
     if( _show_card == "cluster" || _first_call )  what += " cluster";
     if( _show_card == "remote_schedulers"      )  what += " remote_schedulers";
     if( _show_card == "job_chains"             )  what += " job_chains";
+
+    var commands = "<show_state what='" + what + "' max_orders='" + max_orders + "'/>";
     
-    _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
+    if( _show_card == "calendar" )
+    {
+        var before = new Date();
+        if( before.getMonth() < 11 )  before.setMonth( before.getMonth() + 1 );
+                                else  { before.setMonth( 0 );  before.setFullYear( before.getFullYear() + 1 ); }
+        var day = 24*3600*1000;
+        var before = xslt_datetime( new Date( Math.floor( ( before.getTime() ) / day ) * day + before.getTimezoneOffset() * 60*1000 + 1*day ) );
+        commands += "<show_calendar what='orders' before='" + before + "' limit='10000'/>";
+    }
+    
+    _response = _scheduler.execute( "<commands>" + commands + "</commands>" );
     
     modify_response( _response );
     
