@@ -859,9 +859,11 @@
                             </tr>
                             <tr>
                                 <td colspan="5" class="order_id_space" style="padding-top: 1.5em; padding-bottom: 0.5em;">
-                                    <span style="font-weight: bold;" title="Following job chains are connected, order IDs are unique">
-                                        <span style="padding-right: 4px">Order_id_space </span>
-                                        <xsl:value-of select="@name"/>
+                                    <span title="Following job chains are connected, order IDs are unique">
+                                        <span class="label" style="padding-right: 2px">Order_id_space </span>
+                                        <span style="font-weight: bold;">
+                                            <xsl:value-of select="@name"/>
+                                        </span>
                                     </span>
                                 </td>
                             </tr>
@@ -1319,8 +1321,7 @@
                         
                         <xsl:when test="self::job_chain_node.job_chain">
                             <td colspan="4">
-                                <span class="label">Job_chain</span>
-                                <xsl:text> </xsl:text>
+                                <span class="label" style="padding-right: 2pt;">Job_chain </span>
                                 <xsl:value-of select="@job_chain"/>
                             </td>
                         </xsl:when>

@@ -3817,15 +3817,27 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-872" weight="info" object="Job_chain">
+        <message code="SCHEDULER-872" weight="info" object="Order_id_space">
             <text xml:lang="en">
-                <title>New Job_chain shares <p1>Order_id_space</p1> with <p2>job_chains</p2></title>
+                <title>New '<p1>Job_chain</p1>' shares order IDs with <p2>job_chains</p2></title>
             </text>
         </message>
 
         <message code="SCHEDULER-873" weight="info" object="Order_id_space">
             <text xml:lang="en">
+                <title>Job_chains <p2>job_chains</p2> share order IDs because '<p1>Job_chain</p1>' has been removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-874" weight="info" object="Order_id_space">
+            <text xml:lang="en">
                 <title>Order_id_space has been closed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-875" weight="info" object="Order_id_space">
+            <text xml:lang="en">
+                <title>Order_id_space has been closed because '<p1>job_chain</p1>' has been removed</title>
             </text>
         </message>
     </messages>

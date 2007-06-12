@@ -437,8 +437,10 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-869", "Process class has been replaced" },
     { "SCHEDULER-870", "Process class has been added" },
     { "SCHEDULER-871", "Closing process class before $1" },
-    { "SCHEDULER-872", "New Job_chain shares $1 with $2" },
-    { "SCHEDULER-873", "Order_id_space has been closed" },
+    { "SCHEDULER-872", "New '$1' shares order IDs with $2" },
+    { "SCHEDULER-873", "Job_chains $2 share order IDs because '$1' has been removed" },
+    { "SCHEDULER-874", "Order_id_space has been closed" },
+    { "SCHEDULER-875", "Order_id_space has been closed because '$1' has been removed" },
     {}
 };
 } //namespace sos
