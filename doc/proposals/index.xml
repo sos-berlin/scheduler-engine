@@ -12,9 +12,8 @@
 >
 
 
-
     <p>
-        <scheduler_a href="job_files.xml" quote="yes"/>
+        <scheduler_a href="file_based_configuration.xml" quote="yes"/>
     </p>
 
 

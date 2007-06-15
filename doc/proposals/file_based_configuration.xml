@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: distributed_order_execution.xml 4607 2006-11-30 09:10:11Z jz $-->
+<!--$Id$-->
 
 <description
-    title               = "Jedes Scheduler-Objekte in einer eigenen XML-Datei"
+    title               = "Dateibasierte Konfiguration: Scheduler-Objekte in eigenen XML-Dateien"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author: jz $"
-    date                = "$Date: 2006-11-30 10:10:11 +0100 (Do, 30 Nov 2006) $"
+    author              = "$Author$"
+    date                = "$Date$"
     document_state      = "proposal"
 >
     <p>
@@ -186,6 +186,103 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <h2>Kommandos</h2>
+
+    <p>
+        Ändern und Löschen einer Datei sollten wirken wie ein Kommando.
+        Die Kommandos sollten erweitert und vereinheitlicht werden.
+    </p>
+    
+    <div class="max_width" style="margin-top: 1em">
+        <table cellspacing="0" cellpadding="0" >
+            <tr>
+                <th style="padding-right: 2ex">
+                    Datei
+                </th>
+                <th style="padding-right: 2ex">
+                    Kommando zum Ändern
+                </th>
+                <th>
+                    Kommando zum Löschen
+                </th>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    ...<code>.job.xml</code>
+                </td>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    <scheduler_element name="job" attribute="replace" value="yes"/>
+                    <div style="color: red">
+                        neu: <scheduler_element name="job"/>?
+                    </div>
+                </td>
+                <td>
+                    <scheduler_element name="job.remove"/> (neu)
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    ...<code>.job_chain.xml</code>
+                </td>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    <scheduler_element name="job_chain"/>
+                </td>
+                <td>
+                    <scheduler_element name="job_chain.remove"/>.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    ...<code>.order.xml</code>
+                    <div class="small">
+                        (nur erkannt, wenn Auftrag nicht gerade ausgeführt wird)
+                    </div>
+                </td>
+                <td style="padding-top: 0.5em;">
+                    <scheduler_element name="order"/>
+                    <br/>
+                    (ähnlich <scheduler_element name="add_order"/>)
+                </td>
+                <td>
+                    <scheduler_element name="remove_order"/>
+                    <div style="color: red">
+                        neu: <scheduler_element name="order.remove"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    ...<code>.process_class.xml</code>
+                </td>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    <scheduler_element name="process_class"/>
+                </td>
+                <td>
+                    <scheduler_element name="process_class.remove"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    ...<code>.lock.xml</code>
+                </td>
+                <td style="padding-top: 0.5em; padding-right: 2ex">
+                    <scheduler_element name="lock"/>
+                    <div style="color: red">
+                        Funtioniert nicht, wenn <code>max_non_exclusive</code> zu klein ist.
+                    </div>
+                </td>
+                <td>
+                    <scheduler_element name="lock.remove"/>
+                    <div style="color: red">
+                        Funktioniert nicht, wenn Sperre in Gebrauch.
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <h2>Ändern und Löschen der Objekte</h2>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -304,6 +401,13 @@
         Was passiert mit dem Zustand der Jobkette. 
         Soll eine gestoppte Jobkette gestoppt bleiben oder fortgesetzt werden?
     </p>
+
+    <p style="color: red">
+        Wie gehen wir mit Aufträgen um, die nicht in einer Jobkette, sondern nur im Job stehen?
+        Man könnte diese Funktion ausbauen, braucht anscheinend eh keiner.
+        Ansonsten müsste man solche Aufträge weiterhin im Job speichern, 
+        und man hätte zwei Auftragsspeicher: Jobkettenknoten und Job.
+    </p>
     
     <h3>Daueraufträge</h3>
 
@@ -359,7 +463,7 @@
     </p>
     <p style="color: red">
         Das Verhalten von <scheduler_element name="lock.remove"/> ist uneinheitlich mit <scheduler_element name="process_class.remove"/>.
-        Erstes liefert einen Fehler, wenn noch Jobs laufen, letzteres beendet die Jobs selbst.
+        Ersteres liefert einen Fehler, wenn noch Jobs laufen, letzteres beendet die Jobs selbst.
         Das ist verwirrend.
     </p>
 
