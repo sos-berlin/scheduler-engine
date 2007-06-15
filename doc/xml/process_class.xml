@@ -11,6 +11,15 @@
              author   = "$Author$"
              date     = "$Date$">
 
+    <description>
+        <p>
+            Definiert oder ändert eine Prozessklasse.
+        </p>
+        <p>
+            Siehe auch <scheduler_element name="process_class.remove"/>.
+        </p>
+    </description>
+
     <xml_parent_elements>
         <xml_parent_element name="process_classes">
         </xml_parent_element>

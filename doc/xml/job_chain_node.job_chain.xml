@@ -72,20 +72,25 @@
     
 
     <description>
+        <scheduler_keyword keyword="Order_id_space"/>
+        <scheduler_keyword keyword="Verschachtelte Jobketten"/> <!--en: scheduler_keyword keyword="Nested job chains"/-->
+        <scheduler_keyword keyword="ID"/>
+        <scheduler_keyword keyword="Auftragskennung"/> <!--en: scheduler_keyword keyword="Order ID"/-->
+
         <p>
             Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu, der eine verschachtelte Jobkette bezeichnet.
         </p>
         <p>
-            Miteinander durch Verschachtelung verbundene Jobkettenn bilden eine Jobkettengruppe,
+            Miteinander durch Verschachtelung verbundene Jobkettenn bilden einen gemeinsamen <i>Order_id_space</i>,
             um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
         </p>
         <p>
-            Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab, 
-            wenn die Auftragskennung in der Jobkettengruppe bereits vergeben ist.
+            Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab,
+            wenn die Auftragskennung im Order_id_space bereits vergeben ist.
         </p>
         <p>
-            Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette, 
-            die derselben Jobkettengruppe angehört,
+            Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette,
+            die demselben Order_id_space angehört,
             ersetzt.
         </p>
     </description>

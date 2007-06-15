@@ -285,7 +285,6 @@
 
     <h2>Ändern und Löschen der Objekte</h2>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <h3>Jobs</h3>
 
@@ -501,7 +500,7 @@
                 </td>
                 <td style="padding-top: 0.5em; padding-right: 2ex">
                     Die Aufträge der Jobkettenknoten werden übernommen.
-                    Aufträge in Jobkettenknoten, die die ausgetausche Jobkette nicht kennt,
+                    Aufträge in Jobkettenknoten, die die ausgetauschte Jobkette nicht kennt,
                     gehen verloren bzw. bleiben in der Datenbank.
                 </td>
                 <td>
@@ -534,6 +533,9 @@
                 </td>
                 <td style="padding-top: 0.5em; padding-right: 2ex">
                     Die Sperre wird sofort geändert.
+                    <div style="color: red">
+                        Funtioniert nicht, wenn <code>max_non_exclusive</code> zu klein ist.
+                    </div>
                 </td>
                 <td style="color: red">
                     Alle Jobs werden beendet?

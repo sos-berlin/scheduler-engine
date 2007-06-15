@@ -10,8 +10,15 @@ h3.bar          { font-size: 10pt; font-weight: bold; margin-top: 3em; border-to
 h4              { margin-bottom: 1em; }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
+div.table_of_content  {  }
+p.table_of_content_h1 { margin-top: 0.5em;  }
+p.table_of_content_h2 { margin-top: 0.5em;  }
+p.table_of_content_h3 { margin-top: 0em; margin-left: 2ex; }
+p.table_of_content_h4 { margin-top: 0em; margin-left: 4ex; }
+
 hr              { height: 1px; font-size: 1px; border: 0px; color: gray; background-color: gray; }
 
+.max_width      { max-width: 472pt; }
 p.empty         { font-size: 10pt; margin-bottom: 0px; margin-top: 0ex; }    /* <p class="empty">&#160;</p> macht einen Abstand wie margin-top von <p> */
 p               { font-size: 10pt; margin-bottom: 0px; max-width: 472pt; }
 p.ini_entry     { font-size: 10pt; margin-bottom: 0px; max-width: 150ex; }

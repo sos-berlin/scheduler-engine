@@ -14,7 +14,10 @@
 
     <description>
         <p>
-            Entfernt eine Sperre.
+            Entfernt eine Prozessklasse.
+        </p>
+        <p>
+            Siehe auch <scheduler_element name="process_class"/>.
         </p>
     </description>
 

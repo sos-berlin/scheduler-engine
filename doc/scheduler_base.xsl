@@ -1407,6 +1407,51 @@
         </xsl:element>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~h2-->
+    <!-- id= einfügen -->
+
+    <xsl:template match="h2 [ not( @id ) ]" mode="description">
+        <xsl:element name="h2">
+            <xsl:attribute name="id"><xsl:value-of select="generate-id(.)"/></xsl:attribute>
+            <xsl:for-each select="@*">
+                <xsl:copy>
+                    <xsl:value-of select="."/>
+                </xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="description"/>
+        </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~h3-->
+    <!-- id= einfügen -->
+
+    <xsl:template match="h3 [ not( @id ) ]" mode="description">
+        <xsl:element name="h3">
+            <xsl:attribute name="id"><xsl:value-of select="generate-id(.)"/></xsl:attribute>
+            <xsl:for-each select="@*">
+                <xsl:copy>
+                    <xsl:value-of select="."/>
+                </xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="description"/>
+        </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~h4-->
+    <!-- id= einfügen -->
+
+    <xsl:template match="h4 [ not( @id ) ]" mode="description">
+        <xsl:element name="h4">
+            <xsl:attribute name="id"><xsl:value-of select="generate-id(.)"/></xsl:attribute>
+            <xsl:for-each select="@*">
+                <xsl:copy>
+                    <xsl:value-of select="."/>
+                </xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="description"/>
+        </xsl:element>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description.style-->
     <!-- Wird schon von html_head interpretiert -->
 
@@ -1420,6 +1465,55 @@
         <xsl:call-template name="example"/>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_table_of_content-->
+    <!-- Inhaltsverzeichnis aus <h1> usw. -->
+
+    <xsl:template match="scheduler_table_of_content" mode="description">
+
+        <div class="table_of_content">
+            <h2>
+                <xsl:call-template name="phrase">
+                    <xsl:with-param name="id" select="'table_of_content'"/>
+                </xsl:call-template>
+            </h2>
+
+            <xsl:for-each select="//h1 | //h2 | //h3 | //h4">
+                <xsl:choose>
+                    <xsl:when test="self::h1">
+                        <p class="table_of_content_h1">
+                            <xsl:apply-templates select="self::*" mode="scheduler_table_of_content.line"/>
+                        </p>
+                    </xsl:when>
+                    <xsl:when test="self::h2">
+                        <p class="table_of_content_h2">
+                            <xsl:apply-templates select="self::*" mode="scheduler_table_of_content.line"/>
+                        </p>
+                    </xsl:when>
+                    <xsl:when test="self::h3">
+                        <p class="table_of_content_h3">
+                            <xsl:apply-templates select="self::*" mode="scheduler_table_of_content.line"/>
+                        </p>
+                    </xsl:when>
+                    <xsl:when test="self::h4">
+                        <p class="table_of_content_h4">
+                            <xsl:apply-templates select="self::*" mode="scheduler_table_of_content.line"/>
+                        </p>
+                    </xsl:when>
+                </xsl:choose>
+            </xsl:for-each>
+        </div>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_table_of_content.line-->
+    
+    <xsl:template match="h1 | h2 | h3 | h4" mode="scheduler_table_of_content.line">
+        <xsl:element name="a">
+            <xsl:attribute name="href">#<xsl:value-of select="generate-id( . )"/></xsl:attribute>
+            <xsl:copy-of select="child::node()"/>
+        </xsl:element>
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
     <!-- Für Bemerkungen und Anregungen, die nicht für die Anwender gedacht sind -->
 

@@ -16,6 +16,9 @@
         <p>
             Entfernt eine Sperre.
         </p>
+        <p>
+            Siehe auch <scheduler_element name="lock"/>.
+        </p>
     </description>
 
 

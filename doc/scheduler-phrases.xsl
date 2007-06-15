@@ -122,6 +122,7 @@
             <phrase id="xml_element.answer.title.prefix">Anwort</phrase>
             <phrase id="xml_attributes">XML-Attribute</phrase>
 
+            <phrase id="table_of_content">Inhalt</phrase>
         </phrases>
 
     </xsl:template>
