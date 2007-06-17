@@ -12,6 +12,20 @@
     document_state      = "proposal"
 >
     <p>
+        Siehe auch
+    </p>
+    <ul>
+        <li>
+            <scheduler_a href="file_based_commands.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="directories.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="file_based_configuration_supervisor.xml"/>
+        </li>
+    </ul>
+    <p>
         Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren (das alles hier Objekte genannt)
         müssen nicht mehr in einer gemeinsamen Konfigurationsdatei, 
         sondern können in einzelnen Dateien gehalten werden, die der Scheduler automatisch nach Änderung übernimmt
@@ -27,76 +41,79 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <h2>Objekte: Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren</h2>
+    <h2>Dateien für Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren</h2>
 
     <p style="margin-bottom: 1em;">
-        Objekte sind in diesem Text:
+        Hinzugefügte, geänderte und gelöschte Dateien lösen entsprechende Kommandos aus.
     </p>
     <table cellspacing="0" cellpadding="0">
         <tr>
             <th style="padding-right: 2ex">
-                Objekt
-            </th>
-            <th style="padding-right: 2ex">
-                XML-Wurzelelement
-            </th>
-            <th style="padding-right: 2ex">
                 Dateiname
             </th>
+            <th style="padding-right: 2ex">
+                Hinzufügen, Ändern
+                <br/>
+                (alle mit <code>replace="yes")</code>
+            </th>
+            <th>
+                Löschen
+            </th>
+            
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                Jobs
+                <i>name</i><code>.job.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="job"/>
             </td>
             <td>
-                <i>name</i><code>.job.xml</code>
+                <scheduler_element name="job.remove"/>
             </td>
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                Jobketten
+                <i>name</i><code>.job_chain.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="job_chain"/>
             </td>
             <td>
-                <i>name</i><code>.job_chain.xml</code>
+                <scheduler_element name="job_chain.remove"/>
             </td>
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                Daueraufträge
+                <i>jobchainname</i><code>#</code><i>orderid</i><code>.order.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="order"/>
             </td>
             <td>
-                <i>jobchainname</i><code>#</code><i>orderid</i><code>.order.xml</code>
+                <scheduler_element name="order.remove"/>
             </td>
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                Prozessklassen
+                <i>name</i><code>.process_class.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="process_class"/>
             </td>
             <td>
-                <i>name</i><code>.process_class.xml</code>
+                <scheduler_element name="process_class.remove"/>
             </td>
         </tr>
         <tr>
             <td>
-                Sperren
+                <i>name</i><code>.lock.xml</code>
             </td>
-            <td>
+            <td style="padding-right: 2ex">
                 <scheduler_element name="lock"/>
             </td>
             <td>
-                <i>name</i><code>.lock.xml</code>
+                <scheduler_element name="lock.remove"/>
             </td>
         </tr>
     </table>
@@ -122,7 +139,7 @@
     </p>
     <p>
         Unter Windows wird dazu eine Systemfunktion benutzt, die über Änderungen benachrichtigt.
-        Dazu macht Microsoft einen (möglicherweise praktisch bedeutungslose) Hinweis:
+        Dazu macht Microsoft einen (möglicherweise praktisch bedeutungslosen) Hinweis:
     </p>
     <p class="indent">
         "<i>The operating system detects a change to the last write-time only 
@@ -178,445 +195,12 @@
             weil noch die laufende Operation des zu ersetzenden Objekts abgewartet werden muss (Details unten).
         </li>
         <li>
-            Ein Fehler beim Lesen einer Datei beinflusst nicht ein bereits vorhandenes Objekt.
+            Ein Fehler beim Lesen einer Datei beeinflusst nicht ein bereits vorhandenes Objekt.
             Der Scheduler vermerkt den Fehler im Objekt und verschickt eine eMail.
             <scheduler_element name="show_state"/> zeigt den Fehler.
         </li>
     </ul>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Kommandos</h2>
-
-    <p>
-        Ändern und Löschen einer Datei sollten wirken wie ein Kommando.
-        Die Kommandos sollten erweitert und vereinheitlicht werden.
-    </p>
-    
-    <div class="max_width" style="margin-top: 1em">
-        <table cellspacing="0" cellpadding="0" >
-            <tr>
-                <th style="padding-right: 2ex">
-                    Datei
-                </th>
-                <th style="padding-right: 2ex">
-                    Kommando zum Ändern
-                </th>
-                <th>
-                    Kommando zum Löschen
-                </th>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.job.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="job" attribute="replace" value="yes"/>
-                    <div style="color: red">
-                        neu: <scheduler_element name="job"/>?
-                    </div>
-                </td>
-                <td>
-                    <scheduler_element name="job.remove"/> (neu)
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.job_chain.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="job_chain"/>
-                </td>
-                <td>
-                    <scheduler_element name="job_chain.remove"/>.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.order.xml</code>
-                    <div class="small">
-                        (nur erkannt, wenn Auftrag nicht gerade ausgeführt wird)
-                    </div>
-                </td>
-                <td style="padding-top: 0.5em;">
-                    <scheduler_element name="order"/>
-                    <br/>
-                    (ähnlich <scheduler_element name="add_order"/>)
-                </td>
-                <td>
-                    <scheduler_element name="remove_order"/>
-                    <div style="color: red">
-                        neu: <scheduler_element name="order.remove"/>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.process_class.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="process_class"/>
-                </td>
-                <td>
-                    <scheduler_element name="process_class.remove"/>
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.lock.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="lock"/>
-                    <div style="color: red">
-                        Funtioniert nicht, wenn <code>max_non_exclusive</code> zu klein ist.
-                    </div>
-                </td>
-                <td>
-                    <scheduler_element name="lock.remove"/>
-                    <div style="color: red">
-                        Funktioniert nicht, wenn Sperre in Gebrauch.
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
-    
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Ändern und Löschen der Objekte</h2>
-
-
-    <h3>Jobs</h3>
-
-    <p>
-        Der Scheduler kann auch auftragsgesteuerte Jobs ersetzen und löschen.
-        Um einen Job, auf den ein Jobkettenknoten verweist, löschen zu können, müssen die Aufträge erhalten bleiben.
-        Der Scheduler wird also die Aufträge im Jobkettenknoten speichern.
-        Die Auftragswarteschlange des Jobs enthält nur noch Verweise.
-        Aufträge, die von einem Job verarbeitet werden sollen, der gelöscht ist (oder wird),
-        bleiben am Jobkettenknoten stehen.
-        Erst wenn ein neuer Job gleichen Namens wieder hinzugefügt wird
-        (muss auftragsgesteuert sein),
-        werden die Auftrage fortgesetzt.
-    </p>        
-    
-    <ul class="big">
-        <li>
-            Auftragsgesteuerte Jobs können wie normale Jobs gelöscht werden.
-        </li>
-        <li>
-            Dazu wird der Job gestoppt: Tasks werden beendet, Aufträge nicht ausgeführt.
-        </li>
-        <li>
-            Die Aufträge bleiben erhalten, sie stauen sich mit den neu eintreffenden vor dem gelöschten Job. 
-            D.h. Jobkettenknoten mit gelöschtem Job sind möglich.
-        </li>
-        <li>
-            Wenn ein Job von mehreren Jobketten benutzt wird,
-            geht durch diese Änderung die ursprüngliche Reihenfolge verloren.
-            Der Job wird erst Aufträge der einen, dann der nächsten Jobkette ausführen.
-            Das gilt bereits heute für verteilte Aufträge, die Aufträge direkt aus der Datenbank gelesen werden,
-            wo sie nicht unter dem Jobnamen, sondern unter Jobkette und Zustand abgelegt sind (also praktisch im Jobkettenknoten).
-            Die Reihenfolge nach Starzeit und Priorität bleibt erhalten.
-        </li>
-        <li>
-            Solange ein Jobkettenknoten auf einen fehlenden Job verweist, 
-            hält der Scheduler einen leeren Job vor, der im Zustand <i>vermisst</i> ist.
-            Einziger Eintrag ist, dass es sich um einen auftragsgesteuerten Job handelt.
-        </li>
-        <li>
-            Wenn der vermisster auftragsgesteuerter Job geladen wird, 
-            muss er weiterhin ein auftragsgesteuerter Job sein.
-        </li>
-        <li>
-            Der Job kann erneuert werden, während er zum Löschen markiert ist (weil noch Tasks laufen). 
-            Die Erneuerung wird dann bis zum wirklichen Löschen verzögert.
-        </li>
-        <li>
-            Ein wiedereingefügter Job baut seine Warteschlange der Aufträge wieder auf.
-        </li>
-        <li>
-            Das neue Kommando <code>&lt;job.remove job=""></code> wirkt wie <scheduler_element name="modify_job" attribute="cmd" value="remove"/>.
-        </li>
-        <li>
-            <scheduler_element name="job" attribute="replace" value="yes"/>
-            ersetzt einen Job. Das wirkt wie Löschen und Einfügen.
-        </li>
-    </ul>
-
-    <p style="margin-top: 2em">
-        Beim Hinzufügen oder Austausch eines Jobs gilt:
-    </p>
-    <ul class="big">
-        <li>
-            Ein gestoppter Job wird entstoppt.
-        </li>
-        <li>
-            Die <scheduler_element name="run_time"/> wird neu ausgewertet.
-            Die mit <scheduler_element name="period" attribute="repeat"/> eingestellte Wiederholungszeit wird erneut berechnet,
-            der Job startet, wenn er in einer solchen Periode ist, sofort.
-        </li>
-        <li>
-            Die Verzögerung wegen <scheduler_element name="delay_after_error"/> geht verloren,
-            der Verzögerungszähler beginnt wieder von vorn.
-        </li>
-        <li>
-            Das Jobprotokoll wird fortgeschrieben.
-        </li>
-        <li>
-            <scheduler_method class="Job" property="state_text"/> wird übernommen?
-        </li>
-        <li>
-            ...
-        </li>
-    </ul>
-
-
-
-    <h3>Jobketten</h3>
-
-    <p>
-        Jobketten können bereits jetzt gelöscht werden.
-    </p>
-    <p>
-        Beim Austausch einer Jobkette übernimmt der Scheduler Aufträge aus Jobkettenknoten,
-        die (mit gleichem Status) auch in der neuen Jobkette bekannt sind.
-        Andere Aufträge gehen verloren. 
-        Sie bleiben aber in der Datenbank, falls sie dort gespeichert worden sind.
-    </p>
-    <p>
-        Das Kommando <scheduler_element name="job_chain"/> wird entsprechend geändert,
-        sodass es diese Funktionalität hat.
-    </p>
-    
-    <p>
-        Der Austausch einer Jobkette wirkt anders als das Löschen und Wiedereinfügen.
-        Bei letzteren werden die Aufträge aus der Datenbank wiederhergestellt, 
-        was natürlich nur funktioniert, wenn sie dort gespeichert worden sind 
-        (<scheduler_element name="job_chain" attribute="orders_recoverable" value="yes"/>).
-    </p>
-
-    <p style="color: red">
-        Was passiert mit dem Zustand der Jobkette. 
-        Soll eine gestoppte Jobkette gestoppt bleiben oder fortgesetzt werden?
-    </p>
-
-    <p style="color: red">
-        Wie gehen wir mit Aufträgen um, die nicht in einer Jobkette, sondern nur im Job stehen?
-        Man könnte diese Funktion ausbauen, braucht anscheinend eh keiner.
-        Ansonsten müsste man solche Aufträge weiterhin im Job speichern, 
-        und man hätte zwei Auftragsspeicher: Jobkettenknoten und Job.
-    </p>
-    
-    <h3>Daueraufträge</h3>
-
-    <p>
-        Das sind ganz normale Aufträge, die als <scheduler_element name="order"/> in eigenen Dateien gehalten und
-        durch <scheduler_element name="run_time"/> ständig im Scheduler vorgehalten werden.
-        Hinzufügen, Ersetzen und Löschen wirken wie
-        die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="remove_order"/>.
-    </p>
-    <p>
-        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet, 
-        wenn die Jobkette aktiv (<code>state=running</code>) ist und
-    </p>
-    <ul>
-        <li>
-            der Auftrag nicht bekannt,
-        </li>
-        <li>
-            der Auftrag noch nicht gestartet worden oder
-        </li>
-        <li>
-            der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
-        </li>
-    </ul>
-    <p style="color: red">
-        Was machen wir mit Aufträgen, die sich nicht wiederholen?
-        Der Scheduler würde sofort die Auftragsdatei lesen und den Auftrag ohne Pause erneut starten.
-        Wir müssen den Auftrag auf eine Art schwarzer Liste setzen 
-        (die gibt es jetzt nur für Dateiaufträge und könnte vielleicht erweitert werden).
-    </p>
-    
-    <h3>Prozessklassen</h3>
-
-    <p>
-        Prozessklassen können im laufenden Betrieb ausgetauscht werden.
-        Der Austausch wird sofort vorgenommen.
-    </p>
-
-    <p>
-        Löschen der Datei wirkt wie <scheduler_element name="process_class.remove"/>.
-    </p>
-
-    <h3>Sperren</h3>
-    <p>
-        Sperren können im laufenden Betrieb ausgetauscht werden.
-        Der Austausch wird sofort vorgenommen, 
-        der Zustand der Sperre (welche Jobs belegen die Sperre) bleibt erhalten.
-    </p>
-    <p>
-        Eine gelöschte Sperrendatei wirkt wie <scheduler_element name="lock.remove" attribute="force" value="yes"/>.
-        Das Attribut <code>force="yes"</code> wird neu realisiert und beendet alle <scheduler_element name="lock.use"/>,
-        stoppt also alle Jobs.
-    </p>
-    <p style="color: red">
-        Das Verhalten von <scheduler_element name="lock.remove"/> ist uneinheitlich mit <scheduler_element name="process_class.remove"/>.
-        Ersteres liefert einen Fehler, wenn noch Jobs laufen, letzteres beendet die Jobs selbst.
-        Das ist verwirrend.
-    </p>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Zusammengefasst: Was beim Ändern oder Löschen einer Datei geschieht</h2>
-
-    <div class="max_width">
-        <table cellspacing="0" cellpadding="0">
-            <tr>
-                <th style="padding-right: 2ex">
-                    Datei
-                </th>
-                <th style="padding-right: 2ex">
-                    Geändert
-                </th>
-                <th>
-                    Gelöscht
-                </th>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.job.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; " colspan="2">
-                    Der Scheduler beendet laufende Tasks und verhindert neue.
-                    Sobald keine Tasks mehr laufen, tauscht er den Job aus, 
-                    wobei einige Einstellungen erhalten bleiben (z.B. <scheduler_method class="Job" property="title"/>),
-                    bzw. löscht ihn.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.job_chain.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    Die Aufträge der Jobkettenknoten werden übernommen.
-                    Aufträge in Jobkettenknoten, die die ausgetauschte Jobkette nicht kennt,
-                    gehen verloren bzw. bleiben in der Datenbank.
-                </td>
-                <td>
-                    Wie <scheduler_element name="job_chain.remove"/>.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.order.xml</code>
-                </td>
-                <td style="padding-top: 0.5em;" colspan="2">
-                    Die geänderte Datei wird nur beachtet, 
-                    wenn der Auftrag noch nicht gestartet oder nicht vorhanden ist.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.process_class.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    Die Prozessklasse wird sofort geändert.
-                </td>
-                <td>
-                    Alle Jobs werden beendet.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    ...<code>.lock.xml</code>
-                </td>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    Die Sperre wird sofort geändert.
-                    <div style="color: red">
-                        Funtioniert nicht, wenn <code>max_non_exclusive</code> zu klein ist.
-                    </div>
-                </td>
-                <td style="color: red">
-                    Alle Jobs werden beendet?
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Referenzen auf fehlende Objekte</h2>
-
-    <p>
-        Der Scheduler wird mit fehlenden Objekten umgehen können.
-        Die referenzierten Objekte sind dann unvollständig und deshalb nicht in Betrieb.
-    </p>
-    <p>
-        Fehlende referenzierte Objekte werden vom Scheduler automatisch eingefügt und als <i>vermisst</i> gekennzeichnet.
-        Ein Objekt, das von einem vermissten anderen Objekt abhängt, wird nicht aktiv.
-    </p>
-    <p>&#160;</p>
-
-    <div class="max_width">
-        <table cellspacing="0" cellpadding="0">
-            <tr>
-                <th style="padding-right: 2ex">
-                    XML-Element
-                </th>
-                <th>
-                    Verhalten, wenn referenziertes Objekt vermisst wird
-                </th>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="job" attribute="process_class"/>
-                </td>
-                <td>
-                    Der Job ist <i>unvollständig</i> und startet nicht.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="job_chain_node" attribute="job"/>
-                </td>
-                <td>
-                    Der Jobkettenknoten ist <i>unvollständig</i>. 
-                    Aufträge stauen sich im Knoten.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="job_chain_node.job_chain" attribute="job_chain"/>
-                </td>
-                <td>
-                    Der Jobkettenknoten ist <i>unvollständig</i>.
-                    Aufträge stauen sich im Knoten.
-                    Das ist eine neue Situation, weil bisher Aufträge nicht in der übergeordneten Jobkette stehen,
-                    nur in den untergeordneten.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="order" attribute="job_chain"/>
-                </td>
-                <td>
-                    Einen vermissten Auftrag, also einen ohne Jobkette, kann es nicht geben,
-                    weil der Scheduler eine Auftragsdatei nur liest, 
-                    wenn dessen Jobkette definiert ist.
-                </td>
-            </tr>
-            <tr>
-                <td style="padding-top: 0.5em; padding-right: 2ex">
-                    <scheduler_element name="lock.use" attribute="lock"/>
-                </td>
-                <td>
-                    Der Job ist <i>unvollständig</i> und startet nicht.
-                </td>
-            </tr>
-        </table>
-    </div>
-    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </description>
