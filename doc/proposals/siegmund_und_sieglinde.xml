@@ -135,7 +135,7 @@ order.job_chain.add_order( clone );</pre>
         <code>Order.root.remove()</code> oder <code>Order.root.suspended = true</code>.
     </p>
     <p>
-        ...
+        ... 
     </p>
     
     
