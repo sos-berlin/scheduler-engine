@@ -129,6 +129,34 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <h2>Daueraufträge</h2>
+    <p>
+        Daueraufträge werden anders behandelt als die anderen Objekte.
+        Zum einen haben sie einen anderen Namen (<code>job_chain=</code> und <code>id=</code> statt <code>name=</code>),
+        zum anderen werden Dateiänderungen nicht jederzeit beachtet.
+        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet,
+        wenn die Jobkette aktiv (<code>state=running</code>) ist und
+    </p>
+    <ul>
+        <li>
+            der Auftrag nicht bekannt,
+        </li>
+        <li>
+            der Auftrag noch nicht gestartet worden oder
+        </li>
+        <li>
+            der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
+        </li>
+    </ul>
+    <p style="color: red">
+        Was machen wir mit Aufträgen, die sich nicht wiederholen?
+        Der Scheduler würde sofort die Auftragsdatei lesen und den Auftrag ohne Pause erneut starten.
+        Wir müssen den Auftrag auf eine Art schwarzer Liste setzen
+        (die gibt es jetzt nur für Dateiaufträge und könnte vielleicht erweitert werden).
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <h2>Verzeichnisüberwachung</h2>
 
     <p>
@@ -160,7 +188,6 @@
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
     
     <h2>Spiegelung des Verzeichnisses im Scheduler</h2>
 

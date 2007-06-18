@@ -39,6 +39,8 @@
 
     <p>
         Objekte sind in diesem Text Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren.
+        Damit Änderungen an den Dateien sich korrekt in den Objekten wiederspiegeln,
+        werden die Kommandos vereinheitlich. 
     </p>
 
     <div class="max_width" style="margin-top: 1em">
@@ -262,25 +264,8 @@
         die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="remove_order"/>.
     </p>
     <p>
-        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet,
-        wenn die Jobkette aktiv (<code>state=running</code>) ist und
-    </p>
-    <ul>
-        <li>
-            der Auftrag nicht bekannt,
-        </li>
-        <li>
-            der Auftrag noch nicht gestartet worden oder
-        </li>
-        <li>
-            der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
-        </li>
-    </ul>
-    <p style="color: red">
-        Was machen wir mit Aufträgen, die sich nicht wiederholen?
-        Der Scheduler würde sofort die Auftragsdatei lesen und den Auftrag ohne Pause erneut starten.
-        Wir müssen den Auftrag auf eine Art schwarzer Liste setzen
-        (die gibt es jetzt nur für Dateiaufträge und könnte vielleicht erweitert werden).
+        Für die <scheduler_a href="file_based_configuration.xml">dateibasierte Konfiguration</scheduler_a>
+        sind die Kommandos bereits realisiert.
     </p>
 
 
