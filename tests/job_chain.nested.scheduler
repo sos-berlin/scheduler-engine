@@ -44,10 +44,10 @@ function spooler_process()
     
     new ActiveXObject( "hostware.global" ).sleep( 5 );
 
-    var order = spooler.create_order();
-    order.id = 1;
-    order.title = "ERSATZ";
-    spooler.job_chain( "job_chain.nested.scheduler.C" ).add_or_replace_order( order );
+    //var order = spooler.create_order();
+    //order.id = 1;
+    //order.title = "ERSATZ";
+    //spooler.job_chain( "job_chain.nested.scheduler.C" ).add_or_replace_order( order );
     
     return true;
 }

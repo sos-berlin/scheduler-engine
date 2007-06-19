@@ -2523,6 +2523,7 @@
     <register_entry register_file='xml/answer/process_class.xml#' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/include.xml#use_element__process_class' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='process_class'/>
     <register_entry register_file='xml/process.xml#use_element__process_class' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process_class'/>
+    <register_entry register_file='xml/process_class.remove.xml#use_element__process_class' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class'/>
     <register_entry register_file='xml/process_class.xml#' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/script.xml#use_element__process_class' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process_class'/>
 </register_keyword>
@@ -2551,6 +2552,7 @@
     <register_entry register_file='api/Process_class.xml#use_element__process_class.remove' register_title='Process_class'  register_keyword='process_class.remove'/>
     <register_entry register_file='xml.xml#use_element__process_class.remove' register_title='Alle XML-Elemente'  register_keyword='process_class.remove'/>
     <register_entry register_file='xml/process_class.remove.xml#' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class.remove' type='definition'/>
+    <register_entry register_file='xml/process_class.xml#use_element__process_class.remove' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process_class.remove'/>
 </register_keyword>
 <register_keyword keyword='process_class_name'>
     <register_keyword_display><code>process_class_name</code></register_keyword_display>

@@ -2242,6 +2242,7 @@
                         <xsl:when test="$root_title">
                             <xsl:copy-of select="$root_title"/>
                         </xsl:when>
+                        
                         <xsl:otherwise>
                             <code><xsl:value-of select="$href"/></code>
                         </xsl:otherwise>
@@ -3327,35 +3328,47 @@
                             <xsl:with-param name="parent_page" select="$parent_page"/>
                         </xsl:call-template-->
 
-                        <xsl:call-template name="phrase">
-                            <xsl:with-param name="id" select="'head.last_updated_by'"/>
-                        </xsl:call-template>
-                        
-                        <xsl:text> </xsl:text>
-                        
-                        <span style="white-space: nowrap">
-                            <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
-                            <xsl:choose>
-                                <xsl:when test="$name = 'jz'">
-                                    <a href="http://www.zschimmer.com">Joacim Zschimmer</a></xsl:when>
-                                <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
-                            </xsl:choose>,
-                            <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
-                            <xsl:value-of select="$name"/>,-->
-                        </span>
-
-                        <xsl:element name="span">
-                            <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
-                            <xsl:variable name="date" select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' (' ), '/', '-' )"/>
-                            <xsl:attribute name="title">
-                                <xsl:value-of select="$date"/>
-                            </xsl:attribute>
-                            <xsl:value-of select="substring( $date, 1, 10 )"/>   <!-- yyyy-mm-dd -->
-                        </xsl:element>
+                        <xsl:apply-templates mode="last_updated_by" select="/*"/>
                     </p>
                 </td>
             </tr>
         </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~last_updated_by-->
+    
+    <xsl:template mode="last_updated_by" match="*">
+
+        <xsl:call-template name="phrase">
+            <xsl:with-param name="id" select="'head.last_updated_by'"/>
+        </xsl:call-template>
+
+        <xsl:text> </xsl:text>
+
+        <span style="white-space: nowrap">
+            <xsl:variable name="name" select="substring-before( substring-after( @author, 'Author: ' ), ' $' )"/>
+            <xsl:choose>
+                <xsl:when test="$name = 'jz'">
+                    <a href="http://www.zschimmer.com">Joacim Zschimmer</a>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$name"/>
+                </xsl:otherwise>
+            </xsl:choose>,
+            <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
+                            <xsl:value-of select="$name"/>,-->
+        </span>
+
+        <xsl:element name="span">
+            <xsl:attribute name="style">white-space: nowrap</xsl:attribute>
+            <xsl:variable name="date" select="translate( substring-before( substring-after( @date,   'Date: '   ), ' (' ), '/', '-' )"/>
+            <xsl:attribute name="title">
+                <xsl:value-of select="$date"/>
+            </xsl:attribute>
+            <xsl:value-of select="substring( $date, 1, 10 )"/>
+            <!-- yyyy-mm-dd -->
+        </xsl:element>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~browse_bar-->

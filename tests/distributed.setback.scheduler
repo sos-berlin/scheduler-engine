@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="javascript">
+            <![CDATA[
+
+//
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+                    
+function spooler_process() 
+{               
+    var order = spooler_task.order;
+    order.setback();
+    
+    return true;
+}
+
+                ]]>
+                </script>
+
+                <delay_order_after_setback setback_count="1" delay="15"/>
+                <delay_order_after_setback setback_count="999" is_maximum="yes"/>
+            </job>
+
+
+        </jobs>
+
+        
+        <job_chains>
+            <job_chain name="distributed.setback.scheduler" distributed="yes">
+                <job_chain_node state="1" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="distributed.setback.scheduler" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
+        </commands>
+    </config>
+</spooler>

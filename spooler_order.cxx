@@ -3245,10 +3245,11 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     if( w != "" )
     {
-        select_sql << "select %limit(1)  `job_chain`, " << order_select_database_columns <<
+        select_sql << "select %limit(1)  `job_chain`, `distributed_next_time`, " << order_select_database_columns <<
                     "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-                       " and `distributed_next_time` < {ts'" << never_database_distributed_next_time << "'}"
+                    " and `distributed_next_time` < {ts'" << now.as_string( Time::without_ms ) << "'}"
+                  //" and `distributed_next_time` < {ts'" << never_database_distributed_next_time << "'}"
                        " and `occupying_cluster_member_id` is null" << 
                        " and " << w <<
                     "  order by `distributed_next_time`, `priority`, `ordering`";
@@ -3477,6 +3478,8 @@ Order::Order( Spooler* spooler, const Record& record, const string& job_chain_pa
     }
 
     _created.set_datetime( record.as_string( "created_time" ) );
+
+    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
 
     _log->set_prefix( obj_name() );
 
@@ -4185,9 +4188,9 @@ string Order::calculate_db_distributed_next_time()
 
     if( _is_distributed )
     {
-        if( _is_on_blacklist )    result = blacklist_database_distributed_next_time;
+        if( _is_on_blacklist )  result = blacklist_database_distributed_next_time;
         else
-        if( _is_replacement )  result = replacement_database_distributed_next_time;
+        if( _is_replacement  )  result = replacement_database_distributed_next_time;
         else
         {
             Time next_time = this->next_time().rounded_to_next_second();
@@ -5525,7 +5528,7 @@ void Order::handle_end_state()
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
 
     bool is_real_end_state = false;
-    bool reopen_log = false;
+    bool reopen_log        = false;
 
 
     if( _outer_job_chain_path == "" )

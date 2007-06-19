@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-06-18" version="2.0.176" subversion_revision="5090">
+        <revision type="correction" title="-distributed-orders und Order.setback()">
+            <description>
+                <p>
+                    Ein verteilter Auftrag mit Startzeit (z.B. durch <scheduler_method class="Order" method="setback"/>)
+                    konnte nach Neustart den Scheduler in eine Schleife bringen. Das ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-06-06" version="2.0.176" subversion_revision="5087">
         <revision type="new" title="Aufträgskennungen werden in allen verschachtelten Jobketten auf Eindeutigkeit geprüft">
             <description>

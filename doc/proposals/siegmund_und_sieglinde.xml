@@ -11,6 +11,12 @@
     date                = "$Date$"
     document_state      = "proposal"
 >
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <h2>Aufträge zusammenführen</h2>
 
     <p>
@@ -77,14 +83,14 @@ broom.marriage_timeout = 60;</pre>
         Das könnte auch konfigurierbar gemacht werden.
         Damit braucht man keine Methoden aufzurufen,
         und die bevorstehenden Hochzeiten lassen sich aus der XML-Konfiguration ablesen und auf einer Oberfläche darstellen.
-        Die Auftragskennung des Bräutigams wird über zwei Reguläre Ausdrücke 
-        aus der Auftragskennung der Braut errechnet.
+        Die Auftragskennung des Bräutigams wird aus einem Regulären Ausdrücks errechnet, 
+        der die Auftragskennung der Braut beschreibt.
         Dabei bezeichnet wie üblich <code>\1</code> den Text der ersten Klammer.
         Im Beispiel würde der Auftrag <code>42.bride</code> den Auftrag <code>42.broom</code> heiraten.
     </p>
     <example>
         <pre>&lt;job_chain_node state="virgin" job="dress_up"/>
-&lt;order.marry my_id_pattern="(.*)\.bride" other_id_pattern="\1.broom"/>
+&lt;order.marry my_id_pattern="(.*)\.bride" other_id="\1.broom"/>
 &lt;job_chain_node state="married" job="…"/></pre>
         <pre>&lt;job_chain_node state="boy" job="dress_up"/>
 &lt;order.marry next_state="married"/></pre>
