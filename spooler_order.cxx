@@ -3119,7 +3119,7 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
 
     _next_announced_distributed_order_time = t; 
     
-    Z_DEBUG_ONLY( assert( is_now? t <= Time::now() : t > Time::now() ) );
+    //Z_DEBUG_ONLY( assert( is_now? t <= Time::now() : t > Time::now() ) );
 
     if( is_now )
     {
