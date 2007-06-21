@@ -10,7 +10,25 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-06-18" version="2.0.176" subversion_revision="5091">
+    <change date="2007-06-21" version="2.0.176" subversion_revision="5102">
+        <revision type="modification" title="need_db=no nicht länger im Cluster-Betrieb erlaubt">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_option name="exclusive"/>
+                    </li>
+                    <li>
+                        <scheduler_option name="distributed-orders"/>
+                    </li>
+                    <li>
+                        <scheduler_message code="SCHEDULER-357" show_text="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2007-06-18" version="2.0.176" subversion_revision="5101">
         <revision type="correction" title="-distributed-orders und Order.setback()">
             <description>
                 <p>

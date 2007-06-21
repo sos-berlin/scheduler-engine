@@ -16,7 +16,7 @@ namespace cluster {
 
 //--------------------------------------------------------------------------------------------const
 
-const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );
+const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );     // Database::seconds_before_reopen sollte nicht größer sein
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
 //const int                       active_heart_beat_check_period          = heart_beat_period + _cluster->_heart_beat_warn_timeout + 2;
 //const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
@@ -369,6 +369,14 @@ static string my_string_from_time_t( time_t time )
     return string_gmt_from_time_t( time ) + " UTC";
 }
 
+//---------------------------------------------------------------------------is_heartbeat_operation
+
+bool is_heartbeat_operation( Async_operation* operation )
+{
+    // Diese Operation ist während des Wartens auf die Datenbank erlaubt, s. is_allowed_operation_while_waiting()
+    return dynamic_cast<Heart_beat*>( operation ) != NULL;
+}
+
 //-------------------------------------------Heart_beat_watchdog_thread::Heart_beat_watchdog_thread
 
 Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
@@ -451,7 +459,7 @@ int Heart_beat_watchdog_thread::thread_main()
 #           ifdef Z_WINDOWS                                                 
                 if( IsDebuggerPresent() )
                 {
-                    Z_LOG( obj_name() << "  IsDebuggerPresen() ==> 1, exiting\n" );
+                    Z_LOG( obj_name() << "  IsDebuggerPresent() ==> 1, exiting\n" );
                     return 1;
                 }
 #           endif
@@ -1626,7 +1634,9 @@ bool Cluster::start()
     assert( !_is_backup_member || _demand_exclusiveness );
 
 
+    if( !_spooler->_need_db )  z::throw_xc( "SCHEDULER-358", _spooler->string_need_db() ); 
     if( !db()->opened() )  z::throw_xc( "SCHEDULER-357" ); 
+
     if( db()->lock_syntax() == db_lock_none )  z::throw_xc( "SCHEDULER-359", db()->dbms_name() );
 
     if( _heart_beat_warn_timeout < _heart_beat_own_timeout

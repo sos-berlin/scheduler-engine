@@ -301,6 +301,7 @@ struct Spooler : Object,
     const time::Holidays&       holidays                    () const                            { return _holidays; }
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
+    string                      string_need_db              () const;
 
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -382,7 +383,7 @@ struct Spooler : Object,
 
 
     void                        wait                        ();
-    void                        simple_wait_step            ();
+  //void                        simple_wait_step            ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
     void                        signal                      ( const string& signal_name );

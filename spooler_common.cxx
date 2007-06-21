@@ -22,6 +22,17 @@ ptr<Com_variable_set> variable_set_from_environment()
     return result;
 }
 
+//---------------------------------------------------------------is_allowed_operation_while_waiting
+
+bool is_allowed_operation_while_waiting( Async_operation* op )
+{
+    // Diese Operationen werden in spooler_history.cxx fortgesetzt, wenn auf die DB gewartet wird.
+    // Ebenso bei anderen Warte-Operationen
+
+    return is_communication_operation( op ); //||
+           //Das wird rekursiv und sowieso ist vielleicht die Datenbank geschlossen:  cluster::is_heartbeat_operation( op );
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

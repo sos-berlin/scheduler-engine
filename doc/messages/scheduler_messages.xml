@@ -1943,7 +1943,7 @@
 
         <message code="SCHEDULER-314">
             <text xml:lang="en">
-                <title>Cannot open database. Scheduler is aborting immediately because of need_db=yes</title>
+                <title>Cannot open database. Scheduler is aborting immediately because of need_db=<p1/></title>
             </text>
         </message>
 
@@ -2235,15 +2235,15 @@
 
         <message code="SCHEDULER-357">
             <text xml:lang="en">
-                <title>This is member of a cluster (option -exclusive or -distributed-orders), and therefore needs a database</title>
+                <title>This is a member of a cluster (option -exclusive or -distributed-orders), and therefore needs a database</title>
             </text>
         </message>
 
-        <!--message code="SCHEDULER-358">
+        <message code="SCHEDULER-358">
             <text xml:lang="en">
-                <title>Scheduler member id has to start with the Scheduler id followed by a slash</title>
+                <title>This is a member of a cluster (option -exclusive or -distributed-orders), and therefore needs a database. need_db=<p1/> is not allowed</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-359">
             <text xml:lang="en">
@@ -2416,8 +2416,7 @@
 
         <message code="SCHEDULER-386">
             <text xml:lang="en">
-                <title>Last heart beat was <p1>time</p1>, <p2/> seconds ago. Something is delaying Scheduler execution, 
-                the Scheduler is aborted immediately</title>
+                <title>Last heart beat was <p1>time</p1>, <p2/> seconds ago. Something is delaying Scheduler execution, the Scheduler is aborted immediately</title>
             </text>
         </message>
 
@@ -2441,8 +2440,7 @@
 
         <message code="SCHEDULER-392">
             <text xml:lang="en">
-                <title>heart_beat_warn_timeout=<p1/> seconds has to be lower than heart_beat_own_timeout=<p2/>, 
-                which has to be lower than heart_beat_warn_timeout=<p3/> seconds</title>
+                <title>heart_beat_warn_timeout=<p1/> seconds has to be lower than heart_beat_own_timeout=<p2/>, which has to be lower than heart_beat_warn_timeout=<p3/> seconds</title>
             </text>
         </message>
 
@@ -3565,7 +3563,7 @@
 
         <message code="SCHEDULER-827">
             <text xml:lang="en">
-                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/>seconds late)</title>
+                <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/> seconds late)</title>
             </text>
         </message>
 

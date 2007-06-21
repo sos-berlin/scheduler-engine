@@ -172,7 +172,7 @@ static void io_error( Spooler* spooler, const string& filename )
         while( spooler->_state_cmd != Spooler::sc_continue )
         {
             int wait_seconds = 1;
-            spooler->_connection_manager->async_continue_selected( is_communication_operation, wait_seconds );   // Kann ins scheduler.log schreiben!
+            spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, wait_seconds );   // Kann ins scheduler.log schreiben!
         }
 
         spooler->_waiting_errno = 0;

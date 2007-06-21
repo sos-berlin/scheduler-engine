@@ -223,6 +223,7 @@
 
             <messages>
                 <message level="error" code="SCHEDULER-357"/>
+                <message level="error" code="SCHEDULER-358"/>
                 <message level="error" code="SCHEDULER-359"/>
                 <message level="error" code="SCHEDULER-362"/>
                 <message level="error" code="SCHEDULER-365"/>

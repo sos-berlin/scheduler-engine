@@ -35,7 +35,8 @@ const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenb
 
 //-------------------------------------------------------------------------------------------------
 
-const int Database::seconds_before_reopen   = 60;   // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird
+const int Database::seconds_before_reopen   = Z_NDEBUG_DEBUG( 60, 20 );     // Solange warten, bis Datenbank nach Fehler erneut geöffnet wird. 
+                                                                            // Zeiten wie Cluster::heart_beat_period
 //const int Database::lock_timeout            = 30;   // Wartezeit für gesperrte Datenbanksätze, nicht von jeder Datenbank begrenzbar
 
 //---------------------------------------------------------------------------------------------test
@@ -1036,12 +1037,12 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                     if( !_spooler->_wait_endless_for_db_open )  // need_db=strict?
                     {
                         too_much_errors = true;
-                        warn_msg = message_string( "SCHEDULER-314" );   // "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
+                        warn_msg = message_string( "SCHEDULER-314", _spooler->string_need_db() );   // "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
                         break;
                     }
 
                     _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
-                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, seconds_before_reopen );
+                    _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
                 }
             }
         }

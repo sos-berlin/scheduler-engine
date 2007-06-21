@@ -773,6 +773,15 @@ string Spooler::http_url() const
     return result;
 }
 
+//--------------------------------------------------------------------------Spooler::string_need_db
+
+string Spooler::string_need_db() const
+{
+    return _need_db? _wait_endless_for_db_open? "yes" 
+                                              : "strict" 
+                   : "no";
+}
+
 //-----------------------------------------------------------------------Spooler::state_dom_element
 
 xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show )
@@ -795,8 +804,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
   //                            : "strict" 
   //                                                             : "no" );
     if( _need_db )
-    state_element.setAttribute( "need_db"              , _need_db? _wait_endless_for_db_open? "yes" : "strict" 
-                                                                 : "no" );
+    state_element.setAttribute( "need_db"              , string_need_db() );
 
   //if( _wait_endless_for_db_open )
   //state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open? "yes" : "no" );
@@ -1683,7 +1691,13 @@ void Spooler::start()
     if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
-        _need_db = true;
+        //if( !_need_db )
+        //{
+        //    string old_need_db = string_need_db();
+        //    _need_db = true;
+        //    _wait_endless_for_db_open = true;
+        //    _log->info( ... );
+        //}
     }
 
     if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
@@ -1709,6 +1723,8 @@ void Spooler::start()
     {
         start_cluster();
     }
+
+    Z_LOG2( "scheduler", Command_processor( this, Security::seclev_all ).execute( "<show_state what='jobs job_params job_commands tasks job_chains'/>", Time::now(), true ) );
 }
 
 //--------------------------------------------------------------------------------Spooler::activate
@@ -2292,13 +2308,13 @@ void Spooler::wait()
 
 //------------------------------------------------------------------------Spooler::simple_wait_step
 
-void Spooler::simple_wait_step()
-{
-    wait();
-    _connection_manager->async_continue();
-    run_check_ctrl_c();
-    //execute_state_cmd();    // Damit cmd_terminate() zu _shutdown_cmd führt
-}
+//void Spooler::simple_wait_step()
+//{
+//    wait();
+//    _connection_manager->async_continue();
+//    run_check_ctrl_c();
+//    //execute_state_cmd();    // Damit cmd_terminate() zu _shutdown_cmd führt
+//}
 
 //------------------------------------------------------------------------------------Spooler::wait
 
@@ -3460,7 +3476,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         // scheduler.log
 
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
-        if( !log_filename.empty() )  
+        if( !log_filename.empty()  &&  renew_spooler == "" )  
         {
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );

@@ -77,6 +77,10 @@ ptr<Cluster_subsystem_interface> new_cluster_subsystem      ( Scheduler* );
 
 //-------------------------------------------------------------------------------------------------
 
+bool                            is_heartbeat_operation      ( Async_operation* );
+
+//-------------------------------------------------------------------------------------------------
+
 } //namespace cluster
 } //namespace scheduler
 } //namespace sos

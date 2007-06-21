@@ -63,6 +63,7 @@ struct Modified_event_handler
 //-------------------------------------------------------------------------------------------------
 
 ptr<Com_variable_set>           variable_set_from_environment();
+bool                            is_allowed_operation_while_waiting( Async_operation* op );
 
 //-------------------------------------------------------------------------------scheduler_object<>
 /*
