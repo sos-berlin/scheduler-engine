@@ -43,15 +43,15 @@
 		<h3>Scheduler Konfiguration erstellen </h3>
 		
 		<p>
-			Um eine neue Konfiguration zu erstellen, wählen Sie den Menüpunkt <em>File/New Configuration</em>:
+			Um eine neue Konfiguration zu erstellen, wählen Sie den Menüpunkt <em>File/New/Configuration</em>:
 			<br/>
-			<img src="images/editor_menu_file_configuration.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_menu_file_new.jpg" width="317" height="156" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		
 		<p>
 			Der Editor öffnet sein Hauptfenster mit einer Baumansicht für einzelne Elemente, z.B. <em>Config</em>, <em>Jobs</em>, <em>Job Chains</em> etc.
 			<br/>
-			<img src="images/editor_config.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_config.jpg" width="886" height="616" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
 			Für alle Formularfelder und Steuerelemente sind Tooltips verfügbar. Mit der Taste <strong>F1</strong> wird als Hilfe die XML-Dokumentation des 
@@ -63,25 +63,25 @@
 		<p>
 			Das Formular zur Konfiguration eines Jobs ist geöffnet:
 			<br/>
-			<img src="images/editor_job.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_job.jpg" width="1033" height="830" style="margin: 20px 0px ; border:1px solid gray;"/>
 			<br/>
 			Mit <strong>F1</strong> erreichen Sie die Dokumentation des XML-Elements <em>&lt;job&gt;</em>:
 			<br/>
-			<img src="images/editor_help_job.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_help_job.jpg" width="610" height="638" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		
 		
 		
 		<h3>Vorhandene Konfigurationsdatei öffnen</h3>
 		<p>
-			Existierende Konfigurationsdateien öffnen Sie mit dem Menüpunkt <em>File/Open Configuration</em>:
+			Existierende Konfigurationsdateien öffnen Sie mit dem Menüpunkt <em>File/Open</em>:
 			<br/>
-			<img src="images/editor_menu_file_configuration_open.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_menu_file_open.jpg" width="150" height="155" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
 			Beispiel - Öffnen der Datei <em>scheduler.xml</em> aus der Auslieferung, Ansicht der Base-File Konfiguration:
 			<br/>
-			<img src="images/editor_menu_file_open_scheduler_xml.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_menu_file_open_scheduler_xml.jpg" width="887" height="320" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		
 		
@@ -123,7 +123,7 @@
 						Wenn Sie auftragsgesteuerte Jobs in Job-Ketten verwenden, muss festgelegt werden, wie die Aufträge entstehen:
 					<p>
 					</p>
-						Aufträge können durch Verzeichnisüberwachung erzeugt werdenn - definieren Sie hierfür Dateiaufträge im Formualar <em>Job Chains</em>.
+						Aufträge können durch Verzeichnisüberwachung erzeugt werden - definieren Sie hierfür Dateiaufträge im Formualar <em>Job Chains</em>.
 					<p>
 					</p>
 						Sie können Aufträge direkt mit einem &lt;add_order&gt;-Kommando erstellen - definieren Sie solche Aufträge im Formular <em>Orders</em>.
@@ -153,11 +153,11 @@
 		<p>
 			Um den Assistenten zu starten, wählen Sie <em>Job Wizard</em> im Formular <em>Jobs</em>:
 			<br/>
-			<img src="images/editor_job_wizard.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_job_wizard.jpg" width="98" height="111" style="margin: 20px 0px ; border:1px solid gray;"/>
 			<br/>
 			Der Wizard erstellt einen neuen Job in folgenden Schritten:
 			<br/>
-			<img src="images/editor_job_wizard_overview.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_job_wizard_overview.jpg" width="413" height="128" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p> 
 		
 		
@@ -179,14 +179,14 @@
 			Ein dokumentierter Job wird im <em>/jobs</em>-Verzeichnis des Schedulers gespeichert und ist damit als Vorbild für neue Jobs mit Hilfe des Job Wizards verfügbar. 
 		</p>
 		<p>
-			Wählen Sie den Menüpunkt <em>File/New Documentation</em>:
+			Wählen Sie den Menüpunkt <em>File/New/Documentation</em>:
 			<br/>
-			<img src="images/editor_menu_file_documentation.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_menu_file_new.jpg" width="317" height="156" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
 			Zu jedem Formular ist eine kontextbezogene Hilfe mit <strong>F1</strong> erreichbar:
 			<br/>
-			<img src="images/editor_help_documentation.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+			<img src="images/editor_help_documentation.jpg" width="937" height="529" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 
 </description>
