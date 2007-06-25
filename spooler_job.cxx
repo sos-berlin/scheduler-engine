@@ -1997,6 +1997,8 @@ Time Job::next_start_time()
 
 //-------------------------------------------------------------------------Job::calculate_next_time
 // Für Task_subsystem
+// Wird auch gerufen von Directory_file_order_source::start()
+
 
 void Job::calculate_next_time( const Time& now )
 {

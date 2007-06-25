@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-06-21" version="2.0.176" subversion_revision="5102">
+    <change date="2007-06-21" version="2.0.176" subversion_revision="5105">
+        <revision type="correction" title="Zur Laufzeit hinzugefügtes &lt;file_order_source> wirkt">
+            <description>
+                <p>
+                    Eine zur Laufzeit hinzugefügte
+                    <scheduler_element name="job_chain"/> mit 
+                    <scheduler_element name="file_order_source"/> 
+                    hat nicht automatisch gestartet.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="need_db=no nicht länger im Cluster-Betrieb erlaubt">
             <description>
                 <ul>

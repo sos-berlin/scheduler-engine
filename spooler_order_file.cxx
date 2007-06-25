@@ -18,7 +18,7 @@ using stdext::hash_map;
 
 namespace sos {
 namespace scheduler {
-
+namespace order {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -483,13 +483,17 @@ void Directory_file_order_source::finish()
 
 void Directory_file_order_source::start()
 {
-    if( _next_order_queue->job()->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
+    Job* next_job = _next_order_queue->job();
+    if( next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
 
     _expecting_request_order = true;            // Auf request_order() warten
     set_async_next_gmtime( double_time_max );
     //set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
 
     set_async_manager( _spooler->_connection_manager );
+
+
+    if( next_job->state() > Job::s_not_initialized )  next_job->calculate_next_time( Time::now() );     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -1096,5 +1100,6 @@ string Directory_file_order_source::obj_name() const
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace order
 } //namespace spoooler
 } //namespace sos

@@ -114,17 +114,14 @@ using namespace ::std;
 
 struct Show_calendar_options;
 struct Communication;
+struct Database;
 struct Get_events_command_response;
 struct Job;
-struct Job_chain;
 struct Job_subsystem_interface;
 struct Holder;
 struct Requestor;
-struct Lock_subsystem;
 struct Module;
 struct Module_instance;
-struct Order_queue;
-struct Order;
 struct Process;
 struct Process_class;
 struct Remote_scheduler_interface;
@@ -154,6 +151,16 @@ namespace lock
     struct Requestor;
     struct Holder;
 }
+
+namespace order
+{
+    struct Job_chain;
+    struct Order_queue;
+    struct Order;
+    struct Order_subsystem_interface;
+}
+using namespace order;
+
 
 typedef stdext::hash_set<string> String_set;
 

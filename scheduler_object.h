@@ -6,10 +6,6 @@
 namespace sos {
 namespace scheduler {
 
-
-struct Database;
-struct Order_subsystem_interface;
-
 //---------------------------------------------------------------------------------Scheduler_object
 
 struct Scheduler_object

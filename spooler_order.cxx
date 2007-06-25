@@ -18,6 +18,7 @@ using stdext::hash_map;
 
 namespace sos {
 namespace scheduler {
+namespace order {
 
 //--------------------------------------------------------------------------------------------const
 
@@ -6083,5 +6084,6 @@ string Order::obj_name() const
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace order
 } //namespace spoooler
 } //namespace sos

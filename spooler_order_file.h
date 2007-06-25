@@ -6,6 +6,7 @@
 
 namespace sos {
 namespace scheduler {
+namespace order {
 
 //-------------------------------------------------------------------------------------------------
     
@@ -27,6 +28,7 @@ ptr<Directory_file_order_source_interface> new_directory_file_order_source( Job_
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace order
 } //namespace scheduler
 } //namespace sos
 

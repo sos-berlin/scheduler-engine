@@ -7,6 +7,7 @@
 
 namespace sos {
 namespace scheduler {
+namespace order {
 
 struct Job_chain;
 struct Order_id_space;
@@ -699,6 +700,7 @@ ptr<Order_subsystem_interface>  new_order_subsystem         ( Scheduler* );
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace order
 } //namespace scheduler
 } //namespace sos
 

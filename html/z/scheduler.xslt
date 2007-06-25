@@ -277,7 +277,7 @@
                     <xsl:text>&#160;</xsl:text>
                 </td>
 
-                <td valign="top" align="right">
+                <td valign="top" style="text-align: right">
                     <!--span onclick = "open_url( '/doc/index.xml', 'scheduler_documentation' )"
                           class   = "small"
                           style   = "cursor: pointer; text-decoration: underline;">
@@ -556,7 +556,7 @@
                             </xsl:if>
                         </td>
 
-                        <td align="right">
+                        <td style="text-align: right">
                             <xsl:value-of select="@all_steps"/>
                         </td>
 
@@ -651,7 +651,7 @@
                             </xsl:if>
                         </td>
 
-                        <td align="right">
+                        <td style="text-align: right">
                             <xsl:if test="@running_since!=''">
                                 <xsl:text> &#160;</xsl:text>
                                 <!--span class="small"-->
@@ -660,7 +660,7 @@
                             </xsl:if>
                         </td>
 
-                        <td align="right">
+                        <td style="text-align: right">
                             <xsl:value-of select="@steps"/>
                         </td>
 
@@ -1049,7 +1049,7 @@
                 </td>
 
                 <td></td>
-                <td align="right">
+                <td style="text-align: right">
                     <xsl:call-template name="bold_counter">
                         <xsl:with-param name="counter" select="@orders" />
                         <xsl:with-param name="suffix"  select="'orders'" />
@@ -1308,7 +1308,7 @@
 
                             <td></td>
 
-                            <td align="right">
+                            <td style="text-align: right">
                                 <xsl:if test="self::job_chain_node/@job">
                                     <xsl:call-template name="bold_counter">
                                         <xsl:with-param name="counter" select="@orders" />
@@ -1628,7 +1628,7 @@
                         </xsl:choose>
                     </td>
 
-                    <td align="right">
+                    <td style="text-align: right">
                         <xsl:call-template name="command_menu">
                             <xsl:with-param name="onclick_call"         select="'order_menu__onclick'"/>
                             <xsl:with-param name="onclick_param1_str"   select="@job_chain"/>
@@ -2427,7 +2427,7 @@
                                 </xsl:if>
                             </td>
 
-                            <td align="right" style="padding-right: 0pt">
+                            <td style="padding-right: 0pt; text-align: right">
                                 <xsl:call-template name="command_menu">
                                     <xsl:with-param name="onclick_call"       select="'job_menu__onclick'"/>
                                     <xsl:with-param name="onclick_param1_str" select="@job"/>
@@ -2706,7 +2706,7 @@
                             </td>
 
                             <xsl:if test="@id">
-                                <td align="right" valign="top" style="padding-right: 0pt">
+                                <td valign="top" style="padding-right: 0pt; text-align: right;">
                                     <xsl:call-template name="command_menu">
                                         <xsl:with-param name="onclick_call"       select="'task_menu__onclick'"/>
                                         <xsl:with-param name="onclick_param1_str" select="@id"/>
@@ -2960,7 +2960,7 @@
                         <xsl:value-of select="@end_time__xslt_datetime"     disable-output-escaping="yes"/>
                     </td>
 
-                    <td align="right" valign="top" style="padding-right: 0pt">
+                    <td valign="top" style="padding-right: 0pt; text-align: right">
                         <xsl:call-template name="command_menu">
                             <xsl:with-param name="onclick" select="concat( 'history_task_menu__onclick( ', @task, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
                         </xsl:call-template>
@@ -3113,7 +3113,7 @@
                             </td>
                         </xsl:if>
 
-                        <td align="right">
+                        <td style="text-align: right">
                             <xsl:call-template name="command_menu">
                                 <xsl:with-param name="onclick_call">
                                     <xsl:choose>
