@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
@@ -184,7 +184,7 @@
                             <!--scheduler_a href="CHANGES.xml"/-->
                         </td>
                         <td style="padding-left: 2em; font-size: 8pt">
-                            &#x2192;<scheduler_a href="proposals/index.xml"/>
+                        <!--&#x2192;<scheduler_a href="proposals/index.xml"/>-->
                         </td>
                     </tr>
                 </table>
