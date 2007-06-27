@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -10,355 +10,459 @@
     date                = "$Date$"
 >
 
-<scheduler_keyword keyword="Historie"/>
-
-<table width="100%">
-    <tr>
-        <td align="right">19. Mai 2002</td>
-    </tr>
-</table>
-
-<h2>1.&#160; Anforderung</h2>
-<p>Jeder Joblauf soll verzeichnet werden. Festgehalten werden</p>
-<ul>
-<li>Satzkennung: ID der für einen Job gestarteten Task, eindeutig für den Spooler-Lauf oder die Datenbank</li>
-<li>Scheduler-ID</li>
-<li>Jobname</li>
-<li>Startzeit</li>
-<li>Endzeit (falls erreicht)</li>
-<li>Anlass des Starts (falls es mehrere Start-Anlässe gibt, wird der möglicherweise wichtigste Anlass genommen)</li>
-<li>Parameter (in XML)</li>
-<li>Anzahl Jobschritte (Anzahl der spooler_process-Aufrufe)</li>
-<li>Fehlerflag</li>
-<li>Fehlercode und Fehlertext</li>
-<li>Jobprotokoll (nur, wenn Protokoll in eine Datenbank geschrieben wird, nur auf Anforderung)</li>
-<li>Extra Felder</li>
-</ul>
-<p>An der TCP-Schnittstelle sind Auszüge der Historie lesbar.</p>
-<p class="zwischentitel">Spalten der Historie
-</p>
-<p>&#160;
-</p>
-<table border="0" width="100%" cellspacing="0">
-<tr>
-<td width="13%">
-id
-</td>
-<td width="87%">Eindeutige Kennung der Task (Tabellenschlüssel)</td>
-</tr>
-<tr>
-<td width="13%">spooler_id</td>
-<td width="87%">Scheduler-ID</td>
-</tr>
-<tr>
-<td width="13%">job_name</td>
-<td width="87%">Jobname</td>
-</tr>
-<tr>
-<td width="13%">start_time</td>
-<td width="87%">Startzeit (yyyy-mm-dd HH:MM:SS)</td>
-</tr>
-<tr>
-<td width="13%">end_time</td>
-<td width="87%">Endezeit (yyyy-mm-dd HH:MM:SS)</td>
-</tr>
-<tr>
-<td width="13%">steps</td>
-<td width="87%">Anzahl Aufgerufener spooler_process()</td>
-</tr>
-<tr>
-<td width="13%">cause</td>
-<td width="87%">Anlass des Starts</td>
-</tr>
-<tr>
-<td width="13%">error</td>
-<td width="87%">0: Kein Fehler; 1: Fehler</td>
-</tr>
-<tr>
-<td width="13%">error_code</td>
-<td width="87%">Fehlercode</td>
-</tr>
-<tr>
-<td width="13%">error_text</td>
-<td width="87%">Fehlertext</td>
-</tr>
-<tr>
-<td width="13%">parameters</td>
-<td width="87%">Parameter des Jobs (wenn vorhanden) als XML-Dokument (Clob)</td>
-</tr>
-<tr>
-<td width="13%">log</td>
-<td width="87%">Jobprotokoll (nicht in der tabulierten Datei)</td>
-</tr>
-</table>
-<h2>2.&#160; Historiendatei</h2>
-<p>Die Historie kann in einfache Dateien oder in eine Datenbank geschrieben
-werden.</p>
-<h3>2.1&#160; Einfache Dateien (tabulierte Dateien)</h3>
-
-<p>Für jeden Job wird im Verzeichnis der Protokolldateien (Option <font class="mono">-log-dir=</font>)
-eine Datei fortgeschrieben. Die Datenfelder werden durch Tabulator getrennt.
-Beim Start eines Jobs wird ein Satz geschrieben, der beim Ende mit den
-vollständigen Daten überschrieben wird.</p>
-<p>Dateiname ist <i> log_dir</i><font class="mono">/history.</font><i>scheduler_id</i><font class="mono">.job.</font><i>jobname</i><font class="mono">.txt</font></p>
-<p>Die Datei wird beim Scheduler-Start neu angelegt. Eine bereits vorhandene Datei
-kann zurvor umbenannt und auch komprimiert werden.</p>
-<p> Der Scheduler schreibt in die erste Zeile die Spaltennamen.</p>
-<p>Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrückt.</p>
-<p>Jedes Feld hat für 1024 Zeichen Platz. Längere Einträge werden
-abschnitten.</p>
-<p class="zwischentitel">Archivierung</p>
-<p>Beim Start des Schedulers werden die Historien der Jobs überschrieben. 
-Die vorhandenen Historien können aber mit dem Eintrag history_archive in der Konfigurationsdatei
-<a href="factory_ini.xml"><code>factory.ini</code></a> archiviert werden:</p>
-<pre>[spooler]
-history_archive = yes|<u>no</u>|gzip
-
-[Job <i>jobname</i>]
-history_archive = yes|no|gzip</pre>
-<p><font class="mono">history_archive=yes</font>&#160; benennt die Datei um.
-Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergänzt.</p>
-<p><font class="mono">history_archive=gzip&#160;</font> komprimiert die Datei
-mit zlib (gzip) von Jean-loup Gailly [<a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a>].
-Der Dateiname wird außer um den Zeitstempel um die Endung <font class="mono">.gz</font>
-ergänzt. Die Datei kann mit gzip dekomprimiert werden. Sie lässt sich auch mit
-der Hostware mit &quot;<font class="mono">nl | gzip | history.gz</font>&quot;
-lesen.</p>
-<h3>2.2&#160; Datenbank</h3>
-
-<p>Alle Daten werden in eine Tabelle geschrieben. Das Task-Protokoll wird in ein Blob geschrieben.&#160;</p>
-<p>
-Die Tabellennamen können in der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> eingestellt werden:
-</p>
-<pre>[spooler]
-db_history_table   = <i>tabellenname</i> | <u>SCHEDULER_HISTORY</u>
-db_variables_table = <i>tabellenname</i> | <u>SCHEDULER_VARIABLES</u>
-</pre>
-<!--p>
-Die Tabellename ist <font class="mono">SCHEDULER_HISTORY</font>. 
-Wenn die Datei nicht vorhanden ist, wird sie als Datenbank angelegt. 
-Wenn die Tabelle <font class="mono">SCHEDULER_HISTORY</font>nicht vorhanden ist, wird sie angelegt (das gilt nur für Microsoft-Access-Datenbanken).
-</p-->
-
-<p>In der Tabelle <font class="mono">SCHEDULER_VARIABLES</font> wird in einem Eintrag die nächste freie Jobnummer gehalten.</p>
-
-<!--p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt, aber db gesetzt ist.&#160;</p-->
-
-<!--pre>[spooler]
-db = spooler.mdb                 <i>(dasselbe wie nächste Zeile)</i>
-db = odbc -create spooler.mdb</pre>
-
-<pre>[spooler]
-db = odbc -db=spooler</pre-->
-
-<p class="zwischentitel">need_db</p>
-
-<p>Mit dem Eintrag <font class="mono">need_db=no</font> kann eingestellt werden,
-dass der Scheduler auch starten soll, wenn die Datenbank sich nicht öffnen lässt. 
-Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;</p>
-
-<pre>[spooler]
-db = odbc -db=spooler
-need_db = no</pre>
-
-<p>Wenn mit <font class="mono">db=</font> nur ein Datenbankdateiname und<font class="mono">
-log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
-nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
-der Scheduler nicht.</p>
-
-<p class="zwischentitel">Microsoft-Access-Datenbank wird automatisch angelegt</p>
-
-<p>Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
-ist, stellt der Scheduler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
-voran.&#160;Damit wird eine Microsoft-Access-Datenbank automatisch angelegt (s. Dateityp
-ODBC).</p>
-
-<p>In der Datenbank werden die Tabellen <font class="mono">SCHEDULER_HISTORY</font>
-und <font class="mono">SCHEDULER_VARIABLES</font> verwendet. Sie werden bei Bedarf
-eingerichtet, wobei die SQL-Syntax von Microsoft Access verwendet wird.</p> 
-
-<p class="zwischentitel">Satz für Scheduler-Start</p>
-
-<p>Der Scheduler schreibt beim Start einen Satz mit einer eigenen ID in die
-Historie. Beim Beenden trägt er in diesem Satz die Zeit ein, so dass ein Satz
-mit Start- und Endezeit des Schedulers vorliegt. Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;</p>
-
-<h3>2.3&#160; Konfiguration in der Datei factory.ini</h3>
-
-<p>In der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> lassen sich einstellen:</p>
-
-<pre>[spooler]
-db                 = <i>datenbank</i>
-db_history_table   = SCHEDULER_HISTORY
-db_variables_table = SCHEDULER_VARIABLES
-history            = no|<u>yes</u>
-history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>...
-history_on_process = yes|1|2
-history_with_log   = <u>no</u>|yes|gzip
-history_archive    = <u>no</u>|yes|gzip
-
-[Job <i>jobname</i>]
-history            = no|yes
-history_file       = <i>dateiname</i>
-history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>...
-history_on_process = yes|1|2
-history_with_log   = no|yes|gzip
-history_archive    = no|yes|gzip</pre>
-
-<p>Die Einstellungen unter <font class="mono">[Job </font><i>jobname</i><font class="mono">]</font>
-haben Vorrang vor <font class="mono">[spooler]</font>.</p>
-
-<p> <font class="mono">history=no</font> unterdrückt die Historie. Wenn eine
-Datenbank angegeben ist, wird dennoch der Satz für den Scheduler-Start geschrieben.</p>
-
-<p> <font class="mono">history_on_process</font> gibt die Anzahl der Aufrufe von <font class="mono">spooler_process()</font>
-an, ab der ein Eintrag in die Historie geschrieben werden soll. Bei 1 wird ein Satz nicht geschrieben, wenn <font class="mono">spooler_open</font> false
-liefert.</p>
-
-<p><font class="mono">history_with_log</font> lässt das Task-Protokoll in die
-Datenbank mit aufnehmen. Wahlweise komprimiert. <i>In Oracle derzeit nicht
-möglich, weil das Datenbankfeld ein BLOB (statt CLOB) sein muss, was der
-Dateityp odbc oder der Oracle-ODBC-Treiber nicht erkennt.</i></p>
-
-<h3>2.4&#160; Startanlässe (cause)</h3>
-
-<p>In der Historie enthält die Spalte cause den Anlass des Joblaufs:</p>
-
-<p>&#160;</p>
-
-<table border="0" width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td width="18%" style="border-bottom-style: solid">Code des Anlasses</td>
-<td width="82%" style="border-bottom-style: solid">Bedeutung</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">none</font>&#160;&#160;</td>
-<td width="82%">Task ist nicht gestartet (das kommt in der Historie nicht
-vor)&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">period_once</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">&lt;run_time once=&quot;yes&quot;&gt;</font>&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">period_single</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">&lt;run_time single_start=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">period_repeat</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">&lt;run_time repeat=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">job_repeat</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">spooler_job.repeat=</font>...&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">queue</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">spooler_job.start()</font> oder <font class="mono">&lt;start_job&gt;</font>&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">queue_at</font>&#160;&#160;</td>
-<td width="82%">wie <font class="mono">queue</font>, aber mit bestimmter
-Zeitangabe (Option <font class="mono">at</font>)</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">directory</font>&#160;&#160;</td>
-<td width="82%">eine Verzeichnisüberwachung (<font class="mono">start_when_directory_changed</font>)
-lässt den Job starten</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">signal</font>&#160;&#160;</td>
-<td width="82%"><font class="mono">&lt;signal_object&gt;</font>&#160;</td>
-</tr>
-<tr>
-<td width="18%"><font class="mono">delay_after_error</font>&#160;&#160;&#160;&#160;</td>
-<td width="82%"><font class="mono">spooler_job.delay_after_error</font>&#160;&#160;</td>
-</tr>
-</table>
-
-<h2>3.&#160; Task-Kennung und extra Felder</h2>
-<p>Jede Task, die für einen Job gestartet wurde, erhält eine Kennung. Wenn eine Datenbank verwendet wird, ermittelt
-der Scheduler sie aus der Tabelle <font class="mono">SCHEDULER_VARIABLES</font>. Die
-Kennung ist dann für alle Scheduler eindeutig, die diese Datenbanktabelle nutzen.
-Andernfalls wird eine fortlaufende Nummer vergeben. Die erste Task hat die Nummer 1.</p>
-<p>Die Kennung kann im Skript mit der Eigenschaft id abgefragt werden:</p>
-<pre>meine_id = spooler_task.id</pre>
-<p>Die Historie kann weitere beliebige Felder aufnehmen, die der Job füllen kann:</p>
-<pre>spooler_task.history_field( &quot;<i>feldname</i>&quot; ) = <i>wert</i></pre>
-<p>Das Feld <i>feldname</i> muss als Spalte in der tabulierten Datei oder in der
-Historientabelle bekannt sein. Groß-/ Kleinschreibung spielt keine Rolle.</p>
-<p>Wenn die Historie in einer Datenbank geführt wird, kann es eine Rolle
-spielen, von welchem Typ <i>wert</i> ist, insbesondere ob Zahl oder Zeichenkette.</p>
-<h3>3.1&#160; Extra Felder in der tabulierten Datei</h3>
-
-<p>Die zusätzlichen Spalten werden in der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> bekannt gemacht&#160;</p>
-
-<pre>[spooler]
-history_columns = <i>spalteniste</i>
-
-[Job jobname]
-history_columns = <i>spaltenliste</i></pre>
-
-<p>Die <i>spaltenliste</i> ist eine durch Komma getrennte Liste von
-Spaltennamen, die der tabulierten Datei hinzugefügt werden sollen.</p>
-
-<h3>3.2&#160; Extra Felder in der Datenbank</h3>
-
-<p>Die zusätzlichen Spalten in der Historientabelle werden automatisch erkannt.&#160;</p>
-
-<p>Wenn der Scheduler die Tabelle <font class="mono">SCHEDULER_HISTORY</font>
-anlegt, richtet er auch die extra Spalten ein, die in <font class="mono">history_columns</font>
-aufgeführt sind. Als Typ wird <font class="mono">char(250)</font> verwendet.</p>
-
-<h2>4.&#160; Lesen der Historie über die TCP-Schnittstelle</h2>
-<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; prev=&quot;<i>anzahl</i>|all &quot;what=&quot;all&quot;/&gt;</pre>
-
-<p>liefert rückwärts geordnet die letzten <i>anzahl</i>&#160;Einträge der Historie des angegeben
-Jobs <i>jobname</i>. Voreinstellung für <i>anzahl</i> ist 10. Alle Einträge
-werden mit <font class="mono">tail=&quot;all&quot;</font> gelesen. Die Funktion
-braucht viel Speicherplatz, denn die Historie wird als XML-Dokument mit DOM im
-Speicher aufgebaut. Max. 1000 Einträge werden geliefert.</p>
-
-<p><font class="mono">what=&quot;all&quot;</font> liefert auch die
-Jobprotokolle.</p>
-
-<p>Mit folgenden Varianten lassen sich Ausschnitte der Historie lesen. Das
-Attribut what kann immer angegeben werden.</p>
-
-<p>Um <i>anzahl</i> Einträge vor der <i>id</i> zu bekommen:</p>
-
-<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>anzahl</i>&quot;/&gt;</pre>
-
-<p><br/>
-Um <i>anzahl</i> Einträge nach der <i>id</i> zu bekommen:</p>
-
-<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; next=&quot;<i>anzahl</i>&quot;/&gt;</pre>
-
-<p><br/>
-Um nur den Eintrag der <i>id</i> zu bekommen. Gut, wenn mit <font class="mono">what=&quot;all&quot;</font>
-das Jobprotokoll einer bestimmten Task gelesen werden soll.</p>
-
-<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot;/&gt;</pre>
-
-<p><br/>
-Das Ergebnis sind dann so aus:</p>
-
-<pre>&lt;history&gt;
-    &lt;history.entry id=&quot;<i>kennung</i>&quot; job=&quot;<i>jobname</i>&quot; start_time=&quot;<i>startzeit</i>&quot; end_time=&quot;<i>endezeit</i>&quot; ...&gt;
-        &lt;variableset&gt;
-            &lt;variable name=&quot;<i>name1</i>&quot; value=&quot;<i>wert1</i>&quot;/&gt;
-            &lt;variable name=&quot;<i>name2</i>&quot; value=&quot;<i>wert2</i>&quot;/&gt;
-        &lt;/variableset&gt;
-        &lt;log&gt;<i>Jobprotokoll</i>&lt;/log&gt;
-    &lt;/history.entry&gt;
-    &lt;history.entry ...&gt;
-        ...
-    &lt;/history.entry&gt;
-    ...
-&lt;/history&gt;</pre>
-
-<h2>5.&#160; Fehlerbehandlung</h2>
-
-<p>Fehler beim Öffnen oder Schreiben der Historie werden ins Spooler-Protokoll
-geschrieben und ignoriert.</p>
-</description>
+		<scheduler_keyword keyword="Historie"/>
+		
+		<table width="100%">
+			<tr>
+				<td align="right">19. Mai 2002</td>
+			</tr>
+		</table>
+		
+		
+		
+		<h2>1.&#160; Anforderung</h2>
+		
+		<p>
+			Jeder Joblauf soll verzeichnet werden. Festgehalten werden
+		</p>
+		<ul>
+			<li>Satzkennung: ID der für einen Job gestarteten Task, eindeutig für den Spooler-Lauf oder die Datenbank</li>
+			<li>Scheduler-ID</li>
+			<li>Jobname</li>
+			<li>Startzeit</li>
+			<li>Endzeit (falls erreicht)</li>
+			<li>Anlass des Starts (falls es mehrere Start-Anlässe gibt, wird der möglicherweise wichtigste Anlass genommen)</li>
+			<li>Parameter (in XML)</li>
+			<li>Anzahl Jobschritte (Anzahl der spooler_process-Aufrufe)</li>
+			<li>Fehlerflag</li>
+			<li>Fehlercode und Fehlertext</li>
+			<li>Jobprotokoll (nur, wenn Protokoll in eine Datenbank geschrieben wird, nur auf Anforderung)</li>
+			<li>Extra Felder</li>
+		</ul>
+		<p>
+			An der TCP-Schnittstelle sind Auszüge der Historie lesbar.
+		</p>
+		<p class="zwischentitel">
+			Spalten der Historie
+		</p>
+		<p>&#160;</p>
+		<table border="0" width="100%" cellspacing="0">
+			<tr>
+				<td width="13%">id</td>
+				<td width="87%">Eindeutige Kennung der Task (Tabellenschlüssel)</td>
+			</tr>
+			<tr>
+				<td width="13%">spooler_id</td>
+				<td width="87%">Scheduler-ID</td>
+			</tr>
+			<tr>
+				<td width="13%">job_name</td>
+				<td width="87%">Jobname</td>
+			</tr>
+			<tr>
+				<td width="13%">start_time</td>
+				<td width="87%">Startzeit (yyyy-mm-dd HH:MM:SS)</td>
+			</tr>
+			<tr>
+				<td width="13%">end_time</td>
+				<td width="87%">Endezeit (yyyy-mm-dd HH:MM:SS)</td>
+			</tr>
+			<tr>
+				<td width="13%">steps</td>
+				<td width="87%">Anzahl Aufgerufener spooler_process()</td>
+			</tr>
+			<tr>
+				<td width="13%">cause</td>
+				<td width="87%">Anlass des Starts</td>
+			</tr>
+			<tr>
+				<td width="13%">error</td>
+				<td width="87%">0: Kein Fehler; 1: Fehler</td>
+			</tr>
+			<tr>
+				<td width="13%">error_code</td>
+				<td width="87%">Fehlercode</td>
+			</tr>
+			<tr>
+				<td width="13%">error_text</td>
+				<td width="87%">Fehlertext</td>
+			</tr>
+			<tr>
+				<td width="13%">parameters</td>
+				<td width="87%">Parameter des Jobs (wenn vorhanden) als XML-Dokument (Clob)</td>
+			</tr>
+			<tr>
+				<td width="13%">log</td>
+				<td width="87%">Jobprotokoll (nicht in der tabulierten Datei)</td>
+			</tr>
+		</table>
+		
+		
+		
+		<h2>2.&#160; Historiendatei</h2>
+		
+		<p>
+			Die Historie kann in einfache Dateien oder in eine Datenbank geschrieben werden.
+		</p>
+		
+		<h3>2.1&#160; Einfache Dateien (tabulierte Dateien)</h3>
+		
+		<p>
+			Für jeden Job wird im Verzeichnis der Protokolldateien (Option <font class="mono">-log-dir=</font>)
+			eine Datei fortgeschrieben. Die Datenfelder werden durch Tabulator getrennt.
+			Beim Start eines Jobs wird ein Satz geschrieben, der beim Ende mit den
+			vollständigen Daten überschrieben wird.
+		</p>
+		<p>
+			Dateiname ist <i> log_dir</i><font class="mono">/history.
+			</font><i>scheduler_id</i><font class="mono">.job.</font><i>jobname</i><font class="mono">.txt</font>
+		</p>
+		<p>
+			Die Datei wird beim Scheduler-Start neu angelegt. 
+			Eine bereits vorhandene Datei kann zurvor umbenannt und auch komprimiert werden.
+		</p>
+		<p>
+			Der Scheduler schreibt in die erste Zeile die Spaltennamen.
+		</p>
+		<p>
+			Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrückt.
+		</p>
+		<p>
+			Jedes Feld hat für 1024 Zeichen Platz. Längere Einträge werden abschnitten.
+		</p>
+		<p class="zwischentitel">
+			Archivierung
+		</p>
+		<p>
+			Beim Start des Schedulers werden die Historien der Jobs überschrieben. 
+			Die vorhandenen Historien können aber mit dem Eintrag history_archive in der Konfigurationsdatei
+			<a href="factory_ini.xml"><code>factory.ini</code></a> archiviert werden:
+		</p>
+		<pre>[spooler]
+		history_archive = yes|<u>no</u>|gzip
+		
+		[Job <i>jobname</i>]
+		history_archive = yes|no|gzip</pre>
+		<p>
+			<font class="mono">
+			history_archive=yes</font>&#160; benennt die Datei um.
+			Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergänzt.
+			</p>
+		<p>
+			<font class="mono">history_archive=gzip&#160;</font> komprimiert die Datei
+			mit zlib (gzip) von Jean-loup Gailly [<a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a>].
+			Der Dateiname wird außer um den Zeitstempel um die Endung <font class="mono">.gz</font> ergänzt. 
+			Die Datei kann mit gzip dekomprimiert werden. Sie lässt sich auch mit
+			der Hostware mit &quot;<font class="mono">nl | gzip | history.gz</font>&quot; lesen.
+		</p>
+		
+		<h3>2.2&#160; Datenbank</h3>
+		
+		<p>
+			Alle Daten werden in eine Tabelle geschrieben. Das Task-Protokoll wird in ein Blob geschrieben.&#160;
+		</p>
+		<p>
+			Die Tabellennamen können in der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> eingestellt werden:
+		</p>
+		<pre>[spooler]
+		db_history_table   = <i>tabellenname</i> | <u>SCHEDULER_HISTORY</u>
+		db_variables_table = <i>tabellenname</i> | <u>SCHEDULER_VARIABLES</u>
+		</pre>
+		<!--p>
+		Die Tabellename ist <font class="mono">SCHEDULER_HISTORY</font>. 
+		Wenn die Datei nicht vorhanden ist, wird sie als Datenbank angelegt. 
+		Wenn die Tabelle <font class="mono">SCHEDULER_HISTORY</font>nicht vorhanden ist, wird sie angelegt (das gilt nur für Microsoft-Access-Datenbanken).
+		</p-->
+		
+		<p>
+			In der Tabelle <font class="mono">SCHEDULER_VARIABLES</font> wird in einem Eintrag die nächste freie Jobnummer gehalten.
+		</p>
+		
+		<!--p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt, aber db gesetzt ist.&#160;</p-->
+		
+		<!--pre>[spooler]
+		db = spooler.mdb                 <i>(dasselbe wie nächste Zeile)</i>
+		db = odbc -create spooler.mdb</pre>
+		
+		<pre>[spooler]
+		db = odbc -db=spooler</pre-->
+		
+		<p class="zwischentitel">
+			need_db
+		</p>
+		
+		<p>
+			Mit dem Eintrag <font class="mono">need_db=no</font> kann eingestellt werden,
+			dass der Scheduler auch starten soll, wenn die Datenbank sich nicht öffnen lässt. 
+			Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;
+		</p>
+		
+		<pre>[spooler]
+		db = odbc -db=spooler
+		need_db = no</pre>
+		
+		<p>
+			Wenn mit <font class="mono">db=</font> nur ein Datenbankdateiname und<font class="mono">
+			log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
+			nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
+			der Scheduler nicht.
+		</p>
+		
+		<p class="zwischentitel">
+			Microsoft-Access-Datenbank wird automatisch angelegt
+		</p>
+		
+		<p>
+			Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
+			ist, stellt der Scheduler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
+			voran.&#160;Damit wird eine Microsoft-Access-Datenbank automatisch angelegt (s. Dateityp
+			ODBC).
+		</p>
+		
+		<p>
+			In der Datenbank werden die Tabellen <font class="mono">SCHEDULER_HISTORY</font> und 
+			<font class="mono">SCHEDULER_VARIABLES</font> verwendet. 
+			Sie werden bei Bedarf eingerichtet, wobei die SQL-Syntax von Microsoft Access verwendet wird.
+		</p> 
+		
+		<p class="zwischentitel">Satz für Scheduler-Start</p>
+		
+		<p>
+			Der Scheduler schreibt beim Start einen Satz mit einer eigenen ID in die
+			Historie. Beim Beenden trägt er in diesem Satz die Zeit ein, so dass ein Satz
+			mit Start- und Endezeit des Schedulers vorliegt. 
+			Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;
+		</p>
+		
+		<h3>2.3&#160; Konfiguration in der Datei factory.ini</h3>
+		
+		<p>
+			In der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> lassen sich einstellen:
+		</p>
+		
+		<pre>[spooler]
+		db                 = <i>datenbank</i>
+		db_history_table   = SCHEDULER_HISTORY
+		db_variables_table = SCHEDULER_VARIABLES
+		history            = no|<u>yes</u>
+		history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>
+		history_on_process = yes|1|2
+		history_with_log   = <u>no</u>|yes|gzip
+		history_archive    = <u>no</u>|yes|gzip
+		
+		[Job <i>jobname</i>]
+		history            = no|yes
+		history_file       = <i>dateiname</i>
+		history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>
+		history_on_process = yes|1|2
+		history_with_log   = no|yes|gzip
+		history_archive    = no|yes|gzip</pre>
+		
+		<p>
+			Die Einstellungen unter <font class="mono">[Job </font><i>jobname</i><font class="mono">]</font>
+			haben Vorrang vor <font class="mono">[spooler]</font>.
+		</p>
+		
+		<p>
+			<font class="mono">history=no</font> unterdrückt die Historie. Wenn eine
+			Datenbank angegeben ist, wird dennoch der Satz für den Scheduler-Start geschrieben.
+		</p>
+		
+		<p>
+			<font class="mono">history_on_process</font> gibt die Anzahl der Aufrufe von <font class="mono">spooler_process()</font>
+			an, ab der ein Eintrag in die Historie geschrieben werden soll. 
+			Bei 1 wird ein Satz nicht geschrieben, wenn <font class="mono">spooler_open</font> false liefert.
+		</p>
+		
+		<p>
+		<font class="mono">history_with_log</font> lässt das Task-Protokoll in die
+		Datenbank mit aufnehmen. Wahlweise komprimiert. <i>In Oracle derzeit nicht
+		möglich, weil das Datenbankfeld ein BLOB (statt CLOB) sein muss, was der
+		Dateityp odbc oder der Oracle-ODBC-Treiber nicht erkennt.</i>
+		</p>
+		
+		<h3>2.4&#160; Startanlässe (cause)</h3>
+		
+		<p>
+			In der Historie enthält die Spalte cause den Anlass des Joblaufs:
+		</p>
+		
+		<p>&#160;</p>
+		
+		<table border="0" width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td width="18%" style="border-bottom-style: solid">Code des Anlasses</td>
+				<td width="82%" style="border-bottom-style: solid">Bedeutung</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">none</font>&#160;&#160;</td>
+				<td width="82%">Task ist nicht gestartet (das kommt in der Historie nicht vor)&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_once</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time once=&quot;yes&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_single</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time single_start=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_repeat</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time repeat=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">job_repeat</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.repeat=</font>...&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">queue</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.start()</font> oder <font class="mono">&lt;start_job&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">queue_at</font>&#160;&#160;</td>
+				<td width="82%">
+					wie <font class="mono">queue</font>, aber mit bestimmter Zeitangabe (Option <font class="mono">at</font>)
+				</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">directory</font>&#160;&#160;</td>
+				<td width="82%">
+					eine Verzeichnisüberwachung (<font class="mono">start_when_directory_changed</font>)lässt den Job starten
+				</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">signal</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;signal_object&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">delay_after_error</font>&#160;&#160;&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.delay_after_error</font>&#160;&#160;</td>
+			</tr>
+		</table>
+		
+		
+		
+		<h2>3.&#160; Task-Kennung und extra Felder</h2>
+		
+		<p>
+			Jede Task, die für einen Job gestartet wurde, erhält eine Kennung. Wenn eine Datenbank verwendet wird, ermittelt
+			der Scheduler sie aus der Tabelle <font class="mono">SCHEDULER_VARIABLES</font>. Die
+			Kennung ist dann für alle Scheduler eindeutig, die diese Datenbanktabelle nutzen.
+			Andernfalls wird eine fortlaufende Nummer vergeben. Die erste Task hat die Nummer 1.
+		</p>
+		<p>
+			Die Kennung kann im Skript mit der Eigenschaft id abgefragt werden:
+		</p>
+		<pre>meine_id = spooler_task.id</pre>
+		<p>
+			Die Historie kann weitere beliebige Felder aufnehmen, die der Job füllen kann:
+		</p>
+		<pre>spooler_task.history_field( &quot;<i>feldname</i>&quot; ) = <i>wert</i></pre>
+		<p>
+			Das Feld <i>feldname</i> muss als Spalte in der tabulierten Datei oder in der
+			Historientabelle bekannt sein. Groß-/ Kleinschreibung spielt keine Rolle.
+		</p>
+		<p>
+		Wenn die Historie in einer Datenbank geführt wird, kann es eine Rolle
+			spielen, von welchem Typ <i>wert</i> ist, insbesondere ob Zahl oder Zeichenkette.
+		</p>
+		
+		<h3>3.1&#160; Extra Felder in der tabulierten Datei</h3>
+		
+		<p>
+			Die zusätzlichen Spalten werden in der Konfigurationsdatei 
+			<a href="factory_ini.xml"><code>factory.ini</code></a> bekannt gemacht&#160;
+		</p>
+		
+		<pre>[spooler]
+		history_columns = <i>spalteniste</i>
+		
+		[Job jobname]
+		history_columns = <i>spaltenliste</i></pre>
+		
+		<p>
+			Die <i>spaltenliste</i> ist eine durch Komma getrennte Liste von Spaltennamen, 
+			die der tabulierten Datei hinzugefügt werden sollen.
+		</p>
+		
+		<h3>3.2&#160; Extra Felder in der Datenbank</h3>
+		
+		<p>
+			Die zusätzlichen Spalten in der Historientabelle werden automatisch erkannt.&#160;
+		</p>
+		
+		<p>
+			Wenn der Scheduler die Tabelle <font class="mono">SCHEDULER_HISTORY</font>
+			anlegt, richtet er auch die extra Spalten ein, die in <font class="mono">history_columns</font>
+			aufgeführt sind. Als Typ wird <font class="mono">char(250)</font> verwendet.
+		</p>
+		
+		
+		
+		<h2>4.&#160; Lesen der Historie über die TCP-Schnittstelle</h2>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; prev=&quot;<i>anzahl</i>|all &quot;what=&quot;all&quot;/&gt;</pre>
+		
+		<p>
+			liefert rückwärts geordnet die letzten <i>anzahl</i>&#160;Einträge der Historie des angegeben Jobs <i>jobname</i>. 
+			Voreinstellung für <i>anzahl</i> ist 10. 
+			Alle Einträge werden mit <font class="mono">tail=&quot;all&quot;</font> gelesen. 
+			Die Funktion braucht viel Speicherplatz, denn die Historie wird als XML-Dokument mit DOM im Speicher aufgebaut. 
+			Max. 1000 Einträge werden geliefert.
+		</p>
+		
+		<p>
+			<font class="mono">what=&quot;all&quot;</font> liefert auch die Jobprotokolle.
+		</p>
+		
+		<p>Mit folgenden Varianten lassen sich Ausschnitte der Historie lesen. Das Attribut what kann immer angegeben werden.
+		</p>
+		
+		<p>
+			Um <i>anzahl</i> Einträge vor der <i>id</i> zu bekommen:
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>anzahl</i>&quot;/&gt;
+		</pre>
+		
+		<p>
+			Um <i>anzahl</i> Einträge nach der <i>id</i> zu bekommen:
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; next=&quot;<i>anzahl</i>&quot;/&gt;
+		</pre>
+		
+		<p>
+			Um nur den Eintrag der <i>id</i> zu bekommen. Gut, wenn mit <font class="mono">what=&quot;all&quot;</font>
+			das Jobprotokoll einer bestimmten Task gelesen werden soll.
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot;/&gt;
+		</pre>
+		
+		<p>
+			Das Ergebnis sind dann so aus:
+		</p>
+		
+		<pre>&lt;history&gt;
+		    &lt;history.entry id=&quot;<i>kennung</i>&quot; job=&quot;<i>jobname</i>&quot; start_time=&quot;<i>startzeit</i>&quot; end_time=&quot;<i>endezeit</i>&quot; ...&gt;
+		        &lt;variableset&gt;
+		            &lt;variable name=&quot;<i>name1</i>&quot; value=&quot;<i>wert1</i>&quot;/&gt;
+		            &lt;variable name=&quot;<i>name2</i>&quot; value=&quot;<i>wert2</i>&quot;/&gt;
+		        &lt;/variableset&gt;
+		        &lt;log&gt;<i>Jobprotokoll</i>&lt;/log&gt;
+		    &lt;/history.entry&gt;
+		    &lt;history.entry ...&gt;
+		        ...
+		    &lt;/history.entry&gt;
+		    ...
+		&lt;/history&gt;</pre>
+		
+		
+		
+		<h2>5.&#160; Fehlerbehandlung</h2>
+		
+		<p>
+			Fehler beim Öffnen oder Schreiben der Historie werden ins Spooler-Protokoll geschrieben und ignoriert.
+		</p>
+	</description>
