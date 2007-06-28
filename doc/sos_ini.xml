@@ -38,11 +38,9 @@
         <p>
           Sollen Einstellungen aus sos.ini neben dem Scheduler auch für andere SOS-Produkte gelten, kann diese Ini-Datei zentral abgelegt werden.
           <br/><br/>
-          Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gilt:
-
+          Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
         </p>        
-        
-        
+       
         
         <!--p>
             Den Pfad dieser Datei können Sie einstellen (vorrangige Einstellungen zuerst):
