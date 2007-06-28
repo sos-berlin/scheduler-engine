@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -33,7 +33,7 @@
           abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.
         </p>   
         <p>
-          Falls beim Scheduler-Aufruf der Pfad zur Datei factory.ini nicht angegeben wird, gilt:
+                    Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
         </p>
         
     </description>
