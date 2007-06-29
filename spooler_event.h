@@ -94,7 +94,7 @@ struct Scheduler_event_manager : Object,
     
   private:
     Fill_zero                  _zero_;
-    z::File                    _event_file;
+    File                       _event_file;
 
     typedef std::list< Get_events_command_response* >    Get_events_command_response_list;
     Get_events_command_response_list                    _get_events_command_response_list;

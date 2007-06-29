@@ -96,7 +96,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     Time                       _notification_event_time;        // Wann wir zuletzt die Benachrichtigung bestellt haben
     int                        _max_orders;
 
-    vector< ptr<z::File_info> > _new_files;
+    vector< ptr<zschimmer::file::File_info> > _new_files;
     int                        _new_files_index;
     int                        _new_files_count;        // _new_files.size() ohne NULL-Einträge
     Time                       _new_files_time;
@@ -323,7 +323,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
             {
                 for( int i = _new_files_index, j = show._max_orders; i < _new_files.size() && j > 0; i++, j-- )
                 {
-                    z::File_info* f = _new_files[ i ];
+                    zschimmer::file::File_info* f = _new_files[ i ];
                     if( f )
                     {
                         xml::Element_ptr file_element = document.createElement( "file" );
@@ -618,7 +618,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
     while( !result  &&  _new_files_index < _new_files.size() )
     {
-        if( z::File_info* new_file = _new_files[ _new_files_index ] )
+        if( zschimmer::file::File_info* new_file = _new_files[ _new_files_index ] )
         {
             File_path  path = new_file->path();
             ptr<Order> order;
@@ -827,7 +827,7 @@ bool Directory_file_order_source::read_new_files()
 
         //Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
-        ptr<z::File_info> file_info = dir.get();
+        ptr<zschimmer::file::File_info> file_info = dir.get();
         if( !file_info )  break;
 
         bool file_still_exists = file_info->try_call_stat();       // last_write_time füllen für sort, quick_last_write_less()
@@ -846,7 +846,7 @@ bool Directory_file_order_source::read_new_files()
 
     Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
-    sort( _new_files.begin(), _new_files.end(), zschimmer::File_info::quick_last_write_less );
+    sort( _new_files.begin(), _new_files.end(), zschimmer::file::File_info::quick_last_write_less );
 
     return !_new_files.empty();
 }
@@ -875,7 +875,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 
             for( int i = 0; i < _new_files.size(); i++ )
             {
-                if( z::File_info* new_file = _new_files[ i ] )
+                if( zschimmer::file::File_info* new_file = _new_files[ i ] )
                     removed_blacklisted_files.erase( new_file->path() );
             }
 
@@ -935,7 +935,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
 //
 //        for( int i = 0; i < _new_files.size(); i++ )
 //        {
-//            if( z::File_info* new_file = _new_files[ i ] )
+//            if( zschimmer::file::File_info* new_file = _new_files[ i ] )
 //            {
 //                string path  = new_file->path();
 //                Order* order = _job_chain->order_or_null( path );   // Kein Datenbankzugriff, also nicht für verteilte Aufträge

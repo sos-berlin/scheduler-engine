@@ -110,6 +110,7 @@ extern const string             variable_set_name_for_substitution;
 //-------------------------------------------------------------------------------------------------
 
 using namespace ::std;
+using namespace ::zschimmer::file;
 
 
 struct Show_calendar_options;

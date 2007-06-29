@@ -27,6 +27,9 @@
             <description>
                 <ul>
                     <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>
+                    </li>
+                    <li>
                         <scheduler_option name="exclusive"/>
                     </li>
                     <li>

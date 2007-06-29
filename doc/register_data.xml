@@ -874,6 +874,7 @@
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>
     <register_entry register_file='distributed_orders.xml#use_option__exclusive' register_title='Verteilte Aufträge'  register_keyword='exclusive'/>
+    <register_entry register_file='settings.xml#use_option__exclusive' register_title='Einstellungen'  register_keyword='exclusive'/>
     <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
@@ -2182,6 +2183,7 @@
 <register_keyword keyword='need_db'>
     <register_keyword_display><code>need_db=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_need_db' register_title='file factory.ini, section [spooler]'  register_keyword='need_db' type='definition'/>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='need_db'/>
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='need_db'/>
 </register_keyword>
 <register_keyword keyword='new_filename (property)'>

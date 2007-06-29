@@ -117,10 +117,10 @@ struct Directory_watcher : Event  //, Async_operation
                                ~Directory_reader            ();
 
         void                    close                       ();
-        ptr<zschimmer::File_info> get                       ();
+        ptr<zschimmer::file::File_info> get                 ();
 
       private:
-        ptr<zschimmer::File_info> read                      ();
+        ptr<zschimmer::file::File_info> read                ();
 
         string                 _directory_path;
         z::Regex*              _regex;

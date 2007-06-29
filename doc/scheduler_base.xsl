@@ -1591,19 +1591,14 @@
                 <table cellspacing="0" cellpadding="0">
                     <tr>
                         <xsl:if test="$level">
-                            <td>
+                            <td style="padding-right: 1em">
                                 <xsl:call-template name="message_level">
                                     <xsl:with-param name="level" select="@level"/>
                                 </xsl:call-template>
-
-                                <code>
-                                    <xsl:text> </xsl:text>
-                                </code>
                             </td>
                         </xsl:if>
 
-                        <td>
-                            <code>&#160;</code>
+                        <td style="padding-right: 1em">
                             <xsl:call-template name="scheduler_message_code">
                                 <xsl:with-param name="code" select="@code"/>
                             </xsl:call-template>

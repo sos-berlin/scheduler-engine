@@ -248,7 +248,7 @@ static void print_usage()
 
 static void self_test( bool extra = false )
 {
-    zschimmer::test_file_path();
+    zschimmer::file::test_file_path();
 
     if( extra )
     {
@@ -1434,7 +1434,7 @@ void Spooler::load_arg()
         }
 
         _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp" ) );
-        if( _temp_dir.empty() )  _temp_dir = z::get_temp_path() + Z_DIR_SEPARATOR "scheduler";
+        if( _temp_dir.empty() )  _temp_dir = get_temp_path() + Z_DIR_SEPARATOR "scheduler";
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
@@ -3481,7 +3481,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
 
-            if( zschimmer::file_exists( path ) )  
+            if( zschimmer::file::file_exists( path ) )  
             {
                 File_path gz_path = path + ".gz";
                 S cmd; cmd << "gzip <" << path << " >" << gz_path;

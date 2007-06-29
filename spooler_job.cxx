@@ -1834,7 +1834,7 @@ string Job::trigger_files( Task* task )
                 Directory_watcher::Directory_reader dir ( directory_watcher );
                 while(1)
                 {
-                    ptr<z::File_info> file_info = dir.get();
+                    ptr<zschimmer::file::File_info> file_info = dir.get();
                     if( !file_info )  break;
                     
                     string path = file_info->path().path();

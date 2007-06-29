@@ -256,7 +256,7 @@ Log::~Log()
 
 void Log::set_directory( const string& directory )         
 {
-    if( directory.empty() )  _directory = z::get_temp_path();
+    if( directory.empty() )  _directory = get_temp_path();
                        else  _directory = directory;
 
     if( _directory.length() > 0  &&  ( _directory[_directory.length()-1] == '/'  ||  _directory[_directory.length()-1] == '\\' ) ) 

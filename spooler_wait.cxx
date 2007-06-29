@@ -681,9 +681,9 @@ Directory_watcher::Directory_reader::~Directory_reader()
 
 //----------------------------------------------------------------------------Directory_reader::get
 
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::get() 
+ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get() 
 { 
-    ptr<zschimmer::File_info> result;
+    ptr<zschimmer::file::File_info> result;
 
     while(1)
     {
@@ -754,9 +754,9 @@ void Directory_watcher::Directory_reader::close()
 
 //--------------------------------------------------------Directory_watcher::Directory_reader::read
 
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read() 
+ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::read() 
 { 
-    ptr<zschimmer::File_info>   result = Z_NEW( zschimmer::File_info );
+    ptr<zschimmer::file::File_info>   result = Z_NEW( zschimmer::file::File_info );
     _finddata_t                 data;
 
     if( !_first_read )
@@ -824,7 +824,7 @@ void Directory_watcher::Directory_reader::close()
 
 //--------------------------------------------------Directory_watcher::Directory_reader::read_first
     
-ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read() 
+ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::read() 
 { 
     if( !_first_read )
     {
@@ -839,7 +839,7 @@ ptr<zschimmer::File_info> Directory_watcher::Directory_reader::read()
     struct dirent* entry = readdir( _handle );
     if( !entry )  return NULL;
 
-    ptr<zschimmer::File_info> result = Z_NEW( zschimmer::File_info );
+    ptr<zschimmer::file::File_info> result = Z_NEW( zschimmer::file::File_info );
     result->path().set_name( entry->d_name );
     return result;
 }
@@ -939,7 +939,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         
             while(1)
             {
-                ptr<z::File_info> f = dir.get();
+                ptr<zschimmer::file::File_info> f = dir.get();
                 if( !f )  break;
                 string filename = f->path().name(); 
 

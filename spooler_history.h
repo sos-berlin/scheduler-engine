@@ -306,7 +306,7 @@ struct Job_history
 
     string                     _filename;
     string                     _type_string;            // _use_file:  -type=(...) tab ...
-    zschimmer::File            _file;
+    zschimmer::file::File      _file;
     string                     _tabbed_record;
     vector<string>             _extra_names;
     Sos_ptr<Record_type>       _extra_type;

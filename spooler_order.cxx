@@ -4109,7 +4109,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
     }
     else
     if( finished() )  
-        _spooler->_db->write_order_history( this );
+        _spooler->_db->write_order_history( this, outer_transaction );
 
     return update_ok;
 }
@@ -5205,7 +5205,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
                              : message_string( "SCHEDULER-940" ) );
         }
 
-        if( _is_in_database )  db_delete( update_and_release_occupation );
+        db_delete( update_and_release_occupation );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
     }
 
     if( _job_chain )  _job_chain->remove_order( this );

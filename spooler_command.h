@@ -204,7 +204,7 @@ struct File_buffered_command_response : Command_response
     State                      _state;
     int                        _buffer_size;
     string                     _buffer;
-    z::File                    _congestion_file;
+    zschimmer::file::File      _congestion_file;
     bool                       _last_seek_for_read;
     int64                      _congestion_file_write_position;
     int64                      _congestion_file_read_position;

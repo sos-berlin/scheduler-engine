@@ -504,6 +504,11 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                         öffnet sie erneut.
                         Wenn das fehlschlägt, arbeitet der Scheduler ohne Datenbank weiter.
                     </p>
+                    <p>
+                        Im Cluster-Betrieb (<scheduler_option name="exclusive"/> oder <scheduler_option name="distributed-orders"/>)
+                        lehnt der Scheduler <code>need_db=no</code> ab mit der Meldung:
+                        <scheduler_message code="SCHEDULER-358" show_text="yes"/>
+                    </p>
                 </dd>
 
                 <dt><code>need_db=yes</code></dt>
