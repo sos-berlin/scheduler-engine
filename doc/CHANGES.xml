@@ -10,6 +10,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-06-28" version="2.0.176" subversion_revision="5112">
+        <revision type="modification" title="orders_recoverable='no' unterdrückt nicht mehr Auftragshistorie">
+            <description>
+                <p>
+                    <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-06-21" version="2.0.176" subversion_revision="5105">
         <revision type="correction" title="Zur Laufzeit hinzugefügtes &lt;file_order_source> wirkt">
             <description>
@@ -80,14 +90,6 @@
                 <scheduler_message level="info" code="SCHEDULER-873"/>
                 <scheduler_message level="info" code="SCHEDULER-874"/>
                 <scheduler_message level="info" code="SCHEDULER-875"/>
-            </description>
-        </revision>
-
-        <revision type="modification" title="orders_recoverable='no' unterdrückt nicht mehr Auftragshistorie">
-            <description>
-                <p>
-                    <scheduler_element name="job_chain" attribute="orders_recoverable" value="no"/>.
-                </p>
             </description>
         </revision>
 

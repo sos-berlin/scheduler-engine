@@ -105,8 +105,8 @@
                 <scheduler_element name="modify_spooler"/><br/>
                 <scheduler_element name="process_class"/><br/>
                 <scheduler_element name="process_class.remove"/><br/>
-                <scheduler_element name="remove_order"/><br/>
                 <scheduler_element name="remove_job_chain"/><br/>
+                <scheduler_element name="remove_order"/><br/>
                 <scheduler_element name="show_calendar"/><br/>
                 <scheduler_element name="show_history"/><br/>
                 <scheduler_element name="show_job"/><br/>
