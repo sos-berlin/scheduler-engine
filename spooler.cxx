@@ -52,6 +52,7 @@
 
 
 using namespace std;
+using namespace zschimmer::file;
 
 
 namespace sos {
