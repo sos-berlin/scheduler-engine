@@ -3,7 +3,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config tcp_port="4444" supervisor="sos-neu:4445">
+    <config tcp_port="4444" supervisor="sos:4444">
 
         <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
         <security>
@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="localhost:4445" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="localhost:4444" max_processes="50"/>
         </process_classes>
 
         <script language="JavaScript">

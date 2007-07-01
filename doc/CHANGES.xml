@@ -10,7 +10,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-06-28" version="2.0.176" subversion_revision="5112">
+    <change date="2007-07-01" version="2.0.176" subversion_revision="5116">
+        <revision type="modification" title="Linux-Scheduler wird unter Suse 9.1 kompiliert">
+            <description>
+                <p>
+                    Bisher ist die Linux-Software unter Suse 8.0 kompiliert worden.
+                    Betriebssysteme vor Suse 9.1 werden damit nicht mehr unterstützt.
+                </p>
+            </description>
+        </revision>
+        
         <revision type="modification" title="orders_recoverable='no' unterdrückt nicht mehr Auftragshistorie">
             <description>
                 <p>
@@ -478,7 +487,7 @@
                 <p>
                     Enkel-Prozesse, die der Scheduler nicht kennt und also nicht abbrechen kann,
                     blockierten bislang die Scheduler-Ports.
-                    Jetzt sind diese nicht mehr vererbbar und könenn von den Enkeln auch nicht mehr blockiert werden.
+                    Jetzt sind diese nicht mehr vererbbar und können von den Enkeln auch nicht mehr blockiert werden.
                 </p>
                 <p>
                     Die temporären Dateien für stdout und stderr bleiben dagegen unter Windows in einem solchen Fall stehen.
