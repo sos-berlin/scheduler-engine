@@ -2081,9 +2081,9 @@ void Job::calculate_next_time( const Time& now )
         Time old_next_time = _next_time;
         _next_time = next_time;
 
-        Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
-                                                                                                       _next_time > old_next_time? " > " : " = " ) 
-                                                                        << "old " << old_next_time << "\n" );
+        //Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+        //                                                                                               _next_time > old_next_time? " > " : " = " ) 
+        //                                                                << "old " << old_next_time << "\n" );
     }
 }
 

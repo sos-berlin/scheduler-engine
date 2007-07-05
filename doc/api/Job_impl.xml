@@ -106,7 +106,7 @@
             <com.type type="bool"/>
             <description>
                 <code>false</code> beendet die Task.
-                Der Scheduler setzt mit spooler_exit().
+                Der Scheduler setzt mit 
                 <scheduler_method class="Job_impl" method="spooler_exit"/> fort.
                 Wenn die Task einen Auftrag verarbeiten soll, wird die Task mit Fehler beendet,
                 was den Job stoppt (wenn nicht

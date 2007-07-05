@@ -14,8 +14,8 @@
         <revision type="modification" title="Linux-Scheduler wird unter Suse 9.1 kompiliert">
             <description>
                 <p>
+                    Die ausgelieferten Binär-Dateien laufen jetzt unter Suse ab Version 9.1 (bisher 8.0).
                     Bisher ist die Linux-Software unter Suse 8.0 kompiliert worden.
-                    Betriebssysteme vor Suse 9.1 werden damit nicht mehr unterstützt.
                 </p>
             </description>
         </revision>

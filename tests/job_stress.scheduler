@@ -19,13 +19,12 @@
 
         <jobs>
 
-
-            <job name="javascript">
+            <job name="javascript" tasks="1">
         
                 <script language="JavaScript">
         <![CDATA[
 
-function spooler_process() 
+function spooler_init() 
 {               
     spooler_job.start();
     return false;
@@ -39,6 +38,11 @@ function spooler_process()
             </job>
 
         </jobs>
+
+        <commands>
+            <!--start_job job="javascript"/>
+            <start_job job="javascript"/-->
+        </commands>
         
     </config>
 </spooler>

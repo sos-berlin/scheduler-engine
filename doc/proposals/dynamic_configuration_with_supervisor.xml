@@ -18,10 +18,10 @@
     </p>
     <ul>
         <li>
-            <scheduler_a href="file_based_commands.xml"/>
+            <scheduler_a href="dynamic_configuration_commands.xml"/>
         </li>
         <li>
-            <scheduler_a href="file_based_configuration.xml"/>
+            <scheduler_a href="dynamic_configuration.xml"/>
         </li>
         <li>
             <scheduler_a href="directories.xml"/>
@@ -30,7 +30,7 @@
 
     <p>
         Der Supervisor kann die Dateien der 
-        <scheduler_a href="file_based_configuration.xml">dateibasierten Konfiguration</scheduler_a>
+        <scheduler_a href="dynamic_configuration.xml">dateibasierten Konfiguration</scheduler_a>
         an mehrere Scheduler verteilen.
     </p>
 

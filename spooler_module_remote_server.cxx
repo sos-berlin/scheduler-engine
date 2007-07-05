@@ -102,7 +102,7 @@ void Com_remote_module_instance_server::Class_data::initialize()
     string stdin_text = File( STDIN_FILENO ).read_all();
     if( stdin_text != "" )
     {
-        Z_LOG2( "joacim", __FUNCTION__ << " STDIN: " << stdin_text << "\n" );
+        //Z_LOG2( "joacim", __FUNCTION__ << " STDIN: " << stdin_text << "\n" );
         
         _stdin_dom_document.load_xml( stdin_text );
 
@@ -280,10 +280,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             }
         }
 
-        Z_LOG2( "joacim", __FUNCTION__ << " java_class_path=" << java_class_path << "\n" );;
-        Z_LOG2( "joacim", __FUNCTION__ << " java_work_dir  =" << java_work_dir << "\n" );;
-        Z_LOG2( "joacim", __FUNCTION__ << " java_options   =" << java_options << "\n" );;
-        Z_LOG2( "joacim", __FUNCTION__ << " javac          =" << javac << "\n" );;
+        //Z_LOG2( "joacim", __FUNCTION__ << " java_class_path=" << java_class_path << "\n" );;
+        //Z_LOG2( "joacim", __FUNCTION__ << " java_work_dir  =" << java_work_dir << "\n" );;
+        //Z_LOG2( "joacim", __FUNCTION__ << " java_options   =" << java_options << "\n" );;
+        //Z_LOG2( "joacim", __FUNCTION__ << " javac          =" << javac << "\n" );;
 
         _server->_module->init();
       //_server->_module->set_source_only( _server->_module->_source );

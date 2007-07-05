@@ -559,7 +559,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 // Wir haben nicht mehr als 20s: Das ist eigentlich zu kurz. STOP_PENDING gibt eine kleine Gnadenfrist. 2006-06-19
                 pending_timed_out = false;
-                spooler_ptr->cmd_terminate( false, terminate_timeout );   // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.
+                spooler_ptr->cmd_terminate( false, terminate_timeout );   // Shutdown des Clusters  (nicht mehr: // Kein shutdown des Clusters, ein anderer Rechner soll übernehmen.)
                 set_service_status( 0, SERVICE_STOP_PENDING );
                 result = NO_ERROR;  
                 break;

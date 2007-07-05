@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Dateibasierte Konfiguration: Scheduler-Objekte in eigenen XML-Dateien"
+    title               = "Dynamische Konfiguration: Scheduler-Objekte in eigenen XML-Dateien"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"
@@ -16,13 +16,13 @@
     </p>
     <ul>
         <li>
-            <scheduler_a href="file_based_commands.xml"/>
+            <scheduler_a href="dynamic_configuration_commands.xml"/>
         </li>
         <li>
             <scheduler_a href="directories.xml"/>
         </li>
         <li>
-            <scheduler_a href="file_based_configuration_supervisor.xml"/>
+            <scheduler_a href="dynamic_configuration_with_supervisor.xml"/>
         </li>
     </ul>
     <p>

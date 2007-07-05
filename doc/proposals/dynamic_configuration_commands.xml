@@ -16,14 +16,14 @@
     </p>
     <ul>
         <li>
-            <scheduler_a href="file_based_configuration.xml"/>
+            <scheduler_a href="dynamic_configuration.xml"/>
         </li>
         <li>
             <scheduler_a href="directories.xml"/>
         </li>
     </ul>
     <p>
-        Für die <scheduler_a href="file_based_configuration.xml">dateibasierte Konfiguration</scheduler_a>
+        Für die <scheduler_a href="dynamic_configuration.xml">dateibasierte Konfiguration</scheduler_a>
         werden zunächst die bestehenden Kommandos erweitert und angepasst,
         so dass sie die benötigte Funktionalität bereitstellen.
         Jedes Ändern und Löschen einer Datei soll wie ein Kommando wirken.
@@ -264,7 +264,7 @@
         die Kommandos <scheduler_element name="add_order"/> und <scheduler_element name="remove_order"/>.
     </p>
     <p>
-        Für die <scheduler_a href="file_based_configuration.xml">dateibasierte Konfiguration</scheduler_a>
+        Für die <scheduler_a href="dynamic_configuration.xml">dateibasierte Konfiguration</scheduler_a>
         sind die Kommandos bereits realisiert.
     </p>
 

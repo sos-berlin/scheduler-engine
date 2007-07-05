@@ -59,7 +59,6 @@ function spooler_process()
 
         <commands>
             <add_order job_chain="order_params.scheduler" id="1" replace="yes"/>
-            <add_order job_chain="order_params.scheduler" id="1" replace="yes"/>
         </commands>
 
     </config>
