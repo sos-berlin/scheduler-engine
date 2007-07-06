@@ -43,8 +43,14 @@
 
     <h2>Dateien für Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren</h2>
 
-    <p style="margin-bottom: 1em;">
+    <p>
         Hinzugefügte, geänderte und gelöschte Dateien lösen entsprechende Kommandos aus.
+    </p>
+    <p style="margin-bottom: 1em;">
+        <i>
+            Die Kommandos zum Löschen werden nicht also solche nicht realisiert.
+            Die Kommandos stehen symbolisch für die im Scheduler zu realisierenden internen Funktionen.
+        </i>
     </p>
     <table cellspacing="0" cellpadding="0">
         <tr>
@@ -228,6 +234,14 @@
         </li>
     </ul>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <p color="red">
+        Was passiert, wenn eine Objekt mit einem Kommando gelöscht wird?
+        Das sollte nicht möglich sein. 
+        Dateibasierte Objekte sollten nur durchs Löschen der Datei entfernt werden können.
+    </p>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </description>

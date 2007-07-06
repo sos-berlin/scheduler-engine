@@ -644,6 +644,19 @@ int Process_module_instance::termination_signal()
 #   endif
 }
 
+//--------------------------------------------------------Process_module_instance::try_delete_files
+
+bool Process_module_instance::try_delete_files()
+{
+    bool result = true;
+
+  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink();
+    if( _stdout_file.is_to_be_unlinked() )  result &= _stdout_file.try_unlink();
+    if( _stderr_file.is_to_be_unlinked() )  result &= _stderr_file.try_unlink();
+
+    return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

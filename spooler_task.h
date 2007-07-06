@@ -55,6 +55,7 @@ struct Task : Object,
         s_exit,                 // spooler_exit
         s_release,              // Release()
         s_ended,                // 
+        s_deleting_files,
         s_closed,               // close() gerufen, Object Task ist nicht mehr zu gebrauchen
         s__max
     };
@@ -289,6 +290,7 @@ struct Task : Object,
     Time                       _idle_since;
     Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;
+    double                     _deleting_files_delay;
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;

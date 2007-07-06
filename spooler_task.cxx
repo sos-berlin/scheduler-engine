@@ -742,6 +742,7 @@ string Task::state_name( State state )
         case s_exit:                        return "exit";
         case s_release:                     return "release";
         case s_ended:                       return "ended";
+        case s_deleting_files:              return "deleting_files";
         case s_closed:                      return "closed";
         default:                            return as_string( (int)state );
     }
@@ -1431,18 +1432,47 @@ bool Task::do_something()
                             else
                             {
                                 operation__end();
-                                finish();
 
                                 // Gesammelte eMail senden, wenn collected_max erreicht:
                                 //Time log_time = _log->collect_end();
                                 //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
-                                set_state( s_closed );
+                                set_state( s_deleting_files );
+                                //set_state( s_closed );
 				
                                 loop = true;
                             }
 
                             something_done = true;
+                            break;
+                        }
+
+
+                        case s_deleting_files:
+                        {
+                            bool ok = !_module_instance  ||  _module_instance->try_delete_files();
+                            if( !ok )
+                            {
+                                if( _end  &&  _deleting_files_delay )   // Bei cmd_end() nur einmal warten
+                                {
+                                    ok = true;
+                                }
+                                else
+                                {
+                                    if( !_deleting_files_delay )  _deleting_files_delay = 0.1;
+                                    _next_time = Time::now() + _deleting_files_delay;
+                                    _deleting_files_delay = 1.0;
+                                }
+                            }
+                            
+                            if( ok )
+                            {
+                                _module_instance = NULL;
+                                finish();
+                                set_state( s_closed );
+                                loop = true;
+                            }
+                            
                             break;
                         }
 
@@ -2197,7 +2227,7 @@ void Module_task::do_close__end()
         _log->log_file( _module_instance->stdout_path(), "stdout:" );
         _log->log_file( _module_instance->stderr_path(), "stderr:" );
 
-        _module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
+        //_module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }
 }
 

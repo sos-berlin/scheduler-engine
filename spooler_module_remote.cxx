@@ -153,6 +153,14 @@ File_path Remote_module_instance_proxy::stderr_path()
     return _process? _process->stderr_path() : File_path();
 }
 
+//---------------------------------------------------Remote_module_instance_proxy::try_delete_files
+
+bool Remote_module_instance_proxy::try_delete_files()
+{
+    return _process? _process->try_delete_files()
+                   : true;
+}
+
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
 
 void Remote_module_instance_proxy::add_obj( IDispatch* object, const string& name )

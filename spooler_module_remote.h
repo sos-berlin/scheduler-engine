@@ -97,6 +97,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     int                         termination_signal          ();
     File_path                   stdout_path                 ();
     File_path                   stderr_path                 ();
+    bool                        try_delete_files            ();
     string                      process_name                () const;
 
     Fill_zero                  _zero_;

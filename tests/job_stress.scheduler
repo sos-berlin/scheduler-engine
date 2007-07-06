@@ -26,6 +26,9 @@
 
 function spooler_init() 
 {               
+    var shell = new ActiveXObject( "wscript.shell" );
+    shell.run( "notepad" );
+    
     spooler_job.start();
     return false;
 }

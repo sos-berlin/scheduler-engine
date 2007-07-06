@@ -2841,7 +2841,7 @@
 
     <xsl:template match="task/@state">
         <xsl:choose>
-            <xsl:when test=". = 'suspended' or . = 'waiting_for_process'">
+            <xsl:when test=". = 'suspended' or . = 'waiting_for_process' or . = 'deleting_files'">
                 <span class="task_error">
                     <xsl:value-of select="."/>
                 </span>

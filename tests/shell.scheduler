@@ -78,6 +78,7 @@ function spooler_process_after( return_value ) {
             <job name="shell">
                 <script language="shell">#! /bin/bash -v
 echo Hallo
+start notepad
 exit 37
                 </script>
                 <run_time once="yes"/>

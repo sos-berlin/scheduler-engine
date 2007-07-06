@@ -710,6 +710,25 @@ File_path Process::stderr_path()
     return c? c->stderr_path() : _remote_stderr_file.path();
 }
 
+//---------------------------------------------------------------------Process::delete_files__start
+
+bool Process::try_delete_files()
+{
+    bool result = true;
+
+    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
+    {
+        result = c->try_delete_files();
+    }
+    else
+    {
+        if( _remote_stdout_file.is_to_be_unlinked() )  result &= _remote_stdout_file.try_unlink();
+        if( _remote_stderr_file.is_to_be_unlinked() )  result &= _remote_stderr_file.try_unlink();
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------Process::dom_element
 
 xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const Show_what& )
