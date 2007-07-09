@@ -10,6 +10,27 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-07-09" version="2.0.177" subversion_revision="5119">
+        <revision type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
+            <description>
+                <p>
+                    Nur Windows:
+                    Der Scheduler verzögert das Ende einer Task solange,
+                    bis die für <code>stdin</code>, <code>stdout</code> und <code>stderr</code> 
+                    angelegten temporären Dateien löschbar sind.
+                    Die Dateien können von Enkelprozessen, die der Task-Prozess gestartet hat 
+                    und die nach Task-Ende noch weiterlaufen, blockiert sein.
+                    Oder ein Virenscanner hält die Dateien noch einen kurzen Moment fest.
+                    Währenddessen ist die Task im Zustand <code>deleting_files</code>.
+                    Mit <scheduler_element name="kill_task"/> kann das Ende der Task erzwungen werden.
+                    Die Dateien bleiben dann stehen.
+                </p>
+                <scheduler_message level="info" code="SCHEDULER-876"/>
+                <scheduler_message level="info" code="SCHEDULER-877"/>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-07-01" version="2.0.176" subversion_revision="5116">
         <revision type="modification" title="Linux-Scheduler wird unter Suse 9.1 kompiliert">
             <description>

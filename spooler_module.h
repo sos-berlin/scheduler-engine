@@ -255,7 +255,8 @@ struct Module_instance : Object
     virtual int                 termination_signal          ()                                      { return 0; }
     virtual File_path           stdout_path                 ()                                      { return File_path(); }
     virtual File_path           stderr_path                 ()                                      { return File_path(); }
-    virtual bool                try_delete_files            ()                                      { return true; }
+    virtual bool                try_delete_files            ( Has_log* )                            { return true; }
+    virtual std::list<File_path> undeleted_files            ()                                      { return std::list<File_path>(); }
     virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
 
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }

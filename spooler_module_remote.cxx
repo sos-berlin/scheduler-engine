@@ -155,10 +155,21 @@ File_path Remote_module_instance_proxy::stderr_path()
 
 //---------------------------------------------------Remote_module_instance_proxy::try_delete_files
 
-bool Remote_module_instance_proxy::try_delete_files()
+bool Remote_module_instance_proxy::try_delete_files( Has_log* log )
 {
-    return _process? _process->try_delete_files()
+    return _process? _process->try_delete_files( log )
                    : true;
+}
+
+//----------------------------------------------------Remote_module_instance_proxy::undeleted_files
+
+list<File_path> Remote_module_instance_proxy::undeleted_files()
+{
+    list<File_path> result;
+
+    if( _process )  result = _process->undeleted_files();
+
+    return result;
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj

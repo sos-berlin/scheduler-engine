@@ -333,6 +333,16 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
     return false;
 }
 
+//-------------------------------------------------------------------Task_subsystem::kill_all_tasks
+
+void Task_subsystem::end_all_tasks( Task::End_mode end_mode )
+{
+    FOR_EACH_TASK( it, task )
+    {
+        task->cmd_end( end_mode );
+    }
+}
+
 //----------------------------------------------------------Task_subsystem::increment_running_tasks
 
 void Task_subsystem::increment_running_tasks()

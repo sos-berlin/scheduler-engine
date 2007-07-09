@@ -488,9 +488,12 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             int     console_line_length = 0;
             double  step = 1.0;
             
-            while( Time::now() < until - step )
+            while(1)
             {
-                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( step * 1000 ) ), QS_ALLINPUT ); 
+                double remaining = ( until - step ) - Time::now();
+                if( remaining < 0.7 )  break;
+
+                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( remaining * 1000 ) ), QS_ALLINPUT ); 
                 if( ret != WAIT_TIMEOUT )  break;
 
                 Time now = Time::now();

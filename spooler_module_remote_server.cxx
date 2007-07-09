@@ -11,6 +11,10 @@
 #include "spooler_module_remote_server.h"
 #include "../kram/sos_java.h"
 
+#ifdef Z_WINDOWS
+#   include <io.h>
+#endif
+
 
 namespace sos {
 namespace scheduler {
@@ -109,6 +113,9 @@ void Com_remote_module_instance_server::Class_data::initialize()
         _task_process_element = _stdin_dom_document.documentElement();
         if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( __FUNCTION__, "<task_process> expected" );
     }
+
+    //::close( STDIN_FILENO );  // 2007-07-09 Brauchen wir nicht mehr, also schließen, bevor ein Enkelprozess den Handle erbt und dann die Datei nicht löschbar ist.
+    //STDIN_FILENO neu belegen (mit dup()?), damit nicht irgend ein open() STDIN_FILENO zurückliefert. Windows: "nul:", Unix: "/dev/null".
 }
 
 //------------Com_remote_module_instance_server::Stdout_stderr_handler::on_thread_has_received_data

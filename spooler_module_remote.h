@@ -97,7 +97,8 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     int                         termination_signal          ();
     File_path                   stdout_path                 ();
     File_path                   stderr_path                 ();
-    bool                        try_delete_files            ();
+    bool                        try_delete_files            ( Has_log* );
+    std::list<File_path>        undeleted_files             ();
     string                      process_name                () const;
 
     Fill_zero                  _zero_;

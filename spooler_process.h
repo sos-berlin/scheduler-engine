@@ -117,7 +117,8 @@ struct Process : zschimmer::Object, Scheduler_object
     int                         termination_signal          ();
     File_path                   stderr_path                 ();
     File_path                   stdout_path                 ();
-    bool                        try_delete_files            ();
+    bool                        try_delete_files            ( Has_log* );
+    std::list<file::File_path>  undeleted_files             ();
     bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
     bool                        is_remote_host              () const;
 

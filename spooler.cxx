@@ -2491,6 +2491,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
             {
                 _assert_is_active = false;
 
+                if( _task_subsystem )  _task_subsystem->end_all_tasks( Task::end_kill_immediately );
                 kill_all_processes();
                 
                 _log->error( message_string( _cluster_configuration._demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
@@ -2569,6 +2570,7 @@ void Spooler::run_check_ctrl_c()
                 _log->warn( m );
                 if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
+                if( _task_subsystem )  _task_subsystem->end_all_tasks( Task::end_kill_immediately );
                 kill_all_processes();
                 set_ctrl_c_handler( true );
                 ctrl_c_pressed_handled = 2;
@@ -2843,6 +2845,7 @@ void Spooler::abort_now( bool restart )
         try_kill_process_immediately( _pid );
         _exit( exit_code );
 #   endif
+
 }
 
 //----------------------------------------------------------------------Spooler::kill_all_processes
@@ -3320,7 +3323,7 @@ int object_server( int argc, char** argv )
     server.register_class( spooler_com::CLSID_Spooler_proxy                , Com_spooler_proxy                ::Create_instance );
   //server.register_class( spooler_com::CLSID_Xslt_stylesheet              , Xslt_stylesheet                  ::Create_instance );
 
-    return server.main( argc, argv, true );
+    return server.main( argc, argv );
 }
                    
 //-------------------------------------------------------------------------------------------------

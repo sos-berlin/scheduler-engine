@@ -34,7 +34,7 @@ Process_module_instance::~Process_module_instance()
 
     if( _stdout_file.is_to_be_unlinked() )
         _stdout_file.try_unlink( _module? &_module->_log : NULL );      // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. 
-                                                                        // Das soll kein Task-Problem sein!
+                                                                        // Das soll kein Task-Problem sein! Siehe auch Task::do_something, s_deleting_files
     if( _stderr_file.is_to_be_unlinked() )
         _stderr_file.try_unlink( _module? &_module->_log : NULL );      
 }
@@ -646,13 +646,26 @@ int Process_module_instance::termination_signal()
 
 //--------------------------------------------------------Process_module_instance::try_delete_files
 
-bool Process_module_instance::try_delete_files()
+bool Process_module_instance::try_delete_files( Has_log* log )
 {
     bool result = true;
 
-  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink();
-    if( _stdout_file.is_to_be_unlinked() )  result &= _stdout_file.try_unlink();
-    if( _stderr_file.is_to_be_unlinked() )  result &= _stderr_file.try_unlink();
+  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink( log );
+    if( _stdout_file.is_to_be_unlinked() )  result &= _stdout_file.try_unlink( log );
+    if( _stderr_file.is_to_be_unlinked() )  result &= _stderr_file.try_unlink( log );
+
+    return result;
+}
+
+//---------------------------------------------------------Process_module_instance::undeleted_files
+
+list<File_path> Process_module_instance::undeleted_files()
+{
+    list<File_path> result;
+
+  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink( log );
+    if( _stdout_file.is_to_be_unlinked() )  result.push_back( _stdout_file.path() );
+    if( _stderr_file.is_to_be_unlinked() )  result.push_back( _stderr_file.path() );
 
     return result;
 }

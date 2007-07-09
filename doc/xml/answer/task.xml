@@ -141,6 +141,15 @@
                         </td>
                     </tr>
                     <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="deleting_files"/><code>state="deleting_files"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Wenn die temporären Dateien für <code>stdin</code>, <code>stdout</code> und <code>stderr</code>
+                            sich nicht löschen lassen, verharrt die Task in diesem Zustand.
+                            Mit <scheduler_element name="kill_task"/> kann das Ende der Task erzwungen werden.
+                            Die Dateien bleiben dann stehen.
+                        </td>
+                    </tr>
+                    <tr>
                         <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="closed"/><code>state="closed"</code></td>
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Endzustand.

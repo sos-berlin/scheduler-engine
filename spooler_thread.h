@@ -39,6 +39,7 @@ struct Task_subsystem: Object, Subsystem
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
 
     bool                        try_to_free_process         ( Job*, Process_class*, const Time& now );
+    void                        end_all_tasks               ( Task::End_mode = Task::end_normal );
 
     // Für andere Threads:
     bool                        is_ready_for_termination    ();

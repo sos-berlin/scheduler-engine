@@ -667,6 +667,9 @@
     <register_keyword_display><code>delayed_after_error_task=</code></register_keyword_display>
     <register_entry register_file='xml/answer/task.xml#attribute_delayed_after_error_task' register_title='&lt;task&gt; (Antwort)'  register_keyword='delayed_after_error_task' type='definition'/>
 </register_keyword>
+<register_keyword keyword='deleting_files'>
+    <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='deleting_files'/>
+</register_keyword>
 <register_keyword keyword='dequeue'>
     <register_keyword_display><code>dequeue()</code></register_keyword_display>
     <register_entry register_file='api/Mail.xml#method__dequeue' register_title='Mail.dequeue()' register_keyword='dequeue()' type='definition'/>
@@ -1555,6 +1558,7 @@
     <register_entry register_file='order.xml#use_element__kill_task' register_title='Aufträge'  register_keyword='kill_task'/>
     <register_entry register_file='xml.xml#use_element__kill_task' register_title='Alle XML-Elemente'  register_keyword='kill_task'/>
     <register_entry register_file='xml/answer/subprocesses.xml#use_element__kill_task' register_title='&lt;subprocesses&gt; (Antwort)'  register_keyword='kill_task'/>
+    <register_entry register_file='xml/answer/task.xml#use_element__kill_task' register_title='&lt;task&gt; (Antwort)'  register_keyword='kill_task'/>
     <register_entry register_file='xml/kill_task.xml#' register_title='&lt;kill_task&gt; (Kommando)'  register_keyword='kill_task' type='definition'/>
 </register_keyword>
 <register_keyword keyword='killed'>

@@ -3838,6 +3838,18 @@
                 <title>Order_id_space has been closed because '<p1>job_chain</p1>' has been removed</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-876" weight="info" object="Task">
+            <text xml:lang="en">
+                <title>Temporary files cannot be deleted. Still trying ...,  <p1>paths</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-877" weight="info" object="Task">
+            <text xml:lang="en">
+                <title>Temporary files have been deleted now</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

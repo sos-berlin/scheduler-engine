@@ -50,7 +50,8 @@ struct Process_module_instance : Module_instance
     int                         termination_signal          ();
     File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
-    bool                        try_delete_files            ();
+    bool                        try_delete_files            ( Has_log* );
+    std::list<File_path>        undeleted_files             ();
 
   private:
     void                        close_handle                ();

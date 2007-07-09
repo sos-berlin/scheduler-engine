@@ -712,18 +712,37 @@ File_path Process::stderr_path()
 
 //---------------------------------------------------------------------Process::delete_files__start
 
-bool Process::try_delete_files()
+bool Process::try_delete_files( Has_log* log )
 {
     bool result = true;
 
     if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
     {
-        result = c->try_delete_files();
+        result = c->try_delete_files( log );
     }
     else
     {
         if( _remote_stdout_file.is_to_be_unlinked() )  result &= _remote_stdout_file.try_unlink();
         if( _remote_stderr_file.is_to_be_unlinked() )  result &= _remote_stderr_file.try_unlink();
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Process::undeleted_files
+
+list<File_path> Process::undeleted_files()
+{
+    list<File_path> result;
+
+    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
+    {
+        result = c->undeleted_files();
+    }
+    else
+    {
+        if( _remote_stdout_file.is_to_be_unlinked() )  result.push_back( _remote_stdout_file.path() );
+        if( _remote_stderr_file.is_to_be_unlinked() )  result.push_back( _remote_stderr_file.path() );
     }
 
     return result;
