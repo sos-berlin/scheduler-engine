@@ -442,7 +442,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-873", "Job_chains $2 share order IDs because '$1' has been removed" },
     { "SCHEDULER-874", "Order_id_space has been closed" },
     { "SCHEDULER-875", "Order_id_space has been closed because '$1' has been removed" },
-    { "SCHEDULER-876", "Temporary files $1 (for stdin, stdout, stderr) cannot be deleted. Still trying ..." },
+    { "SCHEDULER-876", "Temporary files cannot be deleted. Still trying ...,  $1" },
     { "SCHEDULER-877", "Temporary files have been deleted now" },
     {}
 };
