@@ -422,6 +422,7 @@ void Communication::Connection::do_close()
 
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
     {
+        Z_LOG2( "socket.shutdown", "shutdown(" << _read_socket << ",SHUT_WR)\n" );
         shutdown( _read_socket, SHUT_WR );
 
         Z_LOG2( "socket.close", "close(" << _read_socket << ")\n" );
@@ -685,19 +686,21 @@ void Communication::close( double wait_time )
     {
         //bool responding = false;
 
-        Connection_list::iterator c = _connection_list.begin();
-        while( c != _connection_list.end() )
+        while( !_connection_list.empty() )
         {
+            Connection_list::iterator c = _connection_list.begin();
+
             ptr<Connection> connection = *c;
             c++;
             
             connection->set_linger( true, 1 );     // 1: Eine Sekunde Zeit, um asynchron (non-blocking) die Verbindung abzubauen. sleep(2) in spooler.cxx!
-                                                // 0: close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. D
+                                                // 0: close() bricht Verbindung ab (jedenfalls unter Unix). Schickt RST. 
                                                 // Damit bleibt beim Neustart Windows-Schedulers der Browser nicht kleben (der kriegt den Verbindungsabbau nicht mit)
 
-            //connection->terminate();    // Kann Connection aus _connection_list entfernen.
-            connection->_connection_state = Connection::s_closing;
-            connection->async_continue();
+            connection->remove_me();
+            assert( _connection_list.empty()  ||  *_connection_list.begin() != connection );  // connection muss jetzt gelöscht sein
+            //connection->_connection_state = Connection::s_closing;
+            //connection->async_continue();
             //if( connection->_responding )
             //{
             //    responding = true;
@@ -717,6 +720,7 @@ void Communication::close( double wait_time )
 
     _connection_list.clear();
 
+    sleep( wait_time );
     _terminate = true;
 }
 

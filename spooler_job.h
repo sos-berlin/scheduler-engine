@@ -241,7 +241,7 @@ struct Job : Object,
     void                        set_delay_order_after_setback( int setbacks, const string& delay );
     void                        set_delay_order_after_setback( int setbacks, const Time& delay )    { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
-    void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
+    void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks="+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     bool                        request_order               ( const Time& now, const string& cause );   // Fordert einen Auftrag für die _order_queue an
     void                        withdraw_order_request      ();

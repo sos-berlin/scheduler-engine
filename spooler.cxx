@@ -1906,7 +1906,7 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
     _communication.finish_responses( 5.0 );
-    _communication.close( 5.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
+    _communication.close( 3.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
     _db->spooler_stop();
 
@@ -2802,7 +2802,10 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
 
         kill_all_processes();
         _log->close(); 
-        _communication.close( 0.0 );   // Damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+
+     //?_communication.finish_responses( 5.0 );
+        _communication.close( 3.0 );    // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden. 
+                                        // close(), damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
     } 
     catch( ... ) {}
 

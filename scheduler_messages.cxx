@@ -21,7 +21,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-110", "Unknown task state: $1" },
     { "SCHEDULER-113", "Unexpected XML tag: $1" },
     { "SCHEDULER-115", "Missing XML configuration file, option -config=FILENAME.XML" },
-    { "SCHEDULER-116", "XML configuration contains no <config -spooler-id=$1> element" },
+    { "SCHEDULER-116", "XML configuration contains no <config spooler_id=$1> element" },
     { "SCHEDULER-117", "Cannot use different scripting languages in the same scripting engine" },
     { "SCHEDULER-119", "There is no security level \"$1\"" },
     { "SCHEDULER-120", "Script has reported an error: $1" },

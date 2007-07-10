@@ -190,10 +190,10 @@
 
         <message code="SCHEDULER-116">
             <text xml:lang="de">
-                <title>XML-Konfiguration enthält kein Element &lt;config -spooler-id=<p1/>></title>
+                <title>XML-Konfiguration enthält kein Element &lt;config spooler_id=<p1/>></title>
             </text>
             <text xml:lang="en">
-                <title>XML configuration contains no &lt;config -spooler-id=<p1/>> element</title>
+                <title>XML configuration contains no &lt;config spooler_id=<p1/>> element</title>
             </text>
         </message>
 
