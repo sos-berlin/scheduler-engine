@@ -27,7 +27,7 @@ spooler_log.info( "process_class.name=" + process_class.name );
 spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
 process_classes.add_process_class( process_class );
 
-process_classes.process_class( "Istanbul" ).remove();
+//process_classes.process_class( "Istanbul" ).remove();
 
             ]]>
         </script>
