@@ -1393,7 +1393,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "backup-precedence"      ) )  _cluster_configuration._backup_precedence      = opt.as_int();
             else
-            if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._are_orders_distributed = opt.set();
+            if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._orders_are_distributed = opt.set();
             else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
             else
@@ -1689,7 +1689,7 @@ void Spooler::start()
 
     // Datenbank
 
-    if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
+    if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
         //if( !_need_db )
@@ -1720,7 +1720,7 @@ void Spooler::start()
 
     if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_initialized );
 
-    if( _cluster_configuration._are_orders_distributed || _cluster_configuration._demand_exclusiveness ) 
+    if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         start_cluster();
     }
@@ -1813,7 +1813,7 @@ bool Spooler::is_active()
 
 bool Spooler::are_orders_distributed()
 {
-    return _cluster_configuration._are_orders_distributed;
+    return _cluster_configuration._orders_are_distributed;
 }
 
 //-----------------------------------------------------------Spooler::assert_are_orders_distributed
@@ -1839,13 +1839,13 @@ bool Spooler::has_exclusiveness()
 
 //----------------------------------------------------------------Spooler::assert_has_exclusiveness
 
-void Spooler::assert_has_exclusiveness( const string& text )
-{
-    if( !has_exclusiveness() )
-    {
-        z::throw_xc( "SCHEDULER-366", text );
-    }
-}
+//void Spooler::assert_has_exclusiveness( const string& text )
+//{
+//    if( !has_exclusiveness() )
+//    {
+//        z::throw_xc( "SCHEDULER-366", text );
+//    }
+//}
 
 //------------------------------------------------------------------------------------Spooler::stop
 

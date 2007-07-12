@@ -486,15 +486,17 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         if( _spooler  &&  _spooler->_print_time_every_second )
         {
             int     console_line_length = 0;
-            double  step = 1.0;
+            double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
             
             while(1)
             {
-                double remaining = ( until - step ) - Time::now();
+                double remaining = until - Time::now();
                 if( remaining < 0.7 )  break;
 
-                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( remaining * 1000 ) ), QS_ALLINPUT ); 
+                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
                 if( ret != WAIT_TIMEOUT )  break;
+
+                step = 1.0;
 
                 Time now = Time::now();
                 Time rest = until - now;

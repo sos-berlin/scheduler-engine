@@ -40,6 +40,39 @@ Security::Level Security::as_level( const string& name )
     z::throw_xc( "SCHEDULER-119", name ); return seclev_none;
 }
 
+//--------------------------------------------------------------------------------Security::set_dom
+
+void Security::set_dom( const xml::Element_ptr& security_element ) 
+{ 
+    if( !security_element )  return;
+
+    bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ), true );
+
+    DOM_FOR_EACH_ELEMENT( security_element, e )
+    {
+        if( e.nodeName_is( "allowed_host" ) )
+        {
+            string          hostname = e.getAttribute( "host" );
+            set<Ip_address> host_set;
+
+            try 
+            {
+                host_set = Ip_address::get_host_set_by_name( hostname );
+            }
+            catch( exception& x )
+            {
+                _spooler->log()->warn( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
+                if( !ignore_unknown_hosts )  throw;
+            }
+            
+            FOR_EACH( set<Ip_address>, host_set, h )
+            {
+                _host_map[ *h ] = as_level( e.getAttribute( "level" ) );
+            }
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

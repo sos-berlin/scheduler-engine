@@ -161,7 +161,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_backup_member;
     int                        _backup_precedence;
     bool                       _demand_exclusiveness;
-    bool                       _are_orders_distributed;
+    bool                       _orders_are_distributed;
     bool                       _suppress_watchdog_thread;
     int                        _heart_beat_timeout;         // Großzügigere Frist für den Herzschlag, nach der der Scheduler für tot erklärt wird
     int                        _heart_beat_own_timeout;     // < _heart_beat_timeout      Zur eigenen Prüfung, etwas kürzer als _heart_beat_timeout
@@ -515,7 +515,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
             if( _is_dead  &&  !_is_db_dead )
             {
-                log()->warn( message_string( "SCHEDULER-823", _member_id, now - _last_heart_beat_detected ) );     // Wiederauferstanden?
+                log()->warn( message_string( "SCHEDULER-823", _member_id ) ); //, max( 0, now - _last_heart_beat_detected ) ) );     // Wiederauferstanden?
                 on_resurrection();
             }
 
@@ -697,7 +697,7 @@ void Cluster_member::deactivate_and_release_orders_after_death()
             mark_as_inactive( mai_mark_inactive_record_as_dead );   // ruft free_occupied_orders()
         }
         else    
-        if( _cluster->_are_orders_distributed )
+        if( _cluster->_orders_are_distributed )
         {
             free_occupied_orders();
         }
@@ -724,7 +724,7 @@ bool Cluster_member::mark_as_inactive( Mark_as_inactive_option option )
     {
         _cluster->lock_member_records( &ta, _member_id, _cluster->empty_member_id() );
 
-        if( _cluster->_are_orders_distributed )
+        if( _cluster->_orders_are_distributed )
             free_occupied_orders( &ta );
 
         sql::Update_stmt update ( ta.database_descriptor(), _spooler->_clusters_tablename );
@@ -1615,7 +1615,7 @@ void Cluster::set_configuration( const Configuration& c )
     _is_backup_member             = my_configuration._is_backup_member;
     _backup_precedence            = my_configuration._backup_precedence;
     _demand_exclusiveness         = my_configuration._demand_exclusiveness;
-    _are_orders_distributed       = my_configuration._are_orders_distributed;
+    _orders_are_distributed       = my_configuration._orders_are_distributed;
     _suppress_watchdog_thread     = my_configuration._suppress_watchdog_thread;
     _heart_beat_timeout           = my_configuration._heart_beat_timeout;
     _heart_beat_own_timeout       = my_configuration._heart_beat_own_timeout;
@@ -1654,12 +1654,27 @@ bool Cluster::start()
     create_table_when_needed();
 
 
-    // Datenbanksätze einrichten
+    // Zustand prüfen
+
+    assert_database_integrity( __FUNCTION__ );
+
+
+    check_schedulers_heart_beat();
+    if( _my_scheduler )
+    {
+        _my_scheduler->log()->warn( message_string( "SCHEDULER-879" ) );
+        _my_scheduler->mark_as_inactive( Cluster_member::mai_delete_my_inactive_record );
+    }
+
 
     _is_active = !_demand_exclusiveness;
 
+
+    // Datenbanksätze einrichten
+
     if( _demand_exclusiveness )  check_empty_member_record();
-    assert_database_integrity( __FUNCTION__ );
+
+
 
     insert_member_record();
 
@@ -1668,8 +1683,7 @@ bool Cluster::start()
     //delete_old_member_records( (Transaction*)NULL );
 
 
-    // Informationen über die anderen Scheduler einholen
-
+    // Informationen über alle Scheduler (auch uns) einholen
     check_schedulers_heart_beat();
 
     if( !_my_scheduler )  
@@ -1988,7 +2002,7 @@ bool Cluster::heartbeat_member_record()
         update.and_where_condition( "member_id"      , my_member_id()      );
         update.and_where_condition( "last_heart_beat", _db_last_heart_beat );
         update.and_where_condition( "next_heart_beat", _db_next_heart_beat );
-        update.and_where_condition( "command"          , sql::null_value     );
+        update.and_where_condition( "command"        , sql::null_value     );
         update.add_where( S() << " and `active`"    << ( _is_active        ? " is not null" : " is null" ) );
         update.add_where( S() << " and `exclusive`" << ( _has_exclusiveness? " is not null" : " is null" ) );
         bool record_is_updated = ta.try_execute_single( update, __FUNCTION__ );
@@ -2632,7 +2646,7 @@ bool Cluster::set_command_for_all_schedulers_but_me( Transaction* outer_transact
 
         S w;
         w << " and not( `member_id` in (" << sql::quoted( my_member_id()    ) << "," 
-                                                  << sql::quoted( empty_member_id() ) << ") )";
+                                          << sql::quoted( empty_member_id() ) << ") )";
         w << " and `dead` is null";
         if( where_condition != "" )  w << " and " << where_condition;
 
@@ -2831,9 +2845,13 @@ bool Cluster::is_member_allowed_to_start()
 void Cluster::make_cluster_member_id()
 {
     set_my_member_id( S() << _spooler->id_for_db() 
-                          << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() 
-                          << "/" << getpid() 
-                          << "." << ( as_string( 1000000 + (uint64)( double_from_gmtime() * 1000000 ) % 1000000 ).substr( 1 ) ) );  // Mikrosekunden, sechsstellig
+                          << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() );
+
+    // Wenn jeder Scheduler-Lauf eindeutig sein soll (wie bis 2007-07-11, von Andreas Püschel nicht gewünscht)
+    //set_my_member_id( S() << _spooler->id_for_db() 
+    //                      << "/" << _spooler->_complete_hostname << ":" << _spooler->tcp_port() 
+    //                      << "/" << getpid() 
+    //                      << "." << ( as_string( 1000000 + (uint64)( double_from_gmtime() * 1000000 ) % 1000000 ).substr( 1 ) ) );  // Mikrosekunden, sechsstellig
 }
 
 //---------------------------------------------------------------------Cluster::empty_member_record
@@ -2915,7 +2933,7 @@ xml::Element_ptr Cluster::my_member_dom_element( const xml::Document_ptr& docume
 
     if( is_backup()           )  result.setAttribute( "backup"              , "yes" );
     if( _demand_exclusiveness )  result.setAttribute( "demand_exclusiveness", "yes" );
-    if( _are_orders_distributed )  result.setAttribute( "distributed_orders", "yes" );
+    if( _orders_are_distributed )  result.setAttribute( "distributed_orders", "yes" );
     if( _spooler->tcp_port()  )  result.setAttribute( "tcp_port", _spooler->tcp_port() );
     if( _spooler->udp_port()  )  result.setAttribute( "udp_port", _spooler->udp_port() );
 

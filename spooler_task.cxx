@@ -1450,38 +1450,57 @@ bool Task::do_something()
 
                         case s_deleting_files:
                         {
-                            bool ok = true;
+                            bool ok;
 
-                            if( _module_instance )
+                            if( !_module_instance )
                             {
-                                // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. Das soll kein Task-Problem sein!
-                                // Siehe auch ~Process_module_instance
-                                Has_log* my_log = _deleting_files_error? NULL : _job->log();
+                                ok = true;
+                            }
+                            else
+                            {
+                                ok = false;
+                                Time now = Time::now();
 
-                                ok = _module_instance->try_delete_files( my_log );
-                                if( ok )
+                                if( !_trying_deleting_files_until  ||  now >= _next_time )     // do_something() wird zu oft gerufen, deshalb prüfen, ob_next_time erreicht ist.
                                 {
-                                    if( _deleting_files_error )  _log->info( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
-                                }
-                                else
-                                {
-                                    if( !_deleting_files_error )  
-                                    {
-                                        list<File_path> paths = _module_instance->undeleted_files();
-                                        _log->info( message_string( "SCHEDULER-876", join( ", ", paths ) ) );  // Nur beim ersten Mal
-                                    }
+                                    // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. Das soll kein Task-Problem sein!
+                                    // Siehe auch ~Process_module_instance
+                                    Has_log* my_log = NULL; //_trying_deleting_files_until? NULL : _job->log();
 
-                                    if( _end == end_kill_immediately  &&  _deleting_files_error )   // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
+                                    ok = _module_instance->try_delete_files( my_log );
+                                    if( ok )
                                     {
-                                        ok = true;
+                                        if( _trying_deleting_files_until )  
+                                        {
+                                            _log->info( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
+                                            //_job->log()->info( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
+                                        }
                                     }
                                     else
                                     {
-                                        if( !_deleting_files_error )  _deleting_files_delay = 0.1;
-                                        _deleting_files_error = true;
-                                        _next_time = Time::now() + _deleting_files_delay;
-                                        _deleting_files_delay = 1.0;  // Funktioniert nicht, weil do_something() zu oft gerufen wird: min( 2 * _deleting_files_delay, 5.0 );
+                                        if( !_trying_deleting_files_until )  
+                                        {
+                                            list<File_path> paths = _module_instance->undeleted_files();
+                                            _log->info( message_string( "SCHEDULER-876", join( ", ", paths ) ) );  // Nur beim ersten Mal
+                                            //_job->log()->warn( message_string( "SCHEDULER-876", join( ", ", paths ) ) );  // Nur beim ersten Mal
+                                        }
+
+                                        //if( _end == end_kill_immediately  &&  // Bei kill_immediately nur einmal warten (1/10s, das ist zu kurz!)
+                                        if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
+                                        {
+                                            list<File_path> paths = _module_instance->undeleted_files();
+                                            _log->info( message_string( "SCHEDULER-878", join( ", ", paths ) ) );
+                                            _job->log()->warn( message_string( "SCHEDULER-878", join( ", ", paths ) ) );
+                                            ok = true;
+                                        }
+                                        else
+                                        {
+                                            if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + 0.5;
+                                            _next_time = min( now + 0.1, _trying_deleting_files_until );
+                                        }
                                     }
+
+                                    something_done = true;
                                 }
                             }
                             
@@ -1490,6 +1509,7 @@ bool Task::do_something()
                                 _module_instance = NULL;
                                 finish();
                                 set_state( s_closed );
+                                something_done = true;
                                 loop = true;
                             }
                             

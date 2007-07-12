@@ -35,7 +35,7 @@ struct Configuration
     bool                       _is_backup_member;
     int                        _backup_precedence;
     bool                       _demand_exclusiveness;
-    bool                       _are_orders_distributed;
+    bool                       _orders_are_distributed;
     bool                       _suppress_watchdog_thread;
     int                        _heart_beat_timeout;         // Großzügigere Frist für den Herzschlag, nach der der Scheduler für tot erklärt wird
     int                        _heart_beat_own_timeout;     // < _heart_beat_timeout      Zur eigenen Prüfung, etwas kürzer als _heart_beat_timeout

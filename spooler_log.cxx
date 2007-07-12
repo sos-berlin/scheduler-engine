@@ -382,7 +382,10 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 {
     if( this == NULL )  return;
 
-    //if( level < _spooler->_log_level )  return;
+#   ifndef Z_DEBUG
+        if( !_spooler->_zschimmer_mode  &&  level < _spooler->_log_level )  return;   // eMail von Uwe Risse 2007-07-12 15:18
+#   endif
+
     bool log_to_files = level >= _spooler->_log_level;
 
     try

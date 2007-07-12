@@ -241,7 +241,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-373", "UNEXPECTED DEACTIVATION BY SCHEDULER MEMBER $1" },
     { "SCHEDULER-374", "In $1, state '$2' has no job" },
     { "SCHEDULER-375", "Order is distributed and therefore does not support operation '$1'" },
-    { "SCHEDULER-376", "A distributed, non-exclusive Scheduler enables only order controlled jobs" },
     { "SCHEDULER-377", "After own late heart beat, Scheduler member '$1' has taken exclusiveness" },
     { "SCHEDULER-378", "After own late heart beat, this Scheduler has been deactived and                  the occupied orders have been freed by Scheduler member '$1'" },
     { "SCHEDULER-379", "$1 is occupied by Scheduler member '$2'" },
@@ -395,7 +394,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-820", "Watching heart beat of that Scheduler" },
     { "SCHEDULER-821", "Scheduler member '$1' seems to be active, claiming its last heart beat was $2s ago (pid=$4, $3)" },
     { "SCHEDULER-822", "Scheduler member '$1' seems to be exclusive, claiming its last heart beat was $2s ago (pid=$4, $3)" },
-    { "SCHEDULER-823", "Dead Scheduler member '$1' has resurrected after $2s" },
+    { "SCHEDULER-823", "Dead Scheduler member '$1' has resurrected" },
     { "SCHEDULER-825", "No exclusive Scheduler is running" },
     { "SCHEDULER-826", "That Scheduler has terminated" },
     { "SCHEDULER-827", "Own heart beat is late: next_heart_beat has been announced for $1 (this is $2 seconds late)" },
@@ -444,6 +443,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-875", "Order_id_space has been closed because '$1' has been removed" },
     { "SCHEDULER-876", "Temporary files cannot be deleted. Still trying ...,  $1" },
     { "SCHEDULER-877", "Temporary files have been deleted now" },
+    { "SCHEDULER-878", "Temporary files cannot be deleted: $1" },
+    { "SCHEDULER-879", "Deactivating old cluster member with same ID" },
+    { "SCHEDULER-880", "New cluster member has been started" },
     {}
 };
 } //namespace sos

@@ -574,6 +574,7 @@ void Database::create_tables_when_needed()
     create_table_when_needed( &ta, _spooler->_job_history_tablename, 
                             "\"ID\""         " integer not null,"
                             "\"SPOOLER_ID\"" " varchar(100),"
+                            "`cluster_member_id`"" varchar(100),"
                             "\"JOB_NAME\""   " varchar(100) not null,"
                             "\"START_TIME\"" " datetime not null,"
                             "\"END_TIME\""   " datetime,"
@@ -588,7 +589,9 @@ void Database::create_tables_when_needed()
                             + join( "", create_extra ) 
                             + "primary key( \"ID\" )" );
 
-    add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE", "add \"EXIT_CODE\"     integer" );
+    add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add \"EXIT_CODE\"     integer" );
+    add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+
 
     create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
                             "\"JOB_CHAIN\""    " varchar(100) not null,"                                    // Primärschlüssel
@@ -633,6 +636,7 @@ void Database::create_tables_when_needed()
     create_table_when_needed( &ta, _spooler->_tasks_tablename, 
                             "\"TASK_ID\""        " integer not null,"          // Primärschlüssel
                             "\"SPOOLER_ID\""     " varchar(100),"
+                            "`cluster_member_id`"" varchar(100),"
                             "\"JOB_NAME\""       " varchar(100) not null,"
                             "\"ENQUEUE_TIME\""   " datetime,"
                             "\"START_AT_TIME\""  " datetime,"
@@ -640,7 +644,8 @@ void Database::create_tables_when_needed()
                             "\"TASK_XML\""       " clob,"
                             "primary key( \"TASK_ID\" )" );
 
-    add_column( &ta, _spooler->_tasks_tablename, "TASK_XML", " add \"TASK_XML\" clob" );
+    add_column( &ta, _spooler->_tasks_tablename, "TASK_XML"         , "add \"TASK_XML\" clob" );
+    add_column( &ta, _spooler->_tasks_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
 
 
     handle_order_id_columns( &ta );
@@ -1384,9 +1389,19 @@ void Database::spooler_start()
             {
                 Transaction ta ( this );
                 {
-                    ta.execute( "INSERT into " + _spooler->_job_history_tablename + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
-                                "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})",
-                                __FUNCTION__ );
+                    sql::Insert_stmt insert ( ta.database_descriptor(), _spooler->_job_history_tablename );
+        
+                    insert[ "id"                ] = _id;
+                    insert[ "spooler_id"        ] = _spooler->id_for_db();
+
+                    if( _spooler->is_cluster() )
+                    insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
+
+                    insert[ "job_name"          ] = "(Spooler)";
+                    insert[ "start_time"        ].set_datetime( Time::now().as_string(Time::without_ms) );
+
+                    ta.execute( insert, __FUNCTION__ );
+
                     ta.commit( __FUNCTION__ );
                 }
             }
@@ -1818,6 +1833,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
 
                         clause += " and \"SPOOLER_ID\"=" + sql_quoted( _spooler->id_for_db() );
+                        clause += " and `cluster_member_id` " + sql::null_string_equation( _spooler->cluster_member_id() );
                         
                         if( id != -1 )
                         {
@@ -2032,10 +2048,14 @@ void Task_history::write( bool start )
                         
                         insert.set_table_name( _spooler->_job_history_tablename );
                         
-                        insert[ "id"         ] = _task->_id;
-                        insert[ "spooler_id" ] = _spooler->id_for_db();
-                        insert[ "job_name"   ] = _task->job()->name();
-                        insert[ "cause"      ] = start_cause_name( _task->_cause );
+                        insert[ "id"                ] = _task->_id;
+                        insert[ "spooler_id"        ] = _spooler->id_for_db();
+
+                        if( _spooler->is_cluster() )
+                        insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
+
+                        insert[ "job_name"          ] = _task->job()->name();
+                        insert[ "cause"             ] = start_cause_name( _task->_cause );
                         insert.set_datetime( "start_time", start_time );
 
                         ta.execute( insert, __FUNCTION__ );

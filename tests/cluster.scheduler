@@ -6,11 +6,11 @@
     <config>
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
-        <cluster 
+        <!--cluster 
             heart_beat_warn_timeout = "10" 
             heart_beat_own_timeout  = "15" 
             heart_beat_timeout      = "20"
-         />
+         /-->
 
         <jobs>
             <job name="javascript">
@@ -48,7 +48,7 @@ public class Java extends sos.spooler.Job_impl
         boolean all_schedulers = true;
         boolean continue_exclusive_operation = true;;
 
-        spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
+        //spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
         return false;
     }
 }
@@ -75,7 +75,7 @@ public class Java extends sos.spooler.Job_impl
         boolean all_schedulers = true;
         boolean continue_exclusive_operation = true;;
 
-        spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
+        //spooler.terminate( timeout, restart, all_schedulers, continue_exclusive_operation );
         return false;
     }
 }

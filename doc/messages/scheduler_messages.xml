@@ -2353,11 +2353,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-376">
+        <!--message code="SCHEDULER-376">
             <text xml:lang="en">
                 <title>A distributed, non-exclusive Scheduler enables only order controlled jobs</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-377">
             <text xml:lang="en">
@@ -3539,7 +3539,7 @@
 
         <message code="SCHEDULER-823">
             <text xml:lang="en">
-                <title>Dead Scheduler member '<p1>cluster_member_id</p1>' has resurrected after <p2/>s</title>
+                <title>Dead Scheduler member '<p1>cluster_member_id</p1>' has resurrected</title>
             </text>
         </message>
 
@@ -3848,6 +3848,24 @@
         <message code="SCHEDULER-877" weight="info" object="Task">
             <text xml:lang="en">
                 <title>Temporary files have been deleted now</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-878" weight="info" object="Task">
+            <text xml:lang="en">
+                <title>Temporary files cannot be deleted: <p1>paths</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-879" weight="warn" object="Cluster_member">
+            <text xml:lang="en">
+                <title>Deactivating old cluster member with same ID</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-880" weight="info" object="Cluster_member">
+            <text xml:lang="en">
+                <title>New cluster member has been started</title>
             </text>
         </message>
     </messages>

@@ -681,6 +681,7 @@ void Communication::close( double wait_time )
     _udp_socket.set_linger( true, 0 );
     _udp_socket.close();
 
+    bool connection_was_open = false;
 
     //while(1)
     {
@@ -699,6 +700,8 @@ void Communication::close( double wait_time )
 
             connection->remove_me();
             assert( _connection_list.empty()  ||  *_connection_list.begin() != connection );  // connection muss jetzt gelöscht sein
+
+            connection_was_open = true;
             //connection->_connection_state = Connection::s_closing;
             //connection->async_continue();
             //if( connection->_responding )
@@ -720,7 +723,12 @@ void Communication::close( double wait_time )
 
     _connection_list.clear();
 
-    sleep( wait_time );
+    if( connection_was_open ) 
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << "  sleep(" << wait_time << ")\n" );
+        sleep( wait_time );
+    }
+
     _terminate = true;
 }
 

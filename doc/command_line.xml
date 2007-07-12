@@ -332,11 +332,9 @@
                 <message level="error" code="SCHEDULER-357"/>
                 <message level="error" code="SCHEDULER-358"/>
                 <message level="error" code="SCHEDULER-361"/>
-                <message level="error" code="SCHEDULER-366"/>
                 <message level="error" code="SCHEDULER-370"/>
                 <message level="error" code="SCHEDULER-373"/>
                 <message level="error" code="SCHEDULER-375"/>
-                <message level="error" code="SCHEDULER-376"/>
                 <message level="error" code="SCHEDULER-378"/>
                 <message level="error" code="SCHEDULER-379"/>
                 <message level="error" code="SCHEDULER-380"/>

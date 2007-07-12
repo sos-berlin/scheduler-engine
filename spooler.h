@@ -382,12 +382,13 @@ struct Spooler : Object,
     bool                        check_is_active             ( Transaction* = NULL );
     void                        assert_is_activated         ( const string& function );
 
+    bool                        is_cluster                  () const                            { return _cluster != NULL; }
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
     bool                        are_orders_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
-    void                        assert_has_exclusiveness    ( const string& message_text );
-    string                      cluster_member_id         ();
+  //void                        assert_has_exclusiveness    ( const string& message_text );
+    string                      cluster_member_id           ();
 
 
     void                        wait                        ();

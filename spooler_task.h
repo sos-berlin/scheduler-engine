@@ -290,8 +290,7 @@ struct Task : Object,
     Time                       _idle_since;
     Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;
-    double                     _deleting_files_delay;
-    bool                       _deleting_files_error;
+    Time                       _trying_deleting_files_until;
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;

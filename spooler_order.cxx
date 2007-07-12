@@ -1955,7 +1955,8 @@ void Job_chain::remove_order( Order* order )
 void Job_chain::add_orders_from_database( Read_transaction* ta )
 {
     assert( _orders_recoverable );
-    _spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
+    //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
+    assert( !_is_distributed );
     assert( _spooler->db()  &&  _spooler->db()->opened() );
 
     _load_orders_from_database = false;
@@ -3950,7 +3951,7 @@ bool Order::db_release_occupation()
 
             update[ "occupying_cluster_member_id" ] = sql::null_value;
             update.and_where_condition( "occupying_cluster_member_id", _spooler->cluster_member_id() );
-            update.and_where_condition( "state"                         , _occupied_state.as_string()     );
+            update.and_where_condition( "state"                      , _occupied_state.as_string()   );
 
             update_ok = ta.try_execute_single( update, __FUNCTION__ );
 

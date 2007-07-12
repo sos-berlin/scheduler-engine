@@ -550,12 +550,12 @@ void Job::load( Transaction* ta )
 
         _log->open();
 
-        if( !order_controlled()  &&  !_spooler->has_exclusiveness() )  
-        {
-            _log->error( message_string( "SCHEDULER-376" ) );
-            set_state( s_stopped );
-            return;
-        }
+        //if( !order_controlled()  &&  !_spooler->has_exclusiveness() )  
+        //{
+        //    _log->error( message_string( "SCHEDULER-376" ) );
+        //    set_state( s_stopped );
+        //    return;
+        //}
 
         if( _lock_requestor )  _lock_requestor->load();       // Prüft, ob die Sperre definiert ist
 
@@ -1106,7 +1106,7 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
-    if( !order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
+    //if( !order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
     
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
@@ -1149,19 +1149,21 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 void Job::load_tasks_from_db( Transaction* outer_transaction )
 {
-    _spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
+    //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
 
     Time now = Time::now();
 
     Transaction ta ( _spooler->_db, outer_transaction );
 
-    Any_file sel = ta.open_result_set( 
-                    "select \"TASK_ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
-                    "  from " + _spooler->_tasks_tablename +
-                    "  where \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
-                       " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
-                    "  order by \"TASK_ID\"",
-                    __FUNCTION__ );
+    S select_sql;
+    select_sql << "select `task_id`, `enqueue_time`, `start_at_time`"
+               << "  from " << _spooler->_tasks_tablename
+               << "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
+               <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() )
+               <<    " and `job_name`=" << sql::quoted( _name ) 
+               << "  order by `task_id`";
+
+    Any_file sel = ta.open_result_set( select_sql, __FUNCTION__ );
     
     while( !sel.eof() )
     {
@@ -1210,7 +1212,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
-    if( !_job->order_controlled() )  _spooler->assert_has_exclusiveness( _job->obj_name() + " " + __FUNCTION__ );    // Doppelte Sicherung
+    //if( !_job->order_controlled() )  _spooler->assert_has_exclusiveness( _job->obj_name() + " " + __FUNCTION__ );    // Doppelte Sicherung
 
     _job->set_visible( true );
 
@@ -1231,6 +1233,10 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 insert             [ "TASK_ID"       ] = task->_id;
                 insert             [ "JOB_NAME"      ] = task->_job->_name;
                 insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
+
+                if( _spooler->is_cluster() )
+                insert             [ "cluster_member_id" ] = _spooler->cluster_member_id();
+
                 insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
 
                 if( task->_start_at )

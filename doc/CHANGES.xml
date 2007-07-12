@@ -15,18 +15,26 @@
             <description>
                 <p>
                     Nur Windows:
-                    Der Scheduler verzögert das Ende einer Task solange,
+                    Der Scheduler verzögert das Ende einer Task eine halbe Sekunde,
                     bis die für <code>stdin</code>, <code>stdout</code> und <code>stderr</code> 
                     angelegten temporären Dateien löschbar sind.
                     Die Dateien können von Enkelprozessen, die der Task-Prozess gestartet hat 
                     und die nach Task-Ende noch weiterlaufen, blockiert sein.
                     Oder ein Virenscanner hält die Dateien noch einen kurzen Moment fest.
-                    Währenddessen ist die Task im Zustand <code>deleting_files</code>.
-                    Mit <scheduler_element name="kill_task"/> kann das Ende der Task erzwungen werden.
-                    Die Dateien bleiben dann stehen.
                 </p>
                 <scheduler_message level="info" code="SCHEDULER-876"/>
                 <scheduler_message level="info" code="SCHEDULER-877"/>
+                <scheduler_message level="info" code="SCHEDULER-878"/>
+            </description>
+        </revision>
+
+        <revision type="modification" title="&lt;security> in &lt;base> nutzbar">
+            <description>
+                <p>
+                    <scheduler_element name="security"/> in oberer Konfiguration ersetzt nicht mehr 
+                    die Einstellung aus der <scheduler_element name="base"/>-Konfiguration
+                    sondern wird mit dieser vermengt.
+                </p>
             </description>
         </revision>
     </change>
