@@ -127,6 +127,9 @@ struct Prefix_log : Object, Has_log
     string                      last_line                   () const                            { return last( _last_level ); }
     bool                        has_line_for_level          ( Log_level level ) const           { return _last.find( level ) != _last.end(); }
 
+    //int                         counter                     ( Log_level level ) const           { return level >= log_debug9  &&  level <= log_fatal? _counter[ level - log_debug9 ]
+    //                                                                                                                                                : 0; }
+
     void                        continue_with_text          ( const string& );
     string                      as_string                   ();
 
@@ -187,6 +190,8 @@ struct Prefix_log : Object, Has_log
     
     typedef stdext::hash_map< Log_level, string >   Last;
     Last                       _last;
+
+  //int                        _counter [ log_fatal - log_debug9 + 1 ];
 
     string                     _title;
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)

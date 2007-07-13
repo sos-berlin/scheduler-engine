@@ -18,7 +18,7 @@ spooler.add_job_chain( job_chain );
 
 var order = spooler.create_order();
 order.id = 1;
-job_chain.add_order( order );
+job_chain.add_or_replace_order( order );
         
         
         ]]></script>
@@ -78,6 +78,7 @@ function spooler_process_after( return_value ) {
             <job name="shell">
                 <script language="shell">#! /bin/bash -v
 echo Hallo
+start notepad
 sleep 10&amp;
 exit 37
                 </script>

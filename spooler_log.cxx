@@ -1134,6 +1134,8 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         _last_level = level;
         _last[ level ] = line;
 
+      //if( level >= log_debug9  &&  level <= log_fatal )  _counter[ level - log_debug9 ]++;
+
         bool log_to_files = level >= log_level();
         _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
     }

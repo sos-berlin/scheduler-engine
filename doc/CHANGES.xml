@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-09" version="2.0.177" subversion_revision="5126">
+    <change date="2007-07-09" version="2.0.177" subversion_revision="5128">
         <revision type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
             <description>
                 <p>
