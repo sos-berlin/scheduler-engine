@@ -516,7 +516,7 @@ bool Order_subsystem::subsystem_load()
 
 void Order_subsystem::load_orders_from_database()
 {
-    if( db()->opened()  &&  _spooler->has_exclusiveness() )
+    if( db()->opened() )
     {
         Read_transaction ta ( db() );
 
@@ -672,7 +672,7 @@ void Order_subsystem::add_job_chain( Job_chain* job_chain )
         */
 
 
-        if( _spooler->has_exclusiveness()  &&  job_chain->_orders_recoverable  &&  !job_chain->is_distributed() )
+        if( job_chain->_orders_recoverable  &&  !job_chain->is_distributed() )
         {
             if( !_spooler->db()  ||  !_spooler->db()->opened() )  // Beim Start des Schedulers
             {
@@ -778,9 +778,12 @@ bool Order_subsystem::is_job_in_any_job_chain( Job* job )
 
 bool Order_subsystem::is_job_in_any_distributed_job_chain( Job* job )
 {
+    // Das ist nicht effizient gelöst.
+
+
     if( are_orders_distributed() ) 
     {
-        Z_LOG2( "joacim", __FUNCTION__ << "  " << job->obj_name() << "\n" );    // Diese Routine ist nicht so effizient
+        //Z_LOG2( "joacim", __FUNCTION__ << "  " << job->obj_name() << "\n" );    // Diese Routine ist nicht so effizient
 
         Z_FOR_EACH( Job_chain_map, _job_chain_map, jc )
         {
@@ -1870,7 +1873,6 @@ void Job_chain::add_order( Order* order )
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
     if( state() != s_running  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
-    if( !order->_is_distributed  &&  !_spooler->has_exclusiveness() )  z::throw_xc( "SCHEDULER-383", order->obj_name() );
 
 
     if( _order_id_space )
@@ -2106,9 +2108,13 @@ int Job_chain::order_count( Read_transaction* ta )
 
     if( _is_distributed && ta )
     {
-        result = ta->open_result_set( S() << "select count(*)  from " << _spooler->_orders_tablename <<"  where " << db_where_condition(),
-                                      __FUNCTION__ )
-                 .get_record().as_int( 0 );
+        S select_sql;
+        select_sql << "select count(*)  from " << _spooler->_orders_tablename 
+                   << "  where " << db_where_condition()
+                   <<    " and `distributed_next_time` " << ( _is_distributed? " is not null" 
+                                                                             : " is null"     );
+
+        result = ta->open_result_set( select_sql, __FUNCTION__ ).get_record().as_int( 0 );
     }
     else
     {

@@ -10,16 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-09" version="2.0.177" subversion_revision="5121">
+    <change date="2007-07-09" version="2.0.177" subversion_revision="5126">
         <revision type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
             <description>
                 <p>
                     Nur Windows:
                     Der Scheduler verzögert das Ende einer Task eine halbe Sekunde,
-                    bis die für <code>stdin</code>, <code>stdout</code> und <code>stderr</code> 
+                    bis die für <code>stdin</code>, <code>stdout</code> und <code>stderr</code>
                     angelegten temporären Dateien löschbar sind.
-                    Die Dateien können von Enkelprozessen, die der Task-Prozess gestartet hat 
-                    und die nach Task-Ende noch weiterlaufen, blockiert sein.
+                    Die Dateien können von Enkelprozessen blockiert sein, 
+                    die der Task-Prozess gestartet hat
+                    und die nach Task-Ende noch weiterlaufen.
                     Oder ein Virenscanner hält die Dateien noch einen kurzen Moment fest.
                 </p>
                 <scheduler_message level="info" code="SCHEDULER-876"/>
@@ -34,6 +35,38 @@
                     <scheduler_element name="security"/> in oberer Konfiguration ersetzt nicht mehr 
                     die Einstellung aus der <scheduler_element name="base"/>-Konfiguration
                     sondern wird mit dieser vermengt.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title="abort_immediately_and_restart zögert 2 Sekunden">
+            <description>
+                <p>
+                    <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately_and_restart"/>
+                    schließt wie bisher die TCP-Verbindungen und wartet dann 2 Sekunden,
+                    um dem Internet Explorer die Gelegenheit zu geben,
+                    seinerseits die TCP-Verbindung zu schließen,
+                    um nicht zu blockieren.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="modification" title="distributed='no', Cluster-Member-ID ist nur noch für Rechnername und Port eindeutig">
+            <description>
+                <p>
+                    Ein Verteilter Scheduler (<scheduler_option name="distributed-orders"/>)
+                    führt Jobs lokal im einzelnen Scheduler aus.
+                </p>
+                <p>
+                    Für eine Jobkette kann mit <scheduler_element name="job_chain" attribute="distributed"/>
+                    eingestellt werden, ob sie lokal im einzelnen Scheduler oder verteilt im ganzen Cluster gilt.
+                    Lokale Jobketten <i>müssen</i> im Cluster einen eindeutigen Namen haben
+                    (das wird nicht geprüft).
+                </p>
+                <p>
+                    Bisher war die Cluster-Member-ID für jeden Lauf eines Schedulers (eines Cluster-Mitglieds) eindeutig.
+                    Jetzt wird die ID aus Scheduler-ID, Rechnernamen und TCP-Portnummer gebildet.
+                    Zwei Rechner im selben Cluster dürfen nicht denselben Rechnernamen haben.
                 </p>
             </description>
         </revision>

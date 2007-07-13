@@ -80,6 +80,13 @@
                     Wirkt nur mit der Kommandozeilenoption <scheduler_option name="distributed-orders"/>
                     und lässt die Aufträge von mehreren Schedulern verteilt ausführen.
                 </p>
+                <p>
+                    <code>distributed="no"</code> lässt die Jobkette nicht verteilt,
+                    sondern nur auf diesem Scheduler ausführen,
+                    wie bei einem nicht-verteiltem Scheduler.
+                    Der Name der Jobkette <i>muss</i> in diesem Fall im Cluster eindeutig sein
+                    (das wird nicht geprüft).
+                </p>
             </description>
         </xml_attribute>
 

@@ -19,6 +19,7 @@
 
 namespace sos {
 namespace scheduler {
+namespace database {
 
 //-----------------------------------------------------------------------------------Archive_switch
 
@@ -44,14 +45,21 @@ enum Database_lock_syntax
     db_lock_with_updlock,       // SQL-Server: Sätze mit "select with(updlock)" sperren, für SQL Server
 };
 
-//---------------------------------------------------------------------------------------Database
+//-----------------------------------------------------------------------------------------Database
 
-struct Database : Object, Scheduler_object
+struct Database : Object, Scheduler_object //Subsystem
 {
                                 Database                ( Spooler* );
 
-    void                        open                    ( const string& db_name );
+    // Subsystem
+
     void                        close                   ();
+    //bool                        subsystem_initialize    ();
+    //bool                        subsystem_load          ();
+    //bool                        subsystem_start         ();
+
+
+    void                        open                    ( const string& db_name );
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
     sql::Database_descriptor*   database_descriptor     ()                                          { return &_db_descr; }
@@ -345,6 +353,7 @@ struct Task_history
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace database
 } //namespace scheduler
 } //namespace sos
 

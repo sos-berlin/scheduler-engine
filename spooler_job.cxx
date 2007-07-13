@@ -550,16 +550,9 @@ void Job::load( Transaction* ta )
 
         _log->open();
 
-        //if( !order_controlled()  &&  !_spooler->has_exclusiveness() )  
-        //{
-        //    _log->error( message_string( "SCHEDULER-376" ) );
-        //    set_state( s_stopped );
-        //    return;
-        //}
-
         if( _lock_requestor )  _lock_requestor->load();       // Prüft, ob die Sperre definiert ist
 
-        if( _spooler->_db->opened()  &&  _spooler->has_exclusiveness() )  load_tasks_from_db( ta );
+        if( _spooler->_db->opened() )  load_tasks_from_db( ta );
 
         set_state( s_loaded );
     }

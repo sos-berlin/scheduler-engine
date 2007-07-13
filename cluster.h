@@ -50,7 +50,6 @@ struct Cluster_subsystem_interface : Object, Subsystem
 
 
     virtual void            set_configuration               ( const Configuration& )                = 0;
-    virtual bool                start                       ()                                      = 0;
     virtual void            set_continue_exclusive_operation( const string& http_url )              = 0;  // Oder continue_exclusive_non_backup etc.
     virtual string              my_member_id                ()                                      = 0;
     virtual int                 backup_precedence           ()                                      = 0;

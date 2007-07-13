@@ -22,6 +22,19 @@
 
         <jobs>
 
+            <job name="local">
+                <script language="javascript">
+                    <![CDATA[
+
+function spooler_process()
+{
+    return false;
+}
+
+                ]]>
+                </script>
+            </job>
+            
             <job name="add_orders">
                 <script language="javascript">
                     <![CDATA[
@@ -200,5 +213,9 @@ function spooler_process()
             </job_chain>
         </job_chains>
 
+        <commands>
+            <start_job job="local" after="30"/>
+        </commands>
+        
     </config>
 </spooler>

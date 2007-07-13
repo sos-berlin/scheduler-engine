@@ -338,7 +338,6 @@
                 <message level="error" code="SCHEDULER-378"/>
                 <message level="error" code="SCHEDULER-379"/>
                 <message level="error" code="SCHEDULER-380"/>
-                <message level="error" code="SCHEDULER-383"/>
                 <message level="error" code="SCHEDULER-384"/>
                 <message level="error" code="SCHEDULER-385"/>
                 <message level="warn"  code="SCHEDULER-812"/>
@@ -348,6 +347,7 @@
                 <message level="warn"  code="SCHEDULER-817"/>
                 <message level="info"  code="SCHEDULER-829"/>
                 <message level="info"  code="SCHEDULER-830"/>
+                <message level="warn"  code="SCHEDULER-879"/>
             </messages>
         </command_option>
 

@@ -231,7 +231,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-362", "Scheduler is aborting because it has become inactive" },
     { "SCHEDULER-363", "Error when creating SQL table $1: $2" },
     { "SCHEDULER-365", "Illegal character in -id=$1" },
-    { "SCHEDULER-366", "This is a distributed, non-exclusive Scheduler and therefore does not support operation '$1'" },
     { "SCHEDULER-367", "Scheduler is aborting because it has lost its exclusivity" },
     { "SCHEDULER-368", "Option $1 needs $2" },
     { "SCHEDULER-369", "Option $1 conflicts with $2" },
@@ -246,7 +245,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-379", "$1 is occupied by Scheduler member '$2'" },
     { "SCHEDULER-380", "job_chain orders_recoverable=\"no\" cannot be combined with distributed=\"yes\", in $1" },
     { "SCHEDULER-381", "Scheduler is not yet active and cannot execute the operation" },
-    { "SCHEDULER-383", "This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders. Use <job_chain distributed=\"yes\"> or option -exclusive" },
     { "SCHEDULER-384", "$1 is distributed and therefore does not support operation '$2'" },
     { "SCHEDULER-385", "Deletion of order in database has failed" },
     { "SCHEDULER-386", "Last heart beat was $1, $2 seconds ago. Something is delaying Scheduler execution, the Scheduler is aborted immediately" },
@@ -445,7 +443,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-877", "Temporary files have been deleted now" },
     { "SCHEDULER-878", "Temporary files cannot be deleted: $1" },
     { "SCHEDULER-879", "Deactivating old cluster member with same ID" },
-    { "SCHEDULER-880", "New cluster member has been started" },
     {}
 };
 } //namespace sos

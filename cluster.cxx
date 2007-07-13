@@ -17,6 +17,8 @@ namespace cluster {
 //--------------------------------------------------------------------------------------------const
 
 const int                       heart_beat_period                       = Z_NDEBUG_DEBUG( 60, 20 );     // Database::seconds_before_reopen sollte nicht größer sein
+const int                       heart_beat_period_at_startup            = 5;                            // Zu Beginn Herz schneller schlagen lassen, dann werden wir früher erkannt
+const int                       startup_period                          = heart_beat_period;            // Frist für heart_beat_period_at_startup
 const int                       active_heart_beat_minimum_check_period  = heart_beat_period / 2;
 //const int                       active_heart_beat_check_period          = heart_beat_period + _cluster->_heart_beat_warn_timeout + 2;
 //const int                       database_commit_visible_time            = 10;                           // Zeit, die die Datenbank braucht, um nach Commit Daten für anderen Client sichtbar zu machen.
@@ -58,13 +60,15 @@ struct Cluster : Cluster_subsystem_interface
     // Subsystem
 
     void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
     string                      obj_name                    () const;
 
 
     // Cluster_subsystem_interface
 
     void                    set_configuration               ( const Configuration& );
-    bool                        start                       ();
 
     void                    set_continue_exclusive_operation( const string& http_url );             // Oder continue_exclusive_non_backup etc.
     string                      my_member_id                ()                                      { return _cluster_member_id; }
@@ -152,6 +156,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_backup_precedence_set;
     string                     _continue_exclusive_operation;
 
+    time_t                     _start_time;
     time_t                     _next_heart_beat;
     volatile time_t            _db_last_heart_beat;         // Heart_beat_watchdog_thread liest das
     time_t                     _db_next_heart_beat;
@@ -170,7 +175,6 @@ struct Cluster : Cluster_subsystem_interface
 
     bool                       _is_exclusiveness_lost;
     bool                       _is_in_error;
-    bool                       _was_start_ok;
     bool                       _closed;
 
     ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
@@ -1568,7 +1572,7 @@ void Cluster::close()
                 if( ok )  _my_scheduler = NULL;
             }
             
-            //if( _was_start_ok  &&  !_is_in_error )
+            //if( _start_was_ok  &&  !_is_in_error )
             //{
             //    delete_old_member_records( (Transaction*)NULL );
             //}
@@ -1593,14 +1597,15 @@ void Cluster::close()
 
 void Cluster::assert_not_started( const string& debug_message )
 {
-    if( _was_start_ok )  z::throw_xc( __FUNCTION__, debug_message );
+    if( subsystem_state() == subsys_active )  z::throw_xc( __FUNCTION__, debug_message );
 }
 
 //---------------------------------------------------------------Cluster::calculate_next_heart_beat
 
 void Cluster::calculate_next_heart_beat( time_t now )
 {
-    _next_heart_beat = now + heart_beat_period;
+    _next_heart_beat = now + ( now <= _start_time + startup_period? heart_beat_period_at_startup 
+                                                                  : heart_beat_period            );
 }
 
 //-----------------------------------------------------------------------Cluster::set_configuration
@@ -1622,9 +1627,27 @@ void Cluster::set_configuration( const Configuration& c )
     _heart_beat_warn_timeout      = my_configuration._heart_beat_warn_timeout;
 }
 
-//-----------------------------------------------------------------------------------Cluster::start
+//--------------------------------------------------------------------Cluster::subsystem_initialize
 
-bool Cluster::start()
+bool Cluster::subsystem_initialize()
+{
+    set_subsystem_state( subsys_initialized );
+    return true;
+}
+
+//--------------------------------------------------------------------------Cluster::subsystem_load
+
+bool Cluster::subsystem_load()
+{
+    make_cluster_member_id();
+
+    set_subsystem_state( subsys_loaded );
+    return true;
+}
+
+//----------------------------------------------------------------------Cluster::subsystem_activate
+
+bool Cluster::subsystem_activate()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
@@ -1649,21 +1672,20 @@ bool Cluster::start()
         z::throw_xc( "SCHEDULER-392", _heart_beat_warn_timeout, _heart_beat_own_timeout == INT_MAX? "never" : as_string(_heart_beat_own_timeout) + "s", _heart_beat_timeout );
 
 
-    make_cluster_member_id();
-    //check_member_id();
     create_table_when_needed();
-
-
-    // Zustand prüfen
-
     assert_database_integrity( __FUNCTION__ );
 
 
-    check_schedulers_heart_beat();
+    _start_time = ::time(NULL);
+
+
+    // Zustand prüfen
+    check_schedulers_heart_beat();      // Setzt _my_scheduler, wenn ein Satz mit gleicher Member-ID vorhanden ist
+
     if( _my_scheduler )
     {
         _my_scheduler->log()->warn( message_string( "SCHEDULER-879" ) );
-        _my_scheduler->mark_as_inactive( Cluster_member::mai_delete_my_inactive_record );
+        _my_scheduler->mark_as_inactive( Cluster_member::mai_delete_my_inactive_record );   // Löscht alten Datensatz und gibt die Aufträge frei
     }
 
 
@@ -1715,7 +1737,7 @@ bool Cluster::start()
 
 
 
-    _was_start_ok = true;
+    set_subsystem_state( subsys_active );
 
     return true;
 }
@@ -1811,68 +1833,6 @@ void Cluster::close_operations()
     }
 }
 
-//--------------------------------------------------------------Cluster::wait_until_is_scheduler_up
-
-//bool Cluster::wait_until_is_scheduler_up()
-//{
-//    _log->info( message_string( "SCHEDULER-832" ) );
-//
-//    while( !_spooler->is_termination_state_cmd()  &&  !is_backup_member_allowed_to_start() )
-//    {
-//        _spooler->simple_wait_step();
-//        async_check_exception();
-//    }
-//
-//    bool ok = is_backup_member_allowed_to_start();
-//
-//    if( ok )  assert_database_integrity( __FUNCTION__ );
-//
-//    return ok;
-//}
-//
-////--------------------------------------------------------------------Cluster::wait_until_is_active
-//
-//bool Cluster::wait_until_is_active()
-//{
-//    bool was_scheduler_up = is_backup_member_allowed_to_start();
-//
-//    //if( !was_scheduler_up )  _log->info( message_string( "SCHEDULER-832" ) );
-//
-//    while( !_spooler->is_termination_state_cmd()  &&  !_is_active )  
-//    {
-//        if( was_scheduler_up  &&  !is_backup_member_allowed_to_start() ) 
-//        {
-//            _log->info( message_string( "SCHEDULER-834" ) );
-//            was_scheduler_up = false; 
-//        }
-//
-//        _spooler->simple_wait_step();
-//        async_check_exception();
-//    }
-//
-//    bool ok = _is_active;
-//
-//    if( ok )  assert_database_integrity( __FUNCTION__ );
-//
-//    return ok;
-//}
-//
-////------------------------------------------------------------Cluster::wait_until_has_exclusiveness
-//
-//bool Cluster::wait_until_has_exclusiveness()
-//{
-//    wait_until_is_active();
-//
-//    if( exclusive_member_id() != "" )  _log->info( message_string( "SCHEDULER-833", exclusive_member_id() ) );
-//
-//    while( !_spooler->is_termination_state_cmd()  &&  !has_exclusiveness() )  _spooler->simple_wait_step();
-//
-//    bool ok = has_exclusiveness();
-//    if( ok )  assert_database_integrity( __FUNCTION__ );
-//
-//    return ok;
-//}
-//
 //-------------------------------------------------------------------------Cluster::async_continue_
 
 bool Cluster::async_continue_( Async_operation::Continue_flags )
@@ -1890,7 +1850,7 @@ bool Cluster::async_continue_( Async_operation::Continue_flags )
         _exclusive_scheduler_watchdog = NULL;
     }
 
-    if( _was_start_ok  &&  !_is_in_error )
+    if( subsystem_state() == subsys_active  &&  !_is_in_error )
     {
         start_operations();
     }

@@ -12,6 +12,7 @@ using namespace zschimmer;
 
 namespace sos {
 namespace scheduler {
+namespace database {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -475,6 +476,27 @@ Transaction* Database::transaction()
 
     return _transaction;
 }
+
+//-------------------------------------------------------------------Database::subsystem_initialize
+
+//bool Database::subsystem_initialize()
+//{
+//    set_subsystem_state( subsys_initialized );
+//}
+//
+////-------------------------------------------------------------------------Database::subsystem_load
+//
+//bool Database::subsystem_load()
+//{
+//    set_subsystem_state( subsys_loaded );
+//}
+//
+////------------------------------------------------------------------------Database::subsystem_
+//
+//bool Database::subsystem_activate()
+//{
+//    set_subsystem_state( subsys_active );
+//}
 
 //-----------------------------------------------------------------------------------Database::open
 
@@ -2233,6 +2255,7 @@ void Task_history::set_extra_field( const string& name, const Variant& value )
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace database
 } //namespace scheduler
 } //namespace sos
 

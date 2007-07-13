@@ -94,6 +94,11 @@ const double                    nichts_getan_bremse                 = 1.0;      
 const int                       kill_timeout_1                      = 10;               // < kill_timeout_total
 const int                       kill_timeout_total                  = 30;               // terminate mit timeout: Nach timeout und kill noch soviele Sekunden warten
 
+const int                       tcp_restart_close_delay             = 3;                // Wartezeit, damit der Browser nicht h‰ngenbleibt. 
+                                                                                        // Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloﬂ?
+                                                                                        // Client (Internet Explorer) bekommt so Gelegenheit, selbst die Verbindung zu schlieﬂen.
+                                                                                        // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
+
 const int                       const_order_id_length_max           = 255;              // Die Datenbankspalte _muss_ so groﬂ sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
 const char*                     temporary_process_class_name        = "(temporaries)";
@@ -1502,6 +1507,13 @@ void Spooler::load()
     _short_hostname = hostname;
     _complete_hostname = complete_computer_name();
     
+    if( _cluster_configuration._orders_are_distributed  ||  _cluster_configuration._demand_exclusiveness ) 
+    {
+        _cluster = cluster::new_cluster_subsystem( this );
+        _cluster->set_configuration( _cluster_configuration );
+        _cluster->switch_subsystem_state( subsys_initialized );
+    }
+
     _process_class_subsystem->switch_subsystem_state( subsys_initialized );
     _order_subsystem        ->switch_subsystem_state( subsys_initialized );
     _http_server            ->switch_subsystem_state( subsys_initialized );
@@ -1672,6 +1684,8 @@ void Spooler::start()
     _job_subsystem   ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
     _scheduler_script->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
     
+    if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
+
     _web_services->switch_subsystem_state( subsys_loaded );
 
 
@@ -1692,18 +1706,13 @@ void Spooler::start()
     if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
         if( _db_name == "" )  z::throw_xc( "SCHEDULER-357" ); 
-        //if( !_need_db )
-        //{
-        //    string old_need_db = string_need_db();
-        //    _need_db = true;
-        //    _wait_endless_for_db_open = true;
-        //    _log->info( ... );
-        //}
     }
 
     if( _need_db  && _db_name.empty() )  z::throw_xc( "SCHEDULER-205" );
 
     _db->open( _db_name );
+    
+    assert( !_cluster || _cluster->my_member_id() != "" );
     _db->spooler_start();
 
 
@@ -1719,11 +1728,7 @@ void Spooler::start()
     _communication.start_or_rebind();
 
     if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_initialized );
-
-    if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
-    {
-        start_cluster();
-    }
+    if( _cluster           )  _cluster          ->switch_subsystem_state( subsys_active );
 
     Z_LOG2( "scheduler", Command_processor( this, Security::seclev_all ).execute( "<show_state what='jobs job_params job_commands tasks job_chains'/>", Time::now(), true ) );
 }
@@ -1792,16 +1797,6 @@ void Spooler::execute_config_commands()
     _config_document_to_load = NULL;
 }
 
-//---------------------------------------------------------------------------Spooler::start_cluster
-
-void Spooler::start_cluster()
-{
-    _cluster = cluster::new_cluster_subsystem( this );
-    _cluster->set_configuration( _cluster_configuration );
-
-    _cluster->start();     // Wartet, bis entschieden ist, dass wir aktiv werden
-}
-
 //-------------------------------------------------------------------------------Spooler::is_active
 
 bool Spooler::is_active()
@@ -1852,6 +1847,10 @@ bool Spooler::has_exclusiveness()
 void Spooler::stop( const exception* )
 {
     assert( current_thread_id() == _thread_id );
+
+    bool restart = _shutdown_cmd == sc_terminate_and_restart 
+                || _shutdown_cmd == sc_let_run_terminate_and_restart;
+
 
     if( _cluster )
     {
@@ -1906,24 +1905,17 @@ void Spooler::stop( const exception* )
 
     if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
     _communication.finish_responses( 5.0 );
-    _communication.close( 3.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
+    _communication.close( restart? tcp_restart_close_delay : 0.0 );      // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
     _db->spooler_stop();
-
-    THREAD_LOCK( _lock )
-    {
-        _db->close();
-        _db = NULL;
-    }
+    _db->close();
+    _db = NULL;
 
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
 
-    if( _shutdown_cmd == sc_terminate_and_restart 
-     || _shutdown_cmd == sc_let_run_terminate_and_restart )  
+    if( restart )  
     {
-        sleep( 5.0 + 1.0 );   // Etwas warten, damit der Browser nicht h‰ngenbleibt. Sonst wird die HTTP-Verbindung nicht richtig geschlossen. Warum bloﬂ?
-                              // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
         spooler_restart( &_base_log, _is_service );
     }
 }
@@ -2804,8 +2796,8 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
         _log->close(); 
 
      //?_communication.finish_responses( 5.0 );
-        _communication.close( 3.0 );    // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden. 
-                                        // close(), damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+        _communication.close( restart? tcp_restart_close_delay : 0 );    // Mit Wartezeit. Vor Restart, damit offene Verbindungen nicht vererbt werden. 
+                                            // close(), damit offene HTTP-Logs ordentlich schlieﬂen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
     } 
     catch( ... ) {}
 

@@ -2293,11 +2293,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-366">
+        <!--message code="SCHEDULER-366">
             <text xml:lang="en">
                 <title>This is a distributed, non-exclusive Scheduler and therefore does not support operation '<p1/>'</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-367">
             <text xml:lang="en">
@@ -2396,12 +2396,6 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-383">
-            <text xml:lang="en">
-                <title>This is a non-exclusive Scheduler processing distributed orders, and therefore cannot process non-distributed orders. Use &lt;job_chain distributed="yes"> or option -exclusive</title>
-            </text>
-        </message>
-        
         <message code="SCHEDULER-384">
             <text xml:lang="en">
                 <title><p1>job_chain</p1> is distributed and therefore does not support operation '<p2/>'</title>
@@ -3860,12 +3854,6 @@
         <message code="SCHEDULER-879" weight="warn" object="Cluster_member">
             <text xml:lang="en">
                 <title>Deactivating old cluster member with same ID</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-880" weight="info" object="Cluster_member">
-            <text xml:lang="en">
-                <title>New cluster member has been started</title>
             </text>
         </message>
     </messages>

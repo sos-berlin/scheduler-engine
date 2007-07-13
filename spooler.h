@@ -115,7 +115,6 @@ using namespace ::zschimmer::file;
 
 struct Show_calendar_options;
 struct Communication;
-struct Database;
 struct Get_events_command_response;
 struct Job;
 struct Job_subsystem_interface;
@@ -137,13 +136,13 @@ struct Task_subsystem;
 struct Subprocess;
 struct Subprocess_register;
 struct Task;
-struct Transaction;
 struct Web_service;
 struct Web_service_operation;
 struct Web_service_request;
 struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
+
 
 namespace lock
 {
@@ -153,6 +152,7 @@ namespace lock
     struct Holder;
 }
 
+
 namespace order
 {
     struct Job_chain;
@@ -161,6 +161,14 @@ namespace order
     struct Order_subsystem_interface;
 }
 using namespace order;
+
+
+namespace database
+{
+    struct Database;
+    struct Transaction;
+};
+using namespace database;
 
 
 typedef stdext::hash_set<string> String_set;

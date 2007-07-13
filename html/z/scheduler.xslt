@@ -119,9 +119,7 @@
                     </xsl:apply-templates>
                 </xsl:if>
 
-                <td style="margin-bottom: 0pt; padding: 1ex 0pt 2px 0pt;">
-                    <span style="padding-left: 3pt; padding-bottom: 2pt; border-bottom: 1px solid gray;">&#160;&#160;&#160;&#160;&#160;&#160;</span>
-                </td>
+                <xsl:call-template name="card_selector_end"/>
             </tr>
         </table>
 
@@ -193,6 +191,14 @@
         </td>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~card_selector_end-->
+    
+    <xsl:template name="card_selector_end">
+        <td style="margin-bottom: 0pt; padding: 1ex 0pt 2px 0pt;">
+            <span style="padding-left: 3pt; padding-bottom: 2pt; border-bottom: 1px solid gray;">&#160;&#160;&#160;&#160;&#160;&#160;</span>
+        </td>
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~card_top-->
     <!-- Jede Karte hat etwas Abstand zum Card selector -->
 
@@ -2584,6 +2590,8 @@
                         <xsl:with-param name="class" select="'order'"/>
                     </xsl:apply-templates>
                 </xsl:if>
+
+                <xsl:call-template name="card_selector_end"/>
             </tr>
         </table>
 
