@@ -87,7 +87,7 @@ struct Database : Object, Scheduler_object //Subsystem
     Database_lock_syntax        lock_syntax             ();
     void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
     void                        create_tables_when_needed();
-    void                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
+    bool                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
     time_t                      reopen_time             () const                                    { return _reopen_time; }
 
     Fill_zero                  _zero_;
@@ -215,6 +215,10 @@ struct Transaction : Read_transaction
     void                        update_clob             ( const string& table_name, const string& column_name, const string& key_name, const string& key_value, const string& value );
 
     int                         record_count            ()                                          { return _db->record_count(); }
+
+    bool                        create_index            ( const string& table_name, const string& index_name, const string& short_index_name, const string& column_list, 
+                                                          const string& debug_text );
+
 
 
     Fill_zero                  _zero_;

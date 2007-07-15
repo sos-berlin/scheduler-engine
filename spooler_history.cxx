@@ -580,6 +580,8 @@ void Database::open2( const string& db_name )
 
 void Database::create_tables_when_needed()
 {
+    bool        has_been_created;
+
     Transaction ta ( this );
 
     create_table_when_needed( &ta, _spooler->_variables_tablename, 
@@ -593,7 +595,7 @@ void Database::create_tables_when_needed()
     vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
     for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
 
-    create_table_when_needed( &ta, _spooler->_job_history_tablename, 
+    has_been_created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
                             "\"ID\""         " integer not null,"
                             "\"SPOOLER_ID\"" " varchar(100),"
                             "`cluster_member_id`"" varchar(100),"
@@ -610,9 +612,18 @@ void Database::create_tables_when_needed()
                             "\"LOG\""        " blob," 
                             + join( "", create_extra ) 
                             + "primary key( \"ID\" )" );
-
-    add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add \"EXIT_CODE\"     integer" );
-    add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+    if( has_been_created )
+    {
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME"    , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID"    , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"      , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_CLUSTER_MEMBER", "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
+    }
+    else
+    {
+        add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add \"EXIT_CODE\"     integer" );
+        add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+    }
 
 
     create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
@@ -635,14 +646,14 @@ void Database::create_tables_when_needed()
                             "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
 
 
-    add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE" , "add \"INITIAL_STATE\"" " varchar(100)" );
-    add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"      , "add \"RUN_TIME\""      " clob" );
-    add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"     , "add \"ORDER_XML\""     " clob" );
-    add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"      , "add `distributed_next_time`"         " datetime" );
+    add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE"              , "add \"INITIAL_STATE\""             " varchar(100)" );
+    add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"                   , "add \"RUN_TIME\""                  " clob"         );
+    add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"                  , "add \"ORDER_XML\""                 " clob"         );
+    add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"      , "add `distributed_next_time`"       " datetime"     );
     add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
     
 
-    create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
+    has_been_created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
                             "\"HISTORY_ID\""  " integer not null,"             // Primärschlüssel
                             "\"JOB_CHAIN\""   " varchar(100) not null,"
                             "\"ORDER_ID\""    " varchar(" << const_order_id_length_max << ") not null,"
@@ -654,6 +665,12 @@ void Database::create_tables_when_needed()
                             "\"END_TIME\""    " datetime not null,"
                             "\"LOG\""         " blob," 
                             "primary key( \"HISTORY_ID\" )" );
+
+    if( has_been_created )
+    {
+        ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`", __FUNCTION__ );
+    }
+
 
     create_table_when_needed( &ta, _spooler->_tasks_tablename, 
                             "\"TASK_ID\""        " integer not null,"          // Primärschlüssel
@@ -677,8 +694,10 @@ void Database::create_tables_when_needed()
 
 //---------------------------------------------------------------Database::create_table_when_needed
 
-void Database::create_table_when_needed( Transaction* ta, const string& tablename, const string& fields )
+bool Database::create_table_when_needed( Transaction* ta, const string& tablename, const string& fields )
 {
+    bool result = false;
+
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
     try
@@ -706,12 +725,16 @@ void Database::create_table_when_needed( Transaction* ta, const string& tablenam
             ta->execute( create_table, __FUNCTION__ );
 
             ta->intermediate_commit( __FUNCTION__ ); 
+
+            result = true;
         }
         catch( exception& x )
         {
             z::throw_xc( "SCHEDULER-363", tablename, x );
         }
     }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Database::add_column
@@ -1395,6 +1418,32 @@ bool Transaction::try_execute_single( const string& stmt, const string& debug_te
 { 
     execute( stmt, debug_text );
     return record_count() == 1;
+}
+
+//------------------------------------------------------------------------Transaction::create_index
+
+bool Transaction::create_index( const string& table_name, const string& index_name, const string& short_index_name, const string& column_list, 
+                                const string& debug_text )
+{
+    bool result = false;
+
+    S create_index_sql;
+    create_index_sql << "CREATE INDEX " 
+                     << ( _db->dbms_kind() == dbms_db2? short_index_name : index_name )
+                     << " on " << table_name
+                     << " (" << column_list << ")";
+
+    try
+    {
+        execute( create_index_sql, debug_text );
+    }
+    catch( exception& x )
+    {
+        _log->warn( x.what() );
+        _log->info( message_string( "SCHEDULER-880" ) );
+    }
+
+    return result;
 }
 
 //--------------------------------------------------------------------------Database::spooler_start

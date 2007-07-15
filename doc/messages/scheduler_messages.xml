@@ -3856,6 +3856,12 @@
                 <title>Deactivating old cluster member with same ID</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-880">
+            <text xml:lang="en">
+                <title>Error when creating database index is ignored</title>
+            </text>
+        </message>
     </messages>
     
 </messages>
