@@ -444,6 +444,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-878", "Temporary files cannot be deleted: $1" },
     { "SCHEDULER-879", "Deactivating old cluster member with same ID" },
     { "SCHEDULER-880", "Error when creating database index is ignored" },
+    { "SCHEDULER-881", "Error when reading stdout file is ignored: $1, $2" },
     {}
 };
 } //namespace sos

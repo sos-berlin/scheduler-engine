@@ -30,6 +30,8 @@ namespace scheduler {
 static const string spooler_get_name        = "spooler_get";
 static const string spooler_level_name      = "spooler_level";
 
+const int max_stdout_state_text_length      = 200;                      // Für Job.state_text und Order.state_text
+
 //----------------------------------------------------------------------------Spooler_object::level
 /*
 Level Spooler_object::level()
@@ -1199,6 +1201,7 @@ bool Task::do_something()
                             if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
+                                set_state_texts_from_stdout();
                                 postprocess_order( true );
                                 set_state( s_ending );
                                 loop = true;
@@ -1495,6 +1498,7 @@ bool Task::do_something()
                                         }
                                         else
                                         {
+                                            // Funktioniert in lokaler Zeit. Zum Beginn der Winterzeit: +1h, zum Beginn der Sommerzeit: 0s.
                                             if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + 0.5;
                                             _next_time = min( now + 0.1, _trying_deleting_files_until );
                                         }
@@ -1535,7 +1539,6 @@ bool Task::do_something()
                         {
                             if( _state < s_ending )  set_state( s_ending ), loop = true;
                         }
-
 
                         if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
                     }
@@ -1921,6 +1924,34 @@ void Task::finish()
     task_subsystem()->count_finished_tasks();
 
     if( _job->is_machine_resumable() )  _spooler->end_dont_suspend_machine();
+}
+
+//----------------------------------------------------------------Task::set_state_texts_from_stdout
+
+void Task::set_state_texts_from_stdout()
+{
+    if( _module_instance )
+    {
+        try
+        {
+            file::File stdout_file ( _module_instance->stdout_path(), "r" );
+            string first_line = stdout_file.read_string( max_stdout_state_text_length );
+            stdout_file.close();
+
+            size_t n = first_line.find( '\n' );
+            if( n == string::npos )  n = first_line.length();
+            if( n > 0  &&  first_line[ n - 1 ] == '\r' )  n--;
+            first_line.erase( n );
+
+            _job->set_state_text( first_line );
+
+            if( _order )  _order->set_state_text( first_line );
+        }
+        catch( exception& x )
+        {
+            _log->warn( message_string( "SCHEDULER-881", x ) );
+        }
+    }
 }
 
 //-------------------------------------------------------------------Task::process_on_exit_commands

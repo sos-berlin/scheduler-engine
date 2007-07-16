@@ -172,6 +172,7 @@ struct Task : Object,
     void                        remove_order                ();
 
     void                        finish                      ();
+    void                        set_state_texts_from_stdout ();
     void                        process_on_exit_commands    ();
     bool                        load                        ();
     Async_operation*            begin__start                ();

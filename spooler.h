@@ -118,8 +118,6 @@ struct Communication;
 struct Get_events_command_response;
 struct Job;
 struct Job_subsystem_interface;
-struct Holder;
-struct Requestor;
 struct Module;
 struct Module_instance;
 struct Process;

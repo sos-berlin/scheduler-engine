@@ -3862,6 +3862,12 @@
                 <title>Error when creating database index is ignored</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-881">
+            <text xml:lang="en">
+                <title>Error when reading stdout file is ignored: <p1>error</p1>, <p2>path</p2></title>
+            </text>
+        </message>
     </messages>
     
 </messages>

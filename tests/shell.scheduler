@@ -76,9 +76,10 @@ function spooler_process_after( return_value ) {
             </job>
 
             <job name="shell">
-                <script language="shell">#! /bin/bash -v
+                <script language="shell">@echo off
+#! /bin/bash -v
 echo Hallo
-start notepad
+echo Zweite Zeile
 sleep 10&amp;
 exit 37
                 </script>
