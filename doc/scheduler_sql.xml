@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Vom Scheduler verwendete SQL-Anweisungen"
+    base_dir            = ""
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <scheduler_keyword keyword="Datenbanktabellen"/>
+    <scheduler_keyword keyword="create table (SQL)"/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>SQL-Anweisungen zum Einrichten der Tabellen</h2>
+
+    <p>
+        Der Scheduler richtet beim Start fehlende Tabellen mit folgenden Anweisungen ein.
+        Die Anweisungen unterscheiden sich nach verwendeter Datenbank-Software.
+    </p>
+    
+    <h3>MySQL</h3>
+
+    <pre>CREATE TABLE SCHEDULER_VARIABLES 
+(
+    "NAME"      varchar(100) not null,
+    "WERT"      integer,
+    "TEXTWERT"  varchar(250),
+    primary key ( "NAME" )
+) 
+Type=InnoDB;</pre>
+
+    
+    <pre>CREATE TABLE SCHEDULER_TASKS 
+(
+    "TASK_ID"           integer      not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "ENQUEUE_TIME"      datetime,
+    "START_AT_TIME"     datetime,
+    "PARAMETERS"        longtext,
+    "TASK_XML"          longtext,
+    primary key( "TASK_ID" )
+)
+Type=InnoDB;</pre>
+
+    
+    <pre>CREATE TABLE SCHEDULER_HISTORY 
+(
+    "ID"                integer      not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "START_TIME"        datetime     not null,
+    "END_TIME"          datetime,
+    "CAUSE"             varchar(50),
+    "STEPS"             integer,
+    "EXIT_CODE"         integer,
+    "ERROR"             bool,
+    "ERROR_CODE"        varchar(50),
+    "ERROR_TEXT"        varchar(250),
+    "PARAMETERS"        longtext,
+    "LOG"               longblob,
+    primary key( "ID" )
+) 
+Type=InnoDB;
+    
+CREATE INDEX SCHEDULER_HISTORY_START_TIME     on SCHEDULER_HISTORY ("START_TIME"       ):
+CREATE INDEX SCHEDULER_HISTORY_SPOOLER_ID     on SCHEDULER_HISTORY ("SPOOLER_ID"       ):
+CREATE INDEX SCHEDULER_HISTORY_JOB_NAME       on SCHEDULER_HISTORY ("JOB_NAME"         ):
+CREATE INDEX SCHEDULER_HISTORY_CLUSTER_MEMBER on SCHEDULER_HISTORY ("CLUSTER_MEMBER_ID");</pre>
+
+
+    <pre>CREATE TABLE SCHEDULER_ORDERS 
+( 
+    "JOB_CHAIN"                   varchar(100) not null,
+    "ID"                          varchar(255) not null,
+    "SPOOLER_ID"                  varchar(100),
+    "DISTRIBUTED_NEXT_TIME"       datetime,
+    "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
+    "PRIORITY"                    integer      not null,
+    "STATE"                       varchar(100),
+    "STATE_TEXT"                  varchar(100),
+    "TITLE"                       varchar(200),
+    "CREATED_TIME"                datetime     not null,
+    "MOD_TIME"                    datetime,
+    "ORDERING"                    integer      not null,
+    "PAYLOAD"                     longtext,
+    "INITIAL_STATE"               varchar(100),
+    "RUN_TIME"                    longtext,
+    "ORDER_XML"                   longtext,
+    primary key ( "SPOOLER_ID", "JOB_CHAIN", "ID" )
+)
+Type=InnoDB;</pre>
+    
+    
+    <pre>CREATE TABLE SCHEDULER_ORDER_HISTORY 
+(
+    "HISTORY_ID" integer      not null,
+    "JOB_CHAIN"  varchar(100) not null,
+    "ORDER_ID"   varchar(255) not null,
+    "SPOOLER_ID" varchar(100),
+    "TITLE"      varchar(200),
+    "STATE"      varchar(100),
+    "STATE_TEXT" varchar(100),
+    "START_TIME" datetime     not null,
+    "END_TIME"   datetime     not null,
+    "LOG"        longblob,
+    primary key( "HISTORY_ID" )
+)
+Type=InnoDB;
+
+CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );</pre>
+
+    <pre>CREATE TABLE SCHEDULER_CLUSTERS 
+(
+    "MEMBER_ID"              varchar(100)  not null, 
+    "SCHEDULER_ID"           varchar(100)  not null, 
+    "PRECEDENCE"             integer, 
+    "LAST_HEART_BEAT"        integer, 
+    "NEXT_HEART_BEAT"        integer, 
+    "ACTIVE"                 bool, 
+    "EXCLUSIVE"              bool, 
+    "DEAD"                   bool, 
+    "COMMAND"                varchar(250), 
+    "HTTP_URL"               varchar(100), 
+    "DEACTIVATING_MEMBER_ID" varchar(100), 
+    "XML"                    longtext, 
+    primary key( "MEMBER_ID" )
+) 
+Type=InnoDB;</pre>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h3>PostgresQL</h3>
+    
+    <pre>CREATE TABLE SCHEDULER_VARIABLES 
+(   
+    "NAME"     varchar(100)  not null,
+    "WERT"     integer,
+    "TEXTWERT" varchar(250),
+    primary key ( "NAME" )
+);</pre>
+
+    <pre>CREATE TABLE SCHEDULER_TASKS 
+(
+    "TASK_ID"           integer       not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100)  not null,
+    "ENQUEUE_TIME"      timestamp,
+    "START_AT_TIME"     timestamp,
+    "PARAMETERS"        text,
+    "TASK_XML"          text,
+    primary key( "TASK_ID" )
+);</pre>
+
+    <pre>CREATE TABLE SCHEDULER_HISTORY 
+(
+    "ID" integer not null,
+    "SPOOLER_ID" varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100)  not null,
+    "START_TIME"        timestamp     not null,
+    "END_TIME"          timestamp,
+    "CAUSE"             varchar(50),
+    "STEPS"             integer,
+    "EXIT_CODE"         integer,
+    "ERROR"             numeric(1),
+    "ERROR_CODE"        varchar(50),
+    "ERROR_TEXT"        varchar(250),
+    "PARAMETERS"        text,
+    "LOG"               bytea,
+    primary key( "ID" )
+)
+    
+CREATE INDEX SCHEDULER_HISTORY_START_TIME     on SCHEDULER_HISTORY ("START_TIME"       );
+CREATE INDEX SCHEDULER_HISTORY_SPOOLER_ID     on SCHEDULER_HISTORY ("SPOOLER_ID"       );
+CREATE INDEX SCHEDULER_HISTORY_JOB_NAME       on SCHEDULER_HISTORY ("JOB_NAME"         );
+CREATE INDEX SCHEDULER_HISTORY_CLUSTER_MEMBER on SCHEDULER_HISTORY ("CLUSTER_MEMBER_ID");</pre>
+    
+    <pre>CREATE TABLE SCHEDULER_ORDERS 
+(
+    "JOB_CHAIN" varchar(100) not null,
+    "ID" varchar(255) not null,
+    "SPOOLER_ID" varchar(100),
+    "DISTRIBUTED_NEXT_TIME"       timestamp,
+    "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
+    "PRIORITY"                    integer       not null,
+    "STATE"                       varchar(100),
+    "STATE_TEXT"                  varchar(100),
+    "TITLE"                       varchar(200),
+    "CREATED_TIME"                timestamp     not null,
+    "MOD_TIME"                    timestamp,
+    "ORDERING"                    integer       not null,
+    "PAYLOAD"                     text,
+    "INITIAL_STATE"               varchar(100),
+    "RUN_TIME"                    text,
+    "ORDER_XML"                   text,
+    primary key( "SPOOLER_ID", "JOB_CHAIN", "ID" )
+);</pre>
+    
+    <pre>CREATE TABLE SCHEDULER_ORDER_HISTORY 
+(
+    "HISTORY_ID" integer       not null,
+    "JOB_CHAIN"  varchar(100)  not null,
+    "ORDER_ID"   varchar(255)  not null,
+    "SPOOLER_ID" varchar(100),
+    "TITLE"      varchar(200),
+    "STATE"      varchar(100),
+    "STATE_TEXT" varchar(100),
+    "START_TIME" timestamp     not null,
+    "END_TIME"   timestamp     not null,
+    "LOG"        bytea,
+    primary key( "HISTORY_ID" )
+);
+
+CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );</pre>
+
+
+    <pre>CREATE TABLE SCHEDULER_CLUSTERS 
+(
+    "MEMBER_ID"              varchar(100)  not null, 
+    "SCHEDULER_ID"           varchar(100)  not null, 
+    "PRECEDENCE"             integer, 
+    "LAST_HEART_BEAT"        integer, 
+    "NEXT_HEART_BEAT"        integer, 
+    "ACTIVE"                 numeric(1), 
+    "EXCLUSIVE"              numeric(1), 
+    "DEAD"                   numeric(1), 
+    "COMMAND"                varchar(250), 
+    "HTTP_URL"               varchar(100), 
+    "DEACTIVATING_MEMBER_ID" varchar(100), 
+    "XML"                    text, 
+    primary key( "MEMBER_ID" )
+);</pre>
+
+</description>

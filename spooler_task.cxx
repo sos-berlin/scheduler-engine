@@ -30,7 +30,7 @@ namespace scheduler {
 static const string spooler_get_name        = "spooler_get";
 static const string spooler_level_name      = "spooler_level";
 
-const int max_stdout_state_text_length      = 200;                      // Für Job.state_text und Order.state_text
+const int max_stdout_state_text_length      = 100;                      // Für Job.state_text und Order.state_text
 
 //----------------------------------------------------------------------------Spooler_object::level
 /*

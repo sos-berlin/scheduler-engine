@@ -205,6 +205,9 @@
         <p>
             Der Text wird auf der HTML-Oberfläche gezeigt.
         </p>
+        <p>
+            Für Nicht-API-Jobs füllt der Scheduler dieses Feld mit der ersten Zeile von stdout, max. 100 Zeichen.
+        </p>
     </description>
 </property>
 

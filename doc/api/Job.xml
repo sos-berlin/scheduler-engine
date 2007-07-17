@@ -286,7 +286,12 @@ $spooler->job( 'job_a' )->start( $parameters );</pre>
         </title>
 
         <description>
-            Der Text wird in der HTML-Oberfläche gezeigt.
+            <p>
+                Der Text wird in der HTML-Oberfläche gezeigt.
+            </p>
+            <p>
+                Für Nicht-API-Jobs füllt der Scheduler dieses Feld mit der ersten Zeile von stdout, max. 100 Zeichen.
+            </p>
         </description>
 
         <example programming_language="java">

@@ -47,6 +47,10 @@
 <p>
     <a href="history.xml">Hier lesen Sie weiteres zur Historie</a>.
 </p>
+<p>
+    Wie die Tabellen angelegt werden, steht hier:
+    <scheduler_a href="scheduler_sql.xml" quote="yes"/>.
+</p>    
 
 
 
@@ -141,6 +145,5 @@
     Nur Kommandos über TCP oder HTTP verarbeitet er.
     Er kann nicht beendet, nur abgebrochen werden (s. <a href="termination.xml">Beendigung</a>).
 </p>
-
 
 </description>

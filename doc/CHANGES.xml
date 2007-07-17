@@ -10,6 +10,21 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-07-17" version="2.0.178" subversion_revision="5131">
+        <revision type="modification" title="Prozess-Jobs setzen Job.state_text und Order.state_text">
+            <description>
+                <p>
+                    Der Scheduler füllt nach Beendigung eines Prozess-Jobs 
+                    (<scheduler_element name="process"/> und <scheduler_element name="script" attribute="language" value="shell"/>,
+                    also nicht API-Jobs) 
+                    <scheduler_method class="Job" property="state_text"/> und
+                    <scheduler_method class="Order" property="state_text"/> 
+                    mit der ersten Zeile von stdout, max. 100 Zeichen.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2007-07-13" version="2.0.177" subversion_revision="5128">
         <revision type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
             <description>

@@ -430,6 +430,9 @@
     <register_keyword_display><code>count</code> (property)</register_keyword_display>
     <register_entry register_file='api/Variable_set.xml#method__count' register_title='Variable_set.count' register_keyword='count' type='definition'/>
 </register_keyword>
+<register_keyword keyword='create table (SQL)'>
+    <register_entry register_file='scheduler_sql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen'  register_keyword='create table (SQL)'/>
+</register_keyword>
 <register_keyword keyword='create_job_chain'>
     <register_keyword_display><code>create_job_chain()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
@@ -490,6 +493,9 @@
 <register_keyword keyword='Datenbank'>
     <register_entry register_file='datenbank.xml' register_title='Datenbank'  register_keyword='Datenbank'/>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Datenbank'/>
+</register_keyword>
+<register_keyword keyword='Datenbanktabellen'>
+    <register_entry register_file='scheduler_sql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen'  register_keyword='Datenbanktabellen'/>
 </register_keyword>
 <register_keyword keyword='day'>
     <register_keyword_display><code>&lt;day&gt;</code></register_keyword_display>
