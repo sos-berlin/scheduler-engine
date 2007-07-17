@@ -650,10 +650,10 @@ void Database::create_tables_when_needed()
 
     if( created )
     {
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME"    , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID"    , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"      , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_CLUSTER_MEMBER", "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME" , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID" , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"   , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_CLUSTMEMBER", "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
     }
     else
     {

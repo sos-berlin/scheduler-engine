@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-17" version="2.0.178" subversion_revision="5131">
+    <change date="2007-07-17" version="2.0.178" subversion_revision="5132">
         <revision type="modification" title="Prozess-Jobs setzen Job.state_text und Order.state_text">
             <description>
                 <p>
@@ -20,6 +20,33 @@
                     <scheduler_method class="Job" property="state_text"/> und
                     <scheduler_method class="Order" property="state_text"/> 
                     mit der ersten Zeile von stdout, max. 100 Zeichen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Datenbank-Indicies werden automatisch angelegt">
+            <description>
+                <p>
+                    Der Scheduler legt jetzt zusammen mit den Datenbanktabellen auch die Indices an.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Create-tables in die Dokumentation aufgenommen">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_a href="scheduler_sql.xml" quote="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Umgang mit Backslash in MySQL">
+            <description>
+                <p>
+                    Beim Betrieb mit einer MySQL-Datenbank
+                    berücksichtigt der Scheduler die Besonderheit der Backslashs in MySQL-Strings.
                 </p>
             </description>
         </revision>

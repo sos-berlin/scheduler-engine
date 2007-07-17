@@ -95,6 +95,7 @@
     <file path="remote_execution.xml"/>
     <!--file path="register.xml"/>
     <file path="register_data.xml"/-->
+    <file path="scheduler_sql.xml"/>
     <file path="script_language_javascript.xml"/>
     <file path="service.xml"/>
     <file path="settings.xml"/>
