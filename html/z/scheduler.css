@@ -92,6 +92,8 @@ a:hover                 { background-color: #e0e0FF }
 .menu_click:visited     { color: #0000a0; background-color: inherit; }
 .menu_click:hover       { background-color: #e0e0FF }
 
+/* Für die Job-<description> */
+body#job_description    { background-color: #80ecff }
 
 .cluster                { background-color: #ffffa0 }
 
@@ -116,5 +118,10 @@ pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt
 .log_debug8             { color: #8080FF; }
 .log_debug9             { color: #a0a0a0; }
 
-/* Für die Job-<description> */
-body#job_description    { background-color: #80ecff }
+a.log                   { text-decoration: none     ; color: inherit; background-color: inherit; }
+a.log:link              { background-color: inherit; color: #0000a0; cursor: pointer; }
+a.log:active            { background-color: inherit; color: #0000a0; }
+a.log:visited           { background-color: inherit; color: #0000a0; }
+a.log:hover             { background-color: #e0e0FF }
+
+span.invalid_character  { font-size: 5pt; }

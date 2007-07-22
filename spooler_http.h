@@ -169,6 +169,7 @@ struct Html_chunk_reader : Chunk_reader_filter
     int                         get_next_chunk_size         ();
     string                      read_from_chunk             ( int size );
     bool                        try_fill_chunk              ();
+    bool                        try_fill_line               ();
 
 
     Fill_zero                  _zero_;
@@ -179,11 +180,14 @@ struct Html_chunk_reader : Chunk_reader_filter
     string                     _chunk;
     bool                       _chunk_filled;
 
-    // Für <span class="debug9">...[debug9]...</span>
-    bool                       _awaiting_class;             // Wir erwarten [info] und dergleichen
-  //int                        _blank_count;                // Nach dem vierten Blank haben den Log-Level und Job/Task/Order/Scheduler
     int                        _in_span;                    // Wir müssen am Zeilenende soviele </span> schreiben
-    string                     _line_prefix;                // Zeilenanfang bis "[info"
+    bool                       _at_begin_of_line;
+
+    string                     _line;                       
+    bool                       _is_begin_of_line;
+    string                     _html_insertion;
+    string                     _next_characters;
+    size_t                     _next_offset;
 };
 
 //--------------------------------------------------------------------------------------Status_code

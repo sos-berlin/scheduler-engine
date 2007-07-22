@@ -45,6 +45,9 @@ stdext::hash_map<int,string>    http_status_messages;
 //--------------------------------------------------------------------------------------------const
 
 const string                    default_charset_name = "ISO-8859-1";
+const size_t                    max_line_length      = 10000;
+const char                      hex[]                = "0123456789abcdef";
+
 
 
 struct Http_status_code_table 
@@ -52,6 +55,7 @@ struct Http_status_code_table
     Status_code                _code; 
     const char*                _text;
 };
+
 
 const Http_status_code_table http_status_code_table[]  =
 {
@@ -64,6 +68,28 @@ const Http_status_code_table http_status_code_table[]  =
     { status_504_gateway_timeout               , "Gateway Timeout" },
     { status_505_http_version_not_supported    , "HTTP Version Not Supported" },
     {}
+};
+
+
+const char allowed_html_characters[ 256 ] =
+{
+    // 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f   
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,  // 00   \t, \n, \r  (\r von XML nur geduldet, aber nicht gelesen)
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // 10
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 20
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 30
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 40
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 50
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 60
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  // 70
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // 80
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // 90
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // a0
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // b0
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // c0
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // d0
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // e0
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1   // f0
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -1457,7 +1483,7 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
     Chunk_reader_filter( chunk_reader, "text/html; charset=" + get_content_type_parameter( chunk_reader->content_type(), "charset" ) ),
     _zero_(this+1), 
     _state(reading_prefix),
-    _awaiting_class(true)
+    _at_begin_of_line(true)
 {
     _html_prefix = "<html>\n" 
                         "<head>\n" 
@@ -1516,122 +1542,192 @@ int Html_chunk_reader::get_next_chunk_size()
     return _chunk.length();
 }
 
+//------------------------------------------------------------------------------append_html_encoded
+
+static void append_html_encoded( string* html, const char* p, size_t length, char quote = '\0' )
+{
+    const char* p0    = p;
+    const char* p_end = p + length;
+
+    while( p < p_end )
+    {
+        const char* tail = p;
+        while( p < p_end  &&  ( allowed_html_characters[ (unsigned char)*p ]  ||  *p == quote ) )  p++;
+        html->append( tail, p - tail );
+
+        if( p == p_end )  break;
+
+        switch( char c = *p++ )
+        {
+            case '&' : *html += "&amp;";  break;
+            case '<' : *html += "&lt;";   break;
+            case '>' : if( p > p0  &&  p[-1] != ']' )  *html += '>'; 
+                                                 else  *html += "&gt;";
+                       break;
+            case '\'': *html += "&#x27;";  break;
+            case '"' : *html += "&#x22;";  break;
+
+            default  : //if( (unsigned char)c < 0x20 )  *html += "&#" + as_string( 0x2400 + (unsigned char)c ) + ";";  // Unicode Control Pictures 
+                       //else
+                       //if( c == '\x7F' )  *html += "&#2401";
+                       //else
+                       {
+                           *html += "<span class='invalid_character'>";
+                           *html += hex[ (unsigned char)c >> 4 ];
+                           *html += hex[ c & 0x0F ];
+                           *html += "</span>";
+                       }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------append_html_encoded
+
+inline void append_html_encoded( string* html, const string& text, char quote = '\0' )
+{
+    append_html_encoded( html, text.data(), text.length(), quote );
+}
+
 //----------------------------------------------------------------Html_chunk_reader::try_fill_chunk
 
 bool Html_chunk_reader::try_fill_chunk()
 {
     _chunk = "";
+    _chunk.reserve( _recommended_block_size + 2*max_line_length );
 
     while( _chunk.length() < _recommended_block_size )
     {
-        if( _available_net_chunk_size == 0 )
-        {
-            if( !_chunk_reader->next_chunk_is_ready() )  return _chunk.length() > 0;
+        bool ok = try_fill_line();      // Liefert _html_insertion oder _line
+        if( !ok )  return _chunk.length() > 0;
 
-            _available_net_chunk_size = _chunk_reader->get_next_chunk_size();
+        if( _html_insertion != "" )
+        {
+            _chunk.append( _html_insertion );   // Z.B. <hr/>
+            _html_insertion = "";
         }
-
-        _chunk.append( _chunk_reader->html_insertion() );   // Z.B. <hr/>
-
-        string text = _chunk_reader->read_from_chunk( _available_net_chunk_size );
-        if( text == "" )  return true;  // Fertig, bei _chunk_length() == 0: eof        return _chunk.length() > 0;
-
-        _available_net_chunk_size -= text.length();
-
-        _chunk.reserve( _chunk.length() + text.length() * 2 );
-
-        const char* text_data = text.data();
-
-        for( int i = 0; i < text.length(); i++ )
+        else
+        if( _line != "" )
         {
-            int  begin = i;
-            char c     = text_data[i];
-
-            if( _awaiting_class )
+            if( _at_begin_of_line )
             {
-                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != ']'  &&  c != '\n' )  c = text_data[ ++i ];
+                size_t left_bracket  = _line.find( '[' );
+                size_t right_bracket = _line.find( ']' );
                 
-                _line_prefix.append( text_data + begin, i - begin );
-
-                if( i == text.length() )  break;
-
-                if( c == ']' )
+                if( left_bracket != string::npos  &&  right_bracket != string::npos  &&  left_bracket < right_bracket )
                 {
-                    _awaiting_class = false;
+                    _chunk += "<span class='log_";
+                    append_html_encoded( &_chunk, lcase( _line.substr( left_bracket + 1, right_bracket - left_bracket - 1 ) ) );
+                    _chunk += "'>";
 
-                    {
-                        int left_bracket  = _line_prefix.find( '[' );
-                        int right_bracket = _line_prefix.length();  //_line_prefix.find( ']' );
-                        if( left_bracket != string::npos  &&  right_bracket != string::npos  &&  left_bracket < right_bracket )
-                        {
-
-                            _chunk += "<span class='log_";
-                            _chunk += lcase( _line_prefix.substr( left_bracket + 1, right_bracket - left_bracket - 1 ) );
-                            _chunk += "'>";
-
-                            _in_span++;    // </span> nicht vergessen
-                        }
-                    }
-
-
-                    /*
-                    {
-                        int left_parenthesis   = _line_prefix.find( '(' );
-                        int right_parenthesis  = _line_prefix.find( ')', left_parenthesis );
-                        if( right_parenthesis == string::npos )  right_parenthesis = _line_prefix.length();
-
-                        if( left_parenthesis != string::npos  &&  right_parenthesis != string::npos )
-                        {
-                            int blank = _line_prefix.find( ' ', left_parenthesis );
-                            if( blank == string::npos )  blank = right_parenthesis;
-
-                            _chunk.append( _line_prefix.data(), left_parenthesis );
-                            _chunk += "<span class='log_";
-                            _chunk += lcase( _line_prefix.substr( left_parenthesis + 1, blank - left_parenthesis - 1 ) );
-                            _chunk += "'>";
-                            _chunk.append( _line_prefix.data() + left_parenthesis, right_parenthesis + 1 - left_parenthesis );
-                            _chunk += "</span>";
-
-                            _line_prefix.erase( 0, right_parenthesis + 1 );
-                        }
-                    }
-                    */
-
-                    _chunk += _line_prefix;
-                    _line_prefix = "";
-                    //_blank_count = 0;
-                }
-                else
-                {
-                    _chunk += _line_prefix;      // War nix. 
-                    _line_prefix = "";
+                    _in_span++;    // </span> nicht vergessen
                 }
             }
-            else
+
+
+            _at_begin_of_line = false;
+
+
+            const char* p     = _line.data();
+            const char* tail  = p;
+            const char* p_end = p + _line.length();
+
+            while( p < p_end )
             {
-                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != '\n' )  c = text_data[ ++i ];
-                _chunk.append( text_data + begin, i - begin );
-                if( i == text.length() )  break;
+                switch( char c = *p )
+                {
+                    case '\r': append_html_encoded( &_chunk, tail, p - tail ),  p++,  tail = p;   // Bisherigen Text ausgeben
+                               // \r nicht ausgeben
+                               break;
+
+                    case '\n': append_html_encoded( &_chunk, tail, p - tail ),  p++,  tail = p;   // Bisherigen Text ausgeben
+                               while( _in_span )  _chunk += "</span>", _in_span--;
+                               _chunk += '\n';
+                               _at_begin_of_line = true;
+                               assert( p == p_end );
+                               break;   
+
+                    case 'h': 
+                    {
+                        if( string_begins_with( p, "http://" ) )
+                        {
+                            const char* p0 = p;
+                            while( p < p_end  &&  !isspace( (unsigned char)*p ) ) p++;
+                            while( p > p0  &&  !isalnum( (unsigned char)p[-1]  ) )  p--;
+                            if( p > p0 )
+                            {
+                                append_html_encoded( &_chunk, tail, p0 - tail );    // Bisherigen Text ausgeben
+                               
+                                string url ( p0, p - p0 );
+                                _chunk += "<a class='log' href='";
+                                append_html_encoded( &_chunk, url, '\'' );
+                                _chunk += "' target='_blank'>";
+                                append_html_encoded( &_chunk, url );
+                                _chunk += "</a>";
+
+                                tail = p;
+                                break;
+                            }
+                        }
+
+                        p++;
+                        break;
+                    }
+
+                    default: p++;
+                }
             }
 
-            switch( c )
-            {
-                case '<' : _chunk += "&lt;";   break;
-                case '>' : _chunk += "&gt;";   break;
-                case '&' : _chunk += "&amp;";  break;
-                case '\r': break;
-
-                case '\n': while( _in_span )  _chunk += "</span>", _in_span--;
-                           _chunk += c;        
-                           _awaiting_class = true;      // Wir erwarten [info] [error] und dergleichen
-                           break;   
-
-                default : _chunk += c;
-            }
+            append_html_encoded( &_chunk, tail, p - tail );
+            _line = "";
         }
+        else
+            return true;   // eof
     }
 
-    return true;  // eof
+    return true;
+}
+
+//-----------------------------------------------------------------Html_chunk_reader::try_fill_line
+
+bool Html_chunk_reader::try_fill_line()
+// Liefert _line oder _html_insertion
+{
+    bool line_end_found = false;
+
+    while( !line_end_found  &&  _line.length() < max_line_length )
+    {
+        if( _next_characters == "" )
+        {
+            _html_insertion = _chunk_reader->html_insertion();   // Z.B. <hr/>
+            if( _html_insertion != "" )  return true;
+
+            if( _available_net_chunk_size == 0 )
+            {
+                if( !_chunk_reader->next_chunk_is_ready() )  return false;
+                _available_net_chunk_size = _chunk_reader->get_next_chunk_size();
+                _next_characters.reserve( _available_net_chunk_size );
+            }
+
+            _next_characters = _chunk_reader->read_from_chunk( _available_net_chunk_size );
+            if( _next_characters.length() == 0 )  return true;  // Fertig, bei _chunk_length() == 0: eof
+
+            _available_net_chunk_size -= _next_characters.length();
+        }
+
+        size_t end = _next_characters.find( '\n', _next_offset );
+        size_t length;
+        if( end == string::npos )  length = _next_characters.length() - _next_offset;
+                             else  length = end + 1 - _next_offset, line_end_found = true;
+        
+        if( _line.length() + length > max_line_length )  length = max_line_length - _line.length();
+
+        _line.append( _next_characters.data() + _next_offset, length );
+        _next_offset += length;
+
+        if( _next_offset == _next_characters.length() )  _next_offset = 0, _next_characters = "";
+    }
+
+    return true;
 }
 
 //---------------------------------------------------------------Html_chunk_reader::read_from_chunk
