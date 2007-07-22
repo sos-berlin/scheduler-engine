@@ -64,7 +64,7 @@ struct Order : Com_order,
   //void                        close                   ()                                          { close( true ); }
 
     void                        init                    ();
-    void                        activate                ();
+    bool                        activate                ();
     void                        load_blobs              ( Read_transaction* );
     void                        load_order_xml_blob     ( Read_transaction* );
     void                        load_run_time_blob      ( Read_transaction* );
@@ -216,7 +216,7 @@ struct Order : Com_order,
     void                        run_time_modified_event ();
 
     void                        db_insert               ();
-    bool                        db_try_insert           ();
+    bool                        db_try_insert           ( bool throw_exists_exception = false );
     bool                        db_occupy_for_processing();
     bool                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );

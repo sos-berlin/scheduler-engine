@@ -170,16 +170,6 @@ void Remote_task_close_command_response::write_file( const string& name, const F
     _xml_writer.end_element( "file" );
 }
 
-//--------------------------------------------------------------------------dom_append_text_element
-
-void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
-{
-    xml::Node_ptr     text_node = element.ownerDocument().createTextNode( text );
-    xml::Element_ptr  e         = element.appendChild( element.ownerDocument().createElement( element_name ) );
-
-    e.appendChild( text_node );
-}
-
 //------------------------------------------------------------------------------------dom_append_nl
 
 void dom_append_nl( const xml::Element_ptr& )

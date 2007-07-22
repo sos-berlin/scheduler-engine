@@ -92,7 +92,6 @@ struct Show_calendar_options
 
 //-------------------------------------------------------------------------------------------------
 
-void                            dom_append_text_element     ( const xml::Element_ptr& element, const char* element_name, const string& text );
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
 Xc_copy                         xc_from_dom_error           ( const xml::Element_ptr& );
 void                            dom_append_nl               ( const xml::Element_ptr& );

@@ -253,7 +253,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-391", "Invalid value '$2' for setting '$1'. Allowed values are: $3" },
     { "SCHEDULER-392", "heart_beat_warn_timeout=$1 seconds has to be lower than heart_beat_own_timeout=$2, which has to be lower than heart_beat_warn_timeout=$3 seconds" },
     { "SCHEDULER-393", "Error when calling <run_time> function '$1': $2" },
-    { "SCHEDULER-394", "<run_time>-Function '$1' returned start time $2 which is earlier then the requested beginning $3" },
+    { "SCHEDULER-394", "<run_time>-Function '$1' returned start time $2 which is earlier than the requested beginning $3" },
     { "SCHEDULER-395", "No Scheduler script" },
     { "SCHEDULER-396", "Job has not yet reached state '$1' for operation $2" },
     { "SCHEDULER-397", "A distributed order does not support $1" },

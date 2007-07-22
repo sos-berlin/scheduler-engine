@@ -10,6 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-07-19" version="2.0.178" subversion_revision="5133">
+        <revision type="modification" title="Nicht für XML zugelassene Zeichen werden durch ¿ ersetzt">
+            <description>
+                <p>
+                    Die Zeichen U-0 bis U-1F (außer U-9, U-A, U-D) und U-80 bis U-9F 
+                    ersetzt der Scheduler beim Erzeugen von XML-Dokumenten durch ¿.
+                    Alle anderen Zeichen des Zeichenvorrats Latin1 (ISO-8859-1) werden weiter unterstützt.
+                </p>
+            </description>
+        </revision>
+
+        <!--revision type="new" title="Verteilte Aufträge eine &lt;run_time> haben (?????????????????)">
+            <description>
+                <p>
+                    ?????????????????????
+                </p>
+            </description>
+        </revision-->
+    </change>
+
     <change date="2007-07-17" version="2.0.178" subversion_revision="5132">
         <revision type="modification" title="Prozess-Jobs setzen Job.state_text und Order.state_text">
             <description>
@@ -24,7 +44,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Datenbank-Indicies werden automatisch angelegt">
+        <revision type="new" title="Datenbank-Indices werden automatisch angelegt">
             <description>
                 <p>
                     Der Scheduler legt jetzt zusammen mit den Datenbanktabellen auch die Indices an.

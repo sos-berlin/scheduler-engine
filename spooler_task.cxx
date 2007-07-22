@@ -440,7 +440,6 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
             task_element.appendChild( subprocesses_element );
         }
 
-        //if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
         task_element.appendChild( _log->dom_element( document, show ) );
     }
 

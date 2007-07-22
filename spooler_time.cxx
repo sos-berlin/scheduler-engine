@@ -765,7 +765,7 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     string end = element.getAttribute( "end" , "24:00:00" );
     if( !end.empty() )  dt.set_time( end ), _end = dt;
 
-    _start_once = element.bool_getAttribute( "start_once", _start_once );
+    _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
     //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( __FUNCTION__, "Attribute start_once is not supported" );
 
     check();
@@ -842,7 +842,7 @@ void Period::print( ostream& s ) const
 
 //------------------------------------------------------------------------------Period::dom_element
 
-xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document )
+xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) const
 {
     xml::Element_ptr result;
 

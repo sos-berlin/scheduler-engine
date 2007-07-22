@@ -171,7 +171,7 @@ struct Period
     
     void                        init                        ()                                      { _begin = _end = _repeat = Time::never; }
 
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
 
     bool                        empty                       () const                                { return _begin == Time::never; }
     bool                        has_start                   () const                                { return is_single_start() || repeat() != Time::never; }
@@ -181,7 +181,7 @@ struct Period
 
     void                        set_default                 ();
     void                        set_single_start            ( const Time& );
-    void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt );
+    void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt = NULL );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>

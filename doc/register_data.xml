@@ -1243,6 +1243,9 @@
     <register_entry register_file='api/Job.xml#method__include_path' register_title='Job.include_path' register_keyword='include_path' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__include_path' register_title='Spooler.include_path' register_keyword='include_path' type='definition'/>
 </register_keyword>
+<register_keyword keyword='Indices (SQL)'>
+    <register_entry register_file='scheduler_sql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen'  register_keyword='Indices (SQL)'/>
+</register_keyword>
 <register_keyword keyword='info'>
     <register_keyword_display><code>info()</code></register_keyword_display>
     <register_entry register_file='api/Log.xml#method__info' register_title='Log.info()' register_keyword='info()' type='definition'/>

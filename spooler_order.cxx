@@ -3285,6 +3285,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                 ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
             
                 order->_is_distributed = true;
+                //2007-07-22 order->_order_state    = Order::s_active;
                 
                 Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
                 assert( job_chain->_is_distributed );
@@ -3549,8 +3550,8 @@ void Order::init()
 
 void Order::load_blobs( Read_transaction* ta )
 {
-    load_order_xml_blob( ta );
     load_run_time_blob( ta );
+    load_order_xml_blob( ta );      // Setzt _period, deshalb nach load_run_time_blob()
     load_payload_blob( ta );
 }
 
@@ -3672,7 +3673,9 @@ void Order::set_distributed( bool distributed )
 
     if( distributed )
     {
-        if( _run_time->set() )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
+#     ifndef Z_DEBUG  //test
+        //2007-07-27 if( _run_time->set() )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
+#     endif
         //if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( __FUNCTION__, obj_name(), "no job_chain or job_chain is not distributed" );
     }
 
@@ -3810,15 +3813,15 @@ void Order::db_show_occupation( Log_level log_level )
 
 void Order::db_insert()
 {
-    bool ok = db_try_insert();
+    bool ok = db_try_insert( true );
     if( !ok )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, "in database" );
 }
 
-//-------------------------f----------------------------------------------------Order::db_try_insert
+//-----------------------------------------------------------------------------Order::db_try_insert
 
-bool Order::db_try_insert()
+bool Order::db_try_insert( bool throw_exists_exception )
 {
-    bool   insert_ok     = false;
+    bool   insert_ok      = false;
     string payload_string = string_payload();
 
     if( db()->opened() )
@@ -3894,19 +3897,25 @@ bool Order::db_try_insert()
             }
             catch( exception& x )     // Datensatz ist bereits vorhanden?
             {
-                if( insert_race_retry_count > max_insert_race_retry_count )  throw;
-
                 ta.intermediate_rollback( __FUNCTION__ );      // Postgres verlangt nach Fehler ein Rollback
+
+                if( insert_race_retry_count > max_insert_race_retry_count )  throw;
 
                 Any_file result_set = ta.open_result_set
                     ( 
-                        S() << "select " << order_select_database_columns << 
+                        S() << "select `distributed_next_time`" 
                                " from " << _spooler->_orders_tablename << 
                                db_where_clause().where_string(), 
                         __FUNCTION__ 
                     );
 
-                if( !result_set.eof() )  break;
+                if( !result_set.eof() )
+                {
+                    Record record = result_set.get_record();
+                    if( throw_exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path,
+                                                               record.null( "distributed_next_time" )? "in database, not distributed" : "distributed" );
+                    break;
+                }
 
                 string msg = message_string( "SCHEDULER-851", insert_race_retry_count, x );
                 ( _job_chain? _job_chain->log() : _spooler->log() ) -> info( S() << obj_name() << ":" << msg );
@@ -4437,6 +4446,12 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             set_run_time( e );
         }
         else
+        //2007-07-27 if( e.nodeName_is( "period" ) )
+        //2007-07-27 { 
+        //2007-07-27     _period = Period();
+        //2007-07-27     _period.set_dom( e );
+        //2007-07-27 }
+        //2007-07-27 else
         if( e.nodeName_is( "log" ) )
         {
             assert( !_log->opened() );
@@ -4545,7 +4560,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
             payload_element.appendChild( payload_content );
         }
 
-        if( show.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );
+    }
+
+    if( show.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );  // Vor _period setzen!
+
+    if( show.is_set( show_for_database_only ) )
+    {
+        // Nach <run_time> setzen!
+        //2007-07-27 if( _period.repeat() < Time::never )  element.appendChild( _period.dom_element( document ) );     // Aktuelle Wiederholung merken, für <run_time>
     }
 
     if( show.is_set( show_log )  ||  show.is_set( show_for_database_only ) )
@@ -5251,7 +5273,7 @@ void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option jo
 
 //----------------------------------------------------------------------Order::try_place_in_job_chain
 
-bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option job_chain_stack_option, bool exists_exception )
+bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option job_chain_stack_option, bool exists_exception )
 {
     bool is_new = true;
 
@@ -5318,8 +5340,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
         _job_chain_path = job_chain->path();
         _removed_from_job_chain_name = "";
 
-        //set_setback( _state == _initial_state  &&  !_setback  &&  _run_time->set()? next_start_time( true ) : _setback );
-        activate();
+        activate();     // Errechnet die nächste Startzeit
 
         if( _delay_storing_until_processing ) 
         {
@@ -5328,7 +5349,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_optio
         else
         if( job_chain->_orders_recoverable  &&  !_is_in_database )
         {
-            if( db()->opened() )  is_new = db_try_insert();       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
+            if( db()->opened() )  is_new = db_try_insert( exists_exception );       // false, falls aus irgendeinem Grund die Order-ID schon vorhanden ist
         }
 
         if( is_new  &&  !_is_distributed )
@@ -5376,14 +5397,18 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 //----------------------------------------------------------------------------------Order::activate
 
-void Order::activate()
+bool Order::activate()
 {
+    bool result = false;
+
     if( order_subsystem()->subsystem_state() == subsys_active )  
     {
         _order_state = s_active;
+        set_next_start_time();
+        result = true;
     }
 
-    set_next_start_time();
+    return result;
 }
 
 //-----------------------------------------------------------------------Order::set_next_start_time
@@ -5947,7 +5972,10 @@ Time Order::next_start_time( bool first_call )
 
 void Order::on_before_modify_run_time()
 {
-    if( _is_distributed )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
+# ifndef Z_DEBUG  //test
+    //2007-07-27 if( _is_distributed )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
+# endif
+
   //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
   //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
   //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path );

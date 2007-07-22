@@ -2871,7 +2871,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 
 
-        if( show.is_set( show_description ) )  dom_append_text_element( job_element, "description", _description );
+        if( show.is_set( show_description ) )  job_element.append_new_text_element( "description", _description );
 
         if( show.is_set( show_job_commands ) && _commands_document )  
         {

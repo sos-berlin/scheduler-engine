@@ -29,11 +29,10 @@ else
 
 
         <jobs>
-            <job name="process" title="Aufruf von /tmp/test.cmd" order="yes">
+            <job name="process" title="Aufruf von /tmp/test.cmd" order="yes" stop_on_error="no">
                 
                 <process 
                     file="/tmp/test.cmd" 
-                    ignore_error="no" 
                     param="Mein Parameter 'ab' &quot;ab&quot; &quot;'&quot; \ $ {} () EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH"
                 >
                     <environment>
@@ -55,7 +54,9 @@ else
 
         <job_chains>
             <job_chain name="process.scheduler">
-                <job_chain_node state="1" job="process"/>
+                <job_chain_node     state="1" job="process" next_state="NEXT_STATE" error_state="ERROR_STATE"/>
+                <job_chain_node.end state="NEXT_STATE"/>
+                <job_chain_node.end state="ERROR_STATE"/>
             </job_chain>
         </job_chains>
     </config>
