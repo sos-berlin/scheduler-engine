@@ -1968,7 +1968,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
     }
 
     double t = 1;
-    Z_LOG2( "scheduler", "sleep(" << t << ")...\n" );
+    Z_LOG2( "scheduler", __FUNCTION__ << " sleep(" << t << ")...\n" );
     sos_sleep( t );
 }
 
@@ -3480,17 +3480,17 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             size_t pos = log_filename.find( '>' );
             File_path path = pos == string::npos? log_filename : log_filename.substr( pos + 1 );
 
-            if( zschimmer::file::file_exists( path ) )  
-            {
-                File_path gz_path = path + ".gz";
-                S cmd; cmd << "gzip <" << path << " >" << gz_path;
-                try
-                {
-                    //_log->debug( scheduler_message( "SCHEDULER-848", gz_path ) );
-                    copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
-                }
-                catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
-            }
+            //if( zschimmer::file::file_exists( path ) )  
+            //{
+            //    File_path gz_path = path + ".gz";
+            //    S cmd; cmd << "gzip <" << path << " >" << gz_path;
+            //    try
+            //    {
+            //        //_log->debug( scheduler_message( "SCHEDULER-848", gz_path ) );
+            //        copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
+            //    }
+            //    catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }
+            //}
 
             log_start( log_filename );
         }
