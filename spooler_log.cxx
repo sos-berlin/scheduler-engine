@@ -382,10 +382,6 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 {
     if( this == NULL )  return;
 
-#   ifndef Z_DEBUG
-        if( !_spooler->_zschimmer_mode  &&  level < _spooler->_log_level )  return;   // eMail von Uwe Risse 2007-07-12 15:18
-#   endif
-
     bool log_to_files = level >= _spooler->_log_level;
 
     try
@@ -410,8 +406,15 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 
     //if( _file == -1 )  return;
             
-    if( !log_to_files  &&  !log_category_is_set( "scheduler" ) )  return;
 
+    if( !log_to_files )
+    {
+        if( !log_category_is_set( "scheduler" ) )  return;
+
+#       ifndef Z_DEBUG
+            if( !_spooler->_zschimmer_mode )  return;   // eMail von Uwe Risse 2007-07-12 15:18, Jira JS-50
+#       endif
+    }
 
     string line = line_;
     for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
@@ -1137,6 +1140,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
       //if( level >= log_debug9  &&  level <= log_fatal )  _counter[ level - log_debug9 ]++;
 
         bool log_to_files = level >= log_level();
+
         _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
     }
 }

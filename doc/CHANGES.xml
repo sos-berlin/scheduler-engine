@@ -15,16 +15,15 @@
             <description>
                 <p>
                     Die Zeichen U-0 bis U-1F (außer U-9, U-A, U-D) und U-80 bis U-9F 
-                    ersetzt der Scheduler beim Erzeugen von XML-Dokumenten durch ¿.
+                    ersetzt der Scheduler beim Erzeugen eines XML-Dokuments durch ¿, damit es nicht ungültig wird.
                     Alle anderen Zeichen des Zeichenvorrats Latin1 (ISO-8859-1) werden weiter unterstützt.
                 </p>
             </description>
         </revision>
 
-        <!--revision type="new" title="Verteilte Aufträge eine &lt;run_time> haben (?????????????????)">
+        <!--revision type="new" title="Verteilte Aufträge eine &lt;run_time> haben">
             <description>
                 <p>
-                    ?????????????????????
                 </p>
             </description>
         </revision-->

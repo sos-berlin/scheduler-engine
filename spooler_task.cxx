@@ -1329,6 +1329,12 @@ bool Task::do_something()
                             {
                                 operation__end();
 
+                                //if( _module_instance->_module->_kind == Module::kind_process )
+                                //{
+                                //    set_state_texts_from_stdout();
+                                //    postprocess_order( true );
+                                //}
+
                                 set_state( loaded()? s_ending_waiting_for_subprocesses
                                                    : s_release );
                                 loop = true;
