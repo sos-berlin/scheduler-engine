@@ -9,7 +9,7 @@
     >
 
         <security>
-            <allowed_host host="0.0.0.0" level="all"/>
+            <allowed_host host="127.0.0.1" level="all"/>
         </security>
 
         <process_classes/>
