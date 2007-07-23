@@ -1633,7 +1633,7 @@ bool Html_chunk_reader::try_fill_chunk()
 
             while( p < p_end )
             {
-                switch( char c = *p )
+                switch( *p )
                 {
                     case '\r': append_html_encoded( &_chunk, tail, p - tail ),  p++,  tail = p;   // Bisherigen Text ausgeben
                                // \r nicht ausgeben

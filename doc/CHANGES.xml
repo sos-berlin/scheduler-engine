@@ -10,13 +10,23 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-19" version="2.0.178" subversion_revision="5133">
+    <change date="2007-07-19" version="2.0.179" subversion_revision="5136">
         <revision type="modification" title="Nicht für XML zugelassene Zeichen werden durch ¿ ersetzt">
             <description>
                 <p>
                     Die Zeichen U-0 bis U-1F (außer U-9, U-A, U-D) und U-80 bis U-9F 
                     ersetzt der Scheduler beim Erzeugen eines XML-Dokuments durch ¿, damit es nicht ungültig wird.
                     Alle anderen Zeichen des Zeichenvorrats Latin1 (ISO-8859-1) werden weiter unterstützt.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
+            <description>
+                <p>
+                    Urls in einem über HTTP in HTML gelieferten Protokoll sind klickbar.
+                    Der Scheduler erkennt das Kennzeichen <code>http://</code> und 
+                    setzt den Url in ein <code>&lt;a href="…" target="_blank">...&lt;/a></code>
                 </p>
             </description>
         </revision>
