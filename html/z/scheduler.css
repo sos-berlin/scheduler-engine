@@ -74,7 +74,7 @@ hr.order_id_space       { color: #ff8000; background-color: #ff8000; }
 
 .calendar               { background-color: #ffe0c0; }
 
-a                       { text-decoration: underline; color: inherit; background-color: inherit; }
+a                       { text-decoration: none; color: inherit; background-color: inherit; }
 a.no_underline          { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline:link     { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline:active   { text-decoration: none     ; color: inherit; background-color: inherit; }

@@ -517,7 +517,9 @@
                             <xsl:value-of select="@title"/>
                             <xsl:if test="@state_text!=''">
                                 <xsl:text> &#160;–&#160; </xsl:text>
-                                <xsl:value-of select="@state_text"/>
+                                <xsl:call-template name="show_text_with_url">
+                                    <xsl:with-param name="text" select="@state_text"/>
+                                </xsl:call-template>
                             </xsl:if>
                         </td>
 
@@ -2473,7 +2475,9 @@
 
                     <xsl:if test="@state_text and @state_text != '' ">
                         &#160;–&#160;
-                        <xsl:value-of select="@state_text"/>
+                        <xsl:call-template name="show_text_with_url">
+                            <xsl:with-param name="text" select="@state_text"/>
+                        </xsl:call-template>
                     </xsl:if>
                 </td>
             </tr>
@@ -3117,7 +3121,9 @@
 
                         <xsl:if test="../order/@state_text">
                             <td>
-                                <xsl:value-of select="@state_text"/>
+                                <xsl:call-template name="show_text_with_url">
+                                    <xsl:with-param name="text" select="@state_text"/>
+                                </xsl:call-template>
                             </td>
                         </xsl:if>
 
@@ -3358,7 +3364,87 @@
         </xsl:choose>
 
     </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~show_text_with_url-->
+    <!-- Wickelt http://… in <a href="http://…">http://…</a> ein -->
 
+    <xsl:template name="show_text_with_url">
+
+        <xsl:param name="text"/>
+
+        <xsl:choose>
+            <xsl:when test="contains( $text, 'http://' )">
+                <xsl:value-of select="substring-before( $text, 'http://' )"/>
+                
+                <xsl:variable name="tail" select="substring-after( $text, 'http://' )"/>
+                
+                <xsl:choose>
+                    <xsl:when test="contains( $tail, ' ' )">
+                        <xsl:variable name="url" select="concat( 'http://', substring-before( $tail, ' ' ) )"/>
+
+                        <xsl:call-template name="show_text_with_url.url_with_punctuation">
+                            <xsl:with-param name="url" select="$url"/>
+                        </xsl:call-template>
+
+                        <xsl:text> </xsl:text>
+
+                        <xsl:call-template name="show_text_with_url">
+                            <xsl:with-param name="text" select="substring-after( $tail, ' ' )"/>
+                        </xsl:call-template>
+                    </xsl:when>
+
+                    <xsl:otherwise>
+                        <xsl:call-template name="show_text_with_url.url_with_punctuation">
+                            <xsl:with-param name="url" select="concat( 'http://', $tail )"/>
+                        </xsl:call-template>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+
+            <xsl:otherwise>
+                <xsl:value-of select="$text"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~show_text_with_url.url_with_punctuation-->
+ 
+    <xsl:template name="show_text_with_url.url_with_punctuation">
+        <xsl:param name="url"/>
+        
+        <xsl:choose>
+            <xsl:when test="not( contains( 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/', substring( $url, string-length( $url ), 1 ) ) )">
+                <xsl:call-template name="show_text_with_url.url">
+                    <xsl:with-param name="url" select="substring( $url, 1, string-length( $url ) - 1 )"/>
+                </xsl:call-template>
+                <xsl:value-of select="substring( $url, string-length( $url ), 1 )"/>
+            </xsl:when>
+            
+            <xsl:otherwise>
+                <xsl:call-template name="show_text_with_url.url">
+                    <xsl:with-param name="url" select="$url"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~show_text_with_url.url-->
+    
+    <xsl:template name="show_text_with_url.url">
+        <xsl:param name="url"/>
+
+        <xsl:element name="a">
+            <xsl:attribute name="target">_blank</xsl:attribute>
+            <xsl:attribute name="href">
+                <xsl:value-of select="$url"/>
+            </xsl:attribute>
+
+            <xsl:value-of select="$url"/>
+        </xsl:element>
+
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~translate_target-->
     <!-- Für <a target="..."/> -->
 

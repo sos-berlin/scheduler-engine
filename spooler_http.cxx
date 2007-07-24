@@ -1652,7 +1652,7 @@ bool Html_chunk_reader::try_fill_chunk()
                         {
                             const char* p0 = p;
                             while( p < p_end  &&  !isspace( (unsigned char)*p ) ) p++;
-                            while( p > p0  &&  !isalnum( (unsigned char)p[-1]  ) )  p--;
+                            while( p > p0  &&  !isalnum( (unsigned char)p[-1] )  &&  p[-1] != '/' )  p--;
                             if( p > p0 )
                             {
                                 append_html_encoded( &_chunk, tail, p0 - tail );    // Bisherigen Text ausgeben

@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-23" version="2.0.180" subversion_revision="5138">
+    <change date="2007-07-23" version="2.0.180" subversion_revision="5139">
         <revision type="modification" title="scheduler.log.gz wird nicht mehr erzeugt (Jira JS-39)">
             <description>
                 <p>
