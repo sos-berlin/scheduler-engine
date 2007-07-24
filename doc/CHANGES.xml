@@ -10,6 +10,30 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-07-24" version="2.0.181" subversion_revision="5142">
+        <revision type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet"/>
+        
+        <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
+            <description>
+                <p>
+                    Urls in einem über HTTP in HTML gelieferten Protokoll sind klickbar.
+                    Der Scheduler erkennt das Kennzeichen <code>http://</code> und
+                    setzt den Url in ein <code>&lt;a href="…" target="_blank">...&lt;/a></code>
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="&lt;job tasks='0'> startet keine Task mehr">
+            <description>
+                <p>
+                    Auch im Zustand <code>pending</code> prüft der Scheduler das Attribut
+                    <scheduler_element name="job" attribute="tasks"/>
+                    Bei <code>tasks="0"</code> startet er keine Task.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-07-23" version="2.0.180" subversion_revision="5139">
         <revision type="modification" title="scheduler.log.gz wird nicht mehr erzeugt (Jira JS-39)">
             <description>

@@ -1906,7 +1906,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
             next_start_time = Time::never;
         }
         else
-        if( _state == s_pending )
+        if( _state == s_pending  &&  _max_tasks > 0 )
         {
             if( !_period.is_in_time( _next_start_time ) )
             {
@@ -2019,7 +2019,7 @@ void Job::calculate_next_time( const Time& now )
         }
         else
         {
-            if( _state == s_pending  
+            if( _state == s_pending   &&  _max_tasks > 0
              || _state == s_running   &&  _running_tasks_count < _max_tasks )
             {
                 bool in_period = is_in_period(now);
@@ -2056,7 +2056,9 @@ void Job::calculate_next_time( const Time& now )
                 }
             }
 
-            if( ( _state == s_pending || ( _state == s_running && _running_tasks_count < _max_tasks ) ) &&  _order_queue )
+            if( ( _state == s_pending  &&  _max_tasks > 0  ||
+                  ( _state == s_running && _running_tasks_count < _max_tasks ) ) 
+              &&  _order_queue )
             {
                 Time next_order_time = _order_queue->next_time();
                 if( next_order_time < _period.begin() )  next_order_time = _period.begin();
@@ -2161,14 +2163,14 @@ ptr<Task> Job::task_to_start()
     task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
         
-    if( _state == s_pending  &&  now >= _next_single_start )  
+    if( _state == s_pending  &&  _max_tasks > 0  &&  now >= _next_single_start )  
     {
                                            cause = cause_period_single,                         log_line += "Task starts due to <period single_start=\"...\">\n";
     }
     else
     if( is_in_period(now) )
     {
-        if( _state == s_pending )
+        if( _state == s_pending  &&  _max_tasks > 0 )
         {
             if( _start_once )              cause = cause_period_once,                           log_line += "Task starts due to <run_time once=\"yes\">\n";
             else
@@ -2381,7 +2383,7 @@ bool Job::do_something()
                 }
 
 
-                if( _state == s_pending 
+                if( _state == s_pending  &&  _max_tasks > 0                         // Jira JS-55: tasks="0" soll keine Task starten
                  || _state == s_running  &&  _running_tasks.size() < _max_tasks )
                 {
                     if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module->process_class()->process_available( this ) )    // Optimierung
