@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-24" version="2.0.181" subversion_revision="5142">
+    <change date="2007-07-24" version="2.0.181" subversion_revision="5143">
         <revision type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet"/>
         
         <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
