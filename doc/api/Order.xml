@@ -364,9 +364,6 @@
             <scheduler_element name="modify_order" attribute="at" value="now"/>
             lässt einen wegen <code>run_time</code> wartenden Auftrag sofort anlaufen.
         </p>
-        <p>
-            Verteilte Aufträge können keine <code>run_time</code> haben.
-        </p>
     </description>
 
     <messages>

@@ -31,10 +31,11 @@ div.description         {}
 th                      { text-align: left; padding-left: 2pt; padding-right: 2pt; font-weight: normal; font-size: 8pt; }
 td                      { text-align: left; }
 
-th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; }
-th.head , td.head       { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid black; border-left: 1px solid black; }
+th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid gray; font-size: 8pt; }
+th.head , td.head       { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid gray; font-size: 8pt; border-left: 1px solid gray; }
 
 td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
+td.right_border         { border-right: 1px solid gray; }
 
 
 /* Allgemeiner Scheduler-Zustand */

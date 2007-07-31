@@ -21,7 +21,7 @@
                 name                     = "mein_webdienst" 
                 url_path                 = "/webdienst"
                 job_chain                = "web_service" 
-                timeout                  = "3"
+                timeout                  = "33333"
                 debug="yes"
             >
                 <params>
@@ -205,7 +205,20 @@ function spooler_process()
                 <run_time/>
             </job>
 
-            <job name="scheduler_service_forwarder">
+            <job name="leer" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process()
+{
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+            <job name="scheduler_service_forwarder" tasks="5">
                 <run_time/>
             </job>
 
@@ -213,7 +226,8 @@ function spooler_process()
 
         <job_chains>
             <job_chain name="web_service" orders_recoverable="no">
-                <job_chain_node state="eins" job="java_web_service"/>
+                <job_chain_node state="leer"            job="leer"/>
+                <job_chain_node state="eins" delay="30" job="java_web_service"/>
                 <job_chain_node state="fertig"/>
             </job_chain>
 

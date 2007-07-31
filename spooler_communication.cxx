@@ -521,7 +521,6 @@ bool Communication::Connection::async_continue_( Continue_flags )
         if( _connection_state == s_responding )  assert_no_recv_data();  //2005-10-25 wegen endloser read-Signalisierung zwischen Firefox und Linux-Scheduler (F5 im Protokollfenster)
 
         while( _connection_state == s_ready  ||  _connection_state == s_receiving )
-        //while( _responding  &&  !_dont_receive )
         {
             bool ok = do_recv();
             if( !ok )  break;
@@ -539,6 +538,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
         if( _connection_state == s_processing )
         {
+            //check_for_eof();
             if( _operation->async_finished() )  _connection_state = s_responding;
         }
 
