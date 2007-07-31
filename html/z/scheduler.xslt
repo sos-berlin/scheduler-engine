@@ -986,19 +986,19 @@
 
         <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or /spooler/@show_job_chain_jobs_checkbox ) and position() &gt; 1">
             <tr>
-                <xsl:choose>
-                    <!--xsl:when test="@order_id_space">
+                <!--xsl:choose>
+                    <xsl:when test="@order_id_space">
                         <td colspan="6">
                             <hr class="order_id_space" style="margin-top: 10pt; margin-bottom: 5pt;"/>
                         </td>
-                    </xsl:when-->
-                    <xsl:otherwise>
+                    </xsl:when>
+                    <xsl:otherwise-->
                         <td colspan="6">
                             <div>&#160;</div>
                             <!--hr style="margin-top: 5pt;"/-->
                         </td>
-                    </xsl:otherwise>
-                </xsl:choose>
+                    <!--/xsl:otherwise>
+                </xsl:choose-->
             </tr>
         </xsl:if>
 

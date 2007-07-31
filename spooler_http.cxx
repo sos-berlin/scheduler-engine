@@ -1067,7 +1067,7 @@ void Response::set_ready()
     finish();
 
     _ready = true; 
-    _operation->_connection->signal( "http response is ready" );
+    if( _operation  &&  _operation->_connection )  _operation->_connection->signal( "http response is ready" );
 
     // Nicht sofort senden
 }
