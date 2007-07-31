@@ -538,11 +538,11 @@ bool Order_subsystem::subsystem_activate()
     _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
 
 
-    Z_FOR_EACH( Job_chain_map, _job_chain_map, it ) 
-    {
-        Job_chain* job_chain = it->second;
-        job_chain->activate();
-    }
+    //Z_FOR_EACH( Job_chain_map, _job_chain_map, it ) 
+    //{
+    //    Job_chain* job_chain = it->second;
+    //    job_chain->activate();
+    //}
 
     if( are_orders_distributed() )
     {
@@ -2025,17 +2025,17 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 
 //------------------------------------------------------------------------------Job_chain::activate
 
-void Job_chain::activate()
-{
-    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
-    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.
-    // Für später hinzugefügte Jobketten wird diese Routine nicht gerufen (sie würde auch nichts tun).
-    Z_FOR_EACH( Order_map, _order_map, o )
-    {
-        Order* order = o->second;
-        order->activate();
-    }
-}
+//void Job_chain::activate()
+//{
+//    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
+//    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.
+//    // Für später hinzugefügte Jobketten wird diese Routine nicht gerufen (sie würde auch nichts tun).
+//    Z_FOR_EACH( Order_map, _order_map, o )
+//    {
+//        Order* order = o->second;
+//        order->activate();
+//    }
+//}
 
 //-------------------------------------------------------------Job_chain::remove_all_pending_orders
 
@@ -3116,7 +3116,7 @@ void Order_queue::calculate_next_distributed_order_check_time( time_t now )
     _next_distributed_order_check_delay *= 2;
     if( _next_distributed_order_check_delay > check_database_orders_period )  _next_distributed_order_check_delay = check_database_orders_period;
 
-    _next_distributed_order_check_time = now + _next_distributed_order_check_delay;
+    _next_distributed_order_check_time = min( now + _next_distributed_order_check_delay, _next_announced_distributed_order_time.as_utc_time_t() );
 }
 
 //-------------------------------------------Order_queue::set_next_announced_distributed_order_time
@@ -3196,7 +3196,8 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
 
     // Dann (alte) Aufträge aus der Datenbank
-    if( !order  &&  _next_announced_distributed_order_time <= now  &&  is_in_any_distributed_job_chain() )   // Auftrag nur lesen, wenn vorher angekündigt
+    //if( !order  &&  _next_announced_distributed_order_time <= now  &&  is_in_any_distributed_job_chain() )   // Auftrag nur lesen, wenn vorher angekündigt
+    if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
         withdraw_distributed_order_request();
 
@@ -3223,7 +3224,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
     //    _is_distributed_order_requested = false;            // Nächster request_order() führt zum async_wake() des Database_order_detector
     //}
 
-    _next_announced_distributed_order_time = Time::never;
+    //_next_announced_distributed_order_time = Time::never;
     _has_tip_for_new_order = false;
 
     if( order ) 
@@ -3256,71 +3257,63 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
         select_sql << "select %limit(1)  `job_chain`, `distributed_next_time`, " << order_select_database_columns <<
                     "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-                    " and `distributed_next_time` < {ts'" << now.as_string( Time::without_ms ) << "'}"
-                  //" and `distributed_next_time` < {ts'" << never_database_distributed_next_time << "'}"
+                    " and `distributed_next_time` <= {ts'" << now.as_string( Time::without_ms ) << "'}"
                        " and `occupying_cluster_member_id` is null" << 
                        " and " << w <<
                     "  order by `distributed_next_time`, `priority`, `ordering`";
 
-        //try
-        //{
-            Record record;
-            bool   record_filled = false;
+        Record record;
+        bool   record_filled = false;
 
 
-            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
+            if( !result_set.eof() )
             {
-                Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
-                if( !result_set.eof() )
-                {
-                    record = result_set.get_record();
-                    record_filled = true;
-                }
+                record = result_set.get_record();
+                record_filled = true;
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
 
 
-            if( record_filled )
-            {
-                ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+        if( record_filled )
+        {
+            //Z_LOG2( "joacim", __FUNCTION__ << "  _next_announced_distributed_order_time = Time::never;\n" );
+            _next_announced_distributed_order_time = Time::never;
+
+            ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+        
+            order->_is_distributed = true;
             
-                order->_is_distributed = true;
-                //2007-07-22 order->_order_state    = Order::s_active;
-                
-                Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
-                assert( job_chain->_is_distributed );
+            Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
+            assert( job_chain->_is_distributed );
 
-                bool ok = order->db_occupy_for_processing();
+            bool ok = order->db_occupy_for_processing();
+            if( ok )
+            {
+                try
+                {
+                    Read_transaction ta ( _spooler->db() );
+                    order->load_blobs( &ta );
+                }
+                catch( exception& ) 
+                { 
+                    ok = false;      // Jemand hat wohl den Datensatz gelöscht
+                }
+        
                 if( ok )
                 {
-                    try
-                    {
-                        Read_transaction ta ( _spooler->db() );
-                        order->load_blobs( &ta );
-                    }
-                    catch( exception& ) 
-                    { 
-                        ok = false;      // Jemand hat wohl den Datensatz gelöscht
-                    }
-            
-                    if( ok )
-                    {
-                        order->occupy_for_task( occupying_task, now );
-                        job_chain->add_order( order );
+                    order->occupy_for_task( occupying_task, now );
+                    job_chain->add_order( order );
 
-                        result = order,  order = NULL;
-                    }
+                    result = order,  order = NULL;
                 }
-
-                if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
             }
-        //}
-        //catch( exception& x )
-        //{
-        //    Z_LOGI2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" );
-        //    if( order )  order->close();
-        //    throw;
-        //}
+
+            if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
+        }
     }
 
     return result;
@@ -3698,7 +3691,7 @@ void Order::assert_task( const string& debug_text )
 
 //---------------------------------------------------------------------------Order::occupy_for_task
 
-bool Order::occupy_for_task( Task* task, const Time& now )
+void Order::occupy_for_task( Task* task, const Time& now )
 {
     assert( task );
     assert_no_task( __FUNCTION__ );   // Vorsichtshalber
@@ -3729,8 +3722,6 @@ bool Order::occupy_for_task( Task* task, const Time& now )
 
     _is_virgin = false;
     //_is_virgin_in_this_run_time = false;
-
-    return true;
 }
 
 //------------------------------------------------------------------Order::db_occupy_for_processing
@@ -4446,12 +4437,12 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
             set_run_time( e );
         }
         else
-        //2007-07-27 if( e.nodeName_is( "period" ) )
-        //2007-07-27 { 
-        //2007-07-27     _period = Period();
-        //2007-07-27     _period.set_dom( e );
-        //2007-07-27 }
-        //2007-07-27 else
+        if( e.nodeName_is( "period" ) )
+        { 
+            _period = Period();
+            _period.set_dom( e, Period::with_date );
+        }
+        else
         if( e.nodeName_is( "log" ) )
         {
             assert( !_log->opened() );
@@ -4567,7 +4558,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     if( show.is_set( show_for_database_only ) )
     {
         // Nach <run_time> setzen!
-        //2007-07-27 if( _period.repeat() < Time::never )  element.appendChild( _period.dom_element( document ) );     // Aktuelle Wiederholung merken, für <run_time>
+        if( _period.repeat() < Time::never )  element.appendChild( _period.dom_element( document ) );     // Aktuelle Wiederholung merken, für <run_time>
     }
 
     if( show.is_set( show_log )  ||  show.is_set( show_for_database_only ) )
@@ -5312,8 +5303,12 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( _job_chain_path != "" )  remove_from_job_chain( job_chain_stack_option );
         assert( !_job_chain );
         
-        if( _state.vt == VT_EMPTY )  set_state2( job_chain->first_node()->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
-
+        if( _state.vt == VT_EMPTY )  
+        {
+            // Auftrag bekommt Zustand des ersten Jobs der Jobkette. 
+            set_state2( job_chain->first_node()->_state );     
+            //2007-07-30 Besser so?: set_job_chain_node( job_chain->first_node() );     // Job_chain_node._action, ._suspend und ._delay berücksichtigen
+        }
 
         Job_chain_node* node = job_chain->node_from_state( _state );
 
@@ -5340,7 +5335,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         _job_chain_path = job_chain->path();
         _removed_from_job_chain_name = "";
 
-        activate();     // Errechnet die nächste Startzeit
+        //activate();     // Errechnet die nächste Startzeit
+        set_next_start_time();
 
         if( _delay_storing_until_processing ) 
         {
@@ -5397,19 +5393,12 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 //----------------------------------------------------------------------------------Order::activate
 
-bool Order::activate()
-{
-    bool result = false;
-
-    if( order_subsystem()->subsystem_state() == subsys_active )  
-    {
-        _order_state = s_active;
-        set_next_start_time();
-        result = true;
-    }
-
-    return result;
-}
+//void Order::activate()
+//{
+//    //assert( order_subsystem()->subsystem_state() == subsys_active );
+//
+//    set_next_start_time();
+//}
 
 //-----------------------------------------------------------------------Order::set_next_start_time
 
@@ -5417,10 +5406,7 @@ void Order::set_next_start_time()
 {
     if( _state == _initial_state  &&  !_setback  &&  _run_time->set() )
     {
-        if( _order_state == s_active )  
-        {
-            set_setback( next_start_time( true ) );     // Braucht für <run_time start_time_function=""> das Scheduler-Skript
-        }
+        set_setback( next_start_time( true ) );     // Braucht für <run_time start_time_function=""> das Scheduler-Skript
     }
     else
     {
@@ -5922,7 +5908,6 @@ Time Order::next_start_time( bool first_call )
 
         if( first_call )
         {
-            //_period = _run_time->next_period( now, time::wss_next_single_start );
             _period = _run_time->next_period( now, time::wss_next_period_or_single_start );
             result = _period.begin();
         }
@@ -5985,11 +5970,8 @@ void Order::on_before_modify_run_time()
 
 void Order::run_time_modified_event()
 {
-    if( _order_state == s_active )
-    {
-        _setback = 0;           // Änderung von <run_time> überschreibt Order.at
-        set_next_start_time();
-    }
+    _setback = 0;           // Änderung von <run_time> überschreibt Order.at
+    set_next_start_time();
 
     //if( _state == _initial_state )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
     //                         else  _run_time_modified = true;

@@ -1742,6 +1742,16 @@ void Spooler::activate()
     _order_subsystem->switch_subsystem_state( subsys_loaded );
     _lock_subsystem ->switch_subsystem_state( subsys_loaded );
 
+    bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
+    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+
+    // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
+
+    _job_subsystem  ->switch_subsystem_state( subsys_active );
+    _order_subsystem->switch_subsystem_state( subsys_active );
+    _web_services   ->switch_subsystem_state( subsys_active );          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _lock_subsystem ->switch_subsystem_state( subsys_active );
+
     if( !_xml_cmd.empty() )
     {
         Command_processor cp ( this, Security::seclev_all );
@@ -1750,17 +1760,6 @@ void Spooler::activate()
     }
 
     execute_config_commands();                                                                          
-
-    bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
-    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
-
-
-    // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
-
-    _job_subsystem  ->switch_subsystem_state( subsys_active );
-    _order_subsystem->switch_subsystem_state( subsys_active );
-    _web_services   ->switch_subsystem_state( subsys_active );          // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _lock_subsystem ->switch_subsystem_state( subsys_active );
 
     set_state( s_running );
 }

@@ -39,13 +39,6 @@ struct Order : Com_order,
     typedef Variant             Id;
 
 
-    enum Order_state
-    {
-        s_none,
-        s_active
-    };
-
-
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
@@ -64,13 +57,13 @@ struct Order : Com_order,
   //void                        close                   ()                                          { close( true ); }
 
     void                        init                    ();
-    bool                        activate                ();
+  //void                        activate                ();
     void                        load_blobs              ( Read_transaction* );
     void                        load_order_xml_blob     ( Read_transaction* );
     void                        load_run_time_blob      ( Read_transaction* );
     void                        load_payload_blob       ( Read_transaction* );
 
-    bool                        occupy_for_task         ( Task*, const Time& now );
+    void                        occupy_for_task         ( Task*, const Time& now );
     void                        assert_no_task          ( const string& debug_text );
     void                        assert_task             ( const string& debug_text );
 
@@ -292,7 +285,6 @@ struct Order : Com_order,
 
     // Flüchtige Variablen, nicht für die Datenbank:
 
-    Order_state                _order_state;
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
     Job_chain_node*            _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
@@ -447,7 +439,7 @@ struct Job_chain : Com_job_chain,
                                ~Job_chain               ();
 
     void                        close                   ();
-    void                        activate                ();
+  //void                        activate                ();
     void                        remove                  ();
     void                        check_for_removing      ();
 

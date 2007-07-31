@@ -332,6 +332,16 @@ double Time::as_double() const
                   : _time;    
 }
 
+//------------------------------------------------------------------------------Time::as_utc_double
+
+double Time::as_utc_double() const
+{
+    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( __FUNCTION__ << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
+
+    return _is_utc? _time 
+                  : _time + current_difference_to_utc();    
+}
+
 //------------------------------------------------------------------------------------Time::set_utc
 
 void Time::set_utc( double t )
@@ -724,7 +734,7 @@ void Period::set_single_start( const Time& t )
 
 //----------------------------------------------------------------------------------Period::set_dom
 
-void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
+void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_date w, const Period* deflt )
 {
     if( !element )  return;
 
@@ -744,7 +754,12 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     else
     {
         string begin = element.getAttribute( "begin", "00:00:00" );
-        if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
+        if( !begin.empty() )
+        {
+            if( w == with_date )  dt = begin;
+                            else  dt.set_time( begin );
+            _begin = dt;
+        }
 
         string repeat = element.getAttribute( "repeat" );
         if( !repeat.empty() )
@@ -763,21 +778,26 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     }
 
     string end = element.getAttribute( "end" , "24:00:00" );
-    if( !end.empty() )  dt.set_time( end ), _end = dt;
+    if( !end.empty() )
+    {
+        if( w == with_date )  dt = end;
+                        else  dt.set_time( end );
+        _end = dt;
+    }
 
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
     //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( __FUNCTION__, "Attribute start_once is not supported" );
 
-    check();
+    check( w );
 }
 
 //------------------------------------------------------------------------------------Period::check
 
-void Period::check() const
+void Period::check( With_or_without_date w ) const
 {
     if( _begin < 0      )  goto FEHLER;
     if( _begin > _end   )  goto FEHLER;
-    if( _end > 24*60*60 )  goto FEHLER;
+    if( w == without_date )  if( _end > 24*60*60 )  goto FEHLER;
     return;
 
   FEHLER:
@@ -1490,7 +1510,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 
     _start_time_function = element.getAttribute( "start_time_function" );
 
-    default_period.set_dom( element, NULL );
+    default_period.set_dom( element );
     default_day = default_period;
 
     bool a_day_set = false;

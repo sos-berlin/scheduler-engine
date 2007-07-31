@@ -108,6 +108,7 @@ struct Time
     void                        set                         ( const string& );
     void                        set_utc                     ( double );
     double                      as_double                   () const;
+    double                      as_utc_double               () const;
 
 #ifdef Z_WINDOWS
     //void                        set                         ( const FILETIME& ); 
@@ -120,7 +121,8 @@ struct Time
     Time                        time_of_day                 () const                        { return as_double() - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
-    time_t                      as_time_t                   () const                        { return (time_t)( as_double() + 0.0001 ); }
+    time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
+    time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
     int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
@@ -167,7 +169,7 @@ ptr<Daylight_saving_time_transition_detector_interface> new_daylight_saving_time
 struct Period
 {
                                 Period                      ()                                      : _zero_(this+1) { init(); }
-    explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, deflt ); }
+    explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, without_date, deflt ); }
     
     void                        init                        ()                                      { _begin = _end = _repeat = Time::never; }
 
@@ -181,7 +183,9 @@ struct Period
 
     void                        set_default                 ();
     void                        set_single_start            ( const Time& );
-    void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt = NULL );
+
+    enum With_or_without_date { without_date, with_date };
+    void                        set_dom                     ( const xml::Element_ptr&, With_or_without_date = without_date, const Period* deflt = NULL );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
@@ -197,7 +201,7 @@ struct Period
 
   //void                        set_next_start_time         ( const Time& );
 
-    void                        check                       () const;
+    void                        check                       ( With_or_without_date ) const;
     void                        print                       ( ostream& ) const;
     string                      obj_name                    () const;
     friend ostream&             operator <<                 ( ostream& s, const Period& o )         { o.print(s); return s; }

@@ -10,20 +10,36 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-07-24" version="2.0.181" subversion_revision="5143">
-        <revision type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet"/>
-        
-        <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
+    <change date="2007-07-27" version="2.0.182" subversion_revision="5144">
+        <revision type="modification" title="Scheduler-Skript wird vor &lt;commands> ausgeführt">
             <description>
                 <p>
-                    Urls in einem über HTTP in HTML gelieferten Protokoll sind klickbar.
-                    Der Scheduler erkennt das Kennzeichen <code>http://</code> und
-                    setzt den Url in ein <code>&lt;a href="…" target="_blank">...&lt;/a></code>
+                    Erst wird das Scheduler-Skript <scheduler_element name="config" child="script"/> ausgeführt, 
+                    dann <scheduler_element name="config" child="commands"/>.
                 </p>
             </description>
         </revision>
 
-        <revision type="correction" title="&lt;job tasks='0'> startet keine Task mehr">
+        <revision type="new" title="Verteilte Aufträge mit &lt;run_time> möglich">
+            <description>
+                <p>
+                    Verteilte Aufträge können <scheduler_element name="run_time"/> nutzen.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2007-07-24" version="2.0.181" subversion_revision="5143">
+        <revision type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet (Jira JS-49)"/>
+        
+        <revision type="new" title="Eingaute HTML-Oberfläche: Urls im state_text sind klickbar">
+            <description>
+                <p>
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="&lt;job tasks='0'> startet keine Task mehr (Jira JS-55)">
             <description>
                 <p>
                     Auch im Zustand <code>pending</code> prüft der Scheduler das Attribut

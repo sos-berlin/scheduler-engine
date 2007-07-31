@@ -665,7 +665,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
                         }
                     }
 
-                    if( ok )  ok = order->occupy_for_task( occupying_task, now );
+                    if( ok )  order->occupy_for_task( occupying_task, now );
 
                     if( ok  &&  order->is_distributed() )  _job_chain->add_order( order );
 
