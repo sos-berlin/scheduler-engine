@@ -12,34 +12,6 @@
 
         <process_classes/>
 
-
-        <script language="JavaScript"><![CDATA[
-
-var forwarding_job_chain = spooler.job_chain( "scheduler_service_forwarding" );
-if( forwarding_job_chain.order_count() == 0 )
-{
-    //spooler.job( "order" ).execute_command( "stop" );
-
-    for( var i = 0; i < 1; i++ )  
-    {
-        var order = spooler.create_order();
-        order.payload = 
-            "<?xml version='1.0'?>" + 
-            "<service_request url='http://" + spooler.hostname() + ":" + spooler.tcp_port() + "/webdienst'>" +
-                "<content>" +
-                    "<test/>" +
-                "</content>" +
-            "</service_request>";
-
-        forwarding_job_chain.add_order( order );
-    }
-    
-    spooler_log.info( "*******************************" );
-}
-
-        ]]></script>
-
-
         <http_server>
             <http_directory url_path="/test/" path="s:/tmp/test"/>
             <http_directory url_path="/test2" path="s:/tmp/test"/>
@@ -78,6 +50,37 @@ if( forwarding_job_chain.order_count() == 0 )
 
 
         <jobs>
+
+            <job name="start">
+                <script language="JavaScript">
+                    <![CDATA[
+
+var forwarding_job_chain = spooler.job_chain( "scheduler_service_forwarding" );
+if( forwarding_job_chain.order_count() == 0 )
+{
+    //spooler.job( "order" ).execute_command( "stop" );
+
+    for( var i = 0; i < 100; i++ )  
+    {
+        var order = spooler.create_order();
+        order.payload = 
+            "<?xml version='1.0'?>" + 
+            "<service_request url='http://" + spooler.hostname() + ":" + spooler.tcp_port() + "/webdienst'>" +
+                "<content>" +
+                    "<test/>" +
+                "</content>" +
+            "</service_request>";
+
+        forwarding_job_chain.add_order( order );
+    }
+    
+    spooler_log.info( "*******************************" );
+}
+
+        ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
 
             <job name="job">
                 <script language="JavaScript">
