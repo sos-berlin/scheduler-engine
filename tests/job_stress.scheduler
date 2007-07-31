@@ -19,15 +19,15 @@
 
         <jobs>
 
-            <job name="javascript" tasks="1">
+            <job name="javascript" tasks="3">
         
                 <script language="JavaScript">
         <![CDATA[
 
 function spooler_init() 
 {               
-    var shell = new ActiveXObject( "wscript.shell" );
-    shell.run( "notepad" );
+    //var shell = new ActiveXObject( "wscript.shell" );
+    //shell.run( "notepad" );
     
     spooler_job.start();
     return false;
@@ -38,6 +38,24 @@ function spooler_init()
                 <run_time once="yes">
                     <!--period repeat="1"/-->
                 </run_time>
+            </job>
+
+            
+            <job name="lang" tasks="1">
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_task.delay_spooler_process = 1;
+    return true;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
             </job>
 
         </jobs>

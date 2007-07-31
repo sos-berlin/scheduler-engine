@@ -366,6 +366,8 @@ bool Database_order_detector::is_job_requesting_order_then_calculate_next( Job* 
 
     if( Order_queue* order_queue = job->order_queue() )
     {
+        order_queue->set_next_announced_distributed_order_time( Time::never, false );
+
         if( order_queue->is_distributed_order_requested( _now_utc ) )
         {
             order_queue->calculate_next_distributed_order_check_time( _now_utc );
@@ -3123,7 +3125,10 @@ void Order_queue::calculate_next_distributed_order_check_time( time_t now )
 
 void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool is_now )
 { 
-    Z_LOG2( "scheduler.order", _job->obj_name() << "  " << __FUNCTION__ << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
+    if( _next_announced_distributed_order_time != t  &&  !is_now )
+    {
+        Z_LOG2( "scheduler.order", _job->obj_name() << "  " << __FUNCTION__ << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
+    }
 
     _next_announced_distributed_order_time = t; 
     
@@ -3280,36 +3285,45 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
         if( record_filled )
         {
-            //Z_LOG2( "joacim", __FUNCTION__ << "  _next_announced_distributed_order_time = Time::never;\n" );
             _next_announced_distributed_order_time = Time::never;
 
-            ptr<Order> order = new Order( _spooler, record, record.as_string( "job_chain" ) );
-        
-            order->_is_distributed = true;
-            
-            Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
-            assert( job_chain->_is_distributed );
+            ptr<Order> order;
 
-            bool ok = order->db_occupy_for_processing();
-            if( ok )
+            try
             {
-                try
-                {
-                    Read_transaction ta ( _spooler->db() );
-                    order->load_blobs( &ta );
-                }
-                catch( exception& ) 
-                { 
-                    ok = false;      // Jemand hat wohl den Datensatz gelöscht
-                }
-        
+                order = new Order( _spooler, record, record.as_string( "job_chain" ) );
+            
+                order->_is_distributed = true;
+                
+                Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
+                assert( job_chain->_is_distributed );
+
+                bool ok = order->db_occupy_for_processing();
                 if( ok )
                 {
-                    order->occupy_for_task( occupying_task, now );
-                    job_chain->add_order( order );
+                    try
+                    {
+                        Read_transaction ta ( _spooler->db() );
+                        order->load_blobs( &ta );
+                    }
+                    catch( exception& ) 
+                    { 
+                        ok = false;      // Jemand hat wohl den Datensatz gelöscht
+                    }
+            
+                    if( ok )
+                    {
+                        order->occupy_for_task( occupying_task, now );
+                        job_chain->add_order( order );
 
-                    result = order,  order = NULL;
+                        result = order,  order = NULL;
+                    }
                 }
+            }
+            catch( exception& )
+            {
+                if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
+                throw;
             }
 
             if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
