@@ -37,7 +37,7 @@ struct Text_with_includes : Non_cloneable
                                 Text_with_includes          ()                                      { initialize(); }
                                 Text_with_includes          ( const xml::Element_ptr& e )           { initialize(); append_dom( e ); }
 
-    bool                        is_empty                    () const                                { return !_dom_document || !_dom_document.documentElement().firstChild(); }
+    bool                        is_empty                    () const;
 
     string                      read_text                   ( const string& include_path );
     string                      read_text_element           ( const xml::Element_ptr&, const string& include_path );

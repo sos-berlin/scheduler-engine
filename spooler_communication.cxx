@@ -538,7 +538,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
         if( _connection_state == s_processing )
         {
-            //check_for_eof();
+            //check_for_eof();  Wird nicht durchlaufen, weil kein Ereignis bestellt ist. Lösung: Empfangs- und Sendekanäle trennen (zwei Async_operation)
             if( _operation->async_finished() )  _connection_state = s_responding;
         }
 

@@ -48,8 +48,8 @@
     </p>
     <p style="margin-bottom: 1em;">
         <i>
-            Die Kommandos zum Löschen werden nicht also solche nicht realisiert.
-            Die Kommandos stehen symbolisch für die im Scheduler zu realisierenden internen Funktionen.
+            Die Kommandos zum Löschen werden zunächst nicht realisiert.
+            Sie stehen symbolisch für die im Scheduler zu realisierenden internen Funktionen.
         </i>
     </p>
     <table cellspacing="0" cellpadding="0">
@@ -154,11 +154,10 @@
             der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
         </li>
     </ul>
-    <p style="color: red">
-        Was machen wir mit Aufträgen, die sich nicht wiederholen?
-        Der Scheduler würde sofort die Auftragsdatei lesen und den Auftrag ohne Pause erneut starten.
-        Wir müssen den Auftrag auf eine Art schwarzer Liste setzen
-        (die gibt es jetzt nur für Dateiaufträge und könnte vielleicht erweitert werden).
+    <p>
+        Ein Auftrag, der nicht wiederholt wird, gelangt auf die schwarze Liste,
+        wenn die Auftragsdatei noch da und keinen neuen Zeitstempel hat.
+        <span style="color: red">Wie diese schwarze Liste aussieht, wird noch geklärt.</span>
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -236,10 +235,19 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <p color="red">
-        Was passiert, wenn eine Objekt mit einem Kommando gelöscht wird?
-        Das sollte nicht möglich sein. 
-        Dateibasierte Objekte sollten nur durchs Löschen der Datei entfernt werden können.
+    <h2>Wirkung der Kommandos</h2>
+
+    <p>
+        Die Kommandos zum Ändern und Löschen von Objekten wirken nicht auf die Dateien.
+        Damit ändern sie das Objekt im Scheduler, aber nicht die Datei. 
+        Bekommt eine Datei einen neuen Zeitstempel, lädt der Scheduler das Objekt neu
+        und überschreibt die Änderung des Kommandos.
+    </p>
+    <p>
+        Die Kommandos zum Löschen werden bei dateibasierten Objekten nicht das Objekt direkt, 
+        sondern die Datei löschen.
+        Damit greift das Kommando dauerhaft in die Konfiguration ein.
+        <i>(Ich fände es sauberer, die Löschkommandos zu verbieten.)</i>
     </p>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

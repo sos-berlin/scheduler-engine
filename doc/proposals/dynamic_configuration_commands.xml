@@ -42,6 +42,10 @@
         Damit Änderungen an den Dateien sich korrekt in den Objekten wiederspiegeln,
         werden die Kommandos vereinheitlich. 
     </p>
+    <p>
+        <i>Die neuen Lösch-Kommandos werden zunächst nicht implementiert.
+        Sie werden als interne Funktionen des Schedulers realisiert.</i>
+    </p>
 
     <div class="max_width" style="margin-top: 1em">
         <table cellspacing="0" cellpadding="0" >
@@ -61,7 +65,7 @@
                 </td>
                 <td>
                     <scheduler_element name="job.remove"/>
-                    <div style="color: red">
+                    <div>
                         bisher: <scheduler_element name="modify" attribute="cmd" value="remove"/>
                     </div>
                 </td>
@@ -83,7 +87,7 @@
                 </td>
                 <td>
                     <scheduler_element name="order.remove"/>
-                    <div style="color: red">
+                    <div>
                         bisher: <scheduler_element name="remove_order"/>
                     </div>
                 </td>

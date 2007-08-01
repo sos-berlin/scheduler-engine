@@ -72,8 +72,6 @@ void Text_with_includes::initialize()
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    
-
     int linenr_base = element.line_number(); //? element.line_number() - 1 : 0;
 
     for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
@@ -179,14 +177,20 @@ int Text_with_includes::text_element_linenr( const xml::Element_ptr& element )
     return element.int_getAttribute( "linenr", 0 );
 }
 
-//------------------------------------------------------------------------check_unchanged_attribute
-/*
-static void check_unchanged_attribute( const xml::Element_ptr& element, const string& attribute_name, const string& current_value )
-{
-    if( element.hasAttribute( attribute_name  )  &&  element.getAttribute( attribute_name ) != current_value )  
-        z::throw_xc( "SCHEDULER-234", attribute_name + "+" + current_value );
+//---------------------------------------------------------------------Text_with_includes::is_empty
+
+bool Text_with_includes::is_empty() const
+{ 
+    if( !_dom_document )  return true;
+    if( !_dom_document.documentElement().firstChild() )  return true;
+
+    // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
+    string text = _dom_document.documentElement().text();
+    const char* p = text.c_str();
+    while( *p  &&  isspace( (unsigned char)*p ) )  p++;
+    return *p == '\0';
 }
-*/
+
 //-----------------------------------------------------------------------------------Module::Module
 
 Module::Module( Spooler* sp, const string& include_path, Prefix_log* log )
@@ -266,14 +270,6 @@ void Module::set_process()
 
 void Module::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )  
 { 
-//    set_dom_without_source(e,xml_mod_time); 
-//    set_dom_source_only(include_path); 
-//}
-//
-////-------------------------------------------------------------------Module::set_dom_without_source
-//
-//void Module::set_dom_without_source( const xml::Element_ptr& element, const Time& xml_mod_time )
-//{
     if( !element )  return;
 
     _text_with_includes.append_dom( element );
@@ -308,37 +304,6 @@ void Module::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time 
     _set = true;
 }
 
-//-----------------------------------------------------------------------------------Module::script
-
-//Text_with_includes Module::source_with_parts()
-//{
-//    Text_with_includes result;
-//
-//    result.append( text_from_xml_with_include( element, _xml_mod_time, _include_path )  );
-//    //xml::Document_ptr dom_document ( "<script>" + _source_xml.to_string() + "</script>" );
-//
-//    //DOM_FOR_EACH_ELEMENT( dom_document.documentElement(), element )
-//    //{
-//    //    result.append( text_from_xml_with_include( element, _xml_mod_time, _include_path )  );
-//    //}
-//
-//    return result;
-//}
-
-//----------------------------------------------------------------------Module::set_dom_source_only
-
-//void Module::set_dom_source_only( const string& include_path )
-//{
-//    Text_with_includes source;
-//
-//    Z_FOR_EACH_CONST( list<xml::Element_ptr>, _dom_element_list, it )
-//    {
-//        source.append( text_from_xml_with_include( *it, _xml_mod_time, include_path )  );
-//    }
-//
-//    set_source_only( source );
-//}
-
 //---------------------------------------------------------------Module::set_xml_text_with_includes
 
 void Module::set_xml_text_with_includes( const string& x )
@@ -346,34 +311,6 @@ void Module::set_xml_text_with_includes( const string& x )
     _text_with_includes.set_xml( x );
     _set = true;
 }
-
-//--------------------------------------------------------------------------Module::set_source_only
-
-//void Module::set_source_only( const Text_with_includes& source )
-//{
-//    //if( _kind == kind_java  &&  _spooler  &&  _spooler->job_subsystem_or_null() )
-//    //{
-//    //    FOR_EACH_JOB( j )
-//    //    {
-//    //        Job* job = *j;
-//    //        
-//    //        if( job->module()  
-//    //        &&  job->module()->_kind == kind_java 
-//    //        &&  job->module()->_source.empty() | source.empty()
-//    //        &&  job->module()->_java_class_name == _java_class_name )
-//    //        {
-//    //            z::throw_xc( "SCHEDULER-398", _java_class_name, job->obj_name() );
-//    //        }
-//    //    }
-//    //}
-//
-//    _source = source;
-//    _compiled = false;
-//
-//    clear_java();
-//
-//    _set = true;
-//}
 
 //-------------------------------------------------------------------------------------Module::init
 
