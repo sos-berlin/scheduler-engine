@@ -129,6 +129,8 @@ struct Communication
 
         virtual xml::Element_ptr dom_element                ( const xml::Document_ptr&, const Show_what& ) const = 0;
 
+        Connection*             connection                  () const                                { return _connection; }
+
 
         Fill_zero              _zero_;
         Spooler*               _spooler;

@@ -419,7 +419,7 @@ struct Operation : Communication::Operation
     void                        cancel                      ();
     virtual bool                async_continue_             ( Continue_flags );
     virtual bool                async_finished_             () const                                { return _response  &&  _response->is_ready(); }
-    virtual string              async_state_text_           () const                                { return "none"; }
+    virtual string              async_state_text_           () const;
 
     void                        link_order                  ( Order* );                             // Für Web_service_operation::begin()
     void                        unlink_order                ();                                     // Für Order::close()
@@ -432,6 +432,8 @@ struct Operation : Communication::Operation
 
     Request*                    request                     () const                                { return _request; }
     Response*                   response                    () const                                { return _response; }
+
+    string                      obj_name                    () const                                { return "http::Operation"; }
 
   private:
     friend struct               Request;

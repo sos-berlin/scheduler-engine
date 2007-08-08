@@ -184,7 +184,11 @@ bool Text_with_includes::is_empty() const
     if( !_dom_document )  return true;
     if( !_dom_document.documentElement().firstChild() )  return true;
 
+    
     // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
+
+    if( _dom_document.documentElement().first_child_element() )  return false;
+
     string text = _dom_document.documentElement().text();
     const char* p = text.c_str();
     while( *p  &&  isspace( (unsigned char)*p ) )  p++;

@@ -880,6 +880,20 @@ xml::Element_ptr Operation::dom_element( const xml::Document_ptr& document, cons
     return result;
 }
 
+//---------------------------------------------------------------------Operation::async_state_text_
+
+string Operation::async_state_text_() const
+{
+    S result;
+
+    result << Communication::Operation::async_state_text_();
+    result << ", " <<obj_name();
+    if( _web_service_operation )  result << ", " << _web_service_operation->obj_name();
+    if( _order                 )  result << ", " << _order->obj_name();
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------------Request::close
 /*
 void Request::close()

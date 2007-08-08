@@ -1068,6 +1068,21 @@
             </xsl:element>
         </xsl:if>
 
+        <xsl:if test="/spooler/answer/state/http_server/web_service [ @job_chain = current()/@name ]">
+            <tr>
+                <td></td>
+                <td colspan="5">
+                    <span style="font-size: 8pt">
+                        <xsl:text>Web_service </xsl:text>
+                        <xsl:for-each select="/spooler/answer/state/http_server/web_service [ @job_chain = current()/@name ]">
+                            <xsl:value-of select="@name"/>
+                            <xsl:text> </xsl:text>
+                        </xsl:for-each>
+                    </span>
+                </td>
+            </tr>
+        </xsl:if>
+        
         <xsl:if test="$single  or  /spooler/@show_job_chain_jobs_checkbox  or  /spooler/@show_job_chain_orders_checkbox and job_chain_node/job/order_queue/order">
 
             <!-- $show_orders vergrößert den Abstand zwischen den Job_chain_nodes. Aber nur, wenn überhaupt ein Order in der Jobkette ist -->
@@ -1593,6 +1608,22 @@
                     </xsl:element>
 
                     <td style="text-align: right">
+                        <xsl:if test="@web_service_client">
+                            <span class="web_service" style="white-space: nowrap; font-size: 8pt; margin-right: 1ex;">
+                                <xsl:element name="span">
+                                    <xsl:attribute name="style">cursor: default; </xsl:attribute>
+                                    <xsl:attribute name="title">
+                                        <xsl:text>Web_service_operation </xsl:text>
+                                        <xsl:value-of select="@web_service"/>
+                                        <xsl:text>:</xsl:text>
+                                        <xsl:value-of select="@web_service_operation"/>
+                                    </xsl:attribute>
+                                    <xsl:value-of select="@web_service_client"/>
+                                </xsl:element>
+                            </span>
+                            <xsl:text> </xsl:text>
+                        </xsl:if>
+                        
                         <xsl:choose>
                             <xsl:when test="@task">
                                 <span class="task" style="white-space: nowrap; font-size: 8pt;">
@@ -1641,7 +1672,7 @@
 
                             <xsl:otherwise>
                                 <xsl:if test="@next_start_time">
-                                    <span class="small" style="white-space: nowrap">
+                                    <span class="small" style="white-space: nowrap; cursor: default" title="Start time">
                                         <xsl:value-of select="@next_start_time__xslt_date_or_time_with_diff"/>
                                     </span>
                                 </xsl:if>

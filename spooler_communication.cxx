@@ -150,11 +150,10 @@ string Xml_operation::async_state_text_() const
 { 
     S result;
     
-    result << "Xml_operation(";
     result << Operation::async_state_text_();
+    result << ", Xml_operation";
 
-    if( _request != "" )  result << ", " << quoted_string( truncate_to_one_line_with_ellipsis( _request, 100 ) );
-    result << ")";
+    if( _request != "" )  result << " " << quoted_string( truncate_to_one_line_with_ellipsis( _request, 100 ) );
 
     return result;
 }

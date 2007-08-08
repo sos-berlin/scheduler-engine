@@ -4617,7 +4617,10 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     element.setAttribute( "web_service", _web_service->name() );
 
     if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
-    element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
+    {
+        element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
+        element.setAttribute( "web_service_client"   , _http_operation->web_service_operation_or_null()->http_operation()->connection()->peer().as_string() );
+    }
 
     if( _is_on_blacklist )  element.setAttribute( "on_blacklist", "yes" );
     if( _suspended       )  element.setAttribute( "suspended"   , "yes" );

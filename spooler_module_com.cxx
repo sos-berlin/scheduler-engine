@@ -269,8 +269,12 @@ bool Scripting_engine_module_instance::load()
 
     DOM_FOR_EACH_ELEMENT( _module->_text_with_includes.dom_element(), element )
     {
-        _script_site->parse( _module->_text_with_includes.read_text_element( element, _module->_include_path ), 
-                             _module->_text_with_includes.text_element_linenr( element ) );
+        string text = _module->_text_with_includes.read_text_element( element, _module->_include_path );
+        if( text != "" )
+        {
+            _script_site->parse( text, 
+                                 _module->_text_with_includes.text_element_linenr( element ) );
+        }
     }
 
     //Z_FOR_EACH_CONST( Source_with_parts::Parts, _module->_source._parts, it )

@@ -75,6 +75,8 @@ hr.order_id_space       { color: #ff8000; background-color: #ff8000; }
 
 .calendar               { background-color: #ffe0c0; }
 
+.web_service            { background-color: #ffffa0; }
+
 a                       { text-decoration: none; color: inherit; background-color: inherit; }
 a.no_underline          { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline:link     { text-decoration: none     ; color: inherit; background-color: inherit; }

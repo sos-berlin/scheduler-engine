@@ -169,6 +169,7 @@ struct Web_service_operation : idispatch_implementation< Web_service_operation, 
     int                         id                          () const                                { return _id; }
 
     Web_service*                web_service                 () const                                { return _web_service; }
+    http::Operation*            http_operation              () const                                { return _http_operation; }
     http::Request*              http_request                () const                                { return _http_operation->request(); }
     http::Response*             http_response               () const                                { return _http_operation->response(); }
 

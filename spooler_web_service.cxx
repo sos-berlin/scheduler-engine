@@ -360,7 +360,7 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
     web_service_element.setAttribute_optional( "job_chain"               , _job_chain_name                );
 
     if( _debug )
-    web_service_element.setAttribute         ( "debug"                   , _debug );
+    web_service_element.setAttribute         ( "debug"                   , _debug? "yes" : "no" );
 
     /*
     if( what & show_web_service_operations )
