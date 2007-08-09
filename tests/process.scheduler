@@ -53,7 +53,7 @@ else
         </jobs>
 
         <job_chains>
-            <job_chain name="process.scheduler">
+            <job_chain name="process.scheduler" orders_recoverable="no">
                 <job_chain_node     state="1" job="process" next_state="NEXT_STATE" error_state="ERROR_STATE"/>
                 <job_chain_node.end state="NEXT_STATE"/>
                 <job_chain_node.end state="ERROR_STATE"/>

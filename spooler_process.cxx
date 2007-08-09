@@ -436,6 +436,9 @@ void Process::start_local()
         c->set_priority      ( _priority );
         if( _controller_address )  c->set_controller_address( _controller_address );
 
+#       ifdef Z_HPUX_PARISC
+            c->set_ld_preload( static_ld_preload );
+#       endif
 
         c->start_process( parameters );
 

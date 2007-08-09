@@ -1200,8 +1200,8 @@ bool Task::do_something()
                             if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
-                                set_state_texts_from_stdout();
-                                postprocess_order( true );
+                                //set_state_texts_from_stdout();
+                                //postprocess_order( true );
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -1329,12 +1329,6 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                //if( _module_instance->_module->_kind == Module::kind_process )
-                                //{
-                                //    set_state_texts_from_stdout();
-                                //    postprocess_order( true );
-                                //}
-
                                 set_state( loaded()? s_ending_waiting_for_subprocesses
                                                    : s_release );
                                 loop = true;
@@ -1440,6 +1434,12 @@ bool Task::do_something()
                             else
                             {
                                 operation__end();
+
+                                if( _module_instance->_module->_kind == Module::kind_process )
+                                {
+                                    set_state_texts_from_stdout();
+                                    postprocess_order( _exit_code == 0  &&  !has_error() );     // Auftrag soll in den Fehlerzustand gehen, egal ob 
+                                }                                                               // bei einem Fehler auch der Job stoppt
 
                                 // Gesammelte eMail senden, wenn collected_max erreicht:
                                 //Time log_time = _log->collect_end();

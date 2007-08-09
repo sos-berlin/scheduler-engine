@@ -507,8 +507,10 @@ bool Process_module_instance::begin__end()
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr( m->second->_name ) + "=" + m->second->_value.as_string();
+                    Z_LOG2( "env", "putenv(\"" << e << "\")\n" );
                     putenv( strdup( e.c_str() ) );
 #                else
+                    Z_LOG2( "env", "setenv(\"" << m->second->_name << "\",\"" << m->second->_value.as_string() << "\")\n" );
                     setenv( string_from_bstr( m->second->_name ).c_str(), m->second->_value.as_string().c_str(), true );
 #               endif
             }

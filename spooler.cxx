@@ -112,6 +112,10 @@ volatile int                    ctrl_c_pressed_handled              = 0;
     volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
 #endif
 
+#ifdef Z_HPUX_PARISC
+    extern string               static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
+#endif
+
 Spooler*                        spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
@@ -3456,7 +3460,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 {
                     string value = opt.value();
                     size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
-                    set_environment_variable( value.substr( 0, eq ), value.substr( eq + 1 ) );
+                    string name = value.substr( 0, eq );
+                    value = value.substr( eq + 1 );
+                    set_environment_variable( name, value );
+
+#                   ifdef Z_HPUX_PARISC
+                        if( name == "LD_PRELOAD" )  static_ld_preload = value;
+#                   endif
                 }
                 else
                 if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
@@ -3619,6 +3629,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 int sos_main( int argc, char** argv )
 {
+#   ifdef Z_HPUX_PARISC
+        if( const char* value = getenv( "LD_PRELOAD" ) )  static_ld_preload = value;
+        putenv( "LD_PRELOAD=" );
+#   endif
+
+
     _argc = argc;
     _argv = argv;
 

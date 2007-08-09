@@ -26,6 +26,9 @@
         <log_category name="invoke"         title="Aufruf einer Methode eines COM-Objekts"/>
     </log_category>
 
+    <log_category name="env"            title="Umgebungsvariablen">
+    </log_category>
+
     <log_category name="exception"      title="Bestimmte Fehlercodes">
         <log_category name="*"              global_default="on" title="Alle Fehlercodes"/>
         <log_category name="D310"           local_default="off" title="Dateiende"/>

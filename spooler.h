@@ -107,6 +107,10 @@ extern const string             variable_set_name_for_substitution;
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
 #endif
 
+#ifdef Z_HPUX_PARISC
+    extern string               static_ld_preload;                        // Inhalt der Umgebungsvariablen LD_PRELOAD
+#endif
+
 //-------------------------------------------------------------------------------------------------
 
 using namespace ::std;
