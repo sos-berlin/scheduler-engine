@@ -900,6 +900,17 @@ void Directory_watcher::renew()
 }
 
 #endif
+//----------------------------------------------------------------------Directory_watcher::signaled
+
+bool Directory_watcher::signaled()
+{ 
+#   ifdef Z_WINDOWS
+        return has_changed(); 
+#    else
+        return Event::signaled();
+#   endif
+}
+
 //-------------------------------------------------------------------Directory_watcher::has_changed
 
 bool Directory_watcher::has_changed()
@@ -924,11 +935,14 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         // Für diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
         // Das bremst leider den Scheduler ein wenig.
 
+        Z_LOGI2( "joacim", __FUNCTION__ << "  WaitForSingleObject()\n" );
         int ret = WaitForSingleObject( _handle, 0 );
         if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
         return ret == WAIT_OBJECT_0;
 
 #   else
+
+        Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
 
         bool changed = false;
 

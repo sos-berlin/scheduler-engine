@@ -152,7 +152,7 @@ struct Directory_watcher : Event  //, Async_operation
 
     void                        set_signaled                ();
     void                        reset                       ();
-    virtual bool                signaled                    ()                                      { return has_changed(); }
+    virtual bool                signaled                    ();
 
     string                      directory                   () const                                { return _directory; }
     string                      filename_pattern            () const                                { return _filename_pattern; }

@@ -15,6 +15,22 @@
         
         <process_classes/>
 
+        <script language="javascript">
+    <![CDATA[
+
+for( var i = 1; i <= 100; i++ )
+{
+    spooler.execute_xml( 
+            '<job name="shell' + i + '">' + 
+                '<process file="/tmp/test.cmd"/>' +
+                '<start_when_directory_changed directory="/tmp/z/' + i + '" regex="."/>' +
+            '</job>' 
+      );
+}
+        
+        
+        ]]></script>
+
         <jobs>
 
             <job name="shell">
@@ -29,7 +45,7 @@
                 <start_when_directory_changed directory="/tmp/z/" regex="."/>
             </job>
 
-<!--
+            <!--
         <job name="java">
 
             <script java_class="spooler_job.Test">
