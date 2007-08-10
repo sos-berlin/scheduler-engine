@@ -30,7 +30,7 @@ using namespace zschimmer::sql;
 //-------------------------------------------------------------------------------------------------
 
 const int    max_task_time_out             = 365*24*3600;
-const double directory_watcher_intervall   = 1.0;              // Nur für Unix (Windows gibt ein asynchrones Signal)
+const double directory_watcher_intervall   = 10.0;          // Nur für Unix (Windows gibt ein asynchrones Signal)
 
 //------------------------------------------------------------------------------------Job_subsystem
 

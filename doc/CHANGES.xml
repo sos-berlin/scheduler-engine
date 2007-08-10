@@ -10,6 +10,32 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-10" version="2.0.183" subversion_revision="5153">
+        <revision type="modification" title="Nicht-API-Jobs versetzen im Fehlerfall Auftrag in den Fehlerzustand">
+            <description>
+                <p>
+                    Im Fehlerfall eines auftragsgesteuerten Nicht-API-Jobs
+                    (<scheduler_element name="process"/> oder <scheduler_element name="script" attribute="language" value="shell"/>)
+                    wird der ausgeführte Auftrag in den Fehlerzustand 
+                    (<scheduler_element name="job_chain_node" attribute="error_state"/>) versetzt.
+                    Davon unberührt stoppt der Job
+                    (außer bei <scheduler_element name="job" attribute="stop_on_error" value="no"/>
+                    oder <scheduler_element name="delay_after_error"/>).
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Unix: Viele &lt;start_when_directory_changed> blockieren nicht mehr den Scheduler">
+            <description>
+                <p>
+                    Unter Unix konnten viele Verzeichnisüberwachungen mit <scheduler_element name="start_when_directory_changed"/> 
+                    den Scheduler so beschäftigen, dass die Tasks nicht mehr fortgesetzt wurden.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-07-27" version="2.0.182" subversion_revision="5146">
         <revision type="modification" title="Scheduler-Skript wird vor &lt;commands> ausgeführt">
             <description>
