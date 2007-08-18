@@ -1116,6 +1116,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
 
+    string max_order_history = element.getAttribute( "max_order_history" );
+    if( max_order_history != "" )  show._max_order_history = as_int( max_order_history );
+
     string max_task_history = element.getAttribute( "max_task_history" );
     if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
 

@@ -140,7 +140,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="max_orders" type="zahl">
+        <xml_attribute name="max_orders" type="integer">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
                 <p>
@@ -149,7 +149,16 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="max_task_history" type="zahl">
+        <xml_attribute name="max_order_history" type="integer" initial="20">
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Begrenzt die Anzahl der Aufträge aus der Auftragshistorie.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="max_task_history" type="integer" initial="20">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
                 <p>

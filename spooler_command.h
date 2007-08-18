@@ -59,7 +59,8 @@ inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { retur
 struct Show_what
 {
                                 Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), 
-                                                                                                      _max_orders(INT_MAX), 
+                                                                                                      _max_orders(INT_MAX),
+                                                                                                      _max_task_history(20),
                                                                                                       _max_task_history(10) {}
 
                               //operator Show_what_enum     () const                                { return _what; }
@@ -72,6 +73,7 @@ struct Show_what
     Fill_zero                  _zero_;
     Show_what_enum             _what;
     int                        _max_orders;
+    int                        _max_order_history;
     int                        _max_task_history;
     string                     _job_name;
     int                        _task_id;
