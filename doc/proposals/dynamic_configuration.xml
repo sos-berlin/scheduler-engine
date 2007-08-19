@@ -75,7 +75,8 @@
                 <scheduler_element name="job"/>
             </td>
             <td>
-                <scheduler_element name="job.remove"/>
+                <!--scheduler_element name="job.remove"/-->
+                <scheduler_element name="modify_job" attribute="cmd" value="modify"/>
             </td>
         </tr>
         <tr>
@@ -86,7 +87,7 @@
                 <scheduler_element name="job_chain"/>
             </td>
             <td>
-                <scheduler_element name="job_chain.remove"/>
+                <!--scheduler_element name="job_chain.remove"/-->
             </td>
         </tr>
         <tr>
@@ -97,7 +98,8 @@
                 <scheduler_element name="order"/>
             </td>
             <td>
-                <scheduler_element name="order.remove"/>
+                <!--scheduler_element name="order.remove"/-->
+                <scheduler_element name="remove_order"/>
             </td>
         </tr>
         <tr>

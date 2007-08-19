@@ -1468,12 +1468,13 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
             {
                 Read_transaction ta ( _spooler->_db );
 
-                Any_file sel = ta.open_result_set( 
-                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"HISTORY_ID\", \"JOB_CHAIN\", \"START_TIME\", \"END_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                               " from " + _spooler->_order_history_tablename +
-                               " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
-                                 " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
-                               " order by \"HISTORY_ID\" desc",
+                Any_file sel = ta.open_result_set( S() <<
+                               "select %limit(" << show._max_order_history << ")"
+                               " `order_id` as `id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
+                               " from " << _spooler->_order_history_tablename <<
+                               " where `job_chain`=" << sql::quoted( _name ) <<
+                                 " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
+                               " order by `history_id` desc",
                                __FUNCTION__ );
 
                 while( !sel.eof() )

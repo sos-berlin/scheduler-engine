@@ -438,7 +438,7 @@ Job::Job( Spooler* spooler, const ptr<Module>& module )
     _directory_watcher_next_time = Time::never;
     _default_params = new Com_variable_set;
     _task_timeout   = Time::never;
-    _idle_timeout   = Time::never;
+    _idle_timeout   = 5;
     _max_tasks      = 1;
 }
 

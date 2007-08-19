@@ -1799,9 +1799,9 @@ void Task::postprocess_order( bool spooler_process_result, bool due_to_exception
 {
     if( _order )
     {
-        if( due_to_exception )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         _order->postprocessing( spooler_process_result );
+        if( due_to_exception )  _log->warn( message_string( "SCHEDULER-846", _order->state().as_string() ) );
         remove_order();
     }
 }

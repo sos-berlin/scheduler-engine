@@ -473,9 +473,9 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     if( show.is_set( show_all_ ) )  show |= show_description | show_task_queue | show_orders;
 
     Job_chain*  job_chain      = NULL;
-    string      job_chain_name = element.getAttribute( "job_chain" );
+    string      job_chain_path = element.getAttribute( "job_chain" );
     
-    if( job_chain_name != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+    if( job_chain_path != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     
     return _spooler->job_subsystem()->get_job( element.getAttribute( "job" ), true ) -> dom_element( _answer, show, job_chain );
 }
@@ -733,9 +733,9 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
     if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
     if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
-    string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
+    string job_chain_path = show_job_chain_element.getAttribute( "job_chain" );
 
-    return _spooler->order_subsystem()->job_chain( job_chain_name )->dom_element( _answer, show );
+    return _spooler->order_subsystem()->job_chain( job_chain_path )->dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_order
@@ -749,19 +749,20 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show = Show_what( show_standard );
 
-    string    job_chain_name = show_order_element.getAttribute( "job_chain" );
-    Order::Id id             = show_order_element.getAttribute( "order"     );
-    string    history_id     = show_order_element.getAttribute( "history_id" );
-    string    id_string      = string_from_variant( id );
+    string     job_chain_path = show_order_element.getAttribute( "job_chain" );
+    Job_chain* job_chain      = _spooler->order_subsystem()->job_chain( job_chain_path );
+    Order::Id  id             = show_order_element.getAttribute( "order"     );
+    string     history_id     = show_order_element.getAttribute( "history_id" );
+    string     id_string      = string_from_variant( id );
 
     if( history_id == "" )
     {
-        ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+        ptr<Order> order = job_chain->order_or_null( id );
 
-        if( ptr<Order> order = job_chain->order_or_null( id ) )
-        {
-            result = order->dom_element( _answer, show );
-        }
+        if( !order  &&  job_chain->is_distributed() ) 
+            order = _spooler->order_subsystem()->try_load_order_from_database( NULL, job_chain_path, id );
+
+        result = order->dom_element( _answer, show );
     }
 
     if( !result )
@@ -776,7 +777,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                            " select max(\"HISTORY_ID\") as history_id_max "
                            "  from " + _spooler->_order_history_tablename +
                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
-                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
+                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_path ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ),
                             __FUNCTION__ );
 
@@ -822,15 +823,13 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             if( payload != "" )  order->set_payload( payload );
         }
         */
-
-        result = order->dom_element( _answer, show, &log );
     }
 
     if( result )  return result;
 
 
 NO_ORDER:
-    z::throw_xc( "SCHEDULER-162", id_string, job_chain_name );
+    z::throw_xc( "SCHEDULER-162", id_string, job_chain_path );
 }
 
 //-------------------------------------------------------------Command_processor::execute_add_order
@@ -872,13 +871,13 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
+    string    job_chain_path = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
     string    priority       = modify_order_element.getAttribute( "priority"  );
     string    state          = modify_order_element.getAttribute( "state"     );
     string    at             = modify_order_element.getAttribute( "at"        );
 
-    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order;
 
     try
@@ -886,7 +885,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order = job_chain->_is_distributed? job_chain->order_or_null( id ) 
                                           : job_chain->order( id );
 
-        if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_name, id, Order_subsystem_interface::lo_lock );
+        if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem_interface::lo_lock );
 
         if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
         {
@@ -967,10 +966,10 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
+    string    job_chain_path = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
 
-    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_name );
+    ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
                                                          : job_chain->order( id );
 
@@ -986,7 +985,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
         {
             sql::Delete_stmt delete_stmt ( _spooler->database_descriptor(), _spooler->_orders_tablename );
 
-            delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_name, id.as_string() ) );
+            delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_path, id.as_string() ) );
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
             ta.execute( delete_stmt, __FUNCTION__ );
@@ -995,7 +994,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             //if( ta.record_count() == 0 )
             //{
             //    // Sollte Exception auslösen: nicht da oder belegt
-            //    _spooler->order_subsystem()->load_order_from_database( job_chain_name, id );
+            //    _spooler->order_subsystem()->load_order_from_database( job_chain_path, id );
             //    
             //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
@@ -1017,9 +1016,9 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string job_chain_name = modify_order_element.getAttribute( "job_chain" );
+    string job_chain_path = modify_order_element.getAttribute( "job_chain" );
 
-    _spooler->order_subsystem()->job_chain( job_chain_name )->remove();
+    _spooler->order_subsystem()->job_chain( job_chain_path )->remove();
 
     return _answer.createElement( "ok" );
 }
@@ -1116,8 +1115,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
 
-    string max_order_history = element.getAttribute( "max_order_history" );
-    if( max_order_history != "" )  show._max_order_history = as_int( max_order_history );
+    show._max_order_history = element.int_getAttribute( "max_order_history", show._max_order_history );
 
     string max_task_history = element.getAttribute( "max_task_history" );
     if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
@@ -1378,14 +1376,14 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                     else
                     if( http_request->has_parameter( "order" ) )
                     {
-                        string job_chain_name = http_request->parameter( "job_chain" );
+                        string job_chain_path = http_request->parameter( "job_chain" );
                         string order_id       = http_request->parameter( "order" );
                         string history_id     = http_request->parameter( "history_id" );
                         
 
                         if( history_id == "" )
                         {
-                            if( ptr<Order> order = _spooler->order_subsystem()->job_chain( job_chain_name )->order_or_null( order_id ) )
+                            if( ptr<Order> order = _spooler->order_subsystem()->job_chain( job_chain_path )->order_or_null( order_id ) )
                             {
                                 log = order->_log;
                             }
@@ -1401,7 +1399,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                                 select_sql << "select max(\"HISTORY_ID\") as history_id_max "
                                                "  from " + _spooler->_order_history_tablename +
                                                "  where \"SPOOLER_ID\"=" << sql::quoted( _spooler->id_for_db() ) + 
-                                                 " and \"JOB_CHAIN\"=" << sql::quoted( job_chain_name ) +
+                                                 " and \"JOB_CHAIN\"=" << sql::quoted( job_chain_path ) +
                                                  " and \"ORDER_ID\"=" << sql::quoted( order_id );
                                 if( order_id != "" )  select_sql << " and `order_id`=" << sql::quoted( order_id );
 

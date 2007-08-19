@@ -124,6 +124,11 @@ Time time_from_string( const string& str )
         return dt.time_as_double();
     }
     else
+    if( str == "never" )
+    {
+        return Time::never;
+    }
+    else
         return as_double( str );
 }
 

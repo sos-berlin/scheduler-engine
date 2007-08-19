@@ -60,7 +60,7 @@ struct Show_what
 {
                                 Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), 
                                                                                                       _max_orders(INT_MAX),
-                                                                                                      _max_task_history(20),
+                                                                                                      _max_order_history(20),
                                                                                                       _max_task_history(10) {}
 
                               //operator Show_what_enum     () const                                { return _what; }

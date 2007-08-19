@@ -171,7 +171,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="idle_timeout" type="dauer" title="Frist für den Zustand waiting_for_order">
+        <xml_attribute name="idle_timeout" type="dauer" initial="5" title="Frist für den Zustand waiting_for_order">
             <description>
                 <p>
                     Begrenzt den Leerlauf eines auftragsgesteuerten Jobs (<code>order="yes"</code>).
@@ -180,6 +180,8 @@
                 </p>
                 <p>
                     <i>dauer</i> kann in Sekunden oder im Format <code>HH:MM</code> oder <code>HH:MM:SS</code> angegeben werden.
+                    <code>idle_timeout="never"</code> lässt den Job unbegrenzt laufen, 
+                    nur noch abhängig von <scheduler_element name="run_time"/>.
                 </p>
                 <p>
                     Siehe auch <scheduler_element name="job" attribute="force_idle_timeout"/>.

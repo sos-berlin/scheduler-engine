@@ -222,10 +222,10 @@
         (sie wird also entstoppt).
     </p>
 
-    <p>
+    <!--p>
         <scheduler_element name="job_chain.remove"/>:
         Jobketten können bereits jetzt gelöscht werden.
-    </p>
+    </p-->
 
     <p>
         Eine Jobkette, die verzögert gelöscht wird, kann währenddessen hinzugefügt werden.

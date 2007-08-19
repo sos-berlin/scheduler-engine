@@ -26,6 +26,8 @@
 
     <xml_attributes>
         <xml_attribute name="job_chain" title="Name der Jobkette"/>
+        <xml_attribute name="max_orders"        same_as_element="show_state"/>
+        <xml_attribute name="max_order_history" same_as_element="show_state"/>
         <xml_attribute name="what"              same_as_element="show_state"/>
     </xml_attributes>
 

@@ -2054,6 +2054,12 @@
     <register_keyword_display><code>max_non_exclusive</code> (property)</register_keyword_display>
     <register_entry register_file='api/Lock.xml#method__max_non_exclusive' register_title='Lock.max_non_exclusive' register_keyword='max_non_exclusive' type='definition'/>
 </register_keyword>
+<register_keyword keyword='max_order_history'>
+    <register_keyword_display><code>max_order_history=</code></register_keyword_display>
+    <register_entry register_file='xml/show_job_chain.xml#attribute_max_order_history' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='max_order_history' type='definition'/>
+    <register_entry register_file='xml/show_job_chains.xml#attribute_max_order_history' register_title='&lt;show_job_chains&gt; (Kommando)'  register_keyword='max_order_history' type='definition'/>
+    <register_entry register_file='xml/show_state.xml#attribute_max_order_history' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='max_order_history' type='definition'/>
+</register_keyword>
 <register_keyword keyword='max_order_setbacks (property)'>
     <register_keyword_display><code>max_order_setbacks</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__max_order_setbacks' register_title='Job.max_order_setbacks' register_keyword='max_order_setbacks' type='definition'/>
@@ -2061,6 +2067,7 @@
 <register_keyword keyword='max_orders'>
     <register_keyword_display><code>max_orders=</code></register_keyword_display>
     <register_entry register_file='xml/show_job.xml#attribute_max_orders' register_title='&lt;show_job&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
+    <register_entry register_file='xml/show_job_chain.xml#attribute_max_orders' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_job_chains.xml#attribute_max_orders' register_title='&lt;show_job_chains&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_jobs.xml#attribute_max_orders' register_title='&lt;show_jobs&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_state.xml#attribute_max_orders' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>

@@ -30,7 +30,7 @@ bride.marry( "broom_b" );</pre>
     </example>
     <p>
         Die Bräutigame werden in der Jobkette im selben Zustand erwartet, 
-        den die Braut nach Ausführung von <scheduler_element name="Order" method="marry"/> einnimmt.
+        den die Braut nach Ausführung von <scheduler_method class="Order" method="marry"/> einnimmt.
         Die Bräutigame müssen vorab ihr Ja-Wort geben.
         Den Namen der Braut erfahren sie nicht.
     </p>
