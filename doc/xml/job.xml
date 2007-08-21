@@ -180,6 +180,8 @@
                 </p>
                 <p>
                     <i>dauer</i> kann in Sekunden oder im Format <code>HH:MM</code> oder <code>HH:MM:SS</code> angegeben werden.
+                </p>
+                <p>
                     <code>idle_timeout="never"</code> lässt den Job unbegrenzt laufen, 
                     nur noch abhängig von <scheduler_element name="run_time"/>.
                 </p>

@@ -99,10 +99,10 @@
                         (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
 
-                    <dt><code>order_history</code></dt>
+                    <!--Jetzt Attribut max_order_history="20"   <dt><code>order_history</code></dt>
                     <dd>
                         Liefert auch die letzten zwanzig Einträge der Auftragshistorie.
-                    </dd>
+                    </dd-->
 
                     <dt><code>payload</code></dt>
                     <dd>
@@ -149,11 +149,12 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="max_order_history" type="integer" initial="20">
+        <xml_attribute name="max_order_history" type="integer" initial="0">
             <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
             <description>
                 <p>
                     Begrenzt die Anzahl der Aufträge aus der Auftragshistorie.
+                    <code>max_order_history="0"</code> unterdrückt die Auftragshistorie.
                 </p>
             </description>
         </xml_attribute>

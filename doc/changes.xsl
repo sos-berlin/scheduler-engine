@@ -85,7 +85,21 @@
                 </xsl:choose>
             </xsl:attribute>
 
-            <b><xsl:value-of select="@title"/></b>
+            <b>
+                <xsl:if test="@jira">
+                    <xsl:element name="a">
+                        <xsl:attribute name="href">
+                            <xsl:text>http://www.sos-berlin.com/jira/browse/</xsl:text>
+                            <xsl:value-of select="@jira"/>
+                        </xsl:attribute>
+                        <xsl:attribute name="title">Jira issue</xsl:attribute>
+                        
+                        <xsl:value-of select="@jira"/>
+                    </xsl:element>
+                    <xsl:text>: </xsl:text>
+                </xsl:if>
+                <xsl:value-of select="@title"/>
+            </b>
         </xsl:element>
 
         <xsl:if test="description">

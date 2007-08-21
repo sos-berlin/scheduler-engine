@@ -84,7 +84,7 @@ function spooler_process()
             </job>
 
 
-            <job name="java" order="yes" idle_timeout="30">
+            <job name="java" order="yes" idle_timeout="never">
                 <script java_class="spooler_job.Test"><![CDATA[
 
                     package spooler_job;

@@ -10,6 +10,62 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-21" version="2.0.184" subversion_revision="5158">
+        <revision jira="JS-92" type="modification" title="idle_time=&quot;5&quot; ist jetzt voreingestellt">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="idle_timeout" value="never"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-88" type="modification" title="Neues Attribut max_order_history">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_state" attribute="max_order_history"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_job_chains" attribute="max_order_history"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="show_job_chain" attribute="max_order_history"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-97" type="modification" title="Meldungen wegen später gelöschter Dateien jetzt als debug3">
+            <description>
+                <p>
+                    Zwei Meldung werden mit debug3 statt bisher info ausgegeben:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_message level="debug3" code="SCHEDULER-876" show_text="yes"/>
+                    </li>
+                    <li>
+                        <scheduler_message level="debug3" code="SCHEDULER-877" show_text="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-96" type="correction" title="HTML-codierte Protokolle über HTTP enthalten wieder die Zeichen &lt;, > und &amp;"/>
+
+        <revision jira="JS-93" type="correction" title="Meldung SCHEDULER-846 korrigiert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_message code="SCHEDULER-846" show_text="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-08-10" version="2.0.183" subversion_revision="5153">
         <revision type="modification" title="Nicht-API-Jobs versetzen im Fehlerfall Auftrag in den Fehlerzustand">
             <description>
@@ -188,8 +244,8 @@
                     und die nach Task-Ende noch weiterlaufen.
                     Oder ein Virenscanner hält die Dateien noch einen kurzen Moment fest.
                 </p>
-                <scheduler_message level="info" code="SCHEDULER-876"/>
-                <scheduler_message level="info" code="SCHEDULER-877"/>
+                <scheduler_message level="debug3" code="SCHEDULER-876"/>
+                <scheduler_message level="debug3" code="SCHEDULER-877"/>
                 <scheduler_message level="info" code="SCHEDULER-878"/>
             </description>
         </revision>

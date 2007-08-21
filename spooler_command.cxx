@@ -760,7 +760,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         ptr<Order> order = job_chain->order_or_null( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
-            order = _spooler->order_subsystem()->try_load_order_from_database( NULL, job_chain_path, id );
+            order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
 
         result = order->dom_element( _answer, show );
     }
@@ -811,7 +811,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
         if( show.is_set( show_log ) )
         {
-            log = file_as_string( S() << GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
+            log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" << history_id );
         }
 
@@ -885,7 +885,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order = job_chain->_is_distributed? job_chain->order_or_null( id ) 
                                           : job_chain->order( id );
 
-        if( !order )  order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem_interface::lo_lock );
+        if( !order  &&  job_chain->is_distributed() ) 
+            order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem_interface::lo_lock );
 
         if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
         {
@@ -1115,8 +1116,6 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
 
-    show._max_order_history = element.int_getAttribute( "max_order_history", show._max_order_history );
-
     string max_task_history = element.getAttribute( "max_task_history" );
     if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
 
@@ -1149,7 +1148,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "task_history"     ) )  show |= show_task_history;
         else
-        if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show |= show_order_history;
+        if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show._max_order_history = 20;
         else
         if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
         else
@@ -1185,6 +1184,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
         if( *p == 0 )  break;
     }
+
+    show._max_order_history = element.int_getAttribute( "max_order_history", show._max_order_history );
+
 
 
     string element_name = element.nodeName();
@@ -1376,14 +1378,25 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                     else
                     if( http_request->has_parameter( "order" ) )
                     {
-                        string job_chain_path = http_request->parameter( "job_chain" );
-                        string order_id       = http_request->parameter( "order" );
-                        string history_id     = http_request->parameter( "history_id" );
+                        string     job_chain_path = http_request->parameter( "job_chain" );
+                        string     order_id       = http_request->parameter( "order" );
+                        string     history_id     = http_request->parameter( "history_id" );
+                        Job_chain* job_chain      = _spooler->order_subsystem()->job_chain( job_chain_path );
                         
 
                         if( history_id == "" )
                         {
-                            if( ptr<Order> order = _spooler->order_subsystem()->job_chain( job_chain_path )->order_or_null( order_id ) )
+                            ptr<Order> order = job_chain->order_or_null( order_id );
+
+                            if( !order  &&  job_chain->is_distributed() ) 
+                            {
+                                order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, order_id );
+                                //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben
+                                http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), order->log()->title() ) ) );
+                                return;
+                            }
+
+                            if( order )
                             {
                                 log = order->_log;
                             }
@@ -1413,7 +1426,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
                             if( history_id != "" )
                             {
-                                string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
+                                string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
                                                                 " where \"HISTORY_ID\"=" + history_id );
                                 string title = "Auftrag " + order_id;
                                 //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen

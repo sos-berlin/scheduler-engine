@@ -1275,14 +1275,23 @@ void Prefix_log::continue_with_text( const string& text )
 
 string Prefix_log::as_string()
 {
+    string result;
+
     if( _started )
     {
-        return string_from_file( filename() ) + _log_buffer;
+#       ifdef Z_WINDOWS
+
+            result = File( filename(), "r" ).read_all();        // Ersetzt \r\n zu \n
+
+#        else
+
+            result = string_from_file( filename() );
+
+#       endif
     }
-    else
-    {
-        return _log_buffer;
-    }
+
+    result.append( _log_buffer );
+    return result;
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

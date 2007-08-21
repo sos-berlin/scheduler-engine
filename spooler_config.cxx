@@ -319,7 +319,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 _web_services->set_dom( e );
             }
             else
-            if( e.nodeName_is( "web_services" ) )
+            if( e.nodeName_is( "web_services" ) )       // Veraltet, heiﬂt jetzt <http_server>
             {
                 _log->info( message_string( "SCHEDULER-847", "<http_server>", e.nodeName() ) );
                 _web_services->set_dom( e );

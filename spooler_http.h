@@ -67,15 +67,14 @@ struct String_chunk_reader : Chunk_reader
                                 String_chunk_reader         ( const string& text, const string& content_type = "text/plain; charset=" + scheduler_character_encoding ) 
                                                                                                     : Chunk_reader( content_type ), _zero_(this+1), _text(text) {}
 
-  protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
     int                         get_next_chunk_size         ();
     string                      read_from_chunk             ( int size );
 
-
+  private:
     Fill_zero                  _zero_;
     string                     _text;
-    bool                       _get_next_chunk_size_called;
+   //bool                       _get_next_chunk_size_called;
     uint                       _offset;                     // Bereits gelesene Bytes
 };
 
@@ -134,8 +133,12 @@ struct Log_chunk_reader : Chunk_reader
     Fill_zero                  _zero_;
     ptr<Prefix_log>            _log;
     Event_base*                _event;
+
+    enum State { s_initial, s_reading_string, s_reading_file, s_finished };
+    State                      _state;
+    ptr<String_chunk_reader>   _string_chunk_reader;
+    size_t                     _file_seek;
     File                       _file;
-    bool                       _file_eof;
     string                     _html_insertion;
 };
 

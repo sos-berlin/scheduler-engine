@@ -237,7 +237,7 @@ string Read_transaction::file_as_string( const string& hostware_filename )
     //set_transaction_read();
     try
     {
-        return ::sos::file_as_string( _db->db_name() + hostware_filename );
+        return ::sos::file_as_string( "-binary " + _db->db_name() + hostware_filename );
     }
     catch( exception& x )
     {
@@ -1602,7 +1602,7 @@ void Transaction::update_clob( const string& table_name, const string& column_na
     string hostware_filename = S() <<  "-no-blob-record-allowed -table=" << table_name << " -clob=" << column_name << "  " << where;
     // Falls wir mal auf direkten Aufruf von jdbc umstellen, kann -no-blob-record-allowed wegfallen. Dann können wir das genauer programmieren.
 
-    Any_file clob = open_file( "-out " + db()->db_name(), hostware_filename );
+    Any_file clob = open_file( "-out -binary " + db()->db_name(), hostware_filename );
 
     try
     {
@@ -1747,7 +1747,7 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
                 {
                     ta.set_transaction_read();
 
-                    string log = file_as_string( GZIP_AUTO + db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
+                    string log = file_as_string( "-binary " GZIP_AUTO + db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
                                                 " where \"ID\"=" + as_string(task_id) );
                     task_element.append_new_text_element( "log", log );
                 }
@@ -2038,7 +2038,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
 #ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
                         if( _use_db ) 
-                            param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where `id`=" + as_string(id), "" );
+                            param_xml = file_as_string( "-binary " + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where `id`=" + as_string(id), "" );
 
                         if( !param_xml.empty() )
                         {
@@ -2059,7 +2059,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             {
                                 ta.set_transaction_read();
 
-                                string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                                string log = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() )  history_entry.append_new_text_element( "log", log );
                             }
                             catch( exception&  x ) { _job->_log->warn( string("History: ") + x.what() ); }
@@ -2225,7 +2225,7 @@ void Task_history::write( bool start )
 
                                 string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
                                 if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                                copy_file( "file -b " + log_filename, blob_filename );
+                                copy_file( "file -b " + log_filename, "-binary " + blob_filename );
                             }
                             catch( exception& x ) { _task->_log->warn( string("History: ") + x.what() ); }
                         }

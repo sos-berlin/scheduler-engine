@@ -76,8 +76,8 @@ const char allowed_html_characters[ 256 ] =
     // 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f   
        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,  // 00   \t, \n, \r  (\r von XML nur geduldet, aber nicht gelesen)
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // 10
-       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 20
-       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 30
+       1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 20   &
+       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1,  // 30   < >
        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 40
        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 50
        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 60
@@ -1385,8 +1385,8 @@ STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
 
 int String_chunk_reader::get_next_chunk_size()
 {
-    if( _get_next_chunk_size_called )  return 0;
-    _get_next_chunk_size_called = true;
+    //if( _get_next_chunk_size_called )  return 0;
+    //_get_next_chunk_size_called = true;
 
     return _text.length();
 }
@@ -1395,12 +1395,16 @@ int String_chunk_reader::get_next_chunk_size()
 
 string String_chunk_reader::read_from_chunk( int recommended_size )
 { 
+    string result;
+
     int length = min( recommended_size, (int)( _text.length() - _offset ) );
 
-    int offset = _offset;
-    _offset += length;
+    result = _text.substr( _offset, length ); 
 
-    return _text.substr( offset, length ); 
+    _offset += length;
+    if( _offset == _text.length() )  _text.clear(), _offset = 0;    // Ende, get_next_chunk_size() wird 0 liefern
+
+    return result;
 }
 
 //---------------------------------------------------------------Log_chunk_reader::Log_chunk_reader
@@ -1432,53 +1436,144 @@ void Log_chunk_reader::set_event( Event_base* event )
 
 bool Log_chunk_reader::next_chunk_is_ready()
 { 
-OPEN:
-    if( !_file.opened() )
+    bool result = false;
+
+    for( bool loop = true; loop; )
     {
-        if( !_log->started() )  return false;       // Wenn Log noch nicht gestartet worden ist (z.B. Order in der Warteschlange), dann gibt's noch keine Datei
-                                                    // Und wenn die Datei schon geschlossen ist? Kann das passieren?
-        _file.open( _log->filename(), "rb" );
+        loop = false;
+
+        switch( _state )
+        {
+            case s_initial:
+            {
+                _state = s_reading_string;
+                loop = true;
+
+                break;
+            }
+
+            case s_reading_string:
+            {
+                if( !_string_chunk_reader  &&  _log->started() )
+                {
+                    _state = s_reading_file;
+                    loop = true;
+                }
+                else
+                {
+                    if( !_string_chunk_reader )
+                        _string_chunk_reader = Z_NEW( String_chunk_reader( _log->as_string() ) );
+
+                    if( _string_chunk_reader->next_chunk_is_ready() )   // Immer true
+                    {
+                        if( _string_chunk_reader->get_next_chunk_size() > 0 )
+                        {
+                            result = true;
+                        }
+                        else
+                        {
+                            _string_chunk_reader = NULL;
+                            _state = s_reading_file;
+                            loop = true;
+                        }
+                    }
+                }
+
+                break;
+            }
+
+            case s_reading_file:
+            {
+                if( !_log->started() )      // Wenn Log noch nicht gestartet worden ist (z.B. Order in der Warteschlange), dann gibt's noch keine Datei
+                {                           // Und wenn die Datei schon geschlossen ist? Kann das passieren?
+                    //if( es wird keine Log-Datei geben, z.B. bei aus Datenbank geladenem verteiltem Auftrag )  result = true;    // Ende
+                }
+                else
+                {
+                    if( !_file.opened() )
+                    {
+                        _file.open( _log->filename(), "rb" );
+                        if( _file_seek )  _file.seek( _file_seek ),  _file_seek = 0;
+                    }
+
+                    if( _file.tell() < _file.length() )
+                    {
+                        result = true;
+                    }
+                    else
+                    {
+                        if( _log->closed() )
+                        {
+                            _file.close();
+                            _state = s_finished;
+                            loop = true;
+                        }
+                        else
+                        if( _log->filename() != _file.path() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
+                        {
+                            _file.close();
+                            _html_insertion = "<hr size='1'/>";
+                            result = true;
+                            break;
+                        }
+                    }                                       
+                }
+
+                break;
+            }
+
+            case s_finished:
+            {
+                result = true;
+                break;
+            }
+
+            default:
+                throw_xc( __FUNCTION__ );
+        }
     }
 
-    if( _file.tell() == _file.length() )
-    {
-        if( _log->closed() )
-        {
-            _file_eof = true;
-            return true;
-        }
-        else
-        if( _log->filename() != _file.path() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
-        {
-            _file.close();
-            _html_insertion = "<hr size='1'/>";
-            goto OPEN;
-        }
-        else
-            return false;
-    }                                       
-
-    return true;
+    return result;
 }
 
 //-----------------------------------------------------------Log_chunk_reader::get_next_chunk_size
 
 int Log_chunk_reader::get_next_chunk_size()
 {
-    if( _file.opened()  &&  !_file_eof )
+    int result = 0;     // Ende
+
+    if( _string_chunk_reader )
+    {
+        result = _string_chunk_reader->get_next_chunk_size();
+    }
+    else
+    if( _file.opened() )
     {
         uint64 size = _file.length() - _file.tell();
-        if( size > 0 )  return size < _recommended_block_size? (int)size : _recommended_block_size;
+        if( size > 0 )  result = size < _recommended_block_size? (int)size : _recommended_block_size;
     }
 
-    return 0;  // eof
+    return result;
 }
 
 //----------------------------------------------------------------Log_chunk_reader::read_from_chunk
 
 string Log_chunk_reader::read_from_chunk( int recommended_size )
 { 
-    return _file.read_string( recommended_size );
+    string result;
+
+    if( _string_chunk_reader )
+    {
+        result = _string_chunk_reader->read_from_chunk( recommended_size );
+        _file_seek += result.length();
+    }
+    else
+    if( _file.opened() )
+    {
+        result = _file.read_string( recommended_size );
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------Log_chunk_reader::html_insertion

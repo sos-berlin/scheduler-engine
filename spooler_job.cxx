@@ -1169,12 +1169,12 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
 
-            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
-                                                                                " where \"TASK_ID\"=" + as_string( task_id ) );
+            string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
+                                                                                       " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
-            string xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
-                                                                    " where \"TASK_ID\"=" + as_string( task_id ) );
+            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
+                                                                            " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement(), Time::now() );  // 2006-10-28 Das sieht ja merkwürdig aus. Sollte es heißen task->set_dom()?
 
 

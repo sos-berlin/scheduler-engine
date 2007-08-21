@@ -29,7 +29,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-    show_order_history      = 0x80,
+  //show_order_history      = 0x80,
     show_remote_schedulers  = 0x100,
     show_run_time           = 0x200,
     show_job_chains         = 0x400,
@@ -60,7 +60,6 @@ struct Show_what
 {
                                 Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), 
                                                                                                       _max_orders(INT_MAX),
-                                                                                                      _max_order_history(20),
                                                                                                       _max_task_history(10) {}
 
                               //operator Show_what_enum     () const                                { return _what; }

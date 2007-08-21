@@ -1460,7 +1460,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
         }
 
 
-        if( show.is_set( show_order_history )  &&  _spooler->_db->opened() )
+        if( show._max_order_history  &&  _spooler->_db->opened() )
         {
             xml::Element_ptr order_history_element = document.createElement( "order_history" );
 
@@ -3309,7 +3309,8 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                     }
                     catch( exception& ) 
                     { 
-                        ok = false;      // Jemand hat wohl den Datensatz gelöscht
+                        ok = false;      // Jemand hat wohl den Datensatz gelöscht.  
+                                         // Wenn nicht, dann gibt's eine Schleife! Auftrag ungültig machen?
                     }
             
                     if( ok )
