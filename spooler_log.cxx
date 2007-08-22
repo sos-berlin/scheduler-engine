@@ -38,7 +38,7 @@ struct Log_set_console_colors_base
     Spooler*                    _spooler;
     bool                        _restore_console;
 
-    enum Color { c_black, c_red, c_pale_red, c_blue, c_pale_blue, c_pale_blue_green, c_pale_brown, c_pale_gray };
+    enum Color { c_black, c_dark_red, c_pale_red, c_blue, c_pale_blue, c_pale_blue_green, c_pale_brown, c_gray };
 
 
     Log_set_console_colors_base( Spooler* spooler )
@@ -67,7 +67,7 @@ struct Log_set_console_colors_base
 
             switch( level )
             {
-                case log_error:     set_color( c_red        ); break;
+                case log_error:     set_color( c_dark_red        ); break;
                 case log_warn:      set_color( c_pale_red   ); break;
                 case log_info:      set_color( c_blue       ); break;
                 case log_debug1:    set_color( c_pale_blue  ); break;
@@ -79,7 +79,7 @@ struct Log_set_console_colors_base
                 case log_debug7:    
                 case log_debug8:    
                 case log_debug9:    
-                default:            set_color( c_pale_gray  ); break;
+                default:            set_color( c_gray  ); break;
             }
         }
     }
@@ -120,13 +120,13 @@ struct Log_set_console_colors_base
 
                 switch( color )
                 {
-                    case c_red:              attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED;               break;
-                    case c_pale_red:         attributes |= FOREGROUND_RED;                                      break;
+                    case c_dark_red:         attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED;               break;
+                    case c_pale_red:         attributes |=                        FOREGROUND_RED;               break;
                     case c_blue:             attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE;              break;
-                    case c_pale_blue:        attributes |= FOREGROUND_BLUE;                                     break;
+                    case c_pale_blue:        attributes |=                        FOREGROUND_BLUE;              break;
                     case c_pale_blue_green:  attributes |= FOREGROUND_GREEN | FOREGROUND_BLUE;                  break;
                     case c_pale_brown:       attributes |= FOREGROUND_RED | FOREGROUND_GREEN;                   break;
-                    case c_pale_gray:        attributes |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
+                    case c_gray:             attributes |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
                     case c_black: 
                     default: ;
 
@@ -159,19 +159,19 @@ struct Log_set_console_colors_base
 
             switch( color )
             {
-                case c_red:             seq = "\e[1;31m";   break;
-                case c_pale_red:        seq = "\e[31m";     break;
-                case c_blue:            seq = "\e[34m";     break;
+                case c_dark_red:        seq = "\e[1;31m";   break;
+                case c_pale_red:        seq = "\e[0;31m";   break;
+                case c_blue:            seq = "\e[0;34m";   break;
                 case c_pale_blue:       seq = "\e[1;34m";   break;
-                case c_pale_blue_green: seq = "\e[36m";     break;
-                case c_pale_brown:  seq = "\e[35m";     break;
-                case c_pale_gray:       seq = "\e[37m";     break;
-                case c_black:           seq = "\e[30m";     break;
+                case c_pale_blue_green: seq = "\e[0;36m";   break;
+                case c_pale_brown:      seq = "\e[0;33m";   break;
+                case c_gray:            seq = "\e[0;37m";   break;
+                case c_black:           seq = "\e[0;30m";   break;
                 default: ;
 
             }
 
-            write( stderr, seq.data(), seq.length() );
+            write( fileno(stderr), seq.data(), seq.length() );
         }
     };
 
