@@ -59,7 +59,8 @@ struct Log_set_console_colors_base
 
     void set_color_for_level( Log_level level )
     {
-        bool with_colors = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
+        //bool with_colors = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
+        bool with_colors = _spooler && _spooler->_log_to_stderr;
 
         if( with_colors ) 
         {
