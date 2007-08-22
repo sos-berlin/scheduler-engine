@@ -133,7 +133,7 @@ function spooler_process()
         
             
         <job_chains>
-            <job_chain name="order_at.scheduler">
+            <job_chain name="order_at.scheduler" distributed="yes">
                 <job_chain_node state="first" job="javascript"/>
                 <job_chain_node state="finished"/>
             </job_chain>
