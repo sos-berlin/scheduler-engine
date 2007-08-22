@@ -130,7 +130,6 @@
     <file path="xml/answer/lock.queue.entry.xml"/>
     <file path="xml/answer/locks.xml"/>
     <file path="xml/answer/lock.use.xml"/>
-    <file path="xml/answer/lock.requiror.xml"/>
     <file path="xml/answer/ok.xml"/>
     <file path="xml/answer/order.xml"/>
     <file path="xml/answer/order_queue.xml"/>

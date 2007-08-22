@@ -2963,8 +2963,7 @@
             </xsl:call-template>
 
             <body>
-                <xsl:call-template name="body_start">
-                </xsl:call-template>
+                <xsl:call-template name="body_start"/>
 
                 <table cellpadding="0" cellspacing="0">
                     <thead>
