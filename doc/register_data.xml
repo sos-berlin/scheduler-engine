@@ -2997,6 +2997,7 @@
 </register_keyword>
 <register_keyword keyword='show_job_chain'>
     <register_keyword_display><code>&lt;show_job_chain&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__show_job_chain' register_title='Änderungsprotokoll'  register_keyword='show_job_chain'/>
     <register_entry register_file='xml.xml#use_element__show_job_chain' register_title='Alle XML-Elemente'  register_keyword='show_job_chain'/>
     <register_entry register_file='xml/show_job_chain.xml#' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='show_job_chain' type='definition'/>
     <register_entry register_file='xml/show_order.xml#use_element__show_job_chain' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='show_job_chain'/>

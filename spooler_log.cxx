@@ -33,85 +33,149 @@ namespace scheduler {
 
 //-------------------------------------------------------------------------------Log_set_console_colors
 
+struct Log_set_console_colors_base
+{
+    Spooler*                    _spooler;
+    bool                        _restore_console;
+
+    enum Color { c_black, c_red, c_pale_red, c_blue, c_pale_blue, c_pale_blue_green, c_pale_brown, c_pale_gray };
+
+
+    Log_set_console_colors_base( Spooler* spooler )
+    :
+        _spooler(spooler),
+        _restore_console(false)
+    {
+    }
+
+
+    virtual ~Log_set_console_colors_base()
+    {
+    }
+
+
+    virtual void set_color( Color ) = 0;
+
+
+    void set_color_for_level( Log_level level )
+    {
+        bool with_colors = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
+
+        if( with_colors ) 
+        {
+            _restore_console = true;
+
+            switch( level )
+            {
+                case log_error:     set_color( c_red        ); break;
+                case log_warn:      set_color( c_pale_red   ); break;
+                case log_info:      set_color( c_blue       ); break;
+                case log_debug1:    set_color( c_pale_blue  ); break;
+                case log_debug2:    
+                case log_debug3:    set_color( c_pale_blue_green ); break;
+                case log_debug4:
+                case log_debug5:    
+                case log_debug6:    set_color( c_pale_brown  ); break;
+                case log_debug7:    
+                case log_debug8:    
+                case log_debug9:    
+                default:            set_color( c_pale_gray  ); break;
+            }
+        }
+    }
+};
+
 #ifdef Z_WINDOWS
 
-    struct Log_set_console_colors
+    struct Log_set_console_colors : Log_set_console_colors_base
     {
-        Spooler*                    _spooler;
         CONSOLE_SCREEN_BUFFER_INFO  _console_screen_buffer_info; 
-        bool                        _restore_console;
 
 
-        Log_set_console_colors( Spooler* spooler )
-        :
-            _spooler(spooler),
-            _restore_console(false)
+        Log_set_console_colors( Spooler* spooler ) 
+        :     
+            Log_set_console_colors_base( spooler )
         {
-        }
-
-
-        void set_color_for_level( Log_level level )
-        {
-            bool with_colors = _spooler && _spooler->_zschimmer_mode  Z_WINDOWS_ONLY( Z_DEBUG_ONLY( || true ) );
-
-            if( with_colors ) 
-            {
-                _restore_console = true;
-                GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &_console_screen_buffer_info );
-
-                WORD attributes = _console_screen_buffer_info.wAttributes;   //BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
-                if( attributes & BACKGROUND_INTENSITY
-                 && attributes & BACKGROUND_RED 
-                 && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiﬂ oder gelb
-                {
-                    attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
-
-                    switch( level )
-                    {
-                        case log_error:     attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
-                        case log_warn:      attributes |= FOREGROUND_RED; break;
-                        case log_info:      attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE; break;
-                        case log_debug1:    attributes |= FOREGROUND_BLUE; break;
-                        case log_debug2:    
-                        case log_debug3:    attributes |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-                        case log_debug4:
-                        case log_debug5:    
-                        case log_debug6:    attributes |= FOREGROUND_RED | FOREGROUND_GREEN; break;
-                        case log_debug7:    
-                        case log_debug8:    
-                        case log_debug9:    
-                        default:            attributes |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-                    }
-
-                    SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
-                }
-            }
         }
 
 
         ~Log_set_console_colors()
         {
-            if( _restore_console )
-            {
+            if( _restore_console ) 
                 SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), _console_screen_buffer_info.wAttributes );
+        }
+
+
+        void set_color( Color color )
+        {
+            GetConsoleScreenBufferInfo( GetStdHandle(STD_ERROR_HANDLE), &_console_screen_buffer_info );
+
+            WORD attributes = _console_screen_buffer_info.wAttributes;   //BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY;
+
+            if( attributes & BACKGROUND_INTENSITY
+             && attributes & BACKGROUND_RED 
+             && attributes & BACKGROUND_GREEN )       // Hintergrund ist hell und weiﬂ oder gelb
+            {
+                attributes &= ~( FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE );
+
+                switch( color )
+                {
+                    case c_red:              attributes |= FOREGROUND_INTENSITY | FOREGROUND_RED;               break;
+                    case c_pale_red:         attributes |= FOREGROUND_RED;                                      break;
+                    case c_blue:             attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE;              break;
+                    case c_pale_blue:        attributes |= FOREGROUND_BLUE;                                     break;
+                    case c_pale_blue_green:  attributes |= FOREGROUND_GREEN | FOREGROUND_BLUE;                  break;
+                    case c_pale_brown:       attributes |= FOREGROUND_RED | FOREGROUND_GREEN;                   break;
+                    case c_pale_gray:        attributes |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
+                    case c_black: 
+                    default: ;
+
+                }
+
+                SetConsoleTextAttribute( GetStdHandle(STD_ERROR_HANDLE), attributes );
             }
         }
     };
 
-#  else
+#else
 
-    struct Log_set_console_colors
+    struct Log_set_console_colors : Log_set_console_colors_base
     {
-        Log_set_console_colors( Spooler* )
+        Log_set_console_colors( Spooler* spooler ) 
+        :     
+            Log_set_console_colors_base( spooler )
         {
         }
 
+        ~Log_set_console_colors()
+        {
+            if( _restore_console ) 
+                set_color( c_black );
+        }
 
-        void set_color_for_level( Log_level ) {}
+        void set_color( Color color )
+        {
+            string seq;
+
+            switch( color )
+            {
+                case c_red:             seq = "\e[1;31m";   break;
+                case c_pale_red:        seq = "\e[31m";     break;
+                case c_blue:            seq = "\e[34m";     break;
+                case c_pale_blue:       seq = "\e[1;34m";   break;
+                case c_pale_blue_green: seq = "\e[36m";     break;
+                case c_pale_brown:  seq = "\e[35m";     break;
+                case c_pale_gray:       seq = "\e[37m";     break;
+                case c_black:           seq = "\e[30m";     break;
+                default: ;
+
+            }
+
+            write( stderr, seq.data(), seq.length() );
+        }
     };
 
 #endif
-
 //------------------------------------------------------------------------------------is_stop_errno
     
 static bool is_stop_errno( Spooler* spooler, int err_no )
