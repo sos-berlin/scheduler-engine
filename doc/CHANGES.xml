@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-08-22" version="2.0.184" subversion_revision="5163">
+    <change date="2007-08-23" version="2.0.184" subversion_revision="5167">
         <revision jira="JS-92" type="modification" title="idle_time=&quot;5&quot; ist jetzt voreingestellt">
             <description>
                 <ul>
