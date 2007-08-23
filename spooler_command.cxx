@@ -750,14 +750,14 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     if( show.is_set( show_all_ ) )  show = Show_what( show_standard );
 
     string     job_chain_path = show_order_element.getAttribute( "job_chain" );
-    Job_chain* job_chain      = _spooler->order_subsystem()->job_chain( job_chain_path );
     Order::Id  id             = show_order_element.getAttribute( "order"     );
     string     history_id     = show_order_element.getAttribute( "history_id" );
     string     id_string      = string_from_variant( id );
 
     if( history_id == "" )
     {
-        ptr<Order> order = job_chain->order_or_null( id );
+        Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
+        ptr<Order> order     = job_chain->order_or_null( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
             order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
@@ -1381,12 +1381,12 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                         string     job_chain_path = http_request->parameter( "job_chain" );
                         string     order_id       = http_request->parameter( "order" );
                         string     history_id     = http_request->parameter( "history_id" );
-                        Job_chain* job_chain      = _spooler->order_subsystem()->job_chain( job_chain_path );
                         
 
                         if( history_id == "" )
                         {
-                            ptr<Order> order = job_chain->order_or_null( order_id );
+                            Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
+                            ptr<Order> order     = job_chain->order_or_null( order_id );
 
                             if( !order  &&  job_chain->is_distributed() ) 
                             {
