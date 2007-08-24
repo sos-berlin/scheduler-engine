@@ -73,6 +73,8 @@ struct Web_services : Web_services_interface
     Web_service*                web_service_by_name_or_null ( const string& name );
 
     Http_file_directory*        http_file_directory_by_url_path_or_null( const string& url_path );
+    bool                        need_authentication         ()                                      { return _need_authentication; }
+    bool                        is_request_authorized       ( http::Request* );
 
   protected:
     bool                        subsystem_initialize        ();
@@ -90,6 +92,8 @@ struct Web_services : Web_services_interface
 
     typedef stdext::hash_map< string, ptr<Http_file_directory> >   Alias_map;
     Alias_map                  _alias_map;
+
+    bool                       _need_authentication;
 };
 
 //---------------------------------------------------------------------------------new_web_services
@@ -194,6 +198,28 @@ bool Web_services::subsystem_activate()
     }
 
     _subsystem_state = subsys_active;
+    return true;
+}
+
+//--------------------------------------------------------------Web_services::is_request_authorized
+
+bool Web_services::is_request_authorized( http::Request* http_request )
+{
+    //string authorization = http_request->header( "Authorization" );
+    //if( !string_begins_with( "Basic " ) )  return false;
+
+    //string user_and_password = base64_decode( authorization.substr( 6 ) );
+    //size_t colon = user_and_password.find( ':' );
+    //if( colon == string::npos )  return false;
+
+    //string user_name = user_and_password.substr( 0, colon );
+    //string md5_password = md5( user_and_password.substr( colon + 1 ) );
+
+    //User_map::iterator it = _user_map.find( user_name );
+    //if( it == _user_map.end() )  return false;
+
+    //if( it->second != md5_password )  return false;
+
     return true;
 }
 

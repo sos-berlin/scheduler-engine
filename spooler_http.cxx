@@ -61,6 +61,7 @@ const Http_status_code_table http_status_code_table[]  =
 {
     { status_200_ok                            , "OK" },
     { status_301_moved_permanently             , "Moved Permanently" },
+    { status_401_permission_denied             , "Permission Denied" },
     { status_403_forbidden                     , "Forbidden" },
     { status_404_bad_request                   , "Bad Request" },
     { status_500_internal_server_error         , "Internal Server Error" },

@@ -124,6 +124,8 @@ struct Web_services_interface: Object, Subsystem
     virtual Web_service*        web_service_by_name         ( const string& )                       = 0;
     virtual Web_service*        web_service_by_name_or_null ( const string& )                       = 0;
     virtual Http_file_directory* http_file_directory_by_url_path_or_null( const string& )           = 0;
+    virtual bool                need_authentication         ()                                      = 0;
+    virtual bool                is_request_authorized       ( http::Request* )                      = 0;
 };
 
 

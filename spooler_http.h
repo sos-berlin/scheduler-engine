@@ -199,6 +199,7 @@ enum Status_code
 {
     status_200_ok                           = 200,
     status_301_moved_permanently            = 301,
+    status_401_permission_denied            = 401,
     status_403_forbidden                    = 403,
     status_404_bad_request                  = 404,
     status_500_internal_server_error        = 500,

@@ -585,13 +585,15 @@ void Database::create_tables_when_needed()
 
     Transaction ta ( this );
 
+    string chararacter_set = _db.dbms_kind() == dbms_mysql? " character set latin1" : "";
+
     ////////////////////////////
 
     created = create_table_when_needed( &ta, _spooler->_variables_tablename, 
-                            "\"NAME\" varchar(100) not null,"
-                            "\"WERT\" integer,"  
-                            "\"TEXTWERT\" varchar(250),"  
-                            "primary key ( \"name\" )" );
+                            "`name` varchar(100) not null,"
+                            "`wert` integer,"  
+                            "`textwert` varchar(250),"  
+                            "primary key ( `name` )" );
     if( created )
     {
         // Hier Index anlegen
@@ -604,15 +606,15 @@ void Database::create_tables_when_needed()
     ////////////////////////////
 
     created = create_table_when_needed( &ta, _spooler->_tasks_tablename, 
-                            "\"TASK_ID\""        " integer not null,"          // Primärschlüssel
-                            "\"SPOOLER_ID\""     " varchar(100),"
+                            "`task_id`"        " integer not null,"          // Primärschlüssel
+                            "`spooler_id`"     " varchar(100),"
                             "`cluster_member_id`"" varchar(100),"
-                            "\"JOB_NAME\""       " varchar(100) not null,"
-                            "\"ENQUEUE_TIME\""   " datetime,"
-                            "\"START_AT_TIME\""  " datetime,"
-                            "\"PARAMETERS\""     " clob,"
-                            "\"TASK_XML\""       " clob,"
-                            "primary key( \"TASK_ID\" )" );
+                            "`job_name`"       " varchar(100) not null,"
+                            "`enqueue_time`"   " datetime,"
+                            "`start_at_time`"  " datetime,"
+                            "`parameters`"     " clob,"
+                            "`task_xml`"       " clob,"
+                            "primary key( `task_id` )" );
     if( created )
     {
         // Hier Index anlegen
@@ -622,7 +624,7 @@ void Database::create_tables_when_needed()
         added = add_column( &ta, _spooler->_tasks_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
         
         if( added )  
-                add_column( &ta, _spooler->_tasks_tablename, "TASK_XML"         , "add \"TASK_XML\" clob" );
+                add_column( &ta, _spooler->_tasks_tablename, "task_xml"         , "add `task_xml` clob" );
     }
 
     ////////////////////////////
@@ -631,58 +633,58 @@ void Database::create_tables_when_needed()
     for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
 
     created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
-                            "\"ID\""         " integer not null,"
-                            "\"SPOOLER_ID\"" " varchar(100),"
+                            "`id`"         " integer not null,"
+                            "`spooler_id`" " varchar(100),"
                             "`cluster_member_id`"" varchar(100),"
-                            "\"JOB_NAME\""   " varchar(100) not null,"
-                            "\"START_TIME\"" " datetime not null,"
-                            "\"END_TIME\""   " datetime,"
-                            "\"CAUSE\""      " varchar(50),"
-                            "\"STEPS\""      " integer,"
-                            "\"EXIT_CODE\""  " integer,"
-                            "\"ERROR\""      " boolean,"
-                            "\"ERROR_CODE\"" " varchar(50),"
-                            "\"ERROR_TEXT\"" " varchar(250),"
-                            "\"PARAMETERS\"" " clob,"
-                            "\"LOG\""        " blob," 
+                            "`job_name`"   " varchar(100) not null,"
+                            "`start_time`" " datetime not null,"
+                            "`end_time`"   " datetime,"
+                            "`cause`"      " varchar(50),"
+                            "`steps`"      " integer,"
+                            "`exit_code`"  " integer,"
+                            "`error`"      " boolean,"
+                            "`error_code`" " varchar(50),"
+                            "`error_text`" " varchar(250),"
+                            "`parameters`" " clob,"
+                            "`log`"        " blob," 
                             + join( "", create_extra ) 
-                            + "primary key( \"ID\" )" );
+                            + "primary key( `id` )" );
 
     if( created )
     {
         ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME" , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
         ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID" , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
         ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"   , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_CLUSTMEMBER", "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
+        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_H_CLUSTER_MEMBER"   , "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
     }
     else
     {
         added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
 
         if( added )
-                add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add \"EXIT_CODE\"     integer" );
+                add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
     }
 
     ////////////////////////////
 
     created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                            "\"JOB_CHAIN\""    " varchar(100) not null,"                                    // Primärschlüssel
-                            "\"ID\""           " varchar(" << const_order_id_length_max << ") not null,"    // Primärschlüssel
-                            "\"SPOOLER_ID\""   " varchar(100),"                                             // Primärschlüssel
+                            "`job_chain`"    " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                            "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
+                            "`spooler_id`"   " varchar(100)" << chararacter_set << ","                                             // Primärschlüssel
                             "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
                             "`occupying_cluster_member_id`" "varchar(100),"     // Index
-                            "\"PRIORITY\""     " integer not null,"
-                            "\"STATE\""        " varchar(100),"
-                            "\"STATE_TEXT\""   " varchar(100),"
-                            "\"TITLE\""        " varchar(200),"
-                            "\"CREATED_TIME\"" " datetime not null,"
-                            "\"MOD_TIME\""     " datetime,"
-                            "\"ORDERING\""     " integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
-                            "\"PAYLOAD\""      " clob,"
-                            "\"INITIAL_STATE\"" "varchar(100),"               
-                            "\"RUN_TIME\""     " clob,"
-                            "\"ORDER_XML\""    " clob,"
-                            "primary key( \"SPOOLER_ID\", \"JOB_CHAIN\", \"ID\" )" );
+                            "`priority`"     " integer not null,"
+                            "`state`"        " varchar(100),"
+                            "`state_text`"   " varchar(100),"
+                            "`title`"        " varchar(200),"
+                            "`created_time`" " datetime not null,"
+                            "`mod_time`"     " datetime,"
+                            "`ordering`"     " integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
+                            "`payload`"      " clob,"
+                            "`initial_state`" "varchar(100),"               
+                            "`run_time`"     " clob,"
+                            "`order_xml`"    " clob,"
+                            "primary key( `spooler_id`, `job_chain`, `id` )" );
     if( created )
     {
         // Hier Index anlegen
@@ -695,34 +697,35 @@ void Database::create_tables_when_needed()
         added = add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
 
         if( added )
-                add_column( &ta, _spooler->_orders_tablename, "INITIAL_STATE"              , "add \"INITIAL_STATE\""             " varchar(100)" );
+                add_column( &ta, _spooler->_orders_tablename, "initial_state"              , "add `initial_state`"             " varchar(100)" );
 
         if( added )
-                add_column( &ta, _spooler->_orders_tablename, "RUN_TIME"                   , "add \"RUN_TIME\""                  " clob"         );
+                add_column( &ta, _spooler->_orders_tablename, "run_time"                   , "add `run_time`"                  " clob"         );
 
         if( added )
-                add_column( &ta, _spooler->_orders_tablename, "ORDER_XML"                  , "add \"ORDER_XML\""                 " clob"         );
+                add_column( &ta, _spooler->_orders_tablename, "order_xml"                  , "add `order_xml`"                 " clob"         );
     }
 
     
     ////////////////////////////
 
     created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
-                            "\"HISTORY_ID\""  " integer not null,"             // Primärschlüssel
-                            "\"JOB_CHAIN\""   " varchar(100) not null,"
-                            "\"ORDER_ID\""    " varchar(" << const_order_id_length_max << ") not null,"
-                            "\"SPOOLER_ID\""  " varchar(100),"
-                            "\"TITLE\""       " varchar(200),"
-                            "\"STATE\""       " varchar(100),"
-                            "\"STATE_TEXT\""  " varchar(100),"
-                            "\"START_TIME\""  " datetime not null,"
-                            "\"END_TIME\""    " datetime not null,"
-                            "\"LOG\""         " blob," 
-                            "primary key( \"HISTORY_ID\" )" );
+                            "`history_id`"  " integer not null,"             // Primärschlüssel
+                            "`job_chain`"   " varchar(100) not null,"
+                            "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
+                            "`spooler_id`"  " varchar(100),"
+                            "`title`"       " varchar(200),"
+                            "`state`"       " varchar(100),"
+                            "`state_text`"  " varchar(100),"
+                            "`start_time`"  " datetime not null,"
+                            "`end_time`"    " datetime not null,"
+                            "`log`"         " blob," 
+                            "primary key( `history_id` )" );
 
     if( created )
     {
         ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`", __FUNCTION__ );
+        ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`" , __FUNCTION__ );
     }
     else
     {
