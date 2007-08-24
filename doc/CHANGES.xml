@@ -10,6 +10,56 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-24" version="2.0.185" subversion_revision="5170">
+        <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Info ausgegen">
+            <description>
+                <p>
+                    Die Meldung <scheduler_message code="SCHEDULER-827"/> ist dennoch als Warnung zu verstehen, 
+                    denn ein anderer Scheduler kann bei verspätetem Herzschlag annehmen, 
+                    dass dieser Scheduler nicht mehr aktiv ist, und dessen Datenbankeintrag deaktivieren.
+                    Daraufhin bricht der Scheduler mit der Meldung <scheduler_message code="SCHEDULER-377"/> ab.
+                    Der Scheduler kann sich auch selbst abbrechen (Meldung <scheduler_message code="SCHEDULER-386"/>).
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_message level="info" code="SCHEDULER-827"/>
+                    </li>
+                    <li>
+                        <scheduler_message level="error" code="SCHEDULER-386"/>
+                    </li>
+                    <li>
+                        <scheduler_message level="error" code="SCHEDULER-377"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Änderungen an der Datenbank">
+            <description>
+                <ul>
+                    <li>
+                        Mit der Tabelle <code>SCHEDULER_ORDERS</code>
+                        wird der neue Index <code>SCHEDULER_O_HISTORY_JOB_CHAIN</code> auf die Spalte <code>JOB_CHAIN</code>
+                        angelegt.
+                    </li>
+                    <li>
+                        Der bisherige Index <code>SCHEDULER_HISTORY_CLUSTMEMBER</code> wird jetzt als
+                        <code>SCHEDULER_H_CLUSTER_MEMBER</code> angelegt.
+                    </li>
+                    <li>
+                        Die Datenbankspalte <code>SCHEDULER_ORDERS.SPOOLER_ID</code> 
+                        wird jetzt mit <code>not null</code> angelegt.
+                    </li>
+                    <li>
+                        Für MySQL werden die Primärschlüsselfelder von
+                        <code>SCHEDULER_ORDERS</code> mit dem Zeichensatz Latin1 angelegt.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+    </change>
+
     <change date="2007-08-23" version="2.0.184" subversion_revision="5167">
         <revision jira="JS-92" type="modification" title="idle_time=&quot;5&quot; ist jetzt voreingestellt">
             <description>

@@ -670,7 +670,7 @@ void Database::create_tables_when_needed()
     created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
                             "`job_chain`"    " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
                             "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
-                            "`spooler_id`"   " varchar(100)" << chararacter_set << ","                                             // Primärschlüssel
+                            "`spooler_id`"   " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
                             "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
                             "`occupying_cluster_member_id`" "varchar(100),"     // Index
                             "`priority`"     " integer not null,"

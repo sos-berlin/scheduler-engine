@@ -82,9 +82,9 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ("CLUSTER_MEMBER_
 
     <pre>CREATE TABLE SCHEDULER_ORDERS 
 ( 
-    "JOB_CHAIN"                   varchar(100) not null,
-    "ID"                          varchar(255) not null,
-    "SPOOLER_ID"                  varchar(100),
+    "JOB_CHAIN"                   varchar(100)  character set latin1  not null,
+    "ID"                          varchar(255)  character set latin1  not null,
+    "SPOOLER_ID"                  varchar(100)  character set latin1,
     "DISTRIBUTED_NEXT_TIME"       datetime,
     "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
     "PRIORITY"                    integer not null,

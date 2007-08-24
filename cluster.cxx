@@ -469,7 +469,7 @@ int Heart_beat_watchdog_thread::thread_main()
 #           endif
 
             _cluster->_spooler->kill_all_processes();
-            _log->error( message_string( "SCHEDULER-386", my_string_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
+            _log->error( message_string( "SCHEDULER-386", string_local_from_time_t( heart_beat_time ), ::time(NULL) - heart_beat_time ) );
             _cluster->_spooler->abort_immediately( true );
         }
     }
@@ -542,7 +542,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
             //{
             //    _scheduler_993_logged = true;
             //    log()->warn( message_string( "SCHEDULER-993", _member_id, 
-            //                                                  my_string_from_time_t( next_heart_beat ),
+            //                                                  string_local_from_time_t( next_heart_beat ),
             //                                                  now_before_select - next_heart_beat ) );
             //}
             
@@ -574,7 +574,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 
                     if( !string_begins_with( _log->last_line(), message_code ) )
                     {
-                        Message_string m ( message_code, my_string_from_time_t( _last_heart_beat_detected ), now_before_select - _last_heart_beat_detected );
+                        Message_string m ( message_code, string_local_from_time_t( _last_heart_beat_detected ), now_before_select - _last_heart_beat_detected );
                         if( !is_dead )  m.insert( 3, deadline - ::time(NULL) );
                         log()->warn( m );
                     }
@@ -595,7 +595,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
 //#               ifdef Z_DEBUG
 //                    if( !_is_dead  &&  _is_active  &&  _heart_beat_count > 0  &&  !its_me() )
 //                    {
-//                        _log->warn( S() <<  "_last_heart_beat_detected=" << my_string_from_time_t( _last_heart_beat_detected ) <<
+//                        _log->warn( S() <<  "_last_heart_beat_detected=" << string_local_from_time_t( _last_heart_beat_detected ) <<
 //                                            "  (" << ( now_before_select - _last_heart_beat_detected ) << "s)" );
 //                    }
 //#               endif
@@ -1884,7 +1884,9 @@ bool Cluster::check_heart_beat_is_in_time( time_t expected_next_heart_beat )
         if( _late_heart_beat != expected_next_heart_beat )
         {
             _late_heart_beat = expected_next_heart_beat;
-            _log->error( message_string( "SCHEDULER-827", my_string_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
+
+            // Eigentlich ein Fehler, wenigstens eine Warnung. Andreas Püschel wünscht eine Info-Meldung. 2007-08-24
+            _log->info( message_string( "SCHEDULER-827", string_local_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
         }
     }
 
