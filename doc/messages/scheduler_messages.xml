@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
  
 <messages 
@@ -2367,7 +2367,7 @@
 
         <message code="SCHEDULER-378">
             <text xml:lang="en">
-                <title>After own late heart beat, this Scheduler has been deactived and 
+                <title>After own late heart beat, this Scheduler has been deactivated and 
                 the occupied orders have been freed by Scheduler member '<p1/>'</title>
             </text>
         </message>
