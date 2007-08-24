@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-08-24" version="2.0.185" subversion_revision="5170">
-        <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Info ausgegen">
+        <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Info ausgegeben">
             <description>
                 <p>
                     Die Meldung <scheduler_message code="SCHEDULER-827"/> ist dennoch als Warnung zu verstehen, 

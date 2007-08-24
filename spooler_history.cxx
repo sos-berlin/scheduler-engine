@@ -1278,7 +1278,7 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
             {
                 id = 1;
                 ta.execute( S() << "INSERT into " << _spooler->_variables_tablename << " (`name`,`wert`) " 
-                            "values (" << sql::quoted( variable_name ) << ",'" << id << "')",
+                            "values (" << sql::quoted( variable_name ) << "," << id << ")",
                             __FUNCTION__);
             }
             else
@@ -1304,7 +1304,7 @@ int Database::get_id_( const string& variable_name, Transaction* outer_transacti
                     {
                         id = 1;
                         ta.execute( S() << "INSERT into " << _spooler->_variables_tablename << " (`name`,`wert`) " 
-                                    "values (" << sql::quoted( variable_name ) << ",'" << id << "')",
+                                    "values (" << sql::quoted( variable_name ) << "," << id << ")",
                                     __FUNCTION__);
                     }
                     catch( exception& x )

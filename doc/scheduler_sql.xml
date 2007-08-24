@@ -84,7 +84,7 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ("CLUSTER_MEMBER_
 ( 
     "JOB_CHAIN"                   varchar(100)  character set latin1  not null,
     "ID"                          varchar(255)  character set latin1  not null,
-    "SPOOLER_ID"                  varchar(100)  character set latin1,
+    "SPOOLER_ID"                  varchar(100)  character set latin1  not null,
     "DISTRIBUTED_NEXT_TIME"       datetime,
     "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
     "PRIORITY"                    integer not null,
@@ -191,9 +191,9 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ("CLUSTER_MEMBER_
     
     <pre>CREATE TABLE SCHEDULER_ORDERS 
 (
-    "JOB_CHAIN" varchar(100) not null,
-    "ID" varchar(255) not null,
-    "SPOOLER_ID" varchar(100),
+    "JOB_CHAIN"                   varchar(100) not null,
+    "ID"                          varchar(255) not null,
+    "SPOOLER_ID"                  varchar(100) not null,
     "DISTRIBUTED_NEXT_TIME"       timestamp,
     "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
     "PRIORITY"                    integer not null,
@@ -298,7 +298,7 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ("CLUSTER_MEMBER_
 (
     "JOB_CHAIN"                   varchar(100) not null,
     "ID"                          varchar(255) not null,
-    "SPOOLER_ID"                  varchar(100),
+    "SPOOLER_ID"                  varchar(100) not null,
     "DISTRIBUTED_NEXT_TIME"       date,
     "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
     "PRIORITY"                    integer not null,
@@ -313,7 +313,7 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ("CLUSTER_MEMBER_
     "RUN_TIME"                    clob,
     "ORDER_XML"                   clob,
     primary key( "SPOOLER_ID", "JOB_CHAIN", "ID" )
-) ;</pre>
+);</pre>
     
     <pre>CREATE TABLE SCHEDULER_ORDER_HISTORY 
 (
@@ -350,5 +350,92 @@ CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CH
     "XML"                    clob, 
     primary key( "MEMBER_ID" )
 );</pre>
+
+
+    <h3>Microsoft SQL Server</h3>
+
+    <pre>CREATE TABLE SCHEDULER_VARIABLES 
+(
+    "NAME"     varchar(100) not null,
+    "WERT"     integer,
+    "TEXTWERT" varchar(250),
+    primary key ( "NAME" )
+);</pre>
+
+    <pre>CREATE TABLE SCHEDULER_TASKS 
+(
+    "TASK_ID"           integer not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "ENQUEUE_TIME"      datetime,
+    "START_AT_TIME"     datetime,
+    "PARAMETERS"        NTEXT,
+    "TASK_XML"          NTEXT,
+    primary key( "TASK_ID" )
+);</pre>
+
+    <pre>CREATE TABLE SCHEDULER_HISTORY 
+(
+    "ID"                integer not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "START_TIME"        datetime not null,
+    "END_TIME"          datetime,
+    "CAUSE"             varchar(50),
+    "STEPS"             integer,
+    "EXIT_CODE"         integer,
+    "ERROR"             BIT,
+    "ERROR_CODE"        varchar(50),
+    "ERROR_TEXT"        varchar(250),
+    "PARAMETERS"        NTEXT,
+    "LOG"               IMAGE,
+    primary key( "ID" )
+);
+
+CREATE INDEX SCHEDULER_HISTORY_START_TIME on SCHEDULER_HISTORY ( "START_TIME" );
+CREATE INDEX SCHEDULER_HISTORY_SPOOLER_ID on SCHEDULER_HISTORY ( "SPOOLER_ID" );
+CREATE INDEX SCHEDULER_HISTORY_JOB_NAME   on SCHEDULER_HISTORY ( "JOB_NAME" );
+CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ( "CLUSTER_MEMBER_ID");</pre>
+
+    <pre>CREATE TABLE SCHEDULER_ORDERS 
+(
+    "JOB_CHAIN" varchar(100) not null,
+    "ID" varchar(255) not null,
+    "SPOOLER_ID" varchar(100),
+    "DISTRIBUTED_NEXT_TIME" datetime,
+    "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
+    "PRIORITY"                    integer not null,
+    "STATE"                       varchar(100),
+    "STATE_TEXT"                  varchar(100),
+    "TITLE"                       varchar(200),
+    "CREATED_TIME"                datetime not null,
+    "MOD_TIME"                    datetime,
+    "ORDERING"                    integer not null,
+    "PAYLOAD"                     NTEXT,
+    "INITIAL_STATE"               varchar(100),
+    "RUN_TIME"                    NTEXT,
+    "ORDER_XML"                   NTEXT,
+    primary key( "SPOOLER_ID", "JOB_CHAIN", "ID" );
+);</pre>
+
+    <pre>CREATE TABLE SCHEDULER_ORDER_HISTORY 
+(
+    "HISTORY_ID" integer not null,
+    "JOB_CHAIN"  varchar(100) not null,
+    "ORDER_ID"   varchar(255) not null,
+    "SPOOLER_ID" varchar(100),
+    "TITLE"      varchar(200),
+    "STATE"      varchar(100),
+    "STATE_TEXT" varchar(100),
+    "START_TIME" datetime not null,
+    "END_TIME"   datetime not null,
+    "LOG" IMAGE,
+    primary key( "HISTORY_ID" );
+);
+
+CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );
+CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );</pre>
     
 </description>
