@@ -170,6 +170,9 @@
     <file path="xml/holidays.xml"/>
     <file path="xml/http_directory.xml"/>
     <file path="xml/http_server.xml"/>
+    <file path="xml/http.authentication.xml"/>
+    <file path="xml/http.users.xml"/>
+    <file path="xml/http.user.xml"/>
     <file path="xml/include.xml"/>
     <file path="xml/job.xml"/>
     <file path="xml/job_chain.xml"/>

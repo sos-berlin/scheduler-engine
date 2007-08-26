@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <http_server>
+            <authentication>
+                <users>
+                    <user name="du" password_md5="098f6bcd4621d373cade4e832627b4f6"/>
+                </users>
+            </authentication>
+        </http_server>
+    </config>
+</spooler>

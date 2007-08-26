@@ -1133,6 +1133,10 @@
 <register_keyword keyword='HTTP-Server'>
     <register_entry register_file='http.xml' register_title='HTTP-Server und Web-Services'  register_keyword='HTTP-Server'/>
 </register_keyword>
+<register_keyword keyword='http.authentication'>
+    <register_keyword_display><code>&lt;http.authentication&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__http.authentication' register_title='Änderungsprotokoll'  register_keyword='http.authentication'/>
+</register_keyword>
 <register_keyword keyword='http_directory'>
     <register_keyword_display><code>&lt;http_directory&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__http_directory' register_title='Alle XML-Elemente'  register_keyword='http_directory'/>

@@ -15,7 +15,7 @@
             <description>
                 <ul>
                     <li>
-                        <scheduler_element name="http.authentication"/>
+                        Neues XML-Element <scheduler_element name="http.authentication"/>
                     </li>
                 </ul>
             </description>

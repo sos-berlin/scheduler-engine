@@ -1310,7 +1310,7 @@
             </xsd:element>
         </xsd:sequence>
 
-        <xsd:attribute name="type">
+        <xsd:attribute name="scheme">
             <xsd:simpleType>
                 <xsd:restriction base="xsd:NMTOKEN">
                     <xsd:enumeration value="basic"/>

@@ -1225,9 +1225,9 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"http_server\">\n"
     "<xsd:complexType >\n"
     "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
-    "<xsd:element name=\"authentication\" type=\"authentication\"/>\n"
-    "<xsd:element name=\"web_service\"    type=\"web_service\"/>\n"
-    "<xsd:element name=\"http_directory\" type=\"http_directory\"/>\n"
+    "<xsd:element name=\"http.authentication\" type=\"http.authentication\"/>\n"
+    "<xsd:element name=\"web_service\"         type=\"web_service\"/>\n"
+    "<xsd:element name=\"http_directory\"      type=\"http_directory\"/>\n"
     "</xsd:choice>\n"
     "</xsd:complexType>\n"
     "\n"
@@ -1303,12 +1303,12 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "\n"
-    "<xsd:complexType name=\"authentication\">\n"
+    "<xsd:complexType name=\"http.authentication\">\n"
     "<xsd:sequence>\n"
-    "<xsd:element name=\"users\">\n"
+    "<xsd:element name=\"http.users\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
-    "<xsd:element name=\"user\" maxOccurs=\"unbounded\">\n"
+    "<xsd:element name=\"http.user\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"name\"          type=\"Name\"             use=\"required\"/>\n"
     "<xsd:attribute name=\"password_md5\"  type=\"Md5_checksum\"     use=\"required\"/>\n"
@@ -1657,7 +1657,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1188130647 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1188132959 },
     { NULL, NULL, 0 }
 };
 
