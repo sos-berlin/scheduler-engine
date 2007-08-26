@@ -2653,6 +2653,12 @@
                 <title>'<p2>job_chain</p2>' and '<p3>job_chain</p3>' cannot be combined, because of duplicate order id '<p1/>'</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-427">
+            <text xml:lang="en">
+                <title>Invalid MD5 hexadecimal coded password for HTTP user '<p1/>'</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

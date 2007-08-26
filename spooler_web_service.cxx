@@ -3,6 +3,8 @@
 
 #include "spooler.h"
 #include "../zschimmer/charset.h"
+#include "../zschimmer/z_md5.h"
+#include "../zschimmer/base64.h"
 
 namespace sos {
 namespace scheduler {
@@ -55,6 +57,16 @@ const Com_method Web_service::_methods[] =
     {}
 };
 
+//----------------------------------------------------------------------------------------Http_user
+
+struct Http_user : Object
+{
+                                Http_user                   ( const string& name, const string& password_md5_hex );
+
+    string                     _name;
+    Md5                    _password_md5;
+};
+ 
 //-------------------------------------------------------------------------------------Web_services
 
 struct Web_services : Web_services_interface
@@ -73,7 +85,7 @@ struct Web_services : Web_services_interface
     Web_service*                web_service_by_name_or_null ( const string& name );
 
     Http_file_directory*        http_file_directory_by_url_path_or_null( const string& url_path );
-    bool                        need_authentication         ()                                      { return _need_authentication; }
+    bool                        need_authorization          ()                                      { return _need_authorization; }
     bool                        is_request_authorized       ( http::Request* );
 
   protected:
@@ -93,7 +105,10 @@ struct Web_services : Web_services_interface
     typedef stdext::hash_map< string, ptr<Http_file_directory> >   Alias_map;
     Alias_map                  _alias_map;
 
-    bool                       _need_authentication;
+    bool                       _need_authorization;
+
+    typedef stdext::hash_map< string, ptr<Http_user> >      Users_map;
+    Users_map                   _users_map;
 };
 
 //---------------------------------------------------------------------------------new_web_services
@@ -104,12 +119,48 @@ ptr<Web_services_interface> new_web_services( Scheduler* scheduler )
     return +web_services;
 }
 
+//------------------------------------------------------------------------------ttp_user::Http_user
+
+Http_user::Http_user( const string& name, const string& password_md5_hex )
+: 
+    _name(name)
+{
+    try
+    {
+        _password_md5.set_hex( password_md5_hex );
+    }
+    catch( exception& x )
+    {
+        z::throw_xc( "SCHEDULER-427", name, x );
+    }
+}
+
 //----------------------------------------------------------------------------Web_services::set_dom
 
 void Web_services::set_dom( const xml::Element_ptr& web_services_element )
 {
     DOM_FOR_EACH_ELEMENT( web_services_element, e )
     {
+        if( e.nodeName_is( "http.authentication" ) )
+        {
+            _need_authorization = true;
+
+            DOM_FOR_EACH_ELEMENT( e, ee )
+            {
+                if( ee.nodeName_is( "http.users" ) )
+                {
+                    DOM_FOR_EACH_ELEMENT( ee, eee )
+                    {
+                        if( eee.nodeName_is( "http.user" ) )
+                        {
+                            string name = eee.getAttribute( "name" );
+                            _users_map[ name ] = Z_NEW( Http_user( name, eee.getAttribute( "password_md5" ) ) );
+                        }
+                    }
+                }
+            }
+        }
+        else
         if( e.nodeName_is( "web_service" ) )
         {
             ptr<Web_service> web_service = web_service_by_url_path_or_null( web_services_element.getAttribute( "name" ) );
@@ -205,20 +256,38 @@ bool Web_services::subsystem_activate()
 
 bool Web_services::is_request_authorized( http::Request* http_request )
 {
-    //string authorization = http_request->header( "Authorization" );
-    //if( !string_begins_with( "Basic " ) )  return false;
+    string authorization = http_request->header( "Authorization" );
+    
+    if( !string_begins_with( authorization, "Basic " ) )
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << "  Nur Basic wird akzeptiert: " << authorization << "\n" );
+        return false;
+    }
 
-    //string user_and_password = base64_decode( authorization.substr( 6 ) );
-    //size_t colon = user_and_password.find( ':' );
-    //if( colon == string::npos )  return false;
+    string user_and_password = base64_decode( authorization.substr( 6 ) );
+    size_t colon             = user_and_password.find( ':' );
 
-    //string user_name = user_and_password.substr( 0, colon );
-    //string md5_password = md5( user_and_password.substr( colon + 1 ) );
+    if( colon == string::npos )  
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << "  Doppelpunkt fehlt im decodiertem Text: " << authorization << "\n" );
+        return false;
+    }
 
-    //User_map::iterator it = _user_map.find( user_name );
-    //if( it == _user_map.end() )  return false;
+    string user_name    = user_and_password.substr( 0, colon );
+    Md5    password_md5 = md5( user_and_password.substr( colon + 1 ) );
 
-    //if( it->second != md5_password )  return false;
+    Users_map::iterator it = _users_map.find( user_name );
+    if( it == _users_map.end() )
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << "  Benutzer '" << user_name << "' ist unbekannt\n" );
+        return false;
+    }
+
+    if( it->second->_password_md5 != password_md5 )
+    {
+        Z_LOG2( "scheduler", __FUNCTION__ << "  Kennwort für Benutzer '" << user_name << "' stimmt nicht\n" );
+        return false;
+    }
 
     return true;
 }

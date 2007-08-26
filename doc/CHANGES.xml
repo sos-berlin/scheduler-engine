@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-26" version="2.0.186" subversion_revision="5173">
+        <revision type="new" title="HTTP-Authentifizierung eingeführt">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="http.authentication"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2007-08-24" version="2.0.185" subversion_revision="5170">
         <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Info ausgegeben">
             <description>
@@ -57,7 +69,6 @@
                 </ul>
             </description>
         </revision>
-
     </change>
 
     <change date="2007-08-23" version="2.0.184" subversion_revision="5167">

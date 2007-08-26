@@ -1216,8 +1216,9 @@
     <xsd:element name="http_server">
         <xsd:complexType >
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                <xsd:element name="web_service" type="web_service"/>
-                <xsd:element name="http_directory" type="http_directory"/>
+                <xsd:element name="http.authentication" type="http.authentication"/>
+                <xsd:element name="web_service"         type="web_service"/>
+                <xsd:element name="http_directory"      type="http_directory"/>
             </xsd:choice>
         </xsd:complexType>
 
@@ -1293,6 +1294,33 @@
 
 
 
+    <xsd:complexType name="http.authentication">
+        <xsd:sequence>
+            <xsd:element name="http.users">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="http.user" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="name"          type="Name"             use="required"/>
+                                <xsd:attribute name="password_md5"  type="Md5_checksum"     use="required"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+
+        <xsd:attribute name="type">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:NMTOKEN">
+                    <xsd:enumeration value="basic"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    
+    
     <xsd:complexType name="web_service">
         <xsd:sequence>
             <xsd:element ref="params" minOccurs="0"/>
@@ -1350,6 +1378,13 @@
     </xsd:simpleType>
 
 
+    <xsd:simpleType name="Md5_checksum">
+        <xsd:restriction base="xsd:string">
+            <xsd:length value="32" fixed="true"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+   
     <xsd:simpleType name="Name">
         <!-- Eine engere Beschränkung wäre gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->
         <xsd:restriction base="String">

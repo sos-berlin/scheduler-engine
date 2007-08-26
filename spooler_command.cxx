@@ -1317,24 +1317,24 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
         if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 
-        //if( _spooler->_web_services->_need_authorization  &&  !_spooler->_web_services->is_request_authorized( http_request )
-        //{
-        //    http_response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
-        //    http_response->set_status( http::status_401_permission_denied );
+        if( _spooler->_web_services->need_authorization()  &&  !_spooler->_web_services->is_request_authorized( http_request ) )
+        {
+            http_response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
+            http_response->set_status( http::status_401_permission_denied );
 
-        //    response_content_type = "text/html";
-        //    response_body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"
-        //                    "<HTML>"
-        //                    "<HEAD><TITLE>401 Authorization Required</TITLE></HEAD>"
-        //                    "<BODY>"
-        //                     "<H1>Authorization Required</H1>"
-        //                     "This server could not verify that you are authorized to access the document requested. "
-        //                     "Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
-        //                     "<P>"
-        //                     "</BODY>"
-        //                     "</HTML>";
-        //}
-        //else
+            response_content_type = "text/html";
+            response_body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"
+                            "<HTML>"
+                            "<HEAD><TITLE>401 Authorization Required</TITLE></HEAD>"
+                            "<BODY>"
+                             "<H1>Authorization Required</H1>"
+                             "This server could not verify that you are authorized to access the document requested. "
+                             "Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
+                             "<P>"
+                             "</BODY>"
+                             "</HTML>";
+        }
+        else
         if( http_request->_http_cmd == "GET" )
         {
             if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state

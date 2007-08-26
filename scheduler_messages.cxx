@@ -286,6 +286,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-424", "'$1' is being removed before '$2'" },
     { "SCHEDULER-425", "'$1' cannot be removed, it is used by $2" },
     { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
+    { "SCHEDULER-427", "Invalid MD5 hexadecimal coded password for HTTP user '$1'" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },
