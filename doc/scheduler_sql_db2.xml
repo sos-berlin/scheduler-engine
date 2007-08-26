@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Vom Scheduler verwendete SQL-Anweisungen für DB2®"
+    base_dir            = ""
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <scheduler_keyword keyword="DB2"/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>SQL-Anweisungen zum Einrichten der Tabellen</h2>
+
+
+    <pre>CREATE TABLE <b>SCHEDULER_VARIABLES</b>
+(
+    "NAME"     varchar(100) not null,
+    "WERT"     integer,
+    "TEXTWERT" varchar(250),
+    primary key ( "NAME" )
+);</pre>
+
+    <pre>CREATE TABLE <b>SCHEDULER_TASKS</b>
+(
+    "TASK_ID"           integer not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "ENQUEUE_TIME"      TIMESTAMP,
+    "START_AT_TIME"     TIMESTAMP,
+    "PARAMETERS"        CLOB,
+    "TASK_XML"          CLOB,
+    primary key( "TASK_ID" )
+);</pre>
+
+    <pre>CREATE TABLE <b>SCHEDULER_HISTORY</b>
+(
+    "ID"                integer not null,
+    "SPOOLER_ID"        varchar(100),
+    "CLUSTER_MEMBER_ID" varchar(100),
+    "JOB_NAME"          varchar(100) not null,
+    "START_TIME"        TIMESTAMP not null,
+    "END_TIME"          TIMESTAMP,
+    "CAUSE"             varchar(50),
+    "STEPS"             integer,
+    "EXIT_CODE"         integer,
+    "ERROR"             NUMERIC(1),
+    "ERROR_CODE"        varchar(50),
+    "ERROR_TEXT"        varchar(250),
+    "PARAMETERS"        CLOB,
+    "LOG"               BLOB,
+    primary key( "ID" )
+);
+
+CREATE INDEX SCHEDULER_HIST_1 on SCHEDULER_HISTORY ( "START_TIME" );
+CREATE INDEX SCHEDULER_HIST_2 on SCHEDULER_HISTORY ( "SPOOLER_ID" );
+CREATE INDEX SCHEDULER_HIST_3 on SCHEDULER_HISTORY ( "JOB_NAME" );
+CREATE INDEX SCHEDULER_HIST_4 on SCHEDULER_HISTORY ( "CLUSTER_MEMBER_ID" );</pre>
+
+    <pre>CREATE TABLE <b>SCHEDULER_ORDERS</b>
+(
+    "JOB_CHAIN"                   varchar(100) not null,
+    "ID"                          varchar(255) not null,
+    "SPOOLER_ID"                  varchar(100) not null,
+    "DISTRIBUTED_NEXT_TIME"       TIMESTAMP,
+    "OCCUPYING_CLUSTER_MEMBER_ID" varchar(100),
+    "PRIORITY"                    integer not null,
+    "STATE"                       varchar(100),
+    "STATE_TEXT"                  varchar(100),
+    "TITLE"                       varchar(200),
+    "CREATED_TIME"                TIMESTAMP not null,
+    "MOD_TIME"                    TIMESTAMP,
+    "ORDERING"                    integer not null,
+    "PAYLOAD"                     CLOB,
+    "INITIAL_STATE"               varchar(100),
+    "RUN_TIME"                    CLOB,
+    "ORDER_XML"                   CLOB,
+    primary key( "SPOOLER_ID", "JOB_CHAIN", "ID" )
+);</pre>
+
+    <pre>CREATE TABLE <b>SCHEDULER_ORDER_HISTORY</b>
+(
+    "HISTORY_ID" integer not null,
+    "JOB_CHAIN"  varchar(100) not null,
+    "ORDER_ID"   varchar(255) not null,
+    "SPOOLER_ID" varchar(100),
+    "TITLE"      varchar(200),
+    "STATE"      varchar(100),
+    "STATE_TEXT" varchar(100),
+    "START_TIME" TIMESTAMP not null,
+    "END_TIME"   TIMESTAMP not null,
+    "LOG"        BLOB,
+    primary key( "HISTORY_ID" )
+);
+
+CREATE INDEX SCHED_O_HIST_1 on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );
+CREATE INDEX SCHED_O_HIST_2 on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );</pre>
+
+</description>

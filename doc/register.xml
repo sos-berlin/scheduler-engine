@@ -53,11 +53,13 @@
                         <li>
                             <scheduler_a href="messages/index.xml"/>
                         </li>
+                        <li>
+                            <scheduler_a href="scheduler_sql.xml"/>
+                        </li>
                     </ul>
                 </td>
             </tr>
         </table>
     </description>
-    
     
 </register>
