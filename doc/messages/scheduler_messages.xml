@@ -3868,6 +3868,18 @@
                 <title>Error when reading stdout file is ignored: <p1>error</p1>, <p2>path</p2></title>
             </text>
         </message>
+
+        <!--message code="SCHEDULER-882">
+            <text xml:lang="en">
+                <title>Unknown database '<p1/>', database script has not be runned</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-883">
+            <text xml:lang="en">
+                <title>Error when executing database script '<p1/>': <p2/></title>
+            </text>
+        </message-->
     </messages>
     
 </messages>

@@ -354,12 +354,12 @@ void Transaction::intermediate_commit( const string& debug_text )
     //    _outer_transaction->_transaction_read    |= _transaction_read;
     //}
     
-    if( db()->opened() )  execute( "COMMIT", debug_text, true );
+    if( db()->opened() )  execute( "COMMIT", debug_text, ex_force );
 }
 
 //----------------------------------------------------------------------------Transaction::rollback
 
-void Transaction::rollback( const string& debug_text, bool force )
+void Transaction::rollback( const string& debug_text, Execute_flags flags )
 { 
     if( _db )
     {
@@ -376,7 +376,7 @@ void Transaction::rollback( const string& debug_text, bool force )
         {
             try
             {
-                execute( "ROLLBACK", debug_text, force );
+                execute( "ROLLBACK", debug_text, flags );
             }
             catch( exception& )
             {
@@ -407,8 +407,7 @@ void Retry_nested_transaction::reopen_database_after_error( const exception& x, 
 
     try
     {
-        bool force = true;
-        rollback( S() << __FUNCTION__ << ", " << function, force );
+        rollback( S() << __FUNCTION__ << ", " << function, ex_force );
     }
     catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }
     assert( !db->is_in_transaction() );
@@ -438,7 +437,7 @@ void Retry_transaction::intermediate_rollback( const string& debug_text )
 { 
     assert( _db );
     
-    if( db()->opened() )  execute( "ROLLBACK", debug_text, true );
+    if( db()->opened() )  execute( "ROLLBACK", debug_text, ex_force );
 }
 
 //------------------------------------------------------Database_retry::reopen_database_after_error
@@ -576,167 +575,237 @@ void Database::open2( const string& db_name )
     }
 }
 
+//----------------------------------------------------------------Database::run_create_table_script
+/*
+void Database::run_create_table_script()
+{
+    string filename;
+
+    switch( _db.dbms_kind() )
+    {
+        case dbms_access:       filename = "create_tables.access.sql";                break;
+        case dbms_db2:          filename = "create_tables.db2.sql";                   break;
+        case dbms_firebird:     filename = "create_tables.firebird.sql";              break;
+        case dbms_mysql:        filename = "create_tables.mysql.sql";                 break;
+        case dbms_oracle:
+        case dbms_oracle_thin:  filename = "create_tables.oracle.sql";                break;
+        case dbms_sql_server:   filename = "create_tables.microsoft_sql_server.sql";  break;
+        case dbms_postgresql:   filename = "create_tables.postgresql.sqk";            break;
+        default: ;
+    }
+
+    if( const Embedded_file* embedded_file = embedded_files.get_embedded_file_or_null( "database/" + filename ) )
+    {
+        try
+        {
+            Transaction ta ( this );
+            //string cmd = sql::without_comments_regardless_quotes( embedded_file->_content );
+            //for( int i = 0; i < cmd.length(); i++ )  if( cmd[i] == '\r'  ||  cmd[i] == '\n' )  cmd[i] = ' ';
+            //ta.execute( cmd, __FUNCTION__, Transaction::ex_native );
+            ta.execute( embedded_file->_content , __FUNCTION__, Transaction::ex_native );
+            ta.commit( __FUNCTION__ );
+        }
+        catch( exception& x )
+        {
+            _log->warn( message_string( "SCHEDULER-883", embedded_file->_filename, x ) );
+        }
+    }
+    else
+        _log->info( message_string( "SCHEDULER-882", _db.dbms_name() ) );
+}
+*/
 //--------------------------------------------------------------Database::create_tables_when_needed
 
 void Database::create_tables_when_needed()
 {
-    bool        created;
-    bool        added;
-
-    Transaction ta ( this );
-
     string chararacter_set = _db.dbms_kind() == dbms_mysql? " character set latin1" : "";
 
     ////////////////////////////
 
-    created = create_table_when_needed( &ta, _spooler->_variables_tablename, 
-                            "`name` varchar(100) not null,"
-                            "`wert` integer,"  
-                            "`textwert` varchar(250),"  
-                            "primary key ( `name` )" );
-    if( created )
     {
-        // Hier Index anlegen
-    }
-    else
-    {
-        add_column( &ta, _spooler->_variables_tablename, "textwert", " add `textwert` varchar(250)" );
-    }
+        Transaction ta ( this );
 
-    ////////////////////////////
+        bool created = create_table_when_needed( &ta, _spooler->_variables_tablename, 
+                                "`name` varchar(100) not null,"
+                                "`wert` integer,"  
+                                "`textwert` varchar(250),"  
+                                "primary key ( `name` )" );
+        if( created )
+        {
+            // Hier Index anlegen
+        }
+        else
+        {
+            add_column( &ta, _spooler->_variables_tablename, "textwert", " add `textwert` varchar(250)" );
+        }
 
-    created = create_table_when_needed( &ta, _spooler->_tasks_tablename, 
-                            "`task_id`"        " integer not null,"          // Primärschlüssel
-                            "`spooler_id`"     " varchar(100),"
-                            "`cluster_member_id`"" varchar(100),"
-                            "`job_name`"       " varchar(100) not null,"
-                            "`enqueue_time`"   " datetime,"
-                            "`start_at_time`"  " datetime,"
-                            "`parameters`"     " clob,"
-                            "`task_xml`"       " clob,"
-                            "primary key( `task_id` )" );
-    if( created )
-    {
-        // Hier Index anlegen
-    }
-    else
-    {
-        added = add_column( &ta, _spooler->_tasks_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
-        
-        if( added )  
-                add_column( &ta, _spooler->_tasks_tablename, "task_xml"         , "add `task_xml` clob" );
+        ta.commit( __FUNCTION__ );
     }
 
     ////////////////////////////
 
-    vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
-    for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
-
-    created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
-                            "`id`"         " integer not null,"
-                            "`spooler_id`" " varchar(100),"
-                            "`cluster_member_id`"" varchar(100),"
-                            "`job_name`"   " varchar(100) not null,"
-                            "`start_time`" " datetime not null,"
-                            "`end_time`"   " datetime,"
-                            "`cause`"      " varchar(50),"
-                            "`steps`"      " integer,"
-                            "`exit_code`"  " integer,"
-                            "`error`"      " boolean,"
-                            "`error_code`" " varchar(50),"
-                            "`error_text`" " varchar(250),"
-                            "`parameters`" " clob,"
-                            "`log`"        " blob," 
-                            + join( "", create_extra ) 
-                            + "primary key( `id` )" );
-
-    if( created )
     {
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME" , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID" , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"   , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
-        ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_H_CLUSTER_MEMBER"   , "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
-    }
-    else
-    {
-        added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+        Transaction ta ( this );
 
-        if( added )
-                add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
+        bool created = create_table_when_needed( &ta, _spooler->_tasks_tablename, 
+                                "`task_id`"        " integer not null,"          // Primärschlüssel
+                                "`spooler_id`"     " varchar(100),"
+                                "`cluster_member_id`"" varchar(100),"
+                                "`job_name`"       " varchar(100) not null,"
+                                "`enqueue_time`"   " datetime,"
+                                "`start_at_time`"  " datetime,"
+                                "`parameters`"     " clob,"
+                                "`task_xml`"       " clob,"
+                                "primary key( `task_id` )" );
+        if( created )
+        {
+            // Hier Index anlegen
+        }
+        else
+        {
+            bool added;
+            added = add_column( &ta, _spooler->_tasks_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+            
+            if( added )  
+                    add_column( &ta, _spooler->_tasks_tablename, "task_xml"         , "add `task_xml` clob" );
+
+        }
+
+        ta.commit( __FUNCTION__ );
     }
 
     ////////////////////////////
 
-    created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                            "`job_chain`"    " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
-                            "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
-                            "`spooler_id`"   " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
-                            "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
-                            "`occupying_cluster_member_id`" "varchar(100),"     // Index
-                            "`priority`"     " integer not null,"
-                            "`state`"        " varchar(100),"
-                            "`state_text`"   " varchar(100),"
-                            "`title`"        " varchar(200),"
-                            "`created_time`" " datetime not null,"
-                            "`mod_time`"     " datetime,"
-                            "`ordering`"     " integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
-                            "`payload`"      " clob,"
-                            "`initial_state`" "varchar(100),"               
-                            "`run_time`"     " clob,"
-                            "`order_xml`"    " clob,"
-                            "primary key( `spooler_id`, `job_chain`, `id` )" );
-    if( created )
     {
-        // Hier Index anlegen
+        Transaction ta ( this );
+
+        vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_job_history_columns ) );
+        for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
+
+        bool created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
+                                "`id`"         " integer not null,"
+                                "`spooler_id`" " varchar(100),"
+                                "`cluster_member_id`"" varchar(100),"
+                                "`job_name`"   " varchar(100) not null,"
+                                "`start_time`" " datetime not null,"
+                                "`end_time`"   " datetime,"
+                                "`cause`"      " varchar(50),"
+                                "`steps`"      " integer,"
+                                "`exit_code`"  " integer,"
+                                "`error`"      " boolean,"
+                                "`error_code`" " varchar(50),"
+                                "`error_text`" " varchar(250),"
+                                "`parameters`" " clob,"
+                                "`log`"        " blob," 
+                                + join( "", create_extra ) 
+                                + "primary key( `id` )" );
+
+        if( created )
+        {
+            ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_START_TIME" , "SCHEDULER_HIST_1", "`start_time`"       , __FUNCTION__ );
+            ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_SPOOLER_ID" , "SCHEDULER_HIST_2", "`spooler_id`"       , __FUNCTION__ );
+            ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_HISTORY_JOB_NAME"   , "SCHEDULER_HIST_3", "`job_name`"         , __FUNCTION__ );
+            ta.create_index( _spooler->_job_history_tablename, "SCHEDULER_H_CLUSTER_MEMBER"   , "SCHEDULER_HIST_4", "`cluster_member_id`", __FUNCTION__ );
+        }
+        else
+        {
+            bool added;
+            added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+
+            if( added )
+                    add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
+        }
+
+        ta.commit( __FUNCTION__ );
     }
-    else
+
+    ////////////////////////////
+
     {
-        added = add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"      , "add `distributed_next_time`"       " datetime"     );
-        
-        if( added )
-        added = add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
+        Transaction ta ( this );
 
-        if( added )
-                add_column( &ta, _spooler->_orders_tablename, "initial_state"              , "add `initial_state`"             " varchar(100)" );
+        bool created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
+                                "`job_chain`"    " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
+                                "`spooler_id`"   " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
+                                "`occupying_cluster_member_id`" "varchar(100),"     // Index
+                                "`priority`"     " integer not null,"
+                                "`state`"        " varchar(100),"
+                                "`state_text`"   " varchar(100),"
+                                "`title`"        " varchar(200),"
+                                "`created_time`" " datetime not null,"
+                                "`mod_time`"     " datetime,"
+                                "`ordering`"     " integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
+                                "`payload`"      " clob,"
+                                "`initial_state`" "varchar(100),"               
+                                "`run_time`"     " clob,"
+                                "`order_xml`"    " clob,"
+                                "primary key( `spooler_id`, `job_chain`, `id` )" );
+        if( created )
+        {
+            // Hier Index anlegen
+        }
+        else
+        {
+            bool added;
+            added = add_column( &ta, _spooler->_orders_tablename, "distributed_next_time"      , "add `distributed_next_time`"       " datetime"     );
+            
+            if( added )
+            added = add_column( &ta, _spooler->_orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
 
-        if( added )
-                add_column( &ta, _spooler->_orders_tablename, "run_time"                   , "add `run_time`"                  " clob"         );
+            if( added )
+                    add_column( &ta, _spooler->_orders_tablename, "initial_state"              , "add `initial_state`"             " varchar(100)" );
 
-        if( added )
-                add_column( &ta, _spooler->_orders_tablename, "order_xml"                  , "add `order_xml`"                 " clob"         );
+            if( added )
+                    add_column( &ta, _spooler->_orders_tablename, "run_time"                   , "add `run_time`"                  " clob"         );
+
+            if( added )
+                    add_column( &ta, _spooler->_orders_tablename, "order_xml"                  , "add `order_xml`"                 " clob"         );
+        }
+
+        ta.commit( __FUNCTION__ );
     }
-
     
     ////////////////////////////
 
-    created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
-                            "`history_id`"  " integer not null,"             // Primärschlüssel
-                            "`job_chain`"   " varchar(100) not null,"
-                            "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
-                            "`spooler_id`"  " varchar(100),"
-                            "`title`"       " varchar(200),"
-                            "`state`"       " varchar(100),"
-                            "`state_text`"  " varchar(100),"
-                            "`start_time`"  " datetime not null,"
-                            "`end_time`"    " datetime not null,"
-                            "`log`"         " blob," 
-                            "primary key( `history_id` )" );
+    {
+        Transaction ta ( this );
 
-    if( created )
-    {
-        ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`", __FUNCTION__ );
-        ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`" , __FUNCTION__ );
-    }
-    else
-    {
-        // add_column()
+        bool created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
+                                "`history_id`"  " integer not null,"             // Primärschlüssel
+                                "`job_chain`"   " varchar(100) not null,"
+                                "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
+                                "`spooler_id`"  " varchar(100),"
+                                "`title`"       " varchar(200),"
+                                "`state`"       " varchar(100),"
+                                "`state_text`"  " varchar(100),"
+                                "`start_time`"  " datetime not null,"
+                                "`end_time`"    " datetime not null,"
+                                "`log`"         " blob," 
+                                "primary key( `history_id` )" );
+
+        if( created )
+        {
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`", __FUNCTION__ );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`" , __FUNCTION__ );
+        }
+        else
+        {
+            // add_column()
+        }
+
+        ta.commit( __FUNCTION__ );
     }
 
     ////////////////////////////
 
-    handle_order_id_columns( &ta );
+    {
+        Transaction ta ( this );
+        handle_order_id_columns( &ta );
 
-    ta.commit( __FUNCTION__ );
+        ta.commit( __FUNCTION__ );
+    }
 }
 
 //---------------------------------------------------------------Database::create_table_when_needed
@@ -771,7 +840,7 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
 
             ta->execute( create_table, __FUNCTION__ );
 
-            ta->intermediate_commit( __FUNCTION__ ); 
+            //ta->intermediate_commit( __FUNCTION__ ); 
 
             result = true;
         }
@@ -794,9 +863,7 @@ bool Database::add_column( Transaction* ta, const string& table_name, const stri
 
     try
     {
-        //Transaction ta ( this );
-
-        Any_file select = ta->open_commitable_file( "-in " + db_name() + " -max-length=1K -read-transaction", "select `" + column_name + "` from " + table_name + " where 1=0", "add_column" );
+        ta->open_file( "-in " + db_name() + " -max-length=1K -read-transaction", "select `" + column_name + "` from " + table_name + " where 1=0", __FUNCTION__ );
     }
     catch( exception& x )
     {
@@ -1406,23 +1473,24 @@ bool Transaction::try_update_variable( const string& name, const string& value )
 
 //-----------------------------------------------------------------------------Transaction::execute
 
-void Transaction::execute( const string& stmt, const string& debug_text, bool force )
+void Transaction::execute( const string& stmt, const string& debug_text, Execute_flags flags )
 { 
     bool is_commit   = stmt == "COMMIT";
     bool is_rollback = stmt == "ROLLBACK";
   //if( !is_commit_or_rollback )  set_transaction_written();
 
-    if( force || !is_commit && !is_rollback || need_commit_or_rollback() )
+    if( flags == ex_force || !is_commit && !is_rollback || need_commit_or_rollback() )
     {
         string debug_extra;
         if( debug_text != "" )  debug_extra = "  (" + debug_text + ")";
         if( !_log->is_enabled_log_level( _spooler->_db_log_level ) )  Z_LOG2( "scheduler", __FUNCTION__ << "  " << stmt << debug_extra << "\n" );
 
-        string native_sql = db()->_db.sos_database_session()->translate_sql( stmt );
+        string native_sql = flags == ex_native? stmt 
+                                              : db()->_db.sos_database_session()->translate_sql( stmt );
 
         try
         {
-            _db->_db.put( "%native " + native_sql ); 
+            _db->_db.put( "%native " + native_sql );    // -split-: Semikolons nicht auftrennen, sondern alles auf einmal übergeben
         }
         catch( zschimmer::Xc& x )
         {

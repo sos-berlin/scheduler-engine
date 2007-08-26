@@ -437,5 +437,21 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ( "CLUSTER_MEMBER
 
 CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );
 CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );</pre>
-    
+
+
+    <h3>DB2</h3>
+
+
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+    <pre></pre>
+
 </description>

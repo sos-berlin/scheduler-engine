@@ -86,6 +86,7 @@ struct Database : Object, Scheduler_object //Subsystem
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
     Database_lock_syntax        lock_syntax             ();
     void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
+  //void                        run_create_table_script ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
     time_t                      reopen_time             () const                                    { return _reopen_time; }
@@ -161,7 +162,7 @@ struct Read_transaction
 
   protected:
     Record                      read_single_record      ( const string& sql, const string& debug_text, bool need_commit_or_rollback );
-    Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction);
+    Any_file                    open_result_set         ( const string& sql, const string& debug_text, bool writes_transaction );
     Any_file                    open_file               ( const string& db_prefix, const string& sql, const string& debug_text, bool need_commit_or_rollback );
     Any_file                    open_file_2             ( const string& db_prefix, const string& execution_sql, const string& debug_text, bool need_commit_or_rollback, const string& logging_sql );
 
@@ -178,6 +179,9 @@ struct Read_transaction
 
 struct Transaction : Read_transaction
 {
+    enum Execute_flags { ex_none, ex_force, ex_native };
+
+
                                 Transaction             ( Database* );
                                 Transaction             ( Database*, Transaction* outer_transaction );
              
@@ -192,8 +196,8 @@ struct Transaction : Read_transaction
 
     void                        commit                  ( const string& debug_text );
     void                        intermediate_commit     ( const string& debug_text );
-    void                        rollback                ( const string& debug_text, bool force = false );
-    void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, true ); }
+    void                        rollback                ( const string& debug_text, Execute_flags = ex_none );
+    void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, ex_force ); }
   //void                        try_reopen_after_error  ();
     void                        set_transaction_written ()                                          {} //{ _transaction_written = true; }
     void                        set_transaction_read    ()                                          {} //{ _transaction_read = true; } 
@@ -202,7 +206,7 @@ struct Transaction : Read_transaction
     bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
     Transaction*                outer_transaction       ()                                          { return _outer_transaction; }
 
-    void                        execute                 ( const string& sql, const string& debug_text, bool force = false );
+    void                        execute                 ( const string& sql, const string& debug_text, Execute_flags = ex_none );
     void                        execute_single          ( const string& sql, const string& debug_text );
     bool                        try_execute_single      ( const string& sql, const string& debug_text );
     string                      get_variable_text       ( const string& name, bool* record_exists = NULL );
