@@ -60,6 +60,9 @@
                 <scheduler_element name="file_order_sink"/><br/>
                 <scheduler_element name="holiday"/><br/>
                 <scheduler_element name="holidays"/><br/>
+                <scheduler_element name="http.authentication"/><br/>
+                <scheduler_element name="http.users"/><br/>
+                <scheduler_element name="http.user"/><br/>
                 <scheduler_element name="http_directory"/><br/>
                 <scheduler_element name="http_server"/><br/>
                 <scheduler_element name="include"/><br/>

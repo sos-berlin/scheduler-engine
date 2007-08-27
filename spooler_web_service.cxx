@@ -256,6 +256,8 @@ bool Web_services::subsystem_activate()
 
 bool Web_services::is_request_authorized( http::Request* http_request )
 {
+    // 2007-08-24  Dank an Michael Collard, iinet.net.au.
+
     string authorization = http_request->header( "Authorization" );
     
     if( !string_begins_with( authorization, "Basic " ) )

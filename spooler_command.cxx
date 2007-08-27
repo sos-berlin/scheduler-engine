@@ -1319,6 +1319,8 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
         if( _spooler->_web_services->need_authorization()  &&  !_spooler->_web_services->is_request_authorized( http_request ) )
         {
+            // 2007-08-24  Dank an Michael Collard, iinet.net.au.
+
             http_response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
             http_response->set_status( http::status_401_permission_denied );
 

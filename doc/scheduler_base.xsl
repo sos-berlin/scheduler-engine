@@ -609,17 +609,18 @@
                 </code>
             </td>
 
-            <td style="padding-left: 2ex">
+            <td style="padding-left: 2ex; white-space: nowrap">
                 <xsl:if test="@global_default='off'">
+                    <xsl:copy-of select="$phrases/phrase [ @id='log_category.global_default.off' ]"/>
                 </xsl:if>
                 <xsl:if test="@global_default='on'">
-                    <xsl:text>default</xsl:text>
+                    <xsl:copy-of select="$phrases/phrase [ @id='log_category.global_default.on' ]"/>
                 </xsl:if>
                 <xsl:if test="@local_default='off'">
-                    <xsl:text>nur explizit</xsl:text>
+                    <xsl:copy-of select="$phrases/phrase [ @id='log_category.local_default.off' ]"/>
                 </xsl:if>
                 <xsl:if test="@local_default='on'">
-                    <xsl:text>implizit an</xsl:text>
+                    <xsl:copy-of select="$phrases/phrase [ @id='log_category.local_default.on' ]"/>
                 </xsl:if>
             </td>
 
@@ -2196,19 +2197,19 @@
         <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
 
         <xsl:choose>
-            <xsl:when test="local-name( $root_element ) = 'xml_element'">
+            <xsl:when test="not( $content )  and  local-name( $root_element ) = 'xml_element'">
                 <xsl:call-template name="scheduler_element">
                     <xsl:with-param name="name" select="$root_element/@name"/>
                 </xsl:call-template>
             </xsl:when>
 
-            <xsl:when test="local-name( $root_element ) = 'api.class' and $root_element/@name != 'api'">
+            <xsl:when test="not( $content )  and  local-name( $root_element ) = 'api.class' and $root_element/@name != 'api'">
                 <xsl:call-template name="scheduler_method">
                     <xsl:with-param name="class" select="$root_element/@name"/>
                 </xsl:call-template>
             </xsl:when>
 
-            <xsl:when test="local-name( $root_element ) = 'ini_section'">
+            <xsl:when test="not( $content )  and  local-name( $root_element ) = 'ini_section'">
                 <xsl:call-template name="scheduler_method">
                     <xsl:with-param name="file" select="$root_element/@file"/>
                     <xsl:with-param name="section" select="$root_element/@name"/>
@@ -2932,8 +2933,14 @@
 
     <xsl:template match="messages" mode="inner">
 
-        <h2>Messages of package <xsl:value-of select="@package"/></h2>
-        
+        <h2>
+            <xsl:copy-of select="$phrases/phrase [ @id='messages.list.title.prefix' ]"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="@package"/>
+            <xsl:text> </xsl:text>
+            <xsl:copy-of select="$phrases/phrase [ @id='messages.list.title.suffix' ]"/>
+        </h2>
+
         <table cellpadding="0" cellspacing="0">
             <thead>
                 <tr>

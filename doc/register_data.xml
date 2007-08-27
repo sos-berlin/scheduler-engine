@@ -515,6 +515,9 @@
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='db'/>
     <register_ini_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)' file='factory.ini' section='spooler' entry='db'/>
 </register_keyword>
+<register_keyword keyword='DB2'>
+    <register_entry register_file='scheduler_sql_db2.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für DB2®'  register_keyword='DB2'/>
+</register_keyword>
 <register_keyword keyword='db_check_integrity'>
     <register_keyword_display><code>db_check_integrity=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_db_check_integrity' register_title='file factory.ini, section [spooler]'  register_keyword='db_check_integrity' type='definition'/>
@@ -1136,6 +1139,17 @@
 <register_keyword keyword='http.authentication'>
     <register_keyword_display><code>&lt;http.authentication&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__http.authentication' register_title='Änderungsprotokoll'  register_keyword='http.authentication'/>
+    <register_entry register_file='xml/http.authentication.xml#' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='http.authentication' type='definition'/>
+    <register_entry register_file='xml/http.user.xml#use_element__http.authentication' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='http.authentication'/>
+    <register_entry register_file='xml/http.users.xml#use_element__http.authentication' register_title='&lt;http.users&gt; (Konfiguration)'  register_keyword='http.authentication'/>
+</register_keyword>
+<register_keyword keyword='http.user'>
+    <register_keyword_display><code>&lt;http.user&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/http.user.xml#' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='http.user' type='definition'/>
+</register_keyword>
+<register_keyword keyword='http.users'>
+    <register_keyword_display><code>&lt;http.users&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/http.users.xml#' register_title='&lt;http.users&gt; (Konfiguration)'  register_keyword='http.users' type='definition'/>
 </register_keyword>
 <register_keyword keyword='http_directory'>
     <register_keyword_display><code>&lt;http_directory&gt;</code></register_keyword_display>
@@ -2095,6 +2109,9 @@
     <register_keyword_display><code>merge()</code></register_keyword_display>
     <register_entry register_file='api/Variable_set.xml#method__merge' register_title='Variable_set.merge()' register_keyword='merge()' type='definition'/>
 </register_keyword>
+<register_keyword keyword='Microsoft SQL Server'>
+    <register_entry register_file='scheduler_sql_microsoft_sql_server.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für Microsoft SQL Server'  register_keyword='Microsoft SQL Server'/>
+</register_keyword>
 <register_keyword keyword='min_tasks'>
     <register_keyword_display><code>min_tasks=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_min_tasks' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='min_tasks' type='definition'/>
@@ -2158,6 +2175,9 @@
 <register_keyword keyword='Mutex'>
     <register_entry register_file='lock.xml' register_title='Sperren'  register_keyword='Mutex'/>
 </register_keyword>
+<register_keyword keyword='MySQL'>
+    <register_entry register_file='scheduler_sql_mysql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für MySQL®'  register_keyword='MySQL'/>
+</register_keyword>
 <register_keyword keyword='name'>
     <register_keyword_display><code>name</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='name'/>
@@ -2178,6 +2198,7 @@
     <register_entry register_file='xml/answer/process_class.xml#attribute_name' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/answer/queued_task.xml#attribute_name' register_title='&lt;queued_task&gt; (Antwort)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/answer/task.xml#attribute_name' register_title='&lt;task&gt; (Antwort)'  register_keyword='name' type='definition'/>
+    <register_entry register_file='xml/http.user.xml#attribute_name' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_name' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/job_chain.xml#attribute_name' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/lock.xml#attribute_name' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
@@ -2272,6 +2293,9 @@
     <register_keyword_display><code>options=</code></register_keyword_display>
     <register_entry register_file='sos_ini_java.xml#entry_options' register_title='file sos.ini, section [java]'  register_keyword='options' type='definition'/>
     <register_ini_entry register_file='settings.xml' register_title='Einstellungen' file='sos.ini' section='java' entry='options'/>
+</register_keyword>
+<register_keyword keyword='Oracle'>
+    <register_entry register_file='scheduler_sql_oracle.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für Oracle®'  register_keyword='Oracle'/>
 </register_keyword>
 <register_keyword keyword='order'>
     <register_keyword_display><code>&lt;order&gt;</code></register_keyword_display>
@@ -2410,6 +2434,10 @@
     <register_entry register_file='api/Task.xml#method__params' register_title='Task.params' register_keyword='params' type='definition'/>
     <register_entry register_file='api/Web_service.xml#method__params' register_title='Web_service.params' register_keyword='params' type='definition'/>
 </register_keyword>
+<register_keyword keyword='password_md5'>
+    <register_keyword_display><code>password_md5=</code></register_keyword_display>
+    <register_entry register_file='xml/http.user.xml#attribute_password_md5' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='password_md5' type='definition'/>
+</register_keyword>
 <register_keyword keyword='path'>
     <register_keyword_display><code>path</code></register_keyword_display>
     <register_entry register_file='api/Log.xml#method__log_file' register_title='Log.log_file()' register_keyword='path'/>
@@ -2490,6 +2518,9 @@
 <register_keyword keyword='port'>
     <register_keyword_display><code>port=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_port' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='port' type='definition'/>
+</register_keyword>
+<register_keyword keyword='PostgresQL'>
+    <register_entry register_file='scheduler_sql_postgresql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für PostgreSQL'  register_keyword='PostgresQL'/>
 </register_keyword>
 <register_keyword keyword='prev'>
     <register_keyword_display><code>prev=</code></register_keyword_display>
@@ -2872,6 +2903,10 @@
 <register_keyword keyword='Schema'>
     <register_entry register_file='xml.xml' register_title='Alle XML-Elemente'  register_keyword='Schema'/>
 </register_keyword>
+<register_keyword keyword='scheme'>
+    <register_keyword_display><code>scheme=</code></register_keyword_display>
+    <register_entry register_file='xml/http.authentication.xml#attribute_scheme' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='scheme' type='definition'/>
+</register_keyword>
 <register_keyword keyword='Schwarze Liste'>
     <register_entry register_file='file_orders.xml' register_title='Verzeichnisüberwachung mit Dateiaufträgen'  register_keyword='Schwarze Liste'/>
 </register_keyword>
@@ -3202,6 +3237,9 @@
 <register_keyword keyword='spooler_task_before'>
     <register_keyword_display><code>spooler_task_before()</code></register_keyword_display>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_task_before' register_title='Monitor_impl.spooler_task_before()' register_keyword='spooler_task_before()' type='definition'/>
+</register_keyword>
+<register_keyword keyword='SQL Server, Microsoft'>
+    <register_entry register_file='scheduler_sql_microsoft_sql_server.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für Microsoft SQL Server'  register_keyword='SQL Server, Microsoft'/>
 </register_keyword>
 <register_keyword keyword='start'>
     <register_keyword_display><code>start()</code></register_keyword_display>

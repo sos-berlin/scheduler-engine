@@ -34,17 +34,23 @@
     
     <description>
         <p>
-            Mit diesem Element verlangt der Scheduler vom HTTP-Client eine Authentifizierung
+            Mit diesem Element verlangt der Scheduler vom HTTP-Client (Browser) eine Authentifizierung
             nach <a href="http://www.ietf.org/rfc/rfc2617.txt">RFC 2617</a>, Verfahren »Basic«.
+        </p>
+        <p>
+            Die Authentifizierung gilt auch für die <scheduler_element name="web_service"/>.
         </p>
     </description>
     
     <example>
-        <pre>&lt;authentication>
-    &lt;users>
-        &lt;user name="Rose Kemp" password_md5="701d051b67bc5fc7c7c919d01f0aa7cb"/>
-        &lt;user name="Jeff Beck" password_md5="eb6801a466d5376639e29cd1d11ecb9f"/>
-    &lt;/users>
-&lt;/authentication></pre>
+        <pre>&lt;http_server>
+    &lt;http.authentication>
+        &lt;http.users>
+            &lt;http.user name="Rose Kemp" password_md5="701d051b67bc5fc7c7c919d01f0aa7cb"/>
+            &lt;http.user name="Jeff Beck" password_md5="eb6801a466d5376639e29cd1d11ecb9f"/>
+        &lt;/http.users>
+    &lt;/http.authentication>
+    …
+&lt;/http_server></pre>
     </example>
 </xml_element>

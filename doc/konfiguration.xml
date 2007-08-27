@@ -85,8 +85,8 @@
     Klicken Sie auf ein XML-Element, um dessen Beschreibung zu sehen.
 </p>
 
-<pre>&lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
-    &lt;<a class="silent" href="xml/config.xml">config</a> include_path         = "…"
+<pre>&lt;<scheduler_a href="xml/spooler.xml">spooler</scheduler_a>>
+    &lt;<scheduler_a href="xml/config.xml">config</scheduler_a> include_path         = "…"
             ip_address           = "…"
             java_class_path      = "…"
             java_options         = "…"    
@@ -100,58 +100,66 @@
             tcp_port             = "4444"
             udp_port             = "4444">
             
-        &lt;<a class="silent" href="xml/base.xml">base</a> file="…"/>
+        &lt;<scheduler_a href="xml/base.xml">base</scheduler_a> file="…"/>
 
-        &lt;<a class="silent" href="xml/security.xml">security</a>>
-            &lt;<a class="silent" href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
+        &lt;<scheduler_a href="xml/security.xml">security</scheduler_a>>
+            &lt;<scheduler_a href="xml/allowed_host.xml">allowed_host</scheduler_a> name="…" level="…"/>
             …
         &lt;/security>
 
-        &lt;<a class="silent" href="xml/cluster.xml">cluster</a> heart_beat_own_timeout  = "…" 
+        &lt;<scheduler_a href="xml/cluster.xml">cluster</scheduler_a> heart_beat_own_timeout  = "…" 
                  heart_beat_timeout      = "…"
                  heart_beat_warn_timeout = "…"/>
 
-        &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
-            &lt;<a class="silent" href="xml/process_class.xml">process_class</a> max_processes = "…"
+        &lt;<scheduler_a href="xml/process_classes.xml">process_classes></scheduler_a>
+            &lt;<scheduler_a href="xml/process_class.xml">process_class</scheduler_a> max_processes = "…"
                            name          = "…"
                            spooler_id    = "…"/>
             …
         &lt;/process_classes>
 
-        &lt;<a class="silent" href="xml/locks.xml">locks></a>
-            &lt;<a class="silent" href="xml/lock.xml">lock</a> name= "…" …/>
+        &lt;<scheduler_a href="xml/locks.xml">locks></scheduler_a>
+            &lt;<scheduler_a href="xml/lock.xml">lock</scheduler_a> name= "…" …/>
             …
         &lt;/locks>
 
-        &lt;<a class="silent" href="xml/script.xml">script</a> com_class  = "…"
+        &lt;<scheduler_a href="xml/script.xml">script</scheduler_a> com_class  = "…"
                 filename   = "…" 
                 java_class = "…"
                 language   = "…" >
-            &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
+            &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>
             &lt;![CDATA[
                 <i>programm-code</i>…
             ]]&gt;
         &lt;/script>
 
-        &lt;<a class="silent" href="xml/http_server.xml">http_server</a>>
-            &lt;<a class="silent" href="xml/http_directory.xml">http_directory</a> path="…" url_path="…"/>
-            &lt;<a class="silent" href="xml/web_service.xml">web_service</a> job_chain="…" url_path="…" …>
-            &lt;<a class="silent" href="xml/params.xml">params</a>>
-                     &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
+        &lt;<scheduler_a href="xml/http_server.xml">http_server</scheduler_a>>
+            &lt;<scheduler_a href="xml/http.authentication.xml">http.authentication</scheduler_a> scheme="basic">
+                &lt;<scheduler_a href="xml/http.users.xml">http.users</scheduler_a>>
+                    &lt;<scheduler_a href="xml/http.user.xml">http.user</scheduler_a> name="…" password_md5="…"/>
+                    …
+                &lt;/http.users>
+            &lt;/http.authentication>
+            
+            &lt;<scheduler_a href="xml/http_directory.xml">http_directory</scheduler_a> path="…" url_path="…"/>
+            
+            &lt;<scheduler_a href="xml/web_service.xml">web_service</scheduler_a> job_chain="…" url_path="…" …>
+                &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                     &lt;<scheduler_a href="xml/param.xml">param</scheduler_a> name="…" value="…"/>
                      …
-                 &lt;/params>
+                &lt;/params>
             &lt;/web_service>
             …
         &lt;/http_server>
 
-        &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
-            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="…"/>
-            &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
+        &lt;<scheduler_a href="xml/holidays.xml">holidays</scheduler_a>>
+            &lt;<scheduler_a href="xml/holiday.xml">holiday</scheduler_a> date="…"/>
+            &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>
             …
         &lt;/holidays>
 
-        &lt;<a class="silent" href="xml/jobs.xml">jobs></a>
-            &lt;<a class="silent" href="xml/job.xml">job</a>
+        &lt;<scheduler_a href="xml/jobs.xml">jobs></scheduler_a>
+            &lt;<scheduler_a href="xml/job.xml">job</scheduler_a>
                 force_idle_timeout = "yes|no"
                 idle_timeout   = "…"
                 ignore_signals = "…"
@@ -169,106 +177,106 @@
                 visible        = "no"
             >
 
-                &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
+                &lt;<scheduler_a href="xml/description.xml">description</scheduler_a>> … &lt;/description>
 
-                &lt;<a class="silent" href="xml/lock.use.xml">lock.use</a> lock="…" …/>
+                &lt;<scheduler_a href="xml/lock.use.xml">lock.use</scheduler_a> lock="…" …/>
     
-                &lt;<a class="silent" href="xml/params.xml">params</a>>
-                    &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
+                &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                    &lt;<scheduler_a href="xml/param.xml">param</scheduler_a> name="…" value="…"/>
                     …
                 &lt;/params>
 
-                &lt;<a class="silent" href="xml/script.xml">script</a> com_class  = "…"
+                &lt;<scheduler_a href="xml/script.xml">script</scheduler_a> com_class  = "…"
                         filename   = "…" 
                         java_class = "…"
                         language   = "…" >
-                    &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
+                    &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>
                     &lt;![CDATA[ <i>programm-code</i>… ]]&gt;
                 &lt;/script>
               <i>oder</i>
-                &lt;<a class="silent" href="xml/process.xml">process</a> file         = "…"
+                &lt;<scheduler_a href="xml/process.xml">process</scheduler_a> file         = "…"
                          ignore_error = "no"
                          ignore_signal= "no" 
                          log_file     = ""
                          param        = ""  >
-                    &lt;<a class="silent" href="xml/environment.xml">environment</a>>
-                        &lt;<a class="silent" href="xml/variable.xml">variable</a> name  = "…"
+                    &lt;<scheduler_a href="xml/environment.xml">environment</scheduler_a>>
+                        &lt;<scheduler_a href="xml/variable.xml">variable</scheduler_a> name  = "…"
                                   value = "…"
                         &lt;/variable>
                     &lt;/environment>
                 &lt;/process>
 
-                &lt;<a class="silent" href="xml/monitor.xml">monitor></a>
-                   &lt;<a class="silent" href="xml/script.xml">script language="…" …></a>…&lt;script/>
+                &lt;<scheduler_a href="xml/monitor.xml">monitor></scheduler_a>
+                   &lt;<scheduler_a href="xml/script.xml">script language="…" …></scheduler_a>…&lt;script/>
                 &lt;/monitor>
 
-                &lt;<a class="silent" href="xml/start_when_directory_changed.xml">start_when_directory_changed</a>  directory="…"  regex="…" />
+                &lt;<scheduler_a href="xml/start_when_directory_changed.xml">start_when_directory_changed</scheduler_a>  directory="…"  regex="…" />
 
-                &lt;<a class="silent" href="xml/delay_after_error.xml">delay_after_error</a>  delay="…"  error_count="…" />
+                &lt;<scheduler_a href="xml/delay_after_error.xml">delay_after_error</scheduler_a>  delay="…"  error_count="…" />
                  
-                &lt;<a class="silent" href="xml/delay_order_after_setback.xml">delay_order_after_setback</a>  delay="…"  is_maximum="yes|no"  
+                &lt;<scheduler_a href="xml/delay_order_after_setback.xml">delay_order_after_setback</scheduler_a>  delay="…"  is_maximum="yes|no"  
                                             setback_count="…" />
 
-                &lt;<a class="silent" href="xml/run_time.xml">run_time</a> let_run="no">
-                    &lt;<a class="silent" href="xml/period.xml">period</a> begin        = "00:00"
+                &lt;<scheduler_a href="xml/run_time.xml">run_time</scheduler_a> let_run="no">
+                    &lt;<scheduler_a href="xml/period.xml">period</scheduler_a> begin        = "00:00"
                             end          = "24:00"
                             let_run      = "…"
                             repeat       = "…"     
                             single_start = "…"     />
 
-                    &lt;<a class="silent" href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
+                    &lt;<scheduler_a href="xml/date.xml">date</scheduler_a> date="yyyy-mm-dd"/>
                     …
 
-                    &lt;<a class="silent" href="xml/weekdays.xml">weekdays</a>>
-                        &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                           &lt;<a class="silent" href="xml/period.xml">period …/></a>
+                    &lt;<scheduler_a href="xml/weekdays.xml">weekdays</scheduler_a>>
+                        &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                           &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
                             …
                         &lt;/day>
                         …
                     &lt;/weekdays>
 
-                    &lt;<a class="silent" href="xml/monthdays.xml">monthdays</a>>
-                        &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                            &lt;<a class="silent" href="xml/period.xml">period …/></a>
+                    &lt;<scheduler_a href="xml/monthdays.xml">monthdays</scheduler_a>>
+                        &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                            &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
                             …
                         &lt;/day>
-                        &lt;<a class="silent" href="xml/weekday.xml">weekday</a> weekday="…" which="…">
-                            &lt;<a class="silent" href="xml/period.xml">period …/></a>
+                        &lt;<scheduler_a href="xml/weekday.xml">weekday</scheduler_a> weekday="…" which="…">
+                            &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
                             …
                         &lt;/weekday>
                         …
                     &lt;/monthdays>
 
-                    &lt;<a class="silent" href="xml/ultimos.xml">ultimos</a>>
-                        &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
-                            &lt;<a class="silent" href="xml/period.xml">period …/></a>
+                    &lt;<scheduler_a href="xml/ultimos.xml">ultimos</scheduler_a>>
+                        &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                            &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
                             …
                         &lt;/day>
                         …
                     &lt;/ultimos>
 
-                    &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
-                        &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
-                        &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
+                    &lt;<scheduler_a href="xml/holidays.xml">holidays</scheduler_a>>
+                        &lt;<scheduler_a href="xml/holiday.xml">holiday</scheduler_a> date="yyyy-mm-dd"/>
+                        &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>
                         …
                     &lt;/holidays>
                     
-                    &lt;<a class="silent" href="xml/at.xml">at</a> at="yyyy-mm-dd HH:MM:SS"/>
+                    &lt;<scheduler_a href="xml/at.xml">at</scheduler_a> at="yyyy-mm-dd HH:MM:SS"/>
                 &lt;/run_time>
                  
-                &lt;<a class="silent" href="xml/commands.xml">commands on_exit_code="…"</a>>
-                    &lt;<a href="xml/start_job.xml">start_job</a> job="…" …>
-                        &lt;<a href="xml/params.xml">params</a>>
-                            &lt;<a href="xml/copy_params.xml">copy_params</a> from="task"/>
-                            &lt;<a href="xml/copy_params.xml">copy_params</a> from="order"/>
+                &lt;<scheduler_a href="xml/commands.xml">commands on_exit_code="…"</scheduler_a>>
+                    &lt;<scheduler_a href="xml/start_job.xml">start_job</scheduler_a> job="…" …>
+                        &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                            &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="task"/>
+                            &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="order"/>
                             …
                         &lt;/params>
                     &lt;/start_job>    
                      
-                    &lt;<a href="xml/add_order.xml">add_order</a> job_chain="…" …>
-                        &lt;<a href="xml/params.xml">params</a>>
-                            &lt;<a href="xml/copy_params.xml">copy_params</a> from="task"/>
-                            &lt;<a href="xml/copy_params.xml">copy_params</a> from="order"/>
+                    &lt;<scheduler_a href="xml/add_order.xml">add_order</scheduler_a> job_chain="…" …>
+                        &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                            &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="task"/>
+                            &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="order"/>
                             …
                         &lt;/params>
                     &lt;/add_order>
@@ -278,9 +286,9 @@
             …
         &lt;/jobs>
 
-        &lt;<a class="silent" href="xml/job_chains.xml">job_chains</a>>
-            &lt;<a class="silent" href="xml/job_chain.xml">job_chain</a> name="…"/>
-                &lt;<a class="silent" href="xml/file_order_source.xml">file_order_source</a> 
+        &lt;<scheduler_a href="xml/job_chains.xml">job_chains</scheduler_a>>
+            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> name="…"/>
+                &lt;<scheduler_a href="xml/file_order_source.xml">file_order_source</scheduler_a> 
                     delay_after_error = "…"
                     directory         = "…"  
                     max               = "…"  
@@ -289,28 +297,28 @@
                     repeat            = "…"  
                 />
                 …
-                &lt;<a class="silent" href="xml/job_chain_node.xml">job_chain_node</a>
+                &lt;<scheduler_a href="xml/job_chain_node.xml">job_chain_node</scheduler_a>
                     job         = "…"  
                     error_state = "…"
                     next_state  = "…"  
                     state       = "…"  
                 />
                 …
-                &lt;<a class="silent" href="xml/file_order_sink.xml">file_order_sink</a> 
+                &lt;<scheduler_a href="xml/file_order_sink.xml">file_order_sink</scheduler_a> 
                     move_to     = "…"
                     remove      = "yes"
                 />
                 …
             &lt;/job_chain>
-            &lt;<a class="silent" href="xml/job_chain_node.job_chain.xml">job_chain</a> name="…"/>
-                &lt;<a class="silent" href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</a>
+            &lt;<scheduler_a href="xml/job_chain_node.job_chain.xml">job_chain</scheduler_a> name="…"/>
+                &lt;<scheduler_a href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</scheduler_a>
                     job_chain   = "…"  
                     error_state = "…"
                     next_state  = "…"  
                     state       = "…"  
                 />
                 …
-                &lt;<a class="silent" href="xml/job_chain_node.end.xml">job_chain_node.end</a> 
+                &lt;<scheduler_a href="xml/job_chain_node.end.xml">job_chain_node.end</scheduler_a> 
                     state       = "…"
                 />
                 …
@@ -318,7 +326,7 @@
             …
         &lt;/job_chains>
 
-        &lt;<a class="silent" href="xml/commands.xml">commands</a>>
+        &lt;<scheduler_a href="xml/commands.xml">commands</scheduler_a>>
             …
         &lt;/commands>
 

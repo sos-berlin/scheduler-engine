@@ -11,13 +11,15 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-08-26" version="2.0.186" subversion_revision="5176">
-        <revision type="new" title="HTTP-Authentifizierung eingeführt">
+        <revision jira="JS-103" type="new" title="HTTP-Authentifizierung eingeführt">
             <description>
-                <ul>
-                    <li>
-                        Neues XML-Element <scheduler_element name="http.authentication"/>
-                    </li>
-                </ul>
+                <p>
+                    Neues XML-Element <scheduler_element name="http.authentication"/> eingeführt.
+                    (Dank für den Algorithmus an Michael Collard, iinet.net.au).
+                </p>
+                <p>
+                    Die Authentifizierung gilt auch für die über HTTP angesprochenen <scheduler_element name="web_service"/>.
+                </p>
             </description>
         </revision>
     </change>
@@ -187,11 +189,12 @@
     </change>
 
     <change date="2007-07-23" version="2.0.180" subversion_revision="5139">
-        <revision type="modification" title="scheduler.log.gz wird nicht mehr erzeugt (Jira JS-39)">
+        <revision jira="JS-39" type="modification" title="scheduler.log.gz wird nicht mehr erzeugt">
             <description>
                 <p>
-                    Solange der Scheduler die <code>scheduler.log.gz</code> nicht im Hintergrund 
-                    erzeugen kann, erzeugt er sich erstmal gar nicht, weil das den Start zu lange verzögern kann.
+                    Solange nicht implementiert ist, 
+                    dass der Scheduler die <code>scheduler.log.gz</code> im Hintergrund erzeugt, 
+                    erzeugt er sie erstmal gar nicht, weil das den Start zu lange verzögern kann.
                 </p>
             </description>
         </revision>

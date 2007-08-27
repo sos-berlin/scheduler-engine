@@ -69,10 +69,16 @@
             </phrase>
 
 
+            <phrase id="messages.list.title.prefix">Meldungen des Pakets</phrase>
+            <phrase id="messages.list.title.suffix"></phrase>
             <phrase id="messages.title">Meldungen</phrase>
 
             <phrase id="log_categories.table.categories.title">Kategorie</phrase>
             <phrase id="log_categories.table.default.title">Default</phrase>
+            <phrase id="log_category.global_default.off"></phrase>
+            <phrase id="log_category.global_default.on">default</phrase>
+            <phrase id="log_category.local_default.off">nur explizit</phrase>
+            <phrase id="log_category.local_default.on">implizit an</phrase>
 
             <phrase id="log_categories.footnotes">
                 ¹) "default" bedeutet, dass diese Kategorie voreingestellt ist.
