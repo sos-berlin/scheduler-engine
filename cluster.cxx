@@ -1885,8 +1885,8 @@ bool Cluster::check_heart_beat_is_in_time( time_t expected_next_heart_beat )
         {
             _late_heart_beat = expected_next_heart_beat;
 
-            // Eigentlich ein Fehler, wenigstens eine Warnung. Andreas Püschel wünscht eine Info-Meldung. 2007-08-24
-            _log->info( message_string( "SCHEDULER-827", string_local_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
+            // Eine sehr ernst zu nehmende Warnung! Längere Verzögerungen können tödlich sein.
+            _log->warn( message_string( "SCHEDULER-827", string_local_from_time_t( expected_next_heart_beat ), now - expected_next_heart_beat ) );
         }
     }
 

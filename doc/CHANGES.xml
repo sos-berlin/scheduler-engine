@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-08-26" version="2.0.186" subversion_revision="5176">
+    <change date="2007-08-27" version="2.0.186" subversion_revision="5179">
         <revision jira="JS-103" type="new" title="HTTP-Authentifizierung eingeführt">
             <description>
                 <p>
@@ -22,21 +22,19 @@
                 </p>
             </description>
         </revision>
-    </change>
-    
-    <change date="2007-08-24" version="2.0.185" subversion_revision="5170">
-        <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Info ausgegeben">
+
+        <revision type="modification" title="Meldung für verspäteten Herzschlag wird als Warnung ausgegeben">
             <description>
-                <p>
-                    Die Meldung <scheduler_message code="SCHEDULER-827"/> ist dennoch als Warnung zu verstehen, 
-                    denn ein anderer Scheduler kann bei verspätetem Herzschlag annehmen, 
+                <!--p>
+                    Die Meldung <scheduler_message code="SCHEDULER-827"/> ist dennoch als Warnung zu verstehen,
+                    denn ein anderer Scheduler kann bei verspätetem Herzschlag annehmen,
                     dass dieser Scheduler nicht mehr aktiv ist, und dessen Datenbankeintrag deaktivieren.
                     Daraufhin bricht der Scheduler mit der Meldung <scheduler_message code="SCHEDULER-377"/> ab.
                     Der Scheduler kann sich auch selbst abbrechen (Meldung <scheduler_message code="SCHEDULER-386"/>).
-                </p>
+                </p-->
                 <ul>
                     <li>
-                        <scheduler_message level="info" code="SCHEDULER-827"/>
+                        <scheduler_message level="warn" code="SCHEDULER-827"/>
                     </li>
                     <li>
                         <scheduler_message level="error" code="SCHEDULER-386"/>
@@ -47,7 +45,9 @@
                 </ul>
             </description>
         </revision>
-
+    </change>
+    
+    <change date="2007-08-24" version="2.0.185" subversion_revision="5170">
         <revision type="modification" title="Änderungen an der Datenbank">
             <description>
                 <ul>

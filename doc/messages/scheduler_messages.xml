@@ -3561,7 +3561,7 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-827" weight="info">
+        <message code="SCHEDULER-827" weight="warn">
             <text xml:lang="en">
                 <title>Own heart beat is late: next_heart_beat has been announced for <p1/> (this is <p2/> seconds late)</title>
             </text>

@@ -1139,16 +1139,19 @@
 <register_keyword keyword='http.authentication'>
     <register_keyword_display><code>&lt;http.authentication&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__http.authentication' register_title='Änderungsprotokoll'  register_keyword='http.authentication'/>
+    <register_entry register_file='xml.xml#use_element__http.authentication' register_title='Alle XML-Elemente'  register_keyword='http.authentication'/>
     <register_entry register_file='xml/http.authentication.xml#' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='http.authentication' type='definition'/>
     <register_entry register_file='xml/http.user.xml#use_element__http.authentication' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='http.authentication'/>
     <register_entry register_file='xml/http.users.xml#use_element__http.authentication' register_title='&lt;http.users&gt; (Konfiguration)'  register_keyword='http.authentication'/>
 </register_keyword>
 <register_keyword keyword='http.user'>
     <register_keyword_display><code>&lt;http.user&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__http.user' register_title='Alle XML-Elemente'  register_keyword='http.user'/>
     <register_entry register_file='xml/http.user.xml#' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='http.user' type='definition'/>
 </register_keyword>
 <register_keyword keyword='http.users'>
     <register_keyword_display><code>&lt;http.users&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__http.users' register_title='Alle XML-Elemente'  register_keyword='http.users'/>
     <register_entry register_file='xml/http.users.xml#' register_title='&lt;http.users&gt; (Konfiguration)'  register_keyword='http.users' type='definition'/>
 </register_keyword>
 <register_keyword keyword='http_directory'>
@@ -3766,6 +3769,7 @@
     <register_entry register_file='http.xml#use_element__web_service' register_title='HTTP-Server und Web-Services'  register_keyword='web_service'/>
     <register_entry register_file='xml.xml#use_element__web_service' register_title='Alle XML-Elemente'  register_keyword='web_service'/>
     <register_entry register_file='xml/add_order.xml#use_element__web_service' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='web_service'/>
+    <register_entry register_file='xml/http.authentication.xml#use_element__web_service' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='web_service'/>
     <register_entry register_file='xml/service_request.xml#use_element__web_service' register_title='&lt;service_request&gt;'  register_keyword='web_service'/>
     <register_entry register_file='xml/start_job.xml#use_element__web_service' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='web_service'/>
     <register_entry register_file='xml/web_service.xml#' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='web_service' type='definition'/>
