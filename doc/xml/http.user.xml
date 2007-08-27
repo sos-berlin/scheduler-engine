@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
@@ -17,7 +17,7 @@
 
 
     <xml_attributes>
-        <xml_attribute name="name" type="name" title="Benuterkennung zur Authentifizierung">
+        <xml_attribute name="name" type="name" title="Benutzerkennung zur Authentifizierung">
         </xml_attribute>
 
         <xml_attribute name="password_md5" type="string" title="MD5-Summe des Kennworts">
