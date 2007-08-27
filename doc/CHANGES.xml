@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="changes.xsl" type="text/xsl"?>
 
 <!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
@@ -52,7 +52,7 @@
             <description>
                 <ul>
                     <li>
-                        Mit der Tabelle <code>SCHEDULER_ORDERS</code>
+                        Mit der Tabelle <code>SCHEDULER_ORDER_HISTORY</code>
                         wird der neue Index <code>SCHEDULER_O_HISTORY_JOB_CHAIN</code> auf die Spalte <code>JOB_CHAIN</code>
                         angelegt.
                     </li>
