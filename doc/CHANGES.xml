@@ -10,6 +10,10 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-30" version="2.0.186" subversion_revision="5185">
+        <revision jira="JS-110" type="correction" title="Korrektur &quot;bad allocation&quot;"/>
+    </change>
+    
     <change date="2007-08-27" version="2.0.186" subversion_revision="5179">
         <revision jira="JS-103" type="new" title="HTTP-Authentifizierung eingeführt">
             <description>
