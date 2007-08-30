@@ -2522,8 +2522,8 @@
     <register_keyword_display><code>port=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_port' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='port' type='definition'/>
 </register_keyword>
-<register_keyword keyword='PostgresQL'>
-    <register_entry register_file='scheduler_sql_postgresql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für PostgreSQL'  register_keyword='PostgresQL'/>
+<register_keyword keyword='PostgresSQL'>
+    <register_entry register_file='scheduler_sql_postgresql.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für PostgreSQL'  register_keyword='PostgresSQL'/>
 </register_keyword>
 <register_keyword keyword='prev'>
     <register_keyword_display><code>prev=</code></register_keyword_display>

@@ -1495,8 +1495,8 @@ bool Task::do_something()
                                         if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
                                         {
                                             string paths = join( ", ", _module_instance->undeleted_files() );
-                                            _log->info( message_string( "SCHEDULER-878", join( ", ", paths ) ) );
-                                            _job->log()->warn( message_string( "SCHEDULER-878", join( ", ", paths ) ) );
+                                            _log->info( message_string( "SCHEDULER-878", paths ) );
+                                            _job->log()->warn( message_string( "SCHEDULER-878", paths ) );
                                             ok = true;
                                         }
                                         else

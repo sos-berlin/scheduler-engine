@@ -113,7 +113,7 @@ volatile int                    ctrl_c_pressed_handled              = 0;
 #endif
 
 #ifdef Z_HPUX_PARISC
-    extern string               static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
+    string                      static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
 
 Spooler*                        spooler_ptr                         = NULL;
