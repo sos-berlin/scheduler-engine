@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-08-30" version="2.0.186" subversion_revision="5185">
+    <change date="2007-08-30" version="2.0.186" subversion_revision="5189">
         <revision jira="JS-110" type="correction" title="Korrektur &quot;bad allocation&quot;"/>
     </change>
     
