@@ -3465,7 +3465,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     set_environment_variable( name, value );
 
 #                   ifdef Z_HPUX_PARISC
-                        if( name == "LD_PRELOAD" )  static_ld_preload = value;
+                        if( name == "LD_PRELOAD" )  scheduler::static_ld_preload = value;
 #                   endif
                 }
                 else
@@ -3630,7 +3630,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 int sos_main( int argc, char** argv )
 {
 #   ifdef Z_HPUX_PARISC
-        if( const char* value = getenv( "LD_PRELOAD" ) )  static_ld_preload = value;
+        if( const char* value = getenv( "LD_PRELOAD" ) )  scheduler::static_ld_preload = value;
         putenv( "LD_PRELOAD=" );
 #   endif
 
