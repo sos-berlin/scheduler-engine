@@ -300,41 +300,35 @@ void Lock::close()
 //    return _replacement_is_valid();
 //}
 
-//---------------------------------------------------------------------------------Lock::initialize
+//------------------------------------------------------------------------------Lock::on_initialize
 
-void Lock::initialize()
+bool Lock::on_initialize()
 {
-    if( !base_file_has_error() )
-    {
-    }
+    return true;
 }
 
-//---------------------------------------------------------------------------------------Lock::load
+//------------------------------------------------------------------------------------Lock::on_load
 
-void Lock::load()
+bool Lock::on_load()
 {
-    if( !base_file_has_error() )
-    {
-    }
+    return true;
 }
 
-//-----------------------------------------------------------------------------------Lock::activate
+//--------------------------------------------------------------------------------Lock::on_activate
 
-void Lock::activate()
+bool Lock::on_activate()
 {
-    if( !base_file_has_error() &&
-        subsystem()->subsystem_state() >= subsys_active )
-    {
-        set_state( s_active );
+    set_state( s_active );
 
-        FOR_EACH_JOB( job )
+    FOR_EACH_JOB( job )
+    {
+        if( Requestor* requestor = job->lock_requestor_or_null() )
         {
-            if( Requestor* requestor = job->lock_requestor_or_null() )
-            {
-                requestor->on_new_lock( this );
-            }
+            requestor->on_new_lock( this );
         }
     }
+
+    return true;
 }
 
 //-------------------------------------------------------------------------Lock::can_be_removed_now
@@ -416,25 +410,12 @@ void Lock::set_max_non_exclusive( int max_non_exclusive )
     }
 }
 
-//-----------------------------------------------------------------------------------Lock::is_added
-
-bool Lock::is_added() const
-{
-    bool result = false;
-
-    if( Lock* lock = subsystem()->lock_or_null( path() ) )
-    {
-        if( lock == this )  result = true;
-    }
-
-    return result;
-}
-
 //------------------------------------------------------------------------------------Lock::is_free
 
 bool Lock::is_free() const
 { 
-    return _holder_set.empty(); 
+    return file_based_state() == File_based::s_active  &&  
+           _holder_set.empty(); 
 }
 
 //--------------------------------------------------------------------------------Lock::is_free_for
@@ -477,6 +458,7 @@ void Lock::require_lock_for( Holder* holder, Use* lock_use )
 {
     assert( is_free_for( lock_use->lock_mode() ) );
     assert( holder->requestor() == lock_use->requestor() );
+    assert_is_active();
 
     _holder_set.insert( holder );
     _lock_mode = lock_use->lock_mode();
@@ -1049,6 +1031,8 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
     {
         if( Lock* lock = lock_or_null() )
             result.setAttribute( "is_available", lock->is_free_for( _lock_mode )? "yes" : "no" );
+        else
+            result.setAttribute( "is_missing", "yes" );
     }
 
     return result;

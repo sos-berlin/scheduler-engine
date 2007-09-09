@@ -220,9 +220,9 @@ struct Process_class : Process_class_configuration
 
     // file_based<Process_class>
     void                        close                       ();
-    void                        initialize                  ();
-    void                        load                        ();
-    void                        activate                    ();
+    bool                        on_initialize               ();
+    bool                        on_load                     ();
+    bool                        on_activate                 ();
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
@@ -308,7 +308,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     Process_class*              process_class_or_null       ( const string& path )                  { return file_based_or_null( path ); }
     Process*                    new_temporary_process       ();
     Process_class*              temporary_process_class     ()                                      { return process_class( temporary_process_class_name ); }
-    bool                        has_process_classes         ()                                      { return _file_based_map.size() > 1; }   // Eine ist _temporary_process_class
+  //bool                        has_process_classes         ()                                      { return _file_based_map.size() > 1; }   // Eine ist _temporary_process_class
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();
 

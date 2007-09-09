@@ -50,8 +50,8 @@ struct Job_subsystem : Job_subsystem_interface
 
     ptr<Job_folder>             new_job_folder              ( Folder* folder )                      { return Z_NEW( Job_folder( folder ) ); }
     int                         remove_temporary_jobs       ();
-    Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized );
-    Job*                        job_or_null                 ( const string& job_path )              { return file_based_or_null( job_path ); }
+  //Job*                        get_job                     ( const string& job_name, bool can_be_not_initialized );
+  //Job*                        active_job                  ( const string& job_name );
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -200,12 +200,12 @@ int Job_subsystem::remove_temporary_jobs()
 
 //---------------------------------------------------------------------------Job_subsystem::get_job
 
-Job* Job_subsystem::get_job( const string& job_path, bool can_be_not_initialized )
-{
-    Job* job = file_based( job_path );
-    if( !can_be_not_initialized && !job->state() )  z::throw_xc( "SCHEDULER-109", job_path );
-    return job;
-}
+//Job* Job_subsystem::get_job( const string& job_path, bool can_be_not_initialized )
+//{
+//    Job* job = file_based( job_path );
+//    if( !can_be_not_initialized && !job->state() )  z::throw_xc( "SCHEDULER-109", job_path );
+//    return job;
+//}
 
 //----------------------------------------------------------------Job_subsystem::is_any_task_queued
 
@@ -725,14 +725,13 @@ void Job::close()
 //    return remove();
 //}
 //
-//----------------------------------------------------------------------------------Job::initialize
+//-------------------------------------------------------------------------------Job::on_initialize
 
-void Job::initialize()
+bool Job::on_initialize()
 {
-    if( !base_file_has_error()  &&
-        _state < s_initialized  &&  
-        !base_file_has_error()  &&  
-        subsystem()->subsystem_state() >= subsys_initialized )
+    bool result = false;
+
+    if( _state < s_initialized )
     {
         try
         {
@@ -757,19 +756,20 @@ void Job::initialize()
             _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
             throw;
         }
+
+        result = true;
     }
+
+    return result;
 }
 
-//----------------------------------------------------------------------------------------Job::load
+//-------------------------------------------------------------------------------------Job::on_load
 
-void Job::load() // Transaction* ta )
+bool Job::on_load() // Transaction* ta )
 {
-    initialize();
+    bool result = false;
 
-    if( !base_file_has_error()  &&
-        _state < s_loaded  &&  
-        !base_file_has_error()  &&
-        subsystem()->subsystem_state() >= subsys_loaded )
+    if( _state < s_loaded )
     {
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
@@ -800,22 +800,21 @@ void Job::load() // Transaction* ta )
             _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
             throw;
         }
+
+        result = true;
     }
+
+    return result;
 }
 
-//------------------------------------------------------------------------------------Job::activate
+//---------------------------------------------------------------------------------Job::on_activate
 
-void Job::activate()
+bool Job::on_activate()
 {
-    load();
+    bool result = false;
 
-    int PRUEFUNGEN_ZUSAMMENFASSEN;       // Etwa so:  File_based::is_ready_to_activate()
-    if( !base_file_has_error()  &&
-        _state < s_pending  &&  
-        !base_file_has_error()  &&  
-        subsystem()->subsystem_state() == subsys_active )
+    if( _state < s_pending )
     {
-
         try
         {
             _combined_job_nodes->connect_with_order_queues();
@@ -850,7 +849,11 @@ void Job::activate()
             _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
             throw;
         }
+
+        result = true;
     }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
@@ -1400,6 +1403,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 {
     //if( !is_order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
     
+    assert_is_active();
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
@@ -2491,10 +2495,23 @@ void Job::remove_waiting_job_from_process_list()
         _waiting_for_process = false;
 
         if( Process_class* process_class = _module->process_class_or_null() )
+        {
             process_class->remove_waiting_job( this );
+        }
     }
 
     _waiting_for_process_try_again = false;
+}
+
+//---------------------------------------------------------------------Job::on_process_class_active
+
+void Job::on_process_class_active( Process_class* process_class )
+{
+    if( _waiting_for_process  &&  
+        process_class->normalized_path() == spooler()->process_class_subsystem()->normalized_name( _module->_process_class_path ) )
+    {
+        signal( __FUNCTION__ );
+    }
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -2579,36 +2596,38 @@ ptr<Task> Job::task_to_start()
 
     if( cause || has_order )
     {
-        // Ist denn ein Prozess verfügbar?
-
-        Process_class* process_class = _module->_use_process_class? _module->process_class()        // Fehler, wenn Prozessklasse fehlt
-                                                                  : NULL;
-
-        if( process_class  &&  !process_class->process_available( this ) )
+        if( _module->_use_process_class )
         {
-            if( cause != cause_min_tasks  
-             &&  ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
+            // Ist ein Prozess verfügbar?
+
+            Process_class* process_class = _module->process_class_or_null();
+
+            if( !process_class  ||  !process_class->process_available( this ) )
             {
-                if( !_waiting_for_process )
+                if( process_class && 
+                    cause != cause_min_tasks  &&  
+                    ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
                 {
-                    Message_string m ( "SCHEDULER-949", _module->_process_class_path );   // " ist für einen verfügbaren Prozess vorgemerkt" );
-                    if( task )  m.insert( 2, task->obj_name() );
-                    log()->info( m );
-                    process_class->enqueue_waiting_job( this );
-                    _waiting_for_process = true;
+                    if( !_waiting_for_process  )
+                    {
+                        Message_string m ( "SCHEDULER-949", _module->_process_class_path );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                        if( task )  m.insert( 2, task->obj_name() );
+                        log()->info( m );
+                        process_class->enqueue_waiting_job( this );
+                        _waiting_for_process = true;
+                    }
+
+                    _waiting_for_process_try_again = false;
+                    _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
                 }
 
-                _waiting_for_process_try_again = false;
-                _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
             }
-
-            task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
+            else
+            {
+                remove_waiting_job_from_process_list();
+            }
         }
-        else
-        {
-            remove_waiting_job_from_process_list();
-        }
-
 
         if( cause || has_order )
         {
@@ -2662,11 +2681,11 @@ ptr<Task> Job::task_to_start()
         if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }
 
-    if( _waiting_for_process  &&  _module->process_class()->process_available( this ) )
+    if( _waiting_for_process )
     {
-        Process_class* process_class = _module->process_class_or_null();
-        if( !process_class  ||  process_class->process_available( this ) )
-            remove_waiting_job_from_process_list();
+        if( Process_class* process_class = _module->process_class_or_null() )
+            if( process_class->process_available( this ) )
+                remove_waiting_job_from_process_list();
     }
 
     if( task )  _start_once = false;
@@ -2737,7 +2756,9 @@ bool Job::do_something()
                 if( _state == s_pending  &&  _max_tasks > 0                         // Jira JS-55: tasks="0" soll keine Task starten
                  || _state == s_running  &&  _running_tasks.size() < _max_tasks )
                 {
-                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module->process_class()->process_available( this ) )    // Optimierung
+                    if( !_waiting_for_process  ||  
+                        _waiting_for_process_try_again )
+                        //!_module_process->process_class_or_null() ||  _module->process_class()->process_available( this ) )    // Optimierung
                     {
                         ptr<Task> task = task_to_start();
                         if( task )

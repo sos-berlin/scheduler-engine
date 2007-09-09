@@ -138,6 +138,7 @@ struct Order_subsystem : Order_subsystem_interface
 
     bool                        has_any_order               ()                                      { int IMPLEMENTIEREN;  return false; }
 
+  //Job_chain*                  active_job_chain            ( const string& path )                  { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const string& path )                  { return file_based( path ); }
     Job_chain*                  job_chain_or_null           ( const string& path )                  { return file_based_or_null( path ); }
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -492,7 +493,7 @@ void Order_subsystem::close()
     file_based_subsystem<Job_chain>::close();
 }
 
-//----------------------------------------------------------------------Order_subsystem::initialize
+//------------------------------------------------------------Order_subsystem::subsystem_initialize
 
 bool Order_subsystem::subsystem_initialize()
 {
@@ -1503,9 +1504,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
             if( e.nodeName_is( "file_order_sink" ) )
             {
-                bool can_be_not_initialized = true;
-
-                Job* job = _spooler->job_subsystem()->get_job( file_order_sink_job_path, can_be_not_initialized );
+                Job* job = _spooler->job_subsystem()->job( file_order_sink_job_path );
                 job->set_visible( true );
 
                 ptr<Node> sink_node = new Sink_node( this, state, job->path(), 
@@ -1845,12 +1844,13 @@ Node* Job_chain::add_end_node( const Order::State& state )
     return node;
 }
 
-//----------------------------------------------------------------------------Job_chain::initialize
+//-------------------------------------------------------------------------Job_chain::on_initialize
 
-void Job_chain::initialize()
+bool Job_chain::on_initialize()
 {
-    if( !base_file_has_error()  &&
-        _state == s_under_construction ) 
+    bool result = false;
+
+    if( _state == s_under_construction ) 
     {
         ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( order_subsystem() ) );
 
@@ -1956,7 +1956,11 @@ void Job_chain::initialize()
         //        log << '\n';
         //    }
         //}
+
+        result = true;
     }
+
+    return result;
 }
 
 //------------------------------------------------------------------Job_chain::check_job_chain_node
@@ -2047,7 +2051,7 @@ Job* Job_chain::job_from_state( const Order::State& state )
 
     if( Job_node* node = Job_node::try_cast( node_from_state( state ) ) )
     {
-        return _spooler->job_subsystem()->get_job( node->job_path() );
+        return _spooler->job_subsystem()->job( node->job_path() );
     }
     else z::throw_xc( "SCHEDULER-374", obj_name(), state.as_string() );
 }
@@ -2177,19 +2181,18 @@ void Job_chain::remove_order( Order* order )
     check_for_replacing_or_removing();
 }
 
-//----------------------------------------------------------------------------------Job_chain::load
+//-------------------------------------------------------------------------------Job_chain::on_load
 
-void Job_chain::load()  // Read_transaction* ta )
+bool Job_chain::on_load()  // Read_transaction* ta )
 {
-    initialize();
+    bool result = false;
 
-    if( !base_file_has_error()  &&
-        !_remove  && 
-        _state < s_loaded  &&  
-        subsystem()->subsystem_state() == subsys_active  &&  
-        _spooler->db()  &&  _spooler->db()->opened()) 
+    if( !_remove  && _state < s_loaded )
     {
-        if( orders_are_recoverable()  &&  !is_distributed() )
+        if( _spooler->db()  &&  
+            _spooler->db()->opened()  &&
+            orders_are_recoverable()  &&  
+            !is_distributed() )
         {
             for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
             {
@@ -2209,21 +2212,20 @@ void Job_chain::load()  // Read_transaction* ta )
         }
 
         set_state( s_loaded );
+        result = true;
     }
+
+    return result;
 }
 
-//------------------------------------------------------------------------------Job_chain::activate
+//---------------------------------------------------------------------------Job_chain::on_activate
 
-void Job_chain::activate()
+bool Job_chain::on_activate()
 {
-    if( !base_file_has_error()  && 
-        !_remove  &&  
-        _state < s_active  &&  
-        subsystem()->subsystem_state() == subsys_active )
+    bool result = false;
+
+    if( !_remove  &&  _state < s_active )
     {
-        load();
-        _order_sources.start();
-        
         Z_FOR_EACH( Node_list, _node_list, it )  (*it)->activate();     // Nur eimal beim Übergang von s_stopped zu s_active aufrufen!
 
         //    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
@@ -2236,7 +2238,10 @@ void Job_chain::activate()
         //    }
 
         set_state( s_active );
+        result = true;
     }
+
+    return result;
 }
 
 //-----------------------------------------------------------Job_chain::load_orders_from_result_set
@@ -2944,7 +2949,7 @@ Job_chain* Order_id_space::job_chain_by_order_id_or_null( const string& order_id
 
     if( Order* order = order_or_null( order_id ) )
     {
-        result = order->job_chain();
+        result = order->job_chain();    int DYNAMISCH_KONFIGURIERBAR_MACHEN;
     }
 
     return result;
@@ -3068,7 +3073,7 @@ void Job_chain::get_connected_job_chains( Job_chain_set* result )
     Z_FOR_EACH( Reference_register, _reference_register, it )
     {
         Node* node      = (*it)->referer();
-        Job_chain*      job_chain = node->job_chain();
+        Job_chain*      job_chain = node->job_chain();  int DYNAMISCH_KONFIGURIERBAR_MACHEN;
 
         if( result->find( job_chain ) == result->end() )  
         {
@@ -5065,7 +5070,7 @@ Order_queue* Order::order_queue()
 
 void Order::set_job_by_name( const string& jobname )
 {
-    set_job( _spooler->job_subsystem()->get_job( jobname ) );
+    set_job( _spooler->job_subsystem()->job( jobname ) );
 }
 
 //------------------------------------------------------------------------------------Order::set_id
@@ -5546,6 +5551,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 {
     bool is_new = true;
 
+    job_chain->assert_is_active();
 
     if( _id.vt == VT_EMPTY )  set_default_id();
     _id_locked = true;
@@ -5807,7 +5813,7 @@ void Order::handle_end_state()
 
         try
         {
-            Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );
+            Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );         int DYNAMISCH_KONFIGURIERBAR_MACHEN;
             Node*       outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
             State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
                                                                       : outer_job_chain_node->error_state();

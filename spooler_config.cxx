@@ -196,9 +196,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             else
             if( e.nodeName_is( "process_classes" ) )
             {
-                _ignore_process_classes = e.bool_getAttribute( "ignore", _ignore_process_classes );
-                if( !_ignore_process_classes )
-                    root_folder()->process_class_folder()->set_dom( e );
+                if( !_ignore_process_classes_set )  _ignore_process_classes = e.bool_getAttribute( "ignore", _ignore_process_classes );
+                if( !_ignore_process_classes )  root_folder()->process_class_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "locks" ) )

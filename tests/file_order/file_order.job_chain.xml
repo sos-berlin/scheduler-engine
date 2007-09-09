@@ -2,7 +2,7 @@
            distributed="yes"
 >
     
-    <file_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
+    <Xfile_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
     <!--
                 <file_order_source directory="$SOS_MOUNT/tmp/y/" regex="^g.*\.ok$"/>
                 <file_order_source directory="$SOS_MOUNT/tmp/z/1" regex="^g.*\.ok$"/>

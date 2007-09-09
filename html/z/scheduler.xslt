@@ -23,7 +23,7 @@
                             <td style="margin-top: 0px; padding-bottom: 2pt">
                                 <b>
                                     <xsl:element name="span">
-                                        <xsl:attribute name="style">cursor: default;</xsl:attribute>
+                                        <!--xsl:attribute name="style">cursor: default;</xsl:attribute-->
                                         <xsl:attribute name="title">
                                             Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/>&#10;db=<xsl:value-of select="state/@db"/>
                                         </xsl:attribute>
@@ -60,7 +60,7 @@
             </tr>
         </table>
 
-        <p id="error_message" class="small" style="margin-top: 0px; color: red"> </p>
+        <p id="error_message" class="small" style="margin-top: 0px; color: #e00000"> </p>
         <span style="color: black"> </span>    <!-- Für Firefox -->
 
         &#160;<br/>
@@ -257,9 +257,9 @@
                     <xsl:choose>
                         <xsl:when test="state/@wait_until">
                             <xsl:element name="span">
-                                <xsl:attribute name="style">
+                                <!--xsl:attribute name="style">
                                     <xsl:text>cursor: default;</xsl:text>
-                                </xsl:attribute>
+                                </xsl:attribute-->
                                 <xsl:attribute name="class"></xsl:attribute>
                                 <xsl:attribute name="title">
                                     <xsl:text>Waiting until </xsl:text>
@@ -343,7 +343,7 @@
 
             <xsl:if test="state/@db_waiting='yes'">
                 <tr>
-                    <td colspan="99" style="color: red; font-weight: bold">
+                    <td colspan="99" style="color: #e00000; font-weight: bold">
                         &#160;<br/>
                         Scheduler wartet auf die Datenbank ...<br/>
                         <xsl:value-of select="state/@db_error"/>
@@ -353,7 +353,7 @@
 
             <xsl:if test="state/@waiting_errno">
                 <tr>
-                    <td colspan="99" style="color: red; font-weight: bold">
+                    <td colspan="99" style="color: #e00000; font-weight: bold">
                         Scheduler wartet wegen Dateifehlers:<br/>
                         <xsl:value-of select="state/@waiting_errno_text"/><br/>
                         <xsl:value-of select="state/@waiting_errno_filename"/>
@@ -495,7 +495,7 @@
                             <xsl:value-of select="@job"/>
                         </xsl:attribute>
                         <xsl:attribute name="class"      >job</xsl:attribute>
-                        <xsl:attribute name="style"      >cursor: default; padding-top: 1pt</xsl:attribute>
+                        <xsl:attribute name="style"      >padding-top: 1pt</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover";
@@ -538,7 +538,7 @@
                             <xsl:text>__2</xsl:text>
                         </xsl:attribute>
                         <xsl:attribute name="class">job         </xsl:attribute>
-                        <xsl:attribute name="style">cursor: default</xsl:attribute>
+                        <!--xsl:attribute name="style">cursor: default</xsl:attribute-->
                         <xsl:attribute name="onmouseover">
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job_hover";
@@ -642,7 +642,7 @@
                         </xsl:choose>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:attribute name="style"      >cursor: default</xsl:attribute>
+                        <!--xsl:attribute name="style"      >cursor: default</xsl:attribute-->
                         <xsl:attribute name="onmouseover">this.className='task_hover'; this.cursor = "pointer";</xsl:attribute>
                         <xsl:attribute name="onmouseout" >this.className='task'      ; this.cursor = "default";</xsl:attribute>
                         <xsl:attribute name="onclick">
@@ -899,7 +899,7 @@
                             <xsl:element name="tr">
                                 <xsl:attribute name="colspan">2</xsl:attribute>
                                 <xsl:attribute name="class">job</xsl:attribute>
-                                <xsl:attribute name="style">cursor: default;</xsl:attribute>
+                                <!--xsl:attribute name="style">cursor: default;</xsl:attribute-->
                                 <xsl:attribute name="onmouseover">
                                     <xsl:text>this.className = "job_hover";</xsl:text>
                                     <xsl:text>this.style.cursor = "pointer";</xsl:text>
@@ -953,7 +953,7 @@
 
                                             <xsl:if test="$job/@waiting_for_process='yes'">
                                                 <xsl:text>, </xsl:text>
-                                                <span style="color: red">needs process</span>
+                                                <span style="color: #e00000">needs process</span>
                                             </xsl:if>
                                         </xsl:otherwise>
                                     </xsl:choose>
@@ -995,27 +995,18 @@
 
         <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or /spooler/@show_job_chain_jobs_checkbox ) and position() &gt; 1">
             <tr>
-                <!--xsl:choose>
-                    <xsl:when test="@order_id_space">
-                        <td colspan="6">
-                            <hr class="order_id_space" style="margin-top: 10pt; margin-bottom: 5pt;"/>
-                        </td>
-                    </xsl:when>
-                    <xsl:otherwise-->
-                        <td colspan="6">
-                            <div>&#160;</div>
-                            <!--hr style="margin-top: 5pt;"/-->
-                        </td>
-                    <!--/xsl:otherwise>
-                </xsl:choose-->
+                <td colspan="6">
+                    <div>&#160;</div>
+                    <!--hr style="margin-top: 5pt;"/-->
+                </td>
             </tr>
         </xsl:if>
 
         <xsl:if test="not( $single )">
             <xsl:element name="tr">
-                <xsl:attribute name="style">
+                <!--xsl:attribute name="style">
                     cursor: default;
-                </xsl:attribute>
+                </xsl:attribute-->
                 <xsl:attribute name="onmouseover">
                     this.className = "job_chain_hover";
                     this.style.cursor = "pointer";
@@ -1075,6 +1066,16 @@
                     </xsl:call-template>
                 </td>
             </xsl:element>
+        </xsl:if>
+
+        <xsl:if test="replacement/job_chain/file_based/ERROR">
+            <tr>
+                <td></td>
+                <td colspan="5">
+                    <span class="label">Error in changed file (not loaded): </span>
+                    <xsl:apply-templates mode="file_based_error" select="replacement/job_chain/file_based"/>
+                </td>
+            </tr>
         </xsl:if>
 
         <xsl:if test="/spooler/answer/state/http_server/web_service [ @job_chain = current()/@name ]">
@@ -1250,7 +1251,7 @@
 
                     <xsl:if test="$job and not( $single )">
                         <xsl:attribute name="style">
-                            <xsl:text>cursor: default;</xsl:text>
+                            <!--xsl:text>cursor: default;</xsl:text-->
                             <xsl:value-of select="$tr_style"/>
                         </xsl:attribute>
                         <xsl:attribute name="onmouseover">
@@ -1269,11 +1270,11 @@
                     <td></td>
                     
                     <td class="right_border">
-                        <!--span style="position: relative; left: -6pt; color: red">&#x2022;</span-->
+                        <!--span style="position: relative; left: -6pt; color: #e00000">&#x2022;</span-->
 
                         <xsl:choose>
                             <xsl:when test="@action='stop'">
-                                <span style="color: red" title="Job chain node is stopped (action='stop')">
+                                <span style="color: #e00000" title="Job chain node is stopped (action='stop')">
                                     <xsl:value-of select="@state"/>
                                 </span>
                             </xsl:when>
@@ -1468,7 +1469,7 @@
 
         <xsl:if test="@waiting_for_process='yes'">
             <xsl:text>, </xsl:text>
-            <span style="color: red; font-weight: bold">needs process</span>
+            <span style="color: #e00000; font-weight: bold">needs process</span>
         </xsl:if>
 
         <xsl:if test="lock.requestor">
@@ -1476,7 +1477,7 @@
 
             <xsl:choose>
                 <xsl:when test="lock.requestor[ @enqueued='yes' ]">
-                    <span style="color: red; font-weight: bold;">
+                    <span style="color: #e00000; font-weight: bold;">
                         <xsl:text>needs lock </xsl:text>
                     </span>
                 </xsl:when>
@@ -1513,18 +1514,22 @@
 
     <xsl:template match="lock.use" mode="short">
 
-        <xsl:variable name="lock" select="/spooler/answer/state/locks/lock [ @name = current()/@lock ]"/>
-        <!-- Im rechten Fenster leer -->
-
         <xsl:element name="span">
             <xsl:if test="@is_available='no'">
                 <xsl:attribute name="class">lock_locked</xsl:attribute>
+                <xsl:attribute name="title">Lock is not available, it is locked</xsl:attribute>
+                <!--xsl:attribute name="style">cursor: default;</xsl:attribute-->
+            </xsl:if>
+
+            <xsl:if test="@is_available='yes'">
+                <xsl:attribute name="class">lock_free</xsl:attribute>
+                <xsl:attribute name="title">Lock is available</xsl:attribute>
             </xsl:if>
 
             <xsl:element name="span">
-                <xsl:if test="not( $lock )">
+                <xsl:if test="@is_missing='yes'">
                     <xsl:attribute name="class">lock_missing</xsl:attribute>
-                    <xsl:attribute name="title">Lock is unknown</xsl:attribute>
+                    <xsl:attribute name="title">Lock is missing</xsl:attribute>
                 </xsl:if>
 
                 <xsl:value-of select="@lock"/>
@@ -1686,7 +1691,7 @@
                         <xsl:if test="@web_service_client">
                             <span class="web_service" style="white-space: nowrap; font-size: 8pt; margin-right: 1ex;">
                                 <xsl:element name="span">
-                                    <xsl:attribute name="style">cursor: default; </xsl:attribute>
+                                    <!--xsl:attribute name="style">cursor: default; </xsl:attribute-->
                                     <xsl:attribute name="title">
                                         <xsl:text>Web_service_operation </xsl:text>
                                         <xsl:value-of select="@web_service"/>
@@ -1747,7 +1752,7 @@
 
                             <xsl:otherwise>
                                 <xsl:if test="@next_start_time">
-                                    <span class="small" style="white-space: nowrap; cursor: default" title="Start time">
+                                    <span class="small" style="white-space: nowrap;" title="Start time">
                                         <xsl:value-of select="@next_start_time__xslt_date_or_time_with_diff"/>
                                     </span>
                                 </xsl:if>
@@ -1849,6 +1854,23 @@
                         </xsl:if-->
                     </td>
                 </tr>
+
+                <xsl:if test="file_based/ERROR">
+                    <tr>
+                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <xsl:apply-templates mode="file_based_error" select="file_based"/>
+                        </td>
+                    </tr>
+                </xsl:if>
+
+                <xsl:if test="replacement/lock/file_based/ERROR">
+                    <tr>
+                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <span class="label">Error in changed file (not loaded): </span>
+                            <xsl:apply-templates mode="file_based_error" select="replacement/lock/file_based"/>
+                        </td>
+                    </tr>
+                </xsl:if>
 
                 <tr>
                     <td colspan="5" style="padding-left: 4ex">
@@ -2110,7 +2132,7 @@
                         </xsl:if>
 
                         <xsl:if test="@backup='yes' and not( @is_backup_allowed_to_start='yes' )">
-                            <span style="margin-right: 1em; color: red">Only non-backup Schedulers are allowed to start operation.</span>
+                            <span style="margin-right: 1em; color: #e00000">Only non-backup Schedulers are allowed to start operation.</span>
                         </xsl:if>
                     </td>
                 </tr>
@@ -2155,10 +2177,10 @@
 
         <xsl:element name="tr">
             <xsl:attribute name="style">
-                <xsl:text>cursor: default;</xsl:text>
+                <!--xsl:text>cursor: default;</xsl:text-->
                 <xsl:choose>
                     <xsl:when test="@heart_beat_count=0">color: gray;</xsl:when>
-                    <xsl:when test="@dead='yes'">color: red;</xsl:when>
+                    <xsl:when test="@dead='yes'">color: #e00000;</xsl:when>
                     <xsl:when test="@active='yes'">color: green;</xsl:when>
                 </xsl:choose>
             </xsl:attribute>
@@ -2302,7 +2324,7 @@
                         <xsl:element name="span">
                             <xsl:attribute name="style">
                                 <xsl:choose>
-                                    <xsl:when test="@heart_beat_quality != 'good'">color: red;</xsl:when>
+                                    <xsl:when test="@heart_beat_quality != 'good'">color: #e00000;</xsl:when>
                                 </xsl:choose>
                             </xsl:attribute>
 
@@ -2331,7 +2353,7 @@
 
                 <xsl:if test="@late_heart_beat_count > 0">
                     <xsl:text> </xsl:text>
-                    <span style="margin-left: 1ex; color: red">
+                    <span style="margin-left: 1ex; color: #e00000">
                         <xsl:text>(</xsl:text>
                         <xsl:value-of select="@late_heart_beat_count"/>
                         <xsl:text> late)</xsl:text>
@@ -2463,7 +2485,7 @@
                         <td>
                             <xsl:value-of select="@connected_at__xslt_date_or_time_with_diff"/>
                         </td>
-                        <td style="color: red">
+                        <td style="color: #e00000">
                             <xsl:if test="@connected='no'">
                                 <xsl:value-of select="@disconnected_at__xslt_date_or_time_with_diff"/>
                             </xsl:if>
@@ -2653,10 +2675,10 @@
                         <span class="label">
                             error in changed file:
                             <br/>
-                            (not active)
-                    </span>
+                            (not loaded)
+                        </span>
                     </td>
-                    <td colspan="3" class="job_error">
+                    <td colspan="3">
                         <xsl:apply-templates mode="file_based_error" select="replacement/job/file_based"/>
                     </td>
                 </tr>
@@ -2845,7 +2867,7 @@
                                 <xsl:choose>
                                     <xsl:when test="not( @id )">
                                         <xsl:if test="../../@waiting_for_process='yes'">
-                                            <span style="margin-left: 1ex; color: red">needs process</span>
+                                            <span style="margin-left: 1ex; color: #e00000">needs process</span>
                                         </xsl:if>
                                     </xsl:when>
                                     <xsl:otherwise>
@@ -3354,7 +3376,6 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
 
     <xsl:template mode="file_based_error" match="file_based">
-        <!--span class="small">Error when loading file: </span-->
         <span class="file_based_error">
             <xsl:apply-templates select="ERROR"/>
         </span>
@@ -3737,8 +3758,6 @@
         <xsl:param name="string"/>
         <xsl:param name="old"/>
         <xsl:param name="new"/>
-        <xsl:param name="old2"/>
-        <xsl:param name="new2"/>
 
         <xsl:choose>
             <xsl:when test="contains( $string, $old )">

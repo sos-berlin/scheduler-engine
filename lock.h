@@ -47,9 +47,9 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 
     // file_based<>
 
-    void                        initialize                  ();
-    void                        load                        ();
-    void                        activate                    ();
+    bool                        on_initialize               (); 
+    bool                        on_load                     (); 
+    bool                        on_activate                 ();
 
     bool                        can_be_removed_now          ();
 
@@ -79,7 +79,6 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode ) const;
     bool                        is_free                     () const;
-    bool                        is_added                    () const;
     string                      obj_name                    () const;
     string                      string_from_holders         () const;
     string                      string_from_uses            () const;

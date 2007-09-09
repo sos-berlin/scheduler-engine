@@ -7,7 +7,7 @@
 */
 
 
-body                    { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
+body                    { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; cursor: default; }
 th                      { font-size: 8pt; }
 td                      { font-size: 10pt; vertical-align: baseline; }
 p                       { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
@@ -43,7 +43,7 @@ td.right_border         { border-right: 1px solid gray; }
 .scheduler_error        { color: #e00000; font-weight: bold }
 .scheduler_warning      { color: #800000; font-weight: bold }
 
-.file_based_error       { color: #e00000; }
+.file_based_error       { color: #e00000; font-size: 8pt; }
 
 .job                    { font-size: 10pt; background-color: #00c8ff } /*#fff000*/
 .job_hover              { font-size: 10pt; background-color: #00b0f5; } /*#80ecff*/
@@ -71,9 +71,11 @@ td.right_border         { border-right: 1px solid gray; }
 hr.order_id_space       { color: #ff8000; background-color: #ff8000; }
 
 .lock                   { background-color: #F0F0F0 }
-.lock_free              {}
+.lock_free              { }
 .lock_locked            { color: #c00000; }
+.lock_locked:hover      { color: #e00000; }
 .lock_missing           { color: gray; }
+.lock_missing:hover     { color: #e00000; }
 
 .process_class          { background-color: #F0F0F0 }
 

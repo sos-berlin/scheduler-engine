@@ -563,14 +563,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-158">
-            <text xml:lang="de">
-                <title>Id <p1/> ist schon für Auftrag <p2/> vergeben</title>
-            </text>
+        <message code="SCHEDULER-158">
             <text xml:lang="en">
-                <title></title>
+                <title>'<p1>object</p1>' is not active</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-159">
             <text xml:lang="de">

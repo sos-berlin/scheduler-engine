@@ -127,9 +127,10 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     // File_based:
-  //void                        on_base_file_new            ();
-  //Job*                        on_base_file_changed        ( Job* new_job );
-  //bool                        on_base_file_removed        ();
+    bool                        on_initialize               (); 
+    bool                        on_load                     (); 
+  //void                        on_load                     ( Transaction* );
+    bool                        on_activate                 ();
     bool                        can_be_removed_now          ();
 
 
@@ -142,10 +143,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
 
-    void                        initialize                  (); 
-    void                        load                        (); 
-  //void                        load                        ( Transaction* );
-    void                        activate                    ();
     void                        init_start_when_directory_changed( Task* = NULL );
     void                        prepare_on_exit_commands    ();
     void                        set_log                     ();
@@ -258,6 +255,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        signal                      ( const string& signal_name );
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
     void                        remove_waiting_job_from_process_list();
+    void                        on_process_class_active     ( Process_class* );
 
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
 
@@ -425,9 +423,9 @@ struct Job_subsystem_interface: Object,
     virtual int                 remove_temporary_jobs       ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
-    virtual Job*                get_job                     ( const string& job_path, bool can_be_not_initialized = false ) = 0;
-            Job*                job                         ( const string& job_path )              { return get_job( job_path, true ); }   //?
-    virtual Job*                job_or_null                 ( const string& job_path )              = 0;
+  //virtual Job*                get_job                     ( const string& job_path, bool can_be_not_initialized = false ) = 0;
+    Job*                        job                         ( const string& job_path )              { return file_based( job_path ); } 
+    Job*                        job_or_null                 ( const string& job_path )              { return file_based_or_null( job_path ); }
 };
 
 ptr<Job_subsystem_interface>    new_job_subsystem           ( Scheduler* );

@@ -633,14 +633,11 @@ struct Job_chain : Com_job_chain,
 
     // file_based<>
 
-    void                        initialize                  ();
-    void                        load                        ();
-    void                        activate                    ();
+    bool                        on_initialize               ();
+    bool                        on_load                     ();
+    bool                        on_activate                 ();
 
     File_based*                 new_base_file               ( const Base_file_info& );
-  //void                        on_base_file_new            ();
-  //Job_chain*                  on_base_file_changed        ( Job_chain* new_job_chain );
-  //bool                        on_base_file_removed        ();
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
@@ -652,7 +649,6 @@ struct Job_chain : Com_job_chain,
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
-  //void                    set_name                        ( const string& );
     void                    set_state                       ( const State& state )                  { _state = state; }
     State                       state                       () const                                { return _state; }
     static string               state_name                  ( State );
@@ -665,12 +661,7 @@ struct Job_chain : Com_job_chain,
     void                    set_orders_are_recoverable      ( bool b )                              { _orders_are_recoverable = b; }
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
 
-  //Job_chain_folder_interface* job_chain_folder            () const                                { return folder()->job_chain_folder(); }
-
-  //void                        construct                   ();
     void                        check_job_chain_node        ( job_chain::Node* );
-  //void                        load                        ( Read_transaction* );
-  //void                        activate                    ();
 
 
 
@@ -720,7 +711,6 @@ struct Job_chain : Com_job_chain,
 
 
     void                    set_dom                         ( const xml::Element_ptr& );
-  //void                    set_replacement_job_chain       ( Job_chain* );
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 

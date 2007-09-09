@@ -275,7 +275,6 @@ struct Spooler : Object,
         s_loading,
         s_starting,
         s_waiting_for_activation,
-      //s_starting_waiting,
         s_running,
         s_paused,
         s_stopping,
@@ -286,7 +285,6 @@ struct Spooler : Object,
     enum State_cmd
     {
         sc_none,
-      //sc_stop,                // s_running | s_paused -> s_stopped
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
         sc_let_run_terminate_and_restart,
@@ -338,14 +336,6 @@ struct Spooler : Object,
 
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
-
-    // Für andere Threads:
-    //Task_subsystem*             get_thread                  ( const string& thread_name );
-    //Task_subsystem*             get_thread_or_null          ( const string& thread_name );
-    //Task_subsystem*             select_thread_for_task      ( Task* );
-
-  //Object_set_class*           get_object_set_class        ( const string& name );
-  //Object_set_class*           get_object_set_class_or_null( const string& name );
 
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
@@ -410,12 +400,10 @@ struct Spooler : Object,
     bool                        has_exclusiveness           ();
     bool                        orders_are_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
-  //void                        assert_has_exclusiveness    ( const string& message_text );
     string                      cluster_member_id           ();
 
 
     void                        wait                        ();
-  //void                        simple_wait_step            ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
 
     void                        signal                      ( const string& signal_name );
@@ -592,8 +580,7 @@ struct Spooler : Object,
     struct Killpid { int _pid; bool _is_process_group; };
     Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
     bool                       _are_all_tasks_killed;
-  //Process_group_handle       _process_groups[ max_processes ];    // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
-//private:
+
     time::Holidays             _holidays;                   // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
@@ -609,7 +596,6 @@ struct Spooler : Object,
 
     ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
-  //Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
     ptr<Supervisor_interface>  _supervisor;
@@ -618,8 +604,8 @@ struct Spooler : Object,
 
     ptr<Scheduler_script_interface> _scheduler_script;
 
-  //Process_list               _process_list;
     bool                       _ignore_process_classes;
+    bool                       _ignore_process_classes_set;
 
 
     Time                       _last_wait_until;            // Für <show_state>
@@ -650,8 +636,6 @@ struct Spooler : Object,
     Event                      _waitable_timer;
     bool                       _is_waitable_timer_set;
 
-  //double                     _clock_difference;           // -now="..."   Zum Debuggen: Mit dieser Differenz zur tatsächlichen Uhrzeit arbeiten
-
     ptr<Com_variable_set>      _environment;
     Variable_set_map           _variable_set_map;           // _variable_set_map[""] = _environment; für <params>, Com_variable_set::set_dom()
     
@@ -661,7 +645,6 @@ struct Spooler : Object,
     bool                       _assert_is_active;
     int                        _is_in_check_is_active;
     bool                       _has_windows_console;
-  //string                     _session_id;
     bool                       _check_memory_leak;
 };
 
@@ -669,9 +652,6 @@ struct Spooler : Object,
 
 void                            spooler_restart             ( Log* log, bool is_service );
 void                            send_error_email            ( const exception&, int argc, char** argv, const string& parameter_line, Spooler* spooler = NULL );
-//void                          send_error_email            ( const string& subject, const string& body );
-
-//extern bool                     spooler_is_running;
 
 //-------------------------------------------------------------------------------------------------
 

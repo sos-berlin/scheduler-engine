@@ -123,6 +123,17 @@ struct Base_file_info
 struct File_based : Scheduler_object, 
                     zschimmer::Has_addref_release
 {
+    enum State
+    {
+        s_not_initialized,
+        s_initialized,
+        s_loaded,
+        s_active,
+        s_error,
+        s_closed
+    };
+
+
                                 File_based                  ( File_based_subsystem*, IUnknown*, Type_code );
     virtual                    ~File_based                  ();
 
@@ -143,15 +154,17 @@ struct File_based : Scheduler_object,
     bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
-    bool                        is_ready_to_initialized     () const;
-    bool                        is_ready_to_load            () const;
-    bool                        is_ready_to_activate        () const;
+    const zschimmer::Xc&        base_file_exception         () const                                { return _base_file_xc; }
+    void                        assert_is_active            ();
 
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     string                      path                        () const                                { return _name; }
     string                      normalized_name             () const;
     string                      normalized_path             () const;
+
+    void                    set_file_based_state            ( State state )                         { _state = state; }
+    State                       file_based_state            () const                                { return _state; }
 
     void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement;  _replacement_is_valid = false; }
     File_based*                 replacement                 () const                                { return _replacement; }
@@ -160,10 +173,14 @@ struct File_based : Scheduler_object,
     void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
     bool                        check_for_replacing_or_removing();
 
+    bool                        initialize                  ();
+    bool                        load                        ();
+    bool                        activate                    ();
+
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
-    virtual void                initialize                  ()                                      = 0;
-    virtual void                load                        ()                                      = 0;
-    virtual void                activate                    ()                                      = 0;
+    virtual bool                on_initialize               ()                                      = 0;
+    virtual bool                on_load                     ()                                      = 0;
+    virtual bool                on_activate                 ()                                      = 0;
 
     virtual bool                remove                      ();
   //virtual void                remove_now                  ()                                      = 0;
@@ -193,6 +210,7 @@ struct File_based : Scheduler_object,
     friend struct               Typed_folder;
 
     string                     _name;
+    State                      _state;
     Base_file_info             _base_file_info;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
@@ -352,14 +370,11 @@ struct file_based_subsystem : File_based_subsystem
         {
             File_based* file_based = it->second;
 
-            if( !file_based->base_file_has_error() )
+            try
             {
-                try
-                {
-                    file_based->initialize();
-                }
-                catch( exception& x ) { file_based->log()->error( x.what() ); }
+                file_based->initialize();
             }
+            catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
 
         return true;
@@ -372,14 +387,11 @@ struct file_based_subsystem : File_based_subsystem
         {
             File_based* file_based = it->second;
 
-            if( !file_based->base_file_has_error() )
+            try
             {
-                try
-                {
-                    file_based->load();
-                }
-                catch( exception& x ) { file_based->log()->error( x.what() ); }
+                file_based->load();
             }
+            catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
 
         return true;
@@ -392,14 +404,11 @@ struct file_based_subsystem : File_based_subsystem
         {
             File_based* file_based = it->second;
 
-            if( !file_based->base_file_has_error() )
+            try
             {
-                try
-                {
-                    file_based->activate();
-                }
-                catch( exception& x ) { file_based->log()->error( x.what() ); }
+                file_based->activate();
             }
+            catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
 
         return true;
@@ -421,6 +430,15 @@ struct file_based_subsystem : File_based_subsystem
         return result;
     }
 
+
+    FILE_BASED* active_file_based( const string& path ) const
+    {
+        FILE_BASED* result = file_based_or_null( path );
+        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path );
+        result->assert_is_active();
+
+        return result;
+    }
 
   private:
     friend struct               Typed_folder;

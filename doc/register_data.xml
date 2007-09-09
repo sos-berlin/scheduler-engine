@@ -1306,6 +1306,10 @@
     <register_keyword_display><code>ip_address=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_ip_address' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='ip_address' type='definition'/>
 </register_keyword>
+<register_keyword keyword='is_available'>
+    <register_keyword_display><code>is_available=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.use.xml#attribute_is_available' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='is_available' type='definition'/>
+</register_keyword>
 <register_keyword keyword='is_error (property)'>
     <register_keyword_display><code>is_error</code> (property)</register_keyword_display>
     <register_entry register_file='api/Error.xml#method__is_error' register_title='Error.is_error' register_keyword='is_error' type='definition'/>
@@ -1313,6 +1317,10 @@
 <register_keyword keyword='is_maximum'>
     <register_keyword_display><code>is_maximum=</code></register_keyword_display>
     <register_entry register_file='xml/delay_order_after_setback.xml#attribute_is_maximum' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='is_maximum' type='definition'/>
+</register_keyword>
+<register_keyword keyword='is_missing'>
+    <register_keyword_display><code>is_missing=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/lock.use.xml#attribute_is_missing' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='is_missing' type='definition'/>
 </register_keyword>
 <register_keyword keyword='is_service (property)'>
     <register_keyword_display><code>is_service</code> (property)</register_keyword_display>

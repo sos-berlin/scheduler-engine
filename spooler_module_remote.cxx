@@ -504,16 +504,8 @@ AGAIN:
                 params_array[ nr++ ] = "java_options="    + _module->_java_options;
               //params_array[ nr++ ] = "java_options="    + _spooler->_config_java_options + " " + _module->_java_options;
 
-                //if( _server_hostname.empty() )
-                //{
-                //    params_array[ nr++ ] = "javac="           + _module->_spooler->java_subsystem()->java_vm()->javac_filename();
-                //    params_array[ nr++ ] = "java_class_path=" + _module->_spooler->java_subsystem()->java_vm()->class_path();
-                //    params_array[ nr++ ] = "java_work_dir="   + _module->_spooler->java_subsystem()->java_vm()->work_dir();
-                //}
-
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
-              //params_array[ nr++ ] = "script="          + _module->_source.dom_document().xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
 
@@ -525,7 +517,6 @@ AGAIN:
                     params_array[ nr++ ] = "monitor.java_class="      + _module->_monitor->_java_class_name;
                     params_array[ nr++ ] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
                     params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_text_with_includes.xml();
-                  //params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_source.dom_document().xml();
                 }
             }
 

@@ -255,14 +255,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "recompile"       )  _server->_module->_recompile       = value[0] == '1';
                 else
                 if( key_word == "script"          )  _server->_module->set_xml_text_with_includes( value );
-              //if( key_word == "script"          )  _server->_module->_source          = xml::Document_ptr( value ).documentElement();
                 else
-                //if( key_word == "java_class_path" )  java_class_path                   = value;
-                //else
-                //if( key_word == "java_work_dir"   )  java_work_dir                     = value;
-                //else
-                //if( key_word == "javac"           )  javac                             = value;
-                //else
                 if( key_word == "java_options"    )  java_options                     += " " + value;
                 else
                 if( key_word == "job"             )  job_name                          = value;
@@ -281,7 +274,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "monitor.recompile"  )  _server->_module->_monitor->_recompile       = value[0] == '1';
                 else
                 if( key_word == "monitor.script"     )  _server->_module->_monitor->set_xml_text_with_includes( value );
-              //if( key_word == "monitor.script"     )  _server->_module->_monitor->_source          = xml::Document_ptr( value ).documentElement();
                 else
                     throw_xc( "server::construct", as_string(i), key_word );
             }
@@ -293,9 +285,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         //Z_LOG2( "joacim", __FUNCTION__ << " javac          =" << javac << "\n" );;
 
         _server->_module->init();
-      //_server->_module->set_source_only( _server->_module->_source );
-
-      //if( _server->_module->_monitor )  _server->_module->_monitor->set_source_only( _server->_module->_monitor->_source );
 
 
         ptr<java::Vm> java_vm = get_java_vm( false );

@@ -861,7 +861,9 @@ void Process_class_configuration::set_dom( const xml::Element_ptr& e )
 {
     if( !e )  return;
 
-    set_name            (      e.     getAttribute( "name"            , name()         ) );
+    string name = e.getAttribute( "name" );
+    if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
+
     set_max_processes   ( (int)e.uint_getAttribute( "max_processes"   , _max_processes ) );
     set_remote_scheduler(      e.     getAttribute( "remote_scheduler", _remote_scheduler.as_string() ) );
 }
@@ -982,33 +984,30 @@ void Process_class::close()
     }
 }
 
-//------------------------------------------------------------------------Process_class::initialize
+//---------------------------------------------------------------------Process_class::on_initialize
 
-void Process_class::initialize()
+bool Process_class::on_initialize()
 {
-    if( !base_file_has_error() )
-    {
-    }
+    return true;
 }
 
-//------------------------------------------------------------------------------Process_class::load
+//---------------------------------------------------------------------------Process_class::on_load
 
-void Process_class::load()
+bool Process_class::on_load()
 {
-    if( !base_file_has_error() )
-    {
-    }
+    return true;
 }
 
-//--------------------------------------------------------------------------Process_class::activate
+//-----------------------------------------------------------------------Process_class::on_activate
 
-void Process_class::activate()
+bool Process_class::on_activate()
 {
-    int FEHLERHAFTE_PROCESSCLASS_NICHT_BENUTZEN;    // process_class_or_null() sollte NULL liefern
-
-    if( !base_file_has_error() )
+    FOR_EACH_JOB( job )
     {
+        job->on_process_class_active( this );
     }
+
+    return true;
 }
 
 //--------------------------------------------------------------------Process_class::prepare_to_remove
@@ -1104,6 +1103,8 @@ void Process_class::remove_process( Process* process )
 
 Process* Process_class::new_process()
 {
+    assert_is_active();
+
     ptr<Process> process;
 
     process = Z_NEW( Process( _spooler ) );        
@@ -1122,7 +1123,8 @@ Process* Process_class::select_process_if_available()
 {
     Process* process = NULL;
 
-    if( !_remove )      // remove_process() könnte sonst Process_class löschen.
+    if( !_remove  &&                                    // remove_process() könnte sonst Process_class löschen.
+        file_based_state() == File_based::s_active )  
     {
         FOR_EACH( Process_set, _process_set, p )
         {
@@ -1153,6 +1155,7 @@ Process* Process_class::select_process_if_available()
 
 bool Process_class::process_available( Job* for_job )
 { 
+    if( file_based_state() != File_based::s_active )  return false;
     if( _process_set.size()      >= _max_processes )  return false;
     if( _spooler->_process_count >= scheduler::max_processes )  return false;
 
@@ -1401,6 +1404,10 @@ bool Process_class_subsystem::subsystem_initialize()
 {
     set_subsystem_state( subsys_initialized );
     file_based_subsystem<Process_class>::subsystem_initialize();
+
+    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler() ) ) );     // Default-Prozessklasse ohne Namen
+    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler(), temporary_process_class_name ) ) );
+
     return true;
 }
 
@@ -1420,9 +1427,6 @@ bool Process_class_subsystem::subsystem_activate()
     set_subsystem_state( subsys_active );
     file_based_subsystem<Process_class>::subsystem_activate();
 
-    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler() ) ) );    int NAMENLOSE_PROCESSKLASSE;
-    spooler()->root_folder()->process_class_folder()->add_process_class( Z_NEW( Process_class( spooler(), temporary_process_class_name ) ) );
-
     return true;
 }
 
@@ -1430,6 +1434,7 @@ bool Process_class_subsystem::subsystem_activate()
 
 void Process_class_subsystem::close()
 {
+    set_subsystem_state( subsys_stopped );
     file_based_subsystem<Process_class>::close();
 }
 

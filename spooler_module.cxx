@@ -359,12 +359,11 @@ void Module::init()
     _real_kind = _kind;
 
     if( _real_kind == kind_java  &&  has_source_script()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
-  //if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
 
 
     if( _kind != kind_process  &&  _kind != kind_internal )
     {
-        if( _spooler )  _use_process_class = _spooler->process_class_subsystem()->has_process_classes();
+        if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
 
         if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_path = "";
 
@@ -373,13 +372,15 @@ void Module::init()
             if( _process_class_path != "" )  z::throw_xc( "SCHEDULER-194" );
         }
 
-        if( _use_process_class )  
-        {
-            _spooler->process_class_subsystem()->process_class( _process_class_path );     // Fehler, wenn der Name nicht bekannt ist. (Könnte auch eine Warnung sein)
-        }
+        //if( _use_process_class )  
+        //{
+        //    _spooler->process_class_subsystem()->process_class( _process_class_path );     // Fehler, wenn der Name nicht bekannt ist. (Könnte auch eine Warnung sein)
+        //}
     }
     else
-    if( _process_class_path != ""  &&  process_class()->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
+    if( _process_class_path != ""  )
+        if( Process_class* process_class = process_class_or_null() )
+            if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );    int SPATER_NOCHMAL_PRUEFEN;
 
     if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 

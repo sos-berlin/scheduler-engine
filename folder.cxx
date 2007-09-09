@@ -541,6 +541,73 @@ File_based::~File_based()
     
 void File_based::close()
 {
+    set_file_based_state( s_closed );
+}
+
+//---------------------------------------------------------------------------File_based::initialize
+
+bool File_based::initialize()
+{
+    bool ok = _state == s_initialized;
+
+    if( _state == s_not_initialized  &&  subsystem()->subsystem_state() >= subsys_initialized )
+    {
+        ok = on_initialize();
+        if( ok )  set_file_based_state( s_initialized );
+    }
+
+    return ok;
+}
+
+//---------------------------------------------------------------------------------File_based::load
+
+bool File_based::load()
+{
+    bool ok = _state == s_loaded;
+
+    if( !ok )
+    {
+        initialize();
+
+        if( _state == s_initialized  &&  subsystem()->subsystem_state() >= subsys_loaded )
+        {
+            ok = on_load();
+            if( ok )  set_file_based_state( s_loaded );
+        }
+    }
+
+    return ok;
+}
+
+//-----------------------------------------------------------------------------File_based::activate
+
+bool File_based::activate()
+{
+    bool ok = _state == s_active;
+
+    if( !ok )
+    {
+        load();
+
+        if( _state == s_loaded  &&  subsystem()->subsystem_state() >= subsys_active )
+        {
+            ok = on_activate();
+            if( ok )  set_file_based_state( s_active );
+        }
+    }
+
+    return ok;
+}
+
+//---------------------------------------------------------------------File_based::assert_is_active
+
+void File_based::assert_is_active()
+{
+    if( _state != s_active )  
+    {
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-158", obj_name(), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-158", obj_name() );
+    }
 }
 
 //-------------------------------------------------------------------------------File_based::remove

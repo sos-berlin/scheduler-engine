@@ -1383,7 +1383,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "ip-address"       ) )  _ip_address = opt.value(),  _ip_address.resolve_name(),  _ip_address_as_option_set = true;
             else
-            if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set();
+            if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set(),  _ignore_process_classes_set = true;
             else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else

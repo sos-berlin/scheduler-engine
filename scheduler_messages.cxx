@@ -45,6 +45,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-155", "A temporary job cannot accept orders" },
     { "SCHEDULER-156", "$1 is not in $2" },
     { "SCHEDULER-157", "$1 is not in a job chain" },
+    { "SCHEDULER-158", "'$1' is not active" },
     { "SCHEDULER-159", "Id and priority of an order placed in an order queue cannot be changed" },
     { "SCHEDULER-160", "There is already a $1 '$2'" },
     { "SCHEDULER-161", "There is no $1 '$2'" },
