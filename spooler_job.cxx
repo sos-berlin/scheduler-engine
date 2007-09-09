@@ -231,7 +231,7 @@ bool Job_subsystem::is_any_task_queued()
 
 Job_folder::Job_folder( Folder* folder )
 :
-    typed_folder<Job>( folder, Scheduler_object::type_job_folder )
+    typed_folder<Job>( folder->spooler()->job_subsystem(), folder, Scheduler_object::type_job_folder )
 {
 }
 

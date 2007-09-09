@@ -1252,7 +1252,7 @@ xml::Element_ptr Process_class::execute_xml( Command_processor* command_processo
 
 Process_class_folder::Process_class_folder( Folder* folder )
 :
-    typed_folder<Process_class>( folder, type_process_class_folder )
+    typed_folder<Process_class>( folder->spooler()->process_class_subsystem(), folder, type_process_class_folder )
 {
 }
 

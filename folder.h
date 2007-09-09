@@ -17,6 +17,92 @@ struct Typed_folder;
 struct File_based;
 struct File_based_subsystem;
 
+//-------------------------------------------------------------------------------------------Folder
+//
+// Ein Ordner (Folder) enthält alle Objekte. 
+// Bislang gibt es nur einen Ordner im Scheduler.
+
+struct Folder : Scheduler_object, Object
+{
+    static int                  position_of_extension_point ( const string& filename );
+    static string               object_name_of_filename     ( const string& filename );
+    static string               extension_of_filename       ( const string& filename );
+
+
+                                Folder                      ( Folder_subsystem*, Folder* parent_folder, const string& name );
+                               ~Folder                      ();
+
+    file::File_path             directory                   () const                                { return _directory; }
+    string                      path                        () const                                { return _path; }
+
+    void                        adjust_with_directory       ();
+
+    Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
+    lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
+    Job_folder*                 job_folder                  ()                                      { return _job_folder; }
+    Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
+  //Order_folder_interface*     order_folder                ()                                      { return _order_folder; }
+
+  //virtual void                remove_object               ( const string& name )                  = 0;
+    string                      obj_name                    () const;
+
+  private:
+    void                        add_to_typed_folder_map     ( Typed_folder* );
+
+    Fill_zero                  _zero_;
+    string                     _path;
+    string                     _name;
+    file::File_path            _directory;
+
+    typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
+    Typed_folder_map           _typed_folder_map;
+    
+  //Folder*                    _parent;
+  //Folder_set                 _child_folder_set;
+
+    ptr<Process_class_folder>       _process_class_folder;
+    ptr<lock::Lock_folder>          _lock_folder;
+    ptr<Job_folder>                 _job_folder;
+    ptr<Job_chain_folder_interface> _job_chain_folder;
+};
+
+//---------------------------------------------------------------------------------Folder_subsystem
+
+struct Folder_subsystem : Subsystem,
+                          Async_operation
+{
+                                Folder_subsystem            ( Scheduler* );
+                               ~Folder_subsystem            ();
+
+    // Subsystem
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+                     Subsystem::obj_name;
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+
+
+    void                    set_directory                   ( const file::File_path& );
+    File_path                   directory                   () const                                { return _directory; }
+
+  //Folder*                     folder                      ( const string& path );
+    Folder*                     root_folder                 () const                                { return _root_folder; }
+
+  private:
+    Fill_zero                  _zero_;
+    file::File_path            _directory;
+    ptr<Folder>                _root_folder;
+};
+
+
+inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
+
 //-----------------------------------------------------------------------------------Base_file_info
 
 struct Base_file_info
@@ -140,10 +226,11 @@ struct file_based : File_based
 struct Typed_folder : Scheduler_object, 
                       Object
 {
-                                Typed_folder                ( File_based_subsystem*, Folder*, Type_code );
+                                Typed_folder                ( Folder*, Type_code );
 
     Folder*                     folder                      () const                                { return _folder; }
-    File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
+    File_based_subsystem*       subsystem                   () const                                { return file_based_subsystem(); }
+    virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
 
     void                        adjust_with_directory       ( const list<Base_file_info>& );
     File_based*                 call_on_base_file_changed   ( File_based*, const Base_file_info* changed_base_file_info );
@@ -174,20 +261,26 @@ struct Typed_folder : Scheduler_object,
 template< class FILE_BASED >
 struct typed_folder : Typed_folder
 {
-                                typed_folder                ( Folder* f, Type_code tc )             : Typed_folder( f->spooler()->subsystem( (FILE_BASED*)NULL), f, tc ) {}
-
     typedef typename FILE_BASED::My_subsystem My_subsystem;
 
-    My_subsystem*               subsystem                   () const                                { return static_cast<My_subsystem*>( Typed_folder::subsystem() ); }
+
+                                typed_folder                ( My_subsystem* subsystem, Folder* f, Type_code tc )
+                                                                                                    : Typed_folder( f, tc ), _subsystem(subsystem) {}
+
+    File_based_subsystem*       file_based_subsystem        () const                                { return _subsystem; }
+    My_subsystem*               subsystem                   () const                                { return _subsystem; }
 
     FILE_BASED*                 file_based                  ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based( name ) ); }
     FILE_BASED*                 file_based_or_null          ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based_or_null( name ) ); }
 
     FILE_BASED*                 replace_file_based          ( FILE_BASED* file_based )              { return static_cast<FILE_BASED*>( Typed_folder::replace_file_based( file_based ) ); }
+
+  private:
+    My_subsystem*              _subsystem;
 };
 
 //-----------------------------------------------------------------------------File_based_subsystem
-// Für jede dateibasierten Typ (File_based) gibt es genau eine File_based_subsystem
+// Für jeden dateibasierten Typ (File_based) gibt es genau eine File_based_subsystem
 
 struct File_based_subsystem : Subsystem
 {
@@ -386,92 +479,6 @@ struct file_based_subsystem : File_based_subsystem
 #define FOR_EACH_FILE_BASED( FILE_BASED_CLASS, OBJECT ) \
     Z_FOR_EACH( FILE_BASED_CLASS::My_subsystem::File_based_map, spooler()->subsystem( (FILE_BASED_CLASS*)NULL )->_file_based_map, __file_based_iterator__ )  \
         if( FILE_BASED_CLASS* OBJECT = __file_based_iterator__->second )
-
-//-------------------------------------------------------------------------------------------Folder
-//
-// Ein Ordner (Folder) enthält alle Objekte. 
-// Bislang gibt es nur einen Ordner im Scheduler.
-
-struct Folder : Scheduler_object, Object
-{
-    static int                  position_of_extension_point ( const string& filename );
-    static string               object_name_of_filename     ( const string& filename );
-    static string               extension_of_filename       ( const string& filename );
-
-
-                                Folder                      ( Folder_subsystem*, Folder* parent_folder, const string& name );
-                               ~Folder                      ();
-
-    file::File_path             directory                   () const                                { return _directory; }
-    string                      path                        () const                                { return _path; }
-
-    void                        adjust_with_directory       ();
-
-    Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
-    lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
-    Job_folder*                 job_folder                  ()                                      { return _job_folder; }
-    Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
-  //Order_folder_interface*     order_folder                ()                                      { return _order_folder; }
-
-  //virtual void                remove_object               ( const string& name )                  = 0;
-    string                      obj_name                    () const;
-
-  private:
-    void                        add_to_typed_folder_map     ( Typed_folder* );
-
-    Fill_zero                  _zero_;
-    string                     _path;
-    string                     _name;
-    file::File_path            _directory;
-
-    typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
-    Typed_folder_map           _typed_folder_map;
-    
-  //Folder*                    _parent;
-  //Folder_set                 _child_folder_set;
-
-    ptr<Process_class_folder>       _process_class_folder;
-    ptr<lock::Lock_folder>          _lock_folder;
-    ptr<Job_folder>                 _job_folder;
-    ptr<Job_chain_folder_interface> _job_chain_folder;
-};
-
-//---------------------------------------------------------------------------------Folder_subsystem
-
-struct Folder_subsystem : Subsystem,
-                          Async_operation
-{
-                                Folder_subsystem            ( Scheduler* );
-                               ~Folder_subsystem            ();
-
-    // Subsystem
-    void                        close                       ();
-    bool                        subsystem_initialize        ();
-    bool                        subsystem_load              ();
-    bool                        subsystem_activate          ();
-                     Subsystem::obj_name;
-
-
-    // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-
-
-    void                    set_directory                   ( const file::File_path& );
-    File_path                   directory                   () const                                { return _directory; }
-
-  //Folder*                     folder                      ( const string& path );
-    Folder*                     root_folder                 () const                                { return _root_folder; }
-
-  private:
-    Fill_zero                  _zero_;
-    file::File_path            _directory;
-    ptr<Folder>                _root_folder;
-};
-
-
-inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
 
 //-------------------------------------------------------------------------------------------------
 

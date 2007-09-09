@@ -719,7 +719,7 @@ void Order_subsystem::count_finished_orders()
 
 Job_chain_folder_interface::Job_chain_folder_interface( Folder* folder )
 :
-    typed_folder<Job_chain>( folder, type_job_chain_folder )
+    typed_folder<Job_chain>( folder->spooler()->order_subsystem(), folder, type_job_chain_folder )
 {
 }
 

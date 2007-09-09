@@ -266,12 +266,11 @@ string Folder::obj_name() const
 
 //-----------------------------------------------------------------------Typed_folder::Typed_folder
 
-Typed_folder::Typed_folder( File_based_subsystem* subsystem, Folder* folder, Type_code type_code )
+Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 : 
     Scheduler_object( folder->_spooler, this, type_code ),
     _zero_(this+1),
-    _folder(folder),
-    _file_based_subsystem(subsystem)
+    _folder(folder)
 {
     _log->set_prefix( obj_name() );
 }
