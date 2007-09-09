@@ -103,14 +103,6 @@ string Folder_subsystem::async_state_text_() const
     return result;
 }
 
-//----------------------------------------------------------------------------------Spooler::folder
-
-//Folder* Folder_subsystem::folder( const string& path )
-//{
-//    assert( path == "/" );
-//    return _root_folder;
-//}
-
 //-----------------------------------------------------------------------------------Folder::Folder
 
 Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent_folder, const string& name )

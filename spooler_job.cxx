@@ -60,7 +60,7 @@ struct Job_subsystem : Job_subsystem_interface
     // File_based_subsystem:
 
     string                      object_type_name            () const                                { return "Job"; }
-    string                      filename_extension          () const                                { return "job.xml"; }
+    string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name )                  { return lcase( name ); }
     File_based*                 object_by_path              ( const string& path );
     ptr<Job>                    new_file_based              ();
