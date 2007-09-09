@@ -68,12 +68,12 @@ static jobject scheduler_jobject_from_variant( JNIEnv* jenv, const VARIANT& v, J
 
     if( v.vt == VT_EMPTY )
     {
-        return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     if( v.vt == VT_ERROR  && v.scode == DISP_E_PARAMNOTFOUND ) 
     {
-        return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+        return jenv->NewString( NULL, 0 );       // Für job_chain::Node.next_state, .error_state ("" wird zu VT_EMPTY)
     }
     else
     {
@@ -117,7 +117,7 @@ Java_idispatch_stack_frame::~Java_idispatch_stack_frame()
 //--------------------------------------------------------------------------Module::make_java_class
 // Quellcode compilieren
 
-bool Module::make_java_class( bool force )
+bool Module::make_java_class( bool )
 {
     if( _java_vm->work_dir().empty() )  z::throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
 
@@ -125,41 +125,40 @@ bool Module::make_java_class( bool force )
     string java_filename  = filename + ".java";
     string class_filename = filename + ".class";
     string source;
-    bool   do_compile = force;
-
-
-    if( !do_compile )
-    {
-        struct stat s;
-        int err = ::stat( class_filename.c_str(), &s );
-        if( err )
-        {
-            do_compile = true;
-        }
-        else
-        //if( (time_t)_source._max_modification_time > s.st_mtime )
-        {
-            do_compile = true;
-        }
-//        else
-//        {
-///*
-//            source = _source.text();
+//    bool   do_compile = force;
 //
-//            Mapped_file m ( java_filename, "r" );
-//            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
-//            {
-//                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
-//                do_compile = true;
-//            }
-//*/
+//
+//    if( !do_compile )
+//    {
+//        struct stat s;
+//        int err = ::stat( class_filename.c_str(), &s );
+//        if( err )
+//        {
+//            do_compile = true;
 //        }
-    }
-
-    if( do_compile )
-    {
+//        else
+//        //if( (time_t)_source._max_modification_time > s.st_mtime )
+//        {
+//            do_compile = true;
+//        }
+////        else
+////        {
+/////*
+////            source = _source.text();
+////
+////            Mapped_file m ( java_filename, "r" );
+////            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
+////            {
+////                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
+////                do_compile = true;
+////            }
+////*/
+////        }
+//    }
+//
+//    if( do_compile )
+//    {
         if( source.empty() )  source = read_source_script();
-        //if( source.empty() )  source = _source.text();
 
         make_path( directory_of_path( java_filename ) );
 
@@ -184,9 +183,10 @@ bool Module::make_java_class( bool force )
         if( c.xc() )  throw *c.xc();
 
         //utime( class_filename.c_str(), &utimbuf );
-    }
+    //}
 
-    return do_compile;
+    //return do_compile;
+    return true;
 }
 
 //----------------------------------------------------------------------Java_object::QueryInterface
@@ -279,7 +279,8 @@ void Java_module_instance::init_java_vm( java::Vm* java_vm )
         if( env->ExceptionCheck() )  env.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
 
         int ret = env->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
-        if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
+        if( ret < 0 )  env.throw_java( "RegisterNatives" );
+      //if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
     }
 
 #   ifdef SCHEDULER_WITH_HOSTJAVA

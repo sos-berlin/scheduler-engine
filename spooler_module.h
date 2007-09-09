@@ -80,11 +80,11 @@ struct Module : Object
     Z_GNU_ONLY(                 Module                      (); )
 
                                 Module                      ( Spooler*, const string& include_path, Prefix_log* = NULL );
-    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const string& include_path, const Time& xml_mod_time );
+    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const string& include_path );
                                ~Module                      ()                                      {}
 
     void                        set_log                     ( Prefix_log* log )                     { _log.set_log( log ); }
-    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        set_dom                     ( const xml::Element_ptr& );
     void                        set_xml_text_with_includes  ( const string& xml );
     Text_with_includes           source_with_parts           ();
     void                        set_process                 ();                                     // Für <process>
@@ -146,7 +146,6 @@ struct Module : Object
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
     bool                       _dont_remote;
-    Time                       _xml_mod_time;
     ptr<Module>                _monitor;
 
     Fill_end                   _end_;
@@ -214,6 +213,8 @@ struct Module_instance : Object
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );
+
+    void                        end_task                    ();
 
     bool                        implicit_load_and_start     ();
     virtual bool                load                        ();

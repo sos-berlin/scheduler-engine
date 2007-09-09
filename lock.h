@@ -7,16 +7,27 @@ namespace sos {
 namespace scheduler {
 namespace lock {
 
-struct Requestor;
 struct Holder;
+struct Lock_folder;
+struct Requestor;
 struct Use;
 
 //---------------------------------------------------------------------------------------------Lock
 
 struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>, 
-              Scheduler_object, 
+              file_based< Lock, Lock_folder, Lock_subsystem >, 
               Non_cloneable
 {
+    typedef Lock_subsystem      My_subsystem;
+
+
+    enum State
+    {
+        s_not_initialized,
+        s_active
+    };
+
+
     enum Lock_mode
     { 
         lk_exclusive     = 0,   // Index für _waiting_queues
@@ -27,17 +38,37 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
                                 Lock                        ( Lock_subsystem*, const string& name = "" );
                                ~Lock                        ();
 
-    void                        close                       ();
-    void                        prepare_remove              ();
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
 
+    void                        close                       ();
+    bool                        prepare_to_remove           ();
+
+
+    // file_based<>
+
+    void                        initialize                  ();
+    void                        load                        ();
+    void                        activate                    ();
+
+    bool                        can_be_removed_now          ();
+
+    bool                        prepare_to_replace          ();
+    Lock*                       replace_now                 ();
+
+
+
+    Lock_folder*                lock_folder                 () const                                { return typed_folder(); }
+
+
+    State                       state                       () const                                { return _state; }
+    static string               state_name                  ( State );
+    string                      state_name                  () const                                { return state_name( _state ); }
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
     void                    set_max_non_exclusive           ( int );
-    void                    set_name                        ( const string& );
-    string                      name                        () const                                { return _name; }
-    string                      path                        () const                                { return _name; }
     bool                        its_my_turn                 ( const Use* );
     void                        register_lock_use           ( Use* lock_use )                       { _use_set.insert( lock_use ); }
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
@@ -47,9 +78,8 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     void                        dequeue_lock_use            ( Use* );
     int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode ) const;
-    bool                        is_free                     () const                                { return _holder_set.empty(); }             
+    bool                        is_free                     () const;
     bool                        is_added                    () const;
-    void                        remove                      ();
     string                      obj_name                    () const;
     string                      string_from_holders         () const;
     string                      string_from_uses            () const;
@@ -59,16 +89,27 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Lock"; }
     STDMETHODIMP            put_Name                        ( BSTR );     
-    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
     STDMETHODIMP            put_Max_non_exclusive           ( int );
-    STDMETHODIMP            get_Max_non_exclusive           ( int* result )                         { *result = _max_non_exclusive;  return S_OK; }
+    STDMETHODIMP            get_Max_non_exclusive           ( int* result )                         { *result = _config._max_non_exclusive;  return S_OK; }
     STDMETHODIMP                Remove                      ();
 
   private:
+    void                    set_state                       ( State state )                         { _state = state; }
+
     Fill_zero                  _zero_;
-    string                     _name;
-    int                        _max_non_exclusive;
+
+    struct Configuration
+    {
+        int                    _max_non_exclusive;
+    };
+
+    Configuration              _config;
+
+
     Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
+    State                      _state;
+    bool                       _remove;
 
     typedef stdext::hash_set<Holder*>  Holder_set;
     Holder_set                 _holder_set;
@@ -86,7 +127,25 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     static const Com_method     _methods[];
 };
 
+//--------------------------------------------------------------------------------------Lock_folder
+
+struct Lock_folder : typed_folder< Lock >
+{
+                                Lock_folder                 ( Folder* );
+                               ~Lock_folder                 ();
+
+
+    void                        set_dom                     ( const xml::Element_ptr& );
+    void                        execute_xml_lock            ( const xml::Element_ptr& );
+    void                        add_lock                    ( Lock* lock )                          { add_file_based( lock ); }
+    void                        remove_lock                 ( Lock* lock )                          { remove_file_based( lock ); }
+    Lock*                       lock                        ( const string& name )                  { return file_based( name ); }
+    Lock*                       lock_or_null                ( const string& name )                  { return file_based_or_null( name ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+};
+
 //----------------------------------------------------------------------------------------------Use
+// Verbindet Lock mit Lock_requestor
 
 struct Use : Object, Scheduler_object, Non_cloneable
 {
@@ -129,11 +188,13 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                        load                        ();
     bool                        is_enqueued                 () const                                { return _is_enqueued; }
     bool                        locks_are_available         () const;
-    void                        enqueue_lock_requests       ();
+    bool                        enqueue_lock_requests       ();
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
     Scheduler_object*           object                      () const                                { return _object; }
 
+    void                        on_new_lock                 ( Lock* );
     virtual void                on_locks_are_available      ()                                      = 0;
+    virtual void                on_lock_is_to_be_removed    ( lock::Lock* )                         = 0;
 
     string                      obj_name                    () const;
 
@@ -175,25 +236,31 @@ struct Holder : Object, Scheduler_object, Non_cloneable
 //-----------------------------------------------------------------------------------Lock_subsystem
 
 struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::Ilocks>, 
-                        Subsystem
+                        file_based_subsystem< Lock >
 {
                                 Lock_subsystem              ( Scheduler* );
+
+    // Subsystem
 
     void                        close                       ();
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
-    void                    set_dom                         ( const xml::Element_ptr& );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    void                        execute_xml_lock            ( const xml::Element_ptr& );
 
-    void                        add_lock                    ( Lock* );
-    void                        remove_lock                 ( Lock* );
-    bool                        is_empty                    () const                                { return _lock_map.empty(); }
-    Lock*                       lock                        ( const string& name );
-    Lock*                       lock_or_null                ( const string& name );
+
+    // File_based_subsystem
+
+    string                      object_type_name            () const                                { return "Lock"; }
+    string                      filename_extension          () const                                { return ".lock.xml"; }
+    string                      normalized_name             ( const string& name )                  { return name; }
+    File_based*                 object_by_path              ( const string& path );
+    ptr<Lock>                   new_file_based              ();
+
+
+    ptr<Lock_folder>            new_lock_folder             ( Folder* folder )                      { return Z_NEW( Lock_folder( folder ) ); }
+
+    // Ilocks
 
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Locks"; }
@@ -202,11 +269,14 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     STDMETHODIMP                Create_lock                 ( spooler_com::Ilock** );
     STDMETHODIMP                Add_lock                    ( spooler_com::Ilock* );
 
+
+
+    Lock*                       lock                        ( const string& path ) const            { return file_based( path ); }
+    Lock*                       lock_or_null                ( const string& path ) const            { return file_based_or_null( path ); }
+
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+
   private:
-    typedef map< string, ptr<Lock> > Lock_map;
-    Lock_map                   _lock_map;
-
-
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
 };

@@ -13,10 +13,14 @@
 
 
     <p>
+        <scheduler_a href="order_events.xml" quote="yes"/>
+    </p>
+
+    <p>
         <scheduler_a href="siegmund_und_sieglinde.xml" quote="yes"/>
     </p>
 
-    
+
     <p>
         <scheduler_a href="dynamic_configuration.xml" quote="yes"/>
         <br/>

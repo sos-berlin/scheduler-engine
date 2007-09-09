@@ -487,7 +487,7 @@ void Task::cmd_end( End_mode end_mode )
     {
         if( _end == end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         else
-        if( _state < s_ending )  _log->info( message_string( "SCHEDULER-914" ) );
+        if( _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
         if( _end != end_kill_immediately )  _end = end_mode;
         if( !_ending_since )  _ending_since = Time::now();
@@ -670,7 +670,7 @@ void Task::set_state( State new_state )
 
             case s_running_waiting_for_order:
             {
-                _next_time  = _job->order_queue()->next_time();
+                _next_time  = _job->combined_order_queues()->next_time();
 
                 if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
 
@@ -802,15 +802,6 @@ void Task::set_next_time( const Time& next_time )
 {
     THREAD_LOCK_DUMMY( _lock )  _next_time = next_time;
 }
-
-//---------------------------------------------Task::calculate_next_time_after_modified_order_queue
-
-//void Task::calculate_next_time_after_modified_order_queue()
-//{
-//    assert( _state == s_running_waiting_for_order );
-//
-//    _next_time = min( _next_time, _job->order_queue()->next_time() );
-//}
 
 //----------------------------------------------------------------------------------Task::next_time
 
@@ -1225,7 +1216,7 @@ bool Task::do_something()
                                 }
                                 else
                                 {
-                                    if( _job->order_queue() )
+                                    if( _job->is_order_controlled() )
                                     {
                                         if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
@@ -1435,7 +1426,7 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                if( _module_instance->_module->_kind == Module::kind_process )
+                                if( _module_instance  && _module_instance->_module->_kind == Module::kind_process )
                                 {
                                     set_state_texts_from_stdout();
                                     postprocess_order( _exit_code == 0  &&  !has_error() );     // Auftrag soll in den Fehlerzustand gehen, egal ob 
@@ -1700,7 +1691,7 @@ bool Task::step__end()
             continue_task = result = check_result( spooler_process_result );
         }
 
-        if( _job->order_queue() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
+        if( _job->is_order_controlled() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
         {
@@ -1762,7 +1753,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 // Wird auch von Job gerufen, wenn ein neuer Auftrag zum Start einer neuen Task führt
 
 {
-    assert( _job->order_queue() );
+    assert( _job->is_order_controlled() );
     assert( !_operation );
     assert( _state == s_none || _state == s_running || _state == s_running_waiting_for_order );
 
@@ -1770,7 +1761,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
     if( !_order  
      && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
-        if( Order* order = _job->order_queue()->fetch_and_occupy_order( now, cause, this ) )
+        if( Order* order = _job->combined_order_queues()->fetch_and_occupy_order( now, cause, this ) )
         {
             if( order->is_file_order() )  _trigger_files = order->file_path();
 
@@ -1882,7 +1873,7 @@ void Task::finish()
             {
                 _job->_delay_until = Time::now() + delay;
 
-                if( !_job->order_controlled() )
+                if( !_job->is_order_controlled() )
                 {
                     try
                     {
@@ -1990,7 +1981,7 @@ void Task::process_on_exit_commands()
             cp.set_log( _log );
             cp.set_variable_set( "task", _params );
             
-            if( _job->order_controlled() )
+            if( _job->is_order_controlled() )
             {
                 ptr<Com_variable_set> order_params = _order_for_task_end? _order_for_task_end->params_or_null() : NULL;
                 cp.set_variable_set( "order", order_params );
@@ -2000,7 +1991,7 @@ void Task::process_on_exit_commands()
             {
                 try
                 {
-                    cp.execute_command( c, _job->_commands_document_time );
+                    cp.execute_command( c );
                 }
                 catch( exception& x )
                 {

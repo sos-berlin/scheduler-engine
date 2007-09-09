@@ -1103,7 +1103,7 @@ void Database::close()
 
 //---------------------------------------------------------------------Database::open_history_table
 
-void Database::open_history_table( Transaction* ta )
+void Database::open_history_table( Read_transaction* ta )
 {
     if( _db_name == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
 
@@ -1957,11 +1957,11 @@ void Job_history::close()
 
 //-----------------------------------------------------------------------------Job_history::archive
 
-void Job_history::archive( Archive_switch arc, const string& filename )
+void Job_history::archive( Archive_switch arc, const File_path& filename )
 {
-    if( file_exists( filename ) )
+    if( filename.file_exists() )
     {
-        string ext   = extension_of_path( filename );
+        string ext   = filename.extension();
         string rumpf = filename;
         if( ext != "" )  rumpf = filename.substr( 0, filename.length() - ext.length() - 1 );
 

@@ -118,14 +118,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-108">
+        <!--message code="SCHEDULER-108">
             <text xml:lang="de">
                 <title>Job <p1/> ist nicht bekannt</title>
             </text>
             <text xml:lang="en">
                 <title>Unknown job: <p1/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-109">
             <text xml:lang="en">
@@ -332,14 +332,14 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-132">
+        <!--message code="SCHEDULER-132">
             <text xml:lang="de">
                 <title>Job <p1/> wird nicht gestartet, weil das Laden des Skripts fehlschlug: <p2/></title>
             </text>
             <text xml:lang="en">
                 <title>Job <p1/> has not started because the script could not be loaded: <p2/></title>
             </text>
-        </message>
+        </message-->
 
         <!--message code="SCHEDULER-133">
             <text xml:lang="de">
@@ -550,7 +550,7 @@
                 <title><p1/> ist nicht in der Auftragswarteschlange des Jobs "<p2/>"</title>
             </text>
             <text xml:lang="en">
-                <title><p1/> is not in the order queue of job "<p2/>"</title>
+                <title><p1/> is not in <p2>Order_queue</p2></title>
             </text>
         </message>
 
@@ -582,20 +582,14 @@
         </message>
 
         <message code="SCHEDULER-160">
-            <text xml:lang="de">
-                <title>Jobkette <p1/> gibt es bereits</title>
-            </text>
             <text xml:lang="en">
-                <title>There is already a job chain "<p1/>"</title>
+                <title>There is already a <p1>objecttype</p1> '<p2/>'</title>
             </text>
         </message>
 
         <message code="SCHEDULER-161">
-            <text xml:lang="de">
-                <title>Jobkette <p1/> gibt es nicht</title>
-            </text>
             <text xml:lang="en">
-                <title>There is no job chain "<p1/>"</title>
+                <title>There is no <p1>objecttype</p1> '<p2/>'</title>
             </text>
         </message>
 
@@ -821,14 +815,14 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-190">
+        <!--message code="SCHEDULER-190">
             <text xml:lang="de">
                 <title>Das Skript steht nach Ladefehler nicht zur Verfügung</title>
             </text>
             <text xml:lang="en">
                 <title>Script is not available because of a loading error</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-191">
             <text xml:lang="de">
@@ -866,14 +860,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-195">
+        <!--message code="SCHEDULER-195">
             <text xml:lang="de">
                 <title>Prozessklasse <p1/> ist unbekannt</title>
             </text>
             <text xml:lang="en">
                 <title>Unknown process class "<p1/>"</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-196">
             <text xml:lang="de">
@@ -1160,14 +1154,14 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-229">
+        <!--message code="SCHEDULER-229">
             <text xml:lang="de">
                 <title>Ein auftragsgesteuerter Job kann nicht entfernt werden</title>
             </text>
             <text xml:lang="en">
                 <title>An order controlled job &lt;job order="yes"> cannot be removed</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-230">
             <text xml:lang="de">
@@ -1187,14 +1181,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-232">
-            <text xml:lang="de">
-                <title>Attribut <p1/>= kann ohne job= nicht angegeben werden</title>
-            </text>
+        <message code="SCHEDULER-232">
             <text xml:lang="en">
-                <title>Attribute <p1/>= needs attribute job=</title>
+                <title>Attribute &lt;<p1>xml_element_name</p1> <p2/>="<p3/>" is not allowed in configuration file</title>
             </text>
-        </message-->
+        </message>
 
         <!--message code="SCHEDULER-233">
             <text xml:lang="de">
@@ -1250,14 +1241,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-239">
-            <text xml:lang="de">
-                <title>&lt;payload> darf nur ein Element enthalten</title>
-            </text>
+        <message code="SCHEDULER-239">
             <text xml:lang="en">
-                <title>&lt;payload> contains no more then one element</title>
+                <title>XML root element &lt;<p1/>> expected</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-240">
             <text xml:lang="de">
@@ -1437,14 +1425,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-258">
+        <!--message code="SCHEDULER-258">
             <text xml:lang="de">
                 <title>Job wird entfernt sobald alle Tasks beendet sind</title>
             </text>
             <text xml:lang="en">
                 <title>Job will be removed after all its tasks have terminated</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-259">
             <text xml:lang="de">
@@ -2492,11 +2480,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-402">
+        <!--message code="SCHEDULER-402">
             <text xml:lang="en">
                 <title>Too many lock holders for smaller max_non_exclusive=<p1/>: <p2>holders</p2></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-403">
             <text xml:lang="en">
@@ -2539,18 +2527,8 @@
                 <title>XML tag &lt;<p1/>> expected, instead of &lt;<p2/>></title>
             </text>
         </message>
-        
-        <message code="SCHEDULER-410">
-            <text xml:lang="en">
-                <title><p1>lock</p1> cannot be removed, it is held by <p2/></title>
-            </text>
-        </message>
-        
-        <message code="SCHEDULER-411">
-            <text xml:lang="en">
-                <title><p1>lock</p1> cannot be removed, it is used by <p2/></title>
-            </text>
-        </message>
+
+        <!-- 410 411 -->
         
         <message code="SCHEDULER-412">
             <text xml:lang="en">
@@ -2588,11 +2566,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-418">
+        <!--message code="SCHEDULER-418">
             <text xml:lang="en">
                 <title>'<p1/>' is not added, cannot be removed</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-419">
             <text xml:lang="en">
@@ -2606,11 +2584,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-421">
+        <!--message code="SCHEDULER-421">
             <text xml:lang="en">
                 <title>'<p1/>' is being removed and not longer modifiable</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-422">
             <text xml:lang="en">
@@ -2654,11 +2632,54 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-428">
+            <text xml:lang="en">
+                <title>Error when loading base file '<p1>path</p1>':<br/><p2>error</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-429">
+            <text xml:lang="en">
+                <title>Attribut name='<p1/>' is different from <p2>type</p2> name '<p3/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-430">
+            <text xml:lang="en">
+                <title>No object for configuration file '<p1>path</p1>'</title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-427">
             <text xml:lang="en">
                 <title>Invalid MD5 hexadecimal coded password for HTTP user '<p1/>'</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-431">
+            <text xml:lang="en">
+                <title>Error when processing configuration directory:<br/><p1>error</p1></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-432">
+            <text xml:lang="en">
+                <title><p1>object type</p1> has no name</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-433">
+            <text xml:lang="en">
+                <title>'<p1>object</p1>' is not in any folder and cannot be removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-434">
+            <text xml:lang="en">
+                <title>Error when closing '<p1>object</p1>':<br/><p2>error</p2></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2943,7 +2964,7 @@
 
         <message code="SCHEDULER-936">
             <text xml:lang="en">
-                <title>Removing</title>
+                <title>Replaceing <p1/></title>
             </text>
         </message>
 
@@ -3362,7 +3383,7 @@
 
         <message code="SCHEDULER-989">
             <text xml:lang="en">
-                <title>Job cannot be removed now, it will be done later</title>
+                <title><p1>object_type</p1> cannot be removed now, it will be done later</title>
             </text>
         </message>
 
@@ -3732,7 +3753,7 @@
 
         <message code="SCHEDULER-855" weight="info">
             <text xml:lang="en">
-                <title>Is now holding <p1>Lock</p1> <p2>exclusively/non-exclusively</p2></title>
+                <title>Task is now holding <p1>Lock</p1> <p2>exclusively/non-exclusively</p2></title>
             </text>
         </message>
 
@@ -3785,17 +3806,17 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-867" weight="info">
+        <!--message code="SCHEDULER-867" weight="info">
             <text xml:lang="en">
                 <title>Process_class is in use, it will be removed later</title>
             </text>
-        </message>
+        </message-->
 
-        <message code="SCHEDULER-868" weight="info" object="Process_class">
+        <!--message code="SCHEDULER-868" weight="info" object="Process_class">
             <text xml:lang="en">
                 <title>Process class has been removed</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-869" weight="info" object="Process_class">
             <text xml:lang="en">
@@ -3886,6 +3907,37 @@
                 <title>Error when executing database script '<p1/>': <p2/></title>
             </text>
         </message-->
+    
+        <message code="SCHEDULER-884">
+            <text xml:lang="en">
+                <title>Configuration directory has been deleted</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-885">
+            <text xml:lang="en">
+                <title>Task ends because '<p1>lock</p1>' is being removed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-886" weight="info">
+            <text xml:lang="en">
+                <title>Lock will be removed later, it is held by '<p1/>'</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-887">
+            <text xml:lang="en">
+                <title>More lock holders than new max_non_exclusive=<p1/>: <p2>holders</p2></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-888">
+            <text xml:lang="en">
+                <title><p1>object_type</p1> cannot be repalced now, it will be done later</title>
+            </text>
+        </message>
+        
     </messages>
     
 </messages>

@@ -200,12 +200,27 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
     return e;
 }
 
+//-----------------------------------------------------------------------------create_error_element
+
+xml::Element_ptr create_error_element( const xml::Document_ptr& document, const zschimmer::Xc& x, time_t gm_time )
+{
+    Xc xc ( "" );
+    xc.set_code( x.code().c_str() );
+    xc.set_what( x.what() );
+
+    Xc_copy xc_copy ( xc );
+    xc_copy.set_time( (double)gm_time );
+
+    return create_error_element( document, xc_copy );
+}
+
 //-----------------------------------------------------------------------------append_error_element
 
 void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 {
     element.appendChild( create_error_element( element.ownerDocument(), x, (time_t)x.time() ) );
 }
+
 
 //--------------------------------------------------------------------------------xc_from_dom_error
 
@@ -244,7 +259,7 @@ Command_processor::~Command_processor()
 
 //----------------------------------------------------------------Command_processor::execute_config
 
-xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element, const Time& xml_mod_time )
+xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
@@ -253,8 +268,8 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     string spooler_id = config_element.getAttribute( "spooler_id" );
     if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
     {
-        if( _load_config_immediately )  _spooler->load_config( config_element, xml_mod_time, _source_filename );
-                                  else  _spooler->cmd_load_config( config_element, xml_mod_time, _source_filename );
+        if( _load_config_immediately )  _spooler->load_config( config_element, _source_filename );
+                                  else  _spooler->cmd_load_config( config_element, _source_filename );
     }
 
     return _answer.createElement( "ok" );
@@ -266,7 +281,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    return _spooler->job_subsystem()->jobs_dom_element( _answer, show );
+    return _spooler->root_folder()->job_folder()->jobs_dom_element( _answer, show );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads
@@ -284,7 +299,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    return _spooler->process_class_subsystem()->dom_element( _answer, show );
+    return _spooler->root_folder()->process_class_folder()->dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -693,19 +708,23 @@ xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_ele
     return _answer.createElement( "ok" );
 }
 
-//--------------------------------------------------------------Command_processor::execute_add_jobs
+//-------------------------------------------------------------Command_processor::execute_job_chain
 
 xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& job_chain_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
 
-    // Siehe auch Spooler::load_job_chains_from_xml()
+    // Siehe auch Spooler::set_dom()
 
+    int DOPPELT;
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
+    job_chain->set_name( job_chain_element.getAttribute( "name" ) );
     job_chain->set_dom( job_chain_element );
 
-    _spooler->order_subsystem()->add_job_chain( job_chain );
+    job_chain->initialize();
+    _spooler->root_folder()->job_chain_folder()->add_job_chain( job_chain );
+    job_chain->activate();
 
     return _answer.createElement( "ok" );
 }
@@ -720,7 +739,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
     if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
-    return _spooler->order_subsystem()->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
+    return _spooler->root_folder()->job_chain_folder()->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
 }
 
 //--------------------------------------------------------Command_processor::execute_show_job_chain
@@ -839,24 +858,24 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string job_name = add_order_element.getAttribute( "job" );
+    //string job_name = add_order_element.getAttribute( "job" );
 
     ptr<Order> order = new Order( _spooler );
     order->set_dom( add_order_element, &_variable_set_map );
 
 
-    if( job_name == "" )
-    {
+    //if( job_name == "" )
+    //{
         bool       replace   = add_order_element.bool_getAttribute( "replace", false );
         Job_chain* job_chain = _spooler->order_subsystem()->job_chain( add_order_element.getAttribute( "job_chain" ) );
 
         if( replace )  order->place_or_replace_in_job_chain( job_chain );
                  else  order->place_in_job_chain( job_chain );
-    }
-    else 
-    {
-        order->add_to_job( job_name );
-    }
+    //}
+    //else 
+    //{
+    //    order->add_to_job( job_name );
+    //}
 
 
     xml::Element_ptr result = _answer.createElement( "ok" ); 
@@ -882,8 +901,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
     try
     {
-        order = job_chain->_is_distributed? job_chain->order_or_null( id ) 
-                                          : job_chain->order( id );
+        order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
+                                           : job_chain->order( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
             order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem_interface::lo_lock );
@@ -971,8 +990,8 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     Order::Id id             = modify_order_element.getAttribute( "order"     );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-    ptr<Order>     order     = job_chain->_is_distributed? job_chain->order_or_null( id ) 
-                                                         : job_chain->order( id );
+    ptr<Order>     order     = job_chain->is_distributed()? job_chain->order_or_null( id ) 
+                                                          : job_chain->order( id );
 
     if( order )
     {
@@ -980,7 +999,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     }
     else
     {
-        assert( job_chain->_is_distributed );
+        assert( job_chain->is_distributed() );
 
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
@@ -1099,7 +1118,7 @@ void Get_events_command_response::write_event( const Scheduler_event& event )
 
 //---------------------------------------------------------------Command_processor::execute_command
 
-xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
+xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
     xml::Element_ptr result;
 
@@ -1115,6 +1134,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
+
+    string max_order_history = element.getAttribute( "max_order_history" );
+    if( max_order_history != "" )  show._max_order_history = as_int( max_order_history );
 
     string max_task_history = element.getAttribute( "max_task_history" );
     if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
@@ -1248,7 +1270,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     //if( element.nodeName_is( "signal_object"    ) )  result = execute_signal_object( element );
     //else
-    if( element.nodeName_is( "config"           ) )  result = execute_config( element, xml_mod_time );
+    if( element.nodeName_is( "config"           ) )  result = execute_config( element );
     else
     if( element.nodeName_is( "show_job_chains"  ) )  result = execute_show_job_chains( element, show );
     else
@@ -1317,26 +1339,6 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
         if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );
 
-        if( _spooler->_web_services->need_authorization()  &&  !_spooler->_web_services->is_request_authorized( http_request ) )
-        {
-            // 2007-08-24  Dank an Michael Collard, iinet.net.au.
-
-            http_response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
-            http_response->set_status( http::status_401_permission_denied );
-
-            response_content_type = "text/html";
-            response_body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"
-                            "<HTML>"
-                            "<HEAD><TITLE>401 Authorization Required</TITLE></HEAD>"
-                            "<BODY>"
-                             "<H1>Authorization Required</H1>"
-                             "This server could not verify that you are authorized to access the document requested. "
-                             "Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
-                             "<P>"
-                             "</BODY>"
-                             "</HTML>";
-        }
-        else
         if( http_request->_http_cmd == "GET" )
         {
             if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state
@@ -1351,7 +1353,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                 http_response->set_header( "Cache-Control", "no-cache" );
                 //if( _log )  _log->info( message_string( "SCHEDULER-932", _request ) );
 
-                response_body = execute( xml, Time::now(), true );
+                response_body = execute( xml, true );
 
                 response_content_type = "text/xml";
             }
@@ -1597,7 +1599,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
         else
         if( http_request->_http_cmd == "POST" )
         {
-            response_body = execute( http_request->_body, Time::now(), true );
+            response_body = execute( http_request->_body, true );
             response_content_type = "text/xml";
         }
         else
@@ -1606,7 +1608,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
         if( response_body.empty() )
         {
-            response_body = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+            response_body = execute( "<show_state what=\"all,orders\"/>", true );
             response_content_type = "text/xml";
         }
     }
@@ -1622,7 +1624,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
 //------------------------------------------------------------------------Command_processor::execute
 
-ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
+ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, bool indent )
 {
     try 
     {
@@ -1631,7 +1633,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
         string xml_text = xml_text_par;
         if( strchr( xml_text.c_str(), '<' ) == NULL )  xml_text = "<" + xml_text + "/>";
 
-        execute_2( xml_text, xml_mod_time );
+        execute_2( xml_text );
 
         if( !_answer.documentElement().firstChild().hasChildNodes()  &&  !_response )  z::throw_xc( "SCHEDULER-353" );
     }
@@ -1650,19 +1652,19 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
 
 //------------------------------------------------------------------------Command_processor::execute
 
-string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
+string Command_processor::execute( const string& xml_text_par, bool indent )
 {
-    return response_execute( xml_text_par, xml_mod_time, indent )->complete_text();
+    return response_execute( xml_text_par, indent )->complete_text();
 }
 
 //------------------------------------------------------------------------Command_processor::execute
 
-xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document, const Time& xml_mod_time )
+xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document )
 {
     try 
     {
         _error = NULL;
-        execute_2( command_document, xml_mod_time );
+        execute_2( command_document );
     }
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
@@ -1680,8 +1682,7 @@ void Command_processor::execute_config_file( const string& filename )
     {
         _source_filename = filename;
 
-        Time   xml_mod_time = modification_time_of_file( filename );
-        string content      = string_from_file( filename );
+        string content = string_from_file( filename );
 
         Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
 
@@ -1689,7 +1690,7 @@ void Command_processor::execute_config_file( const string& filename )
         dom_document.select_node_strict( "/spooler/config" );
 
         _dont_log_command = true;
-        execute_2( dom_document, xml_mod_time );
+        execute_2( dom_document );
     }
     catch( zschimmer::Xc& x )
     {
@@ -1722,18 +1723,18 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
 
 //----------------------------------------------------------------------Command_processor::execute_2
 
-void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
+void Command_processor::execute_2( const string& xml_text )
 {
     try 
     {
-        execute_2( dom_from_xml( xml_text ), xml_mod_time );
+        execute_2( dom_from_xml( xml_text ) );
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 }
 
 //----------------------------------------------------------------------Command_processor::execute_2
 
-void Command_processor::execute_2( const xml::Document_ptr& command_doc, const Time& xml_mod_time )
+void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 {
     try 
     {
@@ -1745,7 +1746,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
             _spooler->_schema.validate( command_doc );
         }
 
-        execute_2( command_doc.documentElement(), xml_mod_time );
+        execute_2( command_doc.documentElement() );
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
@@ -1755,7 +1756,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc, const T
 
 //---------------------------------------------------------------------Command_processor::execute_2
 
-void Command_processor::execute_2( const xml::Element_ptr& element, const Time& xml_mod_time )
+void Command_processor::execute_2( const xml::Element_ptr& element )
 {
     xml::Element_ptr e = element;
 
@@ -1770,11 +1771,11 @@ void Command_processor::execute_2( const xml::Element_ptr& element, const Time& 
     {
         if( e.nodeName_is( "commands" )  ||  e.nodeName_is( "command" )  ||  e.nodeName_is( "cluster_member_command" ) )
         {
-            execute_commands( e, xml_mod_time );
+            execute_commands( e );
         }
         else
         {
-            xml::Element_ptr response_element = execute_command( e, xml_mod_time );
+            xml::Element_ptr response_element = execute_command( e );
             
             if( !response_element  &&  !_response )  z::throw_xc( "SCHEDULER-353", e.nodeName() );
         }
@@ -1791,11 +1792,11 @@ void Command_processor::execute_2( const xml::Element_ptr& element, const Time& 
 
 //--------------------------------------------------------------Command_processor::execute_commands
 
-void Command_processor::execute_commands( const xml::Element_ptr& commands_element, const Time& xml_mod_time )
+void Command_processor::execute_commands( const xml::Element_ptr& commands_element )
 {
     DOM_FOR_EACH_ELEMENT( commands_element, node )
     {
-        xml::Element_ptr response_element = execute_command( node, xml_mod_time );
+        xml::Element_ptr response_element = execute_command( node );
         if( !response_element )  z::throw_xc( "SCHEDULER-353", node.nodeName() );
     }
 }

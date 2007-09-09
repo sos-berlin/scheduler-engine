@@ -742,7 +742,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
   private:
     Thread_semaphore           _lock;
-    Job_chain*                 _job_chain;
+    Job_chain*       _job_chain;
 };
 
 //-------------------------------------------------------------------------------Com_job_chain_node

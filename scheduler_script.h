@@ -10,7 +10,7 @@ namespace scheduler {
 
 struct Scheduler_script_interface : Object, Subsystem
 {
-    virtual void                set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time ) = 0;
+    virtual void                set_dom_script              ( const xml::Element_ptr& script_element ) = 0;
 
     virtual Module*             module                      ()                                      = 0;
     virtual Module_instance*    module_instance             ()                                      = 0;

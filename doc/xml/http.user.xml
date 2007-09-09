@@ -30,6 +30,10 @@
                     Die MD5-Summe besteht nur aus den Hexadezimalziffern 0-9, a-f und A-F und ist 32 Zeichen lang.
                 </p>
             </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-427"/>
+            </messages>
         </xml_attribute>
     </xml_attributes>
 

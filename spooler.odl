@@ -1018,8 +1018,8 @@ library Spooler
         [id(1),propget]
         HRESULT                 Length                  ( [out,retval] int* Result );
 
-        [id(2)]
-        HRESULT                 Add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
+      //[id(2)]
+      //HRESULT                 Add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
     }
 
     [

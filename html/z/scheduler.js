@@ -248,13 +248,12 @@ Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, 
         var value   = element.getAttribute( attribute_name );
         if( value )
         {
-            element.setAttribute( attribute_name + "__xslt_datetime"               , xslt_format_datetime     ( value, now ) );
-            element.setAttribute( attribute_name + "__xslt_datetime_diff"          , xslt_format_datetime_diff( value, now, false ) );
-            element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff( value, now, false ) );
-            element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff( value, now, true ) );
-            element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time ( value, now ) );
+            element.setAttribute( attribute_name + "__xslt_datetime"               , xslt_format_datetime              ( value, now ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_diff"          , xslt_format_datetime_diff         ( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff    ( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff    ( value, now, true ) );
+            element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time          ( value, now ) );
             element.setAttribute( attribute_name + "__xslt_date_or_time_with_diff" , xslt_format_date_or_time_with_diff( value, now ) );
-
         }
     }
 }
@@ -512,7 +511,7 @@ function date_from_datetime( datetime )
                          1*datetime.substr( 14, 2 ),
                          1*datetime.substr( 17, 2 ),
                          datetime.length < 23? 0 : 1*datetime.substr( 20, 3 ) );
-
+                         
     return date;
 }
 

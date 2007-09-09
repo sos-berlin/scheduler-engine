@@ -20,10 +20,12 @@ namespace sos {
 namespace scheduler {
 namespace order {
 
+using namespace job_chain;
+
 //--------------------------------------------------------------------------------------------const
 
 const string    scheduler_file_path_variable_name         = "scheduler_file_path";
-const string    file_order_sink_job_name                  = "scheduler_file_order_sink";
+const string    file_order_sink_job_path                  = "scheduler_file_order_sink";
 const int       delay_after_error_default                 = INT_MAX;
 const int       file_order_sink_job_idle_timeout_default  = 60;
 const int       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
@@ -143,10 +145,10 @@ struct File_order_sink_module_instance : Internal_module_instance
         }
         else
         {
-            Job_chain_node* job_chain_node = order->job_chain_node();
-            if( !job_chain_node )  z::throw_xc( __FUNCTION__ );
+            Sink_node* sink_node = Sink_node::cast( order->job_chain_node() );
+            if( !sink_node )  z::throw_xc( __FUNCTION__ );
 
-            if( !file_exists( path ) )
+            if( !path.file_exists() )
             {
                 _log->warn( message_string( "SCHEDULER-339", path ) );
                 result = false;
@@ -155,16 +157,16 @@ struct File_order_sink_module_instance : Internal_module_instance
             {
                 try
                 {
-                    if( job_chain_node->_file_order_sink_move_to != "" ) 
+                    if( sink_node->file_order_sink_move_to() != "" )
                     {
-                        order->log()->info( message_string( "SCHEDULER-980", path, job_chain_node->_file_order_sink_move_to ) );
+                        order->log()->info( message_string( "SCHEDULER-980", path, sink_node->file_order_sink_move_to() ) );
 
-                        path.move_to( job_chain_node->_file_order_sink_move_to );
+                        path.move_to( sink_node->file_order_sink_move_to() );
 
                         result = true;
                     }
                     else
-                    if( job_chain_node->_file_order_sink_remove )                
+                    if( sink_node->file_order_sink_remove() )
                     {
                         order->log()->info( message_string( "SCHEDULER-979", path ) );
 
@@ -212,9 +214,9 @@ struct File_order_sink_module : Internal_module
 
 struct File_order_sink_job : Internal_job
 {
-    File_order_sink_job( Spooler* spooler )
+    File_order_sink_job( Scheduler* scheduler )
     :
-        Internal_job( file_order_sink_job_name, +Z_NEW( File_order_sink_module( spooler ) ) )
+        Internal_job( scheduler, file_order_sink_job_path, +Z_NEW( File_order_sink_module( scheduler ) ) )
     {
     }
 };
@@ -229,7 +231,7 @@ void init_file_order_sink( Scheduler* scheduler )
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
 
-    scheduler->job_subsystem()->add_job( +file_order_sink_job, true );
+    scheduler->root_folder()->job_folder()->add_job( +file_order_sink_job, true );
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)
@@ -296,7 +298,7 @@ void Directory_file_order_source::close()
     _job_chain = NULL;   // close() wird von ~Job_chain gerufen, also kann Job_chain ungültig sein
 }
 
-//-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
+//-------------------------------------------------------------xml::Element_ptr Node::xml
 
 xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
@@ -483,8 +485,13 @@ void Directory_file_order_source::finish()
 
 void Directory_file_order_source::start()
 {
-    Job* next_job = _next_order_queue->job();
-    if( next_job->name() == file_order_sink_job_name )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
+    Job* next_job = NULL;
+
+    if( Job_node* job_node = Job_node::try_cast( _next_order_queue->order_queue_node() ) )
+    {
+        if( job_node->normalized_job_path() == file_order_sink_job_path )  z::throw_xc( "SCHEDULER-342", _job_chain->obj_name() );
+        next_job = job_node->job_or_null();
+    }
 
     _expecting_request_order = true;            // Auf request_order() warten
     set_async_next_gmtime( double_time_max );
@@ -493,7 +500,7 @@ void Directory_file_order_source::start()
     set_async_manager( _spooler->_connection_manager );
 
 
-    if( next_job->state() > Job::s_not_initialized )  next_job->calculate_next_time( Time::now() );     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
+    if( next_job  &&  next_job->state() > Job::s_not_initialized )  next_job->calculate_next_time( Time::now() );     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)
 }
 
 //-------------------------------------------------------Directory_file_order_source::request_order
@@ -626,7 +633,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
             try
             {
-                if( file_exists( path )  &&  !_job_chain->order_or_null( path ) )
+                if( path.file_exists()  &&  !_job_chain->order_or_null( path ) )
                 {
                     if( !known_orders_has_been_read )   // Eine Optimierung: Damit try_place_in_job_chain() nicht bei jeder Datei feststellen muss, dass es bereits einen Auftrag in der Datenbank gibt.
                     {
@@ -657,7 +664,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
                     {
                         ok = order->db_occupy_for_processing();
 
-                        if( !file_exists( path ) )
+                        if( !path.file_exists() )
                         {
                             // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
                             order->db_release_occupation(); 

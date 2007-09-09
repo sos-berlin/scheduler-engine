@@ -44,18 +44,22 @@ void Task_subsystem::close()
 
 void Task_subsystem::build_prioritized_order_job_array()
 {
-    if( _prioritized_order_job_array_version != _spooler->order_subsystem()->job_chain_map_version() )        // Ist eine neue Jobkette hinzugekommen?
+    if( _prioritized_order_job_array_job_chain_map_version != _spooler->order_subsystem()->file_based_map_version() 
+     || _prioritized_order_job_array_job_map_version       != _spooler->job_subsystem()->file_based_map_version()   )
     {
+        // Ist eine neue Jobkette oder Job hinzu- oder weggekommen?
+
         _prioritized_order_job_array.clear();
 
-        for( Job_list::iterator j = _spooler->job_subsystem()->_job_list.begin(); j != _spooler->job_subsystem()->_job_list.end(); j++ )
+        FOR_EACH_JOB( job )
         {
-            if( (*j)->order_controlled() )  _prioritized_order_job_array.push_back( *j );
+            if( job->is_in_job_chain() )  _prioritized_order_job_array.push_back( job );
         }
 
         sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
 
-        _prioritized_order_job_array_version = _spooler->order_subsystem()->job_chain_map_version();
+        _prioritized_order_job_array_job_chain_map_version = _spooler->order_subsystem()->file_based_map_version();
+        _prioritized_order_job_array_job_map_version       = _spooler->job_subsystem()->file_based_map_version();
         //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
     }
 }
@@ -110,38 +114,38 @@ void Task_subsystem::remove_ended_tasks()
         _task_closed = false;
 
 
-#       if defined Z_DEBUG && defined Z_WINDOWS
-        // Könnte eine hübsche Klasse werden.
-        if( _spooler->_check_memory_leak )
-        {
-            static bool         first = true;
-            static _CrtMemState memory_state;
-
-            if( !_spooler->has_any_task()  &&  !_spooler->has_any_order() )     // Scheduler im Leerlauf?
-            {
-                if( first ) 
-                {
-                    first = false;
-                    _CrtMemCheckpoint( &memory_state );
-                }
-                else
-                {
-                    Z_LOGI2( "scheduler", "Checking for memory leak\n" );
-                    _CrtMemState new_memory_state;
-                    _CrtMemState memory_state_difference;
-
-                    _CrtMemCheckpoint( &new_memory_state );
-                    int are_significantly_different = _CrtMemDifference( &memory_state_difference, &memory_state, &new_memory_state );
-                    if( are_significantly_different )
-                    {
-                        _CrtMemDumpStatistics( &memory_state_difference );
-                        _CrtMemDumpAllObjectsSince( &memory_state );
-                        _CrtMemCheckpoint( &memory_state );
-                    }
-                }
-            }
-        }
-#       endif
+//#       if defined Z_DEBUG && defined Z_WINDOWS
+//        // Könnte eine hübsche Klasse werden.
+//        if( _spooler->_check_memory_leak )
+//        {
+//            static bool         first = true;
+//            static _CrtMemState memory_state;
+//
+//            if( !_spooler->has_any_task()  &&  !_spooler->has_any_order() )     // Scheduler im Leerlauf?
+//            {
+//                if( first ) 
+//                {
+//                    first = false;
+//                    _CrtMemCheckpoint( &memory_state );
+//                }
+//                else
+//                {
+//                    Z_LOGI2( "scheduler", "Checking for memory leak\n" );
+//                    _CrtMemState new_memory_state;
+//                    _CrtMemState memory_state_difference;
+//
+//                    _CrtMemCheckpoint( &new_memory_state );
+//                    int are_significantly_different = _CrtMemDifference( &memory_state_difference, &memory_state, &new_memory_state );
+//                    if( are_significantly_different )
+//                    {
+//                        _CrtMemDumpStatistics( &memory_state_difference );
+//                        _CrtMemDumpAllObjectsSince( &memory_state );
+//                        _CrtMemCheckpoint( &memory_state );
+//                    }
+//                }
+//            }
+//        }
+//#       endif
     }
 }
 
@@ -154,11 +158,9 @@ bool Task_subsystem::step( const Time& now )
 
     if( !something_done )
     {
-        Z_FOR_EACH( Job_list, _spooler->job_subsystem()->_job_list, j )
+        FOR_EACH_JOB( job )
         {
-            Job* job = *j;
-            
-            if( job->order_controlled() )
+            if( job->is_in_job_chain() )
             {
                 // Dieser Job ist in _prioritized_order_job_array und wird unten fortgesetzt.
             }
@@ -248,7 +250,8 @@ bool Task_subsystem::step( const Time& now )
 
 bool Task_subsystem::is_ready_for_termination()
 {
-    if( _spooler->state() == Spooler::s_stopping_let_run  &&  !_spooler->has_any_order() ) 
+    if( _spooler->state() == Spooler::s_stopping_let_run  &&  
+        ( !_spooler->order_subsystem()  ||  _spooler->order_subsystem()->has_any_order() ) )
     {
         if( _task_list.size() == 0 )  return true;
     }
@@ -303,9 +306,9 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
 */
     vector<Job*> prioritized_order_job_array;
 
-    for( Job_list::iterator j = _spooler->job_subsystem()->_job_list.begin(); j != _spooler->job_subsystem()->_job_list.end(); j++ )
+    FOR_EACH_JOB( job )
     {
-        if( (*j)->order_controlled() )  prioritized_order_job_array.push_back( *j );
+        if( job->is_in_job_chain() )  prioritized_order_job_array.push_back( job );
     }
 
     sort( prioritized_order_job_array.begin(), prioritized_order_job_array.end(), Job::higher_job_chain_priority );

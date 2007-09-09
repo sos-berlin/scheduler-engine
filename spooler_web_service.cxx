@@ -217,8 +217,8 @@ bool Web_services::subsystem_initialize()
 
     Command_processor command_processor ( _spooler, Security::seclev_all );
 
-    command_processor.execute_2( job_xml      , Time::now() );
-    command_processor.execute_2( job_chain_xml, Time::now() );
+    command_processor.execute_2( job_xml       );
+    command_processor.execute_2( job_chain_xml );
 
     
     _subsystem_state = subsys_initialized;
@@ -411,7 +411,7 @@ void Web_service::check()
 
 //-----------------------------------------------------------------------------Web_service::set_dom
     
-void Web_service::set_dom( const xml::Element_ptr& element, const Time& )
+void Web_service::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
 

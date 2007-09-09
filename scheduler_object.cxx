@@ -20,6 +20,8 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_database_order_detector:      return "Database_order_detector";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
         case type_directory_file_order_source:  return "Directory_file_order_source";
+        case type_folder:                       return "Folder";
+        case type_folder_subsystem:             return "Folder_subsystem";
         case type_heart_beat:                   return "Heart_beat";
         case type_heart_beat_watchdog_thread:   return "Heart_beat_watchdog_thread";
         case type_http_server:                  return "Http_server";
@@ -27,9 +29,13 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_java_subsystem:               return "Java_subsystem";
         case type_job:                          return "Job";
         case type_job_chain:                    return "Job_chain";
+        case type_job_chain_folder:             return "Job_chain_folder";
         case type_job_chain_group:              return "Job_chain_group";
+        case type_job_chain_node:               return "job_chain::Node";
+        case type_job_folder:                   return "Job_folder";
         case type_job_subsystem:                return "Job_subsystem";
         case type_lock:                         return "Lock";
+        case type_lock_folder:                  return "Lock_folder";
         case type_lock_holder:                  return "Lock.Holder";
         case type_lock_requestor:               return "Lock.Use";
         case type_lock_subsystem:               return "Lock_subsystem";
@@ -40,9 +46,12 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_web_service_response:         return "Web_service_response";
         case type_web_services:                 return "Web_services";
         case type_order:                        return "Order";
+        case type_order_folder:                 return "Order_folder";
+        case type_order_queue:                  return "Order_queue";
         case type_order_subsystem:              return "Order_subsystem";
         case type_process:                      return "Process";
         case type_process_class:                return "Process_class";
+        case type_process_class_folder:         return "Process_class_folder";
         case type_process_class_subsystem:      return "Process_class_subsystem";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
@@ -88,6 +97,26 @@ IDispatch* Scheduler_object::idispatch()
 void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
 {
     Z_DEBUG_ONLY( assert( !"Scheduler_object::write_element_attributes" ) );
+}
+
+//---------------------------------------------Scheduler_object::complain_about_non_empty_attribute
+
+void Scheduler_object::complain_about_non_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
+{
+    if( element.getAttribute( attribute_name ) != "" )
+    {
+        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), attribute_name, element.getAttribute( attribute_name ) ) );
+    }
+}
+
+//---------------------------------------------------------Scheduler_object::assert_empty_attribute
+
+void Scheduler_object::assert_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
+{
+    if( element.getAttribute( attribute_name ) != "" )
+    {
+        z::throw_xc( "SCHEDULER-232", element.nodeName(), attribute_name, element.getAttribute( attribute_name ) );
+    }
 }
 
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet

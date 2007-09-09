@@ -121,11 +121,14 @@ struct Show_calendar_options;
 struct Communication;
 struct Get_events_command_response;
 struct Job;
+struct Job_folder;
 struct Job_subsystem_interface;
 struct Module;
 struct Module_instance;
+struct Order_folder_interface;
 struct Process;
 struct Process_class;
+struct Process_class_folder;
 struct Remote_scheduler_interface;
 struct Scheduler_object;
 struct Scheduler_event;
@@ -148,19 +151,31 @@ struct Xslt_stylesheet;
 
 namespace lock
 {
-    struct Lock_subsystem;
-    struct Lock;
-    struct Requestor;
     struct Holder;
+    struct Lock;
+    struct Lock_folder;
+    struct Lock_subsystem;
+    struct Requestor;
 }
 
 
 namespace order
 {
     struct Job_chain;
+    struct Job_chain_folder_interface;
+  //struct Job_chain_folder;
     struct Order_queue;
     struct Order;
     struct Order_subsystem_interface;
+
+    namespace job_chain
+    {
+        struct Nested_job_chain_node;
+        struct Node;
+        struct Job_node;
+        struct Order_queue_node;
+        struct Sink_node;
+    }
 }
 using namespace order;
 
@@ -194,6 +209,7 @@ typedef stdext::hash_set<string> String_set;
 #include "subsystem.h"
 #include "register.h"
 #include "scheduler_script.h"
+#include "folder.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
@@ -235,7 +251,6 @@ extern Spooler*                 spooler_ptr;
 
 //-------------------------------------------------------------------------------------------------
 
-//Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
 int                             read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt );
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
@@ -349,7 +364,7 @@ struct Spooler : Object,
     void                        abort_now                   ( bool restart = false );
     void                        kill_all_processes          ();
 
-    void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
+    void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
     void                        execute_state_cmd           ();
     bool                        is_termination_state_cmd    ();
 
@@ -360,10 +375,8 @@ struct Spooler : Object,
 
     void                        load_arg                    ();
     void                        load                        ();
-    void                        load_config                 ( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename );
+    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
     void                        set_next_daylight_saving_transition();
-
-  //void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
@@ -395,7 +408,7 @@ struct Spooler : Object,
     bool                        is_cluster                  () const                            { return _cluster != NULL; }
     bool                        is_active                   ();
     bool                        has_exclusiveness           ();
-    bool                        are_orders_distributed      ();
+    bool                        orders_are_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
   //void                        assert_has_exclusiveness    ( const string& message_text );
     string                      cluster_member_id           ();
@@ -422,6 +435,9 @@ struct Spooler : Object,
     void                        end_dont_suspend_machine    ();
     void                        suspend_machine             ();
 
+  //Folder*                     folder                      ( const string& path )              { return _folder_subsystem->folder( path ); }
+    Folder*                     root_folder                 ()                                  { return _folder_subsystem->root_folder(); }
+
     Database*                   db                          ()                                  { return _db; }
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
@@ -436,8 +452,13 @@ struct Spooler : Object,
     Order_subsystem_interface*  order_subsystem             ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
+
+    Process_class_subsystem*    subsystem                   ( Process_class* ) const            { return _process_class_subsystem; }
+    lock::Lock_subsystem*       subsystem                   ( lock::Lock* ) const               { return _lock_subsystem; }
+    Job_subsystem_interface*    subsystem                   ( Job* ) const                      { return _job_subsystem; }
+    Order_subsystem_interface*  subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
+
     Supervisor_client_interface*supervisor_client           ();
-    bool                        has_any_order               ();
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
@@ -537,6 +558,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+    ptr<Folder_subsystem>            _folder_subsystem;
     ptr<Process_class_subsystem>     _process_class_subsystem;
     ptr<Job_subsystem_interface>     _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
@@ -558,9 +580,10 @@ struct Spooler : Object,
     ptr<object_server::Connection_manager>  _connection_manager;
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
-    string                     _config_filename;            // -config=
+    file::File_path            _configuration_file_path;            // -config=
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
+    file::File_path            _configuration_directory;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
@@ -577,7 +600,6 @@ struct Spooler : Object,
 
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
-    Time                       _config_element_mod_time;    // Modification time
     string                     _config_source_filename;     // Für cmd_load_config(), der Dateiname der Quelle
 
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element

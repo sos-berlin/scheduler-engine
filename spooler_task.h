@@ -112,6 +112,7 @@ struct Task : Object,
 
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
+    void                        move_to_new_job             ( Job* new_job )                        { assert( _state == s_none );  _job = new_job; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     xml::Document_ptr           dom                         ( const Show_what& ) const;
 

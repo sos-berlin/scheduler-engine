@@ -19,7 +19,7 @@ struct Registered : IUnknown,
                                 Registered                  ( Register*, IUnknown*, Scheduler_object::Type_code, const string& name = "" );
                                ~Registered                  ();
 
-    virtual void                prepare_remove              ()                                      = 0;
+    virtual void                prepare_to_remove           ()                                      = 0;
 
     virtual void            set_name                        ( const string& );
     string                      name                        () const                                { return _name; }
@@ -129,7 +129,7 @@ struct reg : Register
 
         if( it->second != registered )  z::throw_xc( "SCHEDULER-418", registered->obj_name() );
 
-        registered->prepare_remove();
+        registered->prepare_to_remove();
         _registered_map.erase( it );
     }
 

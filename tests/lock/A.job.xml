@@ -1,0 +1,25 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+     
+     tasks="2"
+>
+    <lock.use lock="Georgien"/>
+    <lock.use lock="Venezuela"/>
+
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{
+spooler.job( "B" ).execute_command( "stop" );
+
+var hostware = new ActiveXObject( "hostware.global" );
+hostware.sleep( 10 );
+return false;
+}
+
+    ]]>
+    </script>
+
+    <run_time once="yes" repeat="10"/>
+
+</job>

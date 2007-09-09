@@ -40,7 +40,7 @@
             </description>
 
             <messages>
-                <message level="error" code="SCHEDULER-402"/>
+                <message level="warn" code="SCHEDULER-887"/>
                 <!--message code="SCHEDULER-854" level="error"/   sollte nie auftreten -->
             </messages>
         </xml_attribute>

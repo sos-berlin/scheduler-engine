@@ -14,6 +14,7 @@ const int                       recommended_response_block_size = Z_NDEBUG_DEBUG
 
 //-------------------------------------------------------------------------------------------------
 
+xml::Element_ptr                create_error_element        ( const xml::Document_ptr&, const zschimmer::Xc&, time_t = 0 );
 xml::Element_ptr                create_error_element        ( const xml::Document_ptr&, const Xc_copy&, time_t gmt = 0 );
 
 //-----------------------------------------------------------------------------------Show_what_enum
@@ -94,6 +95,7 @@ struct Show_calendar_options
 //-------------------------------------------------------------------------------------------------
 
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
+void                            append_error_element        ( const xml::Element_ptr&, const zschimmer::Xc& );
 Xc_copy                         xc_from_dom_error           ( const xml::Element_ptr& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
 string                          xml_as_string               ( const xml::Document_ptr&, bool indent = false );
@@ -241,19 +243,19 @@ struct Command_processor
 
     void                        execute_config_file         ( const string& xml_filename );
     void                        execute_http                ( http::Operation*, Http_file_directory* );
-    ptr<Command_response>       response_execute            ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
-    string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
-    xml::Document_ptr           execute                     ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
-    void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time = Time::now() );
-    void                        execute_2                   ( const xml::Document_ptr&, const Time& xml_mod_time = Time::now() );
-    void                        execute_2                   ( const xml::Element_ptr& , const Time& xml_mod_time = Time::now() );
+    ptr<Command_response>       response_execute            ( const string& xml_text, bool indent = false );
+    string                      execute                     ( const string& xml_text, bool indent = false );
+    xml::Document_ptr           execute                     ( const xml::Document_ptr& );
+    void                        execute_2                   ( const string& xml_text );
+    void                        execute_2                   ( const xml::Document_ptr& );
+    void                        execute_2                   ( const xml::Element_ptr& );
     xml::Document_ptr           dom_from_xml                ( const string& xml_text );
-    void                        execute_commands            ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        execute_commands            ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
     void                        begin_answer                ();
     void                        append_error_to_answer      ( const exception& );
     void                        append_error_to_answer      ( const Xc& );
-    xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
+    xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
     void                        set_log                     ( Has_log* log )                        { _log = log; }     // Optional
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );

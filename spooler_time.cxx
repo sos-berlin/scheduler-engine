@@ -401,7 +401,7 @@ string Time::as_string( With_ms with ) const
 {
     string result;
 
-    result.reserve( 27 );  // yyyy-mm-dd hh:mm:ss.mmm GMT
+    result.reserve( 27 );  // yyyy-mm-dd hh:mm:ss.mmm UTC
 
     if( is_never() )
     {
@@ -427,7 +427,7 @@ string Time::as_string( With_ms with ) const
         else
         {
             result = Sos_optional_date_time( uint(_time) ).as_string() + bruch;
-            if( _is_utc )  result += " UTC";
+            if( _is_utc )  result += " UTC";    // xml_value() macht hieraus "Z"
         }
     }
 
@@ -451,6 +451,8 @@ string Time::xml_value( With_ms with ) const
     {
         str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
     }
+
+    if( string_ends_with( str, " UTC" ) )  str.replace( 23, 4, "Z" );
 
     return str;
 }
@@ -1148,7 +1150,7 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
 
                 try
                 {
-                    if( !file.is_absolute_path() )  file.prepend_directory( directory_of_path( _spooler->_config_filename ) );
+                    if( !file.is_absolute_path() )  file.prepend_directory( _spooler->_configuration_file_path.directory() );
                     
                     string xml_text = string_from_file( file );
                     Z_LOG2( "scheduler", __FUNCTION__ << "  " << xml_text << "\n" );

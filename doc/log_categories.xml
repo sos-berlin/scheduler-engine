@@ -80,7 +80,7 @@
         <log_category name="file_order"                         title="&lt;file_order_source>"/>
         <log_category name="http"                               title="HTTP-Server"/>
         <log_category name="log"                                title="Zugriffe auf die Protokolldateien"/>
-        <log_category name="loop"           local_default="off" title="Mikrozyklus des Schedulers"/>
+     <!--log_category name="loop"           local_default="off" title="Mikrozyklus des Schedulers"/-->
         <log_category name="order"          local_default="on"  title="Operation auf Aufträge (zurzeit Setzen der Payload)"/>
         <log_category name="wait"                               title="Wenn der Scheduler in den Wartezustand geht"/>
         <log_category name="xml"                                title="XML/DOM-Operationen"/>

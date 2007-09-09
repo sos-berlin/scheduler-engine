@@ -81,134 +81,9 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
     return text_element.nodeValue();
 }
 
-//-----------------------------------------------------------------------text_from_xml_with_include
-
-//Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const Time& mod_time, const string& include_path )
-//{
-//    Source_with_parts result;
-//    string text;
-//    string inc              = include_path;
-//    int    linenr_base      = element.line_number(); //? element.line_number() - 1 : 0;
-//
-//    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
-//
-//
-//    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
-//    {
-//        if( n.line_number() )  linenr_base = n.line_number();
-//
-//        string text;
-//
-//        switch( n.nodeType() )
-//        {
-//            case xml::CDATA_SECTION_NODE:
-//            {
-//                xml::CDATASection_ptr c = n;
-//                text = c.data();
-//                goto TEXT;
-//            }
-//
-//            case xml::TEXT_NODE:
-//            {
-//                xml::Text_ptr t = n;
-//                text = t.data();
-//                goto TEXT;
-//            }
-//
-//            TEXT:
-//              //result.add( n.line_number(), text, mod_time );
-//                result.add( linenr_base, text, mod_time );
-//                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
-//                break;
-//
-//            case xml::ELEMENT_NODE:     // <include file="..."/>
-//            {
-//                xml::Element_ptr e = n;
-//                string filename = subst_env( e.getAttribute( "file" ) );
-//
-//                if( filename.length() >= 1 ) 
-//                {
-//                    if( filename[0] == '\\' 
-//                     || filename[0] == '/' 
-//                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
-//                    else  
-//                    {
-//                        filename = inc + filename;
-//                    }
-//                }
-//
-//                result.add( 0, string_from_file( filename ), modification_time_of_file( filename ) );
-//                break;
-//            }
-//
-//            default: ;
-//        }
-//    }
-//
-//    return result;
-//}
-
-//------------------------------------------------------------------------Object_set_class::set_dom
-
-//void Object_set_class::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
-//{
-//    _name = element.getAttribute( "name" );
-//
-//    string iface = element.getAttribute( "script_interface", "oo" );
-//    _object_interface = iface == "oo";
-//
-//    DOM_FOR_EACH_ELEMENT( element, e )
-//    {
-//        if( e.nodeName_is( "script" ) )
-//        {
-//            _module.set_dom( e, xml_mod_time, _spooler->include_path() );
-//        }
-//        else
-//        if( e.nodeName_is( "level_decls" ) )
-//        {
-//            DOM_FOR_EACH_ELEMENT( e, e2 )
-//            {
-//                if( e2.nodeName_is( "level_decl" ) )
-//                {
-//                    int    level = e2.int_getAttribute( "level", 0 );
-//                    string name  = e2.getAttribute( "name" );
-//
-//                    _level_map[ level ] = name;
-//                }
-//            }
-//        }
-//    }
-//}
-
-//--------------------------------------------------------------------------Level_interval::set_dom
-
-//void Level_interval::set_dom( const xml::Element_ptr& element )
-//{
-//    _low_level  = as_int( element.getAttribute( "low" ) );
-//    _high_level = as_int( element.getAttribute( "high" ) );
-//}
-
-//------------------------------------------------------------------------Object_set_descr::set_dom
-
-//void Object_set_descr::set_dom( const xml::Element_ptr& element )
-//{ 
-//    _class_name     = element.getAttribute( "class" );
-//    _level_interval.set_dom( single_element( element, "levels" ) );
-//}
-
-//--------------------------------------------------------Spooler::load_object_set_classes_from_xml
-
-//void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element, const Time& xml_mod_time )
-//{
-//    DOM_FOR_EACH_ELEMENT( element, e )
-//    {
-//        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, _log, e, xml_mod_time ) ) );
-//    }
-//}
-
 //-----------------------------------------------------------------------------Spooler::load_config
 
-void Spooler::load_config( const xml::Element_ptr& config_element, const Time& xml_mod_time, const string& source_filename )
+void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename )
 {
     //config_element.ownerDocument().validate_dtd_string( dtd_string );  // Nur <spooler> <config> validieren, nicht die Kommandos. Deshalb hier (s. spooler_command.cxx)
 
@@ -297,12 +172,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 _cluster_configuration.set_dom( e );
             }
             else
-            //if( e.nodeName_is( "object_set_classes" ) )
-            //{
-            //    _object_set_class_list.clear();
-            //    load_object_set_classes_from_xml( &_object_set_class_list, e, xml_mod_time );
-            //}
-            //else
             if( e.nodeName_is( "holidays" ) )
             {
                 //2007-01-19  _holidays.clear();             int VIELLEICHT_BESSER_NICHT_LOESCHEN;
@@ -327,28 +196,29 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
             else
             if( e.nodeName_is( "process_classes" ) )
             {
-                if( !e.bool_getAttribute( "ignore", false )  &&  !_ignore_process_classes )
-                    process_class_subsystem()->set_dom( e );
+                _ignore_process_classes = e.bool_getAttribute( "ignore", _ignore_process_classes );
+                if( !_ignore_process_classes )
+                    root_folder()->process_class_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "locks" ) )
             {
-                _lock_subsystem->set_dom( e );
+                root_folder()->lock_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "script" ) )
             {
-                _scheduler_script->set_dom_script( e, xml_mod_time );
+                _scheduler_script->set_dom_script( e );
             }
             else
             if( e.nodeName_is( "jobs" ) )
             {
-                job_subsystem()->load_jobs_from_xml( e, xml_mod_time );
+                root_folder()->job_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "job_chains" ) )
             {
-                order_subsystem()->load_job_chains_from_xml( e );
+                root_folder()->job_chain_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "commands" ) )

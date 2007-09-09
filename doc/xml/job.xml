@@ -400,9 +400,8 @@
             </description>
 
             <messages>
-                <message level="error" code="SCHEDULER-229"/>
+             <!--message level="error" code="SCHEDULER-229"/-->
                 <message level="info" code="SCHEDULER-988"/>
-                <message level="info" code="SCHEDULER-989"/>
             </messages>
         </xml_attribute>
 

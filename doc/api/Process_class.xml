@@ -125,7 +125,7 @@
         
         <messages>
             <message code="SCHEDULER-861" level="info"/>
-            <message code="SCHEDULER-867" level="info"/>
+            <message code="SCHEDULER-989" level="info"/>
         </messages>
     </method>
 

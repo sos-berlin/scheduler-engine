@@ -21,7 +21,7 @@ struct Scheduler_script : Scheduler_script_interface
 
 
     // Scheduler_script_interface:
-    void                        set_dom_script              ( const xml::Element_ptr& script_element, const Time& xml_mod_time );
+    void                        set_dom_script              ( const xml::Element_ptr& script_element );
     Module*                     module                      ()                                      { return &_module; }
     Module_instance*            module_instance             ()                                      { return _module_instance; }
 
@@ -86,9 +86,9 @@ void Scheduler_script::close()
 
 //-----------------------------------------------------------------Scheduler_script::set_dom_script
 
-void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element, const Time& xml_mod_time )
+void Scheduler_script::set_dom_script( const xml::Element_ptr& script_element )
 {
-    _module.set_dom( script_element, xml_mod_time );
+    _module.set_dom( script_element );
 }
 
 //-----------------------------------------------------------Scheduler_script::subsystem_initialize

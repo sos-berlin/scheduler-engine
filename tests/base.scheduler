@@ -11,8 +11,6 @@
         <security>
             <allowed_host host="0.0.0.0" level="all"/>
         </security>
-
-        <process_classes/>
         
     </config>
 </spooler>

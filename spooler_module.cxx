@@ -210,7 +210,7 @@ Module::Module( Spooler* sp, const string& include_path, Prefix_log* log )
 
 //-----------------------------------------------------------------------------------Module::Module
     
-Module::Module( Spooler* sp, const xml::Element_ptr& e, const string& include_path, const Time& xml_mod_time )  
+Module::Module( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  
 : 
     _zero_(_end_),
     _spooler(sp),
@@ -218,7 +218,7 @@ Module::Module( Spooler* sp, const xml::Element_ptr& e, const string& include_pa
     _include_path(include_path)
 { 
     init0();
-    set_dom( e, xml_mod_time ); 
+    set_dom( e ); 
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -272,14 +272,12 @@ void Module::set_process()
 
 //----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )  
+void Module::set_dom( const xml::Element_ptr& element )  
 { 
     if( !element )  return;
 
     _text_with_includes.append_dom( element );
     //_dom_element_list.push_back( element );
-
-    _xml_mod_time = xml_mod_time;
 
     //_source.clear();  //clear();
 
@@ -955,6 +953,14 @@ Async_operation* Module_instance::release__start()
 void Module_instance::release__end()
 {
     //close();
+}
+
+//------------------------------------------------------------------------Module_instance::end_task
+
+void Module_instance::end_task()
+{
+    assert( _task );
+    if( _task )  _task->cmd_end();
 }
 
 //-------------------------------------------------------------------------------------------------

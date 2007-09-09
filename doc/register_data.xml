@@ -1390,7 +1390,6 @@
 </register_keyword>
 <register_keyword keyword='job'>
     <register_keyword_display><code>job=</code></register_keyword_display>
-    <register_entry register_file='xml/add_order.xml#attribute_job' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/at.xml#attribute_job' register_title='&lt;at&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/job.xml#attribute_job' register_title='&lt;job&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/lock.holder.xml#attribute_job' register_title='&lt;holder&gt; (Antwort)'  register_keyword='job' type='definition'/>

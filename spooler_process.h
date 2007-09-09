@@ -12,6 +12,7 @@ namespace scheduler {
 //-------------------------------------------------------------------------------------------------
 
 struct Process_class;
+struct Process_class_folder;
 struct Process_class_subsystem;
 
 //------------------------------------------------------------------------------------------Process
@@ -112,6 +113,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
     int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
     bool                     is_terminated                  ();
+    void                        end_task                    ();
     bool                        kill                        ();
     int                         exit_code                   ();
     int                         termination_signal          ();
@@ -122,7 +124,7 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
     bool                        is_remote_host              () const;
 
-    void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
     string                      short_name                  () const;
@@ -159,14 +161,12 @@ struct Process : zschimmer::Object, Scheduler_object
 //----------------------------------------------------------------------Process_class_configuration
 
 struct Process_class_configuration : idispatch_implementation< Process_class, spooler_com::Iprocess_class >,
-                                     Scheduler_object
+                                     file_based< Process_class_configuration, Process_class_folder, Process_class_subsystem >
 {
-                                Process_class_configuration ( Process_class_subsystem*, const string& name = "" );
+                                Process_class_configuration ( Scheduler*, const string& name = "" );
 
-
-    virtual void            set_name                        ( const string& );
-    string                      name                        () const                                { return _name; }
-    string                      path                        () const                                { return _name; }
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
 
     virtual void            set_max_processes               ( int );
     int                         max_processes               () const                                { return _max_processes; }
@@ -178,8 +178,6 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 
     bool                        is_remote_host              () const                                { return _remote_scheduler; }
 
-    bool                        is_added                    () const;
-    virtual void                remove                      ()                                      { z::throw_xc( "SCHEDULER-418", obj_name() ); }
     string                      obj_name                    () const;
 
     void                    set_dom                         ( const xml::Element_ptr& );
@@ -190,7 +188,7 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Process_class"; }
     STDMETHODIMP                Remove                      ();
     STDMETHODIMP            put_Name                        ( BSTR );
-    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( _name, result ); }
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
     STDMETHODIMP            put_Remote_scheduler            ( BSTR );
     STDMETHODIMP            get_Remote_scheduler            ( BSTR* result )                        { return String_to_bstr( _remote_scheduler.as_string(), result ); }
     STDMETHODIMP            put_Max_processes               ( int );
@@ -199,7 +197,6 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
   protected: 
     Fill_zero                  _zero_;
 
-    string                     _name;
     int                        _max_processes;
     Host_and_port              _remote_scheduler;
     // Neue Einstellungen in Process_class::set_configuration() berücksichtigen!
@@ -216,19 +213,26 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
 
 struct Process_class : Process_class_configuration
 {
-                                Process_class               ( Process_class_subsystem*, const string& name = "" );
+                                Process_class               ( Scheduler*, const string& name = "" );
     Z_GNU_ONLY(                 Process_class               (); )
                                ~Process_class               ();
 
 
+    // file_based<Process_class>
     void                        close                       ();
+    void                        initialize                  ();
+    void                        load                        ();
+    void                        activate                    ();
+
+    bool                        prepare_to_remove           ();
+    bool                        can_be_removed_now          ();
+    Process_class*              replace_now                 ();
+
+
     void                    set_configuration               ( const Process_class_configuration& );
     void                  check_max_processes               ( int ) const;
     void                    set_max_processes               ( int );
     void                  check_remote_scheduler            ( const Host_and_port& ) const;
-
-    bool                        prepare_remove              ();
-    bool                        is_removable_now            ();
 
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
@@ -240,16 +244,10 @@ struct Process_class : Process_class_configuration
     void                        remove_waiting_job          ( Job* );
     bool                        need_process                ();
     void                        notify_a_process_is_idle    ();
-    void                        remove                      ();
-
-    //void                        register_module             ( Remote_module_instance_proxy* module ){ _module_set.insert( module ); }
-    //void                      unregister_module             ( Remote_module_instance_proxy* module ){ _module_set.erase( module ); }
-    //bool                        is_any_module_registered    () const                                { return !_module_set.empty(); }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
-    
 
   private:
     friend struct               Process_class_subsystem;
@@ -263,10 +261,30 @@ struct Process_class : Process_class_configuration
     Process_set                _process_set;
 };
 
+//-----------------------------------------------------------------------------Process_class_folder
+
+struct Process_class_folder : typed_folder<Process_class>
+{
+                                Process_class_folder        ( Folder* );
+                               ~Process_class_folder        ();
+
+
+    // Typed_folder:
+    bool                        is_empty_name_allowed       () const                                { return true; }
+
+    void                        set_dom                     ( const xml::Element_ptr& );
+    void                        add_process_class           ( Process_class* process_class )        { add_file_based( process_class ); }
+    void                        remove_process_class        ( Process_class* process_class )        { remove_file_based( process_class ); }
+    Process_class*              process_class               ( const string& name )                  { return file_based( name ); }
+    Process_class*              process_class_or_null       ( const string& name )                  { return file_based_or_null( name ); }
+    xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+};
+
 //--------------------------------------------------------------------------Process_class_subsystem
 
 struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>, 
-                                 Subsystem
+                                 file_based_subsystem< Process_class >
 {
                                 Process_class_subsystem     ( Scheduler* );
 
@@ -276,20 +294,23 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
-    void                        add_process_class           ( Process_class*, bool replace = false );
-    void                        remove_process_class        ( Process_class* );
-    Process_class*              process_class               ( const string& name );
-    Process_class*              process_class_or_null       ( const string& name );
+    // file_based_subsystem< Process_class >
+    string                      object_type_name            () const                                { return "Process_class"; }
+    string                      filename_extension          () const                                { return ".process_class.xml"; }
+    string                      normalized_name             ( const string& name )                  { return name; }
+    File_based*                 object_by_path              ( const string& path );
+    ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
+
+    ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
+    Process_class*              process_class               ( const string& path )                  { return file_based( path ); }
+    Process_class*              process_class_or_null       ( const string& path )                  { return file_based_or_null( path ); }
     Process*                    new_temporary_process       ();
     Process_class*              temporary_process_class     ()                                      { return process_class( temporary_process_class_name ); }
-    bool                        has_process_classes         ()                                      { return _process_class_map.size() > 1; }   // Eine ist _temporary_process_class
+    bool                        has_process_classes         ()                                      { return _file_based_map.size() > 1; }   // Eine ist _temporary_process_class
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();
 
-    void                    set_dom                         ( const xml::Element_ptr& );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
 
     // spooler_com::Iprocess_classes
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -304,10 +325,6 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     Fill_zero                  _zero_;
 
   public:
-    typedef map< string, ptr<Process_class> > Process_class_map;
-    Process_class_map                        _process_class_map;
-
-
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
 };

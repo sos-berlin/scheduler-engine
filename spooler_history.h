@@ -103,7 +103,7 @@ struct Database : Object, Scheduler_object //Subsystem
     friend struct Transaction;
 
     void                        open2                   ( const string& db_name );
-    void                        open_history_table      ( Transaction* );
+    void                        open_history_table      ( Read_transaction* );
   //void                        get_history_table_table ();
     bool                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
     void                        handle_order_id_columns ( Transaction* );
@@ -147,6 +147,8 @@ struct Read_transaction
     void                        assert_is_commitable    ( const string& debug_text ) const;
 
     void                    set_log_sql                 ( bool b )                                  { _log_sql = b; }
+
+    void                        set_transaction_read    ()                                          {} //{ _transaction_read = true; } 
 
     Record                      read_single_record      ( const string& sql, const string& debug_text ) { return read_single_record( sql, debug_text, false ); }
     Any_file                    open_result_set         ( const string& sql, const string& debug_text ) { return open_result_set( sql, debug_text, false ); }
@@ -200,7 +202,6 @@ struct Transaction : Read_transaction
     void                        force_rollback          ( const string& debug_text )                { rollback( debug_text, ex_force ); }
   //void                        try_reopen_after_error  ();
     void                        set_transaction_written ()                                          {} //{ _transaction_written = true; }
-    void                        set_transaction_read    ()                                          {} //{ _transaction_read = true; } 
     void                        suppress_heart_beat_timeout_check()                                 { _suppress_heart_beat_timeout_check = true; }
     bool                        is_transaction_used     ()                                          { return db()->_db.is_transaction_used(); }
     bool                        need_commit_or_rollback ()                                          { return db()->_db.need_commit_or_rollback(); }
@@ -304,7 +305,7 @@ struct Job_history
   private:
     friend struct               Task_history;
 
-    void                        archive                 ( Archive_switch, const string& filename );
+    void                        archive                 ( Archive_switch, const File_path& filename );
 
 
     Fill_zero                  _zero_;
@@ -320,7 +321,7 @@ struct Job_history
     bool                       _error;
     bool                       _start_called;
 
-    string                     _filename;
+    file::File_path            _filename;
     string                     _type_string;            // _use_file:  -type=(...) tab ...
     zschimmer::file::File      _file;
     string                     _tabbed_record;

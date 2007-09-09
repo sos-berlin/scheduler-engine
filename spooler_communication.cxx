@@ -186,7 +186,7 @@ void Xml_operation::begin()
 
     //_connection->_log.info( message_string( "SCHEDULER-932", _request ) );
 
-    _response = command_processor.response_execute( _request, Time::now(), _operation_connection->_indent );
+    _response = command_processor.response_execute( _request, _operation_connection->_indent );
     _response->set_connection( _connection );
 
     //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // Für Windows-telnet
@@ -284,7 +284,7 @@ bool Communication::Udp_socket::async_continue_( Continue_flags )
                 //command_processor.set_host( host );
                 string cmd ( buffer, len );
                 _spooler->log()->info( message_string( "SCHEDULER-955", host.as_string(), cmd ) );
-                command_processor.execute( cmd, Time::now() );
+                command_processor.execute( cmd );
             }
             
             something_done = true;

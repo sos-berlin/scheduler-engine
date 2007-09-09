@@ -9,15 +9,31 @@ namespace sos {
 namespace scheduler {
 namespace order {
 
-struct Job_chain;
-struct Order_id_space;
-struct Job_chain_node;
-struct Order_id_spaces;
-struct Order_queue;
-struct Order;
-struct Order_subsystem;
 struct Database_order_detector;
 struct Directory_file_order_source;
+struct Job_chain;
+struct Job_chain_folder;
+struct Order;
+struct Order_id_space;
+struct Order_id_spaces;
+struct Order_queue;
+struct Order_subsystem;
+
+namespace job_chain
+{
+    struct End_node;
+    struct Node;
+    struct Job_node;
+    struct Nested_job_chain_node;
+    struct Order_queue_node;
+    struct Sink_node;
+};
+
+//-------------------------------------------------------------------------------FOR_EACH_JOB_CHAIN
+
+#define FOR_EACH_JOB_CHAIN( JOB_CHAIN )  \
+    Z_FOR_EACH( Order_subsystem_interface::File_based_map, spooler()->order_subsystem()->_file_based_map, __job_chain_iterator__ )  \
+        if( Job_chain* JOB_CHAIN = __job_chain_iterator__->second )
 
 //-------------------------------------------------------------------------------------------------
 
@@ -95,8 +111,7 @@ struct Order : Com_order,
     Job_chain*                  job_chain               () const;
     string                      job_chain_path          () const                                    { return _job_chain_path; }
     Job_chain*                  job_chain_for_api       () const;
-    Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
-  //Job_chain*                  removed_from_job_chain  () const                                    { return _removed_from_job_chain; }
+    job_chain::Node*            job_chain_node          () const                                    { return _job_chain_node; }
     Order_queue*                order_queue             ();
 
     bool                        finished                ();
@@ -108,7 +123,7 @@ struct Order : Com_order,
     void                    set_job_by_name             ( const string& );
     Job*                        job                     () const;
 
-    void                    set_job_chain_node          ( Job_chain_node*, bool is_error_state = false );
+    void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
     void                    set_state                   ( const State&, const Time& );
     void                    set_state                   ( const State& );
     void                    set_state1                  ( const State& );
@@ -155,10 +170,6 @@ struct Order : Com_order,
 
     Com_job*                    com_job                 ();
 
-
-    void                        add_to_order_queue      ( Order_queue* );
-    void                        add_to_job              ( const string& job_name );
-
     bool                        suspended               ()                                          { return _suspended; }
     void                    set_suspended               ( bool b = true );
 
@@ -172,7 +183,7 @@ struct Order : Com_order,
     bool                     is_distributed             () const                                    { return _is_distributed; }
 
     void                        start_now               ();
-    void                        setback                 ();
+    bool                        setback                 ();
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
     void                        clear_setback           ( bool keep_setback_count = false );
     bool                     is_setback                 ()                                          { return _setback_count > 0; }
@@ -192,9 +203,8 @@ struct Order : Com_order,
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        remove_from_job_chain_stack();
-    void                        remove_from_job         ();
     bool                        tip_own_job_for_new_distributed_order_state();
-    void                        move_to_node            ( Job_chain_node* );
+    void                        move_to_node            ( job_chain::Node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
@@ -286,8 +296,7 @@ struct Order : Com_order,
     // Flüchtige Variablen, nicht für die Datenbank:
 
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
-    Job_chain_node*            _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
-    Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
+    job_chain::Node*           _job_chain_node;       // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
 
     string                     _removed_from_job_chain_name; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
@@ -297,7 +306,7 @@ struct Order : Com_order,
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
 
     bool                       _initial_state_set;
-    bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
+    bool                       _is_in_order_queue;      // Auftrag ist in _job_chain_node->order_queue() eingehängt
 
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
@@ -333,7 +342,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                finish                  ();
     virtual void                start                   ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
-    virtual Order*              fetch_and_occupy_order  ( const Time& now, const string& cause , Task* occupying_task ) = 0;
+    virtual Order*              fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task ) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -360,10 +369,93 @@ struct Order_sources
     Order_source_list          _order_source_list;
 };
 
-//-----------------------------------------------------------------------------------Job_chain_node
+//-------------------------------------------------------------------------------------------------
 
-struct Job_chain_node : Com_job_chain_node 
+namespace job_chain {
+
+//---------------------------------------------------------------------------------------------Node
+
+struct Node : Com_job_chain_node,
+              Scheduler_object
 {
+    //---------------------------------------------------------------------------------------------
+
+#   define DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( MY_CLASS, TYPE_CODE )                              \
+                                                                                                    \
+        bool is_type( Type type ) const                                                             \
+        {                                                                                           \
+            return type == TYPE_CODE || Base_class::is_type( type );                                \
+        }                                                                                           \
+                                                                                                    \
+        static MY_CLASS* cast( Node* node )                                                         \
+        {                                                                                           \
+            MY_CLASS* result = try_cast( node );                                                    \
+            if( !result )  z::throw_xc( __FUNCTION__, node? node->obj_name() : "(Node*)NULL" );     \
+            return result;                                                                          \
+        }                                                                                           \
+                                                                                                    \
+        static MY_CLASS* try_cast( Node* node )                                                     \
+        {                                                                                           \
+            if( node  &&  node->is_type( TYPE_CODE ) )                                              \
+            {                                                                                       \
+                assert( dynamic_cast<MY_CLASS*>( node ) );                                          \
+                return static_cast<MY_CLASS*>( node );                                              \
+            }                                                                                       \
+            else                                                                                    \
+                return NULL;                                                                        \
+        }
+
+//    //----------------------------------------------------------------------------------------cast_
+//
+//    template< class JOB_CHAIN_NODE >
+//    static JOB_CHAIN_NODE* cast_( JOB_CHAIN_NODE* dummy, Node* node )
+//    { 
+//        JOB_CHAIN_NODE* result = try_cast_( dummy, node );
+//        if( !result )  z::throw_xc( __FUNCTION__, node? node->obj_name() : "(Node*)NULL" );
+//        return result;
+//    }
+//
+//    //------------------------------------------------------------------------------------try_cast_
+//
+//    template< class JOB_CHAIN_NODE >
+//    static JOB_CHAIN_NODE* try_cast_( JOB_CHAIN_NODE*, Node* node )
+//    {
+//        if( node  &&  node->is_type( JOB_CHAIN_NODE::static_type() ) )
+//        {
+//            assert( dynamic_cast<JOB_CHAIN_NODE*>( node ) );
+//            return static_cast<JOB_CHAIN_NODE*>( node );
+//        }
+//        else
+//            return NULL;
+//    }
+//
+//    //---------------------------------------------------------------------------------------------
+//
+//#   define DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( MY_CLASS, TYPE_CODE )                                                  \
+//        static Type      static_type()              { return TYPE_CODE; }                                               \
+//        bool             is_type    ( Type type )   { return type == static_type() || Base_class::is_type( type ); }    \
+//        static MY_CLASS* cast       ( Node* node )  { return cast_    ( (MY_CLASS*)NULL, node ); }                      \
+//        static MY_CLASS* try_cast   ( Node* node )  { return try_cast_( (MY_CLASS*)NULL, node ); }
+//
+    //---------------------------------------------------------------------------------------------
+
+    enum Type
+    {
+        n_none,
+        n_order_queue,          // Nur zum Casten
+        n_job,
+        n_job_chain,
+        n_end,
+        n_file_order_sink
+    };
+
+    enum State
+    {
+        s_none,
+        s_active,
+        s_closed
+    };
+
     enum Action
     {
         act_process, 
@@ -371,185 +463,333 @@ struct Job_chain_node : Com_job_chain_node
         act_next_state
     };
 
-    static Action               action_from_string      ( const string& );
-    static string               string_from_action      ( Action );
+
+    static Action               action_from_string          ( const string& );
+    static string               string_from_action          ( Action );
 
 
-                                Job_chain_node          ()                                          : _zero_(this+1), _nested_job_chain(this) {}
+                                Node                        ( Job_chain*, const Order::State& state, Type );
 
-    void                        close                   ();
+    virtual void                close                       ();
+    string                      obj_name                    () const;
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
-    int                         order_count             ( Read_transaction*, Job_chain* = NULL );
+    virtual void                activate                    ();
 
-    void                    set_action                  ( const string& );
-    string               string_action                  () const                                    { return string_from_action( _action ); }
+    Order::State                order_state                 () const                                { return _order_state; }
+    void                    set_next_state                  ( const Order::State& );
+    Order::State                next_state                  () const                                { return _next_state; }
+    void                    set_error_state                 ( const Order::State& );
+    Order::State                error_state                 () const                                { return _error_state; }
 
-    bool                        is_end_state            () const                                    { return _job == NULL; }
-    bool                        is_file_order_sink      ()                                          { return _file_order_sink_remove || _file_order_sink_move_to != ""; }
-    xml::Element_ptr            execute_xml             ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    Node*                       next_node                   () const                                { return _next_node; }
+    Node*                       error_node                  () const                                { return _error_node; }
+    Job_chain*                  job_chain                   () const                                { return _job_chain; }
 
-    void                        on_releasing_referenced_object( const reference< Job_chain_node, Job_chain >& );
+    Type                        type                        () const                                { return _type; }
+    
+    void                    set_suspending_order            ( bool b )                              { _is_suspending_order = b; }
+    bool                     is_suspending_order            () const                                { return _is_suspending_order; }
+    void                    set_delay                       ( int delay )                           { _delay = delay; }
+    int                         delay                       () const                                { return _delay; }
+    Action                      action                      () const                                { return _action; }
+    int                         priority                    () const                                { return _priority; }
 
-    string                      obj_name                () const;
+    virtual bool                is_type                     ( Type ) const                          { return false; }
+
+    virtual void                set_action                  ( const string& );
+    string               string_action                      () const                                { return string_from_action( _action ); }
+
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+
+    void                        on_releasing_referenced_object( const reference< Node, Job_chain >& );
+
 
 
     Fill_zero                  _zero_;
 
-    Order::State               _state;                  // Bezeichnung des Zustands
-
-    Order::State               _next_state;             // Bezeichnung des Folgezustands
-    Order::State               _error_state;            // Bezeichnung des Fehlerzustands
-
-    ptr<Job_chain_node>        _next_node;              // Folgeknoten
-    ptr<Job_chain_node>        _error_node;             // Fehlerknoten
-    ptr<Job_chain>             _job_chain;
-
-    ptr<Job>                   _job;                    // NULL: Kein Job, Auftrag endet
-    string                     _nested_job_chain_path;         // Wenn's eine untergeordnete Jobkette ist
-    reference< Job_chain_node, Job_chain >  _nested_job_chain;
+    reference< Node, Job_chain >  _nested_job_chain;
     Job_chain_set              _using_job_chains_set;
-    bool                       _file_order_sink_remove; // <file_order_sink remove="yes"/>
-    File_path                  _file_order_sink_move_to;// <file_order_sink move_to="..."/>
-    bool                       _suspend;                // <job_chain_node suspend="yes"/>
-    int                        _delay;                  // <job_chain_node delay="..."/>  Verzögerung des Auftrags
+
+  protected:
+    friend struct               Job_chain;
+
+    void                        set_state                   ( State state )                         { _state = state; }
+
+    Order::State               _order_state;                // Bezeichnung des Zustands
+    Order::State               _next_state;                 // Bezeichnung des Folgezustands
+    Order::State               _error_state;                // Bezeichnung des Fehlerzustands
+
+    Type                       _type;
+    State                      _state;
+    bool                       _is_suspending_order;        // <job_chain_node suspend="yes"/>
+    int                        _delay;                      // <job_chain_node delay="..."/>  Verzögerung des Auftrags
     Action                     _action;
-    int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
+    int                        _priority;                   // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
+
+    ptr<Node>                  _next_node;                  // Folgeknoten
+    ptr<Node>                  _error_node;                 // Fehlerknoten
+    ptr<Job_chain>             _job_chain;
 };
+
+//----------------------------------------------------------------------------------------End_node
+
+struct End_node : Node
+{
+                                End_node                    ( Job_chain* job_chain, const Order::State& state ) : Node( job_chain, state, n_end ) {}
+};
+
+//---------------------------------------------------------------------------------Order_queue_node
+
+struct Order_queue_node : Node
+{
+    typedef Node                Base_class;
+    DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Order_queue_node, n_order_queue )
+
+
+                                Order_queue_node            ( Job_chain*, const Order::State&, Type );
+
+    void                        close                       ();
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
+    void                    set_action                      ( const string& );
+
+  private:
+    ptr<Order_queue>           _order_queue;
+};
+
+//-----------------------------------------------------------------------------------------Job_node
+
+struct Job_node : Order_queue_node
+{
+    typedef Order_queue_node    Base_class;
+    DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
+
+
+                                Job_node                    ( Job_chain*, const Order::State&, const string& job_path );
+                               ~Job_node                    ();
+
+    void                        close                       ();
+    void                        activate                    ();
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    string                      job_path                    () const                                { return _job_path; }
+    string                      normalized_job_path         () const;
+    Job*                        job                         () const;
+    Job*                        job_or_null                 () const;
+    void                    set_action                      ( const string& );
+
+    void                        connect_job                 ( Job* );
+    void                        disconnect_job              ();
+
+  private:
+    string                     _job_path;
+    Job*                       _job;
+};
+
+//----------------------------------------------------------------------------Nested_job_chain_node
+
+struct Nested_job_chain_node : Node
+{
+    typedef Node                Base_class;
+    DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Nested_job_chain_node, n_job_chain )
+
+
+                                Nested_job_chain_node       ( Job_chain*, const Order::State&, const string& job_chain_path );
+
+    string                      nested_job_chain_path       () const                                { return _nested_job_chain_path; }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+  private:
+    string                     _nested_job_chain_path;      // Wenn's eine untergeordnete Jobkette ist
+};
+
+//----------------------------------------------------------------------------------------Sink_node
+
+struct Sink_node : Job_node
+{
+    typedef Job_node            Base_class;
+    DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Sink_node, n_file_order_sink )
+
+
+                                Sink_node                   ( Job_chain*, const Order::State&, const string& job_path, const string& move_to, bool remove );
+
+
+    bool                        file_order_sink_remove      () const                                { return _file_order_sink_remove; }
+    File_path                   file_order_sink_move_to     () const                                { return _file_order_sink_move_to; }
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+  private:
+    bool                       _file_order_sink_remove;     // <file_order_sink remove="yes"/>
+    File_path                  _file_order_sink_move_to;    // <file_order_sink move_to="..."/>
+};
+
+//-------------------------------------------------------------------------------------------------
+
+} //namespace job_chain
 
 //----------------------------------------------------------------------------------------Job_chain
 
 struct Job_chain : Com_job_chain, 
-                   Scheduler_object, 
-                   is_referenced_by<Job_chain_node,Job_chain>
+                   file_based< Job_chain, Job_chain_folder_interface, Order_subsystem_interface >,
+                   is_referenced_by<job_chain::Node,Job_chain>
 {
     enum State
     {
         s_under_construction,   // add_node() gesperrt, add_order() frei
-        s_running,              // in Betrieb
+        s_initialized,          
+        s_loaded,               // Aus Datenbank geladen
+        s_active,               // in Betrieb
         s_stopped,              // Angehalten
-        s_removing,             // Wird entfernt, aber ein Auftrag wird noch verarbeitet
         s_closed                
     };
 
+    //---------------------------------------------------------------------------------------------
+
+    Z_GNU_ONLY(                 Job_chain                   ();  )                                  // Für gcc 3.2. Nicht implementiert
+                                Job_chain                   ( Scheduler* );
+                               ~Job_chain                   ();
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Com_job_chain::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_job_chain::Release(); }
 
 
-    Z_GNU_ONLY(                 Job_chain               ();  )                                      // Für gcc 3.2. Nicht implementiert
-                                Job_chain               ( Spooler* );
-                               ~Job_chain               ();
+    // Scheduler_object:
+    string                      obj_name                    () const                                { return "Job_chain " + path(); }
+    void                        close                       ();
 
-    void                        close                   ();
-  //void                        activate                ();
-    void                        remove                  ();
-    void                        check_for_removing      ();
 
-    void                    set_name                    ( const string& name )                      { _name = name,  _log->set_prefix( obj_name() ); }
-    string                      path                    () const                                    { return _name; }
 
-    void                    set_state                   ( State state )                             { _state = state; }
-    State                       state                   () const                                    { return _state; }
-    static string               state_name              ( State );
+    // file_based<>
 
-    void                    set_visible                 ( bool b )                                  { _visible = b; }
-    bool                        visible                 () const                                    { return _visible; }
+    void                        initialize                  ();
+    void                        load                        ();
+    void                        activate                    ();
 
-    bool                     is_distributed             () const                                    { return _is_distributed; }
+    File_based*                 new_base_file               ( const Base_file_info& );
+  //void                        on_base_file_new            ();
+  //Job_chain*                  on_base_file_changed        ( Job_chain* new_job_chain );
+  //bool                        on_base_file_removed        ();
 
-    void                    set_orders_recoverable      ( bool b )                                  { _orders_recoverable = b; }
+    bool                        prepare_to_remove           ();
+    bool                        can_be_removed_now          ();
 
-    void                        add_orders_from_database      ( Read_transaction* );
-    int                         load_orders_from_result_set   ( Read_transaction*, Any_file* result_set );
-    Order*                      add_order_from_database_record( Read_transaction*, const Record& );
+    bool                        prepare_to_replace          ();
+    bool                        can_be_replaced_now         ();
+    Job_chain*                  replace_now                 ();
+
+
+    Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
+
+  //void                    set_name                        ( const string& );
+    void                    set_state                       ( const State& state )                  { _state = state; }
+    State                       state                       () const                                { return _state; }
+    static string               state_name                  ( State );
+
+    void                    set_visible                     ( bool b )                              { _visible = b; }
+    bool                        visible                     () const                                { return _visible; }
+
+    bool                     is_distributed                 () const                                { return _is_distributed; }
+
+    void                    set_orders_are_recoverable      ( bool b )                              { _orders_are_recoverable = b; }
+    bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
+
+  //Job_chain_folder_interface* job_chain_folder            () const                                { return folder()->job_chain_folder(); }
+
+  //void                        construct                   ();
+    void                        check_job_chain_node        ( job_chain::Node* );
+  //void                        load                        ( Read_transaction* );
+  //void                        activate                    ();
+
+
+
+    job_chain::Node*            add_job_node                ( const string& job_path, const Order::State& input_state, 
+                                                              const Order::State& next_state, 
+                                                              const Order::State& error_state );
+    
+    job_chain::Node*            add_end_node                ( const Order::State& input_state );
+
+
+    bool                        contains_job                ( Job* );
+
+    job_chain::Node*            first_node                  ();
+    job_chain::Node*            referenced_node_from_state  ( const Order::State& );
+    job_chain::Node*            node_from_state             ( const Order::State& );
+    job_chain::Node*            node_from_state_or_null     ( const Order::State& );
+    job_chain::Node*            node_from_job               ( Job* );
+    Job*                        job_from_state              ( const Order::State& );
+
+    void                        add_orders_from_database    ( Read_transaction* );
+    int                         remove_all_pending_orders   ( bool leave_in_database = false );
+    void                        add_order                   ( Order* );
+    void                        remove_order                ( Order* );
+    ptr<Order>                  order                       ( const Order::Id& );
+    ptr<Order>                  order_or_null               ( const Order::Id& );
+    bool                        has_order_id                ( Read_transaction*, const Order::Id& );
+    int                         order_count                 ( Read_transaction* );
+    bool                        has_order                   () const;
+    void                        register_order              ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
+    void                        unregister_order            ( Order* );
 
     bool                        tip_for_new_distributed_order( const Order::State& state, const Time& at );
 
-    int                         remove_all_pending_orders( bool leave_in_database = false );
-
-    Job_chain_node*             add_job_node            ( Job*, const Order::State& input_state, 
-                                                          const Order::State& next_state  = Variant(Variant::vt_missing), 
-                                                          const Order::State& error_state = Variant(Variant::vt_missing) );
-    
-    Job_chain_node*             add_job_chain_node      ( const string& job_chain_path, const Order::State& input_state, 
-                                                          const Order::State& next_state  = Variant(Variant::vt_missing), 
-                                                          const Order::State& error_state = Variant(Variant::vt_missing) );
-    
-    Job_chain_node*             add_node                ( const Order::State& input_state, 
-                                                          const Order::State& next_state, 
-                                                          const Order::State& error_state );
-    
-    Job_chain_node*             add_end_node            ( const Order::State& input_state );
-
-    void                        finish                  ();
-    void                        check_job_chain_node    ( Job_chain_node* );
-    bool                        contains_job            ( Job* );
-    Job_chain_set               connected_job_chains    ();
-    void                    get_connected_job_chains    ( Job_chain_set* );
-
-  //Job*                        first_job               ();
-    Job_chain_node*             first_node              ();
-    Job_chain_node*             referenced_node_from_state( const Order::State& );
-    Job_chain_node*             node_from_state         ( const Order::State& );
-    Job_chain_node*             node_from_state_or_null ( const Order::State& );
-    Job_chain_node*             node_from_job           ( Job* );
-    Job*                        job_from_state          ( const Order::State& );
-
-    void                        add_order               ( Order* );
-    void                        remove_order            ( Order* );
-
-    ptr<Order>                  order                   ( const Order::Id& );
-    ptr<Order>                  order_or_null           ( const Order::Id& );
-
-    bool                        has_order_id            ( Read_transaction*, const Order::Id& );
-    void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
-    void                        unregister_order        ( Order* );
-    void                        add_order_to_blacklist  ( Order* );
-    void                        remove_order_from_blacklist( Order* );
-    bool                        is_on_blacklist         ( const string& order_id );
-    Order*                      blacklisted_order_or_null( const string& order_id );
+    void                        add_order_to_blacklist      ( Order* );
+    void                        remove_order_from_blacklist ( Order* );
+  //bool                        order_is_on_blacklist       ( const string& order_id );
+    Order*                      blacklisted_order_or_null   ( const string& order_id );
     stdext::hash_set<string>    db_get_blacklisted_order_id_set( const File_path& directory, const Regex& );
 
-    int                         order_count             ( Read_transaction* );
-    bool                        has_order               () const;
+    string                      db_where_condition          () const;
 
-    string                      db_where_condition      () const;
+    // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
+    Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
+    void                    set_order_id_space              ( Order_id_space* g )                       { _order_id_space = g; }
+    Job_chain_set               connected_job_chains        ();
+    void                    get_connected_job_chains        ( Job_chain_set* );
 
-    Order_id_space*             order_id_space          () const                                    { return _order_id_space; }
-    void                    set_order_id_space          ( Order_id_space* g )                       { _order_id_space = g; }
 
-    void                    set_dom                     ( const xml::Element_ptr& );
-    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
-    xml::Element_ptr            execute_xml             ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+    void                    set_dom                         ( const xml::Element_ptr& );
+  //void                    set_replacement_job_chain       ( Job_chain* );
+
+    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
-    Order_subsystem*            order_subsystem         () const;
-    string                      obj_name                () const                                    { return "Job_chain " + path(); }
-
+    Order_subsystem*            order_subsystem             () const;
 
   private:
+    void                        check_for_removing          ();
+    int                         load_orders_from_result_set ( Read_transaction*, Any_file* result_set );
+    Order*                      add_order_from_database_record( Read_transaction*, const Record& );
+
+
     friend struct               Order;
 
     Fill_zero                  _zero_;
-    string                     _name;
     State                      _state;
+    bool                       _remove;
     Order_id_space*            _order_id_space;
     bool                       _visible;
+    bool                       _orders_are_recoverable;
+    bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
 
   public:
     typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
 
-    typedef list< ptr<Job_chain_node> >  Chain;
-    Chain                      _chain;
-
-    bool                       _orders_recoverable;
-    bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
-    bool                       _load_orders_from_database;      // add_orders_from_database() muss noch gerufen werden.
+    typedef list< ptr<job_chain::Node> >  Node_list;
+    Node_list                  _node_list;
 
     Order_sources              _order_sources;
 
     typedef stdext::hash_map< string, ptr<Order> >   Blacklist_map;
     Blacklist_map              _blacklist_map;
 
+    bool                       _load_orders_from_database;      // add_orders_from_database() muss noch gerufen werden.
 };
 
 //------------------------------------------------------------------------Order_id_spaces_interface
@@ -562,95 +802,88 @@ struct Order_id_spaces_interface
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
 };
 
-//--------------------------------------------------------------------------------Internal_priority
-/*
-struct Internal_priority
-{
-                                Internal_priority       ( Priority p = 0 )                          : _ext(p), _sub(0) {}
-
-    bool                        operator <              ( const Internal_priority& p ) const        { return _ext < p._ext? -1
-                                                                                                             _ext > p._ext? +1
-                                                                                                             _sub < p._sub? -1
-                                                                                                             _sub > p._sub? +1
-                                                                                                                          :  0; }
-    
-    Priority                   _ext;
-    int                        _sub;
-};
-*/
 //--------------------------------------------------------------------------------------Order_queue
+// 1:1-Beziehung mit Order_queue_node
 
-struct Order_queue : Com_order_queue
+struct Order_queue : Com_order_queue,
+                     Scheduler_object
 {
-    Z_GNU_ONLY(                 Order_queue             ();  )                                      // Für gcc 3.2. Nicht implementiert
-                                Order_queue             ( Job*, Prefix_log* );
-                               ~Order_queue             ();
+    Z_GNU_ONLY(                 Order_queue                 ();  )                                  // Für gcc 3.2. Nicht implementiert
+                                Order_queue                 ( job_chain::Order_queue_node* );
+                               ~Order_queue                 ();
 
-    void                        close                   ();
-    void                        add_order               ( Order*, Do_log = do_log );
-    void                        remove_order            ( Order*, Do_log = do_log );
-    void                        reinsert_order          ( Order* );
-    void                        register_order_source   ( Order_source* );
-    void                        unregister_order_source ( Order_source* );
-    int                         order_count             ( Read_transaction*, const Job_chain* = NULL );
-    bool                        empty                   ()                                          { return _queue.empty(); }
-    bool                        empty                   ( const Job_chain* job_chain )              { return order_count( (Read_transaction*)NULL, job_chain ) == 0; }  // Ohne Datenbank
-    Order*                      first_order             ( const Time& now ) const;
-    Order*                      fetch_order             ( const Time& now );
+    // Scheduler_object
+
+    void                        close                       ();
+    string                      obj_name                    () const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    job_chain::Order_queue_node* order_queue_node           () const                                { return _order_queue_node; }
+    Job_chain*                  job_chain                   () const                                { return _job_chain; }
+
+    void                        add_order                   ( Order*, Do_log = do_log );
+    void                        remove_order                ( Order*, Do_log = do_log );
+    void                        reinsert_order              ( Order* );
+    void                        register_order_source       ( Order_source* );
+    void                        unregister_order_source     ( Order_source* );
+    int                         order_count                 ( Read_transaction* );
+    bool                        empty                       ()                                      { return _queue.empty(); }
+    Order*                      first_order                 ( const Time& now ) const;
+    Order*                      fetch_order                 ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
-    bool                        has_order               ( const Time& now )                         { return first_order( now ) != NULL; }
-    bool                        request_order           ( const Time& now, const string& cause );
-    void                        withdraw_order_request  ();
+    bool                        has_order                   ( const Time& now )                     { return first_order( now ) != NULL; }
+    bool                        request_order               ( const Time& now, const string& cause );
+    void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
-    Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
-    Time                        next_time               ();
-    bool                        is_distributed_order_requested             ( time_t now )           { return _next_distributed_order_check_time <= now; }
-    time_t                      next_distributed_order_check_time          ()              const    { return _next_distributed_order_check_time; }
+    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
+    Time                        next_time                   ();
+    bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
+    time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }
     void                        calculate_next_distributed_order_check_time( time_t now );
     void                    set_next_announced_distributed_order_time( const Time&, bool is_now );
     Time                        next_announced_distributed_order_time();
-    void                        tip_for_new_distributed_order       ();
-  //void                        update_priorities       ();
-  //ptr<Order>                  order_or_null           ( const Order::Id& );
-    Job*                        job                     () const                                    { return _job; }
+    void                        tip_for_new_distributed_order();
     bool                        is_in_any_distributed_job_chain();
-    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
-    string                      db_where_expression_for_distributed_orders();
-    string                      db_where_expression_for_job_chain( const Job_chain* );
-
-    Order_subsystem*            order_subsystem         () const;
+    string                      db_where_expression         ();
 
 
     Fill_zero                  _zero_;
-    Spooler*                   _spooler;
 
-  private:
-    friend struct               Directory_file_order_source;        // Darf _queue lesen
-    friend struct               Job_chain_node;                     // Darf _queue lesen
-
-    Job*                       _job;
-    Prefix_log*                _log;
-    ptr<Com_order_queue>       _com_order_queue;
-    
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
-  //bool                       _is_distributed_order_requested;
+  private:
+    ptr<Com_order_queue>       _com_order_queue;
+    Job_chain*                 _job_chain;
+    job_chain::Order_queue_node* _order_queue_node;         // 1:1-Beziehung, _order_queue_node->order_queue() == this
+    
     time_t                     _next_distributed_order_check_time;
     int                        _next_distributed_order_check_delay;
-    Time                       _next_announced_distributed_order_time;      // Gültig, wenn _is_distributed_order_requested
+    Time                       _next_announced_distributed_order_time;  // Gültig, wenn _is_distributed_order_requested
     bool                       _has_tip_for_new_order;
 
     typedef list< Order_source* >  Order_source_list;
-    Order_source_list             _order_source_list;    // Muss leer sein bei ~Job!
+    Order_source_list             _order_source_list;                   // Muss leer sein bei ~Order_queue_node!
+};
 
-  //int                        _lowest_priority;        // Zur Optimierung
-  //int                        _highest_priority;       // Zur Optimierung
+//-----------------------------------------------------------------------Job_chain_folder_interface
+
+struct Job_chain_folder_interface : typed_folder< Job_chain >
+{
+                                Job_chain_folder_interface  ( Folder* );
+
+
+    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+    virtual Job_chain*          job_chain_or_null           ( const string& name )                  = 0;
+    virtual void                add_job_chain               ( Job_chain* )                          = 0;
+    virtual void                remove_job_chain            ( Job_chain* )                          = 0;
+    virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
 };
 
 //------------------------------------------------------------------------Order_subsystem_interface
 
-struct Order_subsystem_interface: Object, Subsystem
+struct Order_subsystem_interface: Object, 
+                                  file_based_subsystem< Job_chain >
 {
     enum Load_order_flags
     {
@@ -663,26 +896,22 @@ struct Order_subsystem_interface: Object, Subsystem
                                 Order_subsystem_interface   ( Scheduler* );
 
 
-    virtual void                load_job_chains_from_xml    ( const xml::Element_ptr& )             = 0;
-    virtual void                add_job_chain               ( Job_chain* )                          = 0;
-    virtual void                remove_job_chain            ( Job_chain* )                          = 0;
+    virtual ptr<Job_chain_folder_interface> new_job_chain_folder( Folder* )                         = 0;
     virtual void                check_exception             ()                                      = 0;
-    virtual bool                are_orders_distributed      ()                                      = 0;
-    virtual bool                is_job_in_any_job_chain     ( Job* )                                = 0;
-    virtual bool                is_job_in_any_distributed_job_chain( Job* )                         = 0;
+    virtual bool                orders_are_distributed      ()                                      = 0;
 
     virtual void                request_order               ()                                      = 0;
     virtual ptr<Order>          load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
     virtual ptr<Order>      try_load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
     virtual string              order_db_where_condition    ( const string& job_chain_path, const string& order_id ) = 0;
 
+    virtual bool                has_any_order               ()                                      = 0;
+
     virtual Job_chain*          job_chain                   ( const string& path )                  = 0;
     virtual Job_chain*          job_chain_or_null           ( const string& path )                  = 0;
-    virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
     virtual int                 finished_orders_count       () const                                = 0;
-    virtual int                 job_chain_map_version       () const                                = 0;
     virtual Order_id_spaces_interface* order_id_spaces_interface()                                  = 0;
     virtual Order_id_spaces*    order_id_spaces             ()                                      = 0;
 };

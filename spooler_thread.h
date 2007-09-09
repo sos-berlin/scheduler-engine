@@ -66,7 +66,8 @@ struct Task_subsystem: Object, Subsystem
     bool                       _task_closed;
 
     vector<Job*>               _prioritized_order_job_array;            // Jobs am Ende einer Jobkette priorisieren
-    int                        _prioritized_order_job_array_version;    // Wenn verschieden von _spooler->_job_chain_map, _prioritized_order_job_array neu aufbauen!
+    int                        _prioritized_order_job_array_job_chain_map_version;    // Wenn verschieden von _spooler->_job_chain_map, _prioritized_order_job_array neu aufbauen!
+    int                        _prioritized_order_job_array_job_map_version;
 
     long32                     _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik

@@ -134,7 +134,7 @@
     </change>
 
     <change date="2007-08-10" version="2.0.183" subversion_revision="5153">
-        <revision type="modification" title="Nicht-API-Jobs versetzen im Fehlerfall Auftrag in den Fehlerzustand">
+        <revision jira="JS-48" type="modification" title="Nicht-API-Jobs versetzen im Fehlerfall Auftrag in den Fehlerzustand">
             <description>
                 <p>
                     Im Fehlerfall eines auftragsgesteuerten Nicht-API-Jobs
@@ -148,7 +148,7 @@
             </description>
         </revision>
 
-        <revision type="correction" title="Unix: Viele &lt;start_when_directory_changed> blockieren nicht mehr den Scheduler">
+        <revision jira="JS-82" type="correction" title="Unix: Viele &lt;start_when_directory_changed> blockieren nicht mehr den Scheduler">
             <description>
                 <p>
                     Unter Unix konnten viele Verzeichnisüberwachungen mit <scheduler_element name="start_when_directory_changed"/> 
@@ -157,19 +157,30 @@
                 </p>
             </description>
         </revision>
+
+        <revision jira="JS-81" type="correction" title="Date-Header fehlte beim Erzeugen der eMail mit JavaMail ohne Versand">
+            <description>
+                <p>
+                    EMails, die der Scheduler mit JavaMail erzeugt und im Mail-Verzeichnis abgelegt, also nicht versendet hat,
+                    haben jetzt auch einen Date-Header.
+                </p>
+            </description>
+        </revision>
     </change>
 
     <change date="2007-07-27" version="2.0.182" subversion_revision="5146">
-        <revision type="modification" title="Scheduler-Skript wird vor &lt;commands> ausgeführt">
+        <revision jira="JS-78" type="modification" title="Scheduler-Skript wird vor &lt;commands> ausgeführt">
             <description>
                 <p>
                     Erst wird das Scheduler-Skript <scheduler_element name="config" child="script"/> ausgeführt, 
                     dann <scheduler_element name="config" child="commands"/>.
+                    Damit kann <scheduler_element name="run_time" attribute="start_time_function"/> 
+                    berechnet werden, bevor die Aufträge in der Datenbank abgelegt werden. 
                 </p>
             </description>
         </revision>
 
-        <revision type="new" title="Verteilte Aufträge mit &lt;run_time> möglich">
+        <revision jira="JS-78" type="new" title="Verteilte Aufträge mit &lt;run_time> möglich">
             <description>
                 <p>
                     Verteilte Aufträge können <scheduler_element name="run_time"/> nutzen.
@@ -179,9 +190,9 @@
     </change>
 
     <change date="2007-07-24" version="2.0.181" subversion_revision="5143">
-        <revision type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet (Jira JS-49)"/>
+        <revision jira="JS-49" type="modification" title="Für die Datenbank DB2 wird der Datentyp numeric(1) statt bisher boolean verwendet"/>
         
-        <revision type="correction" title="&lt;job tasks='0'> startet keine Task mehr (Jira JS-55)">
+        <revision jira="JS-55" type="correction" title="&lt;job tasks='0'> startet keine Task mehr">
             <description>
                 <p>
                     Auch im Zustand <code>pending</code> prüft der Scheduler das Attribut
@@ -203,7 +214,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
+        <revision jira="JS-41" type="new" title="Urls im HTML-Protokollfenster sind klickbar">
             <description>
                 <p>
                     Urls in einem über HTTP in HTML gelieferten Protokoll sind klickbar.
@@ -222,22 +233,12 @@
     </change>
 
     <change date="2007-07-23" version="2.0.179" subversion_revision="5136">
-        <revision type="modification" title="Nicht für XML zugelassene Zeichen werden durch ¿ ersetzt">
+        <revision jira="JS-52" type="modification" title="Nicht für XML zugelassene Zeichen werden durch ¿ ersetzt">
             <description>
                 <p>
                     Die Zeichen U-0 bis U-1F (außer U-9, U-A, U-D) und U-80 bis U-9F 
                     ersetzt der Scheduler beim Erzeugen eines XML-Dokuments durch ¿, damit es nicht ungültig wird.
                     Alle anderen Zeichen des Zeichenvorrats Latin1 (ISO-8859-1) werden weiter unterstützt.
-                </p>
-            </description>
-        </revision>
-
-        <revision type="new" title="Urls im HTML-Protokollfenster sind klickbar">
-            <description>
-                <p>
-                    Urls in einem über HTTP in HTML gelieferten Protokoll sind klickbar.
-                    Der Scheduler erkennt das Kennzeichen <code>http://</code> und 
-                    setzt den Url in ein <code>&lt;a href="…" target="_blank">...&lt;/a></code>
                 </p>
             </description>
         </revision>
@@ -251,7 +252,7 @@
     </change>
 
     <change date="2007-07-17" version="2.0.178" subversion_revision="5132">
-        <revision type="modification" title="Prozess-Jobs setzen Job.state_text und Order.state_text">
+        <revision jira="JS-42" type="modification" title="Prozess-Jobs setzen Job.state_text und Order.state_text">
             <description>
                 <p>
                     Der Scheduler füllt nach Beendigung eines Prozess-Jobs 
@@ -282,7 +283,7 @@
             </description>
         </revision>
 
-        <revision type="correction" title="Umgang mit Backslash in MySQL">
+        <revision jire="JS-45" type="correction" title="Umgang mit Backslash in MySQL">
             <description>
                 <p>
                     Beim Betrieb mit einer MySQL-Datenbank
@@ -293,7 +294,7 @@
     </change>
     
     <change date="2007-07-13" version="2.0.177" subversion_revision="5128">
-        <revision type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
+        <revision jira="JS-23" type="modification" title="Tasks warten auf gesperrte temporäre Dateien für stdout und stderr">
             <description>
                 <p>
                     Nur Windows:
@@ -311,7 +312,7 @@
             </description>
         </revision>
 
-        <revision type="modification" title="&lt;security> in &lt;base> nutzbar">
+        <revision jira="JS-47" type="modification" title="&lt;security> in &lt;base> nutzbar">
             <description>
                 <p>
                     <scheduler_element name="security"/> in oberer Konfiguration ersetzt nicht mehr 

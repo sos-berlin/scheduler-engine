@@ -260,12 +260,11 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"xml_payload\" type=\"Xml_payload\" minOccurs=\"0\"/>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"job_chain\"         type=\"Name\"         use=\"required\"/>\n"
+    "<xsd:attribute name=\"job_chain\"         type=\"Name\"                 use=\"required\"/>\n"
     "<xsd:attribute name=\"id\"                type=\"Order_id\"/>\n"
     "<xsd:attribute name=\"priority\"          type=\"xsd:integer\"/>\n"
     "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
     "<xsd:attribute name=\"state\"             type=\"String\"/>\n"
-    "<xsd:attribute name=\"job\"               type=\"Name\"/>\n"
     "<xsd:attribute name=\"web_service\"       type=\"Name\"/>\n"
     "<xsd:attribute name=\"replace\"           type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"at\"                type=\"Date_time_with_now\"/>\n"
@@ -400,7 +399,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"name\"                  type=\"Name\"             use=\"required\"/>\n"
+    "<xsd:attribute name=\"name\"                  type=\"Name\"/>\n"
     "<xsd:attribute name=\"visible\"               type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"priority\"              type=\"Process_priority\"/>\n"
     "<xsd:attribute name=\"temporary\"             type=\"Yes_no\"/>\n"
@@ -518,7 +517,7 @@ const char file_scheduler_xsd[] =
     "</xsd:choice>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"name\"               type=\"Name\"     use=\"required\"/>\n"
+    "<xsd:attribute name=\"name\"               type=\"Name\"/>\n"
     "<xsd:attribute name=\"visible\"            type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"orders_recoverable\" type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"distributed\"        type=\"Yes_no\"/>\n"
@@ -1274,7 +1273,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:complexType name=\"lock\">\n"
-    "<xsd:attribute name=\"name\"                      type=\"Name\"                     use=\"required\"/>\n"
+    "<xsd:attribute name=\"name\"                      type=\"Name\"/>\n"
     "<xsd:attribute name=\"max_non_exclusive\"         type=\"xsd:nonNegativeInteger\"/>\n"
     "</xsd:complexType>\n"
     "\n"
@@ -1335,7 +1334,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"params\" minOccurs=\"0\"/>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"name\"                      type=\"Name\"             use=\"required\"/>\n"
+    "<xsd:attribute name=\"name\"                      type=\"Name\"/>\n"
     "<xsd:attribute name=\"url_path\"                  type=\"Url_path\"         use=\"required\"/>\n"
     "<xsd:attribute name=\"debug\"                     type=\"Yes_no\"/>\n"
     "\n"
@@ -1657,7 +1656,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1188136360 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1188887037 },
     { NULL, NULL, 0 }
 };
 

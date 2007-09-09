@@ -1957,7 +1957,7 @@ STDMETHODIMP Com_job::get_Name( BSTR* result )
         if( !_job )  return E_POINTER;
         //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        *result = SysAllocString_string( _job->_name );
+        *result = SysAllocString_string( _job->name() );
     }
 
     return NOERROR;
@@ -2051,7 +2051,7 @@ STDMETHODIMP Com_job::Remove()
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        _job->_spooler->job_subsystem()->remove_job( _job );
+        _job->remove();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -2089,7 +2089,7 @@ STDMETHODIMP Com_job::get_Order_queue( Iorder_queue** result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        *result = _job->order_queue();
+        *result = _job->any_order_queue();
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.order_queue" ); }
@@ -3383,7 +3383,7 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
     try
     {
         if( !_spooler )  return E_POINTER;
-        *com_job = _spooler->job_subsystem()->get_job( bstr_as_string( job_name ) )->com_job();
+        *com_job = _spooler->job_subsystem()->job( bstr_as_string( job_name ) )->com_job();
         (*com_job)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
@@ -3525,7 +3525,7 @@ STDMETHODIMP Com_spooler::Create_job_chain( spooler_com::Ijob_chain** result )
 
 //-----------------------------------------------------------------------Com_spooler::add_job_chain
 
-STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* job_chain )
+STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* ijob_chain )
 {
     HRESULT hr = NOERROR;
 
@@ -3534,7 +3534,11 @@ STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* job_chain )
     {
         if( !_spooler )  return E_POINTER;
 
-        _spooler->order_subsystem()->add_job_chain( dynamic_cast<Job_chain*>( job_chain ) );
+        Job_chain* job_chain = dynamic_cast<Job_chain*>( ijob_chain );
+
+        job_chain->initialize();
+        _spooler->root_folder()->job_chain_folder()->add_job_chain( job_chain );
+        job_chain->activate();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
@@ -3827,7 +3831,7 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     try
     {
         Command_processor cp ( _spooler, Security::seclev_all );
-        hr = String_to_bstr( cp.execute( string_from_bstr( xml ), Time::now() ), result );
+        hr = String_to_bstr( cp.execute( string_from_bstr( xml ) ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4186,7 +4190,7 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
             default: return DISP_E_TYPEMISMATCH;
         }
 
-        _job_chain->add_job_node( job, *begin_state, *end_state, *error_state );
+        _job_chain->add_job_node( job->path(), *begin_state, *end_state, *error_state );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
@@ -4245,7 +4249,7 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_active )  z::throw_xc( "SCHEDULER-151" );
 
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
@@ -4279,7 +4283,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_active )  z::throw_xc( "SCHEDULER-151" );
 
         Order* order = dynamic_cast<Order*>( &*iorder );
         if( !order )  return E_INVALIDARG;
@@ -4307,7 +4311,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() != Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() != Job_chain::s_active )  z::throw_xc( "SCHEDULER-151" );
         if( !iorder )  return E_POINTER;
 
         Order* order = dynamic_cast<Order*>( &*iorder );
@@ -4334,9 +4338,13 @@ STDMETHODIMP Com_job_chain::get_Order_queue( VARIANT* state, Iorder_queue** resu
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() < Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_active )  z::throw_xc( "SCHEDULER-151" );
 
-        *result = _job_chain->node_from_state( *state )->_job->order_queue();
+        if( job_chain::Order_queue_node* node = job_chain::Order_queue_node::try_cast( _job_chain->node_from_state( *state ) ) )
+        {
+            *result = node->order_queue();
+        }
+
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_queue" ); }
@@ -4355,7 +4363,7 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( _job_chain->state() < Job_chain::s_running )  z::throw_xc( "SCHEDULER-151" );
+        if( _job_chain->state() < Job_chain::s_active )  z::throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state );
         if( *result )  (*result)->AddRef();
@@ -4376,7 +4384,7 @@ STDMETHODIMP Com_job_chain::put_Orders_recoverable( VARIANT_BOOL b )
     {
         if( !_job_chain )  return E_POINTER;
 
-        _job_chain->set_orders_recoverable( b != VARIANT_FALSE );
+        _job_chain->set_orders_are_recoverable( b != VARIANT_FALSE );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
@@ -4390,7 +4398,7 @@ STDMETHODIMP Com_job_chain::get_Orders_recoverable( VARIANT_BOOL* result )
 {
     if( !_job_chain )  return E_POINTER;
 
-    *result = _job_chain->_orders_recoverable? VARIANT_TRUE : VARIANT_FALSE;
+    *result = _job_chain->orders_are_recoverable()? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
 }
@@ -4471,14 +4479,14 @@ STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 
 STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result ) 
 { 
-    return VariantCopy( result, &((Job_chain_node*)(this))->_state );
+    return VariantCopy( result, &((job_chain::Node*)(this))->order_state() );
 }
 
 //----------------------------------------------------------------Com_job_chain_node::get_next_node
 
 STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 { 
-    *result = ((Job_chain_node*)(this))->_next_node;
+    *result = ((job_chain::Node*)(this))->next_node();
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -4487,7 +4495,7 @@ STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 
 STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )   
 { 
-    *result = ((Job_chain_node*)(this))->_error_node; 
+    *result = ((job_chain::Node*)(this))->error_node(); 
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -4496,21 +4504,25 @@ STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )
 
 STDMETHODIMP Com_job_chain_node::get_Next_state( VARIANT* result )
 { 
-    return VariantCopy( result, &((Job_chain_node*)(this))->_next_state );
+    return VariantCopy( result, &((job_chain::Node*)(this))->next_state() );
 }
 
 //--------------------------------------------------------------Com_job_chain_node::get_error_state
 
 STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )   
 { 
-    return VariantCopy( result, &((Job_chain_node*)(this))->_error_state );
+    return VariantCopy( result, &((job_chain::Node*)(this))->error_state() );
 }
 
 //----------------------------------------------------------------------Com_job_chain_node::get_job
 
 STDMETHODIMP Com_job_chain_node::get_Job( Ijob** result )              
 { 
-    *result = ((Job_chain_node*)(this))->_job->com_job(); 
+    if( job_chain::Job_node* job_node = job_chain::Job_node::try_cast( (job_chain::Node*)this ) )
+    {
+        *result = job_node->job()->com_job(); 
+    }
+
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -5399,7 +5411,7 @@ const Com_method Com_order_queue::_methods[] =
 { 
    // _flags          , dispid, _name                       , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "length"                    , (Com_method_ptr)&Com_order_queue::get_Length      , VT_INT        },
-    { DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::Add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+  //{ DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::Add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  3, "java_class_name"           , (Com_method_ptr)&Com_order_queue::get_Java_class_name, VT_BSTR },
     {}
 };
@@ -5439,32 +5451,6 @@ STDMETHODIMP Com_order_queue::get_Length( int* result )
     }
 
     return S_OK;
-}
-
-//-----------------------------------------------------------------------Com_order_queue::add_order
-
-STDMETHODIMP Com_order_queue::Add_order( VARIANT* order_or_payload, Iorder** result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( dynamic_cast<Order_queue*>(this)->_spooler, *order_or_payload );
-        if( !iorder )  return E_POINTER;
-
-        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        dynamic_cast<Order*>( &*iorder )->add_to_order_queue( dynamic_cast<Order_queue*>( this ) );
-
-        *result = iorder;
-        (*result)->AddRef();
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
-
-    //Z_LOG2( "scheduler", "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
-
-    return hr;
 }
 
 //-------------------------------------------------------------------------------------------------

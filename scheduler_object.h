@@ -20,6 +20,8 @@ struct Scheduler_object
         type_database_order_detector,
         type_directory_file_order_source,
         type_exclusive_scheduler_watchdog,
+        type_folder_subsystem,
+        type_folder,
         type_heart_beat,
         type_heart_beat_watchdog_thread,
         type_http_file_directory,
@@ -27,9 +29,13 @@ struct Scheduler_object
         type_java_subsystem,
         type_job,
         type_job_chain,
+        type_job_chain_folder,
         type_job_chain_group,
+        type_job_chain_node,
+        type_job_folder,
         type_job_subsystem,
         type_lock,
+        type_lock_folder,
         type_lock_holder,
         type_lock_requestor,
         type_lock_subsystem,
@@ -40,9 +46,12 @@ struct Scheduler_object
         type_web_service_response,
         type_web_services,
         type_order,
+        type_order_folder,
+        type_order_queue,
         type_order_subsystem,
         type_process,
         type_process_class,
+        type_process_class_folder,
         type_process_class_subsystem,
         type_scheduler,
         type_scheduler_event_manager,
@@ -66,6 +75,8 @@ struct Scheduler_object
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
     void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
+    Spooler*                    spooler                     () const                                { return _spooler; }
+
     virtual void                close                       ()                                      {}
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
@@ -73,6 +84,9 @@ struct Scheduler_object
     virtual IDispatch*          idispatch                   ();
     IUnknown*                   iunknown                    () const                                { return _my_iunknown; }
     virtual void                write_element_attributes    ( const xml::Element_ptr& ) const;
+
+    void                        complain_about_non_empty_attribute( const xml::Element_ptr&, const string& attribute_name );
+    void                        assert_empty_attribute      ( const xml::Element_ptr&, const string& attribute_name );
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;

@@ -41,17 +41,212 @@ const Com_method Lock::_methods[] =
     {}
 };
 
+//-------------------------------------------------------------------Lock_subsystem::Lock_subsystem
+
+Lock_subsystem::Lock_subsystem( Scheduler* scheduler )
+:
+    Idispatch_implementation( &class_descriptor ),
+    file_based_subsystem<Lock>( scheduler, static_cast<spooler_com::Ilocks*>( this ), type_lock_subsystem )
+{
+}
+
+//----------------------------------------------------------------------------Lock_subsystem::close
+    
+void Lock_subsystem::close()
+{
+    set_subsystem_state( subsys_stopped );
+    file_based_subsystem<Lock>::close();
+}
+
+//-------------------------------------------------------------Lock_subsystem::subsystem_initialize
+
+bool Lock_subsystem::subsystem_initialize()
+{
+    file_based_subsystem<Lock>::subsystem_initialize();
+    set_subsystem_state( subsys_initialized );
+    return true;
+}
+
+//-------------------------------------------------------------------Lock_subsystem::subsystem_load
+
+bool Lock_subsystem::subsystem_load()
+{
+    file_based_subsystem<Lock>::subsystem_load();
+    set_subsystem_state( subsys_loaded );
+    return true;
+}
+
+//---------------------------------------------------------------Lock_subsystem::subsystem_activate
+
+bool Lock_subsystem::subsystem_activate()
+{
+    set_subsystem_state( subsys_active );
+    file_based_subsystem<Lock>::subsystem_activate();
+    return true;
+}
+
+//-------------------------------------------------------------Lock_subsystem<Lock>::new_file_based
+
+ptr<Lock> Lock_subsystem::new_file_based()
+{
+    return Z_NEW( Lock( this ) );
+}
+
+//-------------------------------------------------------------------------Lock_subsystem::get_Lock
+
+STDMETHODIMP Lock_subsystem::get_Lock( BSTR path_bstr, spooler_com::Ilock** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = lock( string_from_bstr( path_bstr ) );
+        if( result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Lock_subsystem::get_Lock_or_null
+
+STDMETHODIMP Lock_subsystem::get_Lock_or_null( BSTR path_bstr, spooler_com::Ilock** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = lock_or_null( string_from_bstr( path_bstr ) );
+        if( result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Lock_subsystem::Create_lock
+
+STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        ptr<Lock> lock = Z_NEW( Lock( this ) );
+        *result = lock.take();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Lock_subsystem::Add_lock
+
+STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* lock )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        spooler()->root_folder()->lock_folder()->add_lock( dynamic_cast<Lock*>( lock ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Lock_folder::execute_xml
+
+xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
+{
+    xml::Element_ptr result;
+
+    if( element.nodeName_is( "lock" ) )  spooler()->root_folder()->lock_folder()->execute_xml_lock( element );
+    else
+    if( string_begins_with( element.nodeName(), "lock." ) ) 
+    {
+        lock( element.getAttribute( "lock" ) )->execute_xml( element, show_what );
+    }
+    else
+        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+
+    return command_processor->_answer.createElement( "ok" );
+}
+
+//-------------------------------------------------------------------------Lock_folder::Lock_folder
+
+Lock_folder::Lock_folder( Folder* folder )
+:
+    typed_folder<Lock>( subsystem(), folder, type_lock_folder )
+{
+}
+
+//------------------------------------------------------------------------Lock_folder::~Lock_folder
+    
+Lock_folder::~Lock_folder()
+{
+}
+
+//-----------------------------------------------------------------------------Lock_folder::set_dom
+
+void Lock_folder::set_dom( const xml::Element_ptr& locks_element )
+{
+    assert( locks_element.nodeName_is( "locks" ) );
+
+    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
+    {
+        execute_xml_lock( lock_element );
+    }
+}
+
+//--------------------------------------------------------------------Lock_folder::execute_xml_lock
+
+void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
+{
+    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
+
+    string lock_name = lock_element.getAttribute( "name" );
+    
+    ptr<Lock> lock = lock_or_null( lock_name );
+    if( !lock )  
+    {
+        lock = Z_NEW( Lock( subsystem(), lock_name ) );
+        lock->set_dom( lock_element );
+        add_lock( lock );
+    }
+    else
+        lock->set_dom( lock_element );
+
+    lock->activate();
+}
+
+//-------------------------------------------------------------------------Lock_folder::dom_element
+
+xml::Element_ptr Lock_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+{
+    xml::Element_ptr result = dom_document.createElement( "locks" );
+
+    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
+    {
+        Lock* lock = static_cast<Lock*>( +it->second );
+        result.appendChild( lock->dom_element( dom_document, show_what ) );
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------------------------------Lock::Lock
 
 Lock::Lock( Lock_subsystem* lock_subsystem, const string& name )
 :
     Idispatch_implementation( &class_descriptor ),
-    Scheduler_object( lock_subsystem->_spooler, static_cast<spooler_com::Ilock*>( this ), type_lock ),
+    file_based<Lock,Lock_folder,Lock_subsystem>( lock_subsystem, static_cast<spooler_com::Ilock*>( this ), type_lock ),
     _zero_(this+1),
     _lock_subsystem(lock_subsystem),
-    _max_non_exclusive(INT_MAX),
     _waiting_queues(2)                  // [lk_exclusive] und [lk_non_ecklusive]
 {
+    _config._max_non_exclusive = INT_MAX;
+
     if( name != "" )  set_name( name );
 }
 
@@ -76,63 +271,149 @@ void Lock::close()
         log()->error( message_string( "SCHEDULER-854", obj_name(), holder->obj_name() ) );
     }
 
+
     _waiting_queues.clear();
+
+
+    //Z_FOR_EACH( Use_set, _use_set, it )
+    //{
+    //    Use* use = *it;
+    //    use->disconnect();        Nicht nötig
+    //}
+
+    _use_set.clear();
 }
 
-//-----------------------------------------------------------------------------Lock::prepare_remove
+//-----------------------------------------------------------------------Lock::on_base_file_changed
 
-void Lock::prepare_remove()
+//Lock* Lock::on_base_file_changed( Lock* new_lock )
+//{
+//    set_max_non_exclusive( new_lock->_config._max_non_exclusive );
+//
+//    set_replacement( NULL );
+//
+//    return this;
+//}
+
+//bool Lock::can_be_replaced_now()
+//{
+//    return _replacement_is_valid();
+//}
+
+//---------------------------------------------------------------------------------Lock::initialize
+
+void Lock::initialize()
 {
-    if( !is_free()        )  z::throw_xc( "SCHEDULER-410", obj_name(), string_from_holders() );
-    if( !_use_set.empty() )  z::throw_xc( "SCHEDULER-411", obj_name(), string_from_uses() );
-
-    typedef stdext::hash_set< Requestor* >  Requestor_set;
-    Requestor_set requestor_set;
-
-    for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
+    if( !base_file_has_error() )
     {
-        Z_FOR_EACH( Use_list, _waiting_queues[ lk ], it )
+    }
+}
+
+//---------------------------------------------------------------------------------------Lock::load
+
+void Lock::load()
+{
+    if( !base_file_has_error() )
+    {
+    }
+}
+
+//-----------------------------------------------------------------------------------Lock::activate
+
+void Lock::activate()
+{
+    if( !base_file_has_error() &&
+        subsystem()->subsystem_state() >= subsys_active )
+    {
+        set_state( s_active );
+
+        FOR_EACH_JOB( job )
         {
-            Use* lock_use = *it;
-            requestor_set.insert( lock_use->requestor() );
+            if( Requestor* requestor = job->lock_requestor_or_null() )
+            {
+                requestor->on_new_lock( this );
+            }
+        }
+    }
+}
+
+//-------------------------------------------------------------------------Lock::can_be_removed_now
+
+bool Lock::can_be_removed_now()
+{
+    return _remove  &&  is_free();
+}
+
+//--------------------------------------------------------------------------Lock::prepare_to_remove
+
+bool Lock::prepare_to_remove()
+{
+    if( !_remove )
+    {
+        _remove = true;
+
+        Z_FOR_EACH( Use_set, _use_set, it )
+        {
+            Use* use = *it;
+            use->requestor()->on_lock_is_to_be_removed( this );
+        }
+
+
+        if( !can_be_removed_now() )  log()->info( message_string( "SCHEDULER-886", string_from_holders() ) );
+
+        typedef stdext::hash_set< Requestor* >  Requestor_set;
+        Requestor_set requestor_set;
+
+        for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
+        {
+            Z_FOR_EACH( Use_list, _waiting_queues[ lk ], it )
+            {
+                Use* lock_use = *it;
+                requestor_set.insert( lock_use->requestor() );
+            }
+        }
+
+        Z_FOR_EACH( Requestor_set, requestor_set, it )
+        {
+            Requestor* requestor = *it;
+            requestor->dequeue_lock_requests();
         }
     }
 
-    Z_FOR_EACH( Requestor_set, requestor_set, it )
-    {
-        Requestor* requestor = *it;
-        requestor->dequeue_lock_requests();
-    }
-
-    close();
-
-    log()->info( message_string( "SCHEDULER-861" ) );
+    return can_be_removed_now();
 }
 
-//-----------------------------------------------------------------------------------Lock::set_name
+//-------------------------------------------------------------------------Lock::prepare_to_replace
 
-void Lock::set_name( const string& name )
+bool Lock::prepare_to_replace()
 {
-    _spooler->check_name( name );
+    _remove = false;
 
-    if( name != _name )
-    {
-        if( _name != "" )  z::throw_xc( "SCHEDULER-243", "Lock.name" );
-      //if( is_added() )  z::throw_xc( "SCHEDULER-243", "Lock.name" );
+    return can_be_replaced_now();
+}
 
-        _name = name;
-    }
+//--------------------------------------------------------------------------------Lock::replace_now
 
-    _log->set_prefix( obj_name() );
+Lock* Lock::replace_now()
+{
+    set_max_non_exclusive( replacement()->_config._max_non_exclusive );
+
+    set_replacement( NULL );
+
+    return this;
 }
 
 //----------------------------------------------------------------------Lock::set_max_non_exclusive
 
 void Lock::set_max_non_exclusive( int max_non_exclusive )
 {
-    if( max_non_exclusive < count_non_exclusive_holders() )  z::throw_xc( "SCHEDULER-402", max_non_exclusive, string_from_holders() );
+    if( _config._max_non_exclusive != max_non_exclusive )
+    {
+        if( max_non_exclusive < count_non_exclusive_holders() )  
+            log()->warn( message_string( "SCHEDULER-887", max_non_exclusive, string_from_holders() ) );
 
-    _max_non_exclusive = max_non_exclusive;
+        _config._max_non_exclusive = max_non_exclusive;
+    }
 }
 
 //-----------------------------------------------------------------------------------Lock::is_added
@@ -141,7 +422,7 @@ bool Lock::is_added() const
 {
     bool result = false;
 
-    if( Lock* lock = _spooler->lock_subsystem()->lock_or_null( path() ) )
+    if( Lock* lock = subsystem()->lock_or_null( path() ) )
     {
         if( lock == this )  result = true;
     }
@@ -149,12 +430,24 @@ bool Lock::is_added() const
     return result;
 }
 
+//------------------------------------------------------------------------------------Lock::is_free
+
+bool Lock::is_free() const
+{ 
+    return _holder_set.empty(); 
+}
+
 //--------------------------------------------------------------------------------Lock::is_free_for
 
 bool Lock::is_free_for( Lock_mode lock_mode ) const
 { 
-    return _holder_set.empty()  ||   //deadlock? &&  ( _waiting_queues[ lk_exclusive ].empty() || lock_mode == lk_exclusive )  ||  
-           lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _max_non_exclusive;
+    return lock_mode == lk_exclusive? is_free() 
+                                    : ( _lock_mode != lk_exclusive || is_free() )  &&  
+                                      count_non_exclusive_holders() < _config._max_non_exclusive;
+
+    //if( lock_mode == lk_non_exclusive  &&  _config._max_non_exclusive == 0 )  return false;
+    //return is_free()  ||   
+    //       lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _config._max_non_exclusive;
 }
 
 //--------------------------------------------------------------------------------Lock::its_my_turn
@@ -262,17 +555,22 @@ void Lock::set_dom( const xml::Element_ptr& lock_element )
 {
     Z_DEBUG_ONLY( assert( lock_element.nodeName_is( "lock" ) ) );
 
-    set_max_non_exclusive( lock_element.int_getAttribute( "max_non_exclusive", _max_non_exclusive ) );
+    set_max_non_exclusive( lock_element.int_getAttribute( "max_non_exclusive", _config._max_non_exclusive ) );
 }
 
 //--------------------------------------------------------------------------------Lock::dom_element
 
-xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
+xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
     xml::Element_ptr result = dom_document.createElement( "lock" );
 
-    result.setAttribute( "name", _name );
-    if( _max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _max_non_exclusive );
+    if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
+    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
+
+    result.setAttribute( "name", name() );
+    if( _config._max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _config._max_non_exclusive );
+
+    result.setAttribute( "state", state_name() );
 
     if( !_holder_set.empty() )
     {
@@ -311,13 +609,28 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
     return result;
 }
 
+//---------------------------------------------------------------------------------Lock::state_name
+
+string Lock::state_name( State state )
+{
+    switch( state )
+    {
+        case s_not_initialized: return "not_initialized";
+      //case s_initialized:     return "initialized";
+      //case s_loaded:          return "loaded";
+      //case s_error:           return "error";
+        case s_active:          return "active";
+        default:                return as_string( (int)state );
+    }
+}
+
 //------------------------------------------------------------------------Lock::string_from_holders
 
 string Lock::string_from_holders() const
 {
     S result;
 
-    if( _holder_set.empty() )  // ||  lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive )
+    if( _holder_set.empty() )
     {
         result << "free";
     }
@@ -393,13 +706,6 @@ STDMETHODIMP Lock::put_Max_non_exclusive( int max_non_exclusive )
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
-}
-
-//-------------------------------------------------------------------------------------Lock::remove
-
-void Lock::remove()
-{
-    _spooler->lock_subsystem()->remove_lock( this );
 }
 
 //-------------------------------------------------------------------------------------Lock::Remove
@@ -505,6 +811,21 @@ void Requestor::load()
     }
 }
 
+//---------------------------------------------------------------------------Requestor::on_new_lock
+
+void Requestor::on_new_lock( Lock* lock )
+{
+    Z_FOR_EACH( Use_list, _use_list, it )
+    {
+        Use* use = *it;
+        
+        if( use->lock_or_null() == lock )
+        {
+            use->load();
+        }
+    }
+}
+
 //-------------------------------------------------------------------Requestor::locks_are_available
 
 bool Requestor::locks_are_available() const
@@ -515,9 +836,9 @@ bool Requestor::locks_are_available() const
     Z_FOR_EACH_CONST( Use_list, _use_list, it )
     {
         Use*  lock_use = *it;
-        Lock* lock     = lock_use->lock();
+        Lock* lock     = lock_use->lock_or_null();
 
-        if( !lock->is_free_for( lock_use->lock_mode() ) )
+        if( !lock  ||  !lock->is_free_for( lock_use->lock_mode() ) )
         {
             all_locks_are_free = false;
             break;
@@ -531,28 +852,40 @@ bool Requestor::locks_are_available() const
 
 //-----------------------------------------------------------------Requestor::enqueue_lock_requests
 
-void Requestor::enqueue_lock_requests()
+bool Requestor::enqueue_lock_requests()
 { 
-    if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
-    _is_enqueued = true; 
+    bool result = false;
 
-    //S lock_names;
+    if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
+
+
+    bool all_locks_are_there = true;
 
     Z_FOR_EACH( Use_list, _use_list, it )
     {
         Use*  lock_use = *it;
-        Lock* lock     = lock_use->lock();
-        int   place    = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
-        
-        //if( !lock_names.empty() )  lock_names << ", ";
-        //lock_names << lock_use->lock_path() << " (";
-        //lock_names << ( lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive" );
-        //lock_names << ", at place " << place << ")";
-        _log->info( message_string( "SCHEDULER-860", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive", 
-                                                     place, lock->string_from_holders() ) );
+        if( !lock_use->lock_or_null() )  { all_locks_are_there = false; break; }
     }
-    
-    //_log->info( message_string( "SCHEDULER-860", lock_names ) );
+
+    if( all_locks_are_there )
+    {
+        _is_enqueued = true; 
+
+        Z_FOR_EACH( Use_list, _use_list, it )
+        {
+            Use*  lock_use = *it;
+            Lock* lock     = lock_use->lock();
+            
+            int place = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
+                
+            _log->info( message_string( "SCHEDULER-860", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive", 
+                                                         place, lock->string_from_holders() ) );
+        }
+
+        result = true;
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------Requestor::dequeue_lock_requests
@@ -683,8 +1016,10 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
 
 void Use::load()
 {
-    Lock* lock = this->lock();     // Liefert die Sperre, stellt also sicher, dass sie bekannt ist.
-    lock->register_lock_use( this );
+    if( Lock* lock = this->lock_or_null() )
+    {
+        lock->register_lock_use( this );
+    }
 }
 
 //----------------------------------------------------------------------------------------Use::lock
@@ -712,7 +1047,8 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
 
     if( _requestor->is_enqueued() )
     {
-        result.setAttribute( "is_available", lock()->is_free_for( _lock_mode )? "yes" : "no" );
+        if( Lock* lock = lock_or_null() )
+            result.setAttribute( "is_available", lock->is_free_for( _lock_mode )? "yes" : "no" );
     }
 
     return result;
@@ -777,6 +1113,8 @@ void Holder::hold_locks()
     assert( _requestor->locks_are_available() );
 
 
+    _is_holding = true;
+
     Z_FOR_EACH_CONST( Requestor::Use_list, _requestor->_use_list, it )
     {
         Use*  lock_use = *it;
@@ -786,8 +1124,6 @@ void Holder::hold_locks()
 
         log()->info( message_string( "SCHEDULER-855", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusively" : "non-exclusively" ) );
     }
-
-    _is_holding = true;
 }
 
 //----------------------------------------------------------------------------Holder::release_locks
@@ -798,7 +1134,7 @@ void Holder::release_locks()
     {
         Z_FOR_EACH_CONST( Requestor::Use_list, _requestor->_use_list, it ) 
         {
-            Use*  lock_use = *it;
+            Use* lock_use = *it;
             
             try
             {
@@ -814,6 +1150,8 @@ void Holder::release_locks()
                 {
                     log()->info( message_string( "SCHEDULER-856", lock->obj_name() ) );
                 }
+
+                lock->check_for_replacing_or_removing();
             }
             catch( exception& x )
             {
@@ -851,219 +1189,6 @@ string Holder::obj_name() const
     result << ")";
 
     return result;
-}
-
-//-------------------------------------------------------------------Lock_subsystem::Lock_subsystem
-
-Lock_subsystem::Lock_subsystem( Scheduler* scheduler )
-:
-    Idispatch_implementation( &class_descriptor ),
-    Subsystem( scheduler, static_cast<spooler_com::Ilocks*>( this ), type_lock_subsystem )
-{
-}
-
-//----------------------------------------------------------------------------Lock_subsystem::close
-    
-void Lock_subsystem::close()
-{
-    for( Lock_map::iterator it = _lock_map.begin(); it != _lock_map.end(); )
-    {
-        Lock_map::iterator erase_it = it;
-        it++;
-
-        erase_it->second->close();
-        _lock_map.erase( erase_it );
-    }
-}
-
-//-------------------------------------------------------------Lock_subsystem::subsystem_initialize
-
-bool Lock_subsystem::subsystem_initialize()
-{
-    set_subsystem_state( subsys_initialized );
-    return true;
-}
-
-//-------------------------------------------------------------------Lock_subsystem::subsystem_load
-
-bool Lock_subsystem::subsystem_load()
-{
-    set_subsystem_state( subsys_loaded );
-    return true;
-}
-
-//---------------------------------------------------------------Lock_subsystem::subsystem_activate
-
-bool Lock_subsystem::subsystem_activate()
-{
-    set_subsystem_state( subsys_active );
-    return true;
-}
-
-//-----------------------------------------------------------------------------Lock_subsystem::lock
-
-Lock* Lock_subsystem::lock( const string& name )
-{
-    Lock* result = lock_or_null( name );
-    if( !result )  z::throw_xc( "SCHEDULER-401", "lock " + name );
-    return result;
-}
-
-//---------------------------------------------------------------------Lock_subsystem::lock_or_null
-
-Lock* Lock_subsystem::lock_or_null( const string& name )
-{
-    Lock_map::iterator it = _lock_map.find( name );
-    return it == _lock_map.end()? NULL : it->second;
-}
-
-//----------------------------------------------------------------------Lock_subsystem::remove_lock
-
-void Lock_subsystem::remove_lock( Lock* lock )
-{
-    string             path = lock->path();
-    Lock_map::iterator it   = _lock_map.find( path );
-
-    if( it->second != lock )  z::throw_xc( "SCHEDULER-418", lock->obj_name() );
-
-    lock->prepare_remove();
-    _lock_map.erase( it );
-}
-
-//--------------------------------------------------------------------------Lock_subsystem::set_dom
-
-void Lock_subsystem::set_dom( const xml::Element_ptr& locks_element )
-{
-    assert( locks_element.nodeName_is( "locks" ) );
-
-    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
-    {
-        execute_xml_lock( lock_element );
-    }
-}
-
-//-----------------------------------------------------------------Lock_subsystem::execute_xml_lock
-
-void Lock_subsystem::execute_xml_lock( const xml::Element_ptr& lock_element )
-{
-    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
-
-    string lock_name = lock_element.getAttribute( "name" );
-    
-    ptr<Lock> lock = lock_or_null( lock_name );
-    if( !lock )  lock = Z_NEW( Lock( this, lock_name ) );
-
-    lock->set_dom( lock_element );
-    _lock_map[ lock->name() ] = lock;
-}
-
-//----------------------------------------------------------------------Lock_subsystem::execute_xml
-
-xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
-{
-    xml::Element_ptr result;
-
-    if( element.nodeName_is( "lock" ) )  execute_xml_lock( element );
-    else
-    if( string_begins_with( element.nodeName(), "lock." ) ) 
-    {
-        lock( element.getAttribute( "lock" ) )->execute_xml( element, show_what );
-    }
-    else
-        z::throw_xc( "SCHEDULER-113", element.nodeName() );
-
-    return command_processor->_answer.createElement( "ok" );
-}
-
-//----------------------------------------------------------------------Lock_subsystem::dom_element
-
-xml::Element_ptr Lock_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-{
-    xml::Element_ptr result = dom_document.createElement( "locks" );
-
-    Z_FOR_EACH( Lock_map, _lock_map, it )
-    {
-        Lock* lock = it->second;
-        result.appendChild( lock->dom_element( dom_document, show_what ) );
-    }
-
-    return result;
-}
-
-//-------------------------------------------------------------------------Lock_subsystem::add_lock
-
-void Lock_subsystem::add_lock( Lock* lock )
-{
-    if( !lock )  z::throw_xc( __FUNCTION__ );
-    if( lock->is_added() )  z::throw_xc( "SCHEDULER-422", lock->obj_name() );
-
-    _spooler->check_name( lock->name() );
-    if( lock_or_null( lock->path() ) )  z::throw_xc( "SCHEDULER-416", lock->obj_name() );
-
-    _lock_map[ lock->name() ] = lock;
-}
-
-//-------------------------------------------------------------------------Lock_subsystem::get_Lock
-
-STDMETHODIMP Lock_subsystem::get_Lock( BSTR path_bstr, spooler_com::Ilock** result )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        *result = lock( string_from_bstr( path_bstr ) );
-        if( result )  (*result)->AddRef();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-
-//-----------------------------------------------------------------Lock_subsystem::get_Lock_or_null
-
-STDMETHODIMP Lock_subsystem::get_Lock_or_null( BSTR path_bstr, spooler_com::Ilock** result )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        *result = lock_or_null( string_from_bstr( path_bstr ) );
-        if( result )  (*result)->AddRef();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-
-//----------------------------------------------------------------------Lock_subsystem::Create_lock
-
-STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        ptr<Lock> lock = Z_NEW( Lock( this ) );
-        *result = lock.take();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
-}
-
-//-------------------------------------------------------------------------Lock_subsystem::Add_lock
-
-STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* lock )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        add_lock( dynamic_cast<Lock*>( lock ) );
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-
-    return hr;
 }
 
 //-------------------------------------------------------------------------------------------------

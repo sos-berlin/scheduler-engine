@@ -285,21 +285,21 @@
         Der Austausch wird sofort vorgenommen,
         der Zustand der Sperre (welche Jobs belegen die Sperre) bleibt erhalten.
     </p>
-    <p>
+    <!--p>
         Eine gelöschte Sperrendatei wirkt wie <scheduler_element name="lock.remove" attribute="force" value="yes"/>.
         Das Attribut <code>force="yes"</code> wird neu realisiert und beendet alle <scheduler_element name="lock.use"/>,
         stoppt also alle Jobs.
-    </p>
+    </p-->
     <p>
         <scheduler_element name="lock.remove"/> wird geändert:
         Das Kommando liefert keinen Fehler mehr, wenn noch Tasks die Sperre belegen.
         Stattdessen beendet der Scheduler die Tasks und verzögert das Löschen der Sperre so lange.
-        Die Fehlermeldung <scheduler_message code="SCHEDULER-410"/> erscheint nicht mehr.
+        Die Fehlermeldung <scheduler_message code="SCHEDULER-886"/> erscheint nicht mehr.
     </p>
     <p>
         Ebenso kann eine Sperre gelöscht werden, die von einem Job benutzt wird (<scheduler_element name="lock.use"/>).
         Die Jobs starten bei fehlender Sperre nicht, so als wäre die Sperre belegt.
-        Die Fehlermeldung <scheduler_message code="SCHEDULER-411"/> erscheint nicht mehr.
+        Die Fehlermeldung <scheduler_message code="SCHEDULER-887"/> erscheint nicht mehr.
     </p>
     <p>
         <scheduler_element name="lock"/> wird es erlauben, <code>max_non_exclusive</code>

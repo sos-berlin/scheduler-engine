@@ -45,6 +45,9 @@ function add_new_order()
   //order.id    = ;
   //order.at    = new Date( new Date().getTime() + 80 * 1000 );
     order.title = "____ .... Wir haben einen Auftrag!";
+    var params = spooler.create_variable_set();
+    params.value( "a" ) = "Die Umlaute: äöüßÄÖÜ";
+    order.params = params;
     spooler.job_chain( "my_job_chain" ).add_order( order );
     spooler_log.info( "Neuer Auftrag " + order.id + " " + order.title );
 }
