@@ -878,7 +878,7 @@ struct Com_order_queue : spooler_com::Iorder_queue,
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order_queue"; }
 
     STDMETHODIMP            get_Length                  ( int* );
-    STDMETHODIMP                Add_order               ( VARIANT*, spooler_com::Iorder** );
+  //STDMETHODIMP                Add_order               ( VARIANT*, spooler_com::Iorder** );
 
 
   private:
