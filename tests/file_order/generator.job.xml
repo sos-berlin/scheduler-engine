@@ -1,0 +1,47 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+
+    <params>
+        <param name="sos_mount" value="$SOS_MOUNT"/>
+    </params>
+
+    <script java_class="spooler_job.Generator">
+        <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.io.*;
+
+public class Generator  extends sos.spooler.Job_impl
+{   
+    int i              = 0;
+    int new_file_count = 0;
+
+    //spooler.variables().set_var( "n", Integer.toString( n ) );
+
+
+    public boolean spooler_process()  throws Exception
+    {     
+        int n            = Integer.parseInt( spooler.param() );
+        String sos_mount = spooler_task.params().value( "sos_mount" );
+        
+        for( int j = 1; j <= 10; j++ )
+        {
+            i++;               
+            File file = new File( sos_mount, "tmp/x/g" + i + ".ok" );
+            boolean ok = file.createNewFile();
+            if( ok )  new_file_count++;
+            if( ok  &&  new_file_count % 1000 == 0 )  spooler_log.info( new_file_count + " DATEIEN ERZEUGT: " + file );
+            if( i >= n )  return false;
+        }
+        
+        return true;
+    }                                                     
+}
+                ]]>
+    </script>
+
+    <run_time once="yes">
+        <period repeat=""/>
+    </run_time>
+    
+</job>
