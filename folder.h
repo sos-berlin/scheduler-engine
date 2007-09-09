@@ -174,7 +174,7 @@ struct Typed_folder : Scheduler_object,
 template< class FILE_BASED >
 struct typed_folder : Typed_folder
 {
-                                typed_folder                ( File_based_subsystem* p, Folder* f, Type_code tc ) : Typed_folder( p, f, tc ) {}
+                                typed_folder                ( Folder* f, Type_code tc )             : Typed_folder( f->spooler()->subsystem( (FILE_BASED*)NULL), f, tc ) {}
 
     typedef typename FILE_BASED::My_subsystem My_subsystem;
 

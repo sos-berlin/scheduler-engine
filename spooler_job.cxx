@@ -231,7 +231,7 @@ bool Job_subsystem::is_any_task_queued()
 
 Job_folder::Job_folder( Folder* folder )
 :
-    typed_folder<Job>( subsystem(), folder, Scheduler_object::type_job_folder )
+    typed_folder<Job>( folder, Scheduler_object::type_job_folder )
 {
 }
 
@@ -594,7 +594,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 
 Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 : 
-    file_based<Job,Job_folder,Job_subsystem_interface>( subsystem(), this, Scheduler_object::type_job ),
+    file_based<Job,Job_folder,Job_subsystem_interface>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),

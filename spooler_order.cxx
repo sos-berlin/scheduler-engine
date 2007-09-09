@@ -719,7 +719,7 @@ void Order_subsystem::count_finished_orders()
 
 Job_chain_folder_interface::Job_chain_folder_interface( Folder* folder )
 :
-    typed_folder<Job_chain>( subsystem(), folder, type_job_chain_folder )
+    typed_folder<Job_chain>( folder, type_job_chain_folder )
 {
 }
 
@@ -1368,7 +1368,7 @@ xml::Element_ptr Sink_node::dom_element( const xml::Document_ptr& document, cons
 Job_chain::Job_chain( Scheduler* scheduler )
 :
     Com_job_chain( this ),
-    file_based<Job_chain,Job_chain_folder_interface,Order_subsystem_interface>( subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
+    file_based<Job_chain,Job_chain_folder_interface,Order_subsystem_interface>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(true)

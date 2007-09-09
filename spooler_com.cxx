@@ -4479,14 +4479,17 @@ STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 
 STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result ) 
 { 
-    return VariantCopy( result, &((job_chain::Node*)(this))->order_state() );
+    job_chain::Node* node = static_cast<job_chain::Node*>( this );
+    return node->order_state().CopyTo( result );
+    //return VariantCopy( result, &((job_chain::Node*)(this))->order_state() );
 }
 
 //----------------------------------------------------------------Com_job_chain_node::get_next_node
 
 STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 { 
-    *result = ((job_chain::Node*)(this))->next_node();
+    job_chain::Node* node = static_cast<job_chain::Node*>( this );
+    *result = node->next_node();
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -4495,7 +4498,8 @@ STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 
 STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )   
 { 
-    *result = ((job_chain::Node*)(this))->error_node(); 
+    job_chain::Node* node = static_cast<job_chain::Node*>( this );
+    *result = node->error_node(); 
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -4504,14 +4508,18 @@ STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )
 
 STDMETHODIMP Com_job_chain_node::get_Next_state( VARIANT* result )
 { 
-    return VariantCopy( result, &((job_chain::Node*)(this))->next_state() );
+    job_chain::Node* node = static_cast<job_chain::Node*>( this );
+    return node->next_state().CopyTo( result );
+    //return VariantCopy( result, &((job_chain::Node*)(this))->next_state() );
 }
 
 //--------------------------------------------------------------Com_job_chain_node::get_error_state
 
 STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )   
 { 
-    return VariantCopy( result, &((job_chain::Node*)(this))->error_state() );
+    job_chain::Node* node = static_cast<job_chain::Node*>( this );
+    return node->error_state().CopyTo( result );
+    //return VariantCopy( result, &((job_chain::Node*)(this))->error_state() );
 }
 
 //----------------------------------------------------------------------Com_job_chain_node::get_job

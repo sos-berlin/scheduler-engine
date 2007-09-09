@@ -177,7 +177,7 @@ xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_process
 
 Lock_folder::Lock_folder( Folder* folder )
 :
-    typed_folder<Lock>( subsystem(), folder, type_lock_folder )
+    typed_folder<Lock>( folder, type_lock_folder )
 {
 }
 

@@ -155,6 +155,7 @@ void Folder::add_to_typed_folder_map( Typed_folder* typed_folder )
     
 Folder::~Folder()
 {
+    _typed_folder_map.clear();
 }
 
 //--------------------------------------------------------------Folder::position_of_extension_point
