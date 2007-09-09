@@ -719,7 +719,7 @@ void Order_subsystem::count_finished_orders()
 
 Job_chain_folder_interface::Job_chain_folder_interface( Folder* folder )
 :
-    typed_folder<Job>( subsystem(), folder, type_job_chain_folder )
+    typed_folder<Job_chain>( subsystem(), folder, type_job_chain_folder )
 {
 }
 
@@ -1368,7 +1368,7 @@ xml::Element_ptr Sink_node::dom_element( const xml::Document_ptr& document, cons
 Job_chain::Job_chain( Scheduler* scheduler )
 :
     Com_job_chain( this ),
-    file_based<Job,Job_chain_folder,Job_chain_subsystem_interface>( subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
+    file_based<Job_chain,Job_chain_folder_interface,Order_subsystem_interface>( subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(true)
@@ -2043,7 +2043,7 @@ Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
 
 Job* Job_chain::job_from_state( const Order::State& state )
 {
-    int ÜBERFLÜSSIG;
+    int UEBERFLUESSIG;
 
     if( Job_node* node = Job_node::try_cast( node_from_state( state ) ) )
     {
@@ -2056,7 +2056,7 @@ Job* Job_chain::job_from_state( const Order::State& state )
 
 bool Job_chain::contains_job( Job* job )
 {
-    int ÜBERFLÜSSIG;    // Ersetzen durch einen Eintrag im Job, ob er einer Order_queue (verteilt oder nicht) angehört
+    int UEBERFLUESSIG;    // Ersetzen durch einen Eintrag im Job, ob er einer Order_queue (verteilt oder nicht) angehört
 
     Z_FOR_EACH( Node_list, _node_list, n )
     {

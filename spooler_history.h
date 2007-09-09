@@ -35,6 +35,7 @@ enum Archive_switch
 typedef Archive_switch With_log_switch;
 
 struct Transaction;
+struct Read_transaction;
 
 //-----------------------------------------------------------------------------Database_lock_syntax
 

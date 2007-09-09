@@ -15,6 +15,7 @@ struct Folder;
 struct Folder_subsystem;
 struct Typed_folder;
 struct File_based;
+struct File_based_subsystem;
 
 //-----------------------------------------------------------------------------------Base_file_info
 
@@ -29,6 +30,160 @@ struct Base_file_info
 
     string                     _filename;                   // Ohne Verzeichnis
     double                     _timestamp_utc;
+};
+
+//---------------------------------------------------------------------------------------File_based
+
+struct File_based : Scheduler_object, 
+                    zschimmer::Has_addref_release
+{
+                                File_based                  ( File_based_subsystem*, IUnknown*, Type_code );
+    virtual                    ~File_based                  ();
+
+
+    // Scheduler_object
+
+    void                        close                       ();
+    string                      obj_name                    () const;
+
+
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+
+    File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
+    bool                        is_in_folder                () const                                { return _typed_folder != NULL; }
+    Typed_folder*               typed_folder                () const                                { return _typed_folder; }
+    Folder*                     folder                      () const;
+    bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
+    const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
+    bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
+    bool                        is_ready_to_initialized     () const;
+    bool                        is_ready_to_load            () const;
+    bool                        is_ready_to_activate        () const;
+
+    virtual void            set_name                        ( const string& name );
+    string                      name                        () const                                { return _name; }
+    string                      path                        () const                                { return _name; }
+    string                      normalized_name             () const;
+    string                      normalized_path             () const;
+
+    void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement;  _replacement_is_valid = false; }
+    File_based*                 replacement                 () const                                { return _replacement; }
+    bool                        replacement_is_valid        () const                                { return _replacement_is_valid; }
+
+    void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
+    bool                        check_for_replacing_or_removing();
+
+    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+    virtual void                initialize                  ()                                      = 0;
+    virtual void                load                        ()                                      = 0;
+    virtual void                activate                    ()                                      = 0;
+
+    virtual bool                remove                      ();
+  //virtual void                remove_now                  ()                                      = 0;
+    virtual bool                prepare_to_remove           ()                                      { return can_be_removed_now(); }
+    virtual bool                can_be_removed_now          ()                                      = 0;
+
+    virtual bool                replace_with                ( File_based* );
+    virtual bool                prepare_to_replace          ()                                      { _replacement_is_valid = true;  return true; }
+    virtual bool                can_be_replaced_now         ()                                      { return _replacement_is_valid; }
+    virtual File_based*         replace_now                 ()                                      = 0;
+
+  //virtual void                on_base_file_new            ()                                      = 0;
+    virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
+    virtual bool                on_base_file_removed        ()                                      { return remove(); }
+
+    bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
+    static bool                 less_dereferenced           ( const File_based* a, const File_based* b )  { return *a < *b; }
+
+
+  protected:
+    void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
+
+    Fill_zero                  _zero_;
+    ptr<File_based>            _replacement;
+
+  private:
+    friend struct               Typed_folder;
+
+    string                     _name;
+    Base_file_info             _base_file_info;
+    zschimmer::Xc              _base_file_xc;
+    double                     _base_file_xc_time;
+    bool                       _is_base_file_loaded;
+    Typed_folder*              _typed_folder;
+    File_based_subsystem*      _file_based_subsystem;
+    bool                       _file_is_removed;
+    bool                       _replacement_is_valid;
+};
+
+//-------------------------------------------------------------------------------------file_based<>
+
+template< class FILE_BASED, class TYPED_FOLDER, class SUBSYSTEM >
+struct file_based : File_based
+{                                                           
+                                file_based                  ( SUBSYSTEM* p, IUnknown* iu, Type_code t ): File_based( p, iu, t ) {}
+
+    typedef SUBSYSTEM           My_subsystem;
+
+    SUBSYSTEM*                  subsystem                   () const                                { return static_cast<SUBSYSTEM*>( File_based::subsystem() ); }
+
+    File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
+    virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
+  //void                    set_replacement                 ( FILE_BASED* file_based )              { File_based::set_replacement = file_based;  _replacement_is_valid = false; }
+    FILE_BASED*                 replacement                 () const                                { return static_cast<FILE_BASED*>( File_based::replacement() ); }
+    TYPED_FOLDER*               typed_folder                () const                                { return static_cast<TYPED_FOLDER*>( File_based::typed_folder() ); }
+};
+
+//-------------------------------------------------------------------------------------Typed_folder
+
+struct Typed_folder : Scheduler_object, 
+                      Object
+{
+                                Typed_folder                ( File_based_subsystem*, Folder*, Type_code );
+
+    Folder*                     folder                      () const                                { return _folder; }
+    File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
+
+    void                        adjust_with_directory       ( const list<Base_file_info>& );
+    File_based*                 call_on_base_file_changed   ( File_based*, const Base_file_info* changed_base_file_info );
+    File_based*                 file_based                  ( const string& name ) const;
+    File_based*                 file_based_or_null          ( const string& name ) const;
+
+    virtual bool                is_empty_name_allowed       () const                                { return false; }
+    string                      obj_name                    () const;
+
+    void                        add_file_based              ( File_based* );
+    void                        remove_file_based           ( File_based* );
+    File_based*                 replace_file_based          ( File_based* );
+
+  private:
+    Fill_zero                  _zero_;
+    Folder*                    _folder;
+    File_based_subsystem*      _file_based_subsystem;
+
+  protected:
+
+  public:
+    typedef stdext::hash_map< string, File_based* >  File_based_map;     // File_based::normalized_name() --> File_based
+    File_based_map             _file_based_map;    
+};
+
+//-----------------------------------------------------------------------------------typed_folder<>
+
+template< class FILE_BASED >
+struct typed_folder : Typed_folder
+{
+                                typed_folder                ( File_based_subsystem* p, Folder* f, Type_code tc ) : Typed_folder( p, f, tc ) {}
+
+    typedef typename FILE_BASED::My_subsystem My_subsystem;
+
+    My_subsystem*               subsystem                   () const                                { return static_cast<My_subsystem*>( Typed_folder::subsystem() ); }
+
+    FILE_BASED*                 file_based                  ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based( name ) ); }
+    FILE_BASED*                 file_based_or_null          ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based_or_null( name ) ); }
+
+    FILE_BASED*                 replace_file_based          ( FILE_BASED* file_based )              { return static_cast<FILE_BASED*>( Typed_folder::replace_file_based( file_based ) ); }
 };
 
 //-----------------------------------------------------------------------------File_based_subsystem
@@ -68,10 +223,10 @@ struct file_based_subsystem : File_based_subsystem
 
     void close()
     {
-        for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
+        for( typename File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
         {
-            File_based_map::iterator next_it    = it;  next_it++;
-            ptr<File_based>          file_based = it->second;
+            typename File_based_map::iterator next_it    = it;  next_it++;
+            ptr<File_based>                   file_based = +it->second;
             
             try
             {
@@ -100,7 +255,7 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_initialize()
     {
-        Z_FOR_EACH( File_based_map, _file_based_map, it )
+        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
         {
             File_based* file_based = it->second;
 
@@ -120,7 +275,7 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_load()
     {
-        Z_FOR_EACH( File_based_map, _file_based_map, it )
+        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
         {
             File_based* file_based = it->second;
 
@@ -140,7 +295,7 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_activate()
     {
-        Z_FOR_EACH( File_based_map, _file_based_map, it )
+        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
         {
             File_based* file_based = it->second;
 
@@ -160,7 +315,7 @@ struct file_based_subsystem : File_based_subsystem
 
     FILE_BASED* file_based_or_null( const string& path ) const
     {
-        File_based_map::const_iterator it = _file_based_map.find( normalized_name( path ) );
+        typename File_based_map::const_iterator it = _file_based_map.find( normalized_name( path ) );
         return it == _file_based_map.end()? NULL 
                                           : it->second;
     }
@@ -231,160 +386,6 @@ struct file_based_subsystem : File_based_subsystem
 #define FOR_EACH_FILE_BASED( FILE_BASED_CLASS, OBJECT ) \
     Z_FOR_EACH( FILE_BASED_CLASS::My_subsystem::File_based_map, spooler()->subsystem( (FILE_BASED_CLASS*)NULL )->_file_based_map, __file_based_iterator__ )  \
         if( FILE_BASED_CLASS* OBJECT = __file_based_iterator__->second )
-
-//---------------------------------------------------------------------------------------File_based
-
-struct File_based : Scheduler_object, 
-                    zschimmer::Has_addref_release
-{
-                                File_based                  ( File_based_subsystem*, IUnknown*, Type_code );
-    virtual                    ~File_based                  ();
-
-
-    // Scheduler_object
-
-    void                        close                       ();
-    string                      obj_name                    () const;
-
-
-    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
-
-
-    File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
-    bool                        is_in_folder                () const                                { return _typed_folder != NULL; }
-    Typed_folder*               typed_folder                () const                                { return _typed_folder; }
-    Folder*                     folder                      () const;
-    bool                        has_base_file               () const                                { return _base_file_info._filename != ""; }
-    const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
-    bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
-    bool                        is_ready_to_initialized     () const;
-    bool                        is_ready_to_load            () const;
-    bool                        is_ready_to_activate        () const;
-
-    virtual void            set_name                        ( const string& name );
-    string                      name                        () const                                { return _name; }
-    string                      path                        () const                                { return _name; }
-    string                      normalized_name             () const                                { return _file_based_subsystem->normalized_name( _name ); }
-    string                      normalized_path             () const                                { return _file_based_subsystem->normalized_name( path() ); }
-
-    void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement;  _replacement_is_valid = false; }
-    File_based*                 replacement                 () const                                { return _replacement; }
-    bool                        replacement_is_valid        () const                                { return _replacement_is_valid; }
-
-    void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
-    bool                        check_for_replacing_or_removing();
-
-    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
-    virtual void                initialize                  ()                                      = 0;
-    virtual void                load                        ()                                      = 0;
-    virtual void                activate                    ()                                      = 0;
-
-    virtual bool                remove                      ();
-  //virtual void                remove_now                  ()                                      = 0;
-    virtual bool                prepare_to_remove           ()                                      { return can_be_removed_now(); }
-    virtual bool                can_be_removed_now          ()                                      = 0;
-
-    virtual bool                replace_with                ( File_based* );
-    virtual bool                prepare_to_replace          ()                                      { _replacement_is_valid = true;  return true; }
-    virtual bool                can_be_replaced_now         ()                                      { return _replacement_is_valid; }
-    virtual File_based*         replace_now                 ()                                      = 0;
-
-  //virtual void                on_base_file_new            ()                                      = 0;
-    virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
-    virtual bool                on_base_file_removed        ()                                      { return remove(); }
-
-    bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
-    static bool                 less_dereferenced           ( const File_based* a, const File_based* b )  { return *a < *b; }
-
-
-  protected:
-    void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
-
-    Fill_zero                  _zero_;
-    ptr<File_based>            _replacement;
-
-  private:
-    friend struct               Typed_folder;
-
-    string                     _name;
-    Base_file_info             _base_file_info;
-    zschimmer::Xc              _base_file_xc;
-    double                     _base_file_xc_time;
-    bool                       _is_base_file_loaded;
-    Typed_folder*              _typed_folder;
-    File_based_subsystem*      _file_based_subsystem;
-    bool                       _file_is_removed;
-    bool                       _replacement_is_valid;
-};
-
-//-------------------------------------------------------------------------------------file_based<>
-
-template< class FILE_BASED, class TYPED_FOLDER, class SUBSYSTEM >
-struct file_based : File_based
-{                                                           
-                                file_based                  ( File_based_subsystem* p, IUnknown* iu, Type_code t ): File_based( p, iu, t ) {}
-
-    typedef SUBSYSTEM           My_subsystem;
-
-    SUBSYSTEM*                  subsystem                   () const                                { return static_cast<SUBSYSTEM*>( File_based::subsystem() ); }
-
-    File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
-    virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
-  //void                    set_replacement                 ( FILE_BASED* file_based )              { File_based::set_replacement = file_based;  _replacement_is_valid = false; }
-    FILE_BASED*                 replacement                 () const                                { return static_cast<FILE_BASED*>( File_based::replacement() ); }
-    TYPED_FOLDER*               typed_folder                () const                                { return static_cast<TYPED_FOLDER*>( File_based::typed_folder() ); }
-};
-
-//-------------------------------------------------------------------------------------Typed_folder
-
-struct Typed_folder : Scheduler_object, 
-                      Object
-{
-                                Typed_folder                ( File_based_subsystem*, Folder*, Type_code );
-
-    Folder*                     folder                      () const                                { return _folder; }
-    File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
-
-    void                        adjust_with_directory       ( const list<Base_file_info>& );
-    File_based*                 call_on_base_file_changed   ( File_based*, const Base_file_info* changed_base_file_info );
-    File_based*                 file_based                  ( const string& name ) const;
-    File_based*                 file_based_or_null          ( const string& name ) const;
-
-    virtual bool                is_empty_name_allowed       () const                                { return false; }
-    string                      obj_name                    () const;
-
-    void                        add_file_based              ( File_based* );
-    void                        remove_file_based           ( File_based* );
-    File_based*                 replace_file_based          ( File_based* );
-
-  private:
-    Fill_zero                  _zero_;
-    Folder*                    _folder;
-    File_based_subsystem*      _file_based_subsystem;
-
-  protected:
-
-  public:
-    typedef stdext::hash_map< string, File_based* >  File_based_map;     // File_based::normalized_name() --> File_based
-    File_based_map             _file_based_map;    
-};
-
-//-----------------------------------------------------------------------------------typed_folder<>
-
-template< class FILE_BASED >
-struct typed_folder : Typed_folder
-{
-                                typed_folder                ( File_based_subsystem* p, Folder* f, Type_code tc ) : Typed_folder( p, f, tc ) {}
-
-    typedef typename FILE_BASED::My_subsystem My_subsystem;
-
-    My_subsystem*               subsystem                   () const                                { return static_cast<My_subsystem*>( Typed_folder::subsystem() ); }
-
-    FILE_BASED*                 file_based                  ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based( name ) ); }
-    FILE_BASED*                 file_based_or_null          ( const string& name ) const            { return static_cast<FILE_BASED*>( Typed_folder::file_based_or_null( name ) ); }
-
-    FILE_BASED*                 replace_file_based          ( FILE_BASED* file_based )              { return static_cast<FILE_BASED*>( Typed_folder::replace_file_based( file_based ) ); }
-};
 
 //-------------------------------------------------------------------------------------------Folder
 //

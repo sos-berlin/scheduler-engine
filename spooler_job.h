@@ -394,10 +394,6 @@ struct Internal_job : Job
 
 //------------------------------------------------------------------------------------------Job_map
 
-typedef list< ptr<Job> >                        Job_list;
-
-//#define FOR_EACH_JOB( JOB )  FOR_EACH( Job_subsystem_interface::File_based_map, spooler()->job_subsystem()->_file_based_map, __job_iterator__ )  \
-//                                if( Job* JOB = __job_iterator__->second )
 #define FOR_EACH_JOB( JOB )  FOR_EACH_FILE_BASED( Job, JOB )
 
 //---------------------------------------------------------------------------------------Job_folder

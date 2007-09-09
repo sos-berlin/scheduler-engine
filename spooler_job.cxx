@@ -173,7 +173,7 @@ void Job_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elemen
 
 int Job_subsystem::remove_temporary_jobs()
 {
-    int ÜBERARBEITEN;
+    int UEBERARBEITEN;
     int count = 0;
 
     File_based_map::iterator it = _file_based_map.begin();
@@ -231,7 +231,7 @@ bool Job_subsystem::is_any_task_queued()
 
 Job_folder::Job_folder( Folder* folder )
 :
-    typed_folder( subsystem(), folder, Scheduler_object::type_job_folder )
+    typed_folder<Job>( subsystem(), folder, Scheduler_object::type_job_folder )
 {
 }
 
@@ -570,7 +570,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 
             if( my_show_what.is_set( show_job_orders )  &&  my_show_what._max_orders > 0 )
             {
-                int PRÜFEN_OB_ORDER_QUEUE_ELEMENT_FREIGEGEBEN;
+                int PRUEFEN_OB_ORDER_QUEUE_ELEMENT_FREIGEGEBEN;
 
                 xml::Element_ptr order_queue_element = order_queue->dom_element( document, my_show_what );
 
@@ -594,7 +594,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 
 Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 : 
-    file_based( subsystem(), this, Scheduler_object::type_job ),
+    file_based<Job,Job_folder,Job_subsystem_interface>( subsystem(), this, Scheduler_object::type_job ),
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
@@ -809,7 +809,7 @@ void Job::activate()
 {
     load();
 
-    int PRÜFUNGEN_ZUSAMMENFASSEN;       // Etwa so:  File_based::is_ready_to_activate()
+    int PRUEFUNGEN_ZUSAMMENFASSEN;       // Etwa so:  File_based::is_ready_to_activate()
     if( !base_file_has_error()  &&
         _state < s_pending  &&  
         !base_file_has_error()  &&  

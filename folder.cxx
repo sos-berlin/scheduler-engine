@@ -73,7 +73,7 @@ bool Folder_subsystem::subsystem_load()
 
 bool Folder_subsystem::subsystem_activate()
 {
-    int VERZEICHNISÜBERWACHUNG_STARTEN;
+    int VERZEICHNISUEBERWACHUNG_STARTEN;
 
     set_async_manager( _spooler->_connection_manager );
     async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
@@ -363,7 +363,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             xml::Document_ptr dom_document ( string_from_file( File_path( folder()->directory(), base_file_info->_filename ) ) );
             if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
-            assert_empty_attribute( dom_document.documentElement(), "spooler_id" );      int SPOOLER_ID_PRÜFEN;  //?
+            assert_empty_attribute( dom_document.documentElement(), "spooler_id" );      int SPOOLER_ID_PRUEFEN;  //?
             assert_empty_attribute( dom_document.documentElement(), "replace"    );
 
             file_based->set_dom( dom_document.documentElement() );
@@ -621,6 +621,20 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
     }
 
     return element;
+}
+
+//----------------------------------------------------------------------File_based::normalized_name
+
+string File_based::normalized_name() const
+{ 
+    return _file_based_subsystem->normalized_name( _name ); 
+}
+
+//----------------------------------------------------------------------File_based::normalized_path
+
+string File_based::normalized_path() const
+{ 
+    return _file_based_subsystem->normalized_name( path() ); 
 }
 
 //-----------------------------------------------------------------------------File_based::obj_name

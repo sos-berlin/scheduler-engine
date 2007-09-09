@@ -584,7 +584,7 @@ struct Iorder_queue : IDispatch
 
     virtual HRESULT     get_Length                  ( int* result )                                 = 0;
 
-    virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** )         = 0;
+  //virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** )         = 0;
 };
 
 //----------------------------------------------------------------------------------------Order

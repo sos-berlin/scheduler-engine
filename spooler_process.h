@@ -254,6 +254,8 @@ struct Process_class : Process_class_configuration
 
     Fill_zero                  _zero_;
   //ptr<Process_class>         _new_process_class;          // Prozessklasse ersetzen, sobald is_removable()
+
+    typedef list< ptr<Job> >    Job_list;
     Job_list                   _waiting_jobs;
 
   public:

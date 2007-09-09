@@ -405,38 +405,6 @@ struct Node : Com_job_chain_node,
                 return NULL;                                                                        \
         }
 
-//    //----------------------------------------------------------------------------------------cast_
-//
-//    template< class JOB_CHAIN_NODE >
-//    static JOB_CHAIN_NODE* cast_( JOB_CHAIN_NODE* dummy, Node* node )
-//    { 
-//        JOB_CHAIN_NODE* result = try_cast_( dummy, node );
-//        if( !result )  z::throw_xc( __FUNCTION__, node? node->obj_name() : "(Node*)NULL" );
-//        return result;
-//    }
-//
-//    //------------------------------------------------------------------------------------try_cast_
-//
-//    template< class JOB_CHAIN_NODE >
-//    static JOB_CHAIN_NODE* try_cast_( JOB_CHAIN_NODE*, Node* node )
-//    {
-//        if( node  &&  node->is_type( JOB_CHAIN_NODE::static_type() ) )
-//        {
-//            assert( dynamic_cast<JOB_CHAIN_NODE*>( node ) );
-//            return static_cast<JOB_CHAIN_NODE*>( node );
-//        }
-//        else
-//            return NULL;
-//    }
-//
-//    //---------------------------------------------------------------------------------------------
-//
-//#   define DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( MY_CLASS, TYPE_CODE )                                                  \
-//        static Type      static_type()              { return TYPE_CODE; }                                               \
-//        bool             is_type    ( Type type )   { return type == static_type() || Base_class::is_type( type ); }    \
-//        static MY_CLASS* cast       ( Node* node )  { return cast_    ( (MY_CLASS*)NULL, node ); }                      \
-//        static MY_CLASS* try_cast   ( Node* node )  { return try_cast_( (MY_CLASS*)NULL, node ); }
-//
     //---------------------------------------------------------------------------------------------
 
     enum Type
@@ -476,11 +444,11 @@ struct Node : Com_job_chain_node,
 
     virtual void                activate                    ();
 
-    Order::State                order_state                 () const                                { return _order_state; }
+    const Order::State&         order_state                 () const                                { return _order_state; }
     void                    set_next_state                  ( const Order::State& );
-    Order::State                next_state                  () const                                { return _next_state; }
+    const Order::State&         next_state                  () const                                { return _next_state; }
     void                    set_error_state                 ( const Order::State& );
-    Order::State                error_state                 () const                                { return _error_state; }
+    const Order::State&         error_state                 () const                                { return _error_state; }
 
     Node*                       next_node                   () const                                { return _next_node; }
     Node*                       error_node                  () const                                { return _error_node; }
@@ -512,7 +480,7 @@ struct Node : Com_job_chain_node,
     Job_chain_set              _using_job_chains_set;
 
   protected:
-    friend struct               Job_chain;
+    friend struct               ::sos::scheduler::order::Job_chain;
 
     void                        set_state                   ( State state )                         { _state = state; }
 
