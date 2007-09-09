@@ -165,6 +165,8 @@ struct File_based : Scheduler_object,
 
     void                    set_file_based_state            ( State state )                         { _state = state; }
     State                       file_based_state            () const                                { return _state; }
+    string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
+    static string               file_based_state_name       ( State );
 
     void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement;  _replacement_is_valid = false; }
     File_based*                 replacement                 () const                                { return _replacement; }

@@ -1825,9 +1825,12 @@
                                     </xsl:choose>
                                 </span>
                             </xsl:when>
-                            <xsl:otherwise>
+                            <xsl:when test="file_based/ERROR">
+                                 <xsl:apply-templates mode="file_based_error" select="file_based"/>
+                            </xsl:when>
+                            <xsl:when test="@is_free='yes'">
                                 <span>free</span>
-                            </xsl:otherwise>
+                            </xsl:when>
                         </xsl:choose>
                         <!--xsl:if test="lock.holders/lock.holder">
                             <xsl:value-of select="count( lock.holders/lock.holder )"/>
@@ -1854,14 +1857,6 @@
                         </xsl:if-->
                     </td>
                 </tr>
-
-                <xsl:if test="file_based/ERROR">
-                    <tr>
-                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                            <xsl:apply-templates mode="file_based_error" select="file_based"/>
-                        </td>
-                    </tr>
-                </xsl:if>
 
                 <xsl:if test="replacement/lock/file_based/ERROR">
                     <tr>

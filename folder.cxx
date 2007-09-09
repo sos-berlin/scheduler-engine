@@ -386,6 +386,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
     {
         if( !file_based )  throw;   // Sollte nicht passieren
 
+        file_based->set_file_based_state( File_based::s_error );
         file_based->_base_file_xc      = x;
         file_based->_base_file_xc_time = double_from_gmtime();
         file_based->log()->error( message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x ) );
@@ -563,6 +564,8 @@ bool File_based::initialize()
 
 bool File_based::load()
 {
+    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+
     bool ok = _state == s_loaded;
 
     if( !ok )
@@ -659,6 +662,22 @@ bool File_based::check_for_replacing_or_removing()
     return result;
 }
 
+//----------------------------------------------------------------File_based::file_based_state_name
+
+string File_based::file_based_state_name( State state )
+{
+    switch( state )
+    {
+        case s_not_initialized: return "not_initialized";
+        case s_initialized:     return "initialized";
+        case s_loaded:          return "loaded";
+        case s_active:          return "active";
+        case s_closed:          return "closed";
+        case s_error:           return "error";
+        default:                return S() << "File_based_state-" << state;
+    }
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -675,6 +694,8 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
         Time t;
         t.set_utc( _base_file_info._timestamp_utc );
         element.setAttribute( "last_write_time", t.xml_value() );
+
+        element.setAttribute( "state", file_based_state_name() );
 
         if( base_file_has_error() )  element.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
     }

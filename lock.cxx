@@ -142,13 +142,15 @@ STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
 
 //-------------------------------------------------------------------------Lock_subsystem::Add_lock
 
-STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* lock )
+STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* ilock )
 {
     HRESULT hr = S_OK;
 
     try
     {
-        spooler()->root_folder()->lock_folder()->add_lock( dynamic_cast<Lock*>( lock ) );
+        Lock* lock = dynamic_cast<Lock*>( ilock );
+        spooler()->root_folder()->lock_folder()->add_lock( lock );
+        lock->activate();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -213,6 +215,7 @@ void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
         lock = Z_NEW( Lock( subsystem(), lock_name ) );
         lock->set_dom( lock_element );
         add_lock( lock );
+        lock->activate();
     }
     else
         lock->set_dom( lock_element );
@@ -335,7 +338,7 @@ bool Lock::on_activate()
 
 bool Lock::can_be_removed_now()
 {
-    return _remove  &&  is_free();
+    return _remove  &&  _holder_set.empty();
 }
 
 //--------------------------------------------------------------------------Lock::prepare_to_remove
@@ -551,6 +554,8 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
 
     result.setAttribute( "name", name() );
     if( _config._max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _config._max_non_exclusive );
+
+    if( is_free() )  result.setAttribute( "is_free", "yes" );
 
     result.setAttribute( "state", state_name() );
 
