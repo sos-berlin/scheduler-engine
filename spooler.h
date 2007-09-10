@@ -167,6 +167,9 @@ namespace order
     struct Order_queue;
     struct Order;
     struct Order_subsystem_interface;
+    struct Standing_order;
+    struct Standing_order_folder;
+    struct Standing_order_subsystem;
 
     namespace job_chain
     {
@@ -237,6 +240,7 @@ typedef stdext::hash_set<string> String_set;
 #include "java_subsystem.h"
 #include "lock.h"
 #include "supervisor.h"
+#include "standing_order.h"
 #include "xml_client_connection.h"
 
 //-------------------------------------------------------------------------------------------------
@@ -438,6 +442,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem               ();
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
+    Standing_order_subsystem*   standing_order_subsystem    ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
 
@@ -551,6 +556,7 @@ struct Spooler : Object,
     ptr<Job_subsystem_interface>     _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
     ptr<Order_subsystem_interface>   _order_subsystem;
+    ptr<Standing_order_subsystem>    _standing_order_subsystem;
     ptr<http::Http_server_interface> _http_server;
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;

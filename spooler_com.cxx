@@ -85,7 +85,14 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
         }
     }
 
-    if( !iorder )  iorder = new Order( spooler, order_or_payload );
+    if( !iorder )  
+    {
+        //iorder = new Order( spooler, order_or_payload );
+        ptr<Order> order = new Order( spooler );
+        order->set_payload( order_or_payload );
+
+        iorder = +order;
+    }
 
     return iorder;
 }

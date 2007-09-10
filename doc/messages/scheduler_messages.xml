@@ -518,23 +518,17 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-153">
-            <text xml:lang="de">
-                <title>Auftragswarteschlange des Jobs "<p2/>" hat schon einen Auftrag mit der Kennung "<p1/>"</title>
-            </text>
+        <message code="SCHEDULER-153">
             <text xml:lang="en">
-                <title>Order queue of job <p2/> has already an order with the id "<p1/>"</title>
+                <title>'<p1>object</p1>' is not in state loaded</title>
             </text>
-        </message-->
+        </message>
 
-        <!--message code="SCHEDULER-154">
-            <text xml:lang="de">
-                <title>Auftrag <p1/> ist bereits in der Auftragsliste des Jobs <p2/></title>
-            </text>
+        <message code="SCHEDULER-154">
             <text xml:lang="en">
-                <title></title>
+                <title>'<p1>object</p1>' is not active</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-155">
             <text xml:lang="de">
@@ -563,11 +557,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-158">
+        <!--message code="SCHEDULER-158">
             <text xml:lang="en">
                 <title>'<p1>object</p1>' is not active</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-159">
             <text xml:lang="de">

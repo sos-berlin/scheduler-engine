@@ -245,7 +245,6 @@ Lock::Lock( Lock_subsystem* lock_subsystem, const string& name )
     Idispatch_implementation( &class_descriptor ),
     file_based<Lock,Lock_folder,Lock_subsystem>( lock_subsystem, static_cast<spooler_com::Ilock*>( this ), type_lock ),
     _zero_(this+1),
-    _lock_subsystem(lock_subsystem),
     _waiting_queues(2)                  // [lk_exclusive] und [lk_non_ecklusive]
 {
     _config._max_non_exclusive = INT_MAX;
@@ -321,8 +320,6 @@ bool Lock::on_load()
 
 bool Lock::on_activate()
 {
-    set_state( s_active );
-
     FOR_EACH_JOB( job )
     {
         if( Requestor* requestor = job->lock_requestor_or_null() )
@@ -417,6 +414,8 @@ void Lock::set_max_non_exclusive( int max_non_exclusive )
 
 bool Lock::is_free() const
 { 
+    // Siehe auch can_be_removed_now()
+
     return file_based_state() == File_based::s_active  &&  
            _holder_set.empty(); 
 }
@@ -557,7 +556,7 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
 
     if( is_free() )  result.setAttribute( "is_free", "yes" );
 
-    result.setAttribute( "state", state_name() );
+    //result.setAttribute( "state", state_name() );
 
     if( !_holder_set.empty() )
     {
@@ -594,21 +593,6 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
     }
 
     return result;
-}
-
-//---------------------------------------------------------------------------------Lock::state_name
-
-string Lock::state_name( State state )
-{
-    switch( state )
-    {
-        case s_not_initialized: return "not_initialized";
-      //case s_initialized:     return "initialized";
-      //case s_loaded:          return "loaded";
-      //case s_error:           return "error";
-        case s_active:          return "active";
-        default:                return as_string( (int)state );
-    }
 }
 
 //------------------------------------------------------------------------Lock::string_from_holders

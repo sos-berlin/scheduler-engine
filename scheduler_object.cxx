@@ -46,7 +46,6 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_web_service_response:         return "Web_service_response";
         case type_web_services:                 return "Web_services";
         case type_order:                        return "Order";
-        case type_order_folder:                 return "Order_folder";
         case type_order_queue:                  return "Order_queue";
         case type_order_subsystem:              return "Order_subsystem";
         case type_process:                      return "Process";
@@ -56,6 +55,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler:                    return "Scheduler";
+        case type_standing_order:               return "Standing_order";
+        case type_standing_order_folder:        return "Standing_order_folder";
+        case type_standing_order_subsystem:     return "Standing_order_subsystem";
         case type_supervisor:                   return "Supervisor";
         case type_supervisor_client:            return "Supervisor_client";
         case type_supervisor_client_connection: return "Supervisor_client_connection";

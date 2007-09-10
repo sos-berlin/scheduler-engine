@@ -652,19 +652,20 @@ Spooler::Spooler()
 {
     Z_DEBUG_ONLY( self_test() );
 
-    _scheduler_event_manager = Z_NEW( Scheduler_event_manager( this ) );
-    _scheduler_script        = new_scheduler_script( this );
-    _folder_subsystem        = new_folder_subsystem( this );
-    _process_class_subsystem = Z_NEW( Process_class_subsystem( this ) );
-    _job_subsystem           = new_job_subsystem( this );
-    _task_subsystem          = Z_NEW( Task_subsystem( this ) );
-    _order_subsystem         = new_order_subsystem( this );
-    _java_subsystem          = new_java_subsystem( this );
-    _db                      = Z_NEW( Database( this ) );
-    _http_server             = http::new_http_server( this );
-    _web_services            = new_web_services( this );
-    _lock_subsystem          = Z_NEW( lock::Lock_subsystem( this ) );
-    _supervisor              = new_supervisor( this );
+    _scheduler_event_manager  = Z_NEW( Scheduler_event_manager( this ) );
+    _scheduler_script         = new_scheduler_script( this );
+    _folder_subsystem         = new_folder_subsystem( this );
+    _process_class_subsystem  = Z_NEW( Process_class_subsystem( this ) );
+    _job_subsystem            = new_job_subsystem( this );
+    _task_subsystem           = Z_NEW( Task_subsystem( this ) );
+    _order_subsystem          = new_order_subsystem( this );
+    _standing_order_subsystem = new_standing_order_subsystem( this );
+    _java_subsystem           = new_java_subsystem( this );
+    _db                       = Z_NEW( Database( this ) );
+    _http_server              = http::new_http_server( this );
+    _web_services             = new_web_services( this );
+    _lock_subsystem           = Z_NEW( lock::Lock_subsystem( this ) );
+    _supervisor               = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -1030,7 +1031,7 @@ void Spooler::check_name( const string& name )
 
 Process_class_subsystem* Spooler::process_class_subsystem()
 {
-    if( !_process_class_subsystem )  z::throw_xc( __FUNCTION__, "Process_class subsystem is not initialized" );
+    if( !_process_class_subsystem )  z::throw_xc( __FUNCTION__, "Process_class_subsystem is not initialized" );
 
     return _process_class_subsystem; 
 }
@@ -1039,16 +1040,25 @@ Process_class_subsystem* Spooler::process_class_subsystem()
 
 Order_subsystem_interface* Spooler::order_subsystem()
 { 
-    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Order subsystem is not initialized" );
+    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Order_subsystem is not initialized" );
 
     return _order_subsystem; 
+}
+
+//----------------------------------------------------------------Spooler::standing_order_subsystem
+
+Standing_order_subsystem* Spooler::standing_order_subsystem()
+{ 
+    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Standing_order_subsystem is not initialized" );
+
+    return _standing_order_subsystem; 
 }
 
 //---------------------------------------------------------------------------Spooler::job_subsystem
 
 Job_subsystem_interface* Spooler::job_subsystem()
 { 
-    if( !_job_subsystem )  z::throw_xc( __FUNCTION__, "Job subsystem is not initialized" );
+    if( !_job_subsystem )  z::throw_xc( __FUNCTION__, "Job_subsystem is not initialized" );
 
     return _job_subsystem; 
 }
@@ -1057,7 +1067,7 @@ Job_subsystem_interface* Spooler::job_subsystem()
 
 Task_subsystem* Spooler::task_subsystem()
 { 
-    if( !_task_subsystem )  z::throw_xc( __FUNCTION__, "Task subsystem is not initialized" );
+    if( !_task_subsystem )  z::throw_xc( __FUNCTION__, "Task_subsystem is not initialized" );
 
     return _task_subsystem; 
 }
@@ -1355,7 +1365,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
-            if( opt.flag      ( "log-to-stderr"    ) )  _log_to_stderr = opt.set();
+            if( opt.flag      ( 'e', "log-to-stderr" ) )  _log_to_stderr = opt.set();
             else
             if( opt.with_value( "stderr-level"     ) )  _log_to_stderr = true,  _log_to_stderr_level = make_log_level( opt.value() );
             else
@@ -1522,12 +1532,13 @@ void Spooler::load()
     }
 
     _folder_subsystem->set_directory( _configuration_directory );
-    _folder_subsystem       ->switch_subsystem_state( subsys_initialized );
-    _process_class_subsystem->switch_subsystem_state( subsys_initialized );
-    _order_subsystem        ->switch_subsystem_state( subsys_initialized );
-    _http_server            ->switch_subsystem_state( subsys_initialized );
-    _web_services           ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
-    _lock_subsystem         ->switch_subsystem_state( subsys_initialized );
+    _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
+    _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
+    _order_subsystem         ->switch_subsystem_state( subsys_initialized );
+    _standing_order_subsystem->switch_subsystem_state( subsys_initialized );
+    _http_server             ->switch_subsystem_state( subsys_initialized );
+    _web_services            ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+    _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
 
 
     Command_processor cp ( this, Security::seclev_all );
@@ -1751,24 +1762,26 @@ void Spooler::activate()
     if( !_ignore_process_classes )
     _process_class_subsystem->switch_subsystem_state( subsys_loaded );
 
-    _job_subsystem          ->switch_subsystem_state( subsys_loaded );             // Datenbank muss geöffnet sein
-    _order_subsystem        ->switch_subsystem_state( subsys_loaded );
-    _lock_subsystem         ->switch_subsystem_state( subsys_loaded );
+    _job_subsystem           ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
+    _order_subsystem         ->switch_subsystem_state( subsys_loaded );
+    _standing_order_subsystem->switch_subsystem_state( subsys_loaded );
+    _lock_subsystem          ->switch_subsystem_state( subsys_loaded );
 
     bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
-    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );        // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );       // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
 
     _folder_subsystem->switch_subsystem_state( subsys_active );
     
     if( !_ignore_process_classes )
-    _process_class_subsystem->switch_subsystem_state( subsys_active );
+    _process_class_subsystem ->switch_subsystem_state( subsys_active );
 
-    _job_subsystem          ->switch_subsystem_state( subsys_active );
-    _order_subsystem        ->switch_subsystem_state( subsys_active );
-    _web_services           ->switch_subsystem_state( subsys_active );      // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _lock_subsystem         ->switch_subsystem_state( subsys_active );
+    _job_subsystem           ->switch_subsystem_state( subsys_active );
+    _order_subsystem         ->switch_subsystem_state( subsys_active );
+    _standing_order_subsystem->switch_subsystem_state( subsys_active );
+    _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    _lock_subsystem          ->switch_subsystem_state( subsys_active );
 
     if( !_xml_cmd.empty() )
     {
@@ -1895,19 +1908,21 @@ void Spooler::stop( const exception* )
     _scheduler_script->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
 
 
-    if( _order_subsystem )  _order_subsystem->switch_subsystem_state( subsys_stopped );
+    _standing_order_subsystem->switch_subsystem_state( subsys_stopped );
+    if( _order_subsystem )  
+     _order_subsystem        ->switch_subsystem_state( subsys_stopped );
 
     //_job_subsystem->close_jobs();       // Löst die Sperren ( Job::_requestor=NULL)
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
-    _lock_subsystem         ->switch_subsystem_state( subsys_stopped );
-    _order_subsystem = NULL;
-    _task_subsystem         ->switch_subsystem_state( subsys_stopped );
-    _job_subsystem          ->switch_subsystem_state( subsys_stopped );
-    _process_class_subsystem->switch_subsystem_state( subsys_stopped );
-    _folder_subsystem       ->switch_subsystem_state( subsys_stopped );
-    _java_subsystem         ->switch_subsystem_state( subsys_stopped );
+    _lock_subsystem          ->switch_subsystem_state( subsys_stopped );
+  //_order_subsystem = NULL;
+    _task_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _job_subsystem           ->switch_subsystem_state( subsys_stopped );
+    _process_class_subsystem ->switch_subsystem_state( subsys_stopped );
+    _folder_subsystem        ->switch_subsystem_state( subsys_stopped );
+    _java_subsystem          ->switch_subsystem_state( subsys_stopped );
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
 

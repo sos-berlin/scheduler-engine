@@ -12,7 +12,6 @@ using namespace zschimmer::file;
 //--------------------------------------------------------------------------------------------const
 
 const int                   directory_watch_interval        = 10;
-const char                  job_chain_order_separator       = '#';                                  // Dateiname "jobchainname#orderid.order.xml"
 
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
@@ -123,15 +122,17 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent_folder, const
         _directory = folder_subsystem->directory();
     }
 
-    _process_class_folder = spooler()->process_class_subsystem()->new_process_class_folder( this );
-    _lock_folder          = spooler()->lock_subsystem         ()->new_lock_folder         ( this );
-    _job_folder           = spooler()->job_subsystem          ()->new_job_folder          ( this );
-    _job_chain_folder     = spooler()->order_subsystem        ()->new_job_chain_folder    ( this );
+    _process_class_folder  = spooler()->process_class_subsystem ()->new_process_class_folder ( this );
+    _lock_folder           = spooler()->lock_subsystem          ()->new_lock_folder          ( this );
+    _job_folder            = spooler()->job_subsystem           ()->new_job_folder           ( this );
+    _job_chain_folder      = spooler()->order_subsystem         ()->new_job_chain_folder     ( this );
+    _standing_order_folder = spooler()->standing_order_subsystem()->new_standing_order_folder( this );
 
-    add_to_typed_folder_map( _process_class_folder );
-    add_to_typed_folder_map( _lock_folder          );
-    add_to_typed_folder_map( _job_folder           );
-    add_to_typed_folder_map( _job_chain_folder     );
+    add_to_typed_folder_map( _process_class_folder  );
+    add_to_typed_folder_map( _lock_folder           );
+    add_to_typed_folder_map( _job_folder            );
+    add_to_typed_folder_map( _job_chain_folder      );
+    add_to_typed_folder_map( _standing_order_folder );
 
     _log->set_prefix( obj_name() );
 }
@@ -400,8 +401,6 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             {
                 file_based->activate();
             }
-
-            assert( file_based->typed_folder() );
         }
     }
     catch( exception& x )
@@ -626,14 +625,26 @@ bool File_based::activate()
     return ok;
 }
 
+//---------------------------------------------------------------------File_based::assert_is_loaded
+
+void File_based::assert_is_loaded()
+{
+    if( _state != s_loaded  &&
+        _state != s_active )  
+    {
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-153", obj_name() );
+    }
+}
+
 //---------------------------------------------------------------------File_based::assert_is_active
 
 void File_based::assert_is_active()
 {
     if( _state != s_active )  
     {
-        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-158", obj_name(), _base_file_xc );
-                               else  z::throw_xc( "SCHEDULER-158", obj_name() );
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-154", obj_name(), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-154", obj_name() );
     }
 }
 
@@ -778,28 +789,6 @@ Folder* File_based::folder() const
 
     return _typed_folder->folder(); 
 }
-
-//-------------------------------------------------------Order_folder::job_chain_name_from_filename
-
-//string Order_folder::job_chain_name_from_filename( const string& filename ) const
-//{
-//    size_t separator = filename.find( job_chain_order_separator );
-//    if( separator == string::npos )  separator = 0;
-//
-//    return filename.substr( 0, separator );
-//}
-//
-//-------------------------------------------------------------Order_folder::order_id_from_filename
-//
-//string Order_folder::order_id_from_filename( const string& filename ) const
-//{
-//    string object_name = Folder::object_name_of_filename( filename );
-//
-//    size_t separator = object_name.find( job_chain_order_separator );
-//    if( separator == string::npos )  separator = object_name.length();
-//
-//    return object_name.substr( separator );
-//}
 
 //-------------------------------------------------------------------------------------------------
 

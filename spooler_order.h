@@ -18,6 +18,8 @@ struct Order_id_space;
 struct Order_id_spaces;
 struct Order_queue;
 struct Order_subsystem;
+struct Standing_order_folder;
+struct Standing_order_subsystem;
 
 namespace job_chain
 {
@@ -58,33 +60,28 @@ struct Order : Com_order,
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* );
-                                Order                   ( Spooler*, const VARIANT& );
-                                Order                   ( Spooler*, const Record&, const string& job_chain_path );
                                ~Order                   ();
 
 
-    // Scheduler_object:
-    virtual string              obj_name                () const;
-    virtual IDispatch*          idispatch               ()                                          { return this; }
+    // Scheduler_object
+
+    void                        close                       ();
+    virtual string              obj_name                    () const;
+    virtual IDispatch*          idispatch                   ()                                      { return this; }
 
 
-    enum Close_flag { cls_dont_remove_from_job_chain, cls_remove_from_job_chain };
-    void                        close                   ( Close_flag );
-  //void                        close                   ()                                          { close( true ); }
+    void                        load_record                 ( const string& job_chain_path, const Record& );
+    void                        load_blobs                  ( Read_transaction* );
+    void                        load_order_xml_blob         ( Read_transaction* );
+    void                        load_run_time_blob          ( Read_transaction* );
+    void                        load_payload_blob           ( Read_transaction* );
 
-    void                        init                    ();
-  //void                        activate                ();
-    void                        load_blobs              ( Read_transaction* );
-    void                        load_order_xml_blob     ( Read_transaction* );
-    void                        load_run_time_blob      ( Read_transaction* );
-    void                        load_payload_blob       ( Read_transaction* );
+    void                        occupy_for_task             ( Task*, const Time& now );
+    void                        assert_no_task              ( const string& debug_text );
+    void                        assert_task                 ( const string& debug_text );
 
-    void                        occupy_for_task         ( Task*, const Time& now );
-    void                        assert_no_task          ( const string& debug_text );
-    void                        assert_task             ( const string& debug_text );
-
-    bool                        is_immediately_processable( const Time& now );
-    bool                        is_processable          ();
+    bool                        is_immediately_processable  ( const Time& now );
+    bool                        is_processable              ();
     void                        handle_changed_processable_state ();
     void                        signal_job_when_order_has_become_processable();
 
@@ -99,7 +96,7 @@ struct Order : Com_order,
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { return _id == id; }
 
-    void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  _log->set_prefix( obj_name() ); }
+    void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  log()->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { return _title; }
                                                             
     void                    set_priority                ( Priority );
@@ -235,7 +232,6 @@ struct Order : Com_order,
     string                      db_read_clob            ( Read_transaction*, const string& column_name );
     void                        db_update_clob          ( Transaction*, const string& column_name, const string& value );
 
-  //void                        db_delete_order         ();
     void                        db_show_occupation      ( Log_level );
     sql::Update_stmt            db_update_stmt          ();
     sql::Where_clause           db_where_clause         ();
@@ -373,7 +369,7 @@ struct Order_sources
 
 namespace job_chain {
 
-//---------------------------------------------------------------------------------------------Node
+//----------------------------------------------------------------------------------job_chain::Node
 
 struct Node : Com_job_chain_node,
               Scheduler_object
@@ -500,14 +496,17 @@ struct Node : Com_job_chain_node,
     ptr<Job_chain>             _job_chain;
 };
 
-//----------------------------------------------------------------------------------------End_node
+//------------------------------------------------------------------------------job_chain::End_node
 
 struct End_node : Node
 {
+    typedef Node                Base_class;
+    DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( End_node, n_end )
+
                                 End_node                    ( Job_chain* job_chain, const Order::State& state ) : Node( job_chain, state, n_end ) {}
 };
 
-//---------------------------------------------------------------------------------Order_queue_node
+//----------------------------------------------------------------------job_chain::Order_queue_node
 
 struct Order_queue_node : Node
 {
@@ -527,7 +526,7 @@ struct Order_queue_node : Node
     ptr<Order_queue>           _order_queue;
 };
 
-//-----------------------------------------------------------------------------------------Job_node
+//------------------------------------------------------------------------------job_chain::Job_node
 
 struct Job_node : Order_queue_node
 {
@@ -557,7 +556,7 @@ struct Job_node : Order_queue_node
     Job*                       _job;
 };
 
-//----------------------------------------------------------------------------Nested_job_chain_node
+//-----------------------------------------------------------------job_chain::Nested_job_chain_node
 
 struct Nested_job_chain_node : Node
 {
@@ -574,7 +573,7 @@ struct Nested_job_chain_node : Node
     string                     _nested_job_chain_path;      // Wenn's eine untergeordnete Jobkette ist
 };
 
-//----------------------------------------------------------------------------------------Sink_node
+//-----------------------------------------------------------------------------job_chain::Sink_node
 
 struct Sink_node : Job_node
 {
@@ -830,6 +829,9 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
 {
                                 Job_chain_folder_interface  ( Folder* );
 
+
+    Job_chain*                  job_chain                   ( const string& name ) const            { return file_based( name ); }
+    Job_chain*                  job_chain_or_null           ( const string& name ) const            { return file_based_or_null( name ); }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual Job_chain*          job_chain_or_null           ( const string& name )                  = 0;

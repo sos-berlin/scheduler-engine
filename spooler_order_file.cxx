@@ -682,7 +682,13 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
                         log()->info( message_string( "SCHEDULER-983", order->obj_name(), "written at " + date ) );
                     }
 
-                    if( !ok )  order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain ),  order = NULL;
+                    if( !ok )  
+                    {
+                        if( !was_in_job_chain )  order->remove_from_job_chain();
+                        order->close();
+                        //order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
+                        order = NULL;
+                    }
                 }
 
                 _new_files[ _new_files_index ] = NULL;
@@ -710,7 +716,9 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 
                 if( order ) 
                 {
-                    order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
+                    if( !was_in_job_chain )  order->remove_from_job_chain();
+                    order->close();
+                    //order->close( was_in_job_chain? Order::cls_dont_remove_from_job_chain : Order::cls_remove_from_job_chain );
                 }
             }
         }
@@ -897,7 +905,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                     {
                         order->log()->info( message_string( "SCHEDULER-981" ) );   // "File has been removed"
                         order->remove_from_job_chain();   
-                        order->close( Order::cls_dont_remove_from_job_chain );
+                        order->close();
                     }
                     else
                     if( _job_chain->is_distributed() )

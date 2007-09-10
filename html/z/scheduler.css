@@ -43,7 +43,10 @@ td.right_border         { border-right: 1px solid gray; }
 .scheduler_error        { color: #e00000; font-weight: bold }
 .scheduler_warning      { color: #800000; font-weight: bold }
 
-.file_based_error       { color: #e00000; font-size: 8pt; }
+.error_message          { color: #e00000; font-size: 8pt; }
+
+.file_based_error         { color: #e00000; }
+.file_based_error_message { color: #e00000; font-size: 8pt; }
 
 .job                    { font-size: 10pt; background-color: #00c8ff } /*#fff000*/
 .job_hover              { font-size: 10pt; background-color: #00b0f5; } /*#80ecff*/

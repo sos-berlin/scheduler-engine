@@ -1,0 +1,19 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+     
+     order="yes"
+>
+
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{               
+    var order = spooler_task.order;
+    spooler_log.info( "ORDER-ID=" + order.id );
+    return true;
+}
+
+                ]]>
+    </script>
+
+</job>

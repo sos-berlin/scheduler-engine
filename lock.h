@@ -18,16 +18,6 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
               file_based< Lock, Lock_folder, Lock_subsystem >, 
               Non_cloneable
 {
-    typedef Lock_subsystem      My_subsystem;
-
-
-    enum State
-    {
-        s_not_initialized,
-        s_active
-    };
-
-
     enum Lock_mode
     { 
         lk_exclusive     = 0,   // Index für _waiting_queues
@@ -38,32 +28,46 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
                                 Lock                        ( Lock_subsystem*, const string& name = "" );
                                ~Lock                        ();
 
-    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
-    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
+
+    // Scheduler_object
 
     void                        close                       ();
-    bool                        prepare_to_remove           ();
+    string                      obj_name                    () const;
 
 
     // file_based<>
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
+
 
     bool                        on_initialize               (); 
     bool                        on_load                     (); 
     bool                        on_activate                 ();
 
+    bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
     bool                        prepare_to_replace          ();
     Lock*                       replace_now                 ();
 
 
+    // Ilock
+
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Lock"; }
+    STDMETHODIMP            put_Name                        ( BSTR );     
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
+    STDMETHODIMP            put_Max_non_exclusive           ( int );
+    STDMETHODIMP            get_Max_non_exclusive           ( int* result )                         { *result = _config._max_non_exclusive;  return S_OK; }
+    STDMETHODIMP                Remove                      ();
+
+
+    //
 
     Lock_folder*                lock_folder                 () const                                { return typed_folder(); }
 
 
-    State                       state                       () const                                { return _state; }
-    static string               state_name                  ( State );
-    string                      state_name                  () const                                { return state_name( _state ); }
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
@@ -79,23 +83,11 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
     bool                        is_free_for                 ( Lock_mode ) const;
     bool                        is_free                     () const;
-    string                      obj_name                    () const;
     string                      string_from_holders         () const;
     string                      string_from_uses            () const;
 
 
-    // Ilock:
-    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
-    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Lock"; }
-    STDMETHODIMP            put_Name                        ( BSTR );     
-    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
-    STDMETHODIMP            put_Max_non_exclusive           ( int );
-    STDMETHODIMP            get_Max_non_exclusive           ( int* result )                         { *result = _config._max_non_exclusive;  return S_OK; }
-    STDMETHODIMP                Remove                      ();
-
   private:
-    void                    set_state                       ( State state )                         { _state = state; }
-
     Fill_zero                  _zero_;
 
     struct Configuration
@@ -118,8 +110,6 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 
     typedef stdext::hash_set<Use*>  Use_set;
     Use_set                        _use_set;
-
-    Lock_subsystem*            _lock_subsystem;
 
 
     static Class_descriptor     class_descriptor;

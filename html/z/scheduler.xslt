@@ -591,7 +591,7 @@
 
                     <xsl:if test="ERROR">
                         <tr class="job">
-                            <td colspan="99" class="job_error">
+                            <td colspan="99" class="error_message">
                                 <xsl:apply-templates select="ERROR"/>
                             </td>
                         </tr>
@@ -3387,7 +3387,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
 
     <xsl:template mode="file_based_error" match="file_based">
-        <span class="file_based_error">
+        <span class="file_based_error_message">
             <xsl:apply-templates select="ERROR"/>
         </span>
     </xsl:template>

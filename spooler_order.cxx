@@ -1,12 +1,4 @@
 // $Id$
-/*
-    Hier sind implementiert
-
-    Job_chain
-    Node
-    Order
-    Order_queue
-*/
 
 
 #include "spooler.h"
@@ -586,7 +578,8 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
             {
                 string job_chain_path = record.as_string( "job_chain" );
 
-                ptr<Order> order = new Order( _spooler, record, job_chain_path );
+                ptr<Order> order = new Order( _spooler );
+                order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
                 
                 if( order->run_time() )
@@ -630,7 +623,8 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         if( !result_set.eof() )
         {
             Record record = result_set.get_record();
-            result = new Order( _spooler, record, job_chain_path );
+            result = new Order( _spooler );
+            result->load_record( job_chain_path, record );
             result->set_distributed();
             if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
 
@@ -646,7 +640,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
     }
     catch( exception& x ) 
     { 
-        if( result )  result->close( Order::cls_dont_remove_from_job_chain ),  result = NULL;
+        if( result )  result->close(),  result = NULL;
         ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); 
     }
 
@@ -2087,7 +2081,9 @@ void Job_chain::add_order( Order* order )
 {
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
-    if( _remove  ||  state() != s_active  &&  state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
+    if( _remove  ||  state() != s_loaded  &&  
+                     state() != s_active  &&
+                     state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
 
 
     if( _order_id_space )
@@ -2131,8 +2127,8 @@ void Job_chain::add_order( Order* order )
     else
     if( Job_node* job_node = Job_node::try_cast( node ) )
     {
-        job_node->order_queue()->add_order( order );
         order->_job_chain_node = job_node;
+        job_node->order_queue()->add_order( order );
     }
     else    
         order->set_on_blacklist();
@@ -2274,7 +2270,8 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 {
     string order_id = record.as_string( "id" );
 
-    ptr<Order> order = new Order( _spooler, record, path() );
+    ptr<Order> order = new Order( _spooler );
+    order->load_record( path(), record );
     order->load_blobs( ta );
 
     if( record.as_string( "distributed_next_time" ) != "" )
@@ -3119,7 +3116,7 @@ void Order_queue::close()
     {
         Order* order = *it;
         _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
-        order->close( Order::cls_dont_remove_from_job_chain );
+        order->close();
         order->_is_in_order_queue = false;
         it = _queue.erase( it );
     }
@@ -3199,8 +3196,9 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     string job_chain_path              = record.as_string( "job_chain" );
                     string occupying_cluster_member_id = record.as_string( "occupying_cluster_member_id" );
 
-                    ptr<Order> order = new Order( _spooler, record, job_chain_path );
+                    ptr<Order> order = new Order( _spooler );
 
+                    order->load_record( job_chain_path, record );
                     order->load_order_xml_blob( &ta );
                     if( show_what.is_set( show_payload  ) )  order->load_payload_blob( &ta );
                     if( show_what.is_set( show_run_time ) )  order->load_run_time_blob( &ta );
@@ -3649,9 +3647,10 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
         try
         {
-            order = new Order( _spooler, record, record.as_string( "job_chain" ) );
-        
-            order->_is_distributed = true;
+            order = new Order( _spooler );
+
+            order->load_record( record.as_string( "job_chain" ), record );
+            order->set_distributed();
             
             Job_chain* job_chain = order_subsystem()->job_chain( order->_job_chain_path );
             assert( job_chain->is_distributed() );
@@ -3681,11 +3680,11 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
         }
         catch( exception& )
         {
-            if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
+            if( order )  order->close(), order = NULL;
             throw;
         }
 
-        if( order )  order->close( Order::cls_dont_remove_from_job_chain ), order = NULL;
+        if( order )  order->close(), order = NULL;
     }
 
     return result;
@@ -3787,58 +3786,68 @@ Order::Order( Spooler* spooler )
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
     _zero_(this+1)
 {
-    init();
+    //_log = Z_NEW( Prefix_log( this ) );
+    //_log->set_prefix( obj_name() );
+
+    _com_log = new Com_log;
+    _com_log->set_log( log() );
+
+    _created       = Time::now();
+    _is_virgin     = true;
+    _old_next_time = Time::never;
+
+    set_run_time( NULL );
 }
 
 //-------------------------------------------------------------------------------------Order::Order
-
-Order::Order( Spooler* spooler, const VARIANT& payload )
-:
-    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
-    Com_order(this),
-    _zero_(this+1),
-    _payload(payload)
-{
-    init();
-}
-
+//
+//Order::Order( Spooler* spooler, const VARIANT& payload )
+//:
+//    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
+//    Com_order(this),
+//    _zero_(this+1),
+//    _payload(payload)
+//{
+//    init();
+//}
+//
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Record& record, const string& job_chain_path )
-:
-    Com_order(this),
-    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
-    _zero_(this+1)
-{
-    init();
-
-    _job_chain_path = job_chain_path;
-
-    set_id      ( record.as_string( "id"         ) );   _id_locked = true;
-    _state      = record.as_string( "state"      );
-    _state_text = record.as_string( "state_text" );
-    _title      = record.as_string( "title"      );
-    _priority   = record.as_int   ( "priority"   );
-
-    string initial_state = record.as_string( "initial_state" );
-    if( initial_state != "" )
-    {
-        _initial_state = initial_state;
-        _initial_state_set = true;
-    }
-
-    _created.set_datetime( record.as_string( "created_time" ) );
-
-    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
-
-    _log->set_prefix( obj_name() );
-
-    _order_xml_modified  = false;            
-    _state_text_modified = false; 
-    _title_modified      = false;
-    _state_text_modified = false;
-    _is_in_database      = true;
-}
+//Order::Order( Spooler* spooler, const Record& record, const string& job_chain_path )
+//:
+//    Com_order(this),
+//    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
+//    _zero_(this+1)
+//{
+//    init();
+//
+//    _job_chain_path = job_chain_path;
+//
+//    set_id      ( record.as_string( "id"         ) );   _id_locked = true;
+//    _state      = record.as_string( "state"      );
+//    _state_text = record.as_string( "state_text" );
+//    _title      = record.as_string( "title"      );
+//    _priority   = record.as_int   ( "priority"   );
+//
+//    string initial_state = record.as_string( "initial_state" );
+//    if( initial_state != "" )
+//    {
+//        _initial_state = initial_state;
+//        _initial_state_set = true;
+//    }
+//
+//    _created.set_datetime( record.as_string( "created_time" ) );
+//
+//    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
+//
+//    _log->set_prefix( obj_name() );
+//
+//    _order_xml_modified  = false;            
+//    _state_text_modified = false; 
+//    _title_modified      = false;
+//    _state_text_modified = false;
+//    _is_in_database      = true;
+//}
 
 //------------------------------------------------------------------------------------Order::~Order
 
@@ -3870,21 +3879,53 @@ Order::~Order()
 
 //--------------------------------------------------------------------------------------Order::init
 
-void Order::init()
-{
-    //_recoverable = true;
+//void Order::init()
+//{
+//    //_recoverable = true;
+//
+//    _log = Z_NEW( Prefix_log( this ) );
+//    _log->set_prefix( obj_name() );
+//
+//    _com_log = new Com_log;
+//    _com_log->set_log( _log );
+//
+//    _created       = Time::now();
+//    _is_virgin     = true;
+//    _old_next_time = Time::never;
+//
+//    set_run_time( NULL );
+//}
 
-    _log = Z_NEW( Prefix_log( this ) );
+//-------------------------------------------------------------------------------Order::load_record
+
+void Order::load_record( const string& job_chain_path, const Record& record )
+{
+    _job_chain_path = job_chain_path;
+
+    set_id      ( record.as_string( "id"         ) );   _id_locked = true;
+    _state      = record.as_string( "state"      );
+    _state_text = record.as_string( "state_text" );
+    _title      = record.as_string( "title"      );
+    _priority   = record.as_int   ( "priority"   );
+
+    string initial_state = record.as_string( "initial_state" );
+    if( initial_state != "" )
+    {
+        _initial_state = initial_state;
+        _initial_state_set = true;
+    }
+
+    _created.set_datetime( record.as_string( "created_time" ) );
+
+    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
+
     _log->set_prefix( obj_name() );
 
-    _com_log = new Com_log;
-    _com_log->set_log( _log );
-
-    _created       = Time::now();
-    _is_virgin     = true;
-    _old_next_time = Time::never;
-
-    set_run_time( NULL );
+    _order_xml_modified  = false;            
+    _state_text_modified = false; 
+    _title_modified      = false;
+    _state_text_modified = false;
+    _is_in_database      = true;
 }
 
 //--------------------------------------------------------------------------------Order::load_blobs
@@ -4659,21 +4700,8 @@ void Order::open_log()
 
 //-------------------------------------------------------------------------------------Order::close
 
-void Order::close( Close_flag close_flag )
+void Order::close()
 {
-/*
-    if( !_log->filename().empty() )
-    {
-        try
-        {
-            remove_file( _log->filename() );
-        }
-        catch( const exception& x )
-        {
-            _spooler->_log->warn( "FEHLER BEIM LÖSCHEN DER DATEI " + _log->filename() + ": " + x.what() );
-        }
-    }
-*/
     if( _http_operation )
     {
         _http_operation->unlink_order();
@@ -4682,18 +4710,21 @@ void Order::close( Close_flag close_flag )
 
 
     _task = NULL;
-    //_removed_from_job_chain = NULL;
     set_replacement( false );
     if( _replaced_by )  _replaced_by->set_replacement( false ), _replaced_by = NULL;
 
     if( _is_db_occupied )
     {
-        Z_LOGI2( "scheduler", __FUNCTION__ << "  db_release_occupation()\n" );
-        db_release_occupation();
+        try
+        {
+            Z_LOGI2( "scheduler", __FUNCTION__ << "  db_release_occupation()\n" );
+            db_release_occupation();
+        }
+        catch( exception& x ) { Z_LOG( __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
     }
 
-    if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
-    else
+    //if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
+    //else
     if( _job_chain )  _job_chain->remove_order( this );
 
     if( _run_time )  _run_time->close(), _run_time = NULL;
@@ -5551,7 +5582,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 {
     bool is_new = true;
 
-    job_chain->assert_is_active();
+    job_chain->assert_is_loaded();
 
     if( _id.vt == VT_EMPTY )  set_default_id();
     _id_locked = true;
@@ -5610,7 +5641,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         }
 
 
-        job_chain->job_from_state( _state );     // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
+        job_chain->job_from_state( _state );     int JOB_KANN_FEHLEN;  // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
 
         if( node->is_suspending_order() )  _suspended = true;
 
@@ -5918,7 +5949,7 @@ void Order::handle_end_state()
             {
                 _log->info( message_string( "SCHEDULER-945" ) );     // "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt"
                 remove_from_job_chain();
-                close( cls_dont_remove_from_job_chain );
+                close();
             }
         }
     }
@@ -5989,12 +6020,12 @@ void Order::postprocessing2( Job* last_job )
     if( _is_distributed  &&  _job_chain )
     {
         _job_chain->remove_order( this );
-        close( Order::cls_dont_remove_from_job_chain );
+        close();
     }
 
     if( _removed_from_job_chain_name != "" )
     {
-        close( Order::cls_dont_remove_from_job_chain );
+        close();
     }
 }
 

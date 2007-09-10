@@ -961,7 +961,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         if( order->finished()  &&  !order->is_on_blacklist() )
         {
             order->remove_from_job_chain();
-            order->close( Order::cls_dont_remove_from_job_chain );
+            order->close();
         }
         else
         {

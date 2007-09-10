@@ -41,9 +41,8 @@ struct Folder : Scheduler_object, Object
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
     Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
-  //Order_folder_interface*     order_folder                ()                                      { return _order_folder; }
+    Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
 
-  //virtual void                remove_object               ( const string& name )                  = 0;
     string                      obj_name                    () const;
 
   private:
@@ -64,6 +63,7 @@ struct Folder : Scheduler_object, Object
     ptr<lock::Lock_folder>          _lock_folder;
     ptr<Job_folder>                 _job_folder;
     ptr<Job_chain_folder_interface> _job_chain_folder;
+    ptr<Standing_order_folder>      _standing_order_folder;
 };
 
 //---------------------------------------------------------------------------------Folder_subsystem
@@ -158,6 +158,7 @@ struct File_based : Scheduler_object,
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
     const zschimmer::Xc&        base_file_exception         () const                                { return _base_file_xc; }
+    void                        assert_is_loaded            ();
     void                        assert_is_active            ();
 
     virtual void            set_name                        ( const string& name );
@@ -197,7 +198,6 @@ struct File_based : Scheduler_object,
     virtual bool                can_be_replaced_now         ()                                      { return _replacement_is_valid; }
     virtual File_based*         replace_now                 ()                                      = 0;
 
-  //virtual void                on_base_file_new            ()                                      = 0;
     virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
     virtual bool                on_base_file_removed        ()                                      { return remove(); }
 
