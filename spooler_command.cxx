@@ -311,7 +311,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
-    if( element.nodeName_is( "s" ) )  show |= show_operations;
+    if( element.nodeName_is( "s" ) )  show |= show_job_chains| show_operations;
 
 
     return _spooler->state_dom_element( _answer, show );

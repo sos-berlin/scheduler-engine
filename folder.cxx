@@ -374,7 +374,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             xml::Document_ptr dom_document ( string_from_file( File_path( folder()->directory(), base_file_info->_filename ) ) );
             if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
-            assert_empty_attribute( dom_document.documentElement(), "spooler_id" );      int SPOOLER_ID_PRUEFEN;  //?
+            assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
             assert_empty_attribute( dom_document.documentElement(), "replace"    );
 
             file_based->set_dom( dom_document.documentElement() );
@@ -387,16 +387,19 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
                 {
                     file_based = old_file_based->replace_now();
                     assert( !file_based->replacement() );
+                    if( file_based == old_file_based )  
+                    {
+                        file_based->set_base_file_info( *base_file_info );
+                        file_based->_base_file_xc      = zschimmer::Xc();
+                        file_based->_base_file_xc_time = 0;
+                        file_based->activate();
+                    }
                 }
-                //file_based = old_file_based->on_base_file_changed( file_based );
             }
             else  
             {
                 file_based->activate();
-                //file_based->on_base_file_new();
             }
-
-            //if( _replacement )  _replacement_is_valid = true;  //????
 
             assert( file_based->typed_folder() );
         }
@@ -409,6 +412,8 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
         file_based->_base_file_xc      = x;
         file_based->_base_file_xc_time = double_from_gmtime();
         file_based->log()->error( message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x ) );
+
+        int EMAIL_SCHICKEN;
     }
 
     return file_based;

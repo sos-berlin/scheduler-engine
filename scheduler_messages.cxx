@@ -451,7 +451,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-889", "These filenames yield the same object name: '$1' and '$2'. The second is ignored" },
     { "SCHEDULER-890", "'$2' is going to be removed because the file '$1' has been removed" },
     { "SCHEDULER-891", "New file '$1' is going to be be loaded into '$2 $3'" },
-    { "SCHEDULER-891", "Changed file '$1' is going to replace '$2'" },
+    { "SCHEDULER-892", "Changed file '$1' is going to replace '$2'" },
     {}
 };
 } //namespace sos

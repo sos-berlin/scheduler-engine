@@ -2051,9 +2051,25 @@
                             </b>
 
                             <xsl:text>&#160; </xsl:text>
-                            max_processes=<xsl:value-of select="@max_processes"/>
+                            <xsl:choose>
+                                <xsl:when test="file_based/ERROR">
+                                    <xsl:apply-templates mode="file_based_error" select="file_based"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    max_processes=<xsl:value-of select="@max_processes"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </td>
                     </tr>
+
+                    <xsl:if test="replacement/process_class/file_based/ERROR">
+                        <tr>
+                            <td colspan="6">
+                                <span class="label">Error in changed file (not loaded): </span>
+                                <xsl:apply-templates mode="file_based_error" select="replacement/process_class/file_based"/>
+                            </td>
+                        </tr>
+                    </xsl:if>
 
                     <xsl:for-each select="processes/process">
                         <tr>

@@ -1211,20 +1211,23 @@ void Process_class::notify_a_process_is_idle()
 
 xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
-    xml::Element_ptr element = Process_class_configuration::dom_element( document, show_what );
+    xml::Element_ptr result = Process_class_configuration::dom_element( document, show_what );
 
-    element.setAttribute( "processes"       , (int)_process_set.size() );
+    if( has_base_file() )  result.appendChild( File_based::dom_element( document, show_what ) );
+    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
+
+    result.setAttribute( "processes", (int)_process_set.size() );
 
     if( !_process_set.empty() )
     {
-        xml::Element_ptr processes_element = element.append_new_element( "processes" );
+        xml::Element_ptr processes_element = result.append_new_element( "processes" );
         FOR_EACH( Process_set, _process_set, it )  processes_element.appendChild( (*it)->dom_element( document, show_what ) );
     }
 
     if( !_waiting_jobs.empty() )
     {
         xml::Element_ptr waiting_jobs_element = document.createElement( "waiting_jobs" );
-        element.appendChild( waiting_jobs_element );
+        result.appendChild( waiting_jobs_element );
 
         FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
         {
@@ -1234,7 +1237,7 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
         }
     }
 
-    return element;
+    return result;
 }
 
 //-----------------------------------------------------------------------Process_class::execute_xml
