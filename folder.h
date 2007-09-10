@@ -158,6 +158,7 @@ struct File_based : Scheduler_object,
     const Base_file_info&       base_file_info              () const                                { return _base_file_info; }
     bool                        base_file_has_error         () const                                { return _base_file_xc_time != 0; }
     const zschimmer::Xc&        base_file_exception         () const                                { return _base_file_xc; }
+    bool                        base_file_is_removed        () const                                { return _file_is_removed; }
     void                        assert_is_loaded            ();
     void                        assert_is_active            ();
 

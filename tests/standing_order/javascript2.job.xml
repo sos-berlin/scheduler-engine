@@ -10,6 +10,10 @@ function spooler_process()
 {               
     var order = spooler_task.order;
     spooler_log.info( "ORDER-ID=" + order.id );
+    
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 15 );
+
     return true;
 }
 

@@ -48,12 +48,16 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     string                      job_chain_name              () const;
     string                      order_id                    () const;
 
+    
+    void                        on_order_carried_out        ();                                     // Gerufen von Order::on_carried_out()
 
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
 
   private:
     bool                        order_is_removable_or_replaceable();
+    void                        set_order                   ( Order* );
+    void                        start_order                 ();
 
 
     Fill_zero                  _zero_;

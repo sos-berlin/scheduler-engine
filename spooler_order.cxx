@@ -5360,6 +5360,8 @@ bool Order::end_state_reached()
             result = true;
     }
     
+    int UM_VERSCHACHTELTE_JOBKETTE_ERWEITERN;
+
     return result;
 }
 
@@ -5831,7 +5833,6 @@ void Order::handle_end_state()
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
 
     bool is_real_end_state = false;
-    bool reopen_log        = false;
 
 
     if( _outer_job_chain_path == "" )
@@ -5840,51 +5841,8 @@ void Order::handle_end_state()
     }
     else
     {
-        Z_DEBUG_ONLY( assert( !_is_distributed ) );
-
-        try
-        {
-            Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );         int DYNAMISCH_KONFIGURIERBAR_MACHEN;
-            Node*       outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
-            State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
-                                                                      : outer_job_chain_node->error_state();
-
-            Node* next_outer_job_chain_node = outer_job_chain->node_from_state_or_null( next_outer_job_chain_state );
-            
-
-            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_nested_job_chain )
-            {
-                Job_chain* next_job_chain = next_outer_job_chain_node->_nested_job_chain;
-
-                _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
-
-                close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-                _start_time = 0;
-                _end_time = 0;
-                open_log();
-
-                _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
-                place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-                _outer_job_chain_path = outer_job_chain->path();  // place_in_job_chain() hat's gelöscht
-
-                _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
-            }
-            else
-            {
-                // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
-                is_real_end_state = true;
-            }
-
-            _outer_job_chain_state = next_outer_job_chain_state;
-        }
-        catch( exception& x ) 
-        { 
-            _log->error( message_string( "SCHEDULER-415", x ) );  
-            is_real_end_state = true;
-        }
+        is_real_end_state = handle_end_state_of_nested_job_chain();
     }
-
-
 
     if( !is_real_end_state )
     {
@@ -5896,35 +5854,9 @@ void Order::handle_end_state()
         _run_time_modified = false;
         Time next_start = next_start_time( is_first_call );
 
-        if( next_start != Time::never  &&  _state != _initial_state )
+        if( next_start != Time::never  &&  _state != _initial_state )   // <run_time> verlangt Wiederholung?
         {
-            _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
-            
-            string first_nested_job_chain_path;
-
-            if( _outer_job_chain_path != "" )
-            {
-                if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->job_chain( _outer_job_chain_path )->first_node() ) )
-                    first_nested_job_chain_path = n->nested_job_chain_path();
-
-                remove_from_job_chain( jc_leave_in_job_chain_stack );
-            }
-
-            close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-            _start_time = 0;
-            _end_time = 0;
-            open_log();
-
-            try
-            {
-                set_state( _initial_state, next_start );
-
-                if( first_nested_job_chain_path != "" )
-                {
-                    place_in_job_chain( order_subsystem()->job_chain( first_nested_job_chain_path ), jc_leave_in_job_chain_stack );
-                }
-            }
-            catch( exception& x ) { _log->error( x.what() ); }
+            handle_end_state_repeat_order( next_start );
         }
         else
         {
@@ -5943,7 +5875,6 @@ void Order::handle_end_state()
             }
 
             _end_time = Time::now();
-            order_subsystem()->count_finished_orders();
 
             if( !_is_on_blacklist )
             {
@@ -5952,14 +5883,105 @@ void Order::handle_end_state()
                 close();
             }
         }
+
+        on_carried_out();
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool Order::handle_end_state_of_nested_job_chain()
+{
+    Z_DEBUG_ONLY( assert( !_is_distributed ) );
+
+    bool end_state_reached = false;
+
+    try
+    {
+        Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );         int DYNAMISCH_KONFIGURIERBAR_MACHEN;
+        Node*       outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
+        State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
+                                                                  : outer_job_chain_node->error_state();
+
+        Node* next_outer_job_chain_node = outer_job_chain->node_from_state_or_null( next_outer_job_chain_state );
+        
+
+        if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_nested_job_chain )
+        {
+            Job_chain* next_job_chain = next_outer_job_chain_node->_nested_job_chain;
+
+            _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
+
+            close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+            _start_time = 0;
+            _end_time = 0;
+            open_log();
+
+            _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
+            place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+            _outer_job_chain_path = outer_job_chain->path();  // place_in_job_chain() hat's gelöscht
+
+            _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
+        }
+        else
+        {
+            // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
+            end_state_reached = true;
+        }
+
+        _outer_job_chain_state = next_outer_job_chain_state;
+    }
+    catch( exception& x ) 
+    { 
+        _log->error( message_string( "SCHEDULER-415", x ) );  
+        end_state_reached = true;
     }
 
-    if( reopen_log )
+    return end_state_reached;
+}
+
+//-------------------------------------------------------------Order::handle_end_state_repeat_order
+
+void Order::handle_end_state_repeat_order( const Time& next_start )
+{
+    // Auftrag wird wegen <run_time> wiederholt
+
+    _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+    
+    string first_nested_job_chain_path;
+
+    if( _outer_job_chain_path != "" )
     {
-        _start_time = 0;
-        _end_time = 0;
-        open_log();
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->job_chain( _outer_job_chain_path )->first_node() ) )
+            first_nested_job_chain_path = n->nested_job_chain_path();
+
+        remove_from_job_chain( jc_leave_in_job_chain_stack );
     }
+
+    close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+    _start_time = 0;
+    _end_time = 0;
+    open_log();
+
+    try
+    {
+        set_state( _initial_state, next_start );
+
+        if( first_nested_job_chain_path != "" )
+        {
+            place_in_job_chain( order_subsystem()->job_chain( first_nested_job_chain_path ), jc_leave_in_job_chain_stack );
+        }
+    }
+    catch( exception& x ) { _log->error( x.what() ); }
+}
+
+//----------------------------------------------------------------------------Order::on_carried_out
+
+void Order::on_carried_out()
+{
+    order_subsystem()->count_finished_orders();
+
+    if( _standing_order )  _standing_order->on_order_carried_out();
 }
 
 //--------------------------------------------------------------------------Order::processing_error

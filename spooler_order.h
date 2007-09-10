@@ -205,6 +205,11 @@ struct Order : Com_order,
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
+    bool                        handle_end_state_of_nested_job_chain();
+    void                        handle_end_state_repeat_order( const Time& );
+
+    void                        on_carried_out          ();
+    void                        connect_with_standing_order( Standing_order* standing_order )       { _standing_order = standing_order; };
 
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* = NULL );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
@@ -298,6 +303,7 @@ struct Order : Com_order,
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
     string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
+    Standing_order*            _standing_order;         // Dateibasierter Dauerauftrag?
 
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
 

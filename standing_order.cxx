@@ -167,10 +167,23 @@ Standing_order::~Standing_order()
 
 void Standing_order::close()
 {
+    set_order( NULL );
+}
+
+//------------------------------------------------------------------------Standing_order::set_order
+
+void Standing_order::set_order( Order* order )
+{
     if( _order )  
     {
-        _order->close();
+        _order->connect_with_standing_order( NULL );
         _order = NULL;
+    }
+
+    if( order )
+    {
+        _order = order;
+        _order->connect_with_standing_order( this );
     }
 }
 
@@ -192,8 +205,19 @@ bool Standing_order::on_load()
 
 bool Standing_order::on_activate()
 {
-    _order->place_or_replace_in_job_chain( folder()->job_chain_folder()->job_chain( job_chain_name() ) );
+    start_order();
     return true;
+}
+
+//----------------------------------------------------------------------Standing_order::start_order
+
+void Standing_order::start_order()
+{
+    Job_chain* job_chain = folder()->job_chain_folder()->job_chain( job_chain_name() );
+    if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
+
+    _order->place_or_replace_in_job_chain( job_chain );
+    _order->connect_with_standing_order( this );
 }
 
 //------------------------------------------------Standing_order::order_is_removable_or_replaceable
@@ -249,7 +273,7 @@ bool Standing_order::prepare_to_replace()
     {
         if( order_is_removable_or_replaceable() )
         {
-            if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
+            if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )    // Jobkette bekannt?
             {
                 result = true;
             }
@@ -265,11 +289,28 @@ bool Standing_order::prepare_to_replace()
 
 Standing_order* Standing_order::replace_now()
 {
-    replacement()->_order->place_or_replace_in_job_chain( folder()->job_chain_folder()->job_chain( job_chain_name() ) );
-    _order = replacement()->_order;
+    set_order( replacement()->_order );
+    start_order();
+
+    replacement()->_order = NULL;
     set_replacement( NULL );
 
     return this;
+}
+
+//-------------------------------------------------------------Standing_order::on_order_carried_out
+
+void Standing_order::on_order_carried_out()
+{
+    if( replacement() )
+    {
+        if( can_be_replaced_now() )  replace_now();
+    }
+    else
+    if( base_file_is_removed() )
+    {
+        remove();
+    }
 }
 
 //-------------------------------------------------------------------Standing_order::job_chain_name
@@ -302,10 +343,11 @@ void Standing_order::set_dom( const xml::Element_ptr& order_element )
 {
     assert( !_order );
 
-    _order = new Order( spooler() );
-    _order->set_id( order_id() );           int GEGEN_AENDERUNG_SICHERN;  int JOB_CHAIN_EBENSO;
-    _order->set_dom( order_element );
-    //_order->place_or_replace_in_job_chain( folder()->job_chain_folder()->job_chain( job_chain_name() ) );
+    ptr<Order> order = new Order( spooler() );
+    order->set_id( order_id() );           int GEGEN_AENDERUNG_SICHERN;  int JOB_CHAIN_EBENSO;
+    order->set_dom( order_element );
+
+    set_order( order );
 }
 
 //----------------------------------------------------------------------Standing_order::dom_element
