@@ -279,7 +279,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-425", "'$1' cannot be removed, it is used by $2" },
     { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
     { "SCHEDULER-428", "Error when loading base file '$1':\n$2" },
-    { "SCHEDULER-429", "Attribut name='$1' is different from $2 name '$3'" },
+    { "SCHEDULER-429", "Current name of '$1' is fixed and cannot be changed to '$2'" },
     { "SCHEDULER-430", "No object for configuration file '$1'" },
     { "SCHEDULER-427", "Invalid MD5 hexadecimal coded password for HTTP user '$1'" },
     { "SCHEDULER-431", "Error when processing configuration directory:\n$1" },
@@ -448,6 +448,10 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-886", "Lock will be removed later, it is held by '$1'" },
     { "SCHEDULER-887", "More lock holders than new max_non_exclusive=$1: $2" },
     { "SCHEDULER-888", "$1 cannot be repalced now, it will be done later" },
+    { "SCHEDULER-889", "These filenames yield the same object name: '$1' and '$2'. The second is ignored" },
+    { "SCHEDULER-890", "'$2' is going to be removed because the file '$1' has been removed" },
+    { "SCHEDULER-891", "New file '$1' is going to be be loaded into '$2 $3'" },
+    { "SCHEDULER-891", "Changed file '$1' is going to replace '$2'" },
     {}
 };
 } //namespace sos

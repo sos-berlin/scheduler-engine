@@ -252,7 +252,7 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
 
     string                      object_type_name            () const                                { return "Lock"; }
     string                      filename_extension          () const                                { return ".lock.xml"; }
-    string                      normalized_name             ( const string& name )                  { return name; }
+  //string                      normalized_name             ( const string& name ) const            { return name; }
     File_based*                 object_by_path              ( const string& path );
     ptr<Lock>                   new_file_based              ();
 

@@ -108,14 +108,17 @@ inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* schedul
 struct Base_file_info
 {
                                 Base_file_info              ()                                      : _timestamp_utc(0) {}
-                                Base_file_info              ( const string& filename, double timestamp_utc ) : _filename(filename), _timestamp_utc(timestamp_utc) {}
 
-    bool                        operator <                  ( const Base_file_info& f ) const       { return _filename < f._filename; }
+                                Base_file_info              ( const string& filename, double timestamp_utc, const string& normalized_name ) 
+                                                                                                    : _filename(filename), _timestamp_utc(timestamp_utc),
+                                                                                                      _normalized_name(normalized_name) {}
+
+    bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
     static bool                 less_dereferenced           ( const Base_file_info* a, const Base_file_info* b )  { return *a < *b; }
-
 
     string                     _filename;                   // Ohne Verzeichnis
     double                     _timestamp_utc;
+    string                     _normalized_name;            // Ohne Dateinamenserweiterung
 };
 
 //---------------------------------------------------------------------------------------File_based

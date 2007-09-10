@@ -196,20 +196,33 @@ void Folder::adjust_with_directory()
 
         try
         {
+            string last_normalized_name;
+            string last_filename;
+
             for( file::Directory_lister dir ( _directory );; )
             {
                 ptr<file::File_info> file_info = dir.get();
                 if( !file_info )  break;
 
-                string filename    = file_info->path().name();
-                string object_name = object_name_of_filename( filename );
-                string extension   = extension_of_filename( filename );
+                string filename  = file_info->path().name();
+                string name      = object_name_of_filename( filename );
+                string extension = extension_of_filename( filename );
 
                 Typed_folder_map::iterator it = _typed_folder_map.find( extension );
-                if( it != _typed_folder_map.end()  &&  object_name != "" )
+                if( it != _typed_folder_map.end()  &&  name != "" )
                 {
-                    Typed_folder* typed_folder = it->second;
-                    file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time() ) );
+                    Typed_folder* typed_folder    = it->second;
+                    string        normalized_name = typed_folder->subsystem()->normalized_name( name );
+
+                    if( normalized_name == last_normalized_name )
+                    {
+                        log()->warn( message_string( "SCHEDULER-889", last_filename, filename ) );
+                    }
+                    else
+                        file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name ) );
+
+                    last_normalized_name = normalized_name;
+                    last_filename = filename;
                 }
             }
         }
@@ -289,12 +302,12 @@ void Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
     {
         const Base_file_info* file_info = *it;
 
-        if( fb == ordered_file_based.end()  ||  file_info->_filename < (*fb)->_base_file_info._filename )           // Datei hinzugef¸gt?
+        if( fb == ordered_file_based.end()  ||  file_info->_normalized_name < (*fb)->_base_file_info._normalized_name )  // Datei hinzugef¸gt?
         {
             call_on_base_file_changed( (File_based*)NULL, file_info );       // L‰dt die Datei in das Objekt 
         }
         else
-        for(; fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._filename < file_info->_filename; fb++ )   // Datei entfernt?
+        for(; fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._normalized_name < file_info->_normalized_name; fb++ )   // Datei entfernt?
         { 
             if( !(*fb)->_file_is_removed )
             {
@@ -302,7 +315,7 @@ void Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
             }
         }
 
-        if( fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._filename == file_info->_filename )          // Gleicher Dateiname?
+        if( fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._normalized_name == file_info->_normalized_name )   // Gleicher Name?
         {
             File_based* current_file_based = (*fb)->replacement()? (*fb)->replacement() : (*fb);
 
@@ -338,14 +351,20 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
     {
         if( !base_file_info )
         {
+            folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
             file_based = old_file_based;                // F¸r catch()
             old_file_based->on_base_file_removed();
             file_based = NULL;
         }
         else
         {
+            string name = Folder::object_name_of_filename( base_file_info->_filename );
+
+            if( old_file_based )  folder()->log()->info( message_string( "SCHEDULER-892", base_file_info->_filename, old_file_based->obj_name() ) );
+                            else  folder()->log()->info( message_string( "SCHEDULER-891", base_file_info->_filename, subsystem()->object_type_name(), name ) );
+
             file_based = subsystem()->call_new_file_based();
-            file_based->set_name( Folder::object_name_of_filename( base_file_info->_filename ) );
+            file_based->set_name( name );
             file_based->set_base_file_info( *base_file_info );
 
             if( !old_file_based )  add_file_based( file_based );
@@ -738,7 +757,7 @@ void File_based::set_name( const string& name )
 
     if( normalized_name() != _file_based_subsystem->normalized_name( name ) )
     {
-        if( _typed_folder )  z::throw_xc( __FUNCTION__ );       // Name darf nicht ge‰ndert werden, auﬂer Groﬂschreibung
+        if( is_in_folder() )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht ge‰ndert werden, auﬂer Groﬂschreibung
     }
 
     _name = name;

@@ -61,7 +61,7 @@ struct Job_subsystem : Job_subsystem_interface
 
     string                      object_type_name            () const                                { return "Job"; }
     string                      filename_extension          () const                                { return ".job.xml"; }
-    string                      normalized_name             ( const string& name )                  { return lcase( name ); }
+    string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     File_based*                 object_by_path              ( const string& path );
     ptr<Job>                    new_file_based              ();
 };
@@ -865,9 +865,7 @@ void Job::set_dom( const xml::Element_ptr& element )
     {
         bool order;
 
-        string xml_name = element.getAttribute( "name" );
-        if( xml_name != ""  &&  subsystem()->normalized_name( xml_name ) != normalized_name() )  z::throw_xc( "SCHEDULER-429", xml_name, element.nodeName(), name() );
-
+        set_name    ( element.     getAttribute( "name"         , name()      ) );
         _visible    = element.bool_getAttribute( "visible"      , _visible    );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _module->set_priority( element.getAttribute( "priority"     , _module->_priority   ) );

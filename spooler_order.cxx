@@ -153,7 +153,7 @@ struct Order_subsystem : Order_subsystem_interface
 
     string                      object_type_name            () const                                { return "Job_chain"; }
     string                      filename_extension          () const                                { return ".job_chain.xml"; }
-    string                      normalized_name             ( const string& name )                  { return lcase( name ); }
+    string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     File_based*                 object_by_path              ( const string& path );
     ptr<Job_chain_folder_interface> new_job_chain_folder_interface();
     ptr<Job_chain>              new_file_based              ();
@@ -1477,7 +1477,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
 
     string xml_name = element.getAttribute( "name" );
-    if( xml_name != ""  &&  subsystem()->normalized_name( xml_name ) != normalized_name() )  z::throw_xc( "SCHEDULER-429", xml_name, element.nodeName(), name() );
+    if( xml_name != ""  &&  subsystem()->normalized_name( xml_name ) != normalized_name() )  z::throw_xc( "SCHEDULER-429", obj_name(), xml_name );
   //set_name(                 element.     getAttribute( "name" ) );
 
     _visible                = element.bool_getAttribute( "visible"           , _visible            );

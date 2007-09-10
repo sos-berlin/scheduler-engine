@@ -2637,7 +2637,7 @@
 
         <message code="SCHEDULER-429">
             <text xml:lang="en">
-                <title>Attribut name='<p1/>' is different from <p2>type</p2> name '<p3/>'</title>
+                <title>Current name of '<p1/>' is fixed and cannot be changed to '<p2/>'</title>
             </text>
         </message>
 
@@ -3935,6 +3935,29 @@
             </text>
         </message>
         
+        <message code="SCHEDULER-889">
+            <text xml:lang="en">
+                <title>These filenames yield the same object name: '<p1/>' and '<p2/>'. The second is ignored</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-890">
+            <text xml:lang="en">
+                <title>'<p2>object</p2>' is going to be removed because the file '<p1/>' has been removed</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-891">
+            <text xml:lang="en">
+                <title>New file '<p1/>' is going to be be loaded into '<p2>type</p2> <p3>name</p3>'</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-891">
+            <text xml:lang="en">
+                <title>Changed file '<p1/>' is going to replace '<p2>object</p2>'</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

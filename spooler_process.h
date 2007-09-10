@@ -299,7 +299,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     // file_based_subsystem< Process_class >
     string                      object_type_name            () const                                { return "Process_class"; }
     string                      filename_extension          () const                                { return ".process_class.xml"; }
-    string                      normalized_name             ( const string& name )                  { return name; }
+  //string                      normalized_name             ( const string& name ) const            { return name; }
     File_based*                 object_by_path              ( const string& path );
     ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
 
