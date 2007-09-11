@@ -144,7 +144,7 @@ bool Job_subsystem::subsystem_load()
 
 bool Job_subsystem::subsystem_activate()
 {
-    _subsystem_state = subsys_active;           // Schon hetzt für Job::activate()
+    _subsystem_state = subsys_active;           // Schon jetzt für Job::activate()
     file_based_subsystem<Job>::subsystem_activate();
 
     return true;
@@ -265,7 +265,6 @@ void Job_folder::add_job( const ptr<Job>& job, bool activate )
                                                          else  job->initialize();     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein activate()!
     }
 
-    //_job_map[ job->normalized_name() ] = job;
     add_file_based( job );
 
     int SIGNAL_ADD_JOB;  // _spooler->signal( "job_added" );
@@ -439,32 +438,11 @@ void Combined_job_nodes::close()
     _job_node_set.clear();
 }
 
-//----------------------------------------------------Combined_job_nodes::connect_with_order_queues
-
-void Combined_job_nodes::connect_with_order_queues()
-{
-    string normalized_path = _job->normalized_path();
-
-    FOR_EACH_JOB_CHAIN( job_chain )    
-    {
-        Z_FOR_EACH( Job_chain::Node_list, job_chain->_node_list, it )
-        {
-            if( Job_node* job_node = Job_node::try_cast( *it ) )
-            {
-                if( job_node->normalized_job_path() == normalized_path )
-                {
-                    job_node->connect_job( _job );
-                }
-            }
-        }
-    }
-}
-
 //-------------------------------------------------------------Combined_job_nodes::connect_job_node
 
 void Combined_job_nodes::connect_job_node( Job_node* job_node )
 {
-    //assert( _job_node_set.find( order_queue ) == _order_queue_map.end() );
+    _job->log()->debug( S() << __FUNCTION__ << "  " << job_node->obj_name() );
 
     _job_node_set.insert( job_node );
 }
@@ -473,7 +451,7 @@ void Combined_job_nodes::connect_job_node( Job_node* job_node )
 
 void Combined_job_nodes::disconnect_job_node( Job_node* job_node )
 {
-    //assert( _job_node_set.find( order_queue ) == _order_queue_map.end() );
+    _job->log()->debug( S() << __FUNCTION__ << "  " << job_node->obj_name() );
 
     _job_node_set.erase( job_node );
 }
@@ -773,6 +751,8 @@ bool Job::on_load() // Transaction* ta )
     {
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
+        set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
+
         try
         {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
@@ -817,8 +797,6 @@ bool Job::on_activate()
     {
         try
         {
-            _combined_job_nodes->connect_with_order_queues();
-
             if( !_run_time->set() )  _run_time->set_default();
             if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
@@ -2503,13 +2481,20 @@ void Job::remove_waiting_job_from_process_list()
 
 //---------------------------------------------------------------------Job::on_process_class_active
 
-void Job::on_process_class_active( Process_class* process_class )
+bool Job::on_missing_found( File_based* file_based )
 {
-    if( _waiting_for_process  &&  
-        process_class->normalized_path() == spooler()->process_class_subsystem()->normalized_name( _module->_process_class_path ) )
+    assert( file_based->subsystem() == spooler()->process_class_subsystem() );
+    assert( file_based == _module->process_class() );
+
+    Process_class* process_class = dynamic_cast<Process_class*>( process_class );
+    assert( process_class );
+
+    if( _waiting_for_process )
     {
         signal( __FUNCTION__ );
     }
+
+    return true;
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -2602,7 +2587,7 @@ ptr<Task> Job::task_to_start()
 
             if( !process_class  ||  !process_class->process_available( this ) )
             {
-                if( process_class && 
+                if( process_class  && 
                     cause != cause_min_tasks  &&  
                     ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
                 {

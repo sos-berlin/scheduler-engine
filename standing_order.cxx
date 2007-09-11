@@ -144,12 +144,11 @@ Standing_order_folder::~Standing_order_folder()
 
 //-------------------------------------------------------------------Standing_order::Standing_order
 
-Standing_order::Standing_order( Standing_order_subsystem* standing_order_subsystem, const string& name )
+Standing_order::Standing_order( Standing_order_subsystem* standing_order_subsystem )
 :
     file_based<Standing_order,Standing_order_folder,Standing_order_subsystem>( standing_order_subsystem, this, type_standing_order ),
     _zero_(this+1)
 {
-    if( name != "" )  set_name( name );
 }
 
 //-------------------------------------------------------------------tanding_order::~Standing_order
@@ -167,7 +166,31 @@ Standing_order::~Standing_order()
 
 void Standing_order::close()
 {
-    set_order( NULL );
+    if( _order )
+        set_order( NULL );
+    else
+    if( _missing_job_chain_path != "" )
+    {
+        remove_missing( order_subsystem(), _missing_job_chain_path );
+        _missing_job_chain_path = "";
+    }
+}
+
+//-------------------------------------------------------------------------Standing_order::set_name
+
+void Standing_order::set_name( const string& name )
+{
+    file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >::set_name( name );
+
+    size_t pos = name.find( job_chain_order_separator );
+    if( pos == string::npos )  pos = 0;
+
+    _job_chain_name = name.substr( 0, pos );
+
+    if( pos < name.length() )  pos++;
+    _order_id = name.substr( pos );
+
+    if( _job_chain_name == ""  ||  _order_id == "" )  z::throw_xc( "SCHEDULER-435", base_file_info()._filename );
 }
 
 //------------------------------------------------------------------------Standing_order::set_order
@@ -205,19 +228,42 @@ bool Standing_order::on_load()
 
 bool Standing_order::on_activate()
 {
-    start_order();
-    return true;
+    bool result = false;
+
+    if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
+    {
+        if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
+
+        _order->place_or_replace_in_job_chain( job_chain );
+        _order->connect_with_standing_order( this );
+
+        result = true;
+    }
+    else
+    {
+        _missing_job_chain_path = folder()->make_path( _job_chain_name );
+        add_missing( order_subsystem(), _missing_job_chain_path );
+    }
+
+    return result;
 }
 
-//----------------------------------------------------------------------Standing_order::start_order
+//-----------------------------------------------------------------Standing_order::on_missing_found
 
-void Standing_order::start_order()
+bool Standing_order::on_missing_found( File_based* file_based )
 {
-    Job_chain* job_chain = folder()->job_chain_folder()->job_chain( job_chain_name() );
-    if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
+    Order_subsystem_interface* order_subsystem = spooler()->order_subsystem();
 
-    _order->place_or_replace_in_job_chain( job_chain );
-    _order->connect_with_standing_order( this );
+    assert( file_based->subsystem() == order_subsystem );
+    assert( file_based->normalized_path() == order_subsystem->normalized_name( _missing_job_chain_path ) );
+
+    Job_chain* job_chain = dynamic_cast<Job_chain*>( file_based );
+    assert( job_chain );
+
+    bool ok = on_activate();
+    assert( ok );
+
+    return ok;
 }
 
 //------------------------------------------------Standing_order::order_is_removable_or_replaceable
@@ -240,20 +286,27 @@ bool Standing_order::can_be_removed_now()
 
 bool Standing_order::prepare_to_remove()
 {
-    bool result = false;
+    bool result;
 
     if( _order )
     {
-        if( order_is_removable_or_replaceable() )
-        {
-            _order->remove_from_job_chain();
-            result = true;
-        }
+        result = order_is_removable_or_replaceable();
     }
     else
         result = true;
 
     return result;
+}
+
+//---------------------------------------------------------------------------Standing_order::remove
+
+bool Standing_order::remove()
+{
+    _its_me_removing = true;
+    _order->remove_from_job_chain();
+    _its_me_removing = false;
+
+    return true;
 }
 
 //--------------------------------------------------------------Standing_order::can_be_replaced_now
@@ -289,11 +342,13 @@ bool Standing_order::prepare_to_replace()
 
 Standing_order* Standing_order::replace_now()
 {
-    set_order( replacement()->_order );
-    start_order();
+    ptr<Order> order = replacement()->_order;
 
     replacement()->_order = NULL;
     set_replacement( NULL );
+
+    set_order( order );
+    set_file_based_state( s_loaded );
 
     return this;
 }
@@ -302,6 +357,8 @@ Standing_order* Standing_order::replace_now()
 
 void Standing_order::on_order_carried_out()
 {
+    // Wird auch von on_order_removed() gerufen
+
     if( replacement() )
     {
         if( can_be_replaced_now() )  replace_now();
@@ -313,28 +370,14 @@ void Standing_order::on_order_carried_out()
     }
 }
 
-//-------------------------------------------------------------------Standing_order::job_chain_name
+//-----------------------------------------------------------------Standing_order::on_order_removed
 
-string Standing_order::job_chain_name() const
+void Standing_order::on_order_removed()
 {
-    string filename = base_file_info()._filename;
-
-    size_t separator = filename.find( job_chain_order_separator );
-    if( separator == string::npos )  separator = 0;
-
-    return filename.substr( 0, separator );
-}
-
-//-------------------------------------------------------------------------Standing_order::order_id
-
-string Standing_order::order_id() const
-{
-    string object_name = Folder::object_name_of_filename( base_file_info()._filename );
-
-    size_t separator = object_name.find( job_chain_order_separator );
-    if( separator == string::npos )  separator = object_name.length() - 1;
-
-    return object_name.substr( separator + 1);
+    if( !_its_me_removing )
+    {
+        on_order_carried_out();
+    }
 }
 
 //--------------------------------------------------------------------------Standing_order::set_dom
@@ -367,12 +410,17 @@ xml::Element_ptr Standing_order::dom_element( const xml::Document_ptr& dom_docum
 
 string Standing_order::obj_name() const
 {
-    S result;
+    if( _order )
+    {
+        S result;
 
-    result << "Standing_order";
-    if( _order ) result << " " << _order->obj_name();
+        result << "Standing_order";
+        if( _order ) result << " " << _order->obj_name();
 
-    return result;
+        return result;
+    }
+    else
+        return file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >::obj_name();
 }
 
 //----------------------------------------------------------------------Standing_order::execute_xml

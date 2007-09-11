@@ -320,7 +320,7 @@ struct Order : Com_order,
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
-    Time                       _old_next_time;
+    Time                       _signaled_next_time;
     ptr<http::Operation>       _http_operation;
     ptr<Com_log>               _com_log;                // COM-Hülle für Log
 };
@@ -534,7 +534,8 @@ struct Order_queue_node : Node
 
 //------------------------------------------------------------------------------job_chain::Job_node
 
-struct Job_node : Order_queue_node
+struct Job_node : Order_queue_node,
+                  Missings_requestor
 {
     typedef Order_queue_node    Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
@@ -547,6 +548,12 @@ struct Job_node : Order_queue_node
     void                        activate                    ();
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+
+    // Missings_requestor
+    bool                        on_missing_found            ( folder::File_based* found_job );
+    string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
+
 
     string                      job_path                    () const                                { return _job_path; }
     string                      normalized_job_path         () const;
@@ -686,6 +693,8 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_job               ( Job* );
     Job*                        job_from_state              ( const Order::State& );
 
+  //void                        connect_job_nodes_with_job  ( Job* );                               // Aufgerufen von Job::activate()
+
     void                        add_orders_from_database    ( Read_transaction* );
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
     void                        add_order                   ( Order* );
@@ -791,10 +800,10 @@ struct Order_queue : Com_order_queue,
     void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* );
     bool                        empty                       ()                                      { return _queue.empty(); }
-    Order*                      first_order                 ( const Time& now ) const;
+    Order*                      first_order                 ( const Time& now = Time(0) ) const;
     Order*                      fetch_order                 ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
-    bool                        has_order                   ( const Time& now )                     { return first_order( now ) != NULL; }
+    bool                        has_order                   ( const Time& now = Time(0) )           { return first_order( now ) != NULL; }
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();

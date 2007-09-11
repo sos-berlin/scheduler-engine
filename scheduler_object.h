@@ -72,7 +72,7 @@ struct Scheduler_object
 
 
                                 Scheduler_object            ( Spooler*, IUnknown* me, Type_code );
-    virtual                    ~Scheduler_object            ()                                      {}
+    virtual                    ~Scheduler_object            ();
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
@@ -86,6 +86,7 @@ struct Scheduler_object
     virtual IDispatch*          idispatch                   ();
     IUnknown*                   iunknown                    () const                                { return _my_iunknown; }
     virtual void                write_element_attributes    ( const xml::Element_ptr& ) const;
+
 
     void                        complain_about_non_empty_attribute( const xml::Element_ptr&, const string& attribute_name );
     void                        assert_empty_attribute      ( const xml::Element_ptr&, const string& attribute_name );

@@ -181,6 +181,13 @@ string Folder::extension_of_filename( const string& filename )
     return result;
 }
 
+//--------------------------------------------------------------------------------Folder::make_path
+
+string Folder::make_path( const string& name )
+{
+    return name;
+}
+
 //--------------------------------------------------------------------Folder::adjust_with_directory
 
 void Folder::adjust_with_directory()
@@ -286,57 +293,74 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 void Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_list )
 {
     vector<const Base_file_info*> ordered_file_infos;     // Geordnete Liste der vorgefundenen Dateien    
-    vector<File_based*>           ordered_file_based;     // Geordnete Liste der bereits bekannten (geladenen) Dateien
+    vector<File_based*>           ordered_file_baseds;    // Geordnete Liste der bereits bekannten (geladenen) Dateien
 
     ordered_file_infos.reserve( file_info_list.size() );
     Z_FOR_EACH_CONST( list<Base_file_info>, file_info_list, it )  ordered_file_infos.push_back( &*it );
     sort( ordered_file_infos.begin(), ordered_file_infos.end(), Base_file_info::less_dereferenced );
 
     int NICHT_JEDESMAL_ORDNEN;  // Verbesserung: Nicht jedesmal ordnen. Nicht nötig, wenn Typed_folder nicht verändert worden ist.
-    ordered_file_based.reserve( _file_based_map.size() );
-    Z_FOR_EACH( File_based_map, _file_based_map, fb )  if( fb->second->has_base_file() )  ordered_file_based.push_back( &*fb->second );
-    sort( ordered_file_based.begin(), ordered_file_based.end(), File_based::less_dereferenced );
+    ordered_file_baseds.reserve( _file_based_map.size() );
+    Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
+    sort( ordered_file_baseds.begin(), ordered_file_baseds.end(), File_based::less_dereferenced );
 
 
-    vector<File_based*>::iterator fb = ordered_file_based.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
-    Z_FOR_EACH_CONST( vector<const Base_file_info*>, ordered_file_infos, it )
+    vector<const Base_file_info*>::iterator fi = ordered_file_infos.begin();
+    vector<File_based*          >::iterator fb = ordered_file_baseds.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
+
+    while( fi != ordered_file_infos.end()  ||
+           fb != ordered_file_baseds.end() )
     {
-        const Base_file_info* file_info = *it;
+        /// Dateinamen gleich Objektnamen?
 
-        if( fb == ordered_file_based.end()  ||  file_info->_normalized_name < (*fb)->_base_file_info._normalized_name )  // Datei hinzugefügt?
+        while( fb != ordered_file_baseds.end()  &&
+               fi != ordered_file_infos.end()  &&
+               (*fb)->_base_file_info._normalized_name == (*fi)->_normalized_name )
         {
-            call_on_base_file_changed( (File_based*)NULL, file_info );       // Lädt die Datei in das Objekt 
+            File_based* current_file_based = (*fb)->replacement()? (*fb)->replacement() 
+                                                                 : (*fb);
+
+            if( (*fb)->_file_is_removed  ||
+                current_file_based->_base_file_info._timestamp_utc != (*fi)->_timestamp_utc )  
+            {
+                call_on_base_file_changed( *fb, *fi );
+            }
+
+            fi++, fb++;
         }
-        else
-        for(; fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._normalized_name < file_info->_normalized_name; fb++ )   // Datei entfernt?
-        { 
+
+
+
+        /// Dateien hinzugefügt?
+
+        while( fi != ordered_file_infos.end()  &&
+               ( fb == ordered_file_baseds.end()  ||  (*fi)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
+        {
+            call_on_base_file_changed( (File_based*)NULL, (*fi) );
+            fi++;
+        }
+
+        assert( fi == ordered_file_infos.end()  || 
+                fb == ordered_file_baseds.end() ||
+                (*fi)->_normalized_name >= (*fb)->_base_file_info._normalized_name );
+        
+
+
+        /// Dateien gelöscht?
+
+        while( fb != ordered_file_baseds.end()  &&
+               ( fi == ordered_file_infos.end()  ||  (*fi)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
+        {
             if( !(*fb)->_file_is_removed )
             {
                 call_on_base_file_changed( *fb, NULL );
             }
-        }
-
-        if( fb != ordered_file_based.end()  &&  (*fb)->_base_file_info._normalized_name == file_info->_normalized_name )   // Gleicher Name?
-        {
-            File_based* current_file_based = (*fb)->replacement()? (*fb)->replacement() : (*fb);
-
-            if( (*fb)->_file_is_removed  ||
-                current_file_based->_base_file_info._timestamp_utc != file_info->_timestamp_utc )  
-            {
-                call_on_base_file_changed( *fb, file_info );
-            }
-
             fb++;
         }
-    }
 
-
-    // Zu den übrigenden File_based gibt es keine Dateien, diese sind also gelöscht:
-
-    for(; fb != ordered_file_based.end(); fb++ )  
-    { 
-        (*fb)->_file_is_removed = true;
-        call_on_base_file_changed( *fb, NULL );
+        assert( fb == ordered_file_baseds.end()  ||
+                fi == ordered_file_infos.end()  ||
+                (*fi)->_normalized_name <= (*fb)->_base_file_info._normalized_name );
     }
 }
 
@@ -352,10 +376,13 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
     {
         if( !base_file_info )
         {
-            folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
-            file_based = old_file_based;                // Für catch()
-            old_file_based->on_base_file_removed();
-            file_based = NULL;
+            if( old_file_based->has_base_file() )   // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht löschen
+            {
+                folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
+                file_based = old_file_based;                // Für catch()
+                old_file_based->on_base_file_removed();
+                file_based = NULL;
+            }
         }
         else
         {
@@ -516,7 +543,7 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
 File_based* Typed_folder::file_based( const string& name ) const
 {
     File_based* result = file_based_or_null( name );
-    if( !result )  z::throw_xc( "SCHEDULER-430", name );      // Sollte nicht passieren
+    if( !result )  z::throw_xc( "SCHEDULER-430", file_based_subsystem()->object_type_name(), name );      // Sollte nicht passieren
     return result;
 }
 
@@ -618,7 +645,13 @@ bool File_based::activate()
         if( _state == s_loaded  &&  subsystem()->subsystem_state() >= subsys_active )
         {
             ok = on_activate();
-            if( ok )  set_file_based_state( s_active );
+            
+            if( ok )
+            {
+                set_file_based_state( s_active );
+                subsystem()->missings()->announce_missing_is_found( this ); 
+            }
+
         }
     }
 
@@ -788,6 +821,149 @@ Folder* File_based::folder() const
     if( !_typed_folder )  z::throw_xc( __FUNCTION__, "no folder" );
 
     return _typed_folder->folder(); 
+}
+
+//-------------------------------------------------------File_based_subsystem::File_based_subsystem
+
+File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown, Type_code type_code ) 
+: 
+    Subsystem( spooler, iunknown, type_code ),
+    _missings( this )
+{
+}
+
+//-----------------------------------------------------------Missings_requestor::Missings_requestor
+    
+Missings_requestor::Missings_requestor()
+{
+}
+
+//----------------------------------------------------------Missings_requestor::~Missings_requestor
+
+Missings_requestor::~Missings_requestor()
+{
+    try
+    {
+        close();
+    }
+    catch( exception& x )  { Z_LOG( __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+}
+
+//------------------------------------------------------------------------Missings_requestor::close
+
+void Missings_requestor::close()
+{
+    Z_FOR_EACH( Missing_sets, _missing_sets, it )
+    {
+        File_based_subsystem* subsystem   = it->first;
+        Missing_set&          missing_set = it->second;
+
+        Z_FOR_EACH( Missing_set, missing_set, it2 )
+        {
+            assert( !"remove_missing fehlt" );
+            subsystem->missings()->remove_missing( this, *it2 );
+        }
+    }
+}
+
+//------------------------------------------------------------------Missings_requestor::add_missing
+
+void Missings_requestor::add_missing( File_based_subsystem* subsystem, const string& path )
+{
+    _missing_sets[ subsystem ].insert( subsystem->normalized_name( path ) );
+    subsystem->missings()->add_missing( this, path );
+}
+
+//---------------------------------------------------------------Missings_requestor::remove_missing
+
+void Missings_requestor::remove_missing( File_based_subsystem* subsystem, const string& path )
+{
+    _missing_sets[ subsystem ].erase( subsystem->normalized_name( path ) );
+    subsystem->missings()->remove_missing( this, path );
+}
+
+//-------------------------------------------------------------------------------Missings::Missings
+    
+Missings::Missings( File_based_subsystem* subsystem )
+:
+    _zero_(this+1),
+    _subsystem( subsystem )
+{
+}
+
+//------------------------------------------------------------------------------Missings::~Missings
+    
+Missings::~Missings()
+{
+}
+
+//----------------------------------------------------------------------------Missings::add_missing
+
+void Missings::add_missing( Missings_requestor* requestor, const string& missings_path )
+{
+    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
+    _path_requestors_map[ _subsystem->normalized_name( missings_path ) ].insert( requestor );
+}
+
+//-------------------------------------------------------------------------Missings::remove_missing
+
+void Missings::remove_missing( Missings_requestor* requestor, const string& missings_path )
+{
+    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
+
+    Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
+    
+    requestors_set.erase( requestor );
+    if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_name( missings_path ) );
+}
+
+//-----------------------------------------------------------------------Missings::remove_requestor
+
+void Missings::remove_requestor( Missings_requestor* requestor )
+{
+    Z_FOR_EACH( Path_requestors_map, _path_requestors_map, path_requestors_it )
+    {
+        Requestor_set& requestor_set = path_requestors_it->second;
+
+        Requestor_set::iterator requestor_it = requestor_set.find( requestor );
+        assert( requestor_it == requestor_set.end() );
+        //{
+        //    Z_DEBUG_ONLY( log()->warn( S() << __FUNCTION__ << "  " << requestor->obj_name() << 
+        //                                                      " " << subsystem_it->first->obj_name() << 
+        //                                                      " " << path_requestors_it->first ) );
+        //    assert(0);
+            requestor_set.erase( requestor_it );
+        //}
+    }
+}
+
+//--------------------------------------------------------------Missings::announce_missing_is_found
+
+void Missings::announce_missing_is_found( File_based* found_missing )
+{
+    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
+
+    assert( found_missing->subsystem() == _subsystem );
+    assert( found_missing->file_based_state() == File_based::s_active );
+
+    Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
+
+    if( it != _path_requestors_map.end() )
+    {
+        Requestor_set& requestor_set = it->second;
+
+        for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
+        {
+            Requestor_set::iterator next_it2  = it2;  next_it2++;
+            Missings_requestor*     requestor = *it2;
+        
+            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_missing_found( " << found_missing->obj_name() << " ) " ); )
+            bool ok = requestor->on_missing_found( found_missing );
+            if( ok )  requestor_set.erase( it2 );
+
+            it2 = next_it2;
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

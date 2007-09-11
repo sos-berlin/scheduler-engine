@@ -320,13 +320,13 @@ bool Lock::on_load()
 
 bool Lock::on_activate()
 {
-    FOR_EACH_JOB( job )
-    {
-        if( Requestor* requestor = job->lock_requestor_or_null() )
-        {
-            requestor->on_new_lock( this );
-        }
-    }
+    //FOR_EACH_JOB( job )
+    //{
+    //    if( Requestor* requestor = job->lock_requestor_or_null() )
+    //    {
+    //        requestor->on_new_lock( this );
+    //    }
+    //}
 
     return true;
 }
@@ -784,18 +784,18 @@ void Requestor::load()
 
 //---------------------------------------------------------------------------Requestor::on_new_lock
 
-void Requestor::on_new_lock( Lock* lock )
-{
-    Z_FOR_EACH( Use_list, _use_list, it )
-    {
-        Use* use = *it;
-        
-        if( use->lock_or_null() == lock )
-        {
-            use->load();
-        }
-    }
-}
+//void Requestor::on_new_lock( Lock* lock )
+//{
+//    Z_FOR_EACH( Use_list, _use_list, it )
+//    {
+//        Use* use = *it;
+//        
+//        if( use->lock_or_null() == lock )
+//        {
+//            use->load();
+//        }
+//    }
+//}
 
 //-------------------------------------------------------------------Requestor::locks_are_available
 
@@ -956,6 +956,8 @@ void Use::close()
         lock->dequeue_lock_use( this );
         lock->unregister_lock_use( this );
     }
+    else
+        remove_missing( spooler()->lock_subsystem(), _lock_path );
 }
 
 //-------------------------------------------------------------------------------------Use::set_dom
@@ -991,6 +993,26 @@ void Use::load()
     {
         lock->register_lock_use( this );
     }
+    else
+        add_missing( spooler()->lock_subsystem(), _lock_path );
+}
+
+//----------------------------------------------------------------------------Use::on_missing_found
+
+bool Use::on_missing_found( File_based* file_based )
+{
+    Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
+
+    assert( file_based->subsystem() == lock_subsystem );
+    assert( file_based->normalized_path() == lock_subsystem->normalized_name( _lock_path ) );
+
+    Lock* lock = dynamic_cast<Lock*>( file_based );
+    assert( lock );
+
+    load();
+
+    assert( this->lock() );
+    return true;
 }
 
 //----------------------------------------------------------------------------------------Use::lock

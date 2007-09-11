@@ -1047,7 +1047,7 @@ string Node::obj_name() const
 
     result << Scheduler_object::obj_name();
     result << " ";
-    result << _job_chain->path();
+    if( _job_chain )  result << _job_chain->path();
     result << ":";
     result << _state;
 
@@ -1189,6 +1189,7 @@ Job_node::~Job_node()
     
 void Job_node::close()
 {
+    remove_missing( job_subsystem(), _job_path );
     disconnect_job();
 
     Base_class::close();
@@ -1204,6 +1205,8 @@ void Job_node::activate()
     {
         connect_job( job );
     }
+    
+    if( !_job )  add_missing( job_subsystem(), _job_path );
 }
 
 //----------------------------------------------------------------------------Job_node::connect_job
@@ -1212,10 +1215,19 @@ void Job_node::connect_job( Job* job )
 {
     if( _state == s_active )
     {
-        assert( job->normalized_path() == spooler()->job_subsystem()->normalized_name( _job_path ) );
+        assert( job == spooler()->job_subsystem()->job_or_null( _job_path ) );
 
         bool ok = job->connect_job_node( this );
-        if( ok )  _job = job;
+        if( ok )
+        {
+            _job = job;
+
+            //In connect_job_node() schon erledigt
+            //if( Order* order = order_queue()->first_order() )
+            //{
+            //    order->handle_changed_processable_state();
+            //}
+        }
     }
 }
 
@@ -1228,6 +1240,22 @@ void Job_node::disconnect_job()
         _job->disconnect_job_node( this );
         _job = NULL;
     }
+}
+
+//----------------------------------------------------------------------Job_chain::on_missing_found
+
+bool Job_node::on_missing_found( File_based* file_based )
+{
+    assert( file_based->subsystem() == spooler()->job_subsystem() );
+    assert( file_based->normalized_path() == normalized_job_path() );
+
+    Job* job = dynamic_cast<Job*>( file_based );
+    assert( job );
+
+    connect_job( job );
+
+    assert( _job );
+    return true;
 }
 
 //-----------------------------------------------------------------------------Job_node::set_action
@@ -1246,7 +1274,7 @@ void Job_node::set_action( const string& action_string )
             {
                 case act_process:
                 {
-                    if( Order* order = order_queue()->first_order( Time(0) ) )
+                    if( Order* order = order_queue()->first_order() )
                     {
                         if( Job* job = job_or_null() )  job->signal_earlier_order( order );
                     }
@@ -2075,6 +2103,29 @@ Node* Job_chain::first_node()
     return *_node_list.begin();
 }
 
+//------------------------------------------------------------Job_chain::connect_job_nodes_with_job
+
+//void Job_chain::connect_job_nodes_with_job( Job* job )
+//{
+//    // Aufgerufen von Job::activate()
+//
+//    if( _state >= s_loaded )
+//    {
+//        string normalized_job_path = job->normalized_path();
+//
+//        Z_FOR_EACH( Node_list, _node_list, it )
+//        {
+//            if( Job_node* job_node = Job_node::try_cast( *it ) )
+//            {
+//                if( job_node->normalized_job_path() == normalized_job_path )
+//                {
+//                    job_node->connect_job( job );
+//                }
+//            }
+//        }
+//    }
+//}
+
 //-----------------------------------------------------------------------------Job_chain::add_order
 
 void Job_chain::add_order( Order* order )
@@ -2222,6 +2273,8 @@ bool Job_chain::on_activate()
 
     if( !_remove  &&  _state < s_active )
     {
+        set_state( s_active );
+
         Z_FOR_EACH( Node_list, _node_list, it )  (*it)->activate();     // Nur eimal beim Übergang von s_stopped zu s_active aufrufen!
 
         //    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
@@ -2233,7 +2286,6 @@ bool Job_chain::on_activate()
         //        order->activate();
         //    }
 
-        set_state( s_active );
         result = true;
     }
 
@@ -3794,7 +3846,7 @@ Order::Order( Spooler* spooler )
 
     _created       = Time::now();
     _is_virgin     = true;
-    _old_next_time = Time::never;
+    _signaled_next_time = Time::never;
 
     set_run_time( NULL );
 }
@@ -3891,7 +3943,7 @@ Order::~Order()
 //
 //    _created       = Time::now();
 //    _is_virgin     = true;
-//    _old_next_time = Time::never;
+//    _signaled_next_time = Time::never;
 //
 //    set_run_time( NULL );
 //}
@@ -4030,13 +4082,17 @@ void Order::handle_changed_processable_state()
 {
     Time new_next_time = next_time();
 
-    if( new_next_time <= _old_next_time )
+    if( new_next_time <= _signaled_next_time )
     {
         if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal_earlier_order( this );
+        {
+            if( Job* job = job_node->job_or_null() )  
+            {
+                job->signal_earlier_order( this );
+                _signaled_next_time = new_next_time;
+            }
+        }
     }
-
-    _old_next_time = new_next_time;
 }
 
 //-----------------------------------------------------------------Order::assert_is_not_distributed
@@ -5557,7 +5613,12 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     _job_chain = NULL;
     _job_chain_path = "";
 
-    if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
+
+    if( job_chain_stack_option == jc_remove_from_job_chain_stack )  
+    {
+        remove_from_job_chain_stack();
+        if( _standing_order )  _standing_order->on_order_removed();
+    }
 }
 
 //---------------------------------------------------------------Order::remove_from_job_chain_stack
@@ -6006,7 +6067,7 @@ void Order::postprocessing2( Job* last_job )
 {
     Job* job = this->job();
 
-    if( _moved  &&  job  &&  !order_queue()->has_order( Time::now() ) )
+    if( _moved  &&  job  &&  !order_queue()->has_order() )
     {
         job->signal( "Order (delayed set_state)" );
     }

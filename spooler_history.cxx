@@ -712,7 +712,7 @@ void Database::create_tables_when_needed()
             bool added;
             added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
 
-            if( added )
+            //Jira JS-???  Setup der SOS legt exit_code nicht an.   if( added )
                     add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
         }
 

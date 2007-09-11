@@ -38,7 +38,7 @@ struct Log_set_console_colors_base
     Spooler*                    _spooler;
     bool                        _restore_console;
 
-    enum Color { c_black, c_dark_red, c_pale_red, c_blue, c_pale_blue, c_pale_blue_green, c_pale_brown, c_gray };
+    enum Color { c_black, c_dark_red, c_pale_red, c_blue, c_pale_blue, c_pale_blue_green, c_dark_green, c_pale_brown, c_gray };
 
 
     Log_set_console_colors_base( Spooler* spooler )
@@ -68,11 +68,11 @@ struct Log_set_console_colors_base
 
             switch( level )
             {
-                case log_error:     set_color( c_dark_red        ); break;
-                case log_warn:      set_color( c_pale_red   ); break;
-                case log_info:      set_color( c_blue       ); break;
+                case log_error:     set_color( c_dark_red   ); break;
+                case log_warn:      set_color( c_dark_red   ); break;
+                case log_info:      set_color( c_black      ); break;
                 case log_debug1:    set_color( c_pale_blue  ); break;
-                case log_debug2:    
+                case log_debug2:    //set_color( c_dark_green ); break;
                 case log_debug3:    set_color( c_pale_blue_green ); break;
                 case log_debug4:
                 case log_debug5:    
@@ -126,6 +126,7 @@ struct Log_set_console_colors_base
                     case c_blue:             attributes |= FOREGROUND_INTENSITY | FOREGROUND_BLUE;              break;
                     case c_pale_blue:        attributes |=                        FOREGROUND_BLUE;              break;
                     case c_pale_blue_green:  attributes |= FOREGROUND_GREEN | FOREGROUND_BLUE;                  break;
+                    case c_dark_green:       attributes |= FOREGROUND_GREEN;                                    break;
                     case c_pale_brown:       attributes |= FOREGROUND_RED | FOREGROUND_GREEN;                   break;
                     case c_gray:             attributes |= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
                     case c_black: 

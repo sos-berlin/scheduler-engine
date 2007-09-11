@@ -149,6 +149,12 @@ struct Xml_client_connection;
 struct Xslt_stylesheet;
 
 
+namespace folder
+{
+    struct File_based;
+}
+
+
 namespace lock
 {
     struct Holder;

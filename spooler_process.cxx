@@ -1002,11 +1002,6 @@ bool Process_class::on_load()
 
 bool Process_class::on_activate()
 {
-    FOR_EACH_JOB( job )
-    {
-        job->on_process_class_active( this );
-    }
-
     return true;
 }
 

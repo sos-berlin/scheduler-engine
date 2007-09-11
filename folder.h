@@ -34,6 +34,7 @@ struct Folder : Scheduler_object, Object
 
     file::File_path             directory                   () const                                { return _directory; }
     string                      path                        () const                                { return _path; }
+    string                      make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
     void                        adjust_with_directory       ();
 
@@ -168,7 +169,6 @@ struct File_based : Scheduler_object,
     string                      normalized_name             () const;
     string                      normalized_path             () const;
 
-    void                    set_file_based_state            ( State state )                         { _state = state; }
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
@@ -202,12 +202,14 @@ struct File_based : Scheduler_object,
     virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
     virtual bool                on_base_file_removed        ()                                      { return remove(); }
 
+
     bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
     static bool                 less_dereferenced           ( const File_based* a, const File_based* b )  { return *a < *b; }
 
 
   protected:
     void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
+    void                    set_file_based_state            ( State state )                         { _state = state; }
 
     Fill_zero                  _zero_;
     ptr<File_based>            _replacement;
@@ -303,18 +305,62 @@ struct typed_folder : Typed_folder
     My_subsystem*              _subsystem;
 };
 
+//-------------------------------------------------------------------------------Missings_requestor
+
+struct Missings_requestor
+{
+                                Missings_requestor          ();
+    virtual                    ~Missings_requestor          ();
+
+    virtual void                close                       ();
+    virtual string              obj_name                    () const                                = 0;
+    void                        add_missing                 ( File_based_subsystem*, const string& path );
+    void                        remove_missing              ( File_based_subsystem*, const string& path );
+
+    virtual bool                on_missing_found            ( File_based* )                         = 0;
+
+  private:
+    typedef stdext::hash_set< string >                              Missing_set;
+    typedef stdext::hash_map< File_based_subsystem*, Missing_set >  Missing_sets;
+
+    Missing_sets               _missing_sets;
+};
+
+//-----------------------------------------------------------------------------------------Missings
+
+struct Missings 
+{
+                                Missings                    ( File_based_subsystem* );
+                               ~Missings                    ();
+
+    void                        add_missing                 ( Missings_requestor*, const string& missing_path );
+    void                        remove_missing              ( Missings_requestor*, const string& missing_path );
+    void                        remove_requestor            ( Missings_requestor* );
+    void                        announce_missing_is_found   ( File_based* found_missing );
+
+
+  private:
+    typedef stdext::hash_set< Missings_requestor* >    Requestor_set;
+    typedef stdext::hash_map< string, Requestor_set >  Path_requestors_map;            // Vermisster Pfad -> { Requestor ... }
+
+    Fill_zero                  _zero_;
+    File_based_subsystem*      _subsystem;
+    Path_requestors_map        _path_requestors_map;;
+};
+
 //-----------------------------------------------------------------------------File_based_subsystem
-// Für jeden dateibasierten Typ (File_based) gibt es genau eine File_based_subsystem
+// Für jeden dateibasierten Typ (File_based) gibt es genau ein File_based_subsystem
 
 struct File_based_subsystem : Subsystem
 {
-                                File_based_subsystem        ( Spooler* spooler, IUnknown* u, Type_code t ) : Subsystem( spooler, u, t ) {}
+                                File_based_subsystem        ( Spooler*, IUnknown*, Type_code );
     virtual                    ~File_based_subsystem        ()                                      {}
 
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }
   //virtual ptr<Typed_folder>   new_typed_folder            ()                                      = 0;
+    Missings*                   missings                    ()                                      { return &_missings; }
 
   protected:
     friend struct               Typed_folder;
@@ -323,6 +369,9 @@ struct File_based_subsystem : Subsystem
     virtual void                add_file_based              ( File_based* )                         = 0;
     virtual void                remove_file_based           ( File_based* )                         = 0;
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
+
+  private:
+    Missings                   _missings;
 };
 
 //---------------------------------------------------------------------------file_based_subsystem<>
@@ -503,23 +552,6 @@ struct file_based_subsystem : File_based_subsystem
 #define FOR_EACH_FILE_BASED( FILE_BASED_CLASS, OBJECT ) \
     Z_FOR_EACH( FILE_BASED_CLASS::My_subsystem::File_based_map, spooler()->subsystem( (FILE_BASED_CLASS*)NULL )->_file_based_map, __file_based_iterator__ )  \
         if( FILE_BASED_CLASS* OBJECT = __file_based_iterator__->second )
-
-//-------------------------------------------------------------------------------------------------
-
-//struct Order_folder : Typed_folder
-//{
-//                                Order_folder                ( Folder* );
-//
-//
-//    // Name besteht aus zwei Teilen: Jobkettenname und Auftragskennung
-//
-//    // Typed_folder:
-//    void                        on_base_file_event          ( Detected_directory_change, const Base_file_info&, const xml::Element_ptr& );
-//    string                      filename_extension          () const                                { return ".order.xml"; }
-//
-//    string                      job_chain_name_from_filename( const string& ) const;
-//    string                      order_id_from_filename      ( const string& ) const;
-//};
 
 //-------------------------------------------------------------------------------------------------
 

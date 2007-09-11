@@ -41,7 +41,7 @@ public class Generator  extends sos.spooler.Job_impl
     </script>
 
     <run_time once="yes">
-        <period repeat=""/>
+        <period/>
     </run_time>
     
 </job>

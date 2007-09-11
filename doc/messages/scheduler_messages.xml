@@ -2623,6 +2623,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-427">
+            <text xml:lang="en">
+                <title>Invalid MD5 hexadecimal coded password for HTTP user '<p1/>'</title>
+            </text>
+        </message>
+
         <message code="SCHEDULER-428">
             <text xml:lang="en">
                 <title>Error when loading base file '<p1>path</p1>':<br/><p2>error</p2></title>
@@ -2637,13 +2643,7 @@
 
         <message code="SCHEDULER-430">
             <text xml:lang="en">
-                <title>No object for configuration file '<p1>path</p1>'</title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-427">
-            <text xml:lang="en">
-                <title>Invalid MD5 hexadecimal coded password for HTTP user '<p1/>'</title>
+                <title>'<p1>object type</p1> <p2>name</p2>' is unknown</title>
             </text>
         </message>
 
@@ -2668,6 +2668,12 @@
         <message code="SCHEDULER-434">
             <text xml:lang="en">
                 <title>Error when closing '<p1>object</p1>':<br/><p2>error</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-435">
+            <text xml:lang="en">
+                <title>Standing order filename has not expected syntax <code><i>jobchain</i>,<i>orderid</i>.job.xml</code>: <p1>filename</p1></title>
             </text>
         </message>
 
@@ -3943,7 +3949,7 @@
         
         <message code="SCHEDULER-891">
             <text xml:lang="en">
-                <title>New file '<p1/>' is going to be be loaded into '<p2>type</p2> <p3>name</p3>'</title>
+                <title>File '<p1/>' is going to be be loaded into new '<p2>type</p2> <p3>name</p3>'</title>
             </text>
         </message>
         

@@ -43,6 +43,7 @@ struct Combined_job_nodes : Object
 //----------------------------------------------------------------------------------------------Job
 
 struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
+             Missings_requestor,
              Object
 {
     enum State
@@ -133,6 +134,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        on_activate                 ();
     bool                        can_be_removed_now          ();
 
+
+    // Missings_requestor:
+    bool                        on_missing_found            ( File_based* );
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
 

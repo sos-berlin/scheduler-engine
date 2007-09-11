@@ -10,9 +10,10 @@ namespace order {
 //---------------------------------------------------------------------------------------------Standing_order
 
 struct Standing_order : file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >,
+                        Missings_requestor,
                         Object
 {
-                                Standing_order              ( Standing_order_subsystem*, const string& name = "" );
+                                Standing_order              ( Standing_order_subsystem* );
                                ~Standing_order              ();
 
 
@@ -20,6 +21,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     void                        close                       ();
     string                      obj_name                    () const;
+    bool                        on_missing_found            ( File_based* );
 
 
     // file_based<>
@@ -27,6 +29,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
 
+    void                        set_name                    ( const string& );
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -36,6 +39,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
+    bool                        remove                      ();
 
     bool                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
@@ -45,11 +49,12 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     //
 
     Standing_order_folder*      standing_order_folder       () const                                { return typed_folder(); }
-    string                      job_chain_name              () const;
-    string                      order_id                    () const;
+    string                      job_chain_name              () const                                { return _job_chain_name; }
+    string                      order_id                    () const                                { return _order_id; }
 
     
     void                        on_order_carried_out        ();                                     // Gerufen von Order::on_carried_out()
+    void                        on_order_removed            ();                                     // Gerufen von Order::remove_from_job_chain()
 
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
@@ -57,11 +62,14 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
   private:
     bool                        order_is_removable_or_replaceable();
     void                        set_order                   ( Order* );
-    void                        start_order                 ();
 
 
     Fill_zero                  _zero_;
+    string                     _job_chain_name;
+    string                     _missing_job_chain_path;
+    string                     _order_id;
     ptr<Order>                 _order;
+    bool                       _its_me_removing;
 };
 
 //----------------------------------------------------------------------------Standing_order_folder

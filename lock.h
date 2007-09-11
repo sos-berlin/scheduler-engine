@@ -136,7 +136,10 @@ struct Lock_folder : typed_folder< Lock >
 //----------------------------------------------------------------------------------------------Use
 // Verbindet Lock mit Lock_requestor
 
-struct Use : Object, Scheduler_object, Non_cloneable
+struct Use : Object, 
+             Missings_requestor,
+             Scheduler_object, 
+             Non_cloneable
 {
                                 Use                         ( Requestor* );
                                ~Use                         ();
@@ -146,6 +149,11 @@ struct Use : Object, Scheduler_object, Non_cloneable
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+
+    // Missings_requestor:
+    bool                        on_missing_found            ( File_based* );
+
 
     Lock*                       lock                        () const;
     Lock*                       lock_or_null                () const;
@@ -181,7 +189,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
     Scheduler_object*           object                      () const                                { return _object; }
 
-    void                        on_new_lock                 ( Lock* );
+  //void                        on_new_lock                 ( Lock* );
     virtual void                on_locks_are_available      ()                                      = 0;
     virtual void                on_lock_is_to_be_removed    ( lock::Lock* )                         = 0;
 

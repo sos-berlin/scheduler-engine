@@ -12,7 +12,7 @@ function spooler_process()
     spooler_log.info( "ORDER-ID=" + order.id );
 
     var hostware = new ActiveXObject( "hostware.global" );
-    hostware.sleep( 15 );
+    hostware.sleep( 7 );
 
     return true;
 }

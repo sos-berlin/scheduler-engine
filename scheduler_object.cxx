@@ -87,6 +87,12 @@ Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code co
     }
 }
 
+//--------------------------------------------------------------Scheduler_object::~Scheduler_object
+    
+Scheduler_object::~Scheduler_object()
+{
+}
+
 //----------------------------------------------------------------------Scheduler_object::idispatch
     
 IDispatch* Scheduler_object::idispatch()
