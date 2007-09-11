@@ -1333,7 +1333,7 @@ Job* Job_node::job_or_null() const
     return _job;
 }
 
-//------------------------------------------------------ested_job_chain_node::Nested_job_chain_node
+//-----------------------------------------------------Nested_job_chain_node::Nested_job_chain_node
 
 Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order::State& state, const string& job_chain_path ) 
 : 
@@ -1885,7 +1885,7 @@ bool Job_chain::on_initialize()
 
         for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
         {
-            Node*     node = *it;
+            Node*               node = *it;
             Node_list::iterator next = it;  next++;
 
             if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
@@ -1903,7 +1903,7 @@ bool Job_chain::on_initialize()
             {
                 if( node->next_state().is_missing()  &&  
                     next != _node_list.end()  &&  
-                    node->is_type( Node::n_order_queue ) )
+                    ( node->is_type( Node::n_order_queue ) || node->is_type( Node::n_job_chain ) ) )
                 {
                     node->_next_state = (*next)->order_state();
                 }

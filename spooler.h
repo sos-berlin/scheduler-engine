@@ -101,7 +101,8 @@ extern const string             variable_set_name_for_substitution;
 
 #ifdef Z_WINDOWS
     const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+    const int                   max_communication_connections =    27;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+                                                                          // 2007-09-11  Neues Handle für Folder_subsystem
 #else
     const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
@@ -119,6 +120,7 @@ using namespace ::zschimmer::file;
 
 struct Show_calendar_options;
 struct Communication;
+struct Event;
 struct Get_events_command_response;
 struct Job;
 struct Job_folder;
@@ -218,10 +220,10 @@ typedef stdext::hash_set<string> String_set;
 #include "subsystem.h"
 #include "register.h"
 #include "scheduler_script.h"
-#include "folder.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
+#include "folder.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"
 #include "spooler_command.h"

@@ -99,6 +99,7 @@ struct Folder_subsystem : Subsystem,
     Fill_zero                  _zero_;
     file::File_path            _directory;
     ptr<Folder>                _root_folder;
+    Event                      _directory_event;
 };
 
 

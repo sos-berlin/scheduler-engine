@@ -41,6 +41,12 @@ void Folder_subsystem::close()
     set_async_manager( NULL );
 
     // Sollten wir alle Ordner schlieﬂen?
+
+#   ifdef Z_WINDOWS
+        Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
+        FindCloseChangeNotification( _directory_event._handle );
+        _directory_event._handle = NULL;
+#   endif
 }
 
 //------------------------------------------------------------------Folder_subsystem::set_directory
@@ -72,7 +78,22 @@ bool Folder_subsystem::subsystem_load()
 
 bool Folder_subsystem::subsystem_activate()
 {
-    int VERZEICHNISUEBERWACHUNG_STARTEN;
+#   ifdef Z_WINDOWS
+
+        //Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        //HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+        //if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
+
+        //_directory_event._handle = h;
+        //_directory_event.add_to( &_spooler->_wait_handles );
+        //int WIE_WIRD_ASYNC_CONTINUE_GERUFEN;
+
+        /*
+            Neu: Event mit Async_operation koppeln.
+            Event_async_operation : Async_operation
+        */
+
+#   endif
 
     set_async_manager( _spooler->_connection_manager );
     async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Pr¸fen, ob Verzeichnis ¸berhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
@@ -85,6 +106,7 @@ bool Folder_subsystem::subsystem_activate()
 
 bool Folder_subsystem::async_continue_( Continue_flags )
 {
+    _directory_event.reset();
     _root_folder->adjust_with_directory();
     set_async_delay( directory_watch_interval );
 
@@ -901,7 +923,7 @@ Missings::~Missings()
 
 void Missings::add_missing( Missings_requestor* requestor, const string& missings_path )
 {
-    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
+    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
     _path_requestors_map[ _subsystem->normalized_name( missings_path ) ].insert( requestor );
 }
 
@@ -909,7 +931,7 @@ void Missings::add_missing( Missings_requestor* requestor, const string& missing
 
 void Missings::remove_missing( Missings_requestor* requestor, const string& missings_path )
 {
-    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
+    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
 
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
@@ -941,7 +963,7 @@ void Missings::remove_requestor( Missings_requestor* requestor )
 
 void Missings::announce_missing_is_found( File_based* found_missing )
 {
-    Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
+    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
 
     assert( found_missing->subsystem() == _subsystem );
     assert( found_missing->file_based_state() == File_based::s_active );
