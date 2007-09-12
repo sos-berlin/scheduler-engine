@@ -158,14 +158,14 @@ struct Use : Object,
     Lock*                       lock                        () const;
     Lock*                       lock_or_null                () const;
     Requestor*                  requestor                   () const                                { return _requestor; }
-    string                      lock_path                   () const                                { return _lock_path; }
+    folder::Path                lock_path                   () const                                { return _lock_path; }
     Lock::Lock_mode             lock_mode                   () const                                { return _lock_mode; }
 
     string                      obj_name                    () const;
 
   private:
     Fill_zero                  _zero_;
-    string                     _lock_path;
+    folder::Path               _lock_path;
     Lock::Lock_mode            _lock_mode;
     Requestor* const           _requestor;
 };
@@ -251,7 +251,6 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     string                      object_type_name            () const                                { return "Lock"; }
     string                      filename_extension          () const                                { return ".lock.xml"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    File_based*                 object_by_path              ( const string& path );
     ptr<Lock>                   new_file_based              ();
 
 

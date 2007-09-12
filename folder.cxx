@@ -11,7 +11,101 @@ using namespace zschimmer::file;
 
 //--------------------------------------------------------------------------------------------const
 
-const int                   directory_watch_interval        = 10;
+const char                      folder_separator            = '/';
+const int                       directory_watch_interval    = 10;
+
+//---------------------------------------------------------------------------------------Path::Path
+
+Path::Path( const string& folder_path, const string& tail_path ) 
+{ 
+    if( int len = folder_path.length() + tail_path.length() )
+    {
+        if( folder_path != ""  &&  *folder_path.rbegin() != folder_separator )
+        {
+            reserve( len + 1 );
+            *this = folder_path;
+            *this += folder_separator;
+        }
+        else
+        {
+            reserve( len );
+            *this = folder_path;
+        }
+
+        if( tail_path != "" )
+        {
+            if( folder_path != ""  &&  *tail_path.begin() == folder_separator )  *this += tail_path.c_str() + 1;
+                                                                           else  *this += tail_path;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------Path::is_absolute_path
+
+bool Path::is_absolute_path() const
+{
+    return length() >= 0  &&  (*this)[0] == folder_separator;
+}
+
+//-----------------------------------------------------------------------------------Path::set_name
+
+void Path::set_name( const string& name )
+{
+    string f = folder_path();
+    if( f != "" )  f += folder_separator;
+    set_path( f + name );
+}
+
+//----------------------------------------------------------------------------Path::set_folder_path
+
+void Path::set_folder_path( const string& folder_path )
+{
+    set_path( Path( folder_path, name() ) );
+}
+
+//------------------------------------------------------------------------Path::prepend_folder_path
+
+void Path::prepend_folder_path( const string& folder_path )
+{
+    set_path( Path( folder_path, to_string() ) );
+}
+
+//--------------------------------------------------------------------------------Path::folder_path
+
+Path Path::folder_path() const
+{
+    const char* p0 = c_str();
+    const char* p  = p0 + length();
+
+    if( p > p0 )
+    {
+        while( p > p0  &&  p[-1] != folder_separator )  p--;
+        if( p > p0+1  &&  p[-1] == folder_separator )  p--;
+    }
+
+    return substr( 0, p - c_str() );
+}
+
+//---------------------------------------------------------------------------------------Path::name
+
+string Path::name() const
+{
+    const char* p0 = c_str();
+    const char* p  = p0 + length();
+
+    while( p > p0  &&  p[-1] != folder_separator )  p--;
+
+    return p;
+}
+
+//------------------------------------------------------------------------------------Path::compare
+
+//int Path::compare( const Path& path ) const
+//{
+//    string path1 = normalized();
+//    string path2 = path.normalized();
+//    return strcmp( path1.c_str(), path2.c_str() );
+//}
 
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
@@ -205,9 +299,9 @@ string Folder::extension_of_filename( const string& filename )
 
 //--------------------------------------------------------------------------------Folder::make_path
 
-string Folder::make_path( const string& name )
+Path Folder::make_path( const string& name )
 {
-    return name;
+    return Path( path(), name );
 }
 
 //--------------------------------------------------------------------Folder::adjust_with_directory
@@ -321,7 +415,7 @@ void Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
     Z_FOR_EACH_CONST( list<Base_file_info>, file_info_list, it )  ordered_file_infos.push_back( &*it );
     sort( ordered_file_infos.begin(), ordered_file_infos.end(), Base_file_info::less_dereferenced );
 
-    int NICHT_JEDESMAL_ORDNEN;  // Verbesserung: Nicht jedesmal ordnen. Nicht nötig, wenn Typed_folder nicht verändert worden ist.
+    // Mögliche Verbesserung: Nicht jedesmal ordnen. Nicht nötig, wenn Typed_folder nicht verändert worden ist.
     ordered_file_baseds.reserve( _file_based_map.size() );
     Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
     sort( ordered_file_baseds.begin(), ordered_file_baseds.end(), File_based::less_dereferenced );
@@ -459,9 +553,20 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
         file_based->set_file_based_state( File_based::s_error );
         file_based->_base_file_xc      = x;
         file_based->_base_file_xc_time = double_from_gmtime();
-        file_based->log()->error( message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x ) );
+        string msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x );
+        file_based->log()->error( msg );
 
-        int EMAIL_SCHICKEN;
+        if( _spooler->_mail_on_error )
+        {
+            Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+            scheduler_event.set_error( x );
+
+            Mail_defaults mail_defaults( spooler() );
+            mail_defaults.set( "subject", msg );
+            mail_defaults.set( "body"   , msg );
+
+            scheduler_event.send_mail( mail_defaults );
+        }
     }
 
     return file_based;
@@ -495,7 +600,7 @@ void Typed_folder::add_file_based( File_based* file_based )
     string normalized_name = file_based->normalized_name();
     if( normalized_name == ""  &&  !is_empty_name_allowed() )  z::throw_xc( "SCHEDULER-432", subsystem()->object_type_name() );
 
-    if( file_based_or_null( normalized_name ) )  z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path() );
+    if( file_based_or_null( normalized_name ) )  z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path().to_string() );
 
     subsystem()->add_file_based( file_based );
 
@@ -793,6 +898,14 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
     return element;
 }
 
+//---------------------------------------------------------------------------------File_based::path
+
+Path File_based::path() const
+{ 
+    return _typed_folder? _typed_folder->folder()->make_path( _name ) 
+                        : _name;    // Keine Exception auslösen
+}
+
 //----------------------------------------------------------------------File_based::normalized_name
 
 string File_based::normalized_name() const
@@ -854,6 +967,13 @@ File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown
 {
 }
 
+//------------------------------------------------------------File_based_subsystem::normalized_path
+    
+Path File_based_subsystem::normalized_path( const Path& path ) const
+{
+    return Path( path.folder_path(), normalized_name( path.name() ) );
+}
+
 //-----------------------------------------------------------Missings_requestor::Missings_requestor
     
 Missings_requestor::Missings_requestor()
@@ -890,17 +1010,17 @@ void Missings_requestor::close()
 
 //------------------------------------------------------------------Missings_requestor::add_missing
 
-void Missings_requestor::add_missing( File_based_subsystem* subsystem, const string& path )
+void Missings_requestor::add_missing( File_based_subsystem* subsystem, const Path& path )
 {
-    _missing_sets[ subsystem ].insert( subsystem->normalized_name( path ) );
+    _missing_sets[ subsystem ].insert( subsystem->normalized_path( path ) );
     subsystem->missings()->add_missing( this, path );
 }
 
 //---------------------------------------------------------------Missings_requestor::remove_missing
 
-void Missings_requestor::remove_missing( File_based_subsystem* subsystem, const string& path )
+void Missings_requestor::remove_missing( File_based_subsystem* subsystem, const Path& path )
 {
-    _missing_sets[ subsystem ].erase( subsystem->normalized_name( path ) );
+    _missing_sets[ subsystem ].erase( subsystem->normalized_path( path ) );
     subsystem->missings()->remove_missing( this, path );
 }
 
@@ -924,7 +1044,7 @@ Missings::~Missings()
 void Missings::add_missing( Missings_requestor* requestor, const string& missings_path )
 {
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
-    _path_requestors_map[ _subsystem->normalized_name( missings_path ) ].insert( requestor );
+    _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( requestor );
 }
 
 //-------------------------------------------------------------------------Missings::remove_missing
@@ -936,7 +1056,7 @@ void Missings::remove_missing( Missings_requestor* requestor, const string& miss
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
     requestors_set.erase( requestor );
-    if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_name( missings_path ) );
+    if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
 //-----------------------------------------------------------------------Missings::remove_requestor

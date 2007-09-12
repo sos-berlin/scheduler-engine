@@ -62,7 +62,6 @@ struct Job_subsystem : Job_subsystem_interface
     string                      object_type_name            () const                                { return "Job"; }
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
-    File_based*                 object_by_path              ( const string& path );
     ptr<Job>                    new_file_based              ();
 };
 
@@ -184,28 +183,19 @@ int Job_subsystem::remove_temporary_jobs()
 
         Job* job = it->second;
 
-        //bool ok = job->can_be_removed_now();
-        //if( ok )
-        //{
-        //    job->remove();
-        //    // it ist ungültig
-        //    count++;
-        //}
+        bool ok = job->can_be_removed_now();
+        if( ok )
+        {
+            job->remove();
+            // it ist ungültig
+            count++;
+        }
 
         it = next_it;
     }
 
     return count;
 }
-
-//---------------------------------------------------------------------------Job_subsystem::get_job
-
-//Job* Job_subsystem::get_job( const string& job_path, bool can_be_not_initialized )
-//{
-//    Job* job = file_based( job_path );
-//    if( !can_be_not_initialized && !job->state() )  z::throw_xc( "SCHEDULER-109", job_path );
-//    return job;
-//}
 
 //----------------------------------------------------------------Job_subsystem::is_any_task_queued
 
@@ -247,10 +237,10 @@ Job_folder::Job_folder( Folder* folder )
 
 //--------------------------------------------------------------------------Job_folder::job_or_null
 
-Job* Job_folder::job_or_null( const string& job_name )
-{
-    return file_based_or_null( job_name );
-}
+//Job* Job_folder::job_or_null( const string& job_name )
+//{
+//    return file_based_or_null( job_name );
+//}
 
 //------------------------------------------------------------------------------Job_folder::add_job
 
@@ -267,7 +257,7 @@ void Job_folder::add_job( const ptr<Job>& job, bool activate )
 
     add_file_based( job );
 
-    int SIGNAL_ADD_JOB;  // _spooler->signal( "job_added" );
+    //_spooler->signal( "job_added" );
 }
 
 //---------------------------------------------------------------------------Job_folder::remove_job
@@ -2486,7 +2476,7 @@ bool Job::on_missing_found( File_based* file_based )
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
     assert( file_based == _module->process_class() );
 
-    Process_class* process_class = dynamic_cast<Process_class*>( process_class );
+    Process_class* process_class = dynamic_cast<Process_class*>( file_based );
     assert( process_class );
 
     if( _waiting_for_process )

@@ -749,7 +749,7 @@ void Requestor::close()
 
 void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 {
-    string path = lock_use_element.getAttribute( "lock" );
+    Path path = lock_use_element.getAttribute( "lock" );
 
     ptr<Use> lock_use;
 

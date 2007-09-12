@@ -9,6 +9,8 @@ namespace folder {
 
 //--------------------------------------------------------------------------------------------const
 
+const extern char               folder_separator;
+
 //-------------------------------------------------------------------------------------------------
 
 struct Folder;
@@ -16,6 +18,35 @@ struct Folder_subsystem;
 struct Typed_folder;
 struct File_based;
 struct File_based_subsystem;
+
+//---------------------------------------------------------------------------------------------Path
+
+struct Path : string
+{
+                                Path                        ()                                      {}
+                                Path                        ( const string& path )                  { set_path( path ); }
+                                Path                        ( const string& directory, const string& tail_path );
+
+    Path&                       operator =                  ( const string& path )                  { set_path( path );  return *this; }
+
+  //bool                        operator <                  ( const File_path& path ) const         { return compare( path ) <  0; }
+  //bool                        operator <=                 ( const File_path& path ) const         { return compare( path ) <= 0; }
+  //bool                        operator ==                 ( const File_path& path ) const         { return compare( path ) == 0; }
+  //bool                        operator !=                 ( const File_path& path ) const         { return compare( path ) != 0; }
+  //bool                        operator >=                 ( const File_path& path ) const         { return compare( path ) >= 0; }
+  //bool                        operator >                  ( const File_path& path ) const         { return compare( path ) >  0; }
+  //int                         compare                     ( const File_path& ) const;
+
+    void                    set_name                        ( const string& );                                
+    string                      name                        () const;
+    void                    set_folder_path                 ( const string& );
+    Path                        folder_path                 () const;
+    void                        prepend_folder_path         ( const string& );
+    const string&               to_string                   ()  const                               { return *static_cast<const string*>( this ); }
+    void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
+    bool                     is_absolute_path               () const;
+    string                      absolute_path               () const;
+};
 
 //-------------------------------------------------------------------------------------------Folder
 //
@@ -33,8 +64,8 @@ struct Folder : Scheduler_object, Object
                                ~Folder                      ();
 
     file::File_path             directory                   () const                                { return _directory; }
-    string                      path                        () const                                { return _path; }
-    string                      make_path                   ( const string& name );                 // Hängt den Ordernamen voran
+    Path                        path                        () const                                { return _path; }
+    Path                        make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
     void                        adjust_with_directory       ();
 
@@ -166,7 +197,7 @@ struct File_based : Scheduler_object,
 
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
-    string                      path                        () const                                { return _name; }
+    Path                        path                        () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
 
@@ -315,8 +346,8 @@ struct Missings_requestor
 
     virtual void                close                       ();
     virtual string              obj_name                    () const                                = 0;
-    void                        add_missing                 ( File_based_subsystem*, const string& path );
-    void                        remove_missing              ( File_based_subsystem*, const string& path );
+    void                        add_missing                 ( File_based_subsystem*, const Path& path );
+    void                        remove_missing              ( File_based_subsystem*, const Path& path );
 
     virtual bool                on_missing_found            ( File_based* )                         = 0;
 
@@ -360,6 +391,7 @@ struct File_based_subsystem : Subsystem
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }
+    virtual Path                normalized_path             ( const Path& path ) const;
   //virtual ptr<Typed_folder>   new_typed_folder            ()                                      = 0;
     Missings*                   missings                    ()                                      { return &_missings; }
 
@@ -471,26 +503,26 @@ struct file_based_subsystem : File_based_subsystem
     }
     
 
-    FILE_BASED* file_based_or_null( const string& path ) const
+    FILE_BASED* file_based_or_null( const Path& path ) const
     {
-        typename File_based_map::const_iterator it = _file_based_map.find( normalized_name( path ) );
+        typename File_based_map::const_iterator it = _file_based_map.find( normalized_path( path ) );
         return it == _file_based_map.end()? NULL 
                                           : it->second;
     }
 
     
-    FILE_BASED* file_based( const string& path ) const
+    FILE_BASED* file_based( const Path& path ) const
     {
         FILE_BASED* result = file_based_or_null( path );
-        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path );
+        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path.to_string() );
         return result;
     }
 
 
-    FILE_BASED* active_file_based( const string& path ) const
+    FILE_BASED* active_file_based( const Path& path ) const
     {
         FILE_BASED* result = file_based_or_null( path );
-        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path );
+        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path.to_string() );
         result->assert_is_active();
 
         return result;

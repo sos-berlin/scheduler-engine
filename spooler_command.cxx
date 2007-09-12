@@ -1067,7 +1067,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
     order->set_payload( Variant( service_request_element.xml() ) );
-    order->place_in_job_chain( _spooler->order_subsystem()->job_chain( Web_service::forwarding_job_chain_name ) );
+    order->place_in_job_chain( _spooler->root_folder()->job_chain_folder()->job_chain( Web_service::forwarding_job_chain_name ) );
     
     return _answer.createElement( "ok" );
 }

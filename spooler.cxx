@@ -101,7 +101,7 @@ const int                       tcp_restart_close_delay             = 3;        
 
 const int                       const_order_id_length_max           = 255;              // Die Datenbankspalte _muss_ so groﬂ sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
-const char*                     temporary_process_class_name        = "(temporaries)";
+const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
 //static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;

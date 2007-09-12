@@ -11,6 +11,19 @@ namespace order {
 
 const char                  job_chain_order_separator       = ',';                                  // Dateiname "jobchainname,orderid.order.xml"
 
+//------------------------------------------------------------------------split_standing_order_name
+
+static void split_standing_order_name( const string& name, string* job_chain_name, string* order_id )
+{
+    size_t pos = name.find( job_chain_order_separator );
+    if( pos == string::npos )  pos = 0;
+
+    *job_chain_name = name.substr( 0, pos );
+
+    if( pos < name.length() )  pos++;
+    *order_id = name.substr( pos );
+}
+
 //-----------------------------------------------Standing_order_subsystem::Standing_order_subsystem
     
 Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
@@ -59,6 +72,20 @@ bool Standing_order_subsystem::subsystem_activate()
 ptr<Standing_order> Standing_order_subsystem::new_file_based()
 {
     return Z_NEW( Standing_order( this ) );
+}
+
+//--------------------------------------------------------Standing_order_subsystem::normalized_name
+
+string Standing_order_subsystem::normalized_name( const string& name ) const
+{
+    string job_chain_name;
+    string order_id;
+
+    split_standing_order_name( name, &job_chain_name, &order_id );
+
+    return spooler()->order_subsystem()->normalized_name( job_chain_name ) + 
+           job_chain_order_separator +
+           order_id;
 }
 
 //------------------------------------------------------------Standing_order_subsystem::execute_xml
@@ -182,13 +209,7 @@ void Standing_order::set_name( const string& name )
 {
     file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >::set_name( name );
 
-    size_t pos = name.find( job_chain_order_separator );
-    if( pos == string::npos )  pos = 0;
-
-    _job_chain_name = name.substr( 0, pos );
-
-    if( pos < name.length() )  pos++;
-    _order_id = name.substr( pos );
+    split_standing_order_name( name, &_job_chain_name, &_order_id );
 
     if( _job_chain_name == ""  ||  _order_id == "" )  z::throw_xc( "SCHEDULER-435", base_file_info()._filename );
 }
@@ -387,8 +408,11 @@ void Standing_order::set_dom( const xml::Element_ptr& order_element )
     assert( !_order );
 
     ptr<Order> order = new Order( spooler() );
-    order->set_id( order_id() );           int GEGEN_AENDERUNG_SICHERN;  int JOB_CHAIN_EBENSO;
+    order->set_id( order_id() ); 
     order->set_dom( order_element );
+
+    if( order->string_id() != order_id() )  z::throw_xc( "SCHEDULER-436" );
+    if( order->job_chain_path() != "" )  z::throw_xc( "SCHEDULER-437" );
 
     set_order( order );
 }

@@ -495,6 +495,7 @@ struct Node : Com_job_chain_node,
     bool                       _is_suspending_order;        // <job_chain_node suspend="yes"/>
     int                        _delay;                      // <job_chain_node delay="..."/>  Verzögerung des Auftrags
     Action                     _action;
+    int                        _node_index;
     int                        _priority;                   // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
 
     ptr<Node>                  _next_node;                  // Folgeknoten
@@ -684,14 +685,12 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            add_end_node                ( const Order::State& input_state );
 
 
-    bool                        contains_job                ( Job* );
-
     job_chain::Node*            first_node                  ();
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
     job_chain::Node*            node_from_state             ( const Order::State& );
     job_chain::Node*            node_from_state_or_null     ( const Order::State& );
     job_chain::Node*            node_from_job               ( Job* );
-    Job*                        job_from_state              ( const Order::State& );
+  //Job*                        job_from_state              ( const Order::State& );
 
   //void                        connect_job_nodes_with_job  ( Job* );                               // Aufgerufen von Job::activate()
 
@@ -845,11 +844,11 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
                                 Job_chain_folder_interface  ( Folder* );
 
 
-    Job_chain*                  job_chain                   ( const string& name ) const            { return file_based( name ); }
-    Job_chain*                  job_chain_or_null           ( const string& name ) const            { return file_based_or_null( name ); }
+    Job_chain*                  job_chain                   ( const folder::Path& path ) const      { return file_based( path ); }
+    Job_chain*                  job_chain_or_null           ( const folder::Path& path ) const      { return file_based_or_null( path ); }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
-    virtual Job_chain*          job_chain_or_null           ( const string& name )                  = 0;
+    virtual Job_chain*          job_chain_or_null           ( const folder::Path& )                 = 0;
     virtual void                add_job_chain               ( Job_chain* )                          = 0;
     virtual void                remove_job_chain            ( Job_chain* )                          = 0;
     virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -882,8 +881,8 @@ struct Order_subsystem_interface: Object,
 
     virtual bool                has_any_order               ()                                      = 0;
 
-    virtual Job_chain*          job_chain                   ( const string& path )                  = 0;
-    virtual Job_chain*          job_chain_or_null           ( const string& path )                  = 0;
+    virtual Job_chain*          job_chain                   ( const folder::Path& path )            = 0;
+    virtual Job_chain*          job_chain_or_null           ( const folder::Path& path )            = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
     virtual int                 finished_orders_count       () const                                = 0;

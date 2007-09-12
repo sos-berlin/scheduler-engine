@@ -110,16 +110,15 @@ struct Standing_order_subsystem : file_based_subsystem< Standing_order >,
 
     string                      object_type_name            () const                                { return "Standing_order"; }
     string                      filename_extension          () const                                { return ".order.xml"; }
-  //string                      normalized_name             ( const string& name ) const            { return name; }
-    File_based*                 object_by_path              ( const string& path );
+    string                      normalized_name             ( const string& ) const;
     ptr<Standing_order>         new_file_based              ();
 
 
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
 
 
-    Standing_order*             standing_order              ( const string& path ) const            { return file_based( path ); }
-    Standing_order*             standing_order_or_null      ( const string& path ) const            { return file_based_or_null( path ); }
+    Standing_order*             standing_order              ( const folder::Path& path ) const      { return file_based( path ); }
+    Standing_order*             standing_order_or_null      ( const folder::Path& path ) const      { return file_based_or_null( path ); }
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 };

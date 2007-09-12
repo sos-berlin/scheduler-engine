@@ -2677,6 +2677,23 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-436">
+            <text xml:lang="en">
+                <title>Order id in &lt;order> is different from order id in filename</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-437">
+            <text xml:lang="en">
+                <title>Attribute job_chain= is not allowed in file based order</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-438">
+            <text xml:lang="en">
+                <title>Invalid Job_chain_node for add_order() with state='<p1/>'</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

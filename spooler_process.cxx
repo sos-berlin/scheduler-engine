@@ -1549,6 +1549,13 @@ STDMETHODIMP Process_class_subsystem::Add_process_class( spooler_com::Iprocess_c
     return hr;
 }
 
+//-------------------------------------------------Process_class_subsystem::temporary_process_class
+
+Process_class* Process_class_subsystem::temporary_process_class()
+{ 
+    return spooler()->root_folder()->process_class_folder()->process_class( temporary_process_class_name ); 
+}
+
 //-----------------------------------------------------Process_class_subsystem::try_to_free_process
 
 //bool Process_class_subsystem::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )

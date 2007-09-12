@@ -300,15 +300,13 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     string                      object_type_name            () const                                { return "Process_class"; }
     string                      filename_extension          () const                                { return ".process_class.xml"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
-    File_based*                 object_by_path              ( const string& path );
     ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
 
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
-    Process_class*              process_class               ( const string& path )                  { return file_based( path ); }
-    Process_class*              process_class_or_null       ( const string& path )                  { return file_based_or_null( path ); }
+    Process_class*              process_class               ( const folder::Path& path )            { return file_based( path ); }
+    Process_class*              process_class_or_null       ( const folder::Path& path )            { return file_based_or_null( path ); }
     Process*                    new_temporary_process       ();
-    Process_class*              temporary_process_class     ()                                      { return process_class( temporary_process_class_name ); }
-  //bool                        has_process_classes         ()                                      { return _file_based_map.size() > 1; }   // Eine ist _temporary_process_class
+    Process_class*              temporary_process_class     ();
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();
 

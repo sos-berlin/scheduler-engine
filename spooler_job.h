@@ -409,12 +409,10 @@ struct Job_folder : typed_folder< Job >
     void                        load_job_from_xml           ( const xml::Element_ptr&, bool activate = false );
     void                        add_or_replace_job_from_xml ( const string& name, const xml::Element_ptr&, bool activate = false );
     void                        add_job                     ( const ptr<Job>&, bool activate );
-  //void                        remove_job                  ( Job* );
-  //Job*                        job                         ( const string& name );
-    Job*                        job_or_null                 ( const string& name );
+    Job*                        job                         ( const string& name )                  { return file_based( name ); }
+    Job*                        job_or_null                 ( const string& name )                  { return file_based_or_null( name ); }
     virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
 };
-
 
 //---------------------------------------------------------------------------Job_subsystem_interface
 
@@ -427,7 +425,6 @@ struct Job_subsystem_interface: Object,
     virtual int                 remove_temporary_jobs       ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
-  //virtual Job*                get_job                     ( const string& job_path, bool can_be_not_initialized = false ) = 0;
     Job*                        job                         ( const string& job_path )              { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const string& job_path )              { return file_based_or_null( job_path ); }
 };

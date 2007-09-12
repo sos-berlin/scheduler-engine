@@ -33,6 +33,7 @@ string Scheduler_event::name_of_event_code( Scheduler_event_type event_code )
         case evt_file_order_source_recovered:   return "file_order_source_recovered";
         case evt_file_order_error:              return "file_order_error";
         case evt_order_state_changed:           return "order_state_changed";
+        case evt_base_file_error:               return "base_file_error";
         default:                                return S() << "Scheduler_event_type(" << event_code << ")";
     }
 }

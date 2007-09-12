@@ -29,6 +29,7 @@ enum Scheduler_event_type
     evt_file_order_source_recovered,
     evt_file_order_error,
     evt_order_state_changed,
+    evt_base_file_error
 };
 
 //----------------------------------------------------------------------------------Scheduler_event

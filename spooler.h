@@ -91,7 +91,7 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
     
-extern const char*              temporary_process_class_name;
+extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
 extern const string             scheduler_character_encoding;

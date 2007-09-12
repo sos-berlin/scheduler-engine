@@ -197,7 +197,7 @@ void Xml_operation::begin()
     }
     else
     {
-        Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN; )
+        //? Z_DEBUG_ONLY( int NULL_BYTE_ANHAENGEN; )
     }
 
     //set_log() hat das bereits ausgegeben:  if( command_processor._error )  _connection->_log.error( command_processor._error->what() );

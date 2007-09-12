@@ -40,7 +40,7 @@ struct Job_chain_folder : Job_chain_folder_interface
 
     // Job_chain_folder_interface:
     void                        set_dom                     ( const xml::Element_ptr& );
-    Job_chain*                  job_chain_or_null           ( const string& name )                  { return file_based_or_null( name ); }
+    Job_chain*                  job_chain_or_null           ( const folder::Path& name )            { return file_based_or_null( name ); }
     void                        add_job_chain               ( Job_chain* );
     void                        remove_job_chain            ( Job_chain* );
     xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
@@ -128,11 +128,11 @@ struct Order_subsystem : Order_subsystem_interface
     ptr<Order>                  load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags );
     ptr<Order>              try_load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags );
 
-    bool                        has_any_order               ()                                      { int IMPLEMENTIEREN;  return false; }
+    bool                        has_any_order               ();
 
   //Job_chain*                  active_job_chain            ( const string& path )                  { return active_file_based( path ); }
-    Job_chain*                  job_chain                   ( const string& path )                  { return file_based( path ); }
-    Job_chain*                  job_chain_or_null           ( const string& path )                  { return file_based_or_null( path ); }
+    Job_chain*                  job_chain                   ( const folder::Path& path )            { return file_based( path ); }
+    Job_chain*                  job_chain_or_null           ( const folder::Path& path )            { return file_based_or_null( path ); }
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
@@ -146,7 +146,6 @@ struct Order_subsystem : Order_subsystem_interface
     string                      object_type_name            () const                                { return "Job_chain"; }
     string                      filename_extension          () const                                { return ".job_chain.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
-    File_based*                 object_by_path              ( const string& path );
     ptr<Job_chain_folder_interface> new_job_chain_folder_interface();
     ptr<Job_chain>              new_file_based              ();
 
@@ -590,6 +589,18 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
     }
 }
 
+//-------------------------------------------------------------------Order_subsystem::has_any_order
+
+bool Order_subsystem::has_any_order()
+{ 
+    FOR_EACH_JOB_CHAIN( job_chain )
+    {
+        if( job_chain->has_order() )  return true;
+    }
+
+    return false;
+}
+
 //--------------------------------------------------------Order_subsystem::load_order_from_database
 
 ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transaction, const string& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
@@ -894,12 +905,14 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
     _nested_job_chain(this) 
 {
     Order::check_state( order_state );
-    if( _job_chain->node_from_state_or_null( order_state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( order_state ), _job_chain->path() );
+    if( _job_chain->node_from_state_or_null( order_state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( order_state ), _job_chain->path().to_string() );
 
     set_next_state ( Variant( Variant::vt_missing ) );
     set_error_state( Variant( Variant::vt_missing ) );
 
     _log = job_chain->log();
+
+    _node_index = job_chain->_node_list.size();
 }
 
 //--------------------------------------------------------------------------------------Node::close
@@ -1064,7 +1077,7 @@ string Node::obj_name() const
 
 //--------------------------------------------------------------------------------Node::dom_element
 
-xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     Read_transaction ta ( spooler()->_db );
 
@@ -1220,6 +1233,7 @@ void Job_node::connect_job( Job* job )
         bool ok = job->connect_job_node( this );
         if( ok )
         {
+            job->set_job_chain_priority( _node_index + 1 );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
             _job = job;
 
             //In connect_job_node() schon erledigt
@@ -1358,7 +1372,7 @@ xml::Element_ptr Nested_job_chain_node::dom_element( const xml::Document_ptr& do
 
 Sink_node::Sink_node( Job_chain* job_chain, const Order::State& state, const string& job_path, const string& move_to, bool remove ) 
 : 
-    Job_node( job_chain, state, file_order_sink_job_path ) 
+    Job_node( job_chain, state, job_path ) 
 {
     _type = n_file_order_sink;
 
@@ -1534,9 +1548,6 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
                                                      e.bool_getAttribute( "remove" ) );
 
                 _node_list.push_back( sink_node );
-
-                int SET_JOB_CHAIN_PRIORITY;     // Priorität eines Jobs auch bestimmen, wenn Job später eingefügt oder ausgetauscht wird.
-                //job->set_job_chain_priority( _node_list.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
 
                 node = sink_node;
             }
@@ -1777,9 +1788,6 @@ Order::State normalized_state( const Order::State& state )
 
 Node* Job_chain::add_job_node( const string& job_path, const Order::State& state_, const Order::State& next_state, const Order::State& error_state )
 {
-    int TODO; //if( job  &&  !job->order_queue() )  z::throw_xc( "SCHEDULER-147", job->name() );
-              // Wenn Job später eingefügt wird, sicherstellen, dass er auftragsgesteuert ist.
-
     if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
     if( job_path == "" )  z::throw_xc( __FUNCTION__ );
 
@@ -1794,9 +1802,6 @@ Node* Job_chain::add_job_node( const string& job_path, const Order::State& state
     node->set_error_state( error_state );
 
     _node_list.push_back( node );
-
-    int SET_JOB_CHAIN_PRIORITY;     // Priorität eines Jobs auch bestimmen, wenn Job später eingefügt oder ausgetauscht wird.
-    //job->set_job_chain_priority( _node_list.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
 
     return node;
 }
@@ -2022,7 +2027,7 @@ Node* Job_chain::node_from_job( Job* job )
         }
     }
 
-    z::throw_xc( "SCHEDULER-152", job->path(), path() );
+    z::throw_xc( "SCHEDULER-152", job->path().to_string(), path().to_string() );
     return NULL;
 }
 
@@ -2048,7 +2053,7 @@ Node* Job_chain::referenced_node_from_state( const Order::State& state )
 Node* Job_chain::node_from_state( const Order::State& state )
 {
     Node* result = node_from_state_or_null( state );
-    if( !result )  z::throw_xc( "SCHEDULER-149", path(), debug_string_from_variant(state) );
+    if( !result )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(state) );
     return result;
 }
 
@@ -2065,36 +2070,6 @@ Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
     return NULL;
 }
 
-//------------------------------------------------------------------------Job_chain::job_from_state
-
-Job* Job_chain::job_from_state( const Order::State& state )
-{
-    int UEBERFLUESSIG;
-
-    if( Job_node* node = Job_node::try_cast( node_from_state( state ) ) )
-    {
-        return _spooler->job_subsystem()->job( node->job_path() );
-    }
-    else z::throw_xc( "SCHEDULER-374", obj_name(), state.as_string() );
-}
-
-//--------------------------------------------------------------------------Job_chain::contains_job
-
-bool Job_chain::contains_job( Job* job )
-{
-    int UEBERFLUESSIG;    // Ersetzen durch einen Eintrag im Job, ob er einer Order_queue (verteilt oder nicht) angehört
-
-    Z_FOR_EACH( Node_list, _node_list, n )
-    {
-        if( Job_node* node = Job_node::try_cast( *n ) )
-        {
-            if( node->job_or_null() == job )  return true;
-        }
-    }
-
-    return false;
-}
-
 //----------------------------------------------------------------------------Job_chain::first_node
 
 Node* Job_chain::first_node()
@@ -2102,29 +2077,6 @@ Node* Job_chain::first_node()
     if( _node_list.empty() )  z::throw_xc( __FUNCTION__ );
     return *_node_list.begin();
 }
-
-//------------------------------------------------------------Job_chain::connect_job_nodes_with_job
-
-//void Job_chain::connect_job_nodes_with_job( Job* job )
-//{
-//    // Aufgerufen von Job::activate()
-//
-//    if( _state >= s_loaded )
-//    {
-//        string normalized_job_path = job->normalized_path();
-//
-//        Z_FOR_EACH( Node_list, _node_list, it )
-//        {
-//            if( Job_node* job_node = Job_node::try_cast( *it ) )
-//            {
-//                if( job_node->normalized_job_path() == normalized_job_path )
-//                {
-//                    job_node->connect_job( job );
-//                }
-//            }
-//        }
-//    }
-//}
 
 //-----------------------------------------------------------------------------Job_chain::add_order
 
@@ -2140,11 +2092,11 @@ void Job_chain::add_order( Order* order )
     if( _order_id_space )
     {
         if( Job_chain* in_job_chain = _order_id_space->job_chain_by_order_id_or_null( order->string_id() ) )
-            z::throw_xc( "SCHEDULER-186", order->obj_name(), in_job_chain->path() );
+            z::throw_xc( "SCHEDULER-186", order->obj_name(), in_job_chain->path().to_string() );
     }
     else
     {
-        if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path() );
+        if( has_order_id( (Read_transaction*)NULL, order->id() ) )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path().to_string() );
     }
     
 
@@ -2157,7 +2109,7 @@ void Job_chain::add_order( Order* order )
         order->set_state2( node->order_state() );
     }
 
-    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->is_type( Node::n_job ) )  z::throw_xc( "SCHEDULER-149", path(), debug_string_from_variant(order->_state) );
+    if( ( !order->_suspended || !order->_is_on_blacklist )  &&  !node->is_type( Node::n_job ) )  z::throw_xc( "SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state) );
     //if( node->_job )  assert( node->_job->order_queue() );
 
     order->_job_chain      = this;
@@ -5671,7 +5623,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         }
         catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
 
-        if( !is_new  &&  exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), other_job_chain->path() );
+        if( !is_new  &&  exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), other_job_chain->path().to_string() );
     }
 
     if( is_new )
@@ -5704,7 +5656,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         }
 
 
-        job_chain->job_from_state( _state );     int JOB_KANN_FEHLEN;  // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
+        if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
+        //job_chain->job_from_state( _state );     int JOB_KANN_FEHLEN;  // Fehler bei Endzustand. Wir speichern den Auftrag nur, wenn's einen Job zum Zustand gibt
 
         if( node->is_suspending_order() )  _suspended = true;
 
