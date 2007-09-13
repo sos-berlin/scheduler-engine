@@ -901,8 +901,7 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
     _zero_(this+1), 
     _job_chain(job_chain),
     _type(type),
-    _order_state(order_state),
-    _nested_job_chain(this) 
+    _order_state(order_state)
 {
     Order::check_state( order_state );
     if( _job_chain->node_from_state_or_null( order_state ) )  z::throw_xc( "SCHEDULER-150", debug_string_from_variant( order_state ), _job_chain->path().to_string() );
@@ -919,16 +918,6 @@ Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )
     
 void Node::close()
 {
-    Job_chain_set disconnected_job_chains;
-
-    if( _job_chain  &&  _nested_job_chain )     // Soll schon von Job_chain::close() erledigt sein, damit weniger Meldungen erscheinen
-    {
-        disconnected_job_chains.insert( _job_chain );
-        disconnected_job_chains.insert( _nested_job_chain );
-        _nested_job_chain = NULL;
-        spooler()->order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, _job_chain );
-    }
-
     // Zirkel auflösen:
     _job_chain  = NULL;
     _next_node  = NULL;
@@ -1032,13 +1021,6 @@ void Node::set_action( const string& action_string )
             _job_chain->check_job_chain_node( this );
         }
     }
-}
-
-//-------------------------------------------------------------Node::on_releasing_referenced_object
-
-void Node::on_releasing_referenced_object( const reference< Node, Job_chain >& ref )
-{
-    _job_chain->log()->warn( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );
 }
 
 //--------------------------------------------------------------------------------Node::execute_xml
@@ -1232,8 +1214,6 @@ void Job_node::activate()
     {
         connect_job( job );
     }
-    
-    //if( !_job )  add_dependant( job_subsystem(), _job_path );
 }
 
 //----------------------------------------------------------------------------Job_node::connect_job
@@ -1270,9 +1250,9 @@ void Job_node::disconnect_job()
     }
 }
 
-//----------------------------------------------------------------Job_node::on_dependant_incarnated
+//--------------------------------------------------------------------Job_node::on_dependant_loaded
 
-bool Job_node::on_dependant_incarnated( File_based* file_based )
+bool Job_node::on_dependant_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->job_subsystem() );
     assert( file_based->normalized_path() == normalized_job_path() );
@@ -1366,8 +1346,36 @@ Job* Job_node::job_or_null() const
 Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order::State& state, const string& job_chain_path ) 
 : 
     Node( job_chain, state, n_job_chain ),
-    _nested_job_chain_path( job_chain_path )
+    _nested_job_chain_path( job_chain_path ),
+    _nested_job_chain(this)
 {
+}
+
+//-----------------------------------------------------ested_job_chain_node::~Nested_job_chain_node
+    
+Nested_job_chain_node::~Nested_job_chain_node()
+{
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG( __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+}
+//---------------------------------------------------------------------Nested_job_chain_node::close
+    
+void Nested_job_chain_node::close()
+{
+    Job_chain_set disconnected_job_chains;
+
+    if( _job_chain  &&  _nested_job_chain )     // Soll schon von Job_chain::close() erledigt sein, damit weniger Meldungen erscheinen
+    {
+        disconnected_job_chains.insert( _job_chain );
+        disconnected_job_chains.insert( _nested_job_chain );
+        _nested_job_chain = NULL;
+        spooler()->order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, _job_chain );
+    }
+
+    Base_class::close();
 }
 
 //----------------------------------------------------------------Nested_job_chain_node::initialize
@@ -1376,6 +1384,13 @@ void Nested_job_chain_node::initialize()
 {
     Base_class::initialize();
     _job_chain->add_dependant( _spooler->order_subsystem(), _nested_job_chain_path );
+}
+
+//--------------------------------------------Nested_job_chain_node::on_releasing_referenced_object
+
+void Nested_job_chain_node::on_releasing_referenced_object( const reference< Nested_job_chain_node, Job_chain >& ref )
+{
+    if( _job_chain )  _job_chain->log()->warn( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );
 }
 
 //---------------------------------------------------------------Nested_job_chain_node::dom_element
@@ -1470,24 +1485,7 @@ void Job_chain::close()
 
     // VERSCHACHTELTE JOBKETTEN TRENNEN UND JOBKETTENGRUPPEN NEU BERECHNEN
 
-    Job_chain_set disconnected_job_chains;
-
-    Z_FOR_EACH( Node_list, _node_list, it )
-    {
-        Node* node = *it;
-        if( node->_nested_job_chain )  
-        {
-            disconnected_job_chains.insert( node->_nested_job_chain );
-            node->_nested_job_chain = NULL;
-        }
-    }
-
-    if( !disconnected_job_chains.empty() )
-    {
-        disconnected_job_chains.insert( this  );
-        order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, this );
-    }
-    
+    disconnected_nested_job_chains_and_rebuild_order_id_space();
 
 
     // JOBKETTENKNOTEN SCHLIEßEN
@@ -1513,6 +1511,31 @@ void Job_chain::close()
     File_based::close();
 }
 
+//-----------------------------Job_chain::disconnected_nested_job_chains_and_rebuild_order_id_space
+
+void Job_chain::disconnected_nested_job_chains_and_rebuild_order_id_space()
+{
+    Job_chain_set disconnected_job_chains;
+
+    Z_FOR_EACH( Node_list, _node_list, it )
+    {
+        if( Nested_job_chain_node* node = Nested_job_chain_node::try_cast( *it ) )
+        {
+            if( node->_nested_job_chain )  
+            {
+                disconnected_job_chains.insert( node->_nested_job_chain );
+                node->_nested_job_chain = NULL;
+            }
+        }
+    }
+
+    if( !disconnected_job_chains.empty() )
+    {
+        disconnected_job_chains.insert( this  );
+        order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, this );
+    }
+}    
+
 //----------------------------------------------------------------------------Job_chain::state_name
 
 string Job_chain::state_name( State state )
@@ -1532,6 +1555,7 @@ string Job_chain::state_name( State state )
 void Job_chain::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
+    if( !element.nodeName_is( "job_chain" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", element.nodeName() );
 
     set_name(                 element.     getAttribute( "name"              , name()                  )  );
     _visible                = element.bool_getAttribute( "visible"           , _visible                );
@@ -1675,7 +1699,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
     if( _order_id_space )  result.setAttribute( "order_id_space", _order_id_space->path() );
 
-    if( _state >= s_active )
+    //if( _state >= s_active )
     {
         FOR_EACH( Order_sources::Order_source_list, _order_sources._order_source_list, it )
         {
@@ -1964,8 +1988,6 @@ bool Job_chain::initialize_nested_job_chains()
 
         if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
         {
-            add_dependant( subsystem(), n->nested_job_chain_path() );
-
             if( Job_chain* nested_job_chain = order_subsystem()->job_chain_or_null( n->nested_job_chain_path() ) )
             {
                 if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
@@ -2037,7 +2059,7 @@ void Job_chain::complete_nested_job_chains( Order_id_space* order_id_space )
 
         if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
         {
-            node->_nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );
+            n->_nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );
         }
     }
 
@@ -2087,7 +2109,7 @@ Node* Job_chain::referenced_node_from_state( const Order::State& state )
 {
     Node* node   = node_from_state( state );
     Node* result = node;
-    int             n      = 1000;
+    int   n      = 1000;
 
     while( result->action() == Node::act_next_state )
     {
@@ -2590,7 +2612,7 @@ bool Job_chain::prepare_to_remove()
 {
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
   //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-151" );
-    if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Node,Job_chain>::string_referenced_by() );
+    if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
     int VERSCHACHTELTE_JOB_KETTEN_LOESCHEN;
 
     set_replacement( NULL );
@@ -3062,12 +3084,13 @@ void Job_chain::get_connected_job_chains( Job_chain_set* result )
 
     Z_FOR_EACH( Node_list, _node_list, it )  
     {
-        Node* node = *it;
-
-        if( node->_nested_job_chain  &&  result->find( node->_nested_job_chain ) == result->end() )  
+        if( Nested_job_chain_node* node = Nested_job_chain_node::try_cast( *it ) )
         {
-            result->insert( node->_nested_job_chain );
-            node->_nested_job_chain->get_connected_job_chains( result );
+            if( node->_nested_job_chain  &&  result->find( node->_nested_job_chain ) == result->end() )  
+            {
+                result->insert( node->_nested_job_chain );
+                node->_nested_job_chain->get_connected_job_chains( result );
+            }
         }
     }
 
@@ -4748,6 +4771,9 @@ void Order::close()
 void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable_set_map )
 {
     if( !element )  return;
+    if( !element.nodeName_is( "order" )  && 
+        !element.nodeName_is( "add_order" ) )  z::throw_xc( "SCHEDULER-409", "order", element.nodeName() );
+
 
     string priority         = element.getAttribute( "priority"  );
     string id               = element.getAttribute( "id"        );
@@ -5648,13 +5674,13 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( job_chain_stack_option == jc_remove_from_job_chain_stack )  remove_from_job_chain_stack();
 
-        if( node->_nested_job_chain )   // Verschachtelte Jobkette?
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
         {
             if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich (sollte nicht passieren, wird schon vorher geprüft)
 
             _outer_job_chain_path  = job_chain->path();
             _outer_job_chain_state = _state;
-            job_chain = node->_nested_job_chain;
+            job_chain = n->nested_job_chain();
             _state = job_chain->first_node()->order_state();    // Auftrag bekommt Zustand des ersten Jobs der Jobkette        
         }
 
@@ -5920,12 +5946,12 @@ bool Order::handle_end_state_of_nested_job_chain()
         State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
                                                                   : outer_job_chain_node->error_state();
 
-        Node* next_outer_job_chain_node = outer_job_chain->node_from_state_or_null( next_outer_job_chain_state );
+        Nested_job_chain_node* next_outer_job_chain_node = Nested_job_chain_node::cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
         
 
-        if( next_outer_job_chain_node  &&  next_outer_job_chain_node->_nested_job_chain )
+        if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
         {
-            Job_chain* next_job_chain = next_outer_job_chain_node->_nested_job_chain;
+            Job_chain* next_job_chain = next_outer_job_chain_node->nested_job_chain();
 
             _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
 

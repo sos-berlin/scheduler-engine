@@ -60,7 +60,7 @@ struct Pendant
     void                        remove_dependant            ( File_based_subsystem*, const Path& path );
     void                        remove_dependants           ();
 
-    virtual bool                on_dependant_incarnated     ( File_based* )                         = 0;
+    virtual bool                on_dependant_loaded         ( File_based* )                         = 0;
     virtual bool                on_dependant_to_be_removed  ( File_based* );
     virtual void                on_dependant_removed        ( File_based* );
 
@@ -81,7 +81,7 @@ struct Dependencies
     void                        add_dependant               ( Pendant*, const string& missing_path );
     void                        remove_dependant            ( Pendant*, const string& missing_path );
     void                        remove_requestor            ( Pendant* );
-    void                        announce_dependant_incarnated( File_based* found_missing );
+    void                        announce_dependant_loaded   ( File_based* found_missing );
     bool                        prepare_to_remove           ( File_based* to_be_removed );
 
 
@@ -228,7 +228,7 @@ struct File_based : Scheduler_object,
     string                      obj_name                    () const;
 
     // Pendant
-    bool                        on_dependant_incarnated     ( File_based* );
+    bool                        on_dependant_loaded         ( File_based* );
     bool                        on_dependant_to_be_removed  ( File_based* );
     void                        on_dependant_removed        ( File_based* );
 

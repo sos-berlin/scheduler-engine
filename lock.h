@@ -153,7 +153,7 @@ struct Use : Object,
 
 
     // Pendant:
-    bool                        on_dependant_incarnated     ( File_based* );
+    bool                        on_dependant_loaded         ( File_based* );
 
 
     Lock*                       lock                        () const;

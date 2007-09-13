@@ -504,9 +504,6 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
         {
             string name = Folder::object_name_of_filename( base_file_info->_filename );
 
-            if( old_file_based )  folder()->log()->info( message_string( "SCHEDULER-892", base_file_info->_filename, old_file_based->obj_name() ) );
-                            else  folder()->log()->info( message_string( "SCHEDULER-891", base_file_info->_filename, subsystem()->object_type_name(), name ) );
-
             file_based = subsystem()->call_new_file_based();
             file_based->set_name( name );
             file_based->set_base_file_info( *base_file_info );
@@ -514,6 +511,10 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             if( !old_file_based )  add_file_based( file_based );
             else
             if( file_based != old_file_based )  old_file_based->set_replacement( file_based );
+
+            string relative_file_path = folder()->make_path( base_file_info->_filename );
+            if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
+                            else  file_based    ->log()->info( message_string( "SCHEDULER-891", relative_file_path, subsystem()->object_type_name() ) );
 
             xml::Document_ptr dom_document ( string_from_file( File_path( folder()->directory(), base_file_info->_filename ) ) );
             if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
@@ -772,7 +773,7 @@ bool File_based::load2()
             if( ok )
             {
                 set_file_based_state( s_loaded );
-                subsystem()->dependencies()->announce_dependant_incarnated( this ); 
+                subsystem()->dependencies()->announce_dependant_loaded( this ); 
             }
         }
     }
@@ -850,9 +851,9 @@ bool File_based::switch_file_based_state( State state )
     return result;
 }
 
-//--------------------------------------------------------------File_based::on_dependant_incarnated
+//------------------------------------------------------------------File_based::on_dependant_loaded
 
-bool File_based::on_dependant_incarnated( File_based* )
+bool File_based::on_dependant_loaded( File_based* )
 {
     return try_switch_wished_file_based_state();
 }
@@ -1189,9 +1190,9 @@ void Dependencies::remove_requestor( Pendant* requestor )
     }
 }
 
-//------------------------------------------------------Dependencies::announce_dependant_incarnated
+//------------------------------------------------------Dependencies::announce_dependant_loaded
 
-void Dependencies::announce_dependant_incarnated( File_based* found_missing )
+void Dependencies::announce_dependant_loaded( File_based* found_missing )
 {
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
 
@@ -1210,8 +1211,8 @@ void Dependencies::announce_dependant_incarnated( File_based* found_missing )
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Pendant*     requestor = *it2;
         
-            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_incarnated( " << found_missing->obj_name() << " ) " ); )
-            bool ok = requestor->on_dependant_incarnated( found_missing );
+            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "*** " << requestor->obj_name() << " on_dependant_loaded( " << found_missing->obj_name() << " ) " ); )
+            bool ok = requestor->on_dependant_loaded( found_missing );
             //if( ok )  
             //{
             //    it = _path_requestors_map.find( found_missing->normalized_path() );

@@ -337,7 +337,7 @@ void Job_folder::load_job_from_xml( const xml::Element_ptr& element, bool activa
 
 void Job_folder::add_or_replace_job_from_xml( const string& job_name, const xml::Element_ptr& element, bool activate )
 {
-    if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-239" );
+    if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
 
     // Besser ins Job-Protokoll. Also in Job prüfen:
 
@@ -742,6 +742,8 @@ bool Job::on_load() // Transaction* ta )
     {
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
+        if( !_module  ||  _module->kind() == Module::kind_none )  z::throw_xc( "INVALID_JOB_DEFINITION", obj_name() );
+
         set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
         try
@@ -830,6 +832,7 @@ bool Job::on_activate()
 void Job::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
+    if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
 
     {
         bool order;
@@ -2467,7 +2470,7 @@ void Job::remove_waiting_job_from_process_list()
 
 //---------------------------------------------------------------------Job::on_process_class_active
 
-bool Job::on_dependant_incarnated( File_based* file_based )
+bool Job::on_dependant_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
     assert( file_based == _module->process_class() );

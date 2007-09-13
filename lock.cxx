@@ -193,7 +193,7 @@ Lock_folder::~Lock_folder()
 
 void Lock_folder::set_dom( const xml::Element_ptr& locks_element )
 {
-    assert( locks_element.nodeName_is( "locks" ) );
+    if( !locks_element.nodeName_is( "locks" ) )  z::throw_xc( "SCHEDULER-409", "locks", locks_element.nodeName() );
 
     DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
     {
@@ -537,7 +537,7 @@ void Lock::dequeue_lock_use( Use* lock_use )
 
 void Lock::set_dom( const xml::Element_ptr& lock_element )
 {
-    Z_DEBUG_ONLY( assert( lock_element.nodeName_is( "lock" ) ) );
+    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
 
     set_max_non_exclusive( lock_element.int_getAttribute( "max_non_exclusive", _config._max_non_exclusive ) );
 }
@@ -975,7 +975,7 @@ void Use::close()
 
 void Use::set_dom( const xml::Element_ptr& lock_use_element )
 {
-    Z_DEBUG_ONLY( assert( lock_use_element.nodeName_is( "lock.use" ) ) );
+    if( !lock_use_element.nodeName_is( "lock.use" ) )  z::throw_xc( "SCHEDULER-409", "lock.use", lock_use_element.nodeName() );
 
     string lock_path = lock_use_element.getAttribute( "lock" );
     if( lock_path == "" )  z::throw_xc( "SCHEDULER-407", "lock" );
@@ -1015,9 +1015,9 @@ void Use::load()
     //    add_dependant( spooler()->lock_subsystem(), _lock_path );
 }
 
-//---------------------------------------------------------------------Use::on_dependant_incarnated
+//-------------------------------------------------------------------------Use::on_dependant_loaded
 
-bool Use::on_dependant_incarnated( File_based* file_based )
+bool Use::on_dependant_loaded( File_based* file_based )
 {
     Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
 

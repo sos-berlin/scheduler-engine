@@ -137,7 +137,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     // Pendant:
-    bool                        on_dependant_incarnated     ( File_based* );
+    bool                        on_dependant_loaded         ( File_based* );
     bool                        on_dependant_to_be_removed  ( File_based* );
   //void                        on_dependant_removed        ( File_based* );
 

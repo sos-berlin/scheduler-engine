@@ -872,6 +872,7 @@
                             <xsl:apply-templates select="$job_chain_select [ @order_id_space=current()/@name ]" mode="job_chains_view">
                                 <xsl:with-param name="single" select="$single"/>
                                 <xsl:with-param name="max_orders" select="$max_orders"/>
+                                <xsl:sort select="translate( @name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
                             </xsl:apply-templates>
                         </xsl:for-each>
                     </xsl:otherwise>

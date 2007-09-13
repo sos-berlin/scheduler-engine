@@ -474,14 +474,9 @@ struct Node : Com_job_chain_node,
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
-    void                        on_releasing_referenced_object( const reference< Node, Job_chain >& );
-
 
 
     Fill_zero                  _zero_;
-
-    reference< Node, Job_chain >  _nested_job_chain;
-    Job_chain_set              _using_job_chains_set;
 
   protected:
     friend struct               ::sos::scheduler::order::Job_chain;
@@ -555,7 +550,7 @@ struct Job_node : Order_queue_node,
 
 
     // Pendant
-    bool                        on_dependant_incarnated     ( folder::File_based* found_job );
+    bool                        on_dependant_loaded         ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
 
 
@@ -582,13 +577,23 @@ struct Nested_job_chain_node : Node
 
 
                                 Nested_job_chain_node       ( Job_chain*, const Order::State&, const string& job_chain_path );
+                               ~Nested_job_chain_node       ();
+
+    void                        close                       ();
+    void                        initialize                  ();
 
     string                      nested_job_chain_path       () const                                { return _nested_job_chain_path; }
-    void                        initialize                  ();
+    Job_chain*                  nested_job_chain            () const                                { return _nested_job_chain; }
+    void                        on_releasing_referenced_object( const reference< Nested_job_chain_node, Job_chain >& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+
   private:
-    string                     _nested_job_chain_path;      // Wenn's eine untergeordnete Jobkette ist
+    friend struct Job_chain;
+
+    string                     _nested_job_chain_path; 
+    reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
+    Job_chain_set              _using_job_chains_set;
 };
 
 //-----------------------------------------------------------------------------job_chain::Sink_node
@@ -620,8 +625,7 @@ struct Sink_node : Job_node
 
 struct Job_chain : Com_job_chain, 
                    file_based< Job_chain, Job_chain_folder_interface, Order_subsystem_interface >,
-                 //Pendant,
-                   is_referenced_by<job_chain::Node,Job_chain>
+                   is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>
 {
     enum State
     {
@@ -663,8 +667,6 @@ struct Job_chain : Com_job_chain,
     bool                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
     Job_chain*                  replace_now                 ();
-
-  //bool                        on_dependant_incarnated     ( File_based* );
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
@@ -729,6 +731,7 @@ struct Job_chain : Com_job_chain,
     string                      db_where_condition          () const;
 
     // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
+    void                        disconnected_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
     void                    set_order_id_space              ( Order_id_space* g )                       { _order_id_space = g; }
     Job_chain_set               connected_job_chains        ();

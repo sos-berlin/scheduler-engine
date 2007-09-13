@@ -3966,13 +3966,14 @@
         
         <message code="SCHEDULER-891">
             <text xml:lang="en">
-                <title>File '<p1/>' is going to be be loaded into new '<p2>type</p2> <p3>name</p3>'</title>
+                <title>Configuration file '<p1/>' is going to be be loaded into this new <p2>type</p2></title>
+                <!--title>File '<p1/>' is going to be be loaded into new '<p2>type</p2> <p3>name</p3>'</title-->
             </text>
         </message>
         
         <message code="SCHEDULER-892">
             <text xml:lang="en">
-                <title>Changed file '<p1/>' is going to replace '<p2>object</p2>'</title>
+                <title>Changed configuration file '<p1/>' is going to replace this <p2>type</p2></title>
             </text>
         </message>
         

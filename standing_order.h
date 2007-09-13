@@ -10,7 +10,6 @@ namespace order {
 //---------------------------------------------------------------------------------------------Standing_order
 
 struct Standing_order : file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >,
-                      //Pendant,
                         Object
 {
                                 Standing_order              ( Standing_order_subsystem* );
@@ -21,7 +20,6 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     void                        close                       ();
     string                      obj_name                    () const;
-  //bool                        on_dependant_incarnated     ( File_based* );
 
 
     // file_based<>

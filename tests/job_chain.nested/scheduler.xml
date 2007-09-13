@@ -14,7 +14,11 @@
 
 
         <commands>
-            <add_order job_chain="job_chain.nested" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
+            <add_order job_chain="job_chain.nested" id="1" title="Wir haben einen Auftrag!" replace="yes">
+                <run_time>
+                    <period repeat="15"/>
+                </run_time>
+            </add_order>
             <!--remove_job_chain job_chain="job_chain.nested.scheduler.ce"/-->
             <!--remove_job_chain job_chain="job_chain.nested.scheduler.de"/-->
             <!--add_order job_chain="job_chain.nested.scheduler.B" id="1" title="Wir haben einen Auftrag!" replace="yes"/-->

@@ -269,9 +269,9 @@ bool Standing_order::on_activate()
     return result;
 }
 
-//-----------------------------------------------------------------Standing_order::on_dependant_incarnated
+//-----------------------------------------------------------------Standing_order::on_dependant_loaded
 
-//bool Standing_order::on_dependant_incarnated( File_based* file_based )
+//bool Standing_order::on_dependant_loaded( File_based* file_based )
 //{
 //    Order_subsystem_interface* order_subsystem = spooler()->order_subsystem();
 //
