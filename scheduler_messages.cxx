@@ -291,6 +291,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-436", "Order id in <order> is different from order id in filename" },
     { "SCHEDULER-437", "Attribute job_chain= is not allowed in file based order" },
     { "SCHEDULER-438", "Invalid Job_chain_node for add_order() with state='$1'" },
+    { "SCHEDULER-439", "Error when removing $3 after base file '$1' has been removed:\n$2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

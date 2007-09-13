@@ -320,7 +320,7 @@ struct Order : Com_order,
     State                      _occupied_state;
     bool                       _delay_storing_until_processing;  // Erst in die Datenbank schreiben, wenn die erste Task die Verarbeitung beginnt
     bool                       _end_state_reached;      // Auftrag nach spooler_process() beenden, für <file_order_sink>
-    Time                       _signaled_next_time;
+  //Time                       _signaled_next_time;
     ptr<http::Operation>       _http_operation;
     ptr<Com_log>               _com_log;                // COM-Hülle für Log
 };

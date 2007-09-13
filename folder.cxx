@@ -549,12 +549,21 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
     }
     catch( exception& x )
     {
+        string msg;
+
         if( !file_based )  throw;   // Sollte nicht passieren
 
-        file_based->set_file_based_state( File_based::s_error );
-        file_based->_base_file_xc      = x;
-        file_based->_base_file_xc_time = double_from_gmtime();
-        string msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x );
+        if( base_file_info )    // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markien
+        {
+            file_based->set_file_based_state( File_based::s_error );
+            file_based->_base_file_xc      = x;
+            file_based->_base_file_xc_time = double_from_gmtime();
+            msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x );
+        }
+        else
+            msg = message_string( "SCHEDULER-439", File_path( folder()->directory(), file_based->base_file_info()._filename ), 
+                                                   file_based->subsystem()->object_type_name(), x );
+
         file_based->log()->error( msg );
 
         if( _spooler->_mail_on_error )

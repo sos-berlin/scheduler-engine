@@ -258,9 +258,8 @@ struct File_based : Scheduler_object,
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
 
-    void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement;  _replacement_is_valid = false; }
+    void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement; }
     File_based*                 replacement                 () const                                { return _replacement; }
-    bool                        replacement_is_valid        () const                                { return _replacement_is_valid; }
 
     void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
     bool                        check_for_replacing_or_removing();
@@ -283,8 +282,8 @@ struct File_based : Scheduler_object,
     virtual bool                can_be_removed_now          ()                                      = 0;
 
     virtual bool                replace_with                ( File_based* );
-    virtual bool                prepare_to_replace          ()                                      { _replacement_is_valid = true;  return true; }
-    virtual bool                can_be_replaced_now         ()                                      { return _replacement_is_valid; }
+    virtual bool                prepare_to_replace          ()                                      { return true; }
+    virtual bool                can_be_replaced_now         ()                                      { return true; }
     virtual File_based*         replace_now                 ()                                      = 0;
 
     virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
@@ -319,7 +318,6 @@ struct File_based : Scheduler_object,
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
     bool                       _file_is_removed;
-    bool                       _replacement_is_valid;
 };
 
 //-------------------------------------------------------------------------------------file_based<>
@@ -336,7 +334,6 @@ struct file_based : File_based
 
     File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
     virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
-  //void                    set_replacement                 ( FILE_BASED* file_based )              { File_based::set_replacement = file_based;  _replacement_is_valid = false; }
     FILE_BASED*                 replacement                 () const                                { return static_cast<FILE_BASED*>( File_based::replacement() ); }
     TYPED_FOLDER*               typed_folder                () const                                { return static_cast<TYPED_FOLDER*>( File_based::typed_folder() ); }
 };

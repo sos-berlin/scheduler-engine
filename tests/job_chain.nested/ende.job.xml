@@ -7,8 +7,8 @@
 
 function spooler_process() 
 {               
-    spooler.job_chain( "job_chain.nested.scheduler" ).remove();
-    return false;
+    //spooler.job_chain( "job_chain.nested" ).remove();
+    return true;
 }
 
         ]]>

@@ -2643,7 +2643,7 @@ bool Job_chain::prepare_to_replace()
 
 bool Job_chain::can_be_replaced_now()
 {
-    return _remove  &&  !has_order()  &&  replacement_is_valid()  &&  replacement();
+    return replacement()  &&  !has_order();
 }
 
 //--------------------------------------------------------------------Job_chain_folder::replace_now
@@ -3824,7 +3824,7 @@ Order::Order( Spooler* spooler )
 
     _created       = Time::now();
     _is_virgin     = true;
-    _signaled_next_time = Time::never;
+    //_signaled_next_time = Time::never;
 
     set_run_time( NULL );
 }
@@ -4060,17 +4060,17 @@ void Order::handle_changed_processable_state()
 {
     Time new_next_time = next_time();
 
-    if( new_next_time <= _signaled_next_time )
-    {
+    //if( new_next_time <= _signaled_next_time )
+    //{
         if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) )
         {
             if( Job* job = job_node->job_or_null() )  
             {
                 job->signal_earlier_order( this );
-                _signaled_next_time = new_next_time;
+                //_signaled_next_time = new_next_time;
             }
         }
-    }
+    //}
 }
 
 //-----------------------------------------------------------------Order::assert_is_not_distributed
@@ -5588,7 +5588,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     _setback_count = 0;
     _setback = Time(0);
 
-    set_replacement( false );
+    set_replacement( false );  int DAS_IST_FALSCH_BEI_RUN_TIME;
 
 
     _job_chain = NULL;
@@ -5681,7 +5681,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
             _outer_job_chain_path  = job_chain->path();
             _outer_job_chain_state = _state;
             job_chain = n->nested_job_chain();
-            _state = job_chain->first_node()->order_state();    // Auftrag bekommt Zustand des ersten Jobs der Jobkette        
+            _state = job_chain->first_node()->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
         }
 
 
@@ -5946,7 +5946,7 @@ bool Order::handle_end_state_of_nested_job_chain()
         State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
                                                                   : outer_job_chain_node->error_state();
 
-        Nested_job_chain_node* next_outer_job_chain_node = Nested_job_chain_node::cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
+        Nested_job_chain_node* next_outer_job_chain_node = Nested_job_chain_node::try_cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
         
 
         if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
@@ -5998,7 +5998,7 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
         if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->job_chain( _outer_job_chain_path )->first_node() ) )
             first_nested_job_chain_path = n->nested_job_chain_path();
 
-        remove_from_job_chain( jc_leave_in_job_chain_stack );
+        remove_from_job_chain( jc_leave_in_job_chain_stack );  int ENTFERNT_REPLACEMENT;
     }
 
     close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
@@ -6008,12 +6008,16 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 
     try
     {
-        set_state( _initial_state, next_start );
-
         if( first_nested_job_chain_path != "" )
         {
-            place_in_job_chain( order_subsystem()->job_chain( first_nested_job_chain_path ), jc_leave_in_job_chain_stack );
+            _outer_job_chain_state = _initial_state;
+            Job_chain* nested_job_chain = order_subsystem()->job_chain( first_nested_job_chain_path );
+            Order::State first_nested_state = nested_job_chain->first_node()->order_state();  // Auftrag bekommt Zustand des ersten Jobs der Jobkette
+            set_state( first_nested_state, next_start );
+            place_in_job_chain( nested_job_chain, jc_leave_in_job_chain_stack );
         }
+        else
+            set_state( _initial_state, next_start );
     }
     catch( exception& x ) { _log->error( x.what() ); }
 }

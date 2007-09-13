@@ -2694,6 +2694,12 @@
                 <title>Invalid Job_chain_node for add_order() with state='<p1/>'</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-439">
+            <text xml:lang="en">
+                <title>Error when removing <p3>type</p3> after base file '<p1>path</p1>' has been removed:<br/><p2>error</p2></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
