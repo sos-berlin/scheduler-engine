@@ -48,6 +48,52 @@ struct Path : string
     string                      absolute_path               () const;
 };
 
+//------------------------------------------------------------------------------------------Pendant
+
+struct Pendant
+{
+                                Pendant                     ();
+    virtual                    ~Pendant                     ();
+
+    virtual string              obj_name                    () const                                = 0;
+    void                        add_dependant               ( File_based_subsystem*, const Path& path );
+    void                        remove_dependant            ( File_based_subsystem*, const Path& path );
+    void                        remove_dependants           ();
+
+    virtual bool                on_dependant_incarnated     ( File_based* )                         = 0;
+    virtual bool                on_dependant_to_be_removed  ( File_based* );
+    virtual void                on_dependant_removed        ( File_based* );
+
+  private:
+    typedef stdext::hash_set< string >                                Dependant_set;
+    typedef stdext::hash_map< File_based_subsystem*, Dependant_set >  Dependant_sets;
+
+    Dependant_sets               _missing_sets;
+};
+
+//-------------------------------------------------------------------------------------Dependencies
+
+struct Dependencies 
+{
+                                Dependencies                ( File_based_subsystem* );
+                               ~Dependencies                ();
+
+    void                        add_dependant               ( Pendant*, const string& missing_path );
+    void                        remove_dependant            ( Pendant*, const string& missing_path );
+    void                        remove_requestor            ( Pendant* );
+    void                        announce_dependant_incarnated( File_based* found_missing );
+    bool                        prepare_to_remove           ( File_based* to_be_removed );
+
+
+  private:
+    typedef stdext::hash_set< Pendant* >               Requestor_set;
+    typedef stdext::hash_map< string, Requestor_set >  Path_requestors_map;            // Vermisster Pfad -> { Requestor ... }
+
+    Fill_zero                  _zero_;
+    File_based_subsystem*      _subsystem;
+    Path_requestors_map        _path_requestors_map;;
+};
+
 //-------------------------------------------------------------------------------------------Folder
 //
 // Ein Ordner (Folder) enthält alle Objekte. 
@@ -156,7 +202,8 @@ struct Base_file_info
 
 //---------------------------------------------------------------------------------------File_based
 
-struct File_based : Scheduler_object, 
+struct File_based : Scheduler_object,
+                    Pendant,
                     zschimmer::Has_addref_release
 {
     enum State
@@ -166,6 +213,7 @@ struct File_based : Scheduler_object,
         s_loaded,
         s_active,
         s_error,
+      //s_incomplete,
         s_closed
     };
 
@@ -178,6 +226,11 @@ struct File_based : Scheduler_object,
 
     void                        close                       ();
     string                      obj_name                    () const;
+
+    // Pendant
+    bool                        on_dependant_incarnated     ( File_based* );
+    bool                        on_dependant_to_be_removed  ( File_based* );
+    void                        on_dependant_removed        ( File_based* );
 
 
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -215,6 +268,9 @@ struct File_based : Scheduler_object,
     bool                        initialize                  ();
     bool                        load                        ();
     bool                        activate                    ();
+    bool                        switch_file_based_state     ( State  );
+    bool                        try_switch_wished_file_based_state();
+  //void                        set_file_based_incomplete   ( bool b )                              { _is_incomplete = true; }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual bool                on_initialize               ()                                      = 0;
@@ -223,7 +279,7 @@ struct File_based : Scheduler_object,
 
     virtual bool                remove                      ();
   //virtual void                remove_now                  ()                                      = 0;
-    virtual bool                prepare_to_remove           ()                                      { return can_be_removed_now(); }
+    virtual bool                prepare_to_remove           ();
     virtual bool                can_be_removed_now          ()                                      = 0;
 
     virtual bool                replace_with                ( File_based* );
@@ -241,7 +297,7 @@ struct File_based : Scheduler_object,
 
   protected:
     void                    set_base_file_info              ( const Base_file_info& bfi )           { _base_file_info = bfi; }
-    void                    set_file_based_state            ( State state )                         { _state = state; }
+    void                    set_file_based_state            ( State );
 
     Fill_zero                  _zero_;
     ptr<File_based>            _replacement;
@@ -249,8 +305,13 @@ struct File_based : Scheduler_object,
   private:
     friend struct               Typed_folder;
 
+    bool                        initialize2                 ();
+    bool                        load2                       ();
+    bool                        activate2                   ();
+
     string                     _name;
     State                      _state;
+    State                      _wished_state;
     Base_file_info             _base_file_info;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
@@ -269,6 +330,7 @@ struct file_based : File_based
                                 file_based                  ( SUBSYSTEM* p, IUnknown* iu, Type_code t ): File_based( p, iu, t ) {}
 
     typedef SUBSYSTEM           My_subsystem;
+    typedef file_based          My_file_based;
 
     SUBSYSTEM*                  subsystem                   () const                                { return static_cast<SUBSYSTEM*>( File_based::subsystem() ); }
 
@@ -337,49 +399,6 @@ struct typed_folder : Typed_folder
     My_subsystem*              _subsystem;
 };
 
-//-------------------------------------------------------------------------------Missings_requestor
-
-struct Missings_requestor
-{
-                                Missings_requestor          ();
-    virtual                    ~Missings_requestor          ();
-
-    virtual void                close                       ();
-    virtual string              obj_name                    () const                                = 0;
-    void                        add_missing                 ( File_based_subsystem*, const Path& path );
-    void                        remove_missing              ( File_based_subsystem*, const Path& path );
-
-    virtual bool                on_missing_found            ( File_based* )                         = 0;
-
-  private:
-    typedef stdext::hash_set< string >                              Missing_set;
-    typedef stdext::hash_map< File_based_subsystem*, Missing_set >  Missing_sets;
-
-    Missing_sets               _missing_sets;
-};
-
-//-----------------------------------------------------------------------------------------Missings
-
-struct Missings 
-{
-                                Missings                    ( File_based_subsystem* );
-                               ~Missings                    ();
-
-    void                        add_missing                 ( Missings_requestor*, const string& missing_path );
-    void                        remove_missing              ( Missings_requestor*, const string& missing_path );
-    void                        remove_requestor            ( Missings_requestor* );
-    void                        announce_missing_is_found   ( File_based* found_missing );
-
-
-  private:
-    typedef stdext::hash_set< Missings_requestor* >    Requestor_set;
-    typedef stdext::hash_map< string, Requestor_set >  Path_requestors_map;            // Vermisster Pfad -> { Requestor ... }
-
-    Fill_zero                  _zero_;
-    File_based_subsystem*      _subsystem;
-    Path_requestors_map        _path_requestors_map;;
-};
-
 //-----------------------------------------------------------------------------File_based_subsystem
 // Für jeden dateibasierten Typ (File_based) gibt es genau ein File_based_subsystem
 
@@ -393,7 +412,7 @@ struct File_based_subsystem : Subsystem
     virtual string              normalized_name             ( const string& name ) const            { return name; }
     virtual Path                normalized_path             ( const Path& path ) const;
   //virtual ptr<Typed_folder>   new_typed_folder            ()                                      = 0;
-    Missings*                   missings                    ()                                      { return &_missings; }
+    Dependencies*               dependencies                ()                                      { return &_dependencies; }
 
   protected:
     friend struct               Typed_folder;
@@ -404,7 +423,7 @@ struct File_based_subsystem : Subsystem
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
 
   private:
-    Missings                   _missings;
+    Dependencies               _dependencies;
 };
 
 //---------------------------------------------------------------------------file_based_subsystem<>

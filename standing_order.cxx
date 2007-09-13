@@ -198,7 +198,7 @@ void Standing_order::close()
     else
     if( _missing_job_chain_path != "" )
     {
-        remove_missing( order_subsystem(), _missing_job_chain_path );
+        remove_dependant( order_subsystem(), _missing_job_chain_path );
         _missing_job_chain_path = "";
     }
 }
@@ -263,29 +263,29 @@ bool Standing_order::on_activate()
     else
     {
         _missing_job_chain_path = folder()->make_path( _job_chain_name );
-        add_missing( order_subsystem(), _missing_job_chain_path );
+        add_dependant( order_subsystem(), _missing_job_chain_path );
     }
 
     return result;
 }
 
-//-----------------------------------------------------------------Standing_order::on_missing_found
+//-----------------------------------------------------------------Standing_order::on_dependant_incarnated
 
-bool Standing_order::on_missing_found( File_based* file_based )
-{
-    Order_subsystem_interface* order_subsystem = spooler()->order_subsystem();
-
-    assert( file_based->subsystem() == order_subsystem );
-    assert( file_based->normalized_path() == order_subsystem->normalized_name( _missing_job_chain_path ) );
-
-    Job_chain* job_chain = dynamic_cast<Job_chain*>( file_based );
-    assert( job_chain );
-
-    bool ok = on_activate();
-    assert( ok );
-
-    return ok;
-}
+//bool Standing_order::on_dependant_incarnated( File_based* file_based )
+//{
+//    Order_subsystem_interface* order_subsystem = spooler()->order_subsystem();
+//
+//    assert( file_based->subsystem() == order_subsystem );
+//    assert( file_based->normalized_path() == order_subsystem->normalized_name( _missing_job_chain_path ) );
+//
+//    Job_chain* job_chain = dynamic_cast<Job_chain*>( file_based );
+//    assert( job_chain );
+//
+//    bool ok = on_activate();
+//    assert( ok );
+//
+//    return ok;
+//}
 
 //------------------------------------------------Standing_order::order_is_removable_or_replaceable
 
@@ -307,16 +307,7 @@ bool Standing_order::can_be_removed_now()
 
 bool Standing_order::prepare_to_remove()
 {
-    bool result;
-
-    if( _order )
-    {
-        result = order_is_removable_or_replaceable();
-    }
-    else
-        result = true;
-
-    return result;
+    return My_file_based::prepare_to_remove();
 }
 
 //---------------------------------------------------------------------------Standing_order::remove

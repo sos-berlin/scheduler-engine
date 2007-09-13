@@ -43,7 +43,7 @@ struct Combined_job_nodes : Object
 //----------------------------------------------------------------------------------------------Job
 
 struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
-             Missings_requestor,
+           //Pendant,
              Object
 {
     enum State
@@ -55,6 +55,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
       //s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
         s_error,                // Ein Fehler ist aufgetreten (nicht vom Skript), der Job ist nicht mehr aufrufbar.
+      //s_incomplete,           // Eine Resource fehlt, Lock oder Process_class
         s_pending,              // Warten auf Start
         s_running,              // Mindestens eine Task läuft (die Tasks können aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
         s__max
@@ -135,8 +136,10 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        can_be_removed_now          ();
 
 
-    // Missings_requestor:
-    bool                        on_missing_found            ( File_based* );
+    // Pendant:
+    bool                        on_dependant_incarnated     ( File_based* );
+    bool                        on_dependant_to_be_removed  ( File_based* );
+  //void                        on_dependant_removed        ( File_based* );
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
 
@@ -226,7 +229,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                    set_machine_resumable           ( bool b )                              { _machine_resumable = b; }
 
     lock::Requestor*            lock_requestor_or_null      () const                                { return _lock_requestor; }
-    void                        on_lock_is_to_be_removed    ( lock::Lock* );
+  //void                        on_removing_lock            ( lock::Lock* );
 
     bool                        execute_state_cmd           ();
     ptr<Task>                   task_to_start               ();
@@ -237,6 +240,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
+    void                        end_tasks                   ( const string& task_warning );
     void                        kill_task                   ( int task_id, bool immediately = false );
     void                        kill_queued_task            ( int task_id );
 

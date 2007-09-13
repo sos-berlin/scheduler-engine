@@ -3975,6 +3975,12 @@
                 <title>Changed file '<p1/>' is going to replace '<p2>object</p2>'</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-893" weight="debug3">
+            <text xml:lang="en">
+                <title>file_based_state='<p1/>'</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

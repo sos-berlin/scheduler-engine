@@ -422,6 +422,7 @@ struct Node : Com_job_chain_node,
     enum State
     {
         s_none,
+        s_initialized,
         s_active,
         s_closed
     };
@@ -444,6 +445,7 @@ struct Node : Com_job_chain_node,
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    virtual void                initialize                  ();
     virtual void                activate                    ();
 
     const Order::State&         order_state                 () const                                { return _order_state; }
@@ -536,7 +538,7 @@ struct Order_queue_node : Node
 //------------------------------------------------------------------------------job_chain::Job_node
 
 struct Job_node : Order_queue_node,
-                  Missings_requestor
+                  Pendant
 {
     typedef Order_queue_node    Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
@@ -546,13 +548,14 @@ struct Job_node : Order_queue_node,
                                ~Job_node                    ();
 
     void                        close                       ();
+    void                        initialize                  ();
     void                        activate                    ();
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
 
-    // Missings_requestor
-    bool                        on_missing_found            ( folder::File_based* found_job );
+    // Pendant
+    bool                        on_dependant_incarnated     ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
 
 
@@ -616,6 +619,7 @@ struct Sink_node : Job_node
 
 struct Job_chain : Com_job_chain, 
                    file_based< Job_chain, Job_chain_folder_interface, Order_subsystem_interface >,
+                 //Pendant,
                    is_referenced_by<job_chain::Node,Job_chain>
 {
     enum State
@@ -659,6 +663,7 @@ struct Job_chain : Com_job_chain,
     bool                        can_be_replaced_now         ();
     Job_chain*                  replace_now                 ();
 
+  //bool                        on_dependant_incarnated     ( File_based* );
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
@@ -674,7 +679,13 @@ struct Job_chain : Com_job_chain,
     void                    set_orders_are_recoverable      ( bool b )                              { _orders_are_recoverable = b; }
     bool                        orders_are_recoverable      () const                                { return _orders_are_recoverable; }
 
+
+    void                        fill_holes                  ();
+    bool                        initialize_nested_job_chains();
+    bool                        check_nested_job_chains     ();
     void                        check_job_chain_node        ( job_chain::Node* );
+    void                        add_nested_job_chains_to_order_id_space( Order_id_space* );
+    void                        complete_nested_job_chains  ( Order_id_space* );
 
 
 

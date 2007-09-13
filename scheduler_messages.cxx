@@ -457,6 +457,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-890", "'$2' is going to be removed because the file '$1' has been removed" },
     { "SCHEDULER-891", "File '$1' is going to be be loaded into new '$2 $3'" },
     { "SCHEDULER-892", "Changed file '$1' is going to replace '$2'" },
+    { "SCHEDULER-893", "file_based_state='$1'" },
     {}
 };
 } //namespace sos

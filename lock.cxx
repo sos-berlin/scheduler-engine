@@ -346,14 +346,12 @@ bool Lock::prepare_to_remove()
     {
         _remove = true;
 
-        Z_FOR_EACH( Use_set, _use_set, it )
-        {
-            Use* use = *it;
-            use->requestor()->on_lock_is_to_be_removed( this );
-        }
+        //Z_FOR_EACH( Use_set, _use_set, it )
+        //{
+        //    Use* use = *it;
+        //    use->requestor()->on_removing_lock( this );
+        //}
 
-
-        if( !can_be_removed_now() )  log()->info( message_string( "SCHEDULER-886", string_from_holders() ) );
 
         typedef stdext::hash_set< Requestor* >  Requestor_set;
         Requestor_set requestor_set;
@@ -374,7 +372,9 @@ bool Lock::prepare_to_remove()
         }
     }
 
-    return can_be_removed_now();
+    bool result = My_file_based::prepare_to_remove();
+    if( !result )  log()->info( message_string( "SCHEDULER-886", string_from_holders() ) );     int ON_REMOVE_DELAYED;
+    return result;
 }
 
 //-------------------------------------------------------------------------Lock::prepare_to_replace
@@ -771,6 +771,17 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
     lock_use->set_dom( lock_use_element );
 }
 
+//----------------------------------------------------------------------------Requestor::initialize
+
+void Requestor::initialize()
+{
+    Z_FOR_EACH( Use_list, _use_list, it )
+    {
+        Use* lock_use = *it;
+        lock_use->initialize();
+    }
+}
+
 //----------------------------------------------------------------------------------Requestor::load
 
 void Requestor::load()
@@ -956,8 +967,8 @@ void Use::close()
         lock->dequeue_lock_use( this );
         lock->unregister_lock_use( this );
     }
-    else
-        remove_missing( spooler()->lock_subsystem(), _lock_path );
+
+    remove_dependant( spooler()->lock_subsystem(), _lock_path );
 }
 
 //-------------------------------------------------------------------------------------Use::set_dom
@@ -985,6 +996,13 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     }
 }
 
+//----------------------------------------------------------------------------------Use::initialize
+
+void Use::initialize()
+{
+    add_dependant( spooler()->lock_subsystem(), _lock_path );
+}
+
 //----------------------------------------------------------------------------------------Use::load
 
 void Use::load()
@@ -993,13 +1011,13 @@ void Use::load()
     {
         lock->register_lock_use( this );
     }
-    else
-        add_missing( spooler()->lock_subsystem(), _lock_path );
+    //else
+    //    add_dependant( spooler()->lock_subsystem(), _lock_path );
 }
 
-//----------------------------------------------------------------------------Use::on_missing_found
+//---------------------------------------------------------------------Use::on_dependant_incarnated
 
-bool Use::on_missing_found( File_based* file_based )
+bool Use::on_dependant_incarnated( File_based* file_based )
 {
     Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
 

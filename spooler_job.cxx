@@ -73,7 +73,7 @@ struct Job_lock_requestor : lock::Requestor
 
     // Requestor:
     void                        on_locks_are_available      ()                                      { _job->signal( __FUNCTION__ ); }
-    void                        on_lock_is_to_be_removed    ( lock::Lock* l )                       { _job->on_lock_is_to_be_removed( l ); }
+  //void                        on_removing_lock            ( lock::Lock* l )                       { _job->on_removing_lock( l ); }
 
   private:
     Job*                       _job;
@@ -716,6 +716,7 @@ bool Job::on_initialize()
             if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
 
             prepare_on_exit_commands();
+            if( _lock_requestor )  _lock_requestor->initialize();
 
             _state = s_initialized;
         }
@@ -1208,7 +1209,7 @@ bool Job::prepare_to_remove()
     if( !result )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
     //if( !result  &&  !is_second_remove )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
 
-    return result;
+    return My_file_based::prepare_to_remove();
 }
 
 //--------------------------------------------------------------------------Job::can_be_removed_now
@@ -1369,7 +1370,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 {
     //if( !is_order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
     
-    assert_is_active();
+    assert_is_loaded();
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
@@ -1380,16 +1381,10 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), __FUNCTION__, state_name() );
     }
 
-    ptr<Task> task;
+    ptr<Task> task = Z_NEW( Job_module_task( this ) );
 
-  //if( !_module->_process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
-  //else
-  //if( _object_set_descr          )   task = Z_NEW( Object_set_task( this ) );
-  //else                             
-                                       task = Z_NEW( Job_module_task( this ) );
-
-    task->_id           = id;
-    task->_obj_name     = S() << "Task " << name() << ":" << task->_id;
+    task->_id       = id;
+    task->_obj_name = S() << "Task " << name() << ":" << task->_id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )  task->_params->Merge( params );
@@ -1872,40 +1867,33 @@ bool Job::execute_state_cmd()
                 {
                     if( _state == s_running )
                     {
+                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
                         {
-                            Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                            {
-                                Task* task = *t;
-                                if( task->_state == Task::s_running 
-                                 || task->_state == Task::s_running_delayed
-                                 || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
-                            }
-
-                            //set_state( s_suspended );
-                            something_done = true;
+                            Task* task = *t;
+                            if( task->_state == Task::s_running 
+                             || task->_state == Task::s_running_delayed
+                             || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
                         }
+
+                        //set_state( s_suspended );
+                        something_done = true;
                     }
                     break;
                 }
 
                 case sc_continue:   
                 {
-                    //if( _state == s_suspended )
+                    Z_FOR_EACH( Task_list, _running_tasks, t ) 
                     {
-                        {
-                            Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                            {
-                                Task* task = *t;
-                                if( task->_state == Task::s_suspended 
-                                 || task->_state == Task::s_running_delayed
-                                 || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
-                            }
-                            
-                            set_state( _running_tasks.size() > 0? s_running : s_pending );
-                            check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
-                            something_done = true;
-                        }
+                        Task* task = *t;
+                        if( task->_state == Task::s_suspended 
+                         || task->_state == Task::s_running_delayed
+                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
                     }
+                    
+                    set_state( _running_tasks.size() > 0? s_running : s_pending );
+                    check_min_tasks( "job has been unstopped with cmd=\"continue\"" );
+                    something_done = true;
                     break;
                 }
 
@@ -2369,22 +2357,6 @@ void Job::calculate_next_time( const Time& now )
     //                                                                << "old " << old_next_time << "\n" );
 }
 
-//--------------------------------------------------------------------Job::on_lock_is_to_be_removed
-
-void Job::on_lock_is_to_be_removed( lock::Lock* lock )
-{
-    Z_FOR_EACH( Task_list, _running_tasks, t )
-    {
-        Task* task = *t;
-
-        if( !task->ending() )
-        {
-            task->log()->warn( message_string( "SCHEDULER-885", lock->obj_name() ) );
-            task->cmd_end( Task::end_normal );
-        }
-    }
-}
-
 //------------------------------------------------------------------------Job::signal_earlier_order
 
 void Job::signal_earlier_order( Order* order )
@@ -2395,6 +2367,30 @@ void Job::signal_earlier_order( Order* order )
     {
         Time now = Time::now();
         calculate_next_time( now );
+    }
+}
+
+//----------------------------------------------------------------------------Job::on_removing_lock
+
+//void Job::on_removing_lock( lock::Lock* lock )
+//{
+//    end_tasks( message_string( "SCHEDULER-885", lock->obj_name() ) );
+//    //set_state( s_incomplete );
+//}
+
+//-----------------------------------------------------------------------------------Job::end_tasks
+
+void Job::end_tasks( const string& task_warning )
+{
+    Z_FOR_EACH( Task_list, _running_tasks, t )
+    {
+        Task* task = *t;
+
+        if( !task->ending() )
+        {
+            task->log()->warn( task_warning );
+            task->cmd_end( Task::end_normal );
+        }
     }
 }
 
@@ -2471,7 +2467,7 @@ void Job::remove_waiting_job_from_process_list()
 
 //---------------------------------------------------------------------Job::on_process_class_active
 
-bool Job::on_missing_found( File_based* file_based )
+bool Job::on_dependant_incarnated( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
     assert( file_based == _module->process_class() );
@@ -2484,6 +2480,14 @@ bool Job::on_missing_found( File_based* file_based )
         signal( __FUNCTION__ );
     }
 
+    return true;
+}
+
+//------------------------------------------------------------------Job::on_dependant_to_be_removed
+
+bool Job::on_dependant_to_be_removed( File_based* file_based )
+{
+    end_tasks( message_string( "SCHEDULER-885", file_based->obj_name() ) );
     return true;
 }
 
@@ -2916,38 +2920,34 @@ void Job::set_job_error( const exception& x )
 
 void Job::set_state( State new_state )
 { 
+    if( new_state == _state )  return;
+
+    if( new_state == s_pending  &&  !_delay_until )  reset_error();      // Bei delay_after_error Fehler stehen lassen
+
+    State old_state = _state;
+    _state = new_state;
+
+    if( _state == s_stopped 
+     || _state == s_error      )  _next_start_time = _next_time = Time::never;
+
+    if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
     {
-        if( new_state == _state )  return;
+        if( new_state == s_stopping
+         || new_state == s_stopped  && _visible
+         || new_state == s_error      )  _log->info  ( message_string( "SCHEDULER-931", state_name() ) ); 
+                                   else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );
+    }
 
-        if( new_state == s_pending  &&  !_delay_until )  reset_error();      // Bei delay_after_error Fehler stehen lassen
-
-        State old_state = _state;
-        _state = new_state;
-
-        if( _state == s_stopped 
-       //|| _state == s_read_error
-         || _state == s_error      )  _next_start_time = _next_time = Time::never;
-
-        if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
+    if( _state != s_pending  ||  _state != s_running )
+    {
+        if( _waiting_for_process )
         {
-            if( new_state == s_stopping
-             || new_state == s_stopped  && _visible
-           //|| new_state == s_read_error
-             || new_state == s_error      )  _log->info  ( message_string( "SCHEDULER-931", state_name() ) ); 
-                                       else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );
+            remove_waiting_job_from_process_list();
         }
 
-        if( _state != s_pending  ||  _state != s_running )
+        if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
         {
-            if( _waiting_for_process )
-            {
-                remove_waiting_job_from_process_list();
-            }
-
-            if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
-            {
-                _lock_requestor->dequeue_lock_requests();
-            }
+            _lock_requestor->dequeue_lock_requests();
         }
     }
 }

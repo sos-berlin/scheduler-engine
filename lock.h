@@ -137,7 +137,7 @@ struct Lock_folder : typed_folder< Lock >
 // Verbindet Lock mit Lock_requestor
 
 struct Use : Object, 
-             Missings_requestor,
+             Pendant,
              Scheduler_object, 
              Non_cloneable
 {
@@ -145,14 +145,15 @@ struct Use : Object,
                                ~Use                         ();
 
     void                        close                       ();
+    void                        initialize                  ();
     void                        load                        ();
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
 
-    // Missings_requestor:
-    bool                        on_missing_found            ( File_based* );
+    // Pendant:
+    bool                        on_dependant_incarnated     ( File_based* );
 
 
     Lock*                       lock                        () const;
@@ -182,7 +183,9 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    void                        initialize                  ();
     void                        load                        ();
+
     bool                        is_enqueued                 () const                                { return _is_enqueued; }
     bool                        locks_are_available         () const;
     bool                        enqueue_lock_requests       ();
@@ -191,7 +194,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
 
   //void                        on_new_lock                 ( Lock* );
     virtual void                on_locks_are_available      ()                                      = 0;
-    virtual void                on_lock_is_to_be_removed    ( lock::Lock* )                         = 0;
+  //virtual void                on_removing_lock            ( lock::Lock* )                         = 0;
 
     string                      obj_name                    () const;
 

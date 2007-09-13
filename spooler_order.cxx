@@ -207,7 +207,7 @@ struct Database_order_detector : Async_operation, Scheduler_object
     FOR_EACH_JOB_CHAIN( job_chain )                                                                 \
         if( job_chain->is_distributed() )                                                           \
             Z_FOR_EACH( Job_chain::Node_list, job_chain->_node_list, it )                           \
-                if( Order_queue_node* order_queue_node = Order_queue_node::try_cast( *it ) ) \
+                if( Order_queue_node* order_queue_node = Order_queue_node::try_cast( *it ) )        \
                     if( Order_queue* ORDER_QUEUE = order_queue_node->order_queue() )
 
 //-------------------------------------------------Database_order_detector::Database_order_detector
@@ -937,6 +937,17 @@ void Node::close()
     set_state( s_closed );
 }
 
+//---------------------------------------------------------------------------------Node::initialize
+
+void Node::initialize()
+{
+    if( _state != s_initialized )
+    {
+        assert( _state == s_none );
+        set_state( s_initialized );
+    }
+}
+
 //-------------------------------------------------------------------------Node::action_from_string
 
 Node::Action Node::action_from_string( const string& str )
@@ -975,8 +986,11 @@ string Node::string_from_action( Action action )
 
 void Node::activate()
 {
-    assert( _state == s_none );
-    set_state( s_active );
+    if( _state != s_active )
+    {
+        assert( _state == s_initialized );
+        set_state( s_active );
+    }
 }
 
 //-----------------------------------------------------------------------------Node::set_next_state
@@ -1000,14 +1014,6 @@ void Node::set_error_state( const Order::State& error_state )
     // Bis initialize() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
     // initialize() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY (außer <file_order_sink>)
 }
-
-//----------------------------------------------------------------------Node::order_count
-
-//int Node::order_count( Read_transaction* ta )
-//{
-//    return _order_queue? _order_queue->order_count( ta ) 
-//                       : 0;
-//}
 
 //---------------------------------------------------------------------------------Node::set_action
 
@@ -1202,10 +1208,18 @@ Job_node::~Job_node()
     
 void Job_node::close()
 {
-    remove_missing( job_subsystem(), _job_path );
+    remove_dependant( job_subsystem(), _job_path );
     disconnect_job();
 
     Base_class::close();
+}
+
+//-----------------------------------------------------------------------------Job_node::initialize
+
+void Job_node::initialize()
+{
+    Base_class::initialize();
+    add_dependant( job_subsystem(), _job_path );
 }
 
 //-------------------------------------------------------------------------------Job_node::activate
@@ -1219,14 +1233,14 @@ void Job_node::activate()
         connect_job( job );
     }
     
-    if( !_job )  add_missing( job_subsystem(), _job_path );
+    //if( !_job )  add_dependant( job_subsystem(), _job_path );
 }
 
 //----------------------------------------------------------------------------Job_node::connect_job
 
 void Job_node::connect_job( Job* job )
 {
-    if( _state == s_active )
+    if( _state >= s_initialized )
     {
         assert( job == spooler()->job_subsystem()->job_or_null( _job_path ) );
 
@@ -1256,9 +1270,9 @@ void Job_node::disconnect_job()
     }
 }
 
-//----------------------------------------------------------------------Job_chain::on_missing_found
+//----------------------------------------------------------------Job_node::on_dependant_incarnated
 
-bool Job_node::on_missing_found( File_based* file_based )
+bool Job_node::on_dependant_incarnated( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->job_subsystem() );
     assert( file_based->normalized_path() == normalized_job_path() );
@@ -1367,6 +1381,13 @@ xml::Element_ptr Nested_job_chain_node::dom_element( const xml::Document_ptr& do
 
     return element;
 }
+
+//------------------------------------------------------------------Nested_job_chain_node::activate
+
+//void Nested_job_chain_node::activate()
+//{
+//    Base_class::activate();
+//}
 
 //-----------------------------------------------------------------------------Sink_node::Sink_node
 
@@ -1484,14 +1505,6 @@ void Job_chain::close()
     File_based::close();
 }
 
-//------------------------------------------------------------------------------Job_chain::set_name
-
-//void Job_chain::set_name( const string& name )
-//{ 
-//    File_based::set_name( name );
-//    _log->set_prefix( obj_name() ); 
-//}
-
 //----------------------------------------------------------------------------Job_chain::state_name
 
 string Job_chain::state_name( State state )
@@ -1512,15 +1525,12 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
 
-    string xml_name = element.getAttribute( "name" );
-    if( xml_name != ""  &&  subsystem()->normalized_name( xml_name ) != normalized_name() )  z::throw_xc( "SCHEDULER-429", obj_name(), xml_name );
-  //set_name(                 element.     getAttribute( "name" ) );
-
-    _visible                = element.bool_getAttribute( "visible"           , _visible            );
+    set_name(                 element.     getAttribute( "name"              , name()                  )  );
+    _visible                = element.bool_getAttribute( "visible"           , _visible                );
     _orders_are_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_are_recoverable );
 
     if( order_subsystem()->orders_are_distributed() )
-    _is_distributed     = element.bool_getAttribute( "distributed"       , _is_distributed     );
+    _is_distributed         = element.bool_getAttribute( "distributed"       , _is_distributed     );
 
     if( _is_distributed  &&  !_orders_are_recoverable )  z::throw_xc( message_string( "SCHEDULER-380", obj_name() ) );
 
@@ -1574,21 +1584,9 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             if( e.nodeName_is( "job_chain_node.job_chain" ) )
             {
                 if( _is_distributed )  z::throw_xc( "SCHEDULER-413" );
+                if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "empty state" );
 
                 string nested_job_chain_path = e.getAttribute( "job_chain" );
-                
-                Job_chain* nested_job_chain = order_subsystem()->job_chain( nested_job_chain_path );    int DYNAMISCH_KONFIGURIERBAR_MACHEN;
-                if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
-
-                Z_FOR_EACH( Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
-                {
-                    if( Nested_job_chain_node::try_cast( *it ) )  z::throw_xc( "SCHEDULER-412", obj_name() );
-                    // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
-                }
-
-                if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << nested_job_chain_path << "->" << nested_job_chain_path );
-                if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
-
                 ptr<Nested_job_chain_node> nested_job_chain_node = new Nested_job_chain_node( this, state, nested_job_chain_path );
                 nested_job_chain_node->set_next_state ( next_state  );
                 nested_job_chain_node->set_error_state( error_state );
@@ -1627,8 +1625,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
         string new_state = element.getAttribute( "state" );
         
-        if( new_state == "active"  ||
-            new_state == "running" )
+        if( new_state == "running" )
         {
             if( _state == s_stopped  ||  _state == s_active )  set_state( s_active );
             else  z::throw_xc( "SCHEDULER-405", new_state, state_name( state() ) );
@@ -1879,112 +1876,102 @@ bool Job_chain::on_initialize()
 
     if( _state == s_under_construction ) 
     {
-        ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( order_subsystem() ) );
+        fill_holes();
 
+        Z_FOR_EACH( Node_list, _node_list, it )  (*it)->initialize();
 
-        if( !_node_list.empty() )
+        bool ok = initialize_nested_job_chains();
+
+        if( ok )
         {
-            Node* node = *_node_list.rbegin();
-            if( !node->is_type( Node::n_end )  &&  node->next_state().is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
+            ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( order_subsystem() ) );
+            add_nested_job_chains_to_order_id_space( order_id_space );
+          
+            Z_FOR_EACH( Node_list, _node_list, it )  check_job_chain_node( *it );
+            _order_sources.finish();
+
+            /// Jetzt kann nichts mehr schiefgehen. Keine Exception ab hier! ///
+
+            complete_nested_job_chains( order_id_space );
+
+            set_state( s_initialized );
+            result = true;
         }
+    }
 
-        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+    return result;
+}
+
+//----------------------------------------------------------------------------Job_chain::fill_holes
+
+void Job_chain::fill_holes()
+{
+    if( !_node_list.empty() )
+    {
+        Node* node = *_node_list.rbegin();
+        if( !node->is_type( Node::n_end )  &&  node->next_state().is_missing() )  add_end_node( default_end_state_name );    // Endzustand fehlt? Dann hinzufügen
+    }
+
+    Z_FOR_EACH( Node_list, _node_list, it )
+    {
+        Node* node = *it;
+
+        if( node->is_type( Node::n_file_order_sink ) )
         {
-            Node*               node = *it;
+            // _next_state und _error_state unverändert lassen
+        }
+        else
+        {
             Node_list::iterator next = it;  next++;
 
-            if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
+            if( node->next_state().is_missing()  &&  
+                next != _node_list.end()  &&  
+                ( node->is_type( Node::n_order_queue ) || node->is_type( Node::n_job_chain ) ) )
             {
-                int DYNAMISCH_KONFIGURIERBAR_MACHEN;
-                Job_chain* nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );     // Sicherstellen, dass Jobkette bekannt ist
-                order_id_space->connect_job_chain( nested_job_chain );                                        // Exception bei doppelter Auftragskennung
+                node->_next_state = (*next)->order_state();
             }
 
-            if( node->is_type( Node::n_file_order_sink ) )
+            if( !node->next_state().is_missing() )  node->_next_node  = node_from_state( node->next_state() );
+                                              else  node->_next_state = empty_variant;
+
+            if( !node->error_state().is_missing() )  node->_error_node  = node_from_state( node->error_state() );
+                                               else  node->_error_state = empty_variant;
+        }
+    }
+}
+
+//----------------------------------------------------------Job_chain::initialize_nested_job_chains
+// Prüft, ob alle verschachtelten Jobketten da sind
+
+bool Job_chain::initialize_nested_job_chains()
+{
+    bool result = true;
+
+    Z_FOR_EACH( Node_list, _node_list, it )
+    {
+        Node* node = *it;
+
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
+        {
+            add_dependant( subsystem(), n->nested_job_chain_path() );
+
+            if( Job_chain* nested_job_chain = order_subsystem()->job_chain_or_null( n->nested_job_chain_path() ) )
             {
-                // _next_state und _error_state unverändert lassen
+                if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
+
+                Z_FOR_EACH( Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
+                {
+                    if( Nested_job_chain_node::try_cast( *it ) )  z::throw_xc( "SCHEDULER-412", obj_name() );
+                    // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
+                }
+
+                if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << n->nested_job_chain_path() << "->" << path() );
             }
             else
             {
-                if( node->next_state().is_missing()  &&  
-                    next != _node_list.end()  &&  
-                    ( node->is_type( Node::n_order_queue ) || node->is_type( Node::n_job_chain ) ) )
-                {
-                    node->_next_state = (*next)->order_state();
-                }
-
-                if( !node->next_state().is_missing() )  node->_next_node  = node_from_state( node->next_state() );
-                                                  else  node->_next_state = empty_variant;
-
-                if( !node->error_state().is_missing() )  node->_error_node  = node_from_state( node->error_state() );
-                                                   else  node->_error_state = empty_variant;
+                result = false;
             }
         }
-
-        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
-        {
-            Node* node = *it;
-            check_job_chain_node( node );
-        }
-
-        _order_sources.finish();
-
-
-        /// Jetzt kann nichts mehr schiefgehen. Keine Exception ab hier! ///
-
-
-        Z_FOR_EACH( Node_list, _node_list, it )
-        {
-            Node* node = *it;
-
-            if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
-            {
-                node->_nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );
-            }
-        }
-
-
-        if( order_id_space->size() > 0 )    // Die verschachtelten Jobketten
-        {
-            order_id_space->connect_job_chain( this );
-            order_id_space->complete_and_add( this );
-
-            //S job_chains_string;
-
-            //Z_FOR_EACH( Job_chain_set, order_id_space->_job_chain_set, it )
-            //{
-            //    Job_chain* job_chain = *it;
-            //    if( job_chain != this )
-            //    {
-            //        if( !job_chains_string.empty() )  job_chains_string << ", ";
-            //        job_chains_string << '\'' << job_chain->path() << '\'';
-            //    }
-            //}
-
-            //log()->info( message_string( "SCHEDULER-872", order_id_space->obj_name(), job_chains_string ) );
-        }
-
-        
-        set_state( s_initialized );
-
-
-        //if( zschimmer::Log_ptr log = "" )
-        //{
-        //    log << obj_name() << " finished:\n";
-
-        //    for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
-        //    {
-        //        Node* n = *it;
-
-        //        log << "    job=" << ( n->_job? n->_job->name() : "(end)" );
-        //        log << " state=" << n->_state;
-        //        log << " next="  << n->_next_state;
-        //        log << " error=" << n->_error_state;
-        //        log << '\n';
-        //    }
-        //}
-
-        result = true;
     }
 
     return result;
@@ -2010,6 +1997,58 @@ void Job_chain::check_job_chain_node( Node* node )
     catch( exception& x )
     {
         z::throw_xc( "SCHEDULER-406", node->order_state(), x );
+    }
+}
+
+//-----------------------------------------------Job_chain::add_nested_job_chains_to_order_id_space
+
+void Job_chain::add_nested_job_chains_to_order_id_space( Order_id_space* order_id_space )
+{
+    Z_FOR_EACH( Node_list, _node_list, it )
+    {
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( *it ) )
+        {
+            Job_chain* nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );
+            order_id_space->connect_job_chain( nested_job_chain );                  // Exception bei doppelter Auftragskennung
+        }
+    }
+}
+
+//------------------------------------------------------------Job_chain::complete_nested_job_chains
+
+void Job_chain::complete_nested_job_chains( Order_id_space* order_id_space )
+{
+    // Keine Exception auslösen!
+
+    Z_FOR_EACH( Node_list, _node_list, it )
+    {
+        Node* node = *it;
+
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
+        {
+            node->_nested_job_chain = order_subsystem()->job_chain( n->nested_job_chain_path() );
+        }
+    }
+
+
+    if( order_id_space->size() > 0 )    // Die verschachtelten Jobketten
+    {
+        order_id_space->connect_job_chain( this );
+        order_id_space->complete_and_add( this );
+
+        //S job_chains_string;
+
+        //Z_FOR_EACH( Job_chain_set, order_id_space->_job_chain_set, it )
+        //{
+        //    Job_chain* job_chain = *it;
+        //    if( job_chain != this )
+        //    {
+        //        if( !job_chains_string.empty() )  job_chains_string << ", ";
+        //        job_chains_string << '\'' << job_chain->path() << '\'';
+        //    }
+        //}
+
+        //log()->info( message_string( "SCHEDULER-872", order_id_space->obj_name(), job_chains_string ) );
     }
 }
 
@@ -2544,9 +2583,9 @@ bool Job_chain::prepare_to_remove()
 
     _remove = true;
 
-    bool result = can_be_removed_now();
+    //bool result = can_be_removed_now();
     //if( !result )  _log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
-    return result;
+    return My_file_based::prepare_to_remove();
 }
 
 //--------------------------------------------------------------------Job_chain::can_be_removed_now
@@ -2606,56 +2645,6 @@ Job_chain* Job_chain::replace_now()
 
     return job_chain_folder()->replace_file_based( this );
 }
-
-//-------------------------------------------------------------Job_chain::set_replacement_job_chain
-
-//void Job_chain::set_replacement_job_chain( Job_chain* replacement_job_chain )
-//{
-//    int TODO;
-//    
-//    // Alle Warteschlangen gleichen Zustands übernehmen
-//
-//    if( replacement_job_chain->_state == s_active )  z::throw_xc( __FUNCTION__, "state != s_active" );
-//
-//    prepare_to_remove();
-//    _replacement_job_chain = replacement_job_chain;
-//}
-
-////------------------------------------------------------------------Job_chain::on_base_file_removed
-//
-//bool Job_chain::on_base_file_removed()
-//{
-//    return remove();
-//}
-
-//--------------------------------------------------------------------------------Job_chain::remove
-
-//bool Job_chain::remove()
-//{
-//    bool is_removable = prepare_to_remove();
-//    if( is_removable )  job_chain_folder()->remove_job_chain( this );
-//
-//    return is_removable;
-//}
-
-//-------------------------------------------------------Job_chain::check_for_replacing_or_removing
-
-//void Job_chain::check_for_replacing_or_removing()
-//{
-//    int NACH_FILE_BASED_VERSCHIEBEN;
-//
-//    if( can_be_replaced_now() )
-//    {
-//        log()->info( message_string( "SCHEDULER-936" ) );     // "Removing"
-//        replace_now();
-//    }
-//    else
-//    if( can_be_removed_now() )
-//    {
-//        log()->info( message_string( "SCHEDULER-936" ) );     // "Removing"
-//        remove();
-//    }
-//}
 
 //--------------------------------------------------------------------Job_chain::db_where_condition
 

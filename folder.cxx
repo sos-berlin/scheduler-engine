@@ -536,13 +536,13 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
                         file_based->set_base_file_info( *base_file_info );
                         file_based->_base_file_xc      = zschimmer::Xc();
                         file_based->_base_file_xc_time = 0;
-                        file_based->activate();
+                        file_based->switch_file_based_state( File_based::s_active );
                     }
                 }
             }
             else  
             {
-                file_based->activate();
+                file_based->switch_file_based_state( File_based::s_active );
             }
         }
     }
@@ -719,12 +719,21 @@ File_based::~File_based()
     
 void File_based::close()
 {
+    _wished_state = s_closed;
     set_file_based_state( s_closed );
 }
 
 //---------------------------------------------------------------------------File_based::initialize
 
 bool File_based::initialize()
+{
+    _wished_state = s_initialized;
+    return initialize2();
+}
+
+//--------------------------------------------------------------------------File_based::initialize2
+
+bool File_based::initialize2()
 {
     bool ok = _state == s_initialized;
 
@@ -741,13 +750,20 @@ bool File_based::initialize()
 
 bool File_based::load()
 {
+    _wished_state = s_loaded;
+    return load2();
+}
+
+//--------------------------------------------------------------------------------File_based::load2
+
+bool File_based::load2()
+{
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
     bool ok = _state == s_loaded;
-
     if( !ok )
     {
-        initialize();
+        initialize2();
 
         if( _state == s_initialized  &&  subsystem()->subsystem_state() >= subsys_loaded )
         {
@@ -763,11 +779,18 @@ bool File_based::load()
 
 bool File_based::activate()
 {
-    bool ok = _state == s_active;
+    _wished_state = s_active;
+    return activate2();
+}
 
+//----------------------------------------------------------------------------File_based::activate2
+
+bool File_based::activate2()
+{
+    bool ok = _state == s_active;
     if( !ok )
     {
-        load();
+        load2();
 
         if( _state == s_loaded  &&  subsystem()->subsystem_state() >= subsys_active )
         {
@@ -776,13 +799,74 @@ bool File_based::activate()
             if( ok )
             {
                 set_file_based_state( s_active );
-                subsystem()->missings()->announce_missing_is_found( this ); 
+                subsystem()->dependencies()->announce_dependant_incarnated( this ); 
             }
 
         }
     }
 
     return ok;
+}
+
+//-----------------------------------------------------------------File_based::set_file_based_state
+
+void File_based::set_file_based_state( State state )                         
+{ 
+    if( _state != state )
+    {
+        _state = state; 
+
+        Z_DEBUG_ONLY( log()->debug( message_string( "SCHEDULER-893", file_based_state_name() ) ); )
+    }
+}
+
+//--------------------------------------------------------------File_based::try_set_to_wished_state
+
+bool File_based::try_switch_wished_file_based_state()
+{
+    return switch_file_based_state( _wished_state );
+}
+
+//--------------------------------------------------------------File_based::switch_file_based_state
+
+bool File_based::switch_file_based_state( State state )
+{
+    bool result = false;
+
+    switch( state )
+    {
+        case s_initialized: result = initialize();  break;
+        case s_loaded:      result = load();        break;
+        case s_active:      result = activate();    break;
+        case s_error:       result = true;  set_file_based_state( state );  break;
+      //case s_incomplete:  result = true;  set_file_based_state( state );  break;
+        case s_closed:      result = true;  close(); break;
+        default:            assert(0);
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------File_based::on_dependant_incarnated
+
+bool File_based::on_dependant_incarnated( File_based* )
+{
+    return try_switch_wished_file_based_state();
+}
+
+//-----------------------------------------------------------File_based::on_dependant_to_be_removed
+
+bool File_based::on_dependant_to_be_removed( File_based* )
+{
+    int FEHLT_WAS; //??
+    return true;
+}
+
+//-----------------------------------------------------------------File_based::on_dependant_removed
+
+void File_based::on_dependant_removed( File_based* )
+{
+    check_for_replacing_or_removing();
 }
 
 //---------------------------------------------------------------------File_based::assert_is_loaded
@@ -806,6 +890,16 @@ void File_based::assert_is_active()
         if( base_file_has_error() )  z::throw_xc( "SCHEDULER-154", obj_name(), _base_file_xc );
                                else  z::throw_xc( "SCHEDULER-154", obj_name() );
     }
+}
+
+//--------------------------------------------------------------------File_based::prepare_to_remove
+
+bool File_based::prepare_to_remove()
+{ 
+    subsystem()->dependencies()->prepare_to_remove( this ); 
+    //Dependant::prepare_to_remove();
+
+    return can_be_removed_now(); 
 }
 
 //-------------------------------------------------------------------------------File_based::remove
@@ -868,6 +962,7 @@ string File_based::file_based_state_name( State state )
         case s_loaded:          return "loaded";
         case s_active:          return "active";
         case s_closed:          return "closed";
+      //case s_incomplete:      return "incomplete";
         case s_error:           return "error";
         default:                return S() << "File_based_state-" << state;
     }
@@ -875,7 +970,7 @@ string File_based::file_based_state_name( State state )
 
 //--------------------------------------------------------------------------File_based::dom_element
 
-xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr element;   
 
@@ -963,7 +1058,7 @@ Folder* File_based::folder() const
 File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown, Type_code type_code ) 
 : 
     Subsystem( spooler, iunknown, type_code ),
-    _missings( this )
+    _dependencies( this )
 {
 }
 
@@ -974,82 +1069,94 @@ Path File_based_subsystem::normalized_path( const Path& path ) const
     return Path( path.folder_path(), normalized_name( path.name() ) );
 }
 
-//-----------------------------------------------------------Missings_requestor::Missings_requestor
-    
-Missings_requestor::Missings_requestor()
+//---------------------------------------------------------------------------------Pendant::Pendant
+
+Pendant::Pendant()
 {
 }
 
-//----------------------------------------------------------Missings_requestor::~Missings_requestor
+//--------------------------------------------------------------------------------Pendant::~Pendant
 
-Missings_requestor::~Missings_requestor()
+Pendant::~Pendant()
 {
     try
     {
-        close();
+        remove_dependants();
     }
     catch( exception& x )  { Z_LOG( __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
 }
 
-//------------------------------------------------------------------------Missings_requestor::close
+//-----------------------------------------------------------------------Pendant::remove_dependants
 
-void Missings_requestor::close()
+void Pendant::remove_dependants()
 {
-    Z_FOR_EACH( Missing_sets, _missing_sets, it )
+    Z_FOR_EACH( Dependant_sets, _missing_sets, it )
     {
         File_based_subsystem* subsystem   = it->first;
-        Missing_set&          missing_set = it->second;
+        Dependant_set&          missing_set = it->second;
 
-        Z_FOR_EACH( Missing_set, missing_set, it2 )
+        Z_FOR_EACH( Dependant_set, missing_set, it2 )
         {
-            assert( !"remove_missing fehlt" );
-            subsystem->missings()->remove_missing( this, *it2 );
+            subsystem->dependencies()->remove_dependant( this, *it2 );
         }
     }
 }
 
-//------------------------------------------------------------------Missings_requestor::add_missing
+//---------------------------------------------------------------------------Pendant::add_dependant
 
-void Missings_requestor::add_missing( File_based_subsystem* subsystem, const Path& path )
+void Pendant::add_dependant( File_based_subsystem* subsystem, const Path& path )
 {
     _missing_sets[ subsystem ].insert( subsystem->normalized_path( path ) );
-    subsystem->missings()->add_missing( this, path );
+    subsystem->dependencies()->add_dependant( this, path );
 }
 
-//---------------------------------------------------------------Missings_requestor::remove_missing
+//------------------------------------------------------------------------Pendant::remove_dependant
 
-void Missings_requestor::remove_missing( File_based_subsystem* subsystem, const Path& path )
+void Pendant::remove_dependant( File_based_subsystem* subsystem, const Path& path )
 {
     _missing_sets[ subsystem ].erase( subsystem->normalized_path( path ) );
-    subsystem->missings()->remove_missing( this, path );
+    subsystem->dependencies()->remove_dependant( this, path );
 }
 
-//-------------------------------------------------------------------------------Missings::Missings
-    
-Missings::Missings( File_based_subsystem* subsystem )
+//--------------------------------------------------------------Pendant::on_dependant_to_be_removed
+
+bool Pendant::on_dependant_to_be_removed( File_based* )
+{
+    return false;
+}
+
+//--------------------------------------------------------------------Pendant::on_dependant_removed
+
+void Pendant::on_dependant_removed( File_based* )
+{
+}
+
+//-----------------------------------------------------------------------Dependencies::Dependencies
+
+Dependencies::Dependencies( File_based_subsystem* subsystem )
 :
     _zero_(this+1),
     _subsystem( subsystem )
 {
 }
 
-//------------------------------------------------------------------------------Missings::~Missings
+//----------------------------------------------------------------------Dependencies::~Dependencies
     
-Missings::~Missings()
+Dependencies::~Dependencies()
 {
 }
 
-//----------------------------------------------------------------------------Missings::add_missing
+//----------------------------------------------------------------------Dependencies::add_dependant
 
-void Missings::add_missing( Missings_requestor* requestor, const string& missings_path )
+void Dependencies::add_dependant( Pendant* requestor, const string& missings_path )
 {
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
     _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( requestor );
 }
 
-//-------------------------------------------------------------------------Missings::remove_missing
+//-------------------------------------------------------------------Dependencies::remove_dependant
 
-void Missings::remove_missing( Missings_requestor* requestor, const string& missings_path )
+void Dependencies::remove_dependant( Pendant* requestor, const string& missings_path )
 {
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
 
@@ -1059,9 +1166,9 @@ void Missings::remove_missing( Missings_requestor* requestor, const string& miss
     if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
-//-----------------------------------------------------------------------Missings::remove_requestor
+//-------------------------------------------------------------------Dependencies::remove_requestor
 
-void Missings::remove_requestor( Missings_requestor* requestor )
+void Dependencies::remove_requestor( Pendant* requestor )
 {
     Z_FOR_EACH( Path_requestors_map, _path_requestors_map, path_requestors_it )
     {
@@ -1079,9 +1186,9 @@ void Missings::remove_requestor( Missings_requestor* requestor )
     }
 }
 
-//--------------------------------------------------------------Missings::announce_missing_is_found
+//------------------------------------------------------Dependencies::announce_dependant_incarnated
 
-void Missings::announce_missing_is_found( File_based* found_missing )
+void Dependencies::announce_dependant_incarnated( File_based* found_missing )
 {
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
 
@@ -1094,18 +1201,57 @@ void Missings::announce_missing_is_found( File_based* found_missing )
     {
         Requestor_set& requestor_set = it->second;
 
-        for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
+        //for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
+        Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
-            Missings_requestor*     requestor = *it2;
+            Pendant*     requestor = *it2;
         
-            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_missing_found( " << found_missing->obj_name() << " ) " ); )
-            bool ok = requestor->on_missing_found( found_missing );
-            if( ok )  requestor_set.erase( it2 );
+            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_incarnated( " << found_missing->obj_name() << " ) " ); )
+            bool ok = requestor->on_dependant_incarnated( found_missing );
+            //if( ok )  
+            //{
+            //    it = _path_requestors_map.find( found_missing->normalized_path() );
+            //    if( it != _path_requestors_map.end()    // requestor_set ist noch da?
+            //    {
+            //        assert( it == &requestor_set );
+            //        requestor_set.erase( it2 );
+            //    }
+            //}
 
-            it2 = next_it2;
+            //it2 = next_it2;
         }
     }
+}
+
+//------------------------------------------------------------------Dependencies::prepare_to_remove
+
+bool Dependencies::prepare_to_remove( File_based* to_be_removed )
+{
+    assert( to_be_removed->subsystem() == _subsystem );
+    assert( to_be_removed->file_based_state() == File_based::s_active );
+
+    bool result = true;
+
+    Path_requestors_map::iterator it = _path_requestors_map.find( to_be_removed->normalized_path() );
+
+    if( it != _path_requestors_map.end() )
+    {
+        Requestor_set& requestor_set = it->second;
+
+        //for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
+        Z_FOR_EACH( Requestor_set, requestor_set, it2 )
+        {
+            Requestor_set::iterator next_it2  = it2;  next_it2++;
+            Pendant*     requestor = *it2;
+        
+            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            result = requestor->on_dependant_to_be_removed( to_be_removed );
+            if( !result )  break;
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------
