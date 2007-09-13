@@ -768,7 +768,12 @@ bool File_based::load2()
         if( _state == s_initialized  &&  subsystem()->subsystem_state() >= subsys_loaded )
         {
             ok = on_load();
-            if( ok )  set_file_based_state( s_loaded );
+
+            if( ok )
+            {
+                set_file_based_state( s_loaded );
+                subsystem()->dependencies()->announce_dependant_incarnated( this ); 
+            }
         }
     }
 
@@ -799,9 +804,7 @@ bool File_based::activate2()
             if( ok )
             {
                 set_file_based_state( s_active );
-                subsystem()->dependencies()->announce_dependant_incarnated( this ); 
             }
-
         }
     }
 
@@ -1193,7 +1196,7 @@ void Dependencies::announce_dependant_incarnated( File_based* found_missing )
     //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
 
     assert( found_missing->subsystem() == _subsystem );
-    assert( found_missing->file_based_state() == File_based::s_active );
+    //assert( found_missing->file_based_state() == File_based::s_active );
 
     Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
 
@@ -1229,7 +1232,7 @@ void Dependencies::announce_dependant_incarnated( File_based* found_missing )
 bool Dependencies::prepare_to_remove( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
-    assert( to_be_removed->file_based_state() == File_based::s_active );
+  //assert( to_be_removed->file_based_state() == File_based::s_active );
 
     bool result = true;
 

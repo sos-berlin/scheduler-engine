@@ -656,6 +656,7 @@ Spooler::Spooler()
     _scheduler_script         = new_scheduler_script( this );
     _folder_subsystem         = new_folder_subsystem( this );
     _process_class_subsystem  = Z_NEW( Process_class_subsystem( this ) );
+    _lock_subsystem           = Z_NEW( lock::Lock_subsystem( this ) );
     _job_subsystem            = new_job_subsystem( this );
     _task_subsystem           = Z_NEW( Task_subsystem( this ) );
     _order_subsystem          = new_order_subsystem( this );
@@ -664,7 +665,6 @@ Spooler::Spooler()
     _db                       = Z_NEW( Database( this ) );
     _http_server              = http::new_http_server( this );
     _web_services             = new_web_services( this );
-    _lock_subsystem           = Z_NEW( lock::Lock_subsystem( this ) );
     _supervisor               = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
@@ -1534,11 +1534,11 @@ void Spooler::load()
     _folder_subsystem->set_directory( _configuration_directory );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
+    _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
     _order_subsystem         ->switch_subsystem_state( subsys_initialized );
     _standing_order_subsystem->switch_subsystem_state( subsys_initialized );
     _http_server             ->switch_subsystem_state( subsys_initialized );
     _web_services            ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
-    _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
 
 
     Command_processor cp ( this, Security::seclev_all );
@@ -1762,26 +1762,25 @@ void Spooler::activate()
     if( !_ignore_process_classes )
     _process_class_subsystem->switch_subsystem_state( subsys_loaded );
 
+    _lock_subsystem          ->switch_subsystem_state( subsys_loaded );
     _job_subsystem           ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
     _order_subsystem         ->switch_subsystem_state( subsys_loaded );
     _standing_order_subsystem->switch_subsystem_state( subsys_loaded );
-    _lock_subsystem          ->switch_subsystem_state( subsys_loaded );
 
     bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
     if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );       // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
 
-    _folder_subsystem->switch_subsystem_state( subsys_active );
-    
     if( !_ignore_process_classes )
     _process_class_subsystem ->switch_subsystem_state( subsys_active );
 
+    _lock_subsystem          ->switch_subsystem_state( subsys_active );
     _job_subsystem           ->switch_subsystem_state( subsys_active );
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
     _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _lock_subsystem          ->switch_subsystem_state( subsys_active );
+    _folder_subsystem        ->switch_subsystem_state( subsys_active );
 
     if( !_xml_cmd.empty() )
     {

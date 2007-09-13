@@ -1,0 +1,7 @@
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    
+    <job_chain_node.job_chain state="AAA" job_chain="job_chain.nested.scheduler.A"/>
+    <job_chain_node.job_chain state="BBB" job_chain="job_chain.nested.scheduler.B"/>
+    
+</job_chain>

@@ -1,0 +1,24 @@
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+
+        <script language="javascript">
+        <![CDATA[
+
+//
+
+        ]]></script>
+
+
+        <commands>
+            <add_order job_chain="job_chain.nested" id="1" title="Wir haben einen Auftrag!" replace="yes"/>
+            <!--remove_job_chain job_chain="job_chain.nested.scheduler.ce"/-->
+            <!--remove_job_chain job_chain="job_chain.nested.scheduler.de"/-->
+            <!--add_order job_chain="job_chain.nested.scheduler.B" id="1" title="Wir haben einen Auftrag!" replace="yes"/-->
+        </commands>
+
+    </config>
+</spooler>

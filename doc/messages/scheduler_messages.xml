@@ -3978,7 +3978,7 @@
         
         <message code="SCHEDULER-893" weight="debug3">
             <text xml:lang="en">
-                <title>file_based_state='<p1/>'</title>
+                <title>Subsystem_object::state='<p1/>'</title>
             </text>
         </message>
     </messages>

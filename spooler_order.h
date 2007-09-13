@@ -584,6 +584,7 @@ struct Nested_job_chain_node : Node
                                 Nested_job_chain_node       ( Job_chain*, const Order::State&, const string& job_chain_path );
 
     string                      nested_job_chain_path       () const                                { return _nested_job_chain_path; }
+    void                        initialize                  ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
   private:

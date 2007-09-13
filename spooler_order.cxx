@@ -1370,6 +1370,14 @@ Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order:
 {
 }
 
+//----------------------------------------------------------------Nested_job_chain_node::initialize
+    
+void Nested_job_chain_node::initialize()
+{
+    Base_class::initialize();
+    _job_chain->add_dependant( _spooler->order_subsystem(), _nested_job_chain_path );
+}
+
 //---------------------------------------------------------------Nested_job_chain_node::dom_element
     
 xml::Element_ptr Nested_job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -1931,11 +1939,14 @@ void Job_chain::fill_holes()
                 node->_next_state = (*next)->order_state();
             }
 
-            if( !node->next_state().is_missing() )  node->_next_node  = node_from_state( node->next_state() );
-                                              else  node->_next_state = empty_variant;
 
-            if( !node->error_state().is_missing() )  node->_error_node  = node_from_state( node->error_state() );
-                                               else  node->_error_state = empty_variant;
+
+
+            if( node->_next_state.is_null_or_empty_string() )  node->_next_state = empty_variant;
+                                                         else  node->_next_node  = node_from_state( node->next_state() );
+
+            if( node->_error_state.is_null_or_empty_string() )  node->_error_state = empty_variant;
+                                                          else  node->_error_node  = node_from_state( node->error_state() );
         }
     }
 }
@@ -2100,10 +2111,13 @@ Node* Job_chain::node_from_state( const Order::State& state )
 
 Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
 {
-    for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+    if( !order_state.is_missing() )
     {
-        Node* n = *it;
-        if( n->order_state() == order_state )  return n;
+        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+        {
+            Node* n = *it;
+            if( n->order_state() == order_state )  return n;
+        }
     }
 
     return NULL;
