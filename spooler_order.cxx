@@ -1545,9 +1545,7 @@ void Job_chain::disconnected_nested_job_chains_and_rebuild_order_id_space()
             if( node->_nested_job_chain )  
             {
                 disconnected_job_chains.insert( node->_nested_job_chain );
-                Job_chain* nested_job_chain = node->_nested_job_chain;
                 node->_nested_job_chain = NULL;      // reference<> auflösen
-                nested_job_chain->check_for_replacing_or_removing(); 
             }
         }
     }
@@ -2804,6 +2802,19 @@ void Order_id_spaces::recompute_order_id_spaces( const Job_chain_set& disconnect
     if( job_chains.empty()  &&  old_common_order_id_space )
     {
         remove_order_id_space( old_common_order_id_space, causing_job_chain );
+    }
+
+
+
+
+    Z_FOR_EACH_CONST( Job_chain_set, disconnected_job_chains, it )
+    {
+        Job_chain* job_chain = *it;
+
+        if( job_chain != causing_job_chain )
+        {
+            job_chain->check_for_replacing_or_removing(); 
+        }
     }
 }
 

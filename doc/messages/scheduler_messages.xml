@@ -2984,13 +2984,13 @@
 
         <message code="SCHEDULER-936">
             <text xml:lang="en">
-                <title>Replacing <p1/></title>
+                <title>Replacing <p1/> now</title>
             </text>
         </message>
 
         <message code="SCHEDULER-937">
             <text xml:lang="en">
-                <title>Removing <p1/></title>
+                <title>Removing <p1/> now</title>
             </text>
         </message>
 
