@@ -297,10 +297,12 @@ void Lock::close()
 //    return this;
 //}
 
-//bool Lock::can_be_replaced_now()
-//{
-//    return _replacement_is_valid();
-//}
+//------------------------------------------------------------------------Lock::can_be_replaced_now
+
+bool Lock::can_be_replaced_now()
+{
+    return true;
+}
 
 //------------------------------------------------------------------------------Lock::on_initialize
 
@@ -379,16 +381,14 @@ bool Lock::prepare_to_remove()
 
 //-------------------------------------------------------------------------Lock::prepare_to_replace
 
-bool Lock::prepare_to_replace()
+void Lock::prepare_to_replace()
 {
     _remove = false;
-
-    return can_be_replaced_now();
 }
 
-//--------------------------------------------------------------------------------Lock::replace_now
+//-----------------------------------------------------------------------------Lock::on_replace_now
 
-Lock* Lock::replace_now()
+Lock* Lock::on_replace_now()
 {
     set_max_non_exclusive( replacement()->_config._max_non_exclusive );
 

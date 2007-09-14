@@ -48,8 +48,9 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
-    bool                        prepare_to_replace          ();
-    Lock*                       replace_now                 ();
+    bool                        can_be_replaced_now         ();
+    void                        prepare_to_replace          ();
+    Lock*                       on_replace_now              ();
 
 
     // Ilock

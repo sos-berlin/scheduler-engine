@@ -330,29 +330,23 @@ bool Standing_order::can_be_replaced_now()
 
 //---------------------------------------------------------------Standing_order::prepare_to_replace
 
-bool Standing_order::prepare_to_replace()
+void Standing_order::prepare_to_replace()
 {
-    bool result = false;
-
-    if( _order )
-    {
-        if( order_is_removable_or_replaceable() )
-        {
-            if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )    // Jobkette bekannt?
-            {
-                result = true;
-            }
-        }
-    }
-    else
-        result = true;
-
-    return result;
+    //if( _order )
+    //{
+    //    if( order_is_removable_or_replaceable() )
+    //    {
+    //        if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )    // Jobkette bekannt?
+    //        {
+    //            result = true;
+    //        }
+    //    }
+    //}
 }
 
-//----------------------------------------------------------------------Standing_order::replace_now
+//-------------------------------------------------------------------Standing_order::on_replace_now
 
-Standing_order* Standing_order::replace_now()
+Standing_order* Standing_order::on_replace_now()
 {
     ptr<Order> order = replacement()->_order;
 
@@ -371,15 +365,16 @@ void Standing_order::on_order_carried_out()
 {
     // Wird auch von on_order_removed() gerufen
 
-    if( replacement() )
-    {
-        if( can_be_replaced_now() )  replace_now();
-    }
-    else
-    if( base_file_is_removed() )
-    {
-        remove();
-    }
+    check_for_replacing_or_removing();
+    //if( replacement() )
+    //{
+    //    if( can_be_replaced_now() )  replace_now();
+    //}
+    //else
+    //if( base_file_is_removed() )
+    //{
+    //    remove();
+    //}
 }
 
 //-----------------------------------------------------------------Standing_order::on_order_removed

@@ -447,6 +447,7 @@ struct Node : Com_job_chain_node,
 
     virtual void                initialize                  ();
     virtual void                activate                    ();
+  //virtual void                replace                     ( Node* )                               {}
 
     const Order::State&         order_state                 () const                                { return _order_state; }
     void                    set_next_state                  ( const Order::State& );
@@ -521,6 +522,7 @@ struct Order_queue_node : Node
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
     void                        close                       ();
+  //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
@@ -581,6 +583,7 @@ struct Nested_job_chain_node : Node
 
     void                        close                       ();
     void                        initialize                  ();
+  //void                        replace                     ( Node* old_node );
 
     string                      nested_job_chain_path       () const                                { return _nested_job_chain_path; }
     Job_chain*                  nested_job_chain            () const                                { return _nested_job_chain; }
@@ -593,7 +596,7 @@ struct Nested_job_chain_node : Node
 
     string                     _nested_job_chain_path; 
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
-    Job_chain_set              _using_job_chains_set;
+  //Job_chain_set              _using_job_chains_set;
 };
 
 //-----------------------------------------------------------------------------job_chain::Sink_node
@@ -664,9 +667,9 @@ struct Job_chain : Com_job_chain,
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
-    bool                        prepare_to_replace          ();
-    bool                        can_be_replaced_now         ();
-    Job_chain*                  replace_now                 ();
+    //void                        prepare_to_replace          ();
+    //bool                        can_be_replaced_now         ();
+    //Job_chain*                  on_replace_now              ();
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
@@ -717,6 +720,7 @@ struct Job_chain : Com_job_chain,
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
     int                         order_count                 ( Read_transaction* );
     bool                        has_order                   () const;
+    bool                        has_order_in_task           () const;
     void                        register_order              ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order            ( Order* );
 
@@ -831,6 +835,8 @@ struct Order_queue : Com_order_queue,
     void                        tip_for_new_distributed_order();
     bool                        is_in_any_distributed_job_chain();
     string                      db_where_expression         ();
+
+    void                        on_node_replaced            ( job_chain::Order_queue_node* n )      { _order_queue_node = n;  _job_chain = n->job_chain(); }
 
 
     Fill_zero                  _zero_;

@@ -1241,7 +1241,7 @@ bool Job::can_be_removed_now()
 
 //--------------------------------------------------------------------------Job::prepare_to_replace
 
-bool Job::prepare_to_replace()
+void Job::prepare_to_replace()
 {
     bool result;
     //bool is_second_remove = _remove;
@@ -1251,12 +1251,9 @@ bool Job::prepare_to_replace()
     _remove = true; 
     stop( true );
 
-    result = can_be_replaced_now();
+    //result = can_be_replaced_now();
     //if( !result  )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
     //if( !result  &&  !is_second_remove )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
-
-    return result;
-    //return prepare_to_remove();
 }
 
 //-------------------------------------------------------------------------Job::can_be_replaced_now
@@ -1266,9 +1263,9 @@ bool Job::can_be_replaced_now()
     return _running_tasks.size() == 0;
 }
 
-//---------------------------------------------------------------------------------Job::replace_now
+//------------------------------------------------------------------------------Job::on_replace_now
 
-Job* Job::replace_now()
+Job* Job::on_replace_now()
 {
     assert( can_be_replaced_now() );
 

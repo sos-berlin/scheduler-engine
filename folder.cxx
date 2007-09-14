@@ -523,12 +523,13 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             assert_empty_attribute( dom_document.documentElement(), "replace"    );
 
             file_based->set_dom( dom_document.documentElement() );
+            file_based->initialize();
 
             if( old_file_based )  
             {
-                bool can_be_replaced_now = old_file_based->prepare_to_replace();
+                old_file_based->prepare_to_replace();
 
-                if( can_be_replaced_now ) 
+                if( old_file_based->can_be_replaced_now() ) 
                 {
                     file_based = old_file_based->replace_now();
                     assert( !file_based->replacement() );
@@ -537,7 +538,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
                         file_based->set_base_file_info( *base_file_info );
                         file_based->_base_file_xc      = zschimmer::Xc();
                         file_based->_base_file_xc_time = 0;
-                        file_based->switch_file_based_state( File_based::s_active );
+                        //file_based->switch_file_based_state( File_based::s_active );
                     }
                 }
             }
@@ -877,9 +878,10 @@ bool File_based::on_dependant_to_be_removed( File_based* )
 
 //-----------------------------------------------------------------File_based::on_dependant_removed
 
-void File_based::on_dependant_removed( File_based* )
+void File_based::on_dependant_removed( File_based* file_based )
 {
     check_for_replacing_or_removing();
+    Pendant::on_dependant_removed( file_based );
 }
 
 //---------------------------------------------------------------------File_based::assert_is_loaded
@@ -909,8 +911,7 @@ void File_based::assert_is_active()
 
 bool File_based::prepare_to_remove()
 { 
-    subsystem()->dependencies()->prepare_to_remove( this ); 
-    //Dependant::prepare_to_remove();
+    subsystem()->dependencies()->announce_dependant_to_be_removed( this ); 
 
     return can_be_removed_now(); 
 }
@@ -921,8 +922,13 @@ bool File_based::remove()
 {
     bool is_removable = prepare_to_remove();
 
-    if( is_removable )  typed_folder()->remove_file_based( this );
-                  else  log()->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
+    if( is_removable )  
+    {
+        close();
+        typed_folder()->remove_file_based( this );
+    }
+    else  
+        log()->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
 
     return is_removable;
 }
@@ -931,14 +937,21 @@ bool File_based::remove()
 
 bool File_based::replace_with( File_based* file_based_replacement )
 {
+    bool result = false;
+
     set_replacement( file_based_replacement );
     
-    bool can_be_replaced_now = prepare_to_replace();
+    prepare_to_replace();
 
-    if( can_be_replaced_now )  replace_now();
-                         else  log()->info( message_string( "SCHEDULER-888", subsystem()->object_type_name() ) );
+    if( can_be_replaced_now() )
+    {
+        replace_now();
+        result = true;
+    }
+    else  
+        log()->info( message_string( "SCHEDULER-888", subsystem()->object_type_name() ) );
 
-    return can_be_replaced_now;
+    return result;
 }
 
 //------------------------------------------------------File_based::check_for_replacing_or_removing
@@ -951,6 +964,7 @@ bool File_based::check_for_replacing_or_removing()
     {
         log()->info( message_string( "SCHEDULER-936", subsystem()->object_type_name() ) );
         replace_now();
+        // this ist ungültig!
         result = true;
     }
     else
@@ -962,6 +976,54 @@ bool File_based::check_for_replacing_or_removing()
     }
 
     return result;
+}
+
+//-------------------------------------------------------------------File_based::prepare_to_replace
+
+void File_based::prepare_to_replace()
+{
+    prepare_to_remove();
+}
+
+//------------------------------------------------------------------File_based::can_be_replaced_now
+
+bool File_based::can_be_replaced_now()
+{
+    return replacement()  &&  can_be_removed_now();
+}
+
+//-----------------------------------------------------------------------File_based::on_replace_now
+
+File_based* File_based::on_replace_now()
+{
+    Typed_folder*   typed_folder = this->typed_folder();
+    ptr<File_based> replacement  = this->replacement();
+    State           wished_state = _wished_state;
+
+    assert( can_be_removed_now() );
+
+    typed_folder->remove_file_based( this );
+    // this ist ungültig
+
+    typed_folder->add_file_based( replacement );
+    replacement->switch_file_based_state( wished_state );
+
+    return replacement;
+}
+
+//--------------------------------------------------------------------------File_based::replace_now
+
+File_based* File_based::replace_now()
+{
+    assert( replacement() );
+
+    State wished_state = _wished_state;
+
+    File_based* new_file_based = on_replace_now();
+    // this ist ungültig
+
+    new_file_based->switch_file_based_state( wished_state );
+    return new_file_based;
 }
 
 //----------------------------------------------------------------File_based::file_based_state_name
@@ -1237,9 +1299,9 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
     }
 }
 
-//------------------------------------------------------------------Dependencies::prepare_to_remove
+//---------------------------------------------------Dependencies::announce_dependant_to_be_removed
 
-bool Dependencies::prepare_to_remove( File_based* to_be_removed )
+bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
   //assert( to_be_removed->file_based_state() == File_based::s_active );

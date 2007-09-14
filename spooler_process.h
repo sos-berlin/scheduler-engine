@@ -226,7 +226,9 @@ struct Process_class : Process_class_configuration
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
-    Process_class*              replace_now                 ();
+
+    bool                        can_be_replaced_now         ();
+    Process_class*              on_replace_now              ();
 
 
     void                    set_configuration               ( const Process_class_configuration& );

@@ -170,9 +170,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
   //bool                        remove                      ();
     bool                        prepare_to_remove           ();
 
-    bool                        prepare_to_replace          ();
+    void                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
-    Job*                        replace_now                 ();
+    Job*                        on_replace_now              ();
   //void                    set_replacement_job             ( Job* );
 
     void                        set_delay_after_error       ( int error_steps, const string& delay );

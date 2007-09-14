@@ -2,7 +2,7 @@
 >
     
     <job_chain_node state="111" job="A.111" error_state="222"/>
-    <job_chain_node state="222" job="javascript" error_state="finished**"/>
+    <job_chain_node state="222" job="javascript" error_state="finished"/>
     <job_chain_node state="finished"/>
     
 </job_chain>

@@ -2697,7 +2697,7 @@
 
         <message code="SCHEDULER-439">
             <text xml:lang="en">
-                <title>Error when removing <p3>type</p3> after base file '<p1>path</p1>' has been removed:<br/><p2>error</p2></title>
+                <title>Error when removing <p2>type</p2> after base file '<p1>path</p1>' has been removed:<br/><p3>error</p3></title>
             </text>
         </message>
     </messages>
@@ -2984,7 +2984,7 @@
 
         <message code="SCHEDULER-936">
             <text xml:lang="en">
-                <title>Replaceing <p1/></title>
+                <title>Replacing <p1/></title>
             </text>
         </message>
 

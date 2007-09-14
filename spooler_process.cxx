@@ -1034,9 +1034,16 @@ bool Process_class::can_be_removed_now()
     return _process_set.empty();
 }
 
-//-----------------------------------------------------------------------Process_class::replace_now
+//---------------------------------------------------------------Process_class::can_be_replaced_now
 
-Process_class* Process_class::replace_now()
+bool Process_class::can_be_replaced_now()
+{
+    return true;
+}
+
+//--------------------------------------------------------------------Process_class::on_replace_now
+
+Process_class* Process_class::on_replace_now()
 {
     set_configuration( *replacement() );
     set_replacement( NULL );

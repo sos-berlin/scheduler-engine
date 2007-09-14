@@ -1105,6 +1105,21 @@ void Order_queue_node::close()
     Base_class::close();
 }
 
+//------------------------------------------------------------------------Order_queue_node::replace
+
+//void Order_queue_node::replace( Node* old )
+//{
+//    if( Order_queue_node* old_node = Order_queue_node::try_cast( old ) )
+//    {
+//        if( !_job_chain->orders_are_recoverable()  ||  !_spooler->db()->opened() )   // Mögliche Verbesserung: Immer hier übernehmen, nicht aus der Datenbank laden
+//        {
+//            _order_queue = old_node->_order_queue;
+//            old_node->_order_queue = NULL;
+//            _order_queue->on_node_replaced( this );
+//        }
+//    }
+//}
+
 //---------------------------------------------------------------------Order_queue_node::set_action
 
 void Order_queue_node::set_action( const string& action_string )
@@ -1386,6 +1401,12 @@ void Nested_job_chain_node::initialize()
     _job_chain->add_dependant( _spooler->order_subsystem(), _nested_job_chain_path );
 }
 
+//-------------------------------------------------------------------Nested_job_chain_node::replace
+
+//void Nested_job_chain_node::replace( Node* )
+//{
+//}
+
 //--------------------------------------------Nested_job_chain_node::on_releasing_referenced_object
 
 void Nested_job_chain_node::on_releasing_referenced_object( const reference< Nested_job_chain_node, Job_chain >& ref )
@@ -1524,7 +1545,9 @@ void Job_chain::disconnected_nested_job_chains_and_rebuild_order_id_space()
             if( node->_nested_job_chain )  
             {
                 disconnected_job_chains.insert( node->_nested_job_chain );
-                node->_nested_job_chain = NULL;
+                Job_chain* nested_job_chain = node->_nested_job_chain;
+                node->_nested_job_chain = NULL;      // reference<> auflösen
+                nested_job_chain->check_for_replacing_or_removing(); 
             }
         }
     }
@@ -2270,6 +2293,9 @@ bool Job_chain::on_load()  // Read_transaction* ta )
         {
             for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
             {
+                // Auswahl könnte auf die Zustände der noch nicht geladenen Order_queue_node begrenzt werden.
+                // Beim Ersetzen einer Jobkette werden vorhandene Warteschlangen direkt übernommen, s. Order_queue_node::replace()
+
                 Any_file result_set = ta.open_result_set
                     ( 
                         S() << "select " << order_select_database_columns << ", `distributed_next_time`"
@@ -2419,7 +2445,26 @@ bool Job_chain::has_order() const
     for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
     {
         if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
-            if( !node->order_queue()->empty() )  return true;
+            if( node->order_queue()  &&  !node->order_queue()->empty() )  return true;
+    }
+
+    return false;
+}
+
+//---------------------------------------------------------------------Job_chain::has_order_in_task
+
+bool Job_chain::has_order_in_task() const
+{
+    Z_FOR_EACH_CONST( Node_list, _node_list, it )
+    {
+        if( Order_queue_node* order_queue_node = Order_queue_node::try_cast( *it ) )
+        {
+            Z_FOR_EACH_CONST( Order_queue::Queue, order_queue_node->order_queue()->_queue, it2 )
+            {
+                Order* order = *it2;
+                if( order->_task )  return true;
+            }
+        }
     }
 
     return false;
@@ -2612,12 +2657,16 @@ bool Job_chain::prepare_to_remove()
 {
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
   //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-151" );
-    if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
+
+    _remove = true;
+
+    //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
+    if( !can_be_removed_now() )  return false;
+
     int VERSCHACHTELTE_JOB_KETTEN_LOESCHEN;
 
     set_replacement( NULL );
 
-    _remove = true;
 
     //bool result = can_be_removed_now();
     //if( !result )  _log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
@@ -2628,59 +2677,51 @@ bool Job_chain::prepare_to_remove()
 
 bool Job_chain::can_be_removed_now()
 {
-    return _remove  &&  !has_order();
+    return _remove  && 
+           !is_referenced()  &&
+           !has_order();
 }
 
 //--------------------------------------------------------------------Job_chain::prepare_to_replace
 
-bool Job_chain::prepare_to_replace()
-{
-    _remove = false;
-    return can_be_replaced_now();
-}
+//void Job_chain::prepare_to_replace()
+//{
+//    _remove = false;
+//}
 
 //-------------------------------------------------------------------Job_chain::can_be_replaced_now
 
-bool Job_chain::can_be_replaced_now()
-{
-    return replacement()  &&  !has_order();
-}
+//bool Job_chain::can_be_replaced_now()
+//{
+//    return replacement() &&
+//           replacement()->file_based_state() == File_based::s_initialized &&
+//           !has_order_in_task();
+//}
 
-//--------------------------------------------------------------------Job_chain_folder::replace_now
+//------------------------------------------------------------------------Job_chain::on_replace_now
 
-Job_chain* Job_chain::replace_now()
-{               
-    ptr<Job_chain> holder = this;
-
-    if( !replacement() )  z::throw_xc( __FUNCTION__, obj_name() );
-    if( !can_be_replaced_now() )   z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
-
-    /*
-        Auftragswarteschlangen gleicher Auftragszustände umhängen
-        
-        Was passiert mit gerade ausgeführten Aufträgen gelöschter Auftragswarteschlangen?
-            ((order->remove_from_job_chain()?))
-            Besser warten, bis Auftragsschritt beendet.
-            if( _remove ): Keine neuen Schritte.
-            Bis kein Auftrag in Ausführung
-            Warteschlangen übernehmen bzw. löschen
-            Neue Warteschlangen aus Datenbank laden
-    */
-    Z_FOR_EACH( Node_list, replacement()->_node_list, it )
-    {
-        Node* new_job_chain_node = *it;
-        
-        if( Node* old_job_chain_node = node_from_state_or_null( new_job_chain_node->order_state() ) )
-        {
-            int TODO; // _order_queue übernehmen
-            //new_job_chain_node->_order_queue = old_job_chain_new->_order_queue;
-            //new_job_chain_node->_order_queue_loaded = true;   // Sonst wird die Auftragswarteschlange aus der Datenbank geladen
-        }
-    }
-
-
-    return job_chain_folder()->replace_file_based( this );
-}
+//Job_chain* Job_chain::on_replace_now()
+//{               
+//    ptr<Job_chain> holder = this;
+//
+//    if( !replacement() )  z::throw_xc( __FUNCTION__, obj_name() );
+//    if( !can_be_replaced_now() )   z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
+//
+//    //Z_FOR_EACH( Node_list, replacement()->_node_list, it )
+//    //{
+//    //    Node* new_job_chain_node = *it;
+//    //    
+//    //    if( Node* old_job_chain_node = node_from_state_or_null( new_job_chain_node->order_state() ) )
+//    //    {
+//    //        new_job_chain_node->replace( old_job_chain_node );
+//    //    }
+//    //}
+//
+//    close();
+//
+//
+//    return job_chain_folder()->replace_file_based( this );
+//}
 
 //--------------------------------------------------------------------Job_chain::db_where_condition
 
@@ -4044,6 +4085,7 @@ bool Order::is_processable()
     if( _job_chain )
     {
         if( _job_chain->_remove  || 
+            _job_chain->replacement()  &&  _job_chain->replacement()->file_based_state() == File_based::s_initialized  ||
             _job_chain->state() != Job_chain::s_active )  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
 
         if( Node* node = job_chain_node() )
@@ -5977,6 +6019,7 @@ bool Order::handle_end_state_of_nested_job_chain()
     catch( exception& x ) 
     { 
         _log->error( message_string( "SCHEDULER-415", x ) );  
+        if( _job_chain )  _job_chain->remove_order( this );
         end_state_reached = true;
     }
 

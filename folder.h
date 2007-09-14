@@ -82,7 +82,8 @@ struct Dependencies
     void                        remove_dependant            ( Pendant*, const string& missing_path );
     void                        remove_requestor            ( Pendant* );
     void                        announce_dependant_loaded   ( File_based* found_missing );
-    bool                        prepare_to_remove           ( File_based* to_be_removed );
+    bool                        announce_dependant_to_be_removed( File_based* to_be_removed );
+  //void                        announce_dependant_removed  ( File_based* );
 
 
   private:
@@ -269,6 +270,7 @@ struct File_based : Scheduler_object,
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
     bool                        try_switch_wished_file_based_state();
+    File_based*                 replace_now                 ();
   //void                        set_file_based_incomplete   ( bool b )                              { _is_incomplete = true; }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
@@ -282,9 +284,9 @@ struct File_based : Scheduler_object,
     virtual bool                can_be_removed_now          ()                                      = 0;
 
     virtual bool                replace_with                ( File_based* );
-    virtual bool                prepare_to_replace          ()                                      { return true; }
-    virtual bool                can_be_replaced_now         ()                                      { return true; }
-    virtual File_based*         replace_now                 ()                                      = 0;
+    virtual void                prepare_to_replace          ();
+    virtual bool                can_be_replaced_now         ();
+    virtual File_based*         on_replace_now              ();
 
     virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
     virtual bool                on_base_file_removed        ()                                      { return remove(); }
