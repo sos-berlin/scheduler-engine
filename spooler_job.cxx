@@ -646,8 +646,6 @@ void Job::close()
         }
     }
 
-    int TODO;//if( _order_queue )  _order_queue->close();    // Entkoppelt auch COM-Object Com_order_queue
-
     _log->close_file();
     _history.close();
     _log->close();
@@ -662,37 +660,6 @@ void Job::close()
     File_based::close();
 }
 
-//----------------------------------------------------------------------------Job::on_base_file_new
-
-//void Job::on_base_file_new()
-//{
-//    //if( !element.bool_getAttribute( "replace", true ) )     // replace="no", aber Job ist bekannt?
-//    //{
-//    //    log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) ) );
-//    //}
-//
-//    activate();
-//}
-
-//------------------------------------------------------------------------Job::on_base_file_changed
-
-//Job* Job::on_base_file_changed( Job* replacement_job )
-//{
-//    //set_replacement_job( replacement_job );
-//    //if( can_be_replaced_now() )
-//
-//    int TODO2; // replacement_job übernimmt _task_queue (in ein struct packen!), statt sie aus der Datenbank zu lesen (mit load()).
-//
-//    return this;
-//}
-
-////------------------------------------------------------------------------Job::on_base_file_removed
-//
-//bool Job::on_base_file_removed()
-//{
-//    return remove();
-//}
-//
 //-------------------------------------------------------------------------------Job::on_initialize
 
 bool Job::on_initialize()
@@ -1184,16 +1151,6 @@ void Job::set_run_time( const xml::Element_ptr& element )
     if( _state >= s_pending )  set_next_start_time( Time::now() );
 }
 
-//--------------------------------------------------------------------------------------Job::remove
-
-//bool Job::remove()
-//{
-//    bool is_removable = prepare_to_remove();
-//    if( is_removable )  job_folder()->remove_job( this );
-//
-//    return is_removable;
-//}
-
 //---------------------------------------------------------------------------Job::prepare_to_remove
 
 bool Job::prepare_to_remove()
@@ -1207,10 +1164,6 @@ bool Job::prepare_to_remove()
     _remove = true; 
 
     stop( true );
-
-    result = can_be_removed_now();
-    if( !result )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
-    //if( !result  &&  !is_second_remove )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
 
     return My_file_based::prepare_to_remove();
 }
@@ -1237,6 +1190,13 @@ bool Job::can_be_removed_now()
     }
 
     return false;
+}
+
+//--------------------------------------------------------------------------------Job::remove_error
+
+zschimmer::Xc Job::remove_error()
+{
+    return zschimmer::Xc( "SCHEDULER-258" );
 }
 
 //--------------------------------------------------------------------------Job::prepare_to_replace

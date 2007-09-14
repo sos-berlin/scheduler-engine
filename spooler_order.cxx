@@ -2213,7 +2213,7 @@ void Job_chain::add_order( Order* order )
     order->_removed_from_job_chain_name = "";
     order->_log->set_prefix( order->obj_name() );
 
-    int TODO;//order->_job_chain_node = node;
+    //order->_job_chain_node = node;
 
     // <job_chain_node suspended="yes"> soll beim Laden aus der Datenbank nicht wirken: order->set_job_chain_node( node ); 
 
@@ -2661,13 +2661,8 @@ bool Job_chain::prepare_to_remove()
     //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
     if( !can_be_removed_now() )  return false;
 
-    int VERSCHACHTELTE_JOB_KETTEN_LOESCHEN;
-
     set_replacement( NULL );
 
-
-    //bool result = can_be_removed_now();
-    //if( !result )  _log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
     return My_file_based::prepare_to_remove();
 }
 
@@ -2678,6 +2673,18 @@ bool Job_chain::can_be_removed_now()
     return _remove  && 
            !is_referenced()  &&
            !has_order();
+}
+
+//--------------------------------------------------------------------------Job_chain::remove_error
+
+zschimmer::Xc Job_chain::remove_error()
+{
+    if( is_referenced() )
+    {
+        return zschimmer::Xc( "SCHEDULER-894", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
+    }
+    else
+        return File_based::remove_error();
 }
 
 //--------------------------------------------------------------------Job_chain::prepare_to_replace
@@ -3027,7 +3034,7 @@ Job_chain* Order_id_space::job_chain_by_order_id_or_null( const string& order_id
 
     if( Order* order = order_or_null( order_id ) )
     {
-        result = order->job_chain();    int DYNAMISCH_KONFIGURIERBAR_MACHEN;
+        result = order->job_chain();
     }
 
     return result;
@@ -3152,7 +3159,7 @@ void Job_chain::get_connected_job_chains( Job_chain_set* result )
     Z_FOR_EACH( Reference_register, _reference_register, it )
     {
         Node* node      = (*it)->referer();
-        Job_chain*      job_chain = node->job_chain();  int DYNAMISCH_KONFIGURIERBAR_MACHEN;
+        Job_chain*      job_chain = node->job_chain();
 
         if( result->find( job_chain ) == result->end() )  
         {
@@ -5994,7 +6001,7 @@ bool Order::handle_end_state_of_nested_job_chain()
 
     try
     {
-        Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );         int DYNAMISCH_KONFIGURIERBAR_MACHEN;
+        Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );
         Node*       outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
         State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
                                                                   : outer_job_chain_node->error_state();

@@ -47,6 +47,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
+    zschimmer::Xc               remove_error                ();
 
     bool                        can_be_replaced_now         ();
     void                        prepare_to_replace          ();

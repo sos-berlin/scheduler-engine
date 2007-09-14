@@ -1069,6 +1069,15 @@
             </xsl:element>
         </xsl:if>
 
+        <!--xsl:if test="file_based/removed/ERROR">
+            <tr>
+                <td></td>
+                <td colspan="5">
+                    <xsl:apply-templates mode="file_based_error" select="file_based"/>
+                </td>
+            </tr>
+        </xsl:if-->
+
         <xsl:if test="replacement/job_chain/file_based/ERROR">
             <tr>
                 <td></td>

@@ -2611,11 +2611,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-425">
+        <!--message code="SCHEDULER-425">
             <text xml:lang="en">
                 <title>'<p1/>' cannot be removed, it is used by <p2>job_chains</p2></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-426">
             <text xml:lang="en">
@@ -3986,6 +3986,12 @@
         <message code="SCHEDULER-893" weight="debug3">
             <text xml:lang="en">
                 <title>Subsystem_object::state='<p1/>'</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-894">
+            <text xml:lang="en">
+                <title>'<p1/>' will be removed later, it is used by <p2>job_chains</p2></title>
             </text>
         </message>
     </messages>

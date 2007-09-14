@@ -717,7 +717,6 @@ xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& j
 
     // Siehe auch Spooler::set_dom()
 
-    int DOPPELT;
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
     job_chain->set_name( job_chain_element.getAttribute( "name" ) );
     job_chain->set_dom( job_chain_element );

@@ -12,7 +12,12 @@ using namespace zschimmer::file;
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
-const int                       directory_watch_interval    = 10;
+
+#ifdef Z_WINDOWS
+    const int                       directory_watch_interval    = 60;
+#else
+    const int                       directory_watch_interval    = 10;
+#endif
 
 //---------------------------------------------------------------------------------------Path::Path
 
@@ -65,10 +70,10 @@ void Path::set_folder_path( const string& folder_path )
 
 //------------------------------------------------------------------------Path::prepend_folder_path
 
-void Path::prepend_folder_path( const string& folder_path )
-{
-    set_path( Path( folder_path, to_string() ) );
-}
+//void Path::prepend_folder_path( const string& folder_path )
+//{
+//    set_path( Path( folder_path, to_string() ) );
+//}
 
 //--------------------------------------------------------------------------------Path::folder_path
 
@@ -174,18 +179,12 @@ bool Folder_subsystem::subsystem_activate()
 {
 #   ifdef Z_WINDOWS
 
-        //Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-        //HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-        //if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
+        Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+        HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+        if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
 
-        //_directory_event._handle = h;
-        //_directory_event.add_to( &_spooler->_wait_handles );
-        //int WIE_WIRD_ASYNC_CONTINUE_GERUFEN;
-
-        /*
-            Neu: Event mit Async_operation koppeln.
-            Event_async_operation : Async_operation
-        */
+        _directory_event._handle = h;
+        _directory_event.add_to( &_spooler->_wait_handles );
 
 #   endif
 
@@ -201,6 +200,11 @@ bool Folder_subsystem::subsystem_activate()
 bool Folder_subsystem::async_continue_( Continue_flags )
 {
     _directory_event.reset();
+
+    //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
+    BOOL ok = FindNextChangeNotification( _directory_event );
+    if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+
     _root_folder->adjust_with_directory();
     set_async_delay( directory_watch_interval );
 
@@ -379,7 +383,7 @@ void Folder::adjust_with_directory()
     catch( exception& x ) 
     {
         _log->error( message_string( "SCHEDULER-431", x ) );
-        int VERZEICHNISFEHLER_MERKEN;  // Fehler merken für <show_state>, oder was machen wir mit dem Fehler? Später wiederholen
+        //? Fehler merken für <show_state>, oder was machen wir mit dem Fehler? Später wiederholen
     }
 }
 
@@ -486,7 +490,11 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
 {
     ptr<File_based> file_based = NULL;
 
-    if( old_file_based )  old_file_based->_file_is_removed = base_file_info == NULL;
+    if( old_file_based )  
+    {
+        old_file_based->_file_is_removed = base_file_info == NULL;
+        old_file_based->_remove_xc = zschimmer::Xc();
+    }
 
     try
     {
@@ -496,7 +504,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             {
                 folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
                 file_based = old_file_based;                // Für catch()
-                old_file_based->on_base_file_removed();
+                file_based->remove();  //old_file_based->on_base_file_removed();
                 file_based = NULL;
             }
         }
@@ -872,7 +880,6 @@ bool File_based::on_dependant_loaded( File_based* )
 
 bool File_based::on_dependant_to_be_removed( File_based* )
 {
-    int FEHLT_WAS; //??
     return true;
 }
 
@@ -924,13 +931,25 @@ bool File_based::remove()
 
     if( is_removable )  
     {
+        _remove_xc = zschimmer::Xc();
+
         close();
         typed_folder()->remove_file_based( this );
     }
     else  
-        log()->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
+    {
+        _remove_xc = remove_error();
+        log()->info( _remove_xc.what() );   // Kein Fehler, Löschen ist nur verzögert
+    }
 
     return is_removable;
+}
+
+//-------------------------------------------------------------------------File_based::remove_error
+
+zschimmer::Xc File_based::remove_error()
+{
+    return zschimmer::Xc( "SCHEDULER-989", subsystem()->object_type_name() );
 }
 
 //-------------------------------------------------------------------------File_based::replace_with
@@ -1063,6 +1082,8 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
         element.setAttribute( "state", file_based_state_name() );
 
         if( base_file_has_error() )  element.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
+
+        if( !_remove_xc.is_empty() )  element.append_new_element( "removed" ).appendChild( create_error_element( document, _remove_xc ) );
     }
 
     return element;

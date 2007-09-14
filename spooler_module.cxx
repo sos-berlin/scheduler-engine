@@ -380,7 +380,7 @@ void Module::init()
     else
     if( _process_class_path != ""  )
         if( Process_class* process_class = process_class_or_null() )
-            if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );    int SPATER_NOCHMAL_PRUEFEN;
+            if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
 
     if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 

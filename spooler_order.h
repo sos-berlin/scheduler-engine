@@ -666,6 +666,7 @@ struct Job_chain : Com_job_chain,
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
+    zschimmer::Xc               remove_error                ();
 
     //void                        prepare_to_replace          ();
     //bool                        can_be_replaced_now         ();

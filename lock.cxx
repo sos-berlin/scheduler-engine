@@ -374,9 +374,14 @@ bool Lock::prepare_to_remove()
         }
     }
 
-    bool result = My_file_based::prepare_to_remove();
-    if( !result )  log()->info( message_string( "SCHEDULER-886", string_from_holders() ) );     int ON_REMOVE_DELAYED;
-    return result;
+    return My_file_based::prepare_to_remove();
+}
+
+//-------------------------------------------------------------------------------Lock::remove_error
+
+zschimmer::Xc Lock::remove_error()
+{
+    return zschimmer::Xc( "SCHEDULER-886", string_from_holders() );
 }
 
 //-------------------------------------------------------------------------Lock::prepare_to_replace

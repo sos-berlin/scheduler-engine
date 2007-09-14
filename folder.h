@@ -41,7 +41,7 @@ struct Path : string
     string                      name                        () const;
     void                    set_folder_path                 ( const string& );
     Path                        folder_path                 () const;
-    void                        prepend_folder_path         ( const string& );
+  //void                        prepend_folder_path         ( const string& );
     const string&               to_string                   ()  const                               { return *static_cast<const string*>( this ); }
     void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
     bool                     is_absolute_path               () const;
@@ -165,6 +165,7 @@ struct Folder_subsystem : Subsystem,
     bool                        async_finished_             () const                                { return false; }
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
+    bool                        async_signaled_             ()                                      { return is_signaled(); }
 
 
     void                    set_directory                   ( const file::File_path& );
@@ -172,6 +173,8 @@ struct Folder_subsystem : Subsystem,
 
   //Folder*                     folder                      ( const string& path );
     Folder*                     root_folder                 () const                                { return _root_folder; }
+
+    bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
 
   private:
     Fill_zero                  _zero_;
@@ -282,6 +285,7 @@ struct File_based : Scheduler_object,
   //virtual void                remove_now                  ()                                      = 0;
     virtual bool                prepare_to_remove           ();
     virtual bool                can_be_removed_now          ()                                      = 0;
+    virtual zschimmer::Xc       remove_error                ();
 
     virtual bool                replace_with                ( File_based* );
     virtual void                prepare_to_replace          ();
@@ -289,7 +293,7 @@ struct File_based : Scheduler_object,
     virtual File_based*         on_replace_now              ();
 
     virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
-    virtual bool                on_base_file_removed        ()                                      { return remove(); }
+  //virtual bool                on_base_file_removed        ()                                      { return remove(); }
 
 
     bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
@@ -316,10 +320,10 @@ struct File_based : Scheduler_object,
     Base_file_info             _base_file_info;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
-    bool                       _is_base_file_loaded;
+    zschimmer::Xc              _remove_xc;
+    bool                       _file_is_removed;
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
-    bool                       _file_is_removed;
 };
 
 //-------------------------------------------------------------------------------------file_based<>

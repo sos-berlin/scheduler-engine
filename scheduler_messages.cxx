@@ -277,7 +277,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-422", "'$1' has already been added" },
     { "SCHEDULER-423", "There is no supervisor" },
     { "SCHEDULER-424", "'$1' is being removed before '$2'" },
-    { "SCHEDULER-425", "'$1' cannot be removed, it is used by $2" },
     { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
     { "SCHEDULER-427", "Invalid MD5 hexadecimal coded password for HTTP user '$1'" },
     { "SCHEDULER-428", "Error when loading base file '$1':\n$2" },
@@ -322,8 +321,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-933", "TCP connection accepted" },
     { "SCHEDULER-934", "Compiling Java source: $1" },
     { "SCHEDULER-935", "$1 orders read from database" },
-    { "SCHEDULER-936", "Replacing $1" },
-    { "SCHEDULER-937", "Removing $1" },
+    { "SCHEDULER-936", "Replacing $1 now" },
+    { "SCHEDULER-937", "Removing $1 now" },
     { "SCHEDULER-938", "Order will be processed at $1" },
     { "SCHEDULER-939", "Replacing order with same id: $1" },
     { "SCHEDULER-940", "Removing order from job chain" },
@@ -459,6 +458,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-891", "Configuration file '$1' is going to be be loaded into this new $2" },
     { "SCHEDULER-892", "Changed configuration file '$1' is going to replace this $2" },
     { "SCHEDULER-893", "Subsystem_object::state='$1'" },
+    { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
     {}
 };
 } //namespace sos
