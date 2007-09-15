@@ -80,7 +80,6 @@ struct Dependencies
 
     void                        add_dependant               ( Pendant*, const string& missing_path );
     void                        remove_dependant            ( Pendant*, const string& missing_path );
-    void                        remove_requestor            ( Pendant* );
     void                        announce_dependant_loaded   ( File_based* found_missing );
     bool                        announce_dependant_to_be_removed( File_based* to_be_removed );
   //void                        announce_dependant_removed  ( File_based* );
@@ -217,7 +216,6 @@ struct File_based : Scheduler_object,
         s_loaded,
         s_active,
         s_error,
-      //s_incomplete,
         s_closed
     };
 

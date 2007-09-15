@@ -314,9 +314,12 @@ bool Standing_order::prepare_to_remove()
 
 bool Standing_order::remove()
 {
-    _its_me_removing = true;
-    _order->remove_from_job_chain();
-    _its_me_removing = false;
+    if( _order )  
+    {
+        _its_me_removing = true;
+        _order->remove_from_job_chain();
+        _its_me_removing = false;
+    }
 
     return true;
 }
@@ -325,7 +328,7 @@ bool Standing_order::remove()
 
 bool Standing_order::can_be_replaced_now()
 {
-    return order_is_removable_or_replaceable();
+    return replacement()  &&  order_is_removable_or_replaceable();
 }
 
 //---------------------------------------------------------------Standing_order::prepare_to_replace
@@ -366,15 +369,6 @@ void Standing_order::on_order_carried_out()
     // Wird auch von on_order_removed() gerufen
 
     check_for_replacing_or_removing();
-    //if( replacement() )
-    //{
-    //    if( can_be_replaced_now() )  replace_now();
-    //}
-    //else
-    //if( base_file_is_removed() )
-    //{
-    //    remove();
-    //}
 }
 
 //-----------------------------------------------------------------Standing_order::on_order_removed

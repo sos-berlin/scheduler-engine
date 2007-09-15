@@ -447,7 +447,7 @@ struct Node : Com_job_chain_node,
 
     virtual void                initialize                  ();
     virtual void                activate                    ();
-  //virtual void                replace                     ( Node* )                               {}
+    virtual void                replace                     ( Node* )                               {}
 
     const Order::State&         order_state                 () const                                { return _order_state; }
     void                    set_next_state                  ( const Order::State& );
@@ -522,7 +522,7 @@ struct Order_queue_node : Node
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
     void                        close                       ();
-  //void                        replace                     ( Node* old_node );
+    void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
@@ -530,6 +530,7 @@ struct Order_queue_node : Node
 
   private:
     ptr<Order_queue>           _order_queue;
+    bool                       _order_queue_is_loaded;
 };
 
 //------------------------------------------------------------------------------job_chain::Job_node
@@ -668,9 +669,9 @@ struct Job_chain : Com_job_chain,
     bool                        can_be_removed_now          ();
     zschimmer::Xc               remove_error                ();
 
-    //void                        prepare_to_replace          ();
-    //bool                        can_be_replaced_now         ();
-    //Job_chain*                  on_replace_now              ();
+    void                        prepare_to_replace          ();
+    bool                        can_be_replaced_now         ();
+    Job_chain*                  on_replace_now              ();
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
@@ -695,7 +696,6 @@ struct Job_chain : Com_job_chain,
     void                        complete_nested_job_chains  ( Order_id_space* );
 
 
-
     job_chain::Node*            add_job_node                ( const string& job_path, const Order::State& input_state, 
                                                               const Order::State& next_state, 
                                                               const Order::State& error_state );
@@ -708,11 +708,8 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_state             ( const Order::State& );
     job_chain::Node*            node_from_state_or_null     ( const Order::State& );
     job_chain::Node*            node_from_job               ( Job* );
-  //Job*                        job_from_state              ( const Order::State& );
 
-  //void                        connect_job_nodes_with_job  ( Job* );                               // Aufgerufen von Job::activate()
 
-    void                        add_orders_from_database    ( Read_transaction* );
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
     void                        add_order                   ( Order* );
     void                        remove_order                ( Order* );
@@ -779,8 +776,6 @@ struct Job_chain : Com_job_chain,
 
     typedef stdext::hash_map< string, ptr<Order> >   Blacklist_map;
     Blacklist_map              _blacklist_map;
-
-    bool                       _load_orders_from_database;      // add_orders_from_database() muss noch gerufen werden.
 };
 
 //------------------------------------------------------------------------Order_id_spaces_interface
@@ -844,6 +839,8 @@ struct Order_queue : Com_order_queue,
 
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
+
+    bool                       _is_loaded;
 
   private:
     ptr<Com_order_queue>       _com_order_queue;

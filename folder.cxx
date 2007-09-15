@@ -496,63 +496,77 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
         old_file_based->_remove_xc = zschimmer::Xc();
     }
 
+
     try
     {
-        if( !base_file_info )
+        if( base_file_info )
         {
+            string name       = Folder::object_name_of_filename( base_file_info->_filename );
+            string content;
+            bool   is_removed = false;
+
+            try
+            {
+                content = string_from_file( File_path( folder()->directory(), base_file_info->_filename ) );
+            }
+            catch( zschimmer::Xc& x )
+            {
+                if( x.code() != ( S() << "ERRNO-" << ENOENT ).to_string() )  throw;   // != "ERRNO-2" ?
+                is_removed = false;      // Datei ist nach dem Lesen des Verzeichnisses gelöscht worden, oder Link ins Leere
+            }
+
+            if( !is_removed )
+            {
+                file_based = subsystem()->call_new_file_based();
+                file_based->set_name( name );
+                file_based->set_base_file_info( *base_file_info );
+
+                if( !old_file_based )  add_file_based( file_based );
+                else
+                if( file_based != old_file_based )  old_file_based->set_replacement( file_based );
+
+                string relative_file_path = folder()->make_path( base_file_info->_filename );
+                if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
+                                else  file_based    ->log()->info( message_string( "SCHEDULER-891", relative_file_path, subsystem()->object_type_name() ) );
+
+                xml::Document_ptr dom_document ( content );
+                if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+
+                assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
+                assert_empty_attribute( dom_document.documentElement(), "replace"    );
+
+                file_based->set_dom( dom_document.documentElement() );
+                file_based->initialize();
+
+                if( old_file_based )  
+                {
+                    old_file_based->prepare_to_replace();
+
+                    if( old_file_based->can_be_replaced_now() ) 
+                    {
+                        file_based = old_file_based->replace_now();
+                        assert( !file_based->replacement() );
+                        if( file_based == old_file_based )  
+                        {
+                            file_based->set_base_file_info( *base_file_info );
+                            file_based->_base_file_xc      = zschimmer::Xc();
+                            file_based->_base_file_xc_time = 0;
+                            file_based->activate();
+                        }
+                    }
+                }
+                else
+                    file_based->activate();
+            }
+        }
+        else    // Datei ist gelöscht
+        {   
             if( old_file_based->has_base_file() )   // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht löschen
             {
                 folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
                 file_based = old_file_based;                // Für catch()
-                file_based->remove();  //old_file_based->on_base_file_removed();
+                file_based->remove();
                 file_based = NULL;
-            }
-        }
-        else
-        {
-            string name = Folder::object_name_of_filename( base_file_info->_filename );
-
-            file_based = subsystem()->call_new_file_based();
-            file_based->set_name( name );
-            file_based->set_base_file_info( *base_file_info );
-
-            if( !old_file_based )  add_file_based( file_based );
-            else
-            if( file_based != old_file_based )  old_file_based->set_replacement( file_based );
-
-            string relative_file_path = folder()->make_path( base_file_info->_filename );
-            if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
-                            else  file_based    ->log()->info( message_string( "SCHEDULER-891", relative_file_path, subsystem()->object_type_name() ) );
-
-            xml::Document_ptr dom_document ( string_from_file( File_path( folder()->directory(), base_file_info->_filename ) ) );
-            if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
-
-            assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
-            assert_empty_attribute( dom_document.documentElement(), "replace"    );
-
-            file_based->set_dom( dom_document.documentElement() );
-            file_based->initialize();
-
-            if( old_file_based )  
-            {
-                old_file_based->prepare_to_replace();
-
-                if( old_file_based->can_be_replaced_now() ) 
-                {
-                    file_based = old_file_based->replace_now();
-                    assert( !file_based->replacement() );
-                    if( file_based == old_file_based )  
-                    {
-                        file_based->set_base_file_info( *base_file_info );
-                        file_based->_base_file_xc      = zschimmer::Xc();
-                        file_based->_base_file_xc_time = 0;
-                        //file_based->switch_file_based_state( File_based::s_active );
-                    }
-                }
-            }
-            else  
-            {
-                file_based->switch_file_based_state( File_based::s_active );
             }
         }
     }
@@ -562,7 +576,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
 
         if( !file_based )  throw;   // Sollte nicht passieren
 
-        if( base_file_info )    // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markien
+        if( base_file_info )    // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
         {
             file_based->set_file_based_state( File_based::s_error );
             file_based->_base_file_xc      = x;
@@ -746,7 +760,7 @@ void File_based::close()
 
 bool File_based::initialize()
 {
-    _wished_state = s_initialized;
+    if( _wished_state < s_initialized )  _wished_state = s_initialized;
     return initialize2();
 }
 
@@ -754,7 +768,7 @@ bool File_based::initialize()
 
 bool File_based::initialize2()
 {
-    bool ok = _state == s_initialized;
+    bool ok = _state >= s_initialized;
 
     if( _state == s_not_initialized  &&  subsystem()->subsystem_state() >= subsys_initialized )
     {
@@ -769,7 +783,7 @@ bool File_based::initialize2()
 
 bool File_based::load()
 {
-    _wished_state = s_loaded;
+    if( _wished_state < s_loaded )  _wished_state = s_loaded;
     return load2();
 }
 
@@ -779,7 +793,7 @@ bool File_based::load2()
 {
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
-    bool ok = _state == s_loaded;
+    bool ok = _state >= s_loaded;
     if( !ok )
     {
         initialize2();
@@ -803,7 +817,7 @@ bool File_based::load2()
 
 bool File_based::activate()
 {
-    _wished_state = s_active;
+    if( _wished_state < s_active )  _wished_state = s_active;
     return activate2();
 }
 
@@ -811,7 +825,7 @@ bool File_based::activate()
 
 bool File_based::activate2()
 {
-    bool ok = _state == s_active;
+    bool ok = _state >= s_active;
     if( !ok )
     {
         load2();
@@ -857,6 +871,7 @@ bool File_based::switch_file_based_state( State state )
 
     switch( state )
     {
+        case s_not_initialized: break;
         case s_initialized: result = initialize();  break;
         case s_loaded:      result = load();        break;
         case s_active:      result = activate();    break;
@@ -1056,7 +1071,6 @@ string File_based::file_based_state_name( State state )
         case s_loaded:          return "loaded";
         case s_active:          return "active";
         case s_closed:          return "closed";
-      //case s_incomplete:      return "incomplete";
         case s_error:           return "error";
         default:                return S() << "File_based_state-" << state;
     }
@@ -1246,7 +1260,6 @@ Dependencies::~Dependencies()
 
 void Dependencies::add_dependant( Pendant* requestor, const string& missings_path )
 {
-    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
     _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( requestor );
 }
 
@@ -1254,42 +1267,17 @@ void Dependencies::add_dependant( Pendant* requestor, const string& missings_pat
 
 void Dependencies::remove_dependant( Pendant* requestor, const string& missings_path )
 {
-    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << requestor->obj_name() << " " << quoted_string( missings_path ) ); )
-
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
     requestors_set.erase( requestor );
     if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
-//-------------------------------------------------------------------Dependencies::remove_requestor
-
-void Dependencies::remove_requestor( Pendant* requestor )
-{
-    Z_FOR_EACH( Path_requestors_map, _path_requestors_map, path_requestors_it )
-    {
-        Requestor_set& requestor_set = path_requestors_it->second;
-
-        Requestor_set::iterator requestor_it = requestor_set.find( requestor );
-        assert( requestor_it == requestor_set.end() );
-        //{
-        //    Z_DEBUG_ONLY( log()->warn( S() << __FUNCTION__ << "  " << requestor->obj_name() << 
-        //                                                      " " << subsystem_it->first->obj_name() << 
-        //                                                      " " << path_requestors_it->first ) );
-        //    assert(0);
-            requestor_set.erase( requestor_it );
-        //}
-    }
-}
-
 //------------------------------------------------------Dependencies::announce_dependant_loaded
 
 void Dependencies::announce_dependant_loaded( File_based* found_missing )
 {
-    //Z_DEBUG_ONLY( _subsystem->log()->info( S() << __FUNCTION__ << " " << found_missing->obj_name() ); )
-
     assert( found_missing->subsystem() == _subsystem );
-    //assert( found_missing->file_based_state() == File_based::s_active );
 
     Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
 
@@ -1297,25 +1285,12 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
     {
         Requestor_set& requestor_set = it->second;
 
-        //for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
-            Pendant*     requestor = *it2;
+            Pendant*                requestor = *it2;
         
-            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "*** " << requestor->obj_name() << " on_dependant_loaded( " << found_missing->obj_name() << " ) " ); )
-            bool ok = requestor->on_dependant_loaded( found_missing );
-            //if( ok )  
-            //{
-            //    it = _path_requestors_map.find( found_missing->normalized_path() );
-            //    if( it != _path_requestors_map.end()    // requestor_set ist noch da?
-            //    {
-            //        assert( it == &requestor_set );
-            //        requestor_set.erase( it2 );
-            //    }
-            //}
-
-            //it2 = next_it2;
+            requestor->on_dependant_loaded( found_missing );
         }
     }
 }
@@ -1325,7 +1300,6 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
 bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
-  //assert( to_be_removed->file_based_state() == File_based::s_active );
 
     bool result = true;
 
@@ -1335,13 +1309,12 @@ bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
     {
         Requestor_set& requestor_set = it->second;
 
-        //for( Requestor_set::iterator it2 = requestor_set.begin(); it2 != requestor_set.end(); )
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
             Requestor_set::iterator next_it2  = it2;  next_it2++;
             Pendant*     requestor = *it2;
         
-            Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
             result = requestor->on_dependant_to_be_removed( to_be_removed );
             if( !result )  break;
         }

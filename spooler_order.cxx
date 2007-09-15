@@ -1107,18 +1107,15 @@ void Order_queue_node::close()
 
 //------------------------------------------------------------------------Order_queue_node::replace
 
-//void Order_queue_node::replace( Node* old )
-//{
-//    if( Order_queue_node* old_node = Order_queue_node::try_cast( old ) )
-//    {
-//        if( !_job_chain->orders_are_recoverable()  ||  !_spooler->db()->opened() )   // Mögliche Verbesserung: Immer hier übernehmen, nicht aus der Datenbank laden
-//        {
-//            _order_queue = old_node->_order_queue;
-//            old_node->_order_queue = NULL;
-//            _order_queue->on_node_replaced( this );
-//        }
-//    }
-//}
+void Order_queue_node::replace( Node* old )
+{
+    if( Order_queue_node* old_node = Order_queue_node::try_cast( old ) )
+    {
+        _order_queue = old_node->_order_queue;
+        old_node->_order_queue = NULL;
+        _order_queue->on_node_replaced( this );
+    }
+}
 
 //---------------------------------------------------------------------Order_queue_node::set_action
 
@@ -2289,24 +2286,44 @@ bool Job_chain::on_load()  // Read_transaction* ta )
             orders_are_recoverable()  &&  
             !is_distributed() )
         {
-            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            list<Order_queue_node*> node_list;
+            list<string>            state_sql_list;
+
+            Z_FOR_EACH( Node_list, _node_list, it )
             {
-                // Auswahl könnte auf die Zustände der noch nicht geladenen Order_queue_node begrenzt werden.
-                // Beim Ersetzen einer Jobkette werden vorhandene Warteschlangen direkt übernommen, s. Order_queue_node::replace()
-
-                Any_file result_set = ta.open_result_set
-                    ( 
-                        S() << "select " << order_select_database_columns << ", `distributed_next_time`"
-                        "  from " << _spooler->_orders_tablename <<
-                        "  where " << db_where_condition() <<
-                        "  order by `ordering`",
-                        __FUNCTION__
-                    );
-
-                int count = load_orders_from_result_set( &ta, &result_set );
-                log()->debug( message_string( "SCHEDULER-935", count ) );
+                if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
+                {
+                    if( !node->order_queue()->_is_loaded )  
+                    {   
+                        node_list.push_back( node );
+                        state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                    }
+                }
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+
+
+            if( !state_sql_list.empty() )
+            {
+                for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+                {
+                    Any_file result_set = ta.open_result_set
+                        ( 
+                            S() << "select " << order_select_database_columns << ", `distributed_next_time`"
+                            "  from " << _spooler->_orders_tablename <<
+                            "  where " << db_where_condition() <<
+                               " and `state` in ( " << join( ", ", state_sql_list ) << " )"
+                            "  order by `ordering`",
+                            __FUNCTION__
+                        );
+
+                    int count = load_orders_from_result_set( &ta, &result_set );
+                    log()->debug( message_string( "SCHEDULER-935", count ) );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+            }
+
+
+            Z_FOR_EACH( list<Order_queue_node*>, node_list, it )  (*it)->order_queue()->_is_loaded = true;
         }
 
         set_state( s_loaded );
@@ -2689,44 +2706,44 @@ zschimmer::Xc Job_chain::remove_error()
 
 //--------------------------------------------------------------------Job_chain::prepare_to_replace
 
-//void Job_chain::prepare_to_replace()
-//{
-//    _remove = false;
-//}
+void Job_chain::prepare_to_replace()
+{
+    _remove = false;
+}
 
 //-------------------------------------------------------------------Job_chain::can_be_replaced_now
 
-//bool Job_chain::can_be_replaced_now()
-//{
-//    return replacement() &&
-//           replacement()->file_based_state() == File_based::s_initialized &&
-//           !has_order_in_task();
-//}
+bool Job_chain::can_be_replaced_now()
+{
+    return replacement() &&
+           replacement()->file_based_state() == File_based::s_initialized &&
+           !has_order_in_task();
+}
 
 //------------------------------------------------------------------------Job_chain::on_replace_now
 
-//Job_chain* Job_chain::on_replace_now()
-//{               
-//    ptr<Job_chain> holder = this;
-//
-//    if( !replacement() )  z::throw_xc( __FUNCTION__, obj_name() );
-//    if( !can_be_replaced_now() )   z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
-//
-//    //Z_FOR_EACH( Node_list, replacement()->_node_list, it )
-//    //{
-//    //    Node* new_job_chain_node = *it;
-//    //    
-//    //    if( Node* old_job_chain_node = node_from_state_or_null( new_job_chain_node->order_state() ) )
-//    //    {
-//    //        new_job_chain_node->replace( old_job_chain_node );
-//    //    }
-//    //}
-//
-//    close();
-//
-//
-//    return job_chain_folder()->replace_file_based( this );
-//}
+Job_chain* Job_chain::on_replace_now()
+{               
+    ptr<Job_chain> holder = this;
+
+    if( !replacement() )  z::throw_xc( __FUNCTION__, obj_name() );
+    if( !can_be_replaced_now() )   z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
+
+    Z_FOR_EACH( Node_list, replacement()->_node_list, it )
+    {
+        Node* new_job_chain_node = *it;
+        
+        if( Node* old_job_chain_node = node_from_state_or_null( new_job_chain_node->order_state() ) )
+        {
+            new_job_chain_node->replace( old_job_chain_node );
+        }
+    }
+
+    close();
+
+
+    return job_chain_folder()->replace_file_based( this );
+}
 
 //--------------------------------------------------------------------Job_chain::db_where_condition
 
