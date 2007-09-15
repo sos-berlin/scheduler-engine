@@ -897,6 +897,8 @@
                         <xsl:sort select="translate( @job, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
 
                         <xsl:if test="not( /spooler/answer/state/job_chains/job_chain/job_chain_node/@job=current()/@job )">
+                            <xsl:variable name="job" select="/spooler/answer/state/jobs/job[ @job = current()/@job ]"/>
+
                             <xsl:element name="tr">
                                 <xsl:attribute name="colspan">2</xsl:attribute>
                                 <xsl:attribute name="class">job</xsl:attribute>
@@ -912,9 +914,6 @@
                                 <xsl:attribute name="onclick">
                                     call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )
                                 </xsl:attribute>
-
-                                <xsl:variable name="job_name" select="@job"/>
-                                <xsl:variable name="job" select="/spooler/answer/state/jobs/job[@job=$job_name]"/>
 
                                 <td></td>
 
@@ -960,6 +959,16 @@
                                     </xsl:choose>
                                 </td>
                             </xsl:element>
+
+                            <xsl:if test="$job/replacement/job/file_based/ERROR or $job/file_based/removed/ERROR">
+                                <tr class="job">
+                                    <td colspan="2" class="right_border"></td>
+                                    <td colspan="3" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                                        <xsl:apply-templates mode="file_based_error_with_label" select="$job"/>
+                                    </td>
+                                </tr>
+                            </xsl:if>
+
                         </xsl:if>
                     </xsl:for-each>
                 </xsl:if>
@@ -1069,12 +1078,14 @@
             </xsl:element>
         </xsl:if>
 
-        <tr>
-            <td></td>
-            <td colspan="5">
-                <xsl:apply-templates mode="file_based_error_with_label" select="."/>
-            </td>
-        </tr>
+        <xsl:if test="replacement/job_chain/file_based/ERROR or file_based/removed/ERROR">
+            <tr>
+                <td></td>
+                <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                    <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                </td>
+            </tr>
+        </xsl:if>
 
         <xsl:if test="/spooler/answer/state/http_server/web_service [ @job_chain = current()/@name ]">
             <tr>
@@ -1385,6 +1396,14 @@
                     </xsl:choose>
                 </xsl:element>
 
+                <xsl:if test="$job/replacement/job/file_based/ERROR or $job/file_based/removed/ERROR">
+                    <tr>
+                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <xsl:apply-templates mode="file_based_error_with_label" select="$job"/>
+                        </td>
+                    </tr>
+                </xsl:if>
+                
                 <!--xsl:apply-templates select="job/tasks/task" mode="job_chain_list"/-->
 
             </xsl:for-each>
@@ -1856,11 +1875,13 @@
                     </td>
                 </tr>
 
-                <tr>
-                    <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                        <xsl:apply-templates mode="file_based_error_with_label" select="."/>
-                    </td>
-                </tr>
+                <xsl:if test="replacement/lock/file_based/ERROR or file_based/removed/ERROR">
+                    <tr>
+                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                        </td>
+                    </tr>
+                </xsl:if>
 
                 <tr>
                     <td colspan="5" style="padding-left: 4ex">
@@ -2063,12 +2084,14 @@
                         </td>
                     </tr>
 
-                    <tr>
-                        <td colspan="6">
-                            <xsl:apply-templates mode="file_based_error_with_label" select="."/>
-                        </td>
-                    </tr>
-
+                    <xsl:if test="replacement/process_class/file_based/ERROR or file_based/removed/ERROR">
+                        <tr>
+                            <td colspan="6" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                                <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    
                     <xsl:for-each select="processes/process">
                         <tr>
                             <td style="padding-left: 2ex">
@@ -3383,7 +3406,7 @@
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
-
+    
     <xsl:template mode="file_based_error_with_label" match="*">
         <xsl:choose>
             <xsl:when test="replacement/*/file_based/ERROR">

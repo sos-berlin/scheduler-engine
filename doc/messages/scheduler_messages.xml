@@ -1416,14 +1416,14 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-258">
+        <message code="SCHEDULER-258">
             <text xml:lang="de">
                 <title>Job wird entfernt sobald alle Tasks beendet sind</title>
             </text>
             <text xml:lang="en">
                 <title>Job will be removed after all its tasks have terminated</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-259">
             <text xml:lang="de">

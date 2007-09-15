@@ -170,9 +170,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        prepare_to_remove           ();
     zschimmer::Xc               remove_error                ();
 
-    void                        prepare_to_replace          ();
-    bool                        can_be_replaced_now         ();
-    Job*                        on_replace_now              ();
+    //void                        prepare_to_replace          ();
+    //bool                        can_be_replaced_now         ();
+    //Job*                        on_replace_now              ();
 
     void                        set_delay_after_error       ( int error_steps, const string& delay );
     void                        set_delay_after_error       ( int error_steps, const Time& delay )  { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }

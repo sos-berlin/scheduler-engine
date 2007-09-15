@@ -126,6 +126,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-255", "$1 tasks did not terminate in spite of kill $2 seconds ago. Scheduler is aborting" },
     { "SCHEDULER-256", "Deadline for terminating Scheduler has been reached, but $1 tasks are still running" },
     { "SCHEDULER-257", "Job is being removed now" },
+    { "SCHEDULER-258", "Job will be removed after all its tasks have terminated" },
     { "SCHEDULER-259", "Java did not start. Scheduler is starting without Java" },
     { "SCHEDULER-260", "Error in Scheduler Skript, spooler_exit(): $1Error in Scheduler script, spooler_exit(): $1" },
     { "SCHEDULER-261", "Nothing done, event=$1, operations=$2" },

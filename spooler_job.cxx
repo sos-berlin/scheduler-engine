@@ -1201,47 +1201,43 @@ zschimmer::Xc Job::remove_error()
 
 //--------------------------------------------------------------------------Job::prepare_to_replace
 
-void Job::prepare_to_replace()
-{
-    bool result;
-    //bool is_second_remove = _remove;
+//void Job::prepare_to_replace()
+//{
+//    bool result;
+//    //bool is_second_remove = _remove;
+//
+//    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+//
+//    _remove = true; 
+//    stop( true );
+//}
 
-    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-
-    _remove = true; 
-    stop( true );
-
-    //result = can_be_replaced_now();
-    //if( !result  )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
-    //if( !result  &&  !is_second_remove )  _log->info( message_string( "SCHEDULER-258" ) );   //_log->info( message_string( "SCHEDULER-989", subsystem()->object_type_name() ) );
-}
-
-//-------------------------------------------------------------------------Job::can_be_replaced_now
-
-bool Job::can_be_replaced_now()
-{
-    return _running_tasks.size() == 0;
-}
+////-------------------------------------------------------------------------Job::can_be_replaced_now
+//
+//bool Job::can_be_replaced_now()
+//{
+//    return _running_tasks.size() == 0;
+//}
 
 //------------------------------------------------------------------------------Job::on_replace_now
 
-Job* Job::on_replace_now()
-{
-    assert( can_be_replaced_now() );
-
-    //Nach File_based  _log->info( message_string( "SCHEDULER-988" ) );
-
-    replacement()->_task_queue = _task_queue;
-    replacement()->_task_queue->move_to_new_job( replacement() );
-    _task_queue = Z_NEW( Task_queue( this ) );
-
-    Job* replacement_job = job_folder()->replace_file_based( this );
-    // this ist ungültig.
-
-    replacement_job->activate();
-
-    return replacement_job;
-}
+//Job* Job::on_replace_now()
+//{
+//    assert( can_be_replaced_now() );
+//
+//    //Nach File_based  _log->info( message_string( "SCHEDULER-988" ) );
+//
+//    replacement()->_task_queue = _task_queue;
+//    replacement()->_task_queue->move_to_new_job( replacement() );
+//    _task_queue = Z_NEW( Task_queue( this ) );
+//
+//    Job* replacement_job = job_folder()->replace_file_based( this );
+//    // this ist ungültig.
+//
+//    replacement_job->activate();
+//
+//    return replacement_job;
+//}
 
 //-------------------------------------------------------------------------Job::set_replacement_job
 
