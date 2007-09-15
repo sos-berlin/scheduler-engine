@@ -1069,24 +1069,12 @@
             </xsl:element>
         </xsl:if>
 
-        <!--xsl:if test="file_based/removed/ERROR">
-            <tr>
-                <td></td>
-                <td colspan="5">
-                    <xsl:apply-templates mode="file_based_error" select="file_based"/>
-                </td>
-            </tr>
-        </xsl:if-->
-
-        <xsl:if test="replacement/job_chain/file_based/ERROR">
-            <tr>
-                <td></td>
-                <td colspan="5">
-                    <span class="label">Error in changed file (not loaded): </span>
-                    <xsl:apply-templates mode="file_based_error" select="replacement/job_chain/file_based"/>
-                </td>
-            </tr>
-        </xsl:if>
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+            </td>
+        </tr>
 
         <xsl:if test="/spooler/answer/state/http_server/web_service [ @job_chain = current()/@name ]">
             <tr>
@@ -1868,14 +1856,11 @@
                     </td>
                 </tr>
 
-                <xsl:if test="replacement/lock/file_based/ERROR">
-                    <tr>
-                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                            <span class="label">Error in changed file (not loaded): </span>
-                            <xsl:apply-templates mode="file_based_error" select="replacement/lock/file_based"/>
-                        </td>
-                    </tr>
-                </xsl:if>
+                <tr>
+                    <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                        <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                    </td>
+                </tr>
 
                 <tr>
                     <td colspan="5" style="padding-left: 4ex">
@@ -1967,6 +1952,12 @@
                         <xsl:text>Job </xsl:text>
                         <xsl:value-of select="@job"/>
                     </xsl:element>
+
+                    <xsl:variable name="job" select="/spooler/answer/state/jobs/job[ @job=current()/@job ]"/>
+                    
+                    <td class="job">
+                        <xsl:apply-templates mode="job_state_line" select="$job" />
+                    </td>
                 </xsl:element>
 
             </xsl:for-each>
@@ -2072,14 +2063,11 @@
                         </td>
                     </tr>
 
-                    <xsl:if test="replacement/process_class/file_based/ERROR">
-                        <tr>
-                            <td colspan="6">
-                                <span class="label">Error in changed file (not loaded): </span>
-                                <xsl:apply-templates mode="file_based_error" select="replacement/process_class/file_based"/>
-                            </td>
-                        </tr>
-                    </xsl:if>
+                    <tr>
+                        <td colspan="6">
+                            <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                        </td>
+                    </tr>
 
                     <xsl:for-each select="processes/process">
                         <tr>
@@ -3392,6 +3380,26 @@
             <xsl:text> </xsl:text>
             column <xsl:value-of select="@col"/>
         </xsl:if>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
+
+    <xsl:template mode="file_based_error_with_label" match="*">
+        <xsl:choose>
+            <xsl:when test="replacement/*/file_based/ERROR">
+                <span class="label" style="white-space: nowrap">Error in changed file</span>
+                <span class="label" style="white-space: nowrap"> (not loaded): </span>
+                <span class="file_based_error_message">
+                <xsl:apply-templates select="replacement/*/file_based/ERROR"/>
+                </span>
+            </xsl:when>
+            <xsl:when test="file_based/removed/ERROR">
+                <span class="label" style="white-space: nowrap">Removing delayed: </span>
+                <span class="file_based_error_message">
+                    <xsl:apply-templates select="file_based/removed/ERROR"/>
+                </span>
+            </xsl:when>
+        </xsl:choose>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->

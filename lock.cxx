@@ -301,7 +301,7 @@ void Lock::close()
 
 bool Lock::can_be_replaced_now()
 {
-    return true;
+    return replacement()  &&  _holder_set.empty();
 }
 
 //------------------------------------------------------------------------------Lock::on_initialize

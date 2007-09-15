@@ -227,6 +227,7 @@ struct Process_class : Process_class_configuration
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
+    void                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
     Process_class*              on_replace_now              ();
 
@@ -255,7 +256,6 @@ struct Process_class : Process_class_configuration
     friend struct               Process_class_subsystem;
 
     Fill_zero                  _zero_;
-  //ptr<Process_class>         _new_process_class;          // Prozessklasse ersetzen, sobald is_removable()
 
     typedef list< ptr<Job> >    Job_list;
     Job_list                   _waiting_jobs;

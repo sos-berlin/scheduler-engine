@@ -860,7 +860,7 @@ string Process_class_configuration::obj_name() const
 void Process_class_configuration::set_dom( const xml::Element_ptr& e )
 {
     if( !e )  return;
-    if( !e.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", e.nodeName() );
+    if( !e.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", e.nodeName() );
 
     string name = e.getAttribute( "name" );
     if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
@@ -1024,6 +1024,7 @@ bool Process_class::prepare_to_remove()
     //    }
     //}
 
+    _remove = true;
     return My_file_based::prepare_to_remove();
 }
 
@@ -1032,6 +1033,13 @@ bool Process_class::prepare_to_remove()
 bool Process_class::can_be_removed_now()
 {
     return _process_set.empty();
+}
+
+//----------------------------------------------------------------Process_class::prepare_to_replace
+
+void Process_class::prepare_to_replace()
+{
+    _remove = false;
 }
 
 //---------------------------------------------------------------Process_class::can_be_replaced_now
@@ -1303,7 +1311,7 @@ xml::Element_ptr Process_class_folder::dom_element( const xml::Document_ptr& doc
 //    if( Process_class* other_process_class = process_class_or_null( process_class->path() ) )
 //    {
 //        if( !replace  &&  !other_process_class->_remove )  z::throw_xc( "SCHEDULER-416", other_process_class->obj_name() );
-//        other_process_class->_remove = false;
+//        other_process_class->_remove   = false;
 //        other_process_class->set_configuration( *process_class );
 //        if( _spooler->state() > Spooler::s_loading )  other_process_class->log()->info( message_string( "SCHEDULER-869" ) );
 //    }

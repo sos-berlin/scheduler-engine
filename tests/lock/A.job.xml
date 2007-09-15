@@ -1,5 +1,6 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
-     
+
+     process_class="my_process_class" 
      tasks="2"
 >
     <lock.use lock="Georgien"/>
@@ -13,7 +14,7 @@ function spooler_process()
 spooler.job( "B" ).execute_command( "stop" );
 
 var hostware = new ActiveXObject( "hostware.global" );
-hostware.sleep( 10 );
+hostware.sleep( 30 );
 return false;
 }
 
