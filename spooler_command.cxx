@@ -311,7 +311,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
-    if( element.nodeName_is( "s" ) )  show |= show_job_chains| show_operations;
+    if( element.nodeName_is( "s" ) )  show |= show_job_chains | show_job_chain_orders | show_operations;
 
 
     return _spooler->state_dom_element( _answer, show );
@@ -994,7 +994,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 
     if( order )
     {
-        order->remove_from_job_chain();
+        order->remove( File_based::rm_base_file_too );
     }
     else
     {
@@ -1037,7 +1037,7 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
 
     string job_chain_path = modify_order_element.getAttribute( "job_chain" );
 
-    _spooler->order_subsystem()->job_chain( job_chain_path )->remove();
+    _spooler->order_subsystem()->job_chain( job_chain_path )->remove( File_based::rm_base_file_too );
 
     return _answer.createElement( "ok" );
 }

@@ -193,14 +193,10 @@ Standing_order::~Standing_order()
 
 void Standing_order::close()
 {
-    if( _order )
-        set_order( NULL );
-    else
-    if( _missing_job_chain_path != "" )
-    {
-        remove_dependant( order_subsystem(), _missing_job_chain_path );
-        _missing_job_chain_path = "";
-    }
+    if( _order )  set_order( NULL );
+
+    if( _job_chain_path != "" )  remove_dependant( order_subsystem(), _job_chain_path );
+    _job_chain_path = "";
 }
 
 //-------------------------------------------------------------------------Standing_order::set_name
@@ -242,6 +238,9 @@ bool Standing_order::on_initialize()
 
 bool Standing_order::on_load()
 {
+    _job_chain_path = folder()->make_path( _job_chain_name );
+    add_dependant( order_subsystem(), _job_chain_path );
+
     return true;
 }
 
@@ -259,11 +258,6 @@ bool Standing_order::on_activate()
         _order->connect_with_standing_order( this );
 
         result = true;
-    }
-    else
-    {
-        _missing_job_chain_path = folder()->make_path( _job_chain_name );
-        add_dependant( order_subsystem(), _missing_job_chain_path );
     }
 
     return result;
@@ -293,6 +287,7 @@ bool Standing_order::order_is_removable_or_replaceable()
 {
     return !_order  ||
            _order->job_chain_path() == ""  ||  
+           _order->is_virgin()  || 
            _order->end_state_reached();
 }
 
@@ -300,6 +295,7 @@ bool Standing_order::order_is_removable_or_replaceable()
 
 bool Standing_order::can_be_removed_now()
 {
+    //return true;
     return order_is_removable_or_replaceable();
 }
 
@@ -307,12 +303,22 @@ bool Standing_order::can_be_removed_now()
 
 bool Standing_order::prepare_to_remove()
 {
+    //if( order_is_removable_or_replaceable() )
+    //{
+    //    if( _order )  
+    //    {
+    //        _its_me_removing = true;
+    //        _order->remove_from_job_chain();
+    //        _its_me_removing = false;
+    //    }
+    //}
+
     return My_file_based::prepare_to_remove();
 }
 
 //---------------------------------------------------------------------------Standing_order::remove
 
-bool Standing_order::remove()
+void Standing_order::on_remove_now()
 {
     if( _order )  
     {
@@ -320,14 +326,17 @@ bool Standing_order::remove()
         _order->remove_from_job_chain();
         _its_me_removing = false;
     }
-
-    return true;
 }
 
 //--------------------------------------------------------------Standing_order::can_be_replaced_now
 
 bool Standing_order::can_be_replaced_now()
 {
+    //return replacement()  &&  
+    //       ( !_order  ||
+    //         _order->job_chain_path() == ""  ||  
+    //         _order->end_state_reached()        );
+
     return replacement()  &&  order_is_removable_or_replaceable();
 }
 
@@ -401,11 +410,19 @@ void Standing_order::set_dom( const xml::Element_ptr& order_element )
 
 xml::Element_ptr Standing_order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
-    xml::Element_ptr result = _order? _order->dom_element( dom_document, show_what )
-                                    : dom_document.createElement( "order" );
+    xml::Element_ptr result;
+    
+    if( _order )
+    {
+        result = _order->dom_element( dom_document, show_what );
+    }
+    else
+    {
+        result =  dom_document.createElement( "order" );
 
-    if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
-    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
+        if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
+        if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
+    }
 
     return result;
 }

@@ -2954,7 +2954,7 @@ void Job::set_state_cmd( State_cmd cmd )
             //                    signal( state_cmd_name(cmd) );
             //                    break;
 
-            case sc_remove:     remove();
+            case sc_remove:     remove( File_based::rm_base_file_too );
                                 // this ist möglicherweise ungültig
                                 return;
 

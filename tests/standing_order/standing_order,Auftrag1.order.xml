@@ -1,6 +1,8 @@
 <order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
      
-       title="Wir haben einen Auftrag! 9"
+       title="Wir haben einen Auftrag! 666"
 >
+
+    <run_time repeat="10"/>
     
-    </order>
+</order>

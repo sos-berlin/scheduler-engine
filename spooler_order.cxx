@@ -4957,87 +4957,93 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
 //-------------------------------------------------------------------------------Order::dom_element
 
-xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Show_what& show_what, const string* log ) const
+xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what, const string* log ) const
 {
-    xml::Element_ptr element = document.createElement( "order" );
+    xml::Element_ptr result = dom_document.createElement( "order" );
+
+    if( _standing_order )  
+    {
+        if( _standing_order->has_base_file() )  result.appendChild_if( _standing_order->File_based::dom_element( dom_document, show_what ) );
+        if( _standing_order->replacement()   )  result.append_new_element( "replacement" ).appendChild( _standing_order->replacement()->dom_element( dom_document, show_what ) );
+    }
 
     if( !show_what.is_set( show_for_database_only ) )
     {
         if( !_id.is_empty() )
         {
-            element.setAttribute( "order"     , debug_string_from_variant( _id ) );
-            element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
+            result.setAttribute( "order"     , debug_string_from_variant( _id ) );
+            result.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
         }
     }
 
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
         if( _setback )
-        element.setAttribute( "next_start_time", _setback.as_string() );
+        result.setAttribute( "next_start_time", _setback.as_string() );
 
         if( _title != "" )
-        element.setAttribute( "title"     , _title );
+        result.setAttribute( "title"     , _title );
 
         if( !_state.is_empty() )
-        element.setAttribute( "state"     , debug_string_from_variant( _state ) );
+        result.setAttribute( "state"     , debug_string_from_variant( _state ) );
 
         if( !_initial_state.is_empty() )
-        element.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
+        result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( Job_chain* job_chain = this->job_chain_for_api() )
-        element.setAttribute( "job_chain" , job_chain->path() );
+        result.setAttribute( "job_chain" , job_chain->path() );
 
         if( _replaced_by )
-        element.setAttribute( "replaced"  , "yes" );
+        result.setAttribute( "replaced"  , "yes" );
         else
         if( _removed_from_job_chain_name != "" )
-        element.setAttribute( "removed"   , "yes" );
+        result.setAttribute( "removed"   , "yes" );
 
-        if( Job* job = this->job() )  element.setAttribute( "job", job->name() );
+        if( Job* job = this->job() )  result.setAttribute( "job", job->name() );
         else
         if( Job_chain* job_chain = job_chain_for_api() )
         {
             if( Job_node* job_node = Job_node::try_cast( job_chain->node_from_state_or_null( _state ) ) )
-                element.setAttribute( "job", job_node->job_path() );
+                result.setAttribute( "job", job_node->job_path() );
         }
 
         if( _task )
         {
-            element.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
-            element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
+            result.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
+            result.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
         }
 
         if( _state_text != "" )
-        element.setAttribute( "state_text", _state_text );
+        result.setAttribute( "state_text", _state_text );
 
-        element.setAttribute( "priority"  , _priority );
+        result.setAttribute( "priority"  , _priority );
 
         if( _created )
-        element.setAttribute( "created"   , _created.as_string() );
+        result.setAttribute( "created"   , _created.as_string() );
 
         if( _log->opened() )
-        element.setAttribute( "log_file"  , _log->filename() );
+        result.setAttribute( "log_file"  , _log->filename() );
 
         if( _is_in_database  &&  _job_chain_path != ""  &&  !_job_chain )
-        element.setAttribute( "in_database_only", "yes" );
+        result.setAttribute( "in_database_only", "yes" );
 
         if( show_what.is_set( show_payload )  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
-            xml::Element_ptr payload_element = element.append_new_element( "payload" );
+            xml::Element_ptr payload_element = result.append_new_element( "payload" );
             xml::Node_ptr    payload_content;
 
             if( _payload.vt == VT_DISPATCH )
             {
                 if( Com_variable_set* variable_set = dynamic_cast<Com_variable_set*>( V_DISPATCH( &_payload ) ) )
                 {
-                    payload_content = variable_set->dom_element( document, "params", "param" );
+                    payload_content = variable_set->dom_element( dom_document, "params", "param" );
                 }
             }
 
             if( !payload_content )
             {
                 string payload_string = string_payload();
-                if( !payload_content )  payload_content = document.createTextNode( payload_string );
+                if( !payload_content )  payload_content = dom_document.createTextNode( payload_string );
             }
 
             payload_element.appendChild( payload_content );
@@ -5045,12 +5051,12 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
     }
 
-    if( show_what.is_set( show_run_time ) )  element.appendChild( _run_time->dom_element( document ) );  // Vor _period setzen!
+    if( show_what.is_set( show_run_time ) )  result.appendChild( _run_time->dom_element( dom_document ) );  // Vor _period setzen!
 
     if( show_what.is_set( show_for_database_only ) )
     {
         // Nach <run_time> setzen!
-        if( _period.repeat() < Time::never )  element.appendChild( _period.dom_element( document ) );     // Aktuelle Wiederholung merken, für <run_time>
+        if( _period.repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <run_time>
     }
 
     if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
@@ -5058,14 +5064,14 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         Show_what log_show_what = show_what;
         if( show_what.is_set( show_for_database_only ) )  log_show_what |= show_log;
 
-        if( log  &&  show_what.is_set( show_log ) ) element.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
+        if( log  &&  show_what.is_set( show_log ) ) result.append_new_text_element( "log", *log );     // Protokoll aus der Datenbank
         else
-        if( _log )  element.appendChild( _log->dom_element( document, log_show_what ) );
+        if( _log )  result.appendChild( _log->dom_element( dom_document, log_show_what ) );
     }
 
     if( show_what.is_set( show_payload | show_for_database_only )  &&  _xml_payload != "" )
     {
-        xml::Element_ptr xml_payload_element = element.append_new_element( "xml_payload" );
+        xml::Element_ptr xml_payload_element = result.append_new_element( "xml_payload" );
 
         try
         {
@@ -5086,38 +5092,38 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 
     if( _setback  )
-    element.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
+    result.setAttribute( _setback_count == 0? "at" : "setback", _setback.as_string() );
 
     if( _setback_count > 0 )
-    element.setAttribute( "setback_count", _setback_count );
+    result.setAttribute( "setback_count", _setback_count );
 
     if( _web_service )
-    element.setAttribute( "web_service", _web_service->name() );
+    result.setAttribute( "web_service", _web_service->name() );
 
     if( _http_operation  &&  _http_operation->web_service_operation_or_null() )
     {
-        element.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
-        element.setAttribute( "web_service_client"   , _http_operation->web_service_operation_or_null()->http_operation()->connection()->peer().as_string() );
+        result.setAttribute( "web_service_operation", _http_operation->web_service_operation_or_null()->id() );
+        result.setAttribute( "web_service_client"   , _http_operation->web_service_operation_or_null()->http_operation()->connection()->peer().as_string() );
     }
 
-    if( _is_on_blacklist )  element.setAttribute( "on_blacklist", "yes" );
-    if( _suspended       )  element.setAttribute( "suspended"   , "yes" );
-    if( _is_replacement  )  element.setAttribute( "replacement" , "yes" ),
-                            element.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
-    if( !_is_virgin      )  element.setAttribute( "touched"     , "yes" );
+    if( _is_on_blacklist )  result.setAttribute( "on_blacklist", "yes" );
+    if( _suspended       )  result.setAttribute( "suspended"   , "yes" );
+    if( _is_replacement  )  result.setAttribute( "replacement" , "yes" ),
+                            result.setAttribute_optional( "replaced_order_occupator", _replaced_order_occupator );
+    if( !_is_virgin      )  result.setAttribute( "touched"     , "yes" );
 
-    if( start_time()     )  element.setAttribute( "start_time", start_time().as_string() );
-    if( end_time()       )  element.setAttribute( "end_time"  , end_time  ().as_string() );
+    if( start_time()     )  result.setAttribute( "start_time", start_time().as_string() );
+    if( end_time()       )  result.setAttribute( "end_time"  , end_time  ().as_string() );
 
     if( _outer_job_chain_path != "" )
     {
-        xml::Element_ptr e  = element.append_new_element( "order.job_chain_stack" );
+        xml::Element_ptr e  = result.append_new_element( "order.job_chain_stack" );
         xml::Element_ptr e2 = e.append_new_element( "order.job_chain_stack.entry" );
         e2.setAttribute( "job_chain", _outer_job_chain_path );
         e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
     }
     
-    return element;
+    return result;
 }
 
 //--------------------------------------------------------------Order::append_calendar_dom_elements
@@ -5641,6 +5647,21 @@ Com_job* Order::com_job()
     return result;
 }
 
+//------------------------------------------------------------------------------------Order::remove
+
+void Order::remove( File_based::Remove_flags remove_flag )
+{
+    ptr<Order> hold_me = this;
+
+    if( _standing_order )  
+    {
+        _standing_order->remove( remove_flag );
+        // Löscht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
+    }
+
+    remove_from_job_chain(); 
+}
+
 //---------------------------------------------------------------------Order::remove_from_job_chain
 
 void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option )
@@ -5665,7 +5686,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     _setback_count = 0;
     _setback = Time(0);
 
-    set_replacement( false );  int DAS_IST_FALSCH_BEI_RUN_TIME;
+    set_replacement( false );  
 
 
     _job_chain = NULL;
@@ -5676,6 +5697,8 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     {
         remove_from_job_chain_stack();
         if( _standing_order )  _standing_order->on_order_removed();
+
+        if( !_task )  close();      // 2007-09-16
     }
 }
 
@@ -5820,6 +5843,8 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
                 _replaced_order_occupator = other_order->_task->obj_name();
                 _log->info( message_string( "SCHEDULER-942", _replaced_order_occupator, other_order->obj_name() ) );       // add_or_replace_order(): Auftrag wird verzögert bis <p1/> <p2/> ausgeführt hat
             }
+            //else
+            //    other_order->close();       // 2007-09-16
         }
         else
         {
@@ -5976,6 +6001,7 @@ void Order::handle_end_state()
 
         if( next_start != Time::never  &&  _state != _initial_state )   // <run_time> verlangt Wiederholung?
         {
+            _is_virgin = true;
             handle_end_state_repeat_order( next_start );
         }
         else
@@ -6076,10 +6102,10 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
         if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->job_chain( _outer_job_chain_path )->first_node() ) )
             first_nested_job_chain_path = n->nested_job_chain_path();
 
-        remove_from_job_chain( jc_leave_in_job_chain_stack );  int ENTFERNT_REPLACEMENT;
+        remove_from_job_chain( jc_leave_in_job_chain_stack );  
     }
 
-    close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+    close_log_and_write_history();  // Historie schreiben, aber Auftrag beibehalten
     _start_time = 0;
     _end_time = 0;
     open_log();

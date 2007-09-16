@@ -512,7 +512,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
             catch( zschimmer::Xc& x )
             {
                 if( x.code() != ( S() << "ERRNO-" << ENOENT ).to_string() )  throw;   // != "ERRNO-2" ?
-                is_removed = false;      // Datei ist nach dem Lesen des Verzeichnisses gelöscht worden, oder Link ins Leere
+                is_removed = true;      // Datei ist nach dem Lesen des Verzeichnisses gelöscht worden, oder Link ins Leere
             }
 
             if( !is_removed )
@@ -563,7 +563,9 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
         {   
             if( old_file_based->has_base_file() )   // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht löschen
             {
-                folder()->log()->info( message_string( "SCHEDULER-890", old_file_based->_base_file_info._filename, old_file_based->name() ) );
+                string relative_file_path = folder()->make_path( old_file_based->base_file_info()._filename );
+                old_file_based->log()->info( message_string( "SCHEDULER-890", relative_file_path, subsystem()->object_type_name() ) );
+
                 file_based = old_file_based;                // Für catch()
                 file_based->remove();
                 file_based = NULL;
@@ -852,7 +854,7 @@ void File_based::set_file_based_state( State state )
     {
         _state = state; 
 
-        Z_DEBUG_ONLY( log()->debug( message_string( "SCHEDULER-893", file_based_state_name() ) ); )
+        //Z_DEBUG_ONLY( log()->debug( message_string( "SCHEDULER-893", file_based_state_name() ) ); )
     }
 }
 
@@ -938,18 +940,37 @@ bool File_based::prepare_to_remove()
     return can_be_removed_now(); 
 }
 
+//------------------------------------------------------------------------File_based::on_remove_now
+
+void File_based::on_remove_now()
+{
+}
+
+//---------------------------------------------------------------------------File_based::remove_now
+
+void File_based::remove_now()
+{
+    on_remove_now();
+    typed_folder()->remove_file_based( this );
+}
+
 //-------------------------------------------------------------------------------File_based::remove
 
-bool File_based::remove()
+bool File_based::remove( Remove_flags remove_flag )
 {
+    if( remove_flag == rm_base_file_too  &&  has_base_file() )
+    {
+        remove_base_file();
+    }
+
+
     bool is_removable = prepare_to_remove();
 
     if( is_removable )  
     {
         _remove_xc = zschimmer::Xc();
 
-        close();
-        typed_folder()->remove_file_based( this );
+        remove_now();
     }
     else  
     {
@@ -965,6 +986,29 @@ bool File_based::remove()
 zschimmer::Xc File_based::remove_error()
 {
     return zschimmer::Xc( "SCHEDULER-989", subsystem()->object_type_name() );
+}
+
+//----------------------------------------------------------------------File_base::remove_base_file
+
+void File_based::remove_base_file()
+{
+    if( !has_base_file() )  z::throw_xc( __FUNCTION__ );
+
+    File_path file_path ( folder()->directory(), base_file_info()._filename );
+
+    try
+    {
+#       ifdef Z_DEBUG
+            file_path.move_to( file_path + "-REMOVED" );
+#        else
+            file_path.unlink();
+#       endif    
+    }
+    catch( exception& )
+    {
+        if( file_path.exists() )  throw;
+        _file_is_removed = true;
+    }
 }
 
 //-------------------------------------------------------------------------File_based::replace_with
@@ -1005,7 +1049,7 @@ bool File_based::check_for_replacing_or_removing()
     if( can_be_removed_now() )
     {
         log()->info( message_string( "SCHEDULER-937", subsystem()->object_type_name() ) );
-        typed_folder()->remove_file_based( this );
+        remove_now();
         result = true;
     }
 

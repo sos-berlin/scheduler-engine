@@ -732,6 +732,13 @@ void Prefix_log::open()
 
     if( !_filename.empty() )
     {
+#       ifdef Z_DEBUG
+            if( string_begins_with( file::File_path( _filename ).name(), "order." )  &&  file::File_path( _filename ).file_exists() )
+            {
+                File_path line_for_breakpoint;
+            }
+#       endif
+
         Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
 
         while(1)

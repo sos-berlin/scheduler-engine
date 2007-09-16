@@ -935,7 +935,7 @@ STDMETHODIMP Process_class_configuration::Remove()
 
     try
     {
-        remove();
+        remove( File_based::rm_base_file_too );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -1262,7 +1262,7 @@ xml::Element_ptr Process_class::execute_xml( Command_processor* command_processo
 {
     if( element.nodeName_is( "process_class.remove" ) ) 
     {
-        remove();
+        remove( File_based::rm_base_file_too );
     }
     else
         z::throw_xc( "SCHEDULER-409", "process_class.remove", element.nodeName() );

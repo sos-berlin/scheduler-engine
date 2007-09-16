@@ -1,5 +1,6 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
      
+     idle_timeout="never" 
      order="yes"
 >
 
@@ -12,7 +13,7 @@ function spooler_process()
     spooler_log.info( "ORDER-ID=" + order.id );
     
     var hostware = new ActiveXObject( "hostware.global" );
-    hostware.sleep( 7 );
+    hostware.sleep( 15 );
 
     return true;
 }

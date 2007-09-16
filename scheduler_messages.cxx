@@ -455,7 +455,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-887", "More lock holders than new max_non_exclusive=$1: $2" },
     { "SCHEDULER-888", "$1 cannot be repalced now, it will be done later" },
     { "SCHEDULER-889", "These filenames yield the same object name: '$1' and '$2'. The second is ignored" },
-    { "SCHEDULER-890", "'$2' is going to be removed because the file '$1' has been removed" },
+    { "SCHEDULER-890", "Removed configuration file '$1' is yielding to removal of this $2" },
     { "SCHEDULER-891", "Configuration file '$1' is going to be be loaded into this new $2" },
     { "SCHEDULER-892", "Changed configuration file '$1' is going to replace this $2" },
     { "SCHEDULER-893", "Subsystem_object::state='$1'" },

@@ -2058,7 +2058,7 @@ STDMETHODIMP Com_job::Remove()
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        _job->remove();
+        _job->remove( File_based::rm_base_file_too );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4441,7 +4441,7 @@ STDMETHODIMP Com_job_chain::Remove()
     {
         if( !_job_chain )  return E_POINTER;
 
-        _job_chain->remove();
+        _job_chain->remove( File_based::rm_base_file_too );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -5149,7 +5149,7 @@ STDMETHODIMP Com_order::Remove_from_job_chain()
     {
         if( !_order )  return E_POINTER;
 
-        _order->remove_from_job_chain();  
+        _order->remove( File_based::rm_base_file_too );  
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

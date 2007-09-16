@@ -692,7 +692,7 @@ STDMETHODIMP Lock::Remove()
 
     try
     {
-        remove();
+        remove( rm_base_file_too );
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -705,7 +705,7 @@ void Lock::execute_xml( const xml::Element_ptr& element, const Show_what& )
 {
     if( element.nodeName_is( "lock.remove" ) ) 
     {
-        remove();
+        remove( File_based::rm_base_file_too );
     }
     else
         z::throw_xc( "SCHEDULER-409", "lock.remove", element.nodeName() );

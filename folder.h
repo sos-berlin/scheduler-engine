@@ -271,6 +271,7 @@ struct File_based : Scheduler_object,
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
     bool                        try_switch_wished_file_based_state();
+    void                        remove_now                  ();
     File_based*                 replace_now                 ();
   //void                        set_file_based_incomplete   ( bool b )                              { _is_incomplete = true; }
 
@@ -279,8 +280,11 @@ struct File_based : Scheduler_object,
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
 
-    virtual bool                remove                      ();
-  //virtual void                remove_now                  ()                                      = 0;
+    enum Remove_flags { rm_default, rm_base_file_too };
+    bool                        remove                      ( Remove_flags = rm_default );
+    void                        remove_base_file            ();
+
+    virtual void                on_remove_now               ();
     virtual bool                prepare_to_remove           ();
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();

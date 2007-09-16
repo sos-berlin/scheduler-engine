@@ -37,7 +37,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
-    bool                        remove                      ();
+    void                        on_remove_now               ();
 
     void                        prepare_to_replace          ();
     bool                        can_be_replaced_now         ();
@@ -64,7 +64,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     Fill_zero                  _zero_;
     string                     _job_chain_name;
-    string                     _missing_job_chain_path;
+    string                     _job_chain_path;
     string                     _order_id;
     ptr<Order>                 _order;
     bool                       _its_me_removing;
