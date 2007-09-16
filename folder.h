@@ -215,7 +215,7 @@ struct File_based : Scheduler_object,
         s_initialized,
         s_loaded,
         s_active,
-        s_error,
+      //s_error,
         s_closed
     };
 

@@ -448,7 +448,7 @@ struct Node : Com_job_chain_node,
 
     virtual void                initialize                  ();
     virtual void                activate                    ();
-    virtual void                replace                     ( Node* )                               {}
+  //virtual void                replace                     ( Node* )                               {}
 
     const Order::State&         order_state                 () const                                { return _order_state; }
     void                    set_next_state                  ( const Order::State& );
@@ -523,7 +523,7 @@ struct Order_queue_node : Node
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
     void                        close                       ();
-    void                        replace                     ( Node* old_node );
+  //void                        replace                     ( Node* old_node );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung

@@ -3963,7 +3963,7 @@
 
         <message code="SCHEDULER-890">
             <text xml:lang="en">
-                <title>Removed configuration file '<p1/>' is yielding to removal of this <p2>object_type</p2></title>
+                <title><p2>object_type</p2> is going to be removed because its configuration file '<p1/>' has been removed</title>
             </text>
         </message>
         

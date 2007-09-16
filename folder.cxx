@@ -580,7 +580,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
 
         if( base_file_info )    // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
         {
-            file_based->set_file_based_state( File_based::s_error );
+            //Im selben Zustand lassen.  file_based->set_file_based_state( File_based::s_error );
             file_based->_base_file_xc      = x;
             file_based->_base_file_xc_time = double_from_gmtime();
             msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x );
@@ -877,8 +877,7 @@ bool File_based::switch_file_based_state( State state )
         case s_initialized: result = initialize();  break;
         case s_loaded:      result = load();        break;
         case s_active:      result = activate();    break;
-        case s_error:       result = true;  set_file_based_state( state );  break;
-      //case s_incomplete:  result = true;  set_file_based_state( state );  break;
+      //case s_error:       result = true;  set_file_based_state( state );  break;
         case s_closed:      result = true;  close(); break;
         default:            assert(0);
     }
@@ -963,6 +962,7 @@ bool File_based::remove( Remove_flags remove_flag )
         remove_base_file();
     }
 
+    set_replacement( NULL );
 
     bool is_removable = prepare_to_remove();
 
@@ -1115,7 +1115,7 @@ string File_based::file_based_state_name( State state )
         case s_loaded:          return "loaded";
         case s_active:          return "active";
         case s_closed:          return "closed";
-        case s_error:           return "error";
+      //case s_error:           return "error";
         default:                return S() << "File_based_state-" << state;
     }
 }
@@ -1317,7 +1317,7 @@ void Dependencies::remove_dependant( Pendant* requestor, const string& missings_
     if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
-//------------------------------------------------------Dependencies::announce_dependant_loaded
+//----------------------------------------------------------Dependencies::announce_dependant_loaded
 
 void Dependencies::announce_dependant_loaded( File_based* found_missing )
 {

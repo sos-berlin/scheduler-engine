@@ -1107,15 +1107,15 @@ void Order_queue_node::close()
 
 //------------------------------------------------------------------------Order_queue_node::replace
 
-void Order_queue_node::replace( Node* old )
-{
-    if( Order_queue_node* old_node = Order_queue_node::try_cast( old ) )
-    {
-        _order_queue = old_node->_order_queue;
-        old_node->_order_queue = NULL;
-        _order_queue->on_node_replaced( this );
-    }
-}
+//void Order_queue_node::replace( Node* old )
+//{
+//    if( Order_queue_node* old_node = Order_queue_node::try_cast( old ) )
+//    {
+//        _order_queue = old_node->_order_queue;
+//        old_node->_order_queue = NULL;
+//        _order_queue->on_node_replaced( this );
+//    }
+//}
 
 //---------------------------------------------------------------------Order_queue_node::set_action
 
@@ -2181,9 +2181,9 @@ void Job_chain::add_order( Order* order )
 {
     assert( order->_is_distributed == order->_is_db_occupied );
     assert( !order->_is_distributed || _is_distributed );
-    if( _remove  ||  state() != s_loaded  &&  
-                     state() != s_active  &&
-                     state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
+    if( state() != s_loaded  &&  
+        state() != s_active  &&
+        state() != s_stopped )  z::throw_xc( "SCHEDULER-151" );
 
 
     if( _order_id_space )
@@ -2682,8 +2682,6 @@ bool Job_chain::prepare_to_remove()
     //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
     if( !can_be_removed_now() )  return false;
 
-    set_replacement( NULL );
-
     return My_file_based::prepare_to_remove();
 }
 
@@ -2735,11 +2733,19 @@ Job_chain* Job_chain::on_replace_now()
 
     Z_FOR_EACH( Node_list, replacement()->_node_list, it )
     {
-        Node* new_job_chain_node = *it;
-        
-        if( Node* old_job_chain_node = node_from_state_or_null( new_job_chain_node->order_state() ) )
+        if( Order_queue_node* new_job_chain_node = Order_queue_node::try_cast( *it ) )
         {
-            new_job_chain_node->replace( old_job_chain_node );
+            if( Order_queue_node* old_job_chain_node = Order_queue_node::try_cast( node_from_state_or_null( new_job_chain_node->order_state() ) ) )
+            {
+                Z_FOR_EACH( Order_queue::Queue, old_job_chain_node->order_queue()->_queue, it )
+                {
+                    ptr<Order> order = *it;
+                    remove_order( order );
+                    replacement()->add_order( order );
+                    //order->remove_from_job_chain( jc_leave_in_job_chain_stack );
+                    //order->place_in_job_chain( this, jc_leave_in_job_chain_stack );
+                }
+            }
         }
     }
 
