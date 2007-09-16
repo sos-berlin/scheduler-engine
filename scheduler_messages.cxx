@@ -36,7 +36,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-143", "Task cannot start because it has no start time and no valid <run_time>" },
     { "SCHEDULER-145", "<script> com_class= and language= cannot be combined" },
     { "SCHEDULER-146", "Missing script" },
-    { "SCHEDULER-147", "Job $1 cannot accept orders because it has not been declared with <job order=\"yes\">." },
+    { "SCHEDULER-147", "$1 cannot accept orders because it has not been declared with <job order=\"yes\">" },
     { "SCHEDULER-148", "Job chain has finished (with add_job_chain()) and cannot be modified" },
     { "SCHEDULER-149", "There is no job in job chain \"$1\" for the state \"$2\"" },
     { "SCHEDULER-150", "The state \"$1\" has already assigned a job in job chain $2" },

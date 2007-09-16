@@ -9,7 +9,7 @@
         <http_server>
             <http.authentication>
                 <http.users>
-                    <http.user name="du" password_md5="098f6bcd4621d373cade4e832627b4f6"/>
+                    <http.user name="du" password_md5="13a014cb9de9f7cad88d5dafb70ecb41"/>
                 </http.users>
             </http.authentication>
         </http_server>

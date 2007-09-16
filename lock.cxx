@@ -322,14 +322,6 @@ bool Lock::on_load()
 
 bool Lock::on_activate()
 {
-    //FOR_EACH_JOB( job )
-    //{
-    //    if( Requestor* requestor = job->lock_requestor_or_null() )
-    //    {
-    //        requestor->on_new_lock( this );
-    //    }
-    //}
-
     return true;
 }
 

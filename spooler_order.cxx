@@ -1224,7 +1224,14 @@ void Job_node::activate()
 
     if( Job* job = spooler()->job_subsystem()->job_or_null( _job_path ) )
     {
-        connect_job( job );
+        if( !job->is_order_controlled() )  
+        {
+            log()->warn( message_string( "SCHEDULER-147", job->obj_name() ) );
+        }
+        else
+        {
+            connect_job( job );
+        }
     }
 }
 
@@ -1980,9 +1987,6 @@ void Job_chain::fill_holes()
             {
                 node->_next_state = (*next)->order_state();
             }
-
-
-
 
             if( node->_next_state.is_null_or_empty_string() )  node->_next_state = empty_variant;
                                                          else  node->_next_node  = node_from_state( node->next_state() );
@@ -5480,8 +5484,6 @@ bool Order::end_state_reached()
             result = true;
     }
     
-    int UM_VERSCHACHTELTE_JOBKETTE_ERWEITERN;
-
     return result;
 }
 

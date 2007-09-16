@@ -747,6 +747,31 @@ void Operation::begin()
     {
         _request->check();
 
+        if( _spooler->_web_services->need_authorization()  &&  !_spooler->_web_services->is_request_authorized( _request ) )
+        {
+            // 2007-08-24  Dank an Michael Collard, iinet.net.au.
+
+            _response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
+          //_response->set_status( http::status_401_permission_denied );
+
+            string response_content_type = "text/html";
+            string response_body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"
+                                   "<HTML>"
+                                   "<HEAD><TITLE>401 Authorization Required</TITLE></HEAD>"
+                                   "<BODY>"
+                                    "<H1>Authorization Required</H1>"
+                                    "This server could not verify that you are authorized to access the document requested. "
+                                    "Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
+                                    "<P>"
+                                    "</BODY>"
+                                    "</HTML>";
+
+            _response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
+
+            throw Http_exception( status_401_permission_denied );
+        }
+
+
         if( Web_service* web_service = _spooler->_web_services->web_service_by_url_path_or_null( _request->_path ) )
         {
             _web_service_operation = web_service->new_operation( this );
@@ -778,7 +803,6 @@ void Operation::begin()
     {
         _connection->_log.warn( x.what() );
         _response->set_status( x._status_code, x.what() );
-
         _response->set_ready();
     }
     catch( exception& x )
@@ -942,34 +966,6 @@ void Request::check()
      && _protocol != "HTTP/1.1" )  throw Http_exception( status_505_http_version_not_supported );
 
     if( !string_begins_with( _path, "/" ) )  throw Http_exception( status_404_bad_request );
-
-
-    int HTTP_AUTHENTIFIZIERUNG_EINBAUEN;
-    //if( _spooler->_web_services->need_authorization()  &&  !_spooler->_web_services->is_request_authorized( http_request ) )
-    //{
-    //    // 2007-08-24  Dank an Michael Collard, iinet.net.au.
-
-    //    http_response->set_header( "WWW-Authenticate", "Basic realm=\"Scheduler\"" );
-    //  //http_response->set_status( http::status_401_permission_denied );
-
-    //    response_content_type = "text/html";
-    //    response_body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"
-    //                    "<HTML>"
-    //                    "<HEAD><TITLE>401 Authorization Required</TITLE></HEAD>"
-    //                    "<BODY>"
-    //                     "<H1>Authorization Required</H1>"
-    //                     "This server could not verify that you are authorized to access the document requested. "
-    //                     "Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
-    //                     "<P>"
-    //                     "</BODY>"
-    //                     "</HTML>";
-
-    //    _response->set_chunk_reader( Z_NEW( http::String_chunk_reader( x.body_text(), content_type ) ) );
-
-    //    Http_exception xc ( status_401_permission_denied );
-    //    //xc.set_body_text( response_body );
-    //    zschimmer::throw_xc( xc );
-    //}
 }
 
 //----------------------------------------------------------------------Request::get_String_content

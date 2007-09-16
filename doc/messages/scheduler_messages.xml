@@ -465,11 +465,8 @@
         </message>
 
         <message code="SCHEDULER-147">
-            <text xml:lang="de">
-                <title>Job <p1/> nimmt keine Aufträge an, er ist nicht mit &lt;job order="yes"> deklariert.</title>
-            </text>
             <text xml:lang="en">
-                <title>Job <p1/> cannot accept orders because it has not been declared with &lt;job order="yes">.</title>
+                <title><p1>job</p1> cannot accept orders because it has not been declared with &lt;job order="yes"></title>
             </text>
         </message>
 

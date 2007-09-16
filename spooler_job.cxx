@@ -172,7 +172,6 @@ void Job_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elemen
 
 int Job_subsystem::remove_temporary_jobs()
 {
-    int UEBERARBEITEN;
     int count = 0;
 
     File_based_map::iterator it = _file_based_map.begin();
@@ -183,8 +182,7 @@ int Job_subsystem::remove_temporary_jobs()
 
         Job* job = it->second;
 
-        bool ok = job->can_be_removed_now();
-        if( ok )
+        if( job->temporary()  &&  job->can_be_removed_now() )
         {
             job->remove();
             // it ist ungültig
@@ -538,8 +536,6 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 
             if( my_show_what.is_set( show_job_orders )  &&  my_show_what._max_orders > 0 )
             {
-                int PRUEFEN_OB_ORDER_QUEUE_ELEMENT_FREIGEGEBEN;
-
                 xml::Element_ptr order_queue_element = order_queue->dom_element( document, my_show_what );
 
                 // Alle <order> in unser kombiniertes <order_queue> übernehmen:
@@ -1324,8 +1320,6 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at, int id )
 {
-    //if( !is_order_controlled() )  _spooler->assert_has_exclusiveness( obj_name() + " create_task" );
-    
     assert_is_loaded();
     if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
@@ -1425,8 +1419,6 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
-    //if( !_job->is_order_controlled() )  _spooler->assert_has_exclusiveness( _job->obj_name() + " " + __FUNCTION__ );    // Doppelte Sicherung
-
     _job->set_visible( true );
 
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
