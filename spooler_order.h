@@ -737,8 +737,8 @@ struct Job_chain : Com_job_chain,
     void                        disconnected_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
     void                    set_order_id_space              ( Order_id_space* g )                       { _order_id_space = g; }
-    Job_chain_set               connected_job_chains        ();
-    void                    get_connected_job_chains        ( Job_chain_set* );
+    String_set                  connected_job_chains        ();
+    void                    get_connected_job_chains        ( String_set* );
 
 
     void                    set_dom                         ( const xml::Element_ptr& );
@@ -760,7 +760,6 @@ struct Job_chain : Com_job_chain,
 
     Fill_zero                  _zero_;
     State                      _state;
-    bool                       _remove;
     Order_id_space*            _order_id_space;
     bool                       _visible;
     bool                       _orders_are_recoverable;

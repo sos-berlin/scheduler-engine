@@ -102,7 +102,6 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 
     Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
     State                      _state;
-    bool                       _remove;
 
     typedef stdext::hash_set<Holder*>  Holder_set;
     Holder_set                 _holder_set;

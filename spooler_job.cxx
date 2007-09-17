@@ -1156,8 +1156,7 @@ bool Job::prepare_to_remove()
 
     //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
-    _replacement_job = NULL;
-    _remove = true; 
+    //_remove = true; 
 
     stop( true );
 
@@ -1168,9 +1167,9 @@ bool Job::prepare_to_remove()
 
 bool Job::can_be_removed_now()
 { 
-    if( job_folder()  &&  ( _remove  ||  _temporary ) )
+    if( job_folder()  &&  ( is_to_be_removed()  ||  _temporary ) )
     {
-        if( _temporary  &&  !_remove  &&  has_next_start_time() )  return false;
+        if( _temporary  &&  !is_to_be_removed()  &&  has_next_start_time() )  return false;
 
         if( _running_tasks.size() > 0  ||  _task_queue->size() > 0 )
         {
@@ -1197,23 +1196,22 @@ zschimmer::Xc Job::remove_error()
 
 //--------------------------------------------------------------------------Job::prepare_to_replace
 
-//void Job::prepare_to_replace()
-//{
-//    bool result;
-//    //bool is_second_remove = _remove;
-//
-//    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-//
-//    _remove = true; 
-//    stop( true );
-//}
+void Job::prepare_to_replace()
+{
+    bool result;
+    //bool is_second_remove = _remove;
 
-////-------------------------------------------------------------------------Job::can_be_replaced_now
-//
-//bool Job::can_be_replaced_now()
-//{
-//    return _running_tasks.size() == 0;
-//}
+    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+
+    stop( true );
+}
+
+//-------------------------------------------------------------------------Job::can_be_replaced_now
+
+bool Job::can_be_replaced_now()
+{
+    return _running_tasks.size() == 0;
+}
 
 //------------------------------------------------------------------------------Job::on_replace_now
 
@@ -1321,7 +1319,7 @@ void Job::signal( const string& signal_name )
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at, int id )
 {
     assert_is_loaded();
-    if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
+    if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
     {
@@ -1665,7 +1663,7 @@ void Job::remove_running_task( Task* task )
 
 ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at )
 {
-    if( _remove )  z::throw_xc( "SCHEDULER-230", obj_name() );
+    if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
     
     ptr<Task> task = create_task( params, task_name, start_at );
     enqueue_task( task );
@@ -1790,7 +1788,7 @@ bool Job::execute_state_cmd()
                                      || _state == s_stopped
                                      || _state == s_error      )
                                     {
-                                        if( _remove )
+                                        if( is_to_be_removed() )
                                         {
                                             _log->error( message_string( "SCHEDULER-284", "unstop" ) );
                                         }
@@ -1853,7 +1851,7 @@ bool Job::execute_state_cmd()
                     if( _state == s_pending
                      || _state == s_stopped )
                     {
-                        if( _remove )
+                        if( is_to_be_removed() )
                         {
                             _log->error( message_string( "SCHEDULER-284", "wake" ) );
                         }
@@ -3125,7 +3123,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         result.setAttribute( "in_period", is_in_period( now )? "yes" : "no" );
 
-        if( _remove )
+        if( is_to_be_removed() )
         result.setAttribute( "remove", "yes" );
 
         if( _temporary )

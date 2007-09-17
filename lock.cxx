@@ -329,16 +329,16 @@ bool Lock::on_activate()
 
 bool Lock::can_be_removed_now()
 {
-    return _remove  &&  _holder_set.empty();
+    return is_to_be_removed()  &&  _holder_set.empty();
 }
 
 //--------------------------------------------------------------------------Lock::prepare_to_remove
 
 bool Lock::prepare_to_remove()
 {
-    if( !_remove )
+    if( !is_to_be_removed() )
     {
-        _remove = true;
+        //_remove = true;
 
         //Z_FOR_EACH( Use_set, _use_set, it )
         //{
@@ -380,7 +380,6 @@ zschimmer::Xc Lock::remove_error()
 
 void Lock::prepare_to_replace()
 {
-    _remove = false;
 }
 
 //-----------------------------------------------------------------------------Lock::on_replace_now

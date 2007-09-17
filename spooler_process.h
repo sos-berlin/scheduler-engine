@@ -201,8 +201,6 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     Host_and_port              _remote_scheduler;
     // Neue Einstellungen in Process_class::set_configuration() berücksichtigen!
 
-    bool                       _remove;                     // Löschen, sobald is_removable()
-
 
     static Class_descriptor     class_descriptor;
     static const Com_method    _methods[];

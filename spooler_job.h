@@ -170,8 +170,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        prepare_to_remove           ();
     zschimmer::Xc               remove_error                ();
 
-    //void                        prepare_to_replace          ();
-    //bool                        can_be_replaced_now         ();
+    void                        prepare_to_replace          ();
+    bool                        can_be_replaced_now         ();
     //Job*                        on_replace_now              ();
 
     void                        set_delay_after_error       ( int error_steps, const string& delay );
@@ -305,7 +305,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
     string                     _description;                // <description>
-    ptr<Job>                   _replacement_job;
 
   protected:
     friend struct               Job_history;
@@ -330,7 +329,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
   //string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
     bool                       _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
-    bool                       _remove;                     // Job enfernen sobald möglich. _state == s_stopping, dann s_stopped
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test

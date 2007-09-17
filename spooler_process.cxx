@@ -1024,7 +1024,7 @@ bool Process_class::prepare_to_remove()
     //    }
     //}
 
-    _remove = true;
+    //_remove = true;
     return My_file_based::prepare_to_remove();
 }
 
@@ -1039,7 +1039,6 @@ bool Process_class::can_be_removed_now()
 
 void Process_class::prepare_to_replace()
 {
-    _remove = false;
 }
 
 //---------------------------------------------------------------Process_class::can_be_replaced_now
@@ -1102,7 +1101,7 @@ void Process_class::remove_process( Process* process )
     process->_process_class = NULL; 
     _process_set.erase( it ); 
 
-    if( _remove  &&  can_be_removed_now() )
+    if( is_to_be_removed()  &&  can_be_removed_now() )
     {
         remove();
         // this ist ungültig!
@@ -1139,7 +1138,7 @@ Process* Process_class::select_process_if_available()
 {
     Process* process = NULL;
 
-    if( !_remove  &&                                    // remove_process() könnte sonst Process_class löschen.
+    if( !is_to_be_removed()  &&                                    // remove_process() könnte sonst Process_class löschen.
         file_based_state() == File_based::s_active )  
     {
         FOR_EACH( Process_set, _process_set, p )

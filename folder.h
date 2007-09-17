@@ -174,6 +174,7 @@ struct Folder_subsystem : Subsystem,
     Folder*                     root_folder                 () const                                { return _root_folder; }
 
     bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
+    void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
 
   private:
     Fill_zero                  _zero_;
@@ -260,11 +261,14 @@ struct File_based : Scheduler_object,
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
 
-    void                    set_replacement                 ( File_based* replacement )             { _replacement = replacement; }
+    void                    set_to_be_removed               ( bool );
+    bool                     is_to_be_removed               () const                                { return _is_to_be_removed; }
+
+    void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
 
     void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
-    bool                        check_for_replacing_or_removing();
+    void                        check_for_replacing_or_removing();
 
     bool                        initialize                  ();
     bool                        load                        ();
@@ -307,7 +311,6 @@ struct File_based : Scheduler_object,
     void                    set_file_based_state            ( State );
 
     Fill_zero                  _zero_;
-    ptr<File_based>            _replacement;
 
   private:
     friend struct               Typed_folder;
@@ -324,6 +327,8 @@ struct File_based : Scheduler_object,
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
     bool                       _file_is_removed;
+    bool                       _is_to_be_removed;
+    ptr<File_based>            _replacement;
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
 };
@@ -369,10 +374,14 @@ struct Typed_folder : Scheduler_object,
     void                        remove_file_based           ( File_based* );
     File_based*                 replace_file_based          ( File_based* );
 
+    void                        add_to_replace_or_remove_candidates( const Path& );
+    void                        handle_replace_or_remove_candidates();
+
   private:
     Fill_zero                  _zero_;
     Folder*                    _folder;
     File_based_subsystem*      _file_based_subsystem;
+    String_set                 _replace_or_remove_candidates_set;
 
   protected:
 

@@ -451,6 +451,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
     Standing_order_subsystem*   standing_order_subsystem    ();
+    Folder_subsystem*           folder_subsystem            ()                                  { return _folder_subsystem; }
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
 

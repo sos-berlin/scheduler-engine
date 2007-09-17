@@ -206,6 +206,7 @@ bool Folder_subsystem::async_continue_( Continue_flags )
     if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 
     _root_folder->adjust_with_directory();
+
     set_async_delay( directory_watch_interval );
 
     return true;
@@ -385,6 +386,9 @@ void Folder::adjust_with_directory()
         _log->error( message_string( "SCHEDULER-431", x ) );
         //? Fehler merken für <show_state>, oder was machen wir mit dem Fehler? Später wiederholen
     }
+
+
+    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  it->second->handle_replace_or_remove_candidates();
 }
 
 //---------------------------------------------------------------------------------Folder::obj_name
@@ -523,7 +527,8 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
 
                 if( !old_file_based )  add_file_based( file_based );
                 else
-                if( file_based != old_file_based )  old_file_based->set_replacement( file_based );
+                //if( file_based != old_file_based )  
+                    old_file_based->set_replacement( file_based );
 
                 string relative_file_path = folder()->make_path( base_file_info->_filename );
                 if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
@@ -540,6 +545,7 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
 
                 if( old_file_based )  
                 {
+                    assert( old_file_based->replacement() );
                     old_file_based->prepare_to_replace();
 
                     if( old_file_based->can_be_replaced_now() ) 
@@ -607,23 +613,42 @@ File_based* Typed_folder::call_on_base_file_changed( File_based* old_file_based,
     return file_based;
 }
 
-//-----------------------------------------------------------------Typed_folder::ordered_file_infos
-    
-//vector<Base_file_info*> Typed_folder::ordered_file_infos()
-//{
-//    vector<Base_file_info*> result;
-//    result.reserve( _file_based_map.size() );
-//
-//    Z_FOR_EACH( File_based_map, _file_based_map, it )
-//    {
-//        File_based* file_based = it->second;
-//        if( file_based->has_base_file() )  result.push_back( &file_based->_base_file_info );
-//    }
-//
-//    sort( result.begin(), result.end(), Base_file_info::less_dereferenced );
-//
-//    return result;
-//}
+//------------------------------------------------Typed_folder::add_to_replace_or_remove_candidates
+
+void Typed_folder::add_to_replace_or_remove_candidates( const Path& path )             
+{ 
+    _replace_or_remove_candidates_set.insert( path ); 
+    spooler()->folder_subsystem()->set_signaled( __FUNCTION__ );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
+}
+
+//------------------------------------------------Typed_folder::handle_replace_or_remove_candidates
+
+void Typed_folder::handle_replace_or_remove_candidates()
+{
+    if( !_replace_or_remove_candidates_set.empty() )
+    {
+        String_set my_path_set = _replace_or_remove_candidates_set;
+        _replace_or_remove_candidates_set.clear();
+        
+        Z_FOR_EACH( String_set, my_path_set, it )
+        {
+            if( File_based* file_based = file_based_or_null( *it ) )
+            {
+                if( file_based->replacement()  &&  file_based->can_be_replaced_now() )
+                {
+                    file_based->log()->info( message_string( "SCHEDULER-936", subsystem()->object_type_name() ) );
+                    file_based->replace_now();
+                }
+                else
+                if( file_based->is_to_be_removed()  &&  file_based->can_be_removed_now() ) 
+                {
+                    file_based->log()->info( message_string( "SCHEDULER-937", subsystem()->object_type_name() ) );
+                    file_based->remove_now();
+                }
+            }
+        }
+    } 
+}
 
 //---------------------------------------------------------------------Typed_folder::add_file_based
 
@@ -652,6 +677,8 @@ void Typed_folder::remove_file_based( File_based* file_based )
     assert( file_based->can_be_removed_now() );
     
     string object_name = file_based->obj_name();
+
+    _replace_or_remove_candidates_set.erase( file_based->path() );
 
     File_based_map::iterator it = _file_based_map.find( file_based->normalized_name() );
     
@@ -690,6 +717,8 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
     if( old_file_based->normalized_name() != normalized_name )  z::throw_xc( __FUNCTION__ );
     if( file_based( normalized_name ) != old_file_based )       z::throw_xc( __FUNCTION__ );
     if( new_file_based->typed_folder() )                        z::throw_xc( __FUNCTION__ );
+
+    _replace_or_remove_candidates_set.erase( old_file_based->path() );
 
     old_file_based->set_typed_folder( NULL );
     new_file_based->set_typed_folder( this );
@@ -930,12 +959,28 @@ void File_based::assert_is_active()
     }
 }
 
+//--------------------------------------------------------------------File_based::set_to_be_removed
+
+void File_based::set_to_be_removed( bool b )
+{ 
+    _is_to_be_removed = b; 
+    if( _is_to_be_removed )  set_replacement( NULL );
+}
+
+//----------------------------------------------------------------------File_based::set_replacement
+
+void File_based::set_replacement( File_based* replacement )             
+{ 
+    _replacement = replacement; 
+    if( _replacement )  set_to_be_removed( false ); 
+}
+
 //--------------------------------------------------------------------File_based::prepare_to_remove
 
 bool File_based::prepare_to_remove()
 { 
+    set_to_be_removed( true );
     subsystem()->dependencies()->announce_dependant_to_be_removed( this ); 
-
     return can_be_removed_now(); 
 }
 
@@ -961,8 +1006,6 @@ bool File_based::remove( Remove_flags remove_flag )
     {
         remove_base_file();
     }
-
-    set_replacement( NULL );
 
     bool is_removable = prepare_to_remove();
 
@@ -1034,26 +1077,16 @@ bool File_based::replace_with( File_based* file_based_replacement )
 
 //------------------------------------------------------File_based::check_for_replacing_or_removing
 
-bool File_based::check_for_replacing_or_removing()
+void File_based::check_for_replacing_or_removing()
 {
-    bool result = false;
-
-    if( can_be_replaced_now() )
+    if( is_in_folder() )
     {
-        log()->info( message_string( "SCHEDULER-936", subsystem()->object_type_name() ) );
-        replace_now();
-        // this ist ungültig!
-        result = true;
+        if( replacement()       &&  can_be_replaced_now()  ||  
+            is_to_be_removed()  &&  can_be_removed_now()   )
+        {
+            typed_folder()->add_to_replace_or_remove_candidates( path() );
+        }
     }
-    else
-    if( can_be_removed_now() )
-    {
-        log()->info( message_string( "SCHEDULER-937", subsystem()->object_type_name() ) );
-        remove_now();
-        result = true;
-    }
-
-    return result;
 }
 
 //-------------------------------------------------------------------File_based::prepare_to_replace
