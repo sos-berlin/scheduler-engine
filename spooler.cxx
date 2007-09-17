@@ -1468,10 +1468,11 @@ void Spooler::load_arg()
         if( file::File_info( _configuration_file_path ).is_directory() )
         {
             _configuration_directory = File_path( _configuration_file_path, "" );
+            _configuration_directory_as_option_set = true;
             _configuration_file_path = File_path( _configuration_file_path, "scheduler.xml" );
         }
         else
-            _configuration_directory = File_path( File_path( _configuration_file_path.directory(), "configurations" ), "" );
+            _configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
     }
 
     if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) )  

@@ -883,7 +883,8 @@ void File_based::set_file_based_state( State state )
     {
         _state = state; 
 
-        //Z_DEBUG_ONLY( log()->debug( message_string( "SCHEDULER-893", file_based_state_name() ) ); )
+        log()->log( _state == s_active? log_info : log_debug9,
+                    message_string( "SCHEDULER-893", subsystem()->object_type_name() ) );
     }
 }
 

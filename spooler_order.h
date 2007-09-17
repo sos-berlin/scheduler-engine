@@ -342,8 +342,8 @@ struct Order_source : Scheduler_object, Event_operation
 
 
     virtual void                close                   ()                                          = 0;
-    virtual void                finish                  ();
-    virtual void                start                   ()                                          = 0;
+    virtual void                initialize              ();
+    virtual void                activate                ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
     virtual Order*              fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task ) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
@@ -362,8 +362,8 @@ struct Order_source : Scheduler_object, Event_operation
 struct Order_sources 
 {
     void                        close                   ();
-    void                        finish                  ();
-    void                        start                   ();
+    void                        initialize              ();
+    void                        activate                ();
   //bool                        request_order           ( const string& cause );
     bool                        has_order_source        ()                                          { return !_order_source_list.empty(); }
 

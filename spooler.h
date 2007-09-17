@@ -587,6 +587,7 @@ struct Spooler : Object,
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
     file::File_path            _configuration_directory;
+    bool                       _configuration_directory_as_option_set;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 

@@ -64,8 +64,8 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     // Order_source:
     void                        close                   ();
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
-    void                        finish                  ();
-    void                        start                   ();
+    void                        initialize              ();
+    void                        activate                ();
     bool                        request_order           ( const string& cause );
     Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
     void                        withdraw_order_request  ();
@@ -283,7 +283,7 @@ Directory_file_order_source::~Directory_file_order_source()
     close();
 }
 
-//--------------------------------------------------------------Directory_file_order_source::finish
+//---------------------------------------------------------------Directory_file_order_source::close
 
 void Directory_file_order_source::close()
 {
@@ -471,19 +471,19 @@ void Directory_file_order_source::close_notification()
 #   endif
 }
 
-//--------------------------------------------------------------Directory_file_order_source::finish
+//----------------------------------------------------------Directory_file_order_source::initialize
 
-void Directory_file_order_source::finish()
+void Directory_file_order_source::initialize()
 {
-    Order_source::finish();     // Setzt _next_order_queue
+    Order_source::initialize();     // Setzt _next_order_queue
     assert( _next_order_queue );
 
     _next_order_queue->register_order_source( this );
 }
 
-//---------------------------------------------------------------Directory_file_order_source::start
+//-----------------------------------------------------------Directory_file_order_source::activaate
 
-void Directory_file_order_source::start()
+void Directory_file_order_source::activate()
 {
     Job* next_job = NULL;
 

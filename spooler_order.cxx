@@ -818,9 +818,9 @@ Prefix_log* Order_source::log()
     return _job_chain->log(); 
 }
 
-//-----------------------------------------------------------------------------Order_source::finish
+//-------------------------------------------------------------------------Order_source::initialize
 
-void Order_source::finish()
+void Order_source::initialize()
 {
     if( !_job_chain )  z::throw_xc( __FUNCTION__ );
 
@@ -845,29 +845,29 @@ void Order_sources::close()
     }
 }
 
-//----------------------------------------------------------------------------Order_sources::finish
+//------------------------------------------------------------------------Order_sources::initialize
 
-void Order_sources::finish()
+void Order_sources::initialize()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
         Order_source* order_source = *it;
-        order_source->finish();
+        order_source->initialize();
     }
 }
 
-//-----------------------------------------------------------------------------Order_sources::start
+//--------------------------------------------------------------------------Order_sources::activate
 
-void Order_sources::start()
+void Order_sources::activate()
 {
     Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
         Order_source* order_source = *it;
-        order_source->start();
+        order_source->activate();
     }
 }
 
@@ -1948,7 +1948,7 @@ bool Job_chain::on_initialize()
             add_nested_job_chains_to_order_id_space( order_id_space );
           
             Z_FOR_EACH( Node_list, _node_list, it )  check_job_chain_node( *it );
-            _order_sources.finish();
+            _order_sources.initialize();
 
             /// Jetzt kann nichts mehr schiefgehen. Keine Exception ab hier! ///
 
@@ -2348,6 +2348,8 @@ bool Job_chain::on_activate()
         set_state( s_active );
 
         Z_FOR_EACH( Node_list, _node_list, it )  (*it)->activate();     // Nur eimal beim Übergang von s_stopped zu s_active aufrufen!
+
+        _order_sources.activate();
 
         //    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
         //    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.

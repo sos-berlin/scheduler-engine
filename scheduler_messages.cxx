@@ -458,7 +458,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-890", "$2 is going to be removed because its configuration file '$1' has been removed" },
     { "SCHEDULER-891", "Configuration file '$1' is going to be be loaded into this new $2" },
     { "SCHEDULER-892", "Changed configuration file '$1' is going to replace this $2" },
-    { "SCHEDULER-893", "Subsystem_object::state='$1'" },
+    { "SCHEDULER-893", "$1 is $2 now" },
     { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
     {}
 };
