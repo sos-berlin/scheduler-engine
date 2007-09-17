@@ -1390,7 +1390,10 @@ void Nested_job_chain_node::close()
     {
         disconnected_job_chains.insert( _job_chain );
         disconnected_job_chains.insert( _nested_job_chain );
+
+        _nested_job_chain->check_for_replacing_or_removing();
         _nested_job_chain = NULL;
+
         spooler()->order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, _job_chain );
     }
 
@@ -3102,20 +3105,19 @@ void Order_id_space::remove_job_chain( Job_chain* job_chain )
 
 xml::Element_ptr Order_id_space::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
-    xml::Element_ptr order_id_space_element = document.createElement( "order_id_space" );
+    xml::Element_ptr result = document.createElement( "order_id_space" );
 
-    order_id_space_element.setAttribute( "name" , name() );
+    result.setAttribute( "name" , name() );
 
     Z_FOR_EACH( String_set, _job_chain_set, it )
     {
-        if( Job_chain* job_chain = spooler()->order_subsystem()->job_chain( *it ) )
-        {
-            xml::Element_ptr job_chain_element = order_id_space_element.append_new_element( "job_chain" );
-            job_chain_element.setAttribute( "job_chain", job_chain->path() );
-        }
+        Path job_chain_path = *it;
+
+        xml::Element_ptr job_chain_element = result.append_new_element( "job_chain" );
+        job_chain_element.setAttribute( "job_chain", job_chain_path);
     }
 
-    return order_id_space_element;
+    return result;
 }
 
 //-------------------------------------------------------------------------Order_id_space::obj_name

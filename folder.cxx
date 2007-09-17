@@ -1335,18 +1335,18 @@ Dependencies::~Dependencies()
 
 //----------------------------------------------------------------------Dependencies::add_dependant
 
-void Dependencies::add_dependant( Pendant* requestor, const string& missings_path )
+void Dependencies::add_dependant( Pendant* pendant, const string& missings_path )
 {
-    _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( requestor );
+    _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( pendant );
 }
 
 //-------------------------------------------------------------------Dependencies::remove_dependant
 
-void Dependencies::remove_dependant( Pendant* requestor, const string& missings_path )
+void Dependencies::remove_dependant( Pendant* pendant, const string& missings_path )
 {
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
-    requestors_set.erase( requestor );
+    requestors_set.erase( pendant );
     if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
@@ -1364,10 +1364,10 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
 
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
-            Requestor_set::iterator next_it2  = it2;  next_it2++;
-            Pendant*                requestor = *it2;
+            Requestor_set::iterator next_it2 = it2;  next_it2++;
+            Pendant*                pendant  = *it2;
         
-            requestor->on_dependant_loaded( found_missing );
+            pendant->on_dependant_loaded( found_missing );
         }
     }
 }
@@ -1388,11 +1388,11 @@ bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
 
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
-            Requestor_set::iterator next_it2  = it2;  next_it2++;
-            Pendant*     requestor = *it2;
+            Requestor_set::iterator next_it2 = it2;  next_it2++;
+            Pendant*                pendant  = *it2;
         
-            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << requestor->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
-            result = requestor->on_dependant_to_be_removed( to_be_removed );
+            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << pendant->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            result = pendant->on_dependant_to_be_removed( to_be_removed );
             if( !result )  break;
         }
     }
