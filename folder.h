@@ -18,6 +18,7 @@ struct Folder_subsystem;
 struct Typed_folder;
 struct File_based;
 struct File_based_subsystem;
+struct Subfolder_folder;
 
 //---------------------------------------------------------------------------------------------Path
 
@@ -68,7 +69,7 @@ struct Pendant
     typedef stdext::hash_set< string >                                Dependant_set;
     typedef stdext::hash_map< File_based_subsystem*, Dependant_set >  Dependant_sets;
 
-    Dependant_sets               _missing_sets;
+    Dependant_sets             _dependants_sets;
 };
 
 //-------------------------------------------------------------------------------------Dependencies
@@ -93,98 +94,6 @@ struct Dependencies
     File_based_subsystem*      _subsystem;
     Path_requestors_map        _path_requestors_map;;
 };
-
-//-------------------------------------------------------------------------------------------Folder
-//
-// Ein Ordner (Folder) enthält alle Objekte. 
-// Bislang gibt es nur einen Ordner im Scheduler.
-
-struct Folder : Scheduler_object, Object
-{
-    static int                  position_of_extension_point ( const string& filename );
-    static string               object_name_of_filename     ( const string& filename );
-    static string               extension_of_filename       ( const string& filename );
-
-
-                                Folder                      ( Folder_subsystem*, Folder* parent_folder, const string& name );
-                               ~Folder                      ();
-
-    file::File_path             directory                   () const                                { return _directory; }
-    Path                        path                        () const                                { return _path; }
-    Path                        make_path                   ( const string& name );                 // Hängt den Ordernamen voran
-
-    void                        adjust_with_directory       ();
-
-    Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
-    lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
-    Job_folder*                 job_folder                  ()                                      { return _job_folder; }
-    Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
-    Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
-
-    string                      obj_name                    () const;
-
-  private:
-    void                        add_to_typed_folder_map     ( Typed_folder* );
-
-    Fill_zero                  _zero_;
-    string                     _path;
-    string                     _name;
-    file::File_path            _directory;
-
-    typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
-    Typed_folder_map           _typed_folder_map;
-    
-  //Folder*                    _parent;
-  //Folder_set                 _child_folder_set;
-
-    ptr<Process_class_folder>       _process_class_folder;
-    ptr<lock::Lock_folder>          _lock_folder;
-    ptr<Job_folder>                 _job_folder;
-    ptr<Job_chain_folder_interface> _job_chain_folder;
-    ptr<Standing_order_folder>      _standing_order_folder;
-};
-
-//---------------------------------------------------------------------------------Folder_subsystem
-
-struct Folder_subsystem : Subsystem,
-                          Async_operation
-{
-                                Folder_subsystem            ( Scheduler* );
-                               ~Folder_subsystem            ();
-
-    // Subsystem
-    void                        close                       ();
-    bool                        subsystem_initialize        ();
-    bool                        subsystem_load              ();
-    bool                        subsystem_activate          ();
-                     Subsystem::obj_name;
-
-
-    // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    bool                        async_signaled_             ()                                      { return is_signaled(); }
-
-
-    void                    set_directory                   ( const file::File_path& );
-    File_path                   directory                   () const                                { return _directory; }
-
-  //Folder*                     folder                      ( const string& path );
-    Folder*                     root_folder                 () const                                { return _root_folder; }
-
-    bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
-    void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
-
-  private:
-    Fill_zero                  _zero_;
-    file::File_path            _directory;
-    ptr<Folder>                _root_folder;
-    Event                      _directory_event;
-};
-
-
-inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
 
 //-----------------------------------------------------------------------------------Base_file_info
 
@@ -275,6 +184,10 @@ struct File_based : Scheduler_object,
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
     bool                        try_switch_wished_file_based_state();
+    enum Remove_flags { rm_default, rm_base_file_too };
+    bool                        remove                      ( Remove_flags = rm_default );
+    void                        remove_base_file            ();
+
     void                        remove_now                  ();
     File_based*                 replace_now                 ();
   //void                        set_file_based_incomplete   ( bool b )                              { _is_incomplete = true; }
@@ -283,10 +196,6 @@ struct File_based : Scheduler_object,
     virtual bool                on_initialize               ()                                      = 0;
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
-
-    enum Remove_flags { rm_default, rm_base_file_too };
-    bool                        remove                      ( Remove_flags = rm_default );
-    void                        remove_base_file            ();
 
     virtual void                on_remove_now               ();
     virtual bool                prepare_to_remove           ();
@@ -298,7 +207,7 @@ struct File_based : Scheduler_object,
     virtual bool                can_be_replaced_now         ();
     virtual File_based*         on_replace_now              ();
 
-    virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
+  //virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
   //virtual bool                on_base_file_removed        ()                                      { return remove(); }
 
 
@@ -314,6 +223,7 @@ struct File_based : Scheduler_object,
 
   private:
     friend struct               Typed_folder;
+    friend struct               Subfolder_folder;
 
     bool                        initialize2                 ();
     bool                        load2                       ();
@@ -345,13 +255,14 @@ struct file_based : File_based
 
     SUBSYSTEM*                  subsystem                   () const                                { return static_cast<SUBSYSTEM*>( File_based::subsystem() ); }
 
-    File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
-    virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
+    //File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
+    //virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
     FILE_BASED*                 replacement                 () const                                { return static_cast<FILE_BASED*>( File_based::replacement() ); }
     TYPED_FOLDER*               typed_folder                () const                                { return static_cast<TYPED_FOLDER*>( File_based::typed_folder() ); }
 };
 
 //-------------------------------------------------------------------------------------Typed_folder
+// Order mit Objekten nur eines Typs
 
 struct Typed_folder : Scheduler_object, 
                       Object
@@ -360,22 +271,24 @@ struct Typed_folder : Scheduler_object,
 
     Folder*                     folder                      () const                                { return _folder; }
     File_based_subsystem*       subsystem                   () const                                { return file_based_subsystem(); }
-    virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
 
     void                        adjust_with_directory       ( const list<Base_file_info>& );
-    File_based*                 call_on_base_file_changed   ( File_based*, const Base_file_info* changed_base_file_info );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
 
-    virtual bool                is_empty_name_allowed       () const                                { return false; }
     string                      obj_name                    () const;
 
     void                        add_file_based              ( File_based* );
     void                        remove_file_based           ( File_based* );
     File_based*                 replace_file_based          ( File_based* );
+    bool                        is_empty                    () const                                { return _file_based_map.empty(); }
 
     void                        add_to_replace_or_remove_candidates( const Path& );
     void                        handle_replace_or_remove_candidates();
+
+    virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
+    virtual bool                is_empty_name_allowed       () const                                { return false; }
+    virtual File_based*         on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
 
   private:
     Fill_zero                  _zero_;
@@ -409,8 +322,108 @@ struct typed_folder : Typed_folder
 
     FILE_BASED*                 replace_file_based          ( FILE_BASED* file_based )              { return static_cast<FILE_BASED*>( Typed_folder::replace_file_based( file_based ) ); }
 
+    //File_based*                 on_base_file_changed        ( File_based* file_based, const Base_file_info* file_info )   
+    //                                                                                                { return static_cast<FILE_BASED*>( on_base_file_changed( static_cast<FILE_BASED*>( file_based ), file_info ) ); }
+    //virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED*, const Base_file_info* )  { zschimmer::throw_xc( __FUNCTION__, "not implemented" ); }
   private:
     My_subsystem*              _subsystem;
+};
+
+//-------------------------------------------------------------------------------------------Folder
+//
+// Ein Ordner (Folder) enthält alle Objekte. 
+// Bislang gibt es nur einen Ordner im Scheduler.
+
+struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >, 
+                Object
+{
+    static int                  position_of_extension_point ( const string& filename );
+    static string               object_name_of_filename     ( const string& filename );
+    static string               extension_of_filename       ( const string& filename );
+
+
+                                Folder                      ( Folder_subsystem*, Folder* parent );
+                               ~Folder                      ();
+
+
+    // file_based<>
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Object::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Object::Release(); }
+
+    void                        close                       ();
+    bool                        on_initialize               ();
+    bool                        on_load                     ();
+    bool                        on_activate                 ();
+    void                        set_name                    ( const string& );
+    void                        set_dom                     ( const xml::Element_ptr& )             { zschimmer::throw_xc( __FUNCTION__ ); }
+
+    bool                        prepare_to_remove           ();
+    bool                        can_be_removed_now          ();
+  //void                        on_remove_now               ();
+  //zschimmer::Xc               remove_error                ();
+
+  //bool                        replace_with                ( File_based* );
+  //void                        prepare_to_replace          ();
+  //bool                        can_be_replaced_now         ();
+  //File_based*                 on_replace_now              ();
+
+
+
+    file::File_path             directory                   () const                                { return _directory; }
+  //Path                        path                        () const                                { return _path; }
+    Path                        make_path                   ( const string& name );                 // Hängt den Ordernamen voran
+
+    void                        adjust_with_directory       ();
+
+    Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
+    lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
+    Job_folder*                 job_folder                  ()                                      { return _job_folder; }
+    Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
+    Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
+
+    string                      obj_name                    () const;
+
+  private:
+    void                        add_to_typed_folder_map     ( Typed_folder* );
+
+    Fill_zero                  _zero_;
+    //string                     _path;
+    //string                     _name;
+    file::File_path            _directory;
+
+    typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
+    typedef stdext::hash_set< ptr<Folder> >            Folder_set;
+
+    Typed_folder_map           _typed_folder_map;
+    Folder*                    _parent;
+    Folder_set                 _child_folder_set;
+
+    ptr<Process_class_folder>       _process_class_folder;
+    ptr<lock::Lock_folder>          _lock_folder;
+    ptr<Job_folder>                 _job_folder;
+    ptr<Job_chain_folder_interface> _job_chain_folder;
+    ptr<Standing_order_folder>      _standing_order_folder;
+    ptr<Subfolder_folder>           _subfolder_folder;         // Unterordner
+};
+
+//---------------------------------------------------------------------------------Subfolder_folder
+
+struct Subfolder_folder : typed_folder< Folder >
+{
+                                Subfolder_folder            ( Folder* );
+                               ~Subfolder_folder            ();
+
+
+    // Typed_folder
+    File_based*                 on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
+
+
+    //void                        add_subfolder               ( Folder* folder )                      { add_file_based( folder ); }
+    //void                        remove_subfolder            ( Folder* folder )                      { remove_file_based( folder ); }
+    //Folder*                     subfolder                   ( const string& name )                  { return file_based( name ); }
+    //Folder*                     subfolder_or_null           ( const string& name )                  { return file_based_or_null( name ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 };
 
 //-----------------------------------------------------------------------------File_based_subsystem
@@ -612,6 +625,55 @@ struct file_based_subsystem : File_based_subsystem
   protected:
     int                        _file_based_map_version;
 };
+
+//---------------------------------------------------------------------------------Folder_subsystem
+
+struct Folder_subsystem : file_based_subsystem<Folder>,
+                          Async_operation
+{
+                                Folder_subsystem            ( Scheduler* );
+                               ~Folder_subsystem            ();
+
+    // Subsystem
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+                     Subsystem::obj_name;
+
+
+    // file_based_subsystem
+    string                      object_type_name            () const                                { return "Folder"; }
+    string                      filename_extension          () const                                { return "/"; }             // Wird nicht verwendet
+  //string                      normalized_name             ( const string& name ) const            { return name; }
+    ptr<Folder>                 new_file_based              ();
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+    bool                        async_signaled_             ()                                      { return is_signaled(); }
+
+
+    void                    set_directory                   ( const file::File_path& );
+    File_path                   directory                   () const                                { return _directory; }
+
+  //Folder*                     folder                      ( const string& path );
+    Folder*                     root_folder                 () const                                { return _root_folder; }
+    ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
+
+    bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
+    void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
+
+  private:
+    Fill_zero                  _zero_;
+    file::File_path            _directory;
+    ptr<Folder>                _root_folder;
+    Event                      _directory_event;
+};
+
+
+inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
 
 //------------------------------------------------------------------------------FOR_EACH_FILE_BASED
 
