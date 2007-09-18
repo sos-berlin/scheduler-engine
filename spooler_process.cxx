@@ -850,7 +850,7 @@ string Process_class_configuration::obj_name() const
 {
     S result;
 
-    result << "Process_class " << path();
+    result << "Process_class " << path_without_slash();
 
     return result;
 }

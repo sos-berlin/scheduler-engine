@@ -706,6 +706,8 @@ bool Job::on_load() // Transaction* ta )
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
         if( !_module  ||  _module->kind() == Module::kind_none )  z::throw_xc( "INVALID_JOB_DEFINITION", obj_name() );
+        
+        _module->set_folder_path( folder()->path() );
 
         set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
@@ -1096,7 +1098,7 @@ void Job::prepare_on_exit_commands()
 void Job::set_log()
 {
     _log->set_job_name( name() );
-    _log->set_prefix( "Job  " + name() );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_prefix( "Job  " + path_without_slash() );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_title( obj_name() );
     _log->set_mail_defaults();
@@ -1151,13 +1153,6 @@ void Job::set_run_time( const xml::Element_ptr& element )
 
 bool Job::prepare_to_remove()
 { 
-    bool result;
-    //bool is_second_remove = _remove;
-
-    //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-
-    //_remove = true; 
-
     stop( true );
 
     return My_file_based::prepare_to_remove();
@@ -1198,9 +1193,6 @@ zschimmer::Xc Job::remove_error()
 
 void Job::prepare_to_replace()
 {
-    bool result;
-    //bool is_second_remove = _remove;
-
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
     stop( true );
@@ -1332,7 +1324,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     ptr<Task> task = Z_NEW( Job_module_task( this ) );
 
     task->_id       = id;
-    task->_obj_name = S() << "Task " << name() << ":" << task->_id;
+    task->_obj_name = S() << "Task " << path_without_slash() << ":" << task->_id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )  task->_params->Merge( params );
@@ -2533,7 +2525,7 @@ ptr<Task> Job::task_to_start()
                 {
                     if( !_waiting_for_process  )
                     {
-                        Message_string m ( "SCHEDULER-949", _module->_process_class_path );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                        Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
                         if( task )  m.insert( 2, task->obj_name() );
                         log()->info( m );
                         process_class->enqueue_waiting_job( this );

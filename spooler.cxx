@@ -653,8 +653,8 @@ Spooler::Spooler()
     Z_DEBUG_ONLY( self_test() );
 
     _scheduler_event_manager  = Z_NEW( Scheduler_event_manager( this ) );
-    _scheduler_script         = new_scheduler_script( this );
     _folder_subsystem         = new_folder_subsystem( this );
+    _scheduler_script         = new_scheduler_script( this );
     _process_class_subsystem  = Z_NEW( Process_class_subsystem( this ) );
     _lock_subsystem           = Z_NEW( lock::Lock_subsystem( this ) );
     _job_subsystem            = new_job_subsystem( this );

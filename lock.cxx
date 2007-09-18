@@ -636,14 +636,14 @@ string Lock::string_from_uses() const
 
 //-----------------------------------------------------------------------------------Lock::obj_name
 
-string Lock::obj_name() const
-{
-    S result;
-
-    result << "Lock " << path();
-
-    return result;
-}
+//string Lock::obj_name() const
+//{
+//    S result;
+//
+//    result << "Lock " << path_without_slash();
+//
+//    return result;
+//}
 
 //-----------------------------------------------------------------------------------Lock::put_Name
 

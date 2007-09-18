@@ -75,6 +75,13 @@ void Path::set_folder_path( const string& folder_path )
 //    set_path( Path( folder_path, to_string() ) );
 //}
 
+//-------------------------------------------------------------------Path::set_absolute_if_relative
+
+void Path::set_absolute_if_relative( const Path& absolute_folder_path )
+{
+    if( !is_absolute_path() )  set_folder_path( absolute_folder_path );
+}                           
+
 //--------------------------------------------------------------------------------Path::folder_path
 
 Path Path::folder_path() const
@@ -189,9 +196,10 @@ bool Folder_subsystem::subsystem_activate()
 #   endif
 
     set_async_manager( _spooler->_connection_manager );
+    _subsystem_state = subsys_active;
+
     async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
 
-    _subsystem_state = subsys_active;
     return true;
 }
 
@@ -255,7 +263,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     add_to_typed_folder_map( _standing_order_folder );
     add_to_typed_folder_map( _subfolder_folder      );
 
-    _log->set_prefix( obj_name() );
+    _log->set_prefix( obj_name() );     // Noch ohne Pfad
 }
 
 //--------------------------------------------------------------------------add_to_typed_folder_map
@@ -290,7 +298,7 @@ void Folder::set_name( const string& name )
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
     {
         Typed_folder* typed_folder = it->second;
-        typed_folder->log()->set_prefix( typed_folder->obj_name() );
+        typed_folder->log()->set_prefix( typed_folder->obj_name() );        // Jetzt mit Pfad
     }
 }
 
@@ -475,7 +483,7 @@ string Folder::obj_name() const
 {
     S result;
     result << Scheduler_object::obj_name();
-    if( path() != "" )  result << " " << path();
+    if( path() != "" )  result << " " << path_without_slash();
     return result;
 }
 
@@ -511,8 +519,8 @@ File_based* Subfolder_folder::on_base_file_changed( File_based* file_based, cons
         new_subfolder->set_name( base_file_info->_normalized_name );
         new_subfolder->set_base_file_info( *base_file_info );
         add_file_based( new_subfolder );
-        new_subfolder->activate();
-        new_subfolder->adjust_with_directory();
+        bool ok = new_subfolder->activate();
+        if( ok )  new_subfolder->adjust_with_directory();
         result = new_subfolder;
     }
     else
@@ -544,12 +552,7 @@ bool Folder::prepare_to_remove()
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
     {
         Typed_folder* typed_folder = it->second;
-
-        Z_FOR_EACH( Typed_folder::File_based_map, typed_folder->_file_based_map, it2 )
-        {
-            File_based* file_based = it2->second;
-            file_based->remove();
-        }
+        typed_folder->remove_all();
     }
 
     return can_be_removed_now();
@@ -609,7 +612,7 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
     _zero_(this+1),
     _folder(folder)
 {
-    _log->set_prefix( obj_name() );
+    _log->set_prefix( obj_name() );     // Noch ohne Pfad
 }
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
@@ -868,6 +871,8 @@ void Typed_folder::add_file_based( File_based* file_based )
     if( file_based_or_null( normalized_name ) )  z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path().to_string() );
 
     file_based->set_typed_folder( this );
+    file_based->log()->set_prefix( file_based->obj_name() );        // Jetzt mit Pfad
+
     _file_based_map[ normalized_name ] = file_based;
 
     subsystem()->add_file_based( file_based );
@@ -881,12 +886,16 @@ void Typed_folder::remove_file_based( File_based* file_based )
     assert( file_based->typed_folder() == this );
     assert( file_based->can_be_removed_now() );
     
-    string object_name = file_based->obj_name();
+    ptr<File_based> holder      = file_based;
+    string          object_name = file_based->obj_name();
 
     _replace_or_remove_candidates_set.erase( file_based->path() );
 
+
+    subsystem()->remove_file_based( file_based );
+
+
     File_based_map::iterator it = _file_based_map.find( file_based->normalized_name() );
-    
     assert( it != _file_based_map.end() );
     if( it != _file_based_map.end() )
     {
@@ -902,9 +911,6 @@ void Typed_folder::remove_file_based( File_based* file_based )
         file_based->set_typed_folder( NULL );
         _file_based_map.erase( it );
     }
-
-
-    subsystem()->remove_file_based( file_based );
 
 
     log()->log( subsystem()->subsystem_state() < subsys_stopped? log_info : log_debug9, message_string( "SCHEDULER-861", object_name ) );
@@ -934,6 +940,21 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
     return new_file_based;
 }
 
+//-------------------------------------------------------------------------Typed_folder::remove_all
+
+void Typed_folder::remove_all()
+{
+    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
+    {
+        File_based_map::iterator next_it = it;  next_it++;
+
+        File_based* file_based = it->second;
+        file_based->remove();
+
+        it = next_it;
+    }
+}
+
 //-------------------------------------------------------------------------Typed_folder::file_based
 
 File_based* Typed_folder::file_based( const string& name ) const
@@ -958,8 +979,13 @@ string Typed_folder::obj_name() const
 {
     S result;
     result << Scheduler_object::obj_name();
-    if( _folder->path() != "" )  result << " " << _folder->path();
-                           else  result << " /";
+
+    if( _folder )
+    {
+        if( _folder->path() != "" )  result << " " << _folder->path_without_slash();
+                               else  result << " /";
+    }
+
     return result;
 }
 
@@ -1391,7 +1417,16 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 Path File_based::path() const
 { 
     return _typed_folder? _typed_folder->folder()->make_path( _name ) 
-                        : _name;    // Keine Exception auslösen
+                        : "/" + _name;    // Keine Exception auslösen
+}
+
+//-------------------------------------------------------------------File_based::path_without_slash
+
+Path File_based::path_without_slash() const
+{
+    Path result = path();
+    assert( string_begins_with( result, "/" ) );
+    return result.substr( 1 );
 }
 
 //----------------------------------------------------------------------File_based::normalized_name
@@ -1405,7 +1440,7 @@ string File_based::normalized_name() const
 
 string File_based::normalized_path() const
 { 
-    return _file_based_subsystem->normalized_name( path() ); 
+    return _file_based_subsystem->normalized_path( path() ); 
 }
 
 //-----------------------------------------------------------------------------File_based::obj_name
@@ -1416,7 +1451,7 @@ string File_based::obj_name() const
     
     result << _file_based_subsystem->object_type_name();
     result << " ";
-    result << path(); 
+    result << path_without_slash(); 
 
     return result;
 }
@@ -1434,7 +1469,7 @@ void File_based::set_name( const string& name )
 
     _name = name;
 
-    log()->set_prefix( obj_name() );
+    log()->set_prefix( obj_name() );    // Noch ohne Pfad
 }
 
 //-------------------------------------------------------------------------------File_based::folder
@@ -1459,7 +1494,8 @@ File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown
     
 Path File_based_subsystem::normalized_path( const Path& path ) const
 {
-    return Path( path.folder_path(), normalized_name( path.name() ) );
+    return Path( spooler()->folder_subsystem()->normalized_name( path.folder_path() ), 
+                 normalized_name( path.name() ) );
 }
 
 //---------------------------------------------------------------------------------Pendant::Pendant

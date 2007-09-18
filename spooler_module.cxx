@@ -500,6 +500,13 @@ ptr<Module_instance> Module::create_instance_impl()
     return result;
 }
 
+//--------------------------------------------------------------------------Module::set_folder_path
+
+void Module::set_folder_path( const Path& p )
+{ 
+    if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( p ); 
+}
+
 //--------------------------------------------------------------------Module::process_class_or_null
 
 Process_class* Module::process_class_or_null() const

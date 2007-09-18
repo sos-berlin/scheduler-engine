@@ -32,7 +32,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     // Scheduler_object
 
     void                        close                       ();
-    string                      obj_name                    () const;
+  //string                      obj_name                    () const;
 
 
     // file_based<>

@@ -42,6 +42,7 @@ struct Path : string
     string                      name                        () const;
     void                    set_folder_path                 ( const string& );
     Path                        folder_path                 () const;
+    void                    set_absolute_if_relative        ( const Path& );
   //void                        prepend_folder_path         ( const string& );
     const string&               to_string                   ()  const                               { return *static_cast<const string*>( this ); }
     void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
@@ -163,6 +164,7 @@ struct File_based : Scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     Path                        path                        () const;
+    Path                        path_without_slash          () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
 
@@ -206,10 +208,6 @@ struct File_based : Scheduler_object,
     virtual void                prepare_to_replace          ();
     virtual bool                can_be_replaced_now         ();
     virtual File_based*         on_replace_now              ();
-
-  //virtual File_based*         on_base_file_changed        ( File_based* new_file_based )          = 0;
-  //virtual bool                on_base_file_removed        ()                                      { return remove(); }
-
 
     bool                        operator <                  ( const File_based& f ) const           { return _base_file_info < f._base_file_info; }
     static bool                 less_dereferenced           ( const File_based* a, const File_based* b )  { return *a < *b; }
@@ -255,8 +253,6 @@ struct file_based : File_based
 
     SUBSYSTEM*                  subsystem                   () const                                { return static_cast<SUBSYSTEM*>( File_based::subsystem() ); }
 
-    //File_based*                 on_base_file_changed        ( File_based* new_file_based )          { return on_base_file_changed( static_cast<FILE_BASED*>( new_file_based ) ); }
-    //virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED* new_file_based )          { return new_file_based; }
     FILE_BASED*                 replacement                 () const                                { return static_cast<FILE_BASED*>( File_based::replacement() ); }
     TYPED_FOLDER*               typed_folder                () const                                { return static_cast<TYPED_FOLDER*>( File_based::typed_folder() ); }
 };
@@ -275,6 +271,7 @@ struct Typed_folder : Scheduler_object,
     void                        adjust_with_directory       ( const list<Base_file_info>& );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
+    void                        remove_all                  ();
 
     string                      obj_name                    () const;
 
@@ -293,7 +290,7 @@ struct Typed_folder : Scheduler_object,
   private:
     Fill_zero                  _zero_;
     Folder*                    _folder;
-    File_based_subsystem*      _file_based_subsystem;
+  //File_based_subsystem*      _file_based_subsystem;
     String_set                 _replace_or_remove_candidates_set;
 
   protected:
@@ -551,7 +548,10 @@ struct file_based_subsystem : File_based_subsystem
 
     FILE_BASED* file_based_or_null( const Path& path ) const
     {
-        typename File_based_map::const_iterator it = _file_based_map.find( normalized_path( path ) );
+        Path p = normalized_path( path );
+        p.set_absolute_if_relative( spooler()->root_folder()->path() );
+
+        typename File_based_map::const_iterator it = _file_based_map.find( p );
         return it == _file_based_map.end()? NULL 
                                           : it->second;
     }

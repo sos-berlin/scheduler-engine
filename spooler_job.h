@@ -123,7 +123,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     // Scheduler_object:
-    virtual string              obj_name                    () const                                { return "Job " + name(); }
+    virtual string              obj_name                    () const                                { return "Job " + path(); }
     virtual IDispatch*          idispatch                   ()                                      { return _com_job; }
     virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path() ); }
 

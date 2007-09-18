@@ -1048,7 +1048,7 @@ string Node::obj_name() const
 
     result << Scheduler_object::obj_name();
     result << " ";
-    if( _job_chain )  result << _job_chain->path();
+    if( _job_chain )  result << _job_chain->path_without_slash();
     result << ":";
     result << _state;
 
@@ -3260,7 +3260,7 @@ string Order_queue::obj_name() const
     S result;
 
     result << Scheduler_object::obj_name();
-    if( _job_chain        )  result << " " << _job_chain->path();
+    if( _job_chain        )  result << " " << _job_chain->path_without_slash();
     if( _order_queue_node )  result << ":" << _order_queue_node->order_state();
 
     return result;
@@ -6529,7 +6529,7 @@ string Order::obj_name() const
     S result;
     
     result << "Order ";
-    if( Job_chain* job_chain = this->job_chain_for_api() )  result << job_chain->path() << ":";
+    if( Job_chain* job_chain = this->job_chain_for_api() )  result << job_chain->path_without_slash() << ":";
     result << debug_string_from_variant(_id);
     if( _title != "" )  result << " " << quoted_string( _title );
 
