@@ -597,7 +597,7 @@ struct file_based_subsystem : File_based_subsystem
     {
         xml::Element_ptr result = new_file_baseds_dom_element( document, show_what );
 
-        Z_FOR_EACH( File_based_map, _file_based_map, it )
+        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
         {
             FILE_BASED* file_based = it->second;
             

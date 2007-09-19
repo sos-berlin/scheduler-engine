@@ -1638,13 +1638,10 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             {
                 string job_path = e.getAttribute( "job" );
 
-                bool can_be_not_initialized = true;
-
                 if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node", "state" );
 
                 if( job_path != "" )
                 {
-                    //Job* job = _spooler->job_subsystem()->get_job( job_name, can_be_not_initialized );
                     node = add_job_node( job_path, state, next_state, error_state );
                 }
                 else

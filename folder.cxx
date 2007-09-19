@@ -268,9 +268,11 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 {
     _directory_event.reset();
 
-    //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
-    BOOL ok = FindNextChangeNotification( _directory_event );
-    if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+#   ifdef Z_WINDOWS
+        //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
+        BOOL ok = FindNextChangeNotification( _directory_event );
+        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+#   endif
 
     _root_folder->adjust_with_directory();
 
@@ -1090,7 +1092,7 @@ File_based::~File_based()
 void File_based::close()
 {
     _wished_state = s_closed;
-    set_file_based_state( s_closed );
+    _state = s_closed;   //pure virtual function called: set_file_based_state( s_closed );
 }
 
 //---------------------------------------------------------------------------File_based::initialize

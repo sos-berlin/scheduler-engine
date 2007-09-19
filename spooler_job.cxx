@@ -1306,7 +1306,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), __FUNCTION__, state_name() );
     }
 
-    ptr<Task> task = Z_NEW( Job_module_task( this ) );
+    ptr<Job_module_task> task = Z_NEW( Job_module_task( this ) );
 
     task->_id       = id;
     task->_obj_name = S() << "Task " << path_without_slash() << ":" << task->_id;
@@ -1317,7 +1317,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     task->_name     = task_name;
     task->_start_at = start_at; 
 
-    return task;
+    return +task;
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -2395,8 +2395,7 @@ bool Job::on_dependant_loaded( File_based* file_based )
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
     assert( file_based == _module->process_class() );
 
-    Process_class* process_class = dynamic_cast<Process_class*>( file_based );
-    assert( process_class );
+    assert( dynamic_cast<Process_class*>( file_based ) );
 
     if( _waiting_for_process )
     {

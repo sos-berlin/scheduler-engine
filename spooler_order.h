@@ -594,7 +594,7 @@ struct Nested_job_chain_node : Node
 
 
   private:
-    friend struct Job_chain;
+    friend struct ::sos::scheduler::Job_chain;
 
     Path                       _nested_job_chain_path; 
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
