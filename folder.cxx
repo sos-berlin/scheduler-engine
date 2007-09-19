@@ -248,7 +248,7 @@ bool Folder_subsystem::subsystem_activate()
         result = true;
     }
     else
-        log()->info( message_string( "SCHEDULER-895" ) );
+        log()->info( message_string( "SCHEDULER-895", _directory ) );
 
 
     return result;

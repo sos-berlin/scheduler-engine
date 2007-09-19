@@ -3994,7 +3994,7 @@
         
         <message code="SCHEDULER-895">
             <text xml:lang="en">
-                <title>Configuration directory '<p1/>' does not exists, it will be ignored</title>
+                <title>Configuration directory '<p1/>' does not exist, it will be ignored</title>
             </text>
         </message>
     </messages>
