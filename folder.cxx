@@ -217,23 +217,41 @@ bool Folder_subsystem::subsystem_load()
 
 bool Folder_subsystem::subsystem_activate()
 {
-#   ifdef Z_WINDOWS
+    bool result = false;
 
-        Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-        HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-        if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
+    if( _directory.exists() )
+    {
+#       ifdef Z_WINDOWS
+            //try
+            //{
 
-        _directory_event._handle = h;
-        _directory_event.add_to( &_spooler->_wait_handles );
+                Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+                HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+                if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
 
-#   endif
+                _directory_event._handle = h;
+                _directory_event.add_to( &_spooler->_wait_handles );
+            //}
+            //catch( exception& x )
+            //{
+            //    log()->error( x.what() );
+            //    result = false;
+            //}
 
-    set_async_manager( _spooler->_connection_manager );
-    _subsystem_state = subsys_active;
+#       endif
 
-    async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
+        set_async_manager( _spooler->_connection_manager );
+        _subsystem_state = subsys_active;
 
-    return true;
+        async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
+
+        result = true;
+    }
+    else
+        log()->info( message_string( "SCHEDULER-895" ) );
+
+
+    return result;
 }
 
 //-----------------------------------------------------------------Folder_subsystem::new_file_based

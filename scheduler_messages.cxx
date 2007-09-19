@@ -460,6 +460,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-892", "Changed configuration file '$1' is going to replace this $2" },
     { "SCHEDULER-893", "$1 is $2 now" },
     { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
+    { "SCHEDULER-895", "Configuration directory '$1' does not exists, it will be ignored" },
     {}
 };
 } //namespace sos

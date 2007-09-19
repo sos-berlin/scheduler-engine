@@ -3991,6 +3991,12 @@
                 <title>'<p1/>' will be removed later, it is used by <p2>job_chains</p2></title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-895">
+            <text xml:lang="en">
+                <title>Configuration directory '<p1/>' does not exists, it will be ignored</title>
+            </text>
+        </message>
     </messages>
     
 </messages>
