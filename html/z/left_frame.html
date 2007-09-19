@@ -252,9 +252,9 @@ function show_card( what )
 
 //--------------------------------------------------------------------------------show_task_details
 
-function show_task_details( job_name, task_id )
+function show_task_details( job_path, task_id )
 {
-    var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
+    var job_element  = _response.selectSingleNode( ".//job[@path='" + job_path + "']" );
     var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
     update_jobs_frame();
@@ -263,9 +263,9 @@ function show_task_details( job_name, task_id )
 
 //---------------------------------------------------------------------------------show_job_details
 
-function show_job_details( job_name, job_chain_name )
+function show_job_details( job_path, job_chain_path )
 {
-    var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
+    var job_element  = _response.selectSingleNode( ".//job[@path='" + job_path + "']" );
 
     /*
     if( job_chain_name )    // <task> und <order> mit job_chain != job_chain_name löschen
@@ -284,15 +284,15 @@ function show_job_details( job_name, job_chain_name )
     }
     */
 
-    window.parent.details_frame.show_job_details( job_element, job_chain_name );
+    window.parent.details_frame.show_job_details( job_element, job_chain_path );
     update_jobs_frame();
 }
 
 //---------------------------------------------------------------------------show_job_chain_details
 
-function show_job_chain_details( job_chain_name )
+function show_job_chain_details( job_chain_path )
 {
-    var job_chain_element = _response.selectSingleNode( ".//job_chain[@name='" + job_chain_name + "']" );
+    var job_chain_element = _response.selectSingleNode( ".//job_chain[@path='" + job_chain_path + "']" );
 
     window.parent.details_frame.show_job_chain_details( job_chain_element );
     update();

@@ -132,6 +132,21 @@ Standing_order_folder::~Standing_order_folder()
 //    }
 //}
 
+//---------------------------------------------------------------Standing_order_folder::dom_element
+
+//xml::Element_ptr Standing_order_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+//{
+//    xml::Element_ptr result = dom_document.createElement( "standing_orders" );
+//
+//    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
+//    {
+//        Standing_order* standing_order = static_cast<Standing_order*>( +it->second );
+//        result.appendChild( standing_order->dom_element( dom_document, show_what ) );
+//    }
+//
+//    return result;
+//}
+
 //------------------------------------------------Standing_order_folder::execute_xml_standing_order
 
 //void Standing_order_folder::execute_xml_standing_order( const xml::Element_ptr& standing_order_element )
@@ -418,10 +433,10 @@ xml::Element_ptr Standing_order::dom_element( const xml::Document_ptr& dom_docum
     }
     else
     {
-        result =  dom_document.createElement( "order" );
-
-        if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
-        if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
+        result = dom_document.createElement( "order" );
+        fill_file_based_dom_element( result, show_what );
+        //if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
+        //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
     }
 
     return result;

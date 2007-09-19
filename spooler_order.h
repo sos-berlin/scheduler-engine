@@ -269,8 +269,8 @@ struct Order : Com_order,
     bool                       _priority_modified;
     string                     _title;
     bool                       _title_modified;
-    string                     _job_chain_path;
-    string                     _outer_job_chain_path;
+    Path                       _job_chain_path;
+    Path                       _outer_job_chain_path;
     State                      _outer_job_chain_state;
     Payload                    _payload;
     string                     _xml_payload;
@@ -596,7 +596,7 @@ struct Nested_job_chain_node : Node
   private:
     friend struct Job_chain;
 
-    string                     _nested_job_chain_path; 
+    Path                       _nested_job_chain_path; 
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
   //Job_chain_set              _using_job_chains_set;
 };
@@ -745,6 +745,7 @@ struct Job_chain : Com_job_chain,
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
+    bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
@@ -870,7 +871,8 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
     virtual Job_chain*          job_chain_or_null           ( const folder::Path& )                 = 0;
     virtual void                add_job_chain               ( Job_chain* )                          = 0;
     virtual void                remove_job_chain            ( Job_chain* )                          = 0;
-    virtual xml::Element_ptr    job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& ) = 0;
+  //virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "job_chains" ); }
 };
 
 //------------------------------------------------------------------------Order_subsystem_interface

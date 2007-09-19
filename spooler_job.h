@@ -123,9 +123,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     // Scheduler_object:
-    virtual string              obj_name                    () const                                { return "Job " + path(); }
+    virtual string              obj_name                    () const                                { return "Job " + path_without_slash(); }
     virtual IDispatch*          idispatch                   ()                                      { return _com_job; }
-    virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path() ); }
+    virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path_with_slash() ); }
 
 
     // File_based:
@@ -146,6 +146,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     void                    set_dom                         ( const xml::Element_ptr& );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
+
+    bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
@@ -161,7 +163,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
-    string                      jobname_as_filename         ();
     string                      profile_section             ();
     void                    set_visible                     ( bool b )                              { _visible = b; }
     bool                        visible                     () const                                { return _visible; }
@@ -412,7 +413,8 @@ struct Job_folder : typed_folder< Job >
     void                        add_job                     ( const ptr<Job>&, bool activate );
     Job*                        job                         ( const string& name )                  { return file_based( name ); }
     Job*                        job_or_null                 ( const string& name )                  { return file_based_or_null( name ); }
-    virtual xml::Element_ptr    jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
+  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "jobs" ); }
 };
 
 //---------------------------------------------------------------------------Job_subsystem_interface
@@ -428,6 +430,7 @@ struct Job_subsystem_interface: Object,
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
     Job*                        job                         ( const string& job_path )              { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const string& job_path )              { return file_based_or_null( job_path ); }
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "jobs" ); }
 };
 
 ptr<Job_subsystem_interface>    new_job_subsystem           ( Scheduler* );

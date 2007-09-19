@@ -1639,7 +1639,7 @@ bool Task::load()
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
         bool   remove_after_close = false;
-        string filename           = _spooler->log_directory() + "/task." + _job->jobname_as_filename();
+        string filename           = _spooler->log_directory() + "/task." + _job->path().to_filename();
 
         if( _job->_max_tasks > 1 )  filename += "." + as_string(_id),  remove_after_close = true;
         filename += ".log";

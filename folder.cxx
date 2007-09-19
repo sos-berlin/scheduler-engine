@@ -79,8 +79,20 @@ void Path::set_folder_path( const string& folder_path )
 
 void Path::set_absolute_if_relative( const Path& absolute_folder_path )
 {
-    if( !is_absolute_path() )  set_folder_path( absolute_folder_path );
+    if( !is_absolute_path() )  
+    {
+        set_folder_path( absolute_folder_path );
+        if( !is_absolute_path() )  set_path( "/" + to_string() );
+    }
 }                           
+
+//-------------------------------------------------------------------------------Path::set_absolute
+
+void Path::set_absolute( const Path& absolute_base, const Path& relative )
+{
+    set_path( relative );
+    set_absolute_if_relative( absolute_base );
+}
 
 //--------------------------------------------------------------------------------Path::folder_path
 
@@ -108,6 +120,27 @@ string Path::name() const
     while( p > p0  &&  p[-1] != folder_separator )  p--;
 
     return p;
+}
+
+//--------------------------------------------------------------------------------Path::to_filename
+
+string Path::to_filename() const
+{
+    string result = to_string();
+
+    if( string_begins_with( result, "/" ) )  result.erase( 0, 1 );
+
+    for( int i = 0; i < result.length(); i++ ) 
+    {
+        if( result[i] == '/' )  result[i] = ',';
+
+        if( strchr(     "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+                    "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
+                    "<>:\"/\\|",
+                    result[i] ) )  result[i] = '_';
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------------Path::compare
@@ -477,6 +510,26 @@ void Folder::adjust_with_directory()
 //    }
 //}
 
+//------------------------------------------------------------------------------Folder::dom_element
+
+xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+{
+    xml::Element_ptr result = dom_document.createElement( "folder" );
+    fill_file_based_dom_element( result, show_what );
+
+    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
+    {
+        Typed_folder* typed_folder = it->second;
+
+        if( !typed_folder->is_empty() )
+        {
+            result.appendChild( typed_folder->dom_element( dom_document, show_what ) );
+        }
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------------------------Folder::obj_name
 
 string Folder::obj_name() const
@@ -587,22 +640,6 @@ bool Folder::can_be_removed_now()
 //{
 //    return My_file_based::remove_error();
 //}
-
-//--------------------------------------------------------------------Subfolder_folder::dom_element
-    
-xml::Element_ptr Subfolder_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-{
-    xml::Element_ptr result = dom_document.createElement( "folder" );
-    result.setAttribute( "name", folder()->name() );
-
-    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
-    {
-        Folder* folder = static_cast<Folder*>( +it->second );
-        result.appendChild( folder->dom_element( dom_document, show_what ) );
-    }
-
-    return result;
-}
 
 //-----------------------------------------------------------------------Typed_folder::Typed_folder
 
@@ -731,6 +768,7 @@ File_based* Typed_folder::on_base_file_changed( File_based* old_file_based, cons
                 if( !is_removed )
                 {
                     file_based = subsystem()->call_new_file_based();
+                    file_based->_folder_path = folder()->path();
                     file_based->set_name( name );
                     file_based->set_base_file_info( *base_file_info );
 
@@ -971,6 +1009,27 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
     const File_based_map::const_iterator it = _file_based_map.find( subsystem()->normalized_name( name ) );
     return it == _file_based_map.end()? NULL 
                                       : it->second;
+}
+
+//------------------------------------------------------------------------Typed_folder::dom_element
+
+xml::Element_ptr Typed_folder::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+{
+    xml::Element_ptr result = new_dom_element( document, show_what );
+    dom_append_nl( result );
+
+    Z_FOR_EACH( File_based_map, _file_based_map, it )
+    {
+        File_based* file_based = it->second;
+        
+        if( file_based->is_visible_in_xml_folder( show_what ) )
+        {
+            result.appendChild( file_based->dom_element( document, show_what ) );
+            dom_append_nl( result );
+        }
+    }
+
+    return result;
 }
 
 //---------------------------------------------------------------------------Typed_folder::obj_name
@@ -1385,6 +1444,25 @@ string File_based::file_based_state_name( State state )
     }
 }
 
+//--------------------------------------------------------------------------File_based::folder_path
+
+Path File_based::folder_path() const
+{
+    assert( !is_in_folder()  ||  _folder_path == folder()->path() );
+    return _folder_path;
+}
+
+//----------------------------------------------------------File_based::fill_file_based_dom_element
+
+void File_based::fill_file_based_dom_element( const xml::Element_ptr& element, const Show_what& show_what )
+{
+    element.setAttribute         ( "path", path_with_slash() );
+    element.setAttribute_optional( "name", name() );
+
+    if( has_base_file() )  element.appendChild( File_based::dom_element( element.ownerDocument(), show_what ) );
+    if( replacement()   )  element.append_new_element( "replacement" ).appendChild( replacement()->dom_element( element.ownerDocument(), show_what ) );
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& )
@@ -1416,17 +1494,22 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
 Path File_based::path() const
 { 
-    return _typed_folder? _typed_folder->folder()->make_path( _name ) 
-                        : "/" + _name;    // Keine Exception auslösen
+    return path_without_slash();
 }
 
 //-------------------------------------------------------------------File_based::path_without_slash
 
 Path File_based::path_without_slash() const
 {
-    Path result = path();
-    assert( string_begins_with( result, "/" ) );
-    return result.substr( 1 );
+    return _typed_folder? _typed_folder->folder()->make_path( _name ) 
+                        : _name; 
+}
+
+//----------------------------------------------------------------------File_based::path_with_slash
+
+Path File_based::path_with_slash() const
+{
+    return "/" + path_without_slash();
 }
 
 //----------------------------------------------------------------------File_based::normalized_name

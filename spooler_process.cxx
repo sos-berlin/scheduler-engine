@@ -871,15 +871,16 @@ void Process_class_configuration::set_dom( const xml::Element_ptr& e )
 
 //---------------------------------------------------------Process_class_configuration::dom_element
 
-xml::Element_ptr Process_class_configuration::dom_element( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr Process_class_configuration::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
-    xml::Element_ptr element = document.createElement( "process_class" );
+    xml::Element_ptr result = document.createElement( "process_class" );
         
-    element.setAttribute         ( "name"            , name() );
-    element.setAttribute         ( "max_processes"   , _max_processes );
-    element.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
+    fill_file_based_dom_element( result, show_what );
+  //result.setAttribute         ( "name"            , name() );
+    result.setAttribute         ( "max_processes"   , _max_processes );
+    result.setAttribute_optional( "remote_scheduler", _remote_scheduler.as_string() );
 
-    return element;
+    return result;
 }
 
 //------------------------------------------------------------Process_class_configuration::put_Name
@@ -1228,9 +1229,6 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
 {
     xml::Element_ptr result = Process_class_configuration::dom_element( document, show_what );
 
-    if( has_base_file() )  result.appendChild( File_based::dom_element( document, show_what ) );
-    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
-
     result.setAttribute( "processes", (int)_process_set.size() );
 
     if( !_process_set.empty() )
@@ -1285,19 +1283,19 @@ Process_class_folder::~Process_class_folder()
 
 //----------------------------------------------------------------Process_class_folder::dom_element
 
-xml::Element_ptr Process_class_folder::dom_element( const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr element = document.createElement( "process_classes" );
-
-    FOR_EACH( File_based_map, _file_based_map, it )
-    {
-        Process_class* process_class = static_cast<Process_class*>( it->second );
-        //if( it->second->module_use_count() > 0 )
-            element.appendChild( process_class->dom_element( document, show ) );
-    }
-
-    return element;
-}
+//xml::Element_ptr Process_class_folder::dom_element( const xml::Document_ptr& document, const Show_what& show )
+//{
+//    xml::Element_ptr element = document.createElement( "process_classes" );
+//
+//    FOR_EACH( File_based_map, _file_based_map, it )
+//    {
+//        Process_class* process_class = static_cast<Process_class*>( it->second );
+//        //if( it->second->module_use_count() > 0 )
+//            element.appendChild( process_class->dom_element( document, show ) );
+//    }
+//
+//    return element;
+//}
 
 //----------------------------------------------------------Process_class_folder::add_process_class
 

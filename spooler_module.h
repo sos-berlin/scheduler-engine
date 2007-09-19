@@ -84,7 +84,7 @@ struct Module : Object
                                ~Module                      ()                                      {}
 
     void                        set_log                     ( Prefix_log* log )                     { _log.set_log( log ); }
-    void                        set_folder_path             ( const Path& );
+    void                        set_folder_path             ( const Path& p )                       { _folder_path = p; }
     void                        set_dom                     ( const xml::Element_ptr& );
     void                        set_xml_text_with_includes  ( const string& xml );
     Text_with_includes          source_with_parts           ();
@@ -116,6 +116,7 @@ struct Module : Object
     string                     _include_path;
     Reuse                      _reuse;
     bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
+    Path                       _folder_path;
     Path                       _process_class_path;
     bool                       _use_process_class;
     Kind                       _kind;

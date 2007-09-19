@@ -365,25 +365,25 @@ void Job_folder::add_or_replace_job_from_xml( const string& job_name, const xml:
     }
 }
 
-//---------------------------------------------------------------------Job_folder::jobs_dom_element
+//--------------------------------------------------------------------------Job_folder::dom_element
 
-xml::Element_ptr Job_folder::jobs_dom_element( const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr jobs_element = document.createElement( "jobs" );
-    dom_append_nl( jobs_element );
-
-    Z_FOR_EACH( File_based_map, _file_based_map, it )
-    {
-        Job* job = static_cast<Job*>( +it->second );
-
-        if( job->visible()  &&  ( show._job_name == ""  ||  show._job_name == job->name() ) )
-        {
-            jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
-        }
-    }
-
-    return jobs_element;
-}
+//xml::Element_ptr Job_folder::dom_element( const xml::Document_ptr& document, const Show_what& show )
+//{
+//    xml::Element_ptr jobs_element = document.createElement( "jobs" );
+//    dom_append_nl( jobs_element );
+//
+//    Z_FOR_EACH( File_based_map, _file_based_map, it )
+//    {
+//        Job* job = static_cast<Job*>( +it->second );
+//
+//        if( job->visible()  &&  ( show._job_name == ""  ||  show._job_name == job->name() ) )
+//        {
+//            jobs_element.appendChild( job->dom_element( document, show ) ), dom_append_nl( jobs_element );
+//        }
+//    }
+//
+//    return jobs_element;
+//}
 
 //-----------------------------------------------------------Combined_job_nodes::Combined_job_nodes
 
@@ -461,14 +461,14 @@ bool Combined_job_nodes::request_order( const Time& now, const string& cause )
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
         Order_queue* order_queue = (*it)->order_queue();
-        result |= order_queue->request_order( now, cause );   int JOB_IN_MEHREREN_JOB_CHAIN_NODE_TESTEN;
+        result |= order_queue->request_order( now, cause );
         if( result )  break;
     }
 
     return result;
 }
 
-//----------------------------------------------------------------------Job::withdraw_order_request
+//------------------------------------------------------Combined_job_nodes::withdraw_order_requests
 
 void Combined_job_nodes::withdraw_order_requests()
 {
@@ -668,8 +668,7 @@ bool Job::on_initialize()
         {
             Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-            //if( !_module->_dom_element_list.empty() )  read_script( _module );
-            //if( _module->_monitor  &&  !_module->_monitor->_dom_element_list.empty() )  read_script( _module->_monitor );
+            _module->set_folder_path( folder()->path() );
             if( _module->set() )  _module->init();
 
             _next_start_time = Time::never;
@@ -679,7 +678,12 @@ bool Job::on_initialize()
             if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
 
             prepare_on_exit_commands();
-            if( _lock_requestor )  _lock_requestor->initialize();
+            
+            if( _lock_requestor )  
+            {
+                _lock_requestor->set_folder_path( folder()->path() );
+                _lock_requestor->initialize();
+            }
 
             _state = s_initialized;
         }
@@ -707,8 +711,6 @@ bool Job::on_load() // Transaction* ta )
 
         if( !_module  ||  _module->kind() == Module::kind_none )  z::throw_xc( "INVALID_JOB_DEFINITION", obj_name() );
         
-        _module->set_folder_path( folder()->path() );
-
         set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
         try
@@ -720,7 +722,7 @@ bool Job::on_load() // Transaction* ta )
                 if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
                 {
                     _log->set_append( _log_append );
-                    _log->set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
+                    _log->set_filename( _spooler->log_directory() + "/job." + path().to_filename() + ".log" );      // Jobprotokoll
                 }
 
                 _log->open();
@@ -1233,23 +1235,6 @@ bool Job::can_be_replaced_now()
 //    _replacement_job = replacement_job;
 //}
 
-//-------------------------------------------------------------------------Job::jobname_as_filename
-
-string Job::jobname_as_filename()
-{
-    string filename = name();
-
-    for( int i = 0; i < filename.length(); i++ )
-    {
-        if( strchr(     "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
-                    "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
-                    "<>:\"/\\|",
-                    filename[i] ) )  filename[i] = '_';
-    }
-
-    return filename;
-}
-
 //-----------------------------------------------------------------------------Job::profile_section
 
 string Job::profile_section() 
@@ -1580,7 +1565,7 @@ void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& elem
 
             xml::Element_ptr e = new_calendar_dom_element( element.ownerDocument(), task->_start_at );
             element.appendChild( e );
-            e.setAttribute( "job", _job->path() );
+            e.setAttribute( "job", _job->path_without_slash() );
             e.setAttribute( "task", task->id() );
 
             options->_count++;
@@ -3064,6 +3049,13 @@ Time Job::get_delay_order_after_setback( int setback_count )
     return delay;
 }
 
+//--------------------------------------------------------------------Job::is_visible_in_xml_folder
+
+bool Job::is_visible_in_xml_folder( const Show_what& show_what ) const
+{
+    return visible()  &&  ( show_what._job_name == ""  ||  show_what._job_name == path_without_slash() );
+}
+
 //---------------------------------------------------------------------------------Job::dom_element
 
 xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show_what& show_what, Job_chain* which_job_chain )
@@ -3071,8 +3063,9 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     Time             now    = Time::now();
     xml::Element_ptr result = document.createElement( "job" );
 
-    if( has_base_file() )  result.appendChild( File_based::dom_element( document, show_what ) );
-    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
+    fill_file_based_dom_element( result, show_what );
+    //if( has_base_file() )  result.appendChild( File_based::dom_element( document, show_what ) );
+    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
 
     result.setAttribute( "job"       , name()                   );
     result.setAttribute( "state"     , state_name()            );
@@ -3233,7 +3226,7 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
         {
             if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
             {
-                e.setAttribute( "job", path() );
+                e.setAttribute( "job", path_without_slash() );
             }
         }
 

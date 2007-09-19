@@ -225,18 +225,18 @@ void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
 
 //-------------------------------------------------------------------------Lock_folder::dom_element
 
-xml::Element_ptr Lock_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-{
-    xml::Element_ptr result = dom_document.createElement( "locks" );
-
-    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
-    {
-        Lock* lock = static_cast<Lock*>( +it->second );
-        result.appendChild( lock->dom_element( dom_document, show_what ) );
-    }
-
-    return result;
-}
+//xml::Element_ptr Lock_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+//{
+//    xml::Element_ptr result = dom_document.createElement( "locks" );
+//
+//    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
+//    {
+//        Lock* lock = static_cast<Lock*>( +it->second );
+//        result.appendChild( lock->dom_element( dom_document, show_what ) );
+//    }
+//
+//    return result;
+//}
 
 //---------------------------------------------------------------------------------------Lock::Lock
 
@@ -544,10 +544,11 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
 {
     xml::Element_ptr result = dom_document.createElement( "lock" );
 
-    if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
-    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
+    fill_file_based_dom_element( result, show_what );
+    //if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
+    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
 
-    result.setAttribute( "name", name() );
+    //result.setAttribute( "name", name() );
     if( _config._max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _config._max_non_exclusive );
 
     if( is_free() )  result.setAttribute( "is_free", "yes" );
@@ -765,6 +766,17 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
     }
 
     lock_use->set_dom( lock_use_element );
+}
+
+//-----------------------------------------------------------------------Requestor::set_folder_path
+
+void Requestor::set_folder_path( const Path& folder_path )
+{ 
+    Z_FOR_EACH( Use_list, _use_list, it )
+    {
+        Use* use = *it;
+        use->set_folder_path( folder_path );
+    }
 }
 
 //----------------------------------------------------------------------------Requestor::initialize
@@ -987,6 +999,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     }
     else
     {
+        if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
         if( _lock_path != lock_path )  z::throw_xc( __FUNCTION__ );
         if( _lock_mode != lock_mode )  z::throw_xc( "SCHEDULER-408", "lock.use", "exclusive" );
     }

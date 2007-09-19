@@ -45,6 +45,7 @@ enum Show_what_enum
     show_job_params         = 0x100000,
     show_cluster            = 0x200000,
     show_operations         = 0x400000,
+    show_folders            = 0x800000,
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 

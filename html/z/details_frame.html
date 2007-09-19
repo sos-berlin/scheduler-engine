@@ -49,8 +49,8 @@ var _scheduler;
 var _stylesheet;
 var _timer;
 var _job_element;
-var _job_name;
-var _job_chain_name;
+var _job_path;
+var _job_chain_path;
 var _task_id;
 var _job_chain_element;
 var _description_popup;
@@ -63,10 +63,10 @@ var _show_card = "";
 function init()
 {
     _job_element       = undefined;
-    _job_name          = undefined;
+    _job_path          = undefined;
     _task_id           = undefined;
     _job_chain_element = undefined;
-    _job_chain_name    = "";
+    _job_chain_path    = "";
 
     if( !_scheduler )
     {
@@ -91,7 +91,7 @@ function clear()
     init();
     
     _job_element = undefined;
-    _job_name    = undefined;
+    _job_path    = undefined;
     _task_id     = undefined;
 }
 
@@ -136,7 +136,7 @@ function show_task_details( job_element, task_element )
     var job_title = job_element.getAttribute( "title" );
     
     _job_element = job_element;
-    _job_name    = job_element.getAttribute( "job" )
+    _job_path    = job_element.getAttribute( "job" )
     _task_id     = task_element.getAttribute( "id" );
 
     //document.all.job_name.innerText = "Job " + _job_name;
@@ -148,13 +148,13 @@ function show_task_details( job_element, task_element )
 
 //---------------------------------------------------------------------------------show_job_details
 
-function show_job_details( job_element, job_chain_name )
+function show_job_details( job_element, job_chain_path )
 {
     init();
     
-    _job_element = job_element;   
-    _job_name    = job_element.getAttribute( "job" )
-    _job_chain_name = job_chain_name? job_chain_name : "";
+    _job_element    = job_element;   
+    _job_path       = job_element.getAttribute( "path" )
+    _job_chain_path = job_chain_path? job_chain_path : "";
     
     _show_card = job_element.getAttribute( "order" ) == "yes"? "order_queue" : "task_queue";
     
@@ -226,14 +226,14 @@ function update( force )
         ok = true;
     }
     else
-    if( _job_name != undefined )
+    if( _job_path != undefined )
     {
         var what = _show_card == "task_queue"  ? "task_queue"     :
                    _show_card == "task_history"? "task_history" :
                    _show_card == "order_queue" ? "orders" 
                                                : "";
         
-        var response = _scheduler.execute( "<show_job job='" + _job_name + "' job_chain='" + _job_chain_name + "' what='" + what + "' max_task_history='10'/>" );
+        var response = _scheduler.execute( "<show_job job='" + _job_path + "' job_chain='" + _job_chain_path + "' what='" + what + "' max_task_history='10'/>" );
         
         _job_element = response.selectSingleNode( "spooler/answer/job" );
 
@@ -251,18 +251,18 @@ function update( force )
         //window.parent.left_frame.modify_response( response );
         
         var response       = window.parent.left_frame._response;
-        var job_chain_name = _job_chain_element.getAttribute( "name" );
+        var job_chain_path = _job_chain_element.getAttribute( "path" );
         
         var checkbox = document.getElementById( "show_order_history_checkbox" );
         if( checkbox  &&  checkbox.checked )
         {
             var what = "orders,order_history";
-            response = _scheduler.execute( "<show_job_chain job_chain='" + job_chain_name + "' what='" + what + "' />" );
+            response = _scheduler.execute( "<show_job_chain job_chain='" + job_chain_path + "' what='" + what + "' />" );
             
             modify_response( response );
         }
         
-        _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
+        _job_chain_element = response.selectSingleNode( "//job_chain[ @path='" + job_chain_path + "' ]" );
         document.getElementById( "stylesheet_output" ).innerHTML = _job_chain_element? _stylesheet.xml_transform( _job_chain_element ) : "";
 
         ok = true;

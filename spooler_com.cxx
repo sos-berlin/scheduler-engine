@@ -4133,7 +4133,7 @@ STDMETHODIMP Com_job_chain::get_Name( BSTR* result )
     {
         if( !_job_chain )  return E_POINTER;
 
-        *result = bstr_from_string( _job_chain->path() );
+        *result = bstr_from_string( _job_chain->name() );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }

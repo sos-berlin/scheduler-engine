@@ -131,7 +131,8 @@ struct Lock_folder : typed_folder< Lock >
     void                        remove_lock                 ( Lock* lock )                          { remove_file_based( lock ); }
     Lock*                       lock                        ( const string& name )                  { return file_based( name ); }
     Lock*                       lock_or_null                ( const string& name )                  { return file_based_or_null( name ); }
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "locks" ); }
 };
 
 //----------------------------------------------------------------------------------------------Use
@@ -152,6 +153,8 @@ struct Use : Object,
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
+    void                    set_folder_path                 ( const Path& p )                       { _folder_path = p;  _lock_path.set_absolute_if_relative( p ); }
+
 
     // Pendant:
     bool                        on_dependant_loaded         ( File_based* );
@@ -167,7 +170,8 @@ struct Use : Object,
 
   private:
     Fill_zero                  _zero_;
-    folder::Path               _lock_path;
+    Path                       _lock_path;
+    Path                       _folder_path;
     Lock::Lock_mode            _lock_mode;
     Requestor* const           _requestor;
 };
@@ -183,6 +187,8 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
 
     void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    void                    set_folder_path                 ( const Path& );
 
     void                        initialize                  ();
     void                        load                        ();
@@ -256,6 +262,7 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     string                      filename_extension          () const                                { return ".lock.xml"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Lock>                   new_file_based              ();
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "locks" ); }
 
 
     ptr<Lock_folder>            new_lock_folder             ( Folder* folder )                      { return Z_NEW( Lock_folder( folder ) ); }

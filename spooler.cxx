@@ -877,20 +877,30 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 //    }
 //#   endif
 
-    if( !lock_subsystem()->is_empty() )  state_element.appendChild( root_folder()->lock_folder()->dom_element( dom, show ) );
-
-    if( show.is_set( show_jobs ) )  state_element.appendChild( root_folder()->job_folder()->jobs_dom_element( dom, show ) );
-                              else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
-
-    if( _process_class_subsystem )  state_element.appendChild( root_folder()->process_class_folder()->dom_element( dom, show ) );
-    
-    if( _order_subsystem )
+    if( !show.is_set( show_folders ) )
     {
-        state_element.appendChild( root_folder()->job_chain_folder()->job_chains_dom_element( dom, show ) );
+        if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->file_baseds_dom_element( dom, show ) );
 
-        if( !_order_subsystem->order_id_spaces_interface()->is_empty() )
-            state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show ) );
+        if( show.is_set( show_jobs ) )  state_element.appendChild( job_subsystem()->file_baseds_dom_element( dom, show ) );
+                                  else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+
+        if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show ) );
+    
+        if( _order_subsystem )
+        {
+            state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show ) );
+
+            if( !_order_subsystem->order_id_spaces_interface()->is_empty() )
+                state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show ) );
+        }
     }
+    else
+    if( _folder_subsystem )  
+        state_element.appendChild( root_folder()->dom_element( dom, show ) );
+
+
+    if( _order_subsystem  &&  !_order_subsystem->order_id_spaces_interface()->is_empty() )
+         state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show ) );
 
     {
         xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );

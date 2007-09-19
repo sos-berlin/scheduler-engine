@@ -26,9 +26,11 @@ struct Path : string
 {
                                 Path                        ()                                      {}
                                 Path                        ( const string& path )                  { set_path( path ); }
+                                Path                        ( const char* path )                    { set_path( path ); }
                                 Path                        ( const string& directory, const string& tail_path );
 
     Path&                       operator =                  ( const string& path )                  { set_path( path );  return *this; }
+    Path&                       operator =                  ( const char* path )                    { set_path( path );  return *this; }
 
   //bool                        operator <                  ( const File_path& path ) const         { return compare( path ) <  0; }
   //bool                        operator <=                 ( const File_path& path ) const         { return compare( path ) <= 0; }
@@ -43,12 +45,17 @@ struct Path : string
     void                    set_folder_path                 ( const string& );
     Path                        folder_path                 () const;
     void                    set_absolute_if_relative        ( const Path& );
+    void                    set_absolute                    ( const Path& absolute_base, const Path& relative );
   //void                        prepend_folder_path         ( const string& );
     const string&               to_string                   ()  const                               { return *static_cast<const string*>( this ); }
     void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
     bool                     is_absolute_path               () const;
     string                      absolute_path               () const;
+    string                      to_filename                 () const;
 };
+
+
+inline void insert_into_message( Message_string* m, int index, const Path& path ) throw()           { return m->insert( index, path.to_string() ); }
 
 //------------------------------------------------------------------------------------------Pendant
 
@@ -65,7 +72,7 @@ struct Pendant
     virtual bool                on_dependant_loaded         ( File_based* )                         = 0;
     virtual bool                on_dependant_to_be_removed  ( File_based* );
     virtual void                on_dependant_removed        ( File_based* );
-
+    
   private:
     typedef stdext::hash_set< string >                                Dependant_set;
     typedef stdext::hash_map< File_based_subsystem*, Dependant_set >  Dependant_sets;
@@ -146,7 +153,9 @@ struct File_based : Scheduler_object,
     void                        on_dependant_removed        ( File_based* );
 
 
+    void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    virtual bool                is_visible_in_xml_folder    ( const Show_what& ) const              { return true; }
 
 
     File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
@@ -164,6 +173,7 @@ struct File_based : Scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     Path                        path                        () const;
+    Path                        path_with_slash             () const;
     Path                        path_without_slash          () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
@@ -179,6 +189,7 @@ struct File_based : Scheduler_object,
     File_based*                 replacement                 () const                                { return _replacement; }
 
     void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
+    Path                        folder_path                 () const;
     void                        check_for_replacing_or_removing();
 
     bool                        initialize                  ();
@@ -237,6 +248,7 @@ struct File_based : Scheduler_object,
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
     ptr<File_based>            _replacement;
+    Path                       _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
 };
@@ -286,6 +298,8 @@ struct Typed_folder : Scheduler_object,
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
     virtual File_based*         on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
 
   private:
     Fill_zero                  _zero_;
@@ -354,6 +368,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     bool                        on_activate                 ();
     void                        set_name                    ( const string& );
     void                        set_dom                     ( const xml::Element_ptr& )             { zschimmer::throw_xc( __FUNCTION__ ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
@@ -420,7 +435,8 @@ struct Subfolder_folder : typed_folder< Folder >
     //void                        remove_subfolder            ( Folder* folder )                      { remove_file_based( folder ); }
     //Folder*                     subfolder                   ( const string& name )                  { return file_based( name ); }
     //Folder*                     subfolder_or_null           ( const string& name )                  { return file_based_or_null( name ); }
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "folders" ); }
 };
 
 //-----------------------------------------------------------------------------File_based_subsystem
@@ -435,7 +451,9 @@ struct File_based_subsystem : Subsystem
     virtual string              filename_extension          () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }
     virtual Path                normalized_path             ( const Path& path ) const;
-  //virtual ptr<Typed_folder>   new_typed_folder            ()                                      = 0;
+    virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
+    virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
+
     Dependencies*               dependencies                ()                                      { return &_dependencies; }
 
   protected:
@@ -549,7 +567,7 @@ struct file_based_subsystem : File_based_subsystem
     FILE_BASED* file_based_or_null( const Path& path ) const
     {
         Path p = normalized_path( path );
-        p.set_absolute_if_relative( spooler()->root_folder()->path() );
+        if( string_begins_with( p, "/" ) )  p.erase( 0, 1 );  //p.set_absolute_if_relative( spooler()->root_folder()->path() );
 
         typename File_based_map::const_iterator it = _file_based_map.find( p );
         return it == _file_based_map.end()? NULL 
@@ -573,6 +591,27 @@ struct file_based_subsystem : File_based_subsystem
 
         return result;
     }
+
+
+    xml::Element_ptr file_baseds_dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+    {
+        xml::Element_ptr result = new_file_baseds_dom_element( document, show_what );
+        dom_append_nl( result );
+
+        Z_FOR_EACH( File_based_map, _file_based_map, it )
+        {
+            FILE_BASED* file_based = it->second;
+            
+            if( file_based->is_visible_in_xml_folder( show_what ) )
+            {
+                result.appendChild( file_based->dom_element( document, show_what ) );
+                dom_append_nl( result );
+            }
+        }
+
+        return result;
+    }
+
 
   private:
     friend struct               Typed_folder;
@@ -647,6 +686,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     string                      filename_extension          () const                                { return "/"; }             // Wird nicht verwendet
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Folder>                 new_file_based              ();
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }
 
     // Async_operation
     bool                        async_finished_             () const                                { return false; }

@@ -281,7 +281,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    return _spooler->root_folder()->job_folder()->jobs_dom_element( _answer, show );
+    return _spooler->root_folder()->job_folder()->dom_element( _answer, show );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads
@@ -738,7 +738,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
     if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
-    return _spooler->root_folder()->job_chain_folder()->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
+    return _spooler->root_folder()->job_chain_folder()->dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
 }
 
 //--------------------------------------------------------Command_processor::execute_show_job_chain
@@ -1194,6 +1194,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "cluster"          ) )  show |= show_cluster;
         else
         if( string_equals_prefix_then_skip( &p, "operations"       ) )  show |= show_operations;
+        else
+        if( string_equals_prefix_then_skip( &p, "folders"          ) )  show |= show_folders;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else

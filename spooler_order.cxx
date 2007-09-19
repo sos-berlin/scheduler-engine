@@ -43,7 +43,7 @@ struct Job_chain_folder : Job_chain_folder_interface
     Job_chain*                  job_chain_or_null           ( const folder::Path& name )            { return file_based_or_null( name ); }
     void                        add_job_chain               ( Job_chain* );
     void                        remove_job_chain            ( Job_chain* );
-    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
+  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 };
 
 //-----------------------------------------------------------------------------------Order_id_space
@@ -148,6 +148,8 @@ struct Order_subsystem : Order_subsystem_interface
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     ptr<Job_chain_folder_interface> new_job_chain_folder_interface();
     ptr<Job_chain>              new_file_based              ();
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& );
+
 
 
     // Privat
@@ -246,7 +248,7 @@ string Database_order_detector::async_state_text_() const
         if( t < time_max )
         {
             if( !text.empty() )  text << ", ";
-            text << order_queue->job_chain()->path() << ":" << order_queue->order_queue_node()->order_state() << " ";
+            text << order_queue->job_chain()->path_without_slash() << ":" << order_queue->order_queue_node()->order_state() << " ";
 
             if( t == 0 )  text << "0";
             else
@@ -537,6 +539,15 @@ ptr<Job_chain> Order_subsystem::new_file_based()
     return new Job_chain( _spooler );
 }
 
+//-----------------------------------------------------Order_subsystem::new_file_baseds_dom_element
+
+xml::Element_ptr Order_subsystem::new_file_baseds_dom_element( const xml::Document_ptr& doc, const Show_what& )
+{ 
+    xml::Element_ptr result = doc.createElement( "job_chains" );
+    result.setAttribute( "count", (int64)_file_based_map.size() );
+    return result;
+}
+
 //----------------------------------------------------Order_subsystem::append_calendar_dom_elements
 
 void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
@@ -777,28 +788,28 @@ void Job_chain_folder::remove_job_chain( Job_chain* job_chain )
     remove_file_based( job_chain );
 }
 
-//---------------------------------------------------------Job_chain_folder::job_chains_dom_element
+//--------------------------------------------------------------------Job_chain_folder::dom_element
 
-xml::Element_ptr Job_chain_folder::job_chains_dom_element( const xml::Document_ptr& document, const Show_what& show_what )
-{
-    xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
-
-    job_chains_element.setAttribute( "count", (int)_file_based_map.size() );
-
-    if( show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
-    {
-        FOR_EACH( File_based_map, _file_based_map, it )
-        {
-            Job_chain* job_chain = static_cast<Job_chain*>( +it->second );
-            if( job_chain->visible() )
-            {
-                job_chains_element.appendChild( job_chain->dom_element( document, show_what ) );
-            }
-        }
-    }
-
-    return job_chains_element;
-}
+//xml::Element_ptr Job_chain_folder::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
+//{
+//    xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
+//
+//    job_chains_element.setAttribute( "count", (int)_file_based_map.size() );
+//
+//    if( show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
+//    {
+//        FOR_EACH( File_based_map, _file_based_map, it )
+//        {
+//            Job_chain* job_chain = static_cast<Job_chain*>( +it->second );
+//            if( job_chain->visible() )
+//            {
+//                job_chains_element.appendChild( job_chain->dom_element( document, show_what ) );
+//            }
+//        }
+//    }
+//
+//    return job_chains_element;
+//}
 
 //-----------------------------------------------------------------------Order_source::Order_source
 
@@ -1315,8 +1326,8 @@ void Job_node::set_action( const string& action_string )
     }
 }
 
-//------------------------------------------------------------------Job_node::dom_element
-    
+//----------------------------------------------------------------------------Job_node::dom_element
+
 xml::Element_ptr Job_node::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
     xml::Element_ptr element = Base_class::dom_element( document, show_what );
@@ -1368,6 +1379,7 @@ Nested_job_chain_node::Nested_job_chain_node( Job_chain* job_chain, const Order:
     _nested_job_chain_path( job_chain_path ),
     _nested_job_chain(this)
 {
+    _nested_job_chain_path.set_absolute_if_relative( job_chain->folder_path() );
 }
 
 //-----------------------------------------------------ested_job_chain_node::~Nested_job_chain_node
@@ -1705,6 +1717,13 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
 }
 
+//--------------------------------------------------------------Job_chain::is_visible_in_xml_folder
+
+bool Job_chain::is_visible_in_xml_folder( const Show_what& show_what ) const
+{
+    return show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders );
+}
+
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
 
 xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -1717,10 +1736,11 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
     xml::Element_ptr result = document.createElement( "job_chain" );
 
-    if( has_base_file() )  result.appendChild_if( File_based::dom_element( document, show_what ) );
-    if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
+    fill_file_based_dom_element( result, show_what );
+    //if( has_base_file() )  result.appendChild_if( File_based::dom_element( document, show_what ) );
+    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
 
-    result.setAttribute( "name"  , name() );
+    //result.setAttribute( "name"  , name() );
     result.setAttribute( "orders", order_count( &ta ) );
     result.setAttribute( "state" , state_name( state() ) );
     if( !_visible ) result.setAttribute( "visible", _visible? "yes" : "no" );
@@ -1853,8 +1873,10 @@ Node* Job_chain::add_job_node( const string& job_path, const Order::State& state
     if( state.is_missing() )  state = job_path;//job->name();      // Parameter state nicht angegeben? Default ist der Jobname
 
 
+    Path absolute_job_path = job_path;
+    absolute_job_path.set_absolute_if_relative( folder_path() );
 
-    ptr<Node> node = new Job_node( this, state, job_path );
+    ptr<Node> node = new Job_node( this, state, absolute_job_path );
     node->set_next_state ( next_state );
     node->set_error_state( error_state );
 
@@ -2210,7 +2232,7 @@ void Job_chain::add_order( Order* order )
     //if( node->_job )  assert( node->_job->order_queue() );
 
     order->_job_chain      = this;
-    order->_job_chain_path = path();
+    order->_job_chain_path = path_with_slash();
     order->_removed_from_job_chain_name = "";
     order->_log->set_prefix( order->obj_name() );
 
@@ -2238,7 +2260,7 @@ void Job_chain::add_order( Order* order )
 
 void Job_chain::remove_order( Order* order )
 {
-    assert( order->_job_chain_path == name() );
+    assert( order->_job_chain_path == path_with_slash() );
     assert( order->_job_chain == this );
 
     ptr<Order> hold_order = order;   // Halten
@@ -4025,7 +4047,7 @@ Order::~Order()
 
 void Order::load_record( const string& job_chain_path, const Record& record )
 {
-    _job_chain_path = job_chain_path;
+    _job_chain_path.set_absolute( "/", job_chain_path );
 
     set_id      ( record.as_string( "id"         ) );   _id_locked = true;
     _state      = record.as_string( "state"      );
@@ -4822,7 +4844,7 @@ void Order::open_log()
             }
         }
 
-        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_path + "." + name + ".log" );      // Jobprotokoll
+        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_path.to_filename() + "." + name + ".log" );      // Jobprotokoll
         _log->set_remove_after_close( true );
         _log->open();
     }
@@ -4963,7 +4985,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         if( e.nodeName_is( "order.job_chain_stack" ) )
         {
             xml::Element_ptr e2 = e.select_element_strict( "order.job_chain_stack.entry" );
-            _outer_job_chain_path  = e2.getAttribute( "job_chain", _outer_job_chain_path );
+            _outer_job_chain_path.set_absolute( "/", e2.getAttribute( "job_chain", _outer_job_chain_path ) );
             _outer_job_chain_state = e2.getAttribute( "state" );
 
             // Nicht prüfen, weil Äußere Jobkette später definiert werden kann
@@ -4982,8 +5004,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( _standing_order )  
     {
-        if( _standing_order->has_base_file() )  result.appendChild_if( _standing_order->File_based::dom_element( dom_document, show_what ) );
-        if( _standing_order->replacement()   )  result.append_new_element( "replacement" ).appendChild( _standing_order->replacement()->dom_element( dom_document, show_what ) );
+        _standing_order->fill_file_based_dom_element( result, show_what );
+        //if( _standing_order->has_base_file() )  result.appendChild_if( _standing_order->File_based::dom_element( dom_document, show_what ) );
+        //if( _standing_order->replacement()   )  result.append_new_element( "replacement" ).appendChild( _standing_order->replacement()->dom_element( dom_document, show_what ) );
     }
 
     if( !show_what.is_set( show_for_database_only ) )
@@ -5010,7 +5033,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( Job_chain* job_chain = this->job_chain_for_api() )
-        result.setAttribute( "job_chain" , job_chain->path() );
+        result.setAttribute( "job_chain" , job_chain->path_with_slash() );
 
         if( _replaced_by )
         result.setAttribute( "replaced"  , "yes" );
@@ -5799,7 +5822,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         {
             if( _outer_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412" );      // Mehrfache Verschachtelung nicht möglich (sollte nicht passieren, wird schon vorher geprüft)
 
-            _outer_job_chain_path  = job_chain->path();
+            _outer_job_chain_path.set_absolute( "/", job_chain->path() );
             _outer_job_chain_state = _state;
             job_chain = n->nested_job_chain();
             _state = job_chain->first_node()->order_state();    // S.a. handle_end_state_repeat_order(). Auftrag bekommt Zustand des ersten Jobs der Jobkette
@@ -5813,7 +5836,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
 
-        _job_chain_path = job_chain->path();
+        _job_chain_path = job_chain->path_with_slash();
         _removed_from_job_chain_name = "";
 
         //activate();     // Errechnet die nächste Startzeit
@@ -6086,7 +6109,7 @@ bool Order::handle_end_state_of_nested_job_chain()
 
             _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
             place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-            _outer_job_chain_path = outer_job_chain->path();  // place_in_job_chain() hat's gelöscht
+            _outer_job_chain_path.set_absolute( "/", outer_job_chain->path() );  // place_in_job_chain() hat's gelöscht
 
             _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
         }

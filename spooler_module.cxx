@@ -372,10 +372,11 @@ void Module::init()
             if( _process_class_path != "" )  z::throw_xc( "SCHEDULER-194" );
         }
 
-        //if( _use_process_class )  
-        //{
+        if( _use_process_class )  
+        {
+            if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
         //    _spooler->process_class_subsystem()->process_class( _process_class_path );     // Fehler, wenn der Name nicht bekannt ist. (Könnte auch eine Warnung sein)
-        //}
+        }
     }
     else
     if( _process_class_path != ""  )
@@ -498,13 +499,6 @@ ptr<Module_instance> Module::create_instance_impl()
     }
 
     return result;
-}
-
-//--------------------------------------------------------------------------Module::set_folder_path
-
-void Module::set_folder_path( const Path& p )
-{ 
-    if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( p ); 
 }
 
 //--------------------------------------------------------------------Module::process_class_or_null
