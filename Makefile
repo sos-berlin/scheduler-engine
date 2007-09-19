@@ -56,6 +56,7 @@ objects = \
  spooler_wait.o\
  spooler_web_service.o\
  spooler_xslt_stylesheet.o\
+ standing_order.o\
  subsystem.o\
  supervisor.o\
  xml_client_connection.o
