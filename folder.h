@@ -596,7 +596,6 @@ struct file_based_subsystem : File_based_subsystem
     xml::Element_ptr file_baseds_dom_element( const xml::Document_ptr& document, const Show_what& show_what )
     {
         xml::Element_ptr result = new_file_baseds_dom_element( document, show_what );
-        dom_append_nl( result );
 
         Z_FOR_EACH( File_based_map, _file_based_map, it )
         {
@@ -605,7 +604,6 @@ struct file_based_subsystem : File_based_subsystem
             if( file_based->is_visible_in_xml_folder( show_what ) )
             {
                 result.appendChild( file_based->dom_element( document, show_what ) );
-                dom_append_nl( result );
             }
         }
 

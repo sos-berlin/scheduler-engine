@@ -1034,7 +1034,6 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
 xml::Element_ptr Typed_folder::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
     xml::Element_ptr result = new_dom_element( document, show_what );
-    dom_append_nl( result );
 
     Z_FOR_EACH( File_based_map, _file_based_map, it )
     {
@@ -1043,7 +1042,6 @@ xml::Element_ptr Typed_folder::dom_element( const xml::Document_ptr& document, c
         if( file_based->is_visible_in_xml_folder( show_what ) )
         {
             result.appendChild( file_based->dom_element( document, show_what ) );
-            dom_append_nl( result );
         }
     }
 
