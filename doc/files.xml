@@ -115,6 +115,7 @@
     <file path="xml/answer/description.xml"/>
     <file path="xml/answer/event.xml"/>
     <file path="xml/answer/events.xml"/>
+    <file path="xml/answer/file_based.xml"/>
     <file path="xml/answer/history.entry.xml"/>
     <file path="xml/answer/history.xml"/>
     <file path="xml/answer/job.xml"/>
@@ -140,8 +141,10 @@
     <file path="xml/answer/processes.xml"/>
     <file path="xml/answer/queued_task.xml"/>
     <file path="xml/answer/queued_tasks.xml"/>
+    <file path="xml/answer/replacement.xml"/>
     <file path="xml/answer/remote_scheduler.xml"/>
     <file path="xml/answer/remote_schedulers.xml"/>
+    <file path="xml/answer/removed.xml"/>
     <file path="xml/answer/run_time.xml"/>
     <file path="xml/answer/spooler.xml"/>
     <file path="xml/answer/state.xml"/>

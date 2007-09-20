@@ -618,7 +618,7 @@ spooler_job.max_order_setbacks = 5;                      // Die 5. Rückstellung
         </description>
 
         <messages>
-            <message level="error" code="SCHEDULER-401"/>
+            <message level="error" code="SCHEDULER-161"/>
         </messages>
     </property>
     

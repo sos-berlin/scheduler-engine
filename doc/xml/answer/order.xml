@@ -168,6 +168,7 @@
     </xml_attributes>
 
     <xml_child_elements>
+        <xml_child_element name="file_based" title="Wenn das Objekt dateibasiert ist"/>
         <xml_child_element name="log"/>
         <xml_child_element name="run_time"/>
         <xml_child_element name="payload"  directory="xml/"/>

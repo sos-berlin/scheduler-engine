@@ -12,45 +12,54 @@
     document_state      = "proposal"
 >
     <p>
-        Siehe auch
-    </p>
-    <ul>
-        <li>
-            <scheduler_a href="dynamic_configuration_commands.xml"/>
-        </li>
-        <li>
-            <scheduler_a href="directories.xml"/>
-        </li>
-        <li>
-            <scheduler_a href="dynamic_configuration_with_supervisor.xml"/>
-        </li>
-    </ul>
-    <p>
         Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren (das alles hier Objekte genannt)
-        müssen nicht mehr in einer gemeinsamen Konfigurationsdatei, 
-        sondern können in einzelnen Dateien gehalten werden, die der Scheduler automatisch nach Änderung übernimmt
+        können in einzelnen Dateien gehalten werden, die der Scheduler automatisch nach Änderung übernimmt.
     </p>
-    <p>
-        Der Scheduler überwacht das Verzeichnis und übernimmt hinzugefügte und geänderte Dateien.
-        Eine gelöschte Datei lässt den Scheduler das Objekt im Scheduler löschen.
-    </p>
-
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <scheduler_table_of_content/>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <h2>Dateien für Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren</h2>
+    <h2>Konfigurationsverzeichnis</h2>
+    
+    <p>
+        Die Dateien liest der Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnisse.
+        Das Konfigurationsverzeichnis kann eingestellt werden mit
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="config" attribute="configuration_directory"/>,
+            voreingestellt ist das Verzeichnis <code>live</code> im Verzeichnis der Konfigurationsdatei.
+        </li>
+        <li>
+            <scheduler_option name="config"/>. 
+            Die Konfigurationsdatei erwartet der Scheduler dann im Konfigurationsverzeichnis 
+            unter dem Namen <code>scheduler.xml</code>.
+        </li>
+    </ul>
+    
+    <p>
+        Der Scheduler überwacht das Konfigurationsverzeichnis und seine Unterverzeichnisse
+        und übernimmt hinzugefügte und geänderte Dateien.
+        Löschen einer Datei führt zum Löschen des entsprechenden Objekts im Scheduler.
+    </p>
 
     <p>
-        Hinzugefügte, geänderte und gelöschte Dateien lösen entsprechende Kommandos aus.
+        Unter Windows verwendet der Scheduler die Verzeichnisüberwachung des Betriebsystems, 
+        bemerkt Änderungen also sofort.
+        Außerdem liest der die Verzeichnisse im Minutenabstand.
     </p>
+    <p>
+        Unter Unix überwacht der Scheduler die Verzeichnisse im Abstand von (zurzeit) 10 Sekunden.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Dateien für Prozessklassen, Sperren, Jobs, Jobketten und Daueraufträge</h2>
+
     <p style="margin-bottom: 1em;">
-        <i>
-            Die Kommandos zum Löschen werden zunächst nicht realisiert.
-            Sie stehen symbolisch für die im Scheduler zu realisierenden internen Funktionen.
-        </i>
+        Die Dateien enthalten die XML-Elemente für die Definition des Objekts:        
     </p>
     <table cellspacing="0" cellpadding="0">
         <tr>
@@ -58,14 +67,26 @@
                 Dateiname
             </th>
             <th style="padding-right: 2ex">
-                Hinzufügen, Ändern
-                <br/>
-                (alle mit <code>replace="yes")</code>
+                XML-Element
             </th>
-            <th>
-                Löschen
-            </th>
-            
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                <i>name</i>
+                <code>.process_class.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="process_class"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <i>name</i>
+                <code>.lock.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="lock"/>
+            </td>
         </tr>
         <tr>
             <td style="padding-right: 2ex">
@@ -73,10 +94,6 @@
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="job"/>
-            </td>
-            <td>
-                <!--scheduler_element name="job.remove"/-->
-                <scheduler_element name="modify_job" attribute="cmd" value="modify"/>
             </td>
         </tr>
         <tr>
@@ -86,42 +103,13 @@
             <td style="padding-right: 2ex">
                 <scheduler_element name="job_chain"/>
             </td>
-            <td>
-                <!--scheduler_element name="job_chain.remove"/-->
-            </td>
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                <i>jobchainname</i><code>#</code><i>orderid</i><code>.order.xml</code>
+                <i>jobchainname</i><code>,</code><i>orderid</i><code>.order.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="order"/>
-            </td>
-            <td>
-                <!--scheduler_element name="order.remove"/-->
-                <scheduler_element name="remove_order"/>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-right: 2ex">
-                <i>name</i><code>.process_class.xml</code>
-            </td>
-            <td style="padding-right: 2ex">
-                <scheduler_element name="process_class"/>
-            </td>
-            <td>
-                <scheduler_element name="process_class.remove"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <i>name</i><code>.lock.xml</code>
-            </td>
-            <td style="padding-right: 2ex">
-                <scheduler_element name="lock"/>
-            </td>
-            <td>
-                <scheduler_element name="lock.remove"/>
             </td>
         </tr>
     </table>
@@ -129,69 +117,11 @@
     <p>
         Das Attribut <code>name=</code> 
         (oder <code>job_chain=</code> und <code>id=</code> bei Aufträgen)
-        kann angegeben werden und muss dann dem Dateinamen entsprechen.
+        sollte nicht angegeben werden.
+        Wird es angegeben, muss es dem Dateinamen entsprechen.
     </p>
     <p>
-        Jobkettennamen dürfen kein <code>#</code> mehr enthalten.
-    </p>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Daueraufträge</h2>
-    <p>
-        Daueraufträge werden anders behandelt als die anderen Objekte.
-        Zum einen haben sie einen anderen Namen (<code>job_chain=</code> und <code>id=</code> statt <code>name=</code>),
-        zum anderen werden Dateiänderungen nicht jederzeit beachtet.
-        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet,
-        wenn die Jobkette aktiv (<code>state=running</code>) ist und
-    </p>
-    <ul>
-        <li>
-            der Auftrag nicht bekannt,
-        </li>
-        <li>
-            der Auftrag noch nicht gestartet worden oder
-        </li>
-        <li>
-            der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
-        </li>
-    </ul>
-    <p>
-        Ein Auftrag, der nicht wiederholt wird, gelangt auf die schwarze Liste,
-        wenn die Auftragsdatei noch da und keinen neuen Zeitstempel hat.
-        <span style="color: red">Wie diese schwarze Liste aussieht, wird noch geklärt.</span>
-    </p>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <h2>Verzeichnisüberwachung</h2>
-
-    <p>
-        Die Algorithmen der Verzeichnisüberwachung (getrennt für Windows und Unix)
-        werden nicht nur Änderungen der Dateinamensliste,
-        sondern auch die Zeitstempel der Dateien überwachen,
-        um Änderungen an bekannten Dateien festzustellen.
-    </p>
-    <p>
-        Unter Windows wird dazu eine Systemfunktion benutzt, die über Änderungen benachrichtigt.
-        Dazu macht Microsoft einen (möglicherweise praktisch bedeutungslosen) Hinweis:
-    </p>
-    <p class="indent">
-        "<i>The operating system detects a change to the last write-time only 
-        when the file is written to the disk. 
-        For operating systems that use extensive caching, 
-        detection occurs only when the cache is sufficiently flushed.</i>"
-        (<a href="http://msdn2.microsoft.com/en-us/library/aa364417.aspx">http://msdn2.microsoft.com/en-us/library/aa364417.aspx</a>).
-    </p>
-
-    <p>
-        Das Verzeichnis wird eingestellt mit dem neuen Attribut
-        <scheduler_element name="config" attribute="directory"/>.
-        Voreingestellt ist das Unterverzeichnis <code>configurations</code> im Verzeichnis der Konfigurationsdatei.
-        Das Attribut ist in mit <scheduler_element name="base"/> eingezogenen Basiskonfigurationen wirkungslos.
-    </p>
-    <p>
-        Das Verzeichnis sollte nur hier spezifizierte Dateien enthalten.
+        Die Attribute <code>replace=</code> und <code>spooler_id=</code> sind nicht zulässsig.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -201,13 +131,13 @@
     <p>
         Der Scheduler legt für jede Datei mit bekannter Dateinamensendung (<code>.job</code> usw.)
         ein entsprechendes Objekt im Scheduler an und verbindet es mit der Datei.
-        Der Scheduler überwacht das Verzeichnis und die Zeitstempel der Dateien und geht bei Änderungen wie folgt vor.
+        Der Scheduler überwacht den Zeitstempel der Datei und geht bei Änderung wie folgt vor.
     </p>
     
     <ul class="big">
         <li>
             Ein hinzugefügter Dateiname führt zu Anlage eines neuen, noch leeren Objekts im Scheduler,
-            das mit der Datei verbunden wird.
+            das mit der Datei verbunden ist.
             Das Objekt ist mit <scheduler_element name="show_state"/> sichtbar.
             Z.B. wird eine Datei <code>xxx.job.xml</code> im Scheduler gespiegelt als ein Job
             <scheduler_element name="job" attribute="name" value="xxx"/>,
@@ -215,7 +145,8 @@
         </li>
         <li>
             Eine gelöschte Datei führt zum Löschen des Objekts.
-            Das Löschen läuft in der Regel asynchron, weil z.B. bei einem Job das Ende der Tasks abgewartet werden muss.
+            Das Löschen wird in der Regel verzögert, 
+            weil z.B. bei einem Job das Ende der Tasks abgewartet werden muss.
         </li>
         <li>
             Wenn während des Löschens die Datei wieder angelegt wird,
@@ -237,21 +168,125 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <h2>Wirkung der Kommandos</h2>
+    <h2>Wirkung der Kommandos zum Ändern und Löschen</h2>
 
     <p>
-        Die Kommandos zum Ändern und Löschen von Objekten wirken nicht auf die Dateien.
-        Damit ändern sie das Objekt im Scheduler, aber nicht die Datei. 
-        Bekommt eine Datei einen neuen Zeitstempel, lädt der Scheduler das Objekt neu
-        und überschreibt die Änderung des Kommandos.
+        Kommandos zum Ändern von Objekten ändern nicht die Dateien.
     </p>
     <p>
-        Die Kommandos zum Löschen werden bei dateibasierten Objekten nicht das Objekt direkt, 
-        sondern die Datei löschen.
-        Damit greift das Kommando dauerhaft in die Konfiguration ein.
-        <i>(Ich fände es sauberer, die Löschkommandos zu verbieten.)</i>
+        Kommandos zum Löschen von Objekten dagegen löschen die zugrundliegende Datei
+        (die Debug-Version des Schedulers versieht den Dateinamen mit dem Anhängsel "<code>-REMOVED</code>").
     </p>
-    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Verhalten der einzelnen Objekttypen</h2>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Prozessklassen</h3>
+
+    <p>
+        Änderungen an einer Prozessklasse übernimmt der Scheduler sofort.
+    </p>
+    <p>
+        Beim Löschen einer Prozessklasse beendet der Scheduler alle zugehörigen Tasks.
+        Erst wenn keine Task mehr läuft, löscht er die Prozessklasse.
+        Bis dahin startet der Scheduler keine weiteren Tasks, wie wenn die Prozessklasse erschöpft wäre.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Sperren</h3>
+
+    <p>
+        Änderungen an einer Prozessklasse übernimmt der Scheduler sofort.
+    </p>
+    <p>
+        Beim Löschen einer Sperre beendet der Scheduler alle zugehörigen Tasks.
+        Erst wenn keine Task mehr läuft, löscht er die Sperre.
+        Bis dahin startet der Scheduler keine weiteren Tasks, wie wenn die bereits Sperre belegt wäre.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Jobs</h3>
+
+    <p>
+        Einen geänderten Job übernimmt der Scheduler, nachdem er alle Tasks beendet hat.
+    </p>
+    <p>
+        Beim Löschen verfährt der Scheduler ebenso.
+        Keine neue Tasks werden gestartet.
+    </p>
+    <p>
+        Fehlt dem Job die Prozessklasse oder eine Sperre, wirkt das so, 
+        wie wenn die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Jobketten</h3>
+
+    <p>
+        Eine geänderte Jobkette übernimmt der Scheduler, nachdem alle Aufträge ihren Jobschritt beendet haben.
+        Weitere Jobschritte werden solange verhindert.
+    </p>
+    <p>
+        Aufträge in Jobkettenknoten mit gleichem Auftragszustand übernimmt der Scheduler in die geänderte Jobkette.
+    </p>
+    <p>
+        Beim Löschen verfährt der Scheduler ebenso.
+    </p>
+    <p>
+        Fehlt der Jobkette ein Job, dann sammeln sich die Aufträge im Jobkettenknoten,
+        als wäre der Job nicht zur Auftragsausführung bereit.
+    </p>
+    <p>
+        Fehlt der Jobkette eine verschachtelte Jobkette <scheduler_element name="job_chain_node.job_chain"/>,
+        dann ist die gesamte Jobkette nicht bereit.
+        Alle untergeordneten Jobketten müssen bekannt sein, 
+        damit der Scheduler die Eindeutigkeit der Auftragskennungen sicherstellen kann.
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Daueraufträge</h3>
+    <p>
+        Daueraufträge werden anders behandelt als die anderen Objekte.
+        Zum einen haben sie einen zusammengesetzten Namen (<code>job_chain=</code> und <code>id=</code> statt <code>name=</code>),
+        zum anderen werden Dateiänderungen nicht jederzeit beachtet.
+        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet,
+        wenn 
+    </p>
+    <ul>
+        <li>
+            der Auftrag nicht bekannt,
+        </li>
+        <li>
+            der Auftrag noch nicht gestartet worden oder
+        </li>
+        <li>
+            der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.
+        </li>
+    </ul>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Kommando &lt;show_state></h2>
+
+    <p>
+        Das Kommando liefert zu jedem dateibasiertem Objekt ein
+        <scheduler_element directory="xml/answer/" name="file_based"/> mit Angaben zur Datei.
+    </p>
+    <p>
+        Wenn eine Ersetzung im Gang ist, zeigt <scheduler_element directory="xml/answer/" name="replacement"/> dies an.
+    </p>
+    <p>
+        Wenn eine Datei gelöscht ist, aber das dazugehörige Objekt noch nicht,
+        wird ein <scheduler_element directory="xml/answer/" name="removed"/> geliefert.
+    </p>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 </description>

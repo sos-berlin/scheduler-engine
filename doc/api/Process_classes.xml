@@ -70,7 +70,7 @@
         </description>
 
         <messages>
-            <message level="error" code="SCHEDULER-401"/>
+            <message level="error" code="SCHEDULER-161"/>
         </messages>
     </property>
 

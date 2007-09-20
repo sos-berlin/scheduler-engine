@@ -22,6 +22,11 @@
                 <p>
                     "<code>-config=</code>" vor dem Dateinamen kann weggelassen werden.
                 </p>
+                <p>
+                    Die Option gibt die Konfigurationsdatei oder das Konfigurationsverzeichnis an.
+                    Mit letzteren Fall erwartet der Scheduler die Konfigurationsdatei im
+                    Konfigurationsverzeichnis unter dem Namen <code>scheduler.xml</code>.
+                </p>
             </description>
         </command_option>
 
@@ -351,6 +356,19 @@
             </messages>
         </command_option>
 
+
+        <command_option name="configuraton-directory" title="Konfigurationsverzeichnis">
+            <description>
+                <p>
+                    Voreingestellt ist das Verzeichnis <code>live</code> im Verzeichnis
+                    der Konfigurationsdatei (<scheduler_option name="config"/>).
+                </p>
+                <p>
+                    Diesem Verzeichnis entnimmt der Scheduler 
+                    Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren.
+                </p>
+            </description>
+        </command_option>
 
         <example>
             <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>

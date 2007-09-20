@@ -57,7 +57,7 @@
     </description>
     
     <messages>
-        <message code="SCHEDULER-401" level="error"/>
+        <message code="SCHEDULER-161" level="error"/>
         <message code="SCHEDULER-407" level="error"/>
         <message code="SCHEDULER-408" level="error"/>
         <message code="SCHEDULER-855" level="info"/>

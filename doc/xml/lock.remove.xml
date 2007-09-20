@@ -47,7 +47,7 @@
     <xml_answer element="ok"/>
 
     <messages>
-        <message code="SCHEDULER-401" level="error"/>
+        <message code="SCHEDULER-161" level="error"/>
         <message code="SCHEDULER-886" level="info"/>
         <message code="SCHEDULER-861" level="info"/>
     </messages>

@@ -22,6 +22,7 @@
     </xml_attributes>
 
     <xml_child_elements>
+        <xml_child_element name="file_based" title="Wenn das Objekt dateibasiert ist"/>
         <xml_child_element name="lock.holders"/>
         <xml_child_element name="lock.queue"/>
     </xml_child_elements>
