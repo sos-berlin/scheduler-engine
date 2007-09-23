@@ -517,15 +517,15 @@
 
         <message code="SCHEDULER-153">
             <text xml:lang="en">
-                <title>'<p1>object</p1>' is not in state loaded</title>
+                <title>'<p1>object</p1>' is not in state '<p2/>'</title>
             </text>
         </message>
 
-        <message code="SCHEDULER-154">
+        <!--message code="SCHEDULER-154">
             <text xml:lang="en">
                 <title>'<p1>object</p1>' is not active</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-155">
             <text xml:lang="de">
@@ -2055,7 +2055,7 @@
         
         <message code="SCHEDULER-330">
             <text xml:lang="en">
-                <title><p1>job</p1> could not be initialized</title>
+                <title><p1>job</p1> could not be initialized:<br/><p2>error</p2></title>
             </text>
         </message>
         
@@ -2695,6 +2695,12 @@
         <message code="SCHEDULER-439">
             <text xml:lang="en">
                 <title>Error when removing <p2>type</p2> after base file '<p1>path</p1>' has been removed:<br/><p3>error</p3></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-440">
+            <text xml:lang="en">
+                <title>Definition of <p1>object</p1> is incomplete</title>
             </text>
         </message>
     </messages>

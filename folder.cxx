@@ -1379,13 +1379,26 @@ void File_based::on_dependant_removed( File_based* file_based )
 
 //---------------------------------------------------------------------File_based::assert_is_loaded
 
+void File_based::assert_is_initialized()
+{
+    if( _state != s_initialized  &&
+        _state != s_loaded  &&
+        _state != s_active )  
+    {
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_initialized ), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_initialized ) );
+    }
+}
+
+//---------------------------------------------------------------------File_based::assert_is_loaded
+
 void File_based::assert_is_loaded()
 {
     if( _state != s_loaded  &&
         _state != s_active )  
     {
-        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), _base_file_xc );
-                               else  z::throw_xc( "SCHEDULER-153", obj_name() );
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_loaded ), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_loaded ) );
     }
 }
 
@@ -1395,8 +1408,8 @@ void File_based::assert_is_active()
 {
     if( _state != s_active )  
     {
-        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-154", obj_name(), _base_file_xc );
-                               else  z::throw_xc( "SCHEDULER-154", obj_name() );
+        if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_active ), _base_file_xc );
+                               else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_active ) );
     }
 }
 
@@ -1718,11 +1731,9 @@ void File_based::set_name( const string& name )
     if( normalized_name() != _file_based_subsystem->normalized_name( name ) )
     {
         if( is_in_folder() )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
+        _name = name;
+        log()->set_prefix( obj_name() );    // Noch ohne Pfad
     }
-
-    _name = name;
-
-    log()->set_prefix( obj_name() );    // Noch ohne Pfad
 }
 
 //-------------------------------------------------------------------------------File_based::folder

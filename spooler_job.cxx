@@ -673,8 +673,13 @@ bool Job::on_initialize()
         {
             Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
+            if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
+            
+            add_dependant( spooler()->process_class_subsystem(), _module->_process_class_path );
+
             //_module->set_folder_path( folder_path() );
             if( _module->set() )  _module->init();
+            if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
             _next_start_time = Time::never;
             _period._begin = 0;
@@ -713,8 +718,6 @@ bool Job::on_load() // Transaction* ta )
     {
         Z_LOGI2( "scheduler", obj_name() << ".load()\n" );
 
-        if( !_module  ||  _module->kind() == Module::kind_none )  z::throw_xc( "INVALID_JOB_DEFINITION", obj_name() );
-        
         set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
         try
@@ -817,8 +820,8 @@ void Job::set_dom( const xml::Element_ptr& element )
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );
-        _module->_process_class_string = 
-                      element.     getAttribute( "process_class", _module->_process_class_string );
+        _module->_process_class_path = Absolute_path( folder_path(),
+                      element.     getAttribute( "process_class", _module->_process_class_path ) );
         _module->_java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
         _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
@@ -1306,7 +1309,7 @@ void Job::signal( const string& signal_name )
 
 ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at, int id )
 {
-    assert_is_loaded();
+    assert_is_initialized();
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
 
     switch( _state )
@@ -2404,13 +2407,18 @@ void Job::remove_waiting_job_from_process_list()
 bool Job::on_dependant_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
-    assert( file_based == _module->process_class() );
 
-    assert( dynamic_cast<Process_class*>( file_based ) );
-
-    if( _waiting_for_process )
+    if( _module->_use_process_class )
     {
-        signal( __FUNCTION__ );
+        assert( file_based == _module->process_class() );
+
+        assert( dynamic_cast<Process_class*>( file_based ) );
+
+        if( _waiting_for_process )
+        {
+            _waiting_for_process_try_again = true;
+            signal( __FUNCTION__ );
+        }
     }
 
     return true;
@@ -2514,22 +2522,26 @@ ptr<Task> Job::task_to_start()
 
             if( !process_class  ||  !process_class->process_available( this ) )
             {
-                if( process_class  && 
-                    cause != cause_min_tasks  &&  
-                    ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
+                if( process_class )
                 {
-                    if( !_waiting_for_process  )
+                    if( cause != cause_min_tasks  &&  
+                        ( !_waiting_for_process  ||  _waiting_for_process_try_again ) )
                     {
-                        Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
-                        if( task )  m.insert( 2, task->obj_name() );
-                        log()->info( m );
-                        process_class->enqueue_waiting_job( this );
-                        _waiting_for_process = true;
-                    }
+                        if( !_waiting_for_process  )
+                        {
+                            Message_string m ( "SCHEDULER-949", _module->_process_class_path.to_string() );   // " ist für einen verfügbaren Prozess vorgemerkt" );
+                            if( task )  m.insert( 2, task->obj_name() );
+                            log()->info( m );
+                            process_class->enqueue_waiting_job( this );
+                            _waiting_for_process = true;
+                        }
 
-                    _waiting_for_process_try_again = false;
-                    _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                        _waiting_for_process_try_again = false;
+                        _spooler->task_subsystem()->try_to_free_process( this, process_class, now );     // Beendet eine Task in s_running_waiting_for_order
+                    }
                 }
+                else
+                    _waiting_for_process = true;
 
                 task = NULL, cause = cause_none, has_order = false;      // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
             }

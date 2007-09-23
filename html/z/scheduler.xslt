@@ -897,7 +897,7 @@
                         <xsl:sort select="translate( @path, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
 
                         <xsl:if test="not( /spooler/answer/state/job_chains/job_chain/job_chain_node/@job=current()/@path )">
-                            <xsl:variable name="job" select="/spooler/answer/state/jobs/job[ @path = current()/@job ]"/>
+                            <!--xsl:variable name="job" select="/spooler/answer/state/jobs/job[ @path = current()/@job ]"/-->
 
                             <xsl:element name="tr">
                                 <xsl:attribute name="colspan">2</xsl:attribute>
@@ -925,46 +925,46 @@
 
                                 <td colspan="3">
                                     <xsl:choose>
-                                        <xsl:when test="$job/file_based/ERROR">
-                                            <xsl:apply-templates mode="file_based_error" select="$job/file_based"/>
+                                        <xsl:when test="file_based/ERROR">***
+                                            <xsl:apply-templates mode="file_based_error" select="file_based"/>
                                         </xsl:when>
                                         <xsl:otherwise>
-                                            <xsl:apply-templates mode="job_state_line" select="$job" />
+                                            <xsl:apply-templates mode="job_state_line" select="." />
 
                                             <xsl:choose>
-                                                <xsl:when test="$job/tasks/@count>0">
+                                                <xsl:when test="tasks/@count>0">
                                                     <xsl:text>, </xsl:text>
                                                     <span class="task" style="padding-left: 2pt; padding-right: 2pt; padding-bottom: 2pt;">
                                                         <xsl:call-template name="bold_counter">
-                                                            <xsl:with-param name="counter" select="$job/tasks/@count" />
+                                                            <xsl:with-param name="counter" select="tasks/@count" />
                                                             <xsl:with-param name="suffix" select="'tasks'" />
                                                         </xsl:call-template>
                                                     </span>
                                                 </xsl:when>
                                                 <xsl:otherwise>
-                                                    <xsl:if test="$job/@next_start_time">
+                                                    <xsl:if test="@next_start_time">
                                                         <xsl:text>, </xsl:text>
                                                         <span style="white-space: nowrap">
-                                                            <xsl:value-of select="$job/@next_start_time__xslt_date_or_time_with_diff"/>
+                                                            <xsl:value-of select="@next_start_time__xslt_date_or_time_with_diff"/>
                                                         </span>
                                                     </xsl:if>
                                                 </xsl:otherwise>
                                             </xsl:choose>
 
-                                            <xsl:if test="$job/@waiting_for_process='yes'">
+                                            <!--xsl:if test="@waiting_for_process='yes'">
                                                 <xsl:text>, </xsl:text>
                                                 <span style="color: #e00000">needs process</span>
-                                            </xsl:if>
+                                            </xsl:if-->
                                         </xsl:otherwise>
                                     </xsl:choose>
                                 </td>
                             </xsl:element>
 
-                            <xsl:if test="$job/replacement/job/file_based/ERROR or $job/file_based/removed/ERROR">
+                            <xsl:if test="replacement/job/file_based/ERROR or file_based/removed/ERROR">
                                 <tr class="job">
                                     <td colspan="2" class="right_border"></td>
                                     <td colspan="3" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                                        <xsl:apply-templates mode="file_based_error_with_label" select="$job"/>
+                                        <xsl:apply-templates mode="file_based_error_with_label" select="."/>
                                     </td>
                                 </tr>
                             </xsl:if>

@@ -863,12 +863,12 @@ function job_menu__onclick( job_name, x, y )
     var state = job_element.getAttribute( "state" );
     var is_initialized = state != "not_initialized";
 
-    popup_builder.add_show_log( "Show log"      , "show_log?job=" + job_name, "show_log_job_" + job_name, is_initialized );
+    popup_builder.add_show_log( "Show log"      , "show_log?job=" + job_name, "show_log_job_" + job_name );
 
     //var description_element = job_element.selectSingleNode( "description" );
     //var is_active = description_element? description_element.text != "" : false;
     var is_active = job_element.getAttribute( "has_description" ) == "yes";
-    popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
+    popup_builder.add_entry   ( "Show description", "show_job_description()" );
 
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>"                , is_initialized );

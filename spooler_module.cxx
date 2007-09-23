@@ -291,6 +291,7 @@ void Module::set_dom( const xml::Element_ptr& element )
     if( _use_process_class )
     {
         set_checked_attribute( &_process_class_string, element, "process_class"    );
+        if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
     }
 
     bool separate_process_default = false;
@@ -374,11 +375,10 @@ void Module::init()
             if( _process_class_path != "" )  z::throw_xc( "SCHEDULER-194" );
         }
 
-        if( _use_process_class )  
-        {
-            _process_class_path = Absolute_path( _folder_path, _process_class_string );
-            //if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
-        }
+        //if( _use_process_class )  
+        //{
+        //    //if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
+        //}
     }
     else
     if( _process_class_path != ""  )
