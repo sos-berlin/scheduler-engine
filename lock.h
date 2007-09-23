@@ -125,7 +125,7 @@ struct Lock_folder : typed_folder< Lock >
                                ~Lock_folder                 ();
 
 
-    void                        set_dom                     ( const xml::Element_ptr& );
+  //void                        set_dom                     ( const xml::Element_ptr& );
     void                        execute_xml_lock            ( const xml::Element_ptr& );
     void                        add_lock                    ( Lock* lock )                          { add_file_based( lock ); }
     void                        remove_lock                 ( Lock* lock )                          { remove_file_based( lock ); }
@@ -188,7 +188,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                    set_folder_path                 ( const Absolute_path& );
+    void                    set_folder_path                 ( const Absolute_path& p )              { _folder_path = p; }
 
     void                        initialize                  ();
     void                        load                        ();
@@ -209,6 +209,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     Fill_zero                  _zero_;
     Scheduler_object*          _object;
     bool                       _is_enqueued;
+    Absolute_path              _folder_path;
 
   public:
     typedef list< ptr<Use> >    Use_list;
@@ -260,6 +261,8 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
 
     string                      object_type_name            () const                                { return "Lock"; }
     string                      filename_extension          () const                                { return ".lock.xml"; }
+    string                      xml_element_name            () const                                { return "lock"; }
+    string                      xml_elements_name           () const                                { return "locks"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Lock>                   new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "locks" ); }

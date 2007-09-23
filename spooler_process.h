@@ -124,7 +124,7 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                        connected                   ()                                      { return _connection? _connection->connected() : false; }
     bool                        is_remote_host              () const;
 
-    void                    set_dom                         ( const xml::Element_ptr& );
+  //void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
     string                      short_name                  () const;
@@ -274,7 +274,7 @@ struct Process_class_folder : typed_folder<Process_class>
     // Typed_folder:
     bool                        is_empty_name_allowed       () const                                { return true; }
 
-    void                        set_dom                     ( const xml::Element_ptr& );
+  //void                        set_dom                     ( const xml::Element_ptr& );
     void                        add_process_class           ( Process_class* process_class )        { add_file_based( process_class ); }
     void                        remove_process_class        ( Process_class* process_class )        { remove_file_based( process_class ); }
     Process_class*              process_class               ( const string& name )                  { return file_based( name ); }
@@ -300,6 +300,8 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     // file_based_subsystem< Process_class >
     string                      object_type_name            () const                                { return "Process_class"; }
     string                      filename_extension          () const                                { return ".process_class.xml"; }
+    string                      xml_element_name            () const                                { return "process_class"; }
+    string                      xml_elements_name           () const                                { return "process_classes"; }
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Process_class>          new_file_based              ()                                      { return Z_NEW( Process_class( spooler() ) ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }

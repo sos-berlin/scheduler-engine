@@ -3544,9 +3544,12 @@ STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* ijob_chain )
         if( !_spooler )  return E_POINTER;
 
         Job_chain* job_chain = dynamic_cast<Job_chain*>( ijob_chain );
+        if( !job_chain)  return E_POINTER;
 
+        Folder* folder = _spooler->root_folder();
+        job_chain->set_folder_path( folder->path() );
         job_chain->initialize();
-        _spooler->root_folder()->job_chain_folder()->add_job_chain( job_chain );
+        folder->job_chain_folder()->add_job_chain( job_chain );
         job_chain->activate();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }

@@ -867,7 +867,7 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
     Job_chain*                  job_chain                   ( const string& name ) const            { return file_based( name ); }
     Job_chain*                  job_chain_or_null           ( const string& name ) const            { return file_based_or_null( name ); }
 
-    virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+  //virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual void                add_job_chain               ( Job_chain* )                          = 0;
     virtual void                remove_job_chain            ( Job_chain* )                          = 0;
   //virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;

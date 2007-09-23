@@ -1388,8 +1388,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-level"        ) )  log_level = opt.value();
             else
-            if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
-            else
+            //if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
+            //else
             if( opt.with_value( "program-file"     ) )  _my_program_filename = opt.value();        // .../scheduler.exe
             else
             if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
@@ -1496,8 +1496,8 @@ void Spooler::load_arg()
         if( !_log_directory_as_option_set )  _log_directory = "*stderr";
     }
 
-    _manual = !_job_name.empty();
-    if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
+    //_manual = !_job_name.empty();
+    //if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
 }
 
 //------------------------------------------------------------------------------------Spooler::load
@@ -2805,7 +2805,7 @@ void Spooler::cmd_let_run_terminate_and_restart()
 void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 {
     //_job_subsystem->set_dom( element, Time::now(), true );
-    root_folder()->job_folder()->set_dom( element, true );
+    root_folder()->job_folder()->set_dom( element );
 
     signal( "add_jobs" );
 }
@@ -2815,7 +2815,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 void Spooler::cmd_job( const xml::Element_ptr& element )
 {
     //_job_subsystem->load_job_from_xml( element, Time::now(), _spooler->state() >= Spooler::s_starting );
-    root_folder()->job_folder()->load_job_from_xml( element, _spooler->state() >= Spooler::s_starting );
+    root_folder()->job_folder()->add_file_based_xml( element );
 
     signal( "add_job" );
 }

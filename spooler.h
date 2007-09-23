@@ -554,7 +554,7 @@ struct Spooler : Object,
 
     bool                       _interactive;                // Kommandos über stdin zulassen
     bool                       _manual;
-    string                     _job_name;                   // Bei manuellem Betrieb
+  //string                     _job_name;                   // Bei manuellem Betrieb
 
     string                     _send_cmd;                   // Der Spooler soll nur dem eigentlichen Spooler dieses Kommando schicken und sich dann beenden.
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.

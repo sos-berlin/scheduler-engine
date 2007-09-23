@@ -1007,7 +1007,7 @@ bool Process_class::on_activate()
     return true;
 }
 
-//--------------------------------------------------------------------Process_class::prepare_to_remove
+//-----------------------------------------------------------------Process_class::prepare_to_remove
 
 bool Process_class::prepare_to_remove()
 {
@@ -1372,38 +1372,38 @@ xml::Element_ptr Process_class_folder::execute_xml_process_class( Command_proces
 
 //--------------------------------------------------------------------Process_class_folder::set_dom
 
-void Process_class_folder::set_dom( const xml::Element_ptr& element )
-{
-    //if( !process_class_or_null( "" ) )
-    //{
-    //    // has_process_classes() => true
-    //    add_process_class( Z_NEW( Process_class( spooler() ) ) );    int NAMENLOSE_PROCESSKLASSE;  int FRÜHER_EINRICHEN;
-    //}
-
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "process_class" ) )
-        {
-            string spooler_id = e.getAttribute( "spooler_id" );
-
-            if( spooler_id.empty() || spooler_id == _spooler->id() )
-            {
-                string process_class_name = e.getAttribute( "name" );
-
-                if( ptr<Process_class> process_class = process_class_or_null( process_class_name ) )
-                {
-                    process_class->set_dom( e );
-                }
-                else
-                {
-                    process_class = Z_NEW( Process_class( spooler() ) );
-                    process_class->set_dom( e );
-                    add_process_class( process_class );
-                }
-            }
-        }
-    }
-}
+//void Process_class_folder::set_dom( const xml::Element_ptr& element )
+//{
+//    //if( !process_class_or_null( "" ) )
+//    //{
+//    //    // has_process_classes() => true
+//    //    add_process_class( Z_NEW( Process_class( spooler() ) ) );    int NAMENLOSE_PROCESSKLASSE;  int FRÜHER_EINRICHEN;
+//    //}
+//
+//    DOM_FOR_EACH_ELEMENT( element, e )
+//    {
+//        if( e.nodeName_is( "process_class" ) )
+//        {
+//            string spooler_id = e.getAttribute( "spooler_id" );
+//
+//            if( spooler_id.empty() || spooler_id == _spooler->id() )
+//            {
+//                string process_class_name = e.getAttribute( "name" );
+//
+//                if( ptr<Process_class> process_class = process_class_or_null( process_class_name ) )
+//                {
+//                    process_class->set_dom( e );
+//                }
+//                else
+//                {
+//                    process_class = Z_NEW( Process_class( spooler() ) );
+//                    process_class->set_dom( e );
+//                    add_process_class( process_class );
+//                }
+//            }
+//        }
+//    }
+//}
 
 //-------------------------------------------------Process_class_subsystem::Process_class_subsystem
 
@@ -1562,7 +1562,23 @@ STDMETHODIMP Process_class_subsystem::Add_process_class( spooler_com::Iprocess_c
 
     try
     {
-        spooler()->root_folder()->process_class_folder()->add_process_class( dynamic_cast<Process_class*>( iprocess_class ) );
+        Process_class* process_class = dynamic_cast<Process_class*>( iprocess_class );
+        if( !process_class )  return E_POINTER;
+
+        Folder* folder = spooler()->root_folder();
+        process_class->set_folder_path( folder->path() );
+        process_class->initialize();
+
+        Process_class* current_process_class = process_class_or_null( process_class->path() );
+        if( current_process_class  &&  current_process_class->is_to_be_removed() )
+        {
+            current_process_class->replace_with( process_class );
+        }
+        else
+        {
+            folder->process_class_folder()->add_process_class( process_class );
+            process_class->activate();
+        }
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 

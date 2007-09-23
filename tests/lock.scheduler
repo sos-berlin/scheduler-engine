@@ -174,8 +174,13 @@ public class My_job  extends sos.spooler.Job_impl
         spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
         
         lock = locks.create_lock();
+        lock.set_name( "anders" );
         lock.set_name( "neu" );
-        lock.set_name( "neu" );
+        
+        lock.set_max_non_exclusive( 10 );
+        spooler_log.info( "lock.name=" + lock.name() );
+        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
+        locks.add_lock( lock );
         
         try
         {
@@ -184,11 +189,6 @@ public class My_job  extends sos.spooler.Job_impl
         }
         catch( Exception x ) { spooler_log.info( "OK: " + x ); }
 
-        lock.set_max_non_exclusive( 10 );
-        spooler_log.info( "lock.name=" + lock.name() );
-        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
-        locks.add_lock( lock );
-        
         locks.lock( "neu" );
         
         String xml = spooler.execute_xml( "<job name='neu'><lock.use lock='neu'/><script language='javascript'>spooler_log.info( 'NEU' );</script><run_time once='yes'/></job>" );

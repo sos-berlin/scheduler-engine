@@ -407,10 +407,10 @@ struct Job_folder : typed_folder< Job >
                                 Job_folder                  ( Folder* );
 
 
-    void                        set_dom                     ( const xml::Element_ptr&, bool activate = false );
-    void                        load_job_from_xml           ( const xml::Element_ptr&, bool activate = false );
-    void                        add_or_replace_job_from_xml ( const string& name, const xml::Element_ptr&, bool activate = false );
-    void                        add_job                     ( const ptr<Job>&, bool activate );
+  //void                        set_dom                     ( const xml::Element_ptr& );
+  //void                        load_job_from_xml           ( const xml::Element_ptr&  );
+  //void                        add_or_replace_job_from_xml ( const string& name, const xml::Element_ptr&, bool activate = false );
+    void                        add_job                     ( const ptr<Job>& job )                 { add_file_based( +job ); }
     Job*                        job                         ( const string& name )                  { return file_based( name ); }
     Job*                        job_or_null                 ( const string& name )                  { return file_based_or_null( name ); }
   //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );

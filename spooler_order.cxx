@@ -39,7 +39,7 @@ struct Job_chain_folder : Job_chain_folder_interface
 
 
     // Job_chain_folder_interface:
-    void                        set_dom                     ( const xml::Element_ptr& );
+  //void                        set_dom                     ( const xml::Element_ptr& );
     void                        add_job_chain               ( Job_chain* );
     void                        remove_job_chain            ( Job_chain* );
   //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -144,6 +144,8 @@ struct Order_subsystem : Order_subsystem_interface
 
     string                      object_type_name            () const                                { return "Job_chain"; }
     string                      filename_extension          () const                                { return ".job_chain.xml"; }
+    string                      xml_element_name            () const                                { return "job_chain"; }
+    string                      xml_elements_name           () const                                { return "job_chains"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     ptr<Job_chain_folder_interface> new_job_chain_folder_interface();
     ptr<Job_chain>              new_file_based              ();
@@ -749,23 +751,24 @@ Job_chain_folder::Job_chain_folder( Folder* folder )
 
 //------------------------------------------------------------------------Job_chain_folder::set_dom
 
-void Job_chain_folder::set_dom( const xml::Element_ptr& element )
-{
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "job_chain" ) )
-        {
-            // Siehe auch Command_processor::execute_job_chain()
-            ptr<Job_chain> job_chain = new Job_chain( _spooler );
-            job_chain->set_folder_path( folder()->path() );
-            job_chain->set_name( e.getAttribute( "name" ) );
-            job_chain->set_dom( e );
-            job_chain->initialize();
-            add_job_chain( job_chain );
-            job_chain->activate();
-        }
-    }
-}
+//void Job_chain_folder::set_dom( const xml::Element_ptr& element )
+//{
+//    DOM_FOR_EACH_ELEMENT( element, e )
+//    {
+//        if( e.nodeName_is( "job_chain" ) )
+//        {
+//            // Siehe auch Command_processor::execute_job_chain()
+//            add_file_based_xml( e );
+//            //ptr<Job_chain> job_chain = new Job_chain( _spooler );
+//            //job_chain->set_folder_path( folder()->path() );
+//            //job_chain->set_name( e.getAttribute( "name" ) );
+//            //job_chain->set_dom( e );
+//            //job_chain->initialize();
+//            //add_job_chain( job_chain );
+//            //job_chain->activate();
+//        }
+//    }
+//}
 
 //------------------------------------------------------------------Job_chain_folder::add_job_chain
 

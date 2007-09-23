@@ -231,7 +231,7 @@ void init_file_order_sink( Scheduler* scheduler )
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
 
-    scheduler->root_folder()->job_folder()->add_job( +file_order_sink_job, true );
+    scheduler->root_folder()->job_folder()->add_job( +file_order_sink_job );
 
     // Der Scheduler führt Tasks des Jobs scheduler_file_order_sink in jedem Scheduler-Schritt aus,
     // damit sich die Aufträge nicht stauen (Der interne Job läuft nicht in einem eigenen Prozess)

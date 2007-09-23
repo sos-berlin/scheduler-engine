@@ -318,12 +318,16 @@ struct Typed_folder : Scheduler_object,
     File_based*                 replace_file_based          ( File_based* );
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
 
+    ptr<File_based>             new_initialized_file_based_xml( const xml::Element_ptr& );
+    void                        add_file_based_xml          ( const xml::Element_ptr& );
+    void                        add_or_replace_file_based_xml( const xml::Element_ptr& );
     void                        add_to_replace_or_remove_candidates( const Absolute_path& );
     void                        handle_replace_or_remove_candidates();
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
     virtual File_based*         on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
+    virtual void                set_dom                     ( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
 
@@ -473,14 +477,17 @@ struct File_based_subsystem : Subsystem
                                 File_based_subsystem        ( Spooler*, IUnknown*, Type_code );
     virtual                    ~File_based_subsystem        ()                                      {}
 
+    Dependencies*               dependencies                ()                                      { return &_dependencies; }
+
+    virtual void                check_file_based_element    ( const xml::Element_ptr& );
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
+    virtual string              xml_element_name            () const                                = 0;
+    virtual string              xml_elements_name           () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }
     virtual Path                normalized_path             ( const Path& path ) const;
     virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
-
-    Dependencies*               dependencies                ()                                      { return &_dependencies; }
 
   protected:
     friend struct               Typed_folder;
@@ -706,6 +713,8 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     // file_based_subsystem
     string                      object_type_name            () const                                { return "Folder"; }
     string                      filename_extension          () const                                { return "/"; }             // Wird nicht verwendet
+    string                      xml_element_name            () const                                { z::throw_xc( __FUNCTION__ ); }
+    string                      xml_elements_name           () const                                { z::throw_xc( __FUNCTION__ ); }
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Folder>                 new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }

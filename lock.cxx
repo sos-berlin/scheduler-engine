@@ -149,9 +149,25 @@ STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* ilock )
 
     try
     {
+        // Das ist derselbe Algorithmus wie Add_job_chain(). Sollte zusammengefasst werden.
+
         Lock* lock = dynamic_cast<Lock*>( ilock );
-        spooler()->root_folder()->lock_folder()->add_lock( lock );
-        lock->activate();
+        if( !lock)  return E_POINTER;
+
+        Folder* folder = spooler()->root_folder();
+        lock->set_folder_path( folder->path() );
+        lock->initialize();
+
+        Lock* current_lock = lock_or_null( lock->path() );
+        if( current_lock  &&  current_lock->is_to_be_removed() )
+        {
+            current_lock->replace_with( lock );
+        }
+        else
+        {
+            folder->lock_folder()->add_lock( lock );
+            lock->activate();
+        }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -192,15 +208,15 @@ Lock_folder::~Lock_folder()
 
 //-----------------------------------------------------------------------------Lock_folder::set_dom
 
-void Lock_folder::set_dom( const xml::Element_ptr& locks_element )
-{
-    if( !locks_element.nodeName_is( "locks" ) )  z::throw_xc( "SCHEDULER-409", "locks", locks_element.nodeName() );
-
-    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
-    {
-        execute_xml_lock( lock_element );
-    }
-}
+//void Lock_folder::set_dom( const xml::Element_ptr& locks_element )
+//{
+//    if( !locks_element.nodeName_is( "locks" ) )  z::throw_xc( "SCHEDULER-409", "locks", locks_element.nodeName() );
+//
+//    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
+//    {
+//        execute_xml_lock( lock_element );
+//    }
+//}
 
 //--------------------------------------------------------------------Lock_folder::execute_xml_lock
 
@@ -210,20 +226,14 @@ void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
 
     string lock_name = lock_element.getAttribute( "name" );
     
-    ptr<Lock> lock = lock_or_null( lock_name );
-    if( !lock )  
+    if( ptr<Lock> lock = lock_or_null( lock_name ) )
     {
-        lock = Z_NEW( Lock( subsystem(), lock_name ) );
-        lock->set_folder_path( folder()->path() );
         lock->set_dom( lock_element );
-        lock->initialize();
-        add_lock( lock );
-        lock->activate();
     }
     else
-        lock->set_dom( lock_element );
-
-    lock->activate();
+    {
+        add_file_based_xml( lock_element );
+    }
 }
 
 //-------------------------------------------------------------------------Lock_folder::dom_element
@@ -765,6 +775,7 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
     if( !lock_use )  
     {
         lock_use = Z_NEW( Use( this ) );
+        lock_use->set_folder_path( _folder_path );
         _use_list.push_back( lock_use );
     }
 
@@ -773,14 +784,14 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 
 //-----------------------------------------------------------------------Requestor::set_folder_path
 
-void Requestor::set_folder_path( const Absolute_path& folder_path )
-{ 
-    Z_FOR_EACH( Use_list, _use_list, it )
-    {
-        Use* use = *it;
-        use->set_folder_path( folder_path );
-    }
-}
+//void Requestor::set_folder_path( const Absolute_path& folder_path )
+//{ 
+//    Z_FOR_EACH( Use_list, _use_list, it )
+//    {
+//        Use* use = *it;
+//        use->set_folder_path( folder_path );
+//    }
+//}
 
 //----------------------------------------------------------------------------Requestor::initialize
 

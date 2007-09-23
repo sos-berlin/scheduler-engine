@@ -59,6 +59,8 @@ struct Job_subsystem : Job_subsystem_interface
 
     // File_based_subsystem:
 
+    string                      xml_element_name            () const                                { return "job"; }
+    string                      xml_elements_name           () const                                { return "jobs"; }
     string                      object_type_name            () const                                { return "Job"; }
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
@@ -242,21 +244,21 @@ Job_folder::Job_folder( Folder* folder )
 
 //------------------------------------------------------------------------------Job_folder::add_job
 
-void Job_folder::add_job( const ptr<Job>& job, bool activate )
-{
-    Job* j = job_or_null( job->name() );
-    if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
-
-    if( activate )
-    {
-        if( subsystem()->subsystem_state() == subsys_active )  job->activate();
-                                                         else  job->initialize();     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein activate()!
-    }
-
-    add_file_based( job );
-
-    //_spooler->signal( "job_added" );
-}
+//void Job_folder::add_job( const ptr<Job>& job, bool activate )
+//{
+//    Job* j = job_or_null( job->name() );
+//    if( j )  z::throw_xc( "SCHEDULER-130", j->name() );
+//
+//    if( activate )
+//    {
+//        if( subsystem()->subsystem_state() == subsys_active )  job->activate();
+//                                                         else  job->initialize();     // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein activate()!
+//    }
+//
+//    add_file_based( job );
+//
+//    //_spooler->signal( "job_added" );
+//}
 
 //---------------------------------------------------------------------------Job_folder::remove_job
 
@@ -293,79 +295,80 @@ void Job_folder::add_job( const ptr<Job>& job, bool activate )
 
 //------------------------------------------------------------------------------Job_folder::set_dom
 
-void Job_folder::set_dom( const xml::Element_ptr& element, bool activate )
-{
-    DOM_FOR_EACH_ELEMENT( element, e )
-    {
-        if( e.nodeName_is( "job" ) )
-        {
-            load_job_from_xml( e, activate );
-        }
-    }
-}
+//void Job_folder::set_dom( const xml::Element_ptr& element )
+//{
+//    DOM_FOR_EACH_ELEMENT( element, e )
+//    {
+//        if( e.nodeName_is( "job" ) )
+//        {
+//            load_job_from_xml( e, activate );
+//        }
+//    }
+//}
 
 //--------------------------------------------------------------------Job_folder::load_job_from_xml
 
-void Job_folder::load_job_from_xml( const xml::Element_ptr& element, bool activate )
-{
-    string spooler_id = element.getAttribute( "spooler_id" );
-    string job_name   = element.getAttribute( "name"       );
-
-    if( _spooler->_manual? job_name == _spooler->_job_name 
-                         : spooler_id.empty() || spooler_id == _spooler->id() )
-    {
-        if( element.bool_getAttribute( "replace", false ) )                     // replace="yes" ?
-        {
-            add_or_replace_job_from_xml( job_name, element, activate );
-        }
-        else
-        if( ptr<Job> job = job_or_null( job_name ) )        // Job ist bekannt und replace="no" oder =""
-        {
-            job->set_dom( element );
-            if( activate )  job->activate();
-        }
-        else
-        {
-            add_or_replace_job_from_xml( job_name, element, activate );     // Neuer Job
-        }
-    }
-}
+//void Job_folder::load_job_from_xml( const xml::Element_ptr& element, bool activate )
+//{
+//    string spooler_id = element.getAttribute( "spooler_id" );
+//    string job_name   = element.getAttribute( "name"       );
+//
+//    if( _spooler->_manual? job_name == _spooler->_job_name 
+//                         : spooler_id.empty() || spooler_id == _spooler->id() )
+//    {
+//        add_or_replace_file_based_xml( element );
+//        //if( element.bool_getAttribute( "replace", false ) )                     // replace="yes" ?
+//        //{
+//        //    add_or_replace_job_from_xml( job_name, element, activate );
+//        //}
+//        //else
+//        //if( ptr<Job> job = job_or_null( job_name ) )        // Job ist bekannt und replace="no" oder =""
+//        //{
+//        //    job->set_dom( element );
+//        //    if( activate )  job->activate();
+//        //}
+//        //else
+//        //{
+//        //    add_or_replace_job_from_xml( job_name, element, activate );     // Neuer Job
+//        //}
+//    }
+//}
 
 //----------------------------------------------------------Job_folder::add_or_replace_job_from_xml
 
-void Job_folder::add_or_replace_job_from_xml( const string& job_name, const xml::Element_ptr& element, bool activate )
-{
-    if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
-
-    // Besser ins Job-Protokoll. Also in Job prüfen:
-
-    if( element.getAttribute( "spooler_id" ) != ""  &&
-        element.getAttribute( "spooler_id" ) != _spooler->id() )
-    {
-        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "spooler_id", element.getAttribute( "spooler_id" ) ) );
-    }
-
-
-    if( ptr<Job> job = job_or_null( job_name ) )
-    {
-        if( !element.bool_getAttribute( "replace", true ) )     // replace="no", aber Job ist bekannt?
-        {
-            log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) ) );
-        }
-
-        ptr<Job> replacement_job = Z_NEW( Job( _spooler, job_name ) );
-        replacement_job->set_folder_path( folder()->path() );
-        replacement_job->set_dom( element );
-        job->replace_with( replacement_job );
-    }
-    else
-    {
-        job = Z_NEW( Job( _spooler, job_name ) );
-        job->set_folder_path( folder()->path() );
-        job->set_dom( element );
-        add_job( job, activate );
-    }
-}
+//void Job_folder::add_or_replace_job_from_xml( const string& job_name, const xml::Element_ptr& element, bool activate )
+//{
+//    if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
+//
+//    // Besser ins Job-Protokoll. Also in Job prüfen:
+//
+//    if( element.getAttribute( "spooler_id" ) != ""  &&
+//        element.getAttribute( "spooler_id" ) != _spooler->id() )
+//    {
+//        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "spooler_id", element.getAttribute( "spooler_id" ) ) );
+//    }
+//
+//
+//    if( ptr<Job> job = job_or_null( job_name ) )
+//    {
+//        if( !element.bool_getAttribute( "replace", true ) )     // replace="no", aber Job ist bekannt?
+//        {
+//            log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) ) );
+//        }
+//
+//        ptr<Job> replacement_job = Z_NEW( Job( _spooler, job_name ) );
+//        replacement_job->set_folder_path( folder()->path() );
+//        replacement_job->set_dom( element );
+//        job->replace_with( replacement_job );
+//    }
+//    else
+//    {
+//        job = Z_NEW( Job( _spooler, job_name ) );
+//        job->set_folder_path( folder()->path() );
+//        job->set_dom( element );
+//        add_job( job, activate );
+//    }
+//}
 
 //--------------------------------------------------------------------------Job_folder::dom_element
 
@@ -670,7 +673,7 @@ bool Job::on_initialize()
         {
             Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-            _module->set_folder_path( folder()->path() );
+            //_module->set_folder_path( folder_path() );
             if( _module->set() )  _module->init();
 
             _next_start_time = Time::never;
@@ -683,7 +686,6 @@ bool Job::on_initialize()
             
             if( _lock_requestor )  
             {
-                _lock_requestor->set_folder_path( folder()->path() );
                 _lock_requestor->initialize();
             }
 
@@ -760,7 +762,7 @@ bool Job::on_activate()
         try
         {
             if( !_run_time->set() )  _run_time->set_default();
-            if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
+          //if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
             set_state( s_pending );
             
@@ -802,6 +804,8 @@ void Job::set_dom( const xml::Element_ptr& element )
 {
     if( !element )  return;
     if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
+
+    _module->set_folder_path( folder_path() );
 
     {
         bool order;
@@ -887,7 +891,12 @@ void Job::set_dom( const xml::Element_ptr& element )
             //else
             if( e.nodeName_is( "lock.use" ) )  
             {
-                if( !_lock_requestor )  _lock_requestor = Z_NEW( Job_lock_requestor( this ) );
+                if( !_lock_requestor ) 
+                {
+                    _lock_requestor = Z_NEW( Job_lock_requestor( this ) );
+                    _lock_requestor->set_folder_path( folder_path() );
+                }
+
                 _lock_requestor->set_dom( e );
             }
             else

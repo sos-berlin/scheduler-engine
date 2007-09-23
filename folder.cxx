@@ -936,6 +936,62 @@ File_based* Typed_folder::on_base_file_changed( File_based* old_file_based, cons
     return file_based;
 }
 
+//-----------------------------------------------------Typed_folder::new_initialized_file_based_xml
+
+ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element_ptr& element )
+{
+    subsystem()->check_file_based_element( element );
+    //assert_empty_attribute( element, "replace"    );
+
+    ptr<File_based> file_based = subsystem()->call_new_file_based();
+    file_based->set_folder_path( folder()->path() );
+    file_based->set_name( element.getAttribute( "name" ) );
+    file_based->set_dom( element );
+    file_based->initialize();
+
+    return file_based;
+}
+
+//-----------------------------------------------------------------Typed_folder::add_file_based_xml
+
+void Typed_folder::add_file_based_xml( const xml::Element_ptr& element )
+{
+    ptr<File_based> file_based = new_initialized_file_based_xml( element );
+    add_file_based( file_based );
+    file_based->activate();
+}
+
+//------------------------------------------------------Typed_folder::add_or_replace_file_based_xml
+
+void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& element )
+{
+    subsystem()->check_file_based_element( element );
+
+    if( ptr<File_based> file_based = file_based_or_null( element.getAttribute( "name" ) ) )
+    {
+        //if( !element.bool_getAttribute( "replace", true ) )     // replace="no", aber Job ist bekannt?
+        //{
+        //    log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) ) );
+        //}
+
+        if( !element.bool_getAttribute( "replace", false )  &&  // Nicht replace="yes"?
+            file_based_subsystem()->subsystem_state() < subsys_active )    // Wird noch die Scheduler-Konfigurationsdatei geladen?
+        {
+            assert( file_based->file_based_state() < File_based::s_active );    
+            file_based->set_dom( element );                     // Objekt ergänzen. Siehe XML-Element <base>
+        }
+        else
+        {
+            ptr<File_based> replacement = new_initialized_file_based_xml( element );
+            file_based->replace_with( replacement );
+        }
+    }
+    else
+    {
+        add_file_based_xml( element );
+    }
+}
+
 //------------------------------------------------Typed_folder::add_to_replace_or_remove_candidates
 
 void Typed_folder::add_to_replace_or_remove_candidates( const Absolute_path& path )             
@@ -1086,6 +1142,25 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
     const File_based_map::const_iterator it = _file_based_map.find( subsystem()->normalized_name( name ) );
     return it == _file_based_map.end()? NULL 
                                       : it->second;
+}
+
+//----------------------------------------------------------------------------Typed_folder::set_dom
+
+void Typed_folder::set_dom( const xml::Element_ptr& element )
+{
+    if( !element.nodeName_is( subsystem()->xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_elements_name(), element.nodeName() );
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( !e.nodeName_is( subsystem()->xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_elements_name(), element.nodeName() );
+        
+        string spooler_id = element.getAttribute( "spooler_id" );
+
+        if( spooler_id.empty()  ||  spooler_id == _spooler->id() )
+        {
+            add_or_replace_file_based_xml( e );
+        }
+    }
 }
 
 //------------------------------------------------------------------------Typed_folder::dom_element
@@ -1532,7 +1607,7 @@ void File_based::set_folder_path( const Absolute_path& folder_path )
 {
     assert( !folder_path.empty() );
     assert( !_typed_folder );
-    assert( _folder_path.empty() );
+    assert( _folder_path.empty() || _folder_path == folder_path );
 
     _folder_path = folder_path;
 }
@@ -1549,7 +1624,7 @@ Absolute_path File_based::folder_path() const
 
 void File_based::set_typed_folder( Typed_folder* typed_folder )
 { 
-    if( _typed_folder )
+    if( typed_folder )
     {
         assert( _folder_path.empty()  ||  _folder_path == typed_folder->folder()->path() );
         _typed_folder = typed_folder; 
@@ -1603,7 +1678,8 @@ Absolute_path File_based::path() const
 { 
     return _typed_folder? _typed_folder->folder()->make_path( _name ) : 
            _name == ""  ? root_path
-                        : Absolute_path( Absolute_path( "/(not in a folder)" ), _name ); 
+                        : Absolute_path( _folder_path.empty()? Absolute_path( "/(not in a folder)" ) 
+                                                             : _folder_path                        , _name ); 
 }
 
 //----------------------------------------------------------------------File_based::normalized_name
@@ -1673,6 +1749,19 @@ Path File_based_subsystem::normalized_path( const Path& path ) const
 {
     return Path( spooler()->folder_subsystem()->normalized_name( path.folder_path() ), 
                  normalized_name( path.name() ) );
+}
+
+//---------------------------------------------------File_based_subsystem::check_file_based_element
+
+void File_based_subsystem::check_file_based_element( const xml::Element_ptr& element )
+{
+    if( !element.nodeName_is( xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", xml_element_name(), element.nodeName() );
+
+    if( element.getAttribute( "spooler_id" ) != ""  &&
+        element.getAttribute( "spooler_id" ) != _spooler->id() )
+    {
+        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "spooler_id", element.getAttribute( "spooler_id" ) ) );
+    }
 }
 
 //---------------------------------------------------------------------------------Pendant::Pendant
