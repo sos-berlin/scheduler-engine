@@ -354,12 +354,14 @@ void Job_folder::add_or_replace_job_from_xml( const string& job_name, const xml:
         }
 
         ptr<Job> replacement_job = Z_NEW( Job( _spooler, job_name ) );
+        replacement_job->set_folder_path( folder()->path() );
         replacement_job->set_dom( element );
         job->replace_with( replacement_job );
     }
     else
     {
         job = Z_NEW( Job( _spooler, job_name ) );
+        job->set_folder_path( folder()->path() );
         job->set_dom( element );
         add_job( job, activate );
     }
@@ -811,8 +813,8 @@ void Job::set_dom( const xml::Element_ptr& element )
         _title      = element.     getAttribute( "title"        , _title      );
         _log_append = element.bool_getAttribute( "log_append"   , _log_append );
         order       = element.bool_getAttribute( "order"        );
-        _module->_process_class_path 
-                    = element.     getAttribute( "process_class", _module->_process_class_path );
+        _module->_process_class_string = 
+                      element.     getAttribute( "process_class", _module->_process_class_string );
         _module->_java_options += " " + subst_env( 
                       element.     getAttribute( "java_options" ) );
         _min_tasks  = element.uint_getAttribute( "min_tasks"    , _min_tasks );
@@ -1100,7 +1102,7 @@ void Job::prepare_on_exit_commands()
 void Job::set_log()
 {
     _log->set_job_name( name() );
-    _log->set_prefix( "Job  " + path_without_slash() );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_prefix( "Job  " + path().without_slash() );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_title( obj_name() );
     _log->set_mail_defaults();
@@ -1309,7 +1311,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     ptr<Job_module_task> task = Z_NEW( Job_module_task( this ) );
 
     task->_id       = id;
-    task->_obj_name = S() << "Task " << path_without_slash() << ":" << task->_id;
+    task->_obj_name = S() << "Task " << path().without_slash() << ":" << task->_id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )  task->_params->Merge( params );
@@ -1565,7 +1567,7 @@ void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& elem
 
             xml::Element_ptr e = new_calendar_dom_element( element.ownerDocument(), task->_start_at );
             element.appendChild( e );
-            e.setAttribute( "job", _job->path_without_slash() );
+            e.setAttribute( "job", _job->path().without_slash() );
             e.setAttribute( "task", task->id() );
 
             options->_count++;
@@ -3052,7 +3054,7 @@ Time Job::get_delay_order_after_setback( int setback_count )
 
 bool Job::is_visible_in_xml_folder( const Show_what& show_what ) const
 {
-    return visible()  &&  ( show_what._job_name == ""  ||  show_what._job_name == path_without_slash() );
+    return visible()  &&  ( show_what._job_name == ""  ||  show_what._job_name == path().without_slash() );
 }
 
 //---------------------------------------------------------------------------------Job::dom_element
@@ -3225,7 +3227,7 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
         {
             if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
             {
-                e.setAttribute( "job", path_without_slash() );
+                e.setAttribute( "job", path().without_slash() );
             }
         }
 

@@ -10,6 +10,39 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-08-30" version="2.0.187" subversion_revision="5234">
+        <revision type="new" title="Dynamische Konfiguration">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_a href="dynamic_configuration.xml" quote="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-126" type="new" title="HTTP-Authentifizierung wird auch für Web-Services verlangt">
+            <description>
+                <p>
+                    Die Authentifizierung <scheduler_element name="http.authentication"/> 
+                    gilt auch für die über HTTP angesprochenen <scheduler_element name="web_service"/>.
+                </p>
+            </description>            
+        </revision>
+
+        <revision jira="JS-129" type="new" title="Datenbankspalte EXIT_CODE wird nachträglich angelegt"/>
+
+        <revision jira="JS-116" type="correction" title="&lt;run_time> für Aufträge in verschachtelter Jobkette">
+            <description>
+                <p>
+                    <scheduler_element name="run_time"/> wiederholt jetzt einen Auftrag korrekt,
+                    auch wenn er in einer verschachtelten Jobkette (<scheduler_element name="job_chain_node.job_chain"/>) ist.
+                </p>
+            </description>
+        </revision>
+        
+    </change>
+
     <change date="2007-08-30" version="2.0.186" subversion_revision="5189">
         <revision jira="JS-110" type="correction" title="Korrektur &quot;bad allocation&quot;"/>
     </change>
@@ -20,9 +53,6 @@
                 <p>
                     Neues XML-Element <scheduler_element name="http.authentication"/> eingeführt.
                     (Dank für den Algorithmus an Michael Collard, iinet.net.au).
-                </p>
-                <p>
-                    Die Authentifizierung gilt auch für die über HTTP angesprochenen <scheduler_element name="web_service"/>.
                 </p>
             </description>
         </revision>

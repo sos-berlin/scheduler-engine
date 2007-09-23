@@ -18,6 +18,22 @@
 
     <xml_attributes>
 
+        <xml_attribute name="configuration_directory" type="path">
+            <description>
+                <p>
+                    Voreingestellt ist das Verzeichnis <code>live</code> 
+                    im Verzeichnis der Konfigurationsdatei,
+                    siehe <scheduler_option name="config"/>.
+                </p>
+                <p>
+                    Diesem Verzeichnis entnimmt der Scheduler die
+                    Defitionen der Jobs usw., 
+                    siehe <scheduler_a href="../dynamic_configuration.xml" quote="yes"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        
         <xml_attribute name="main_scheduler" type="host:port">
             <description>
                 <p>

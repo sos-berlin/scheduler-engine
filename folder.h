@@ -13,6 +13,7 @@ const extern char               folder_separator;
 
 //-------------------------------------------------------------------------------------------------
 
+struct Absolute_path;
 struct Folder;
 struct Folder_subsystem;
 struct Typed_folder;
@@ -44,10 +45,10 @@ struct Path : string
     string                      name                        () const;
     void                    set_folder_path                 ( const string& );
     Path                        folder_path                 () const;
-    void                    set_absolute_if_relative        ( const Path& );
-    void                    set_absolute                    ( const Path& absolute_base, const Path& relative );
+  //void                    set_absolute_if_relative        ( const Absolute_path& );
+    void                    set_absolute                    ( const Absolute_path& absolute_base, const Path& relative );
   //void                        prepend_folder_path         ( const string& );
-    const string&               to_string                   ()  const                               { return *static_cast<const string*>( this ); }
+    const string&               to_string                   () const                                { return *static_cast<const string*>( this ); }
     void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
     bool                     is_absolute_path               () const;
     string                      absolute_path               () const;
@@ -57,6 +58,32 @@ struct Path : string
 
 inline void insert_into_message( Message_string* m, int index, const Path& path ) throw()           { return m->insert( index, path.to_string() ); }
 
+//-------------------------------------------------------------------------------------------------
+
+struct Absolute_path : Path
+{
+                                Absolute_path               ()                                      {}
+                              //Absolute_path               ( const string& path )                  { set_path( path ); }
+                              //Absolute_path               ( const char* path )                    { set_path( path ); }
+                                Absolute_path               ( const Absolute_path& absolute_directory, const string& path )  { set_absolute( absolute_directory, path ); }
+                                Absolute_path               ( const Absolute_path& absolute_directory, const Bstr&   path )  { set_absolute( absolute_directory, string_from_bstr( path ) ); }
+    explicit                    Absolute_path               ( const Path& );
+
+    void                    set_path                        ( const string& path );
+
+    string                      with_slash                  () const;
+    string                      without_slash               () const;
+
+  private: 
+    Absolute_path&              operator =                  ( const string& path );                 // Nicht implementiert
+  //Absolute_path&              operator =                  ( const char* path );
+};
+
+//-------------------------------------------------------------------------------------------------
+
+
+extern const Absolute_path      root_path;
+
 //------------------------------------------------------------------------------------------Pendant
 
 struct Pendant
@@ -65,8 +92,8 @@ struct Pendant
     virtual                    ~Pendant                     ();
 
     virtual string              obj_name                    () const                                = 0;
-    void                        add_dependant               ( File_based_subsystem*, const Path& path );
-    void                        remove_dependant            ( File_based_subsystem*, const Path& path );
+    void                        add_dependant               ( File_based_subsystem*, const Absolute_path& );
+    void                        remove_dependant            ( File_based_subsystem*, const Absolute_path& );
     void                        remove_dependants           ();
 
     virtual bool                on_dependant_loaded         ( File_based* )                         = 0;
@@ -172,9 +199,7 @@ struct File_based : Scheduler_object,
 
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
-    Path                        path                        () const;
-    Path                        path_with_slash             () const;
-    Path                        path_without_slash          () const;
+    Absolute_path               path                        () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
 
@@ -188,8 +213,9 @@ struct File_based : Scheduler_object,
     void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
 
-    void                    set_typed_folder                ( Typed_folder* tf )                    { _typed_folder = tf; }     // Nur für Typed_folder!
-    Path                        folder_path                 () const;
+    void                    set_typed_folder                ( Typed_folder* );                      // Nur für Typed_folder!
+    void                    set_folder_path                 ( const Absolute_path& );
+    Absolute_path               folder_path                 () const;
     void                        check_for_replacing_or_removing();
 
     bool                        initialize                  ();
@@ -248,7 +274,7 @@ struct File_based : Scheduler_object,
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
     ptr<File_based>            _replacement;
-    Path                       _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
+    Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
     File_based_subsystem*      _file_based_subsystem;
 };
@@ -292,7 +318,7 @@ struct Typed_folder : Scheduler_object,
     File_based*                 replace_file_based          ( File_based* );
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
 
-    void                        add_to_replace_or_remove_candidates( const Path& );
+    void                        add_to_replace_or_remove_candidates( const Absolute_path& );
     void                        handle_replace_or_remove_candidates();
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
@@ -384,7 +410,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
     file::File_path             directory                   () const                                { return _directory; }
   //Path                        path                        () const                                { return _path; }
-    Path                        make_path                   ( const string& name );                 // Hängt den Ordernamen voran
+    Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
     void                        adjust_with_directory       ();
 
@@ -564,10 +590,9 @@ struct file_based_subsystem : File_based_subsystem
     }
     
 
-    FILE_BASED* file_based_or_null( const Path& path ) const
+    FILE_BASED* file_based_or_null( const Absolute_path& path ) const
     {
-        Path p = normalized_path( path );
-        if( string_begins_with( p, "/" ) )  p.erase( 0, 1 );  //p.set_absolute_if_relative( spooler()->root_folder()->path() );
+        Absolute_path p ( normalized_path( path ) );
 
         typename File_based_map::const_iterator it = _file_based_map.find( p );
         return it == _file_based_map.end()? NULL 
@@ -575,18 +600,17 @@ struct file_based_subsystem : File_based_subsystem
     }
 
     
-    FILE_BASED* file_based( const Path& path ) const
+    FILE_BASED* file_based( const Absolute_path& path ) const
     {
         FILE_BASED* result = file_based_or_null( path );
-        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path.to_string() );
+        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path );
         return result;
     }
 
 
-    FILE_BASED* active_file_based( const Path& path ) const
+    FILE_BASED* active_file_based( const Absolute_path& path ) const
     {
-        FILE_BASED* result = file_based_or_null( path );
-        if( !result )  z::throw_xc( "SCHEDULER-161", object_type_name(), path.to_string() );
+        FILE_BASED* result = file_based( path );
         result->assert_is_active();
 
         return result;

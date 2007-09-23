@@ -70,7 +70,7 @@ struct Order : Com_order,
     virtual IDispatch*          idispatch                   ()                                      { return this; }
 
 
-    void                        load_record                 ( const string& job_chain_path, const Record& );
+    void                        load_record                 ( const Absolute_path&, const Record& );
     void                        load_blobs                  ( Read_transaction* );
     void                        load_order_xml_blob         ( Read_transaction* );
     void                        load_run_time_blob          ( Read_transaction* );
@@ -106,7 +106,7 @@ struct Order : Com_order,
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
-    string                      job_chain_path          () const                                    { return _job_chain_path; }
+    Absolute_path               job_chain_path          () const                                    { return _job_chain_path; }
     Job_chain*                  job_chain_for_api       () const;
     job_chain::Node*            job_chain_node          () const                                    { return _job_chain_node; }
     Order_queue*                order_queue             ();
@@ -117,7 +117,7 @@ struct Order : Com_order,
 
     void                    set_job                     ( Job* );
     void                    set_job                     ( spooler_com::Ijob* );
-    void                    set_job_by_name             ( const string& );
+    void                    set_job_by_name             ( const Absolute_path& );
     Job*                        job                     () const;
 
     void                    set_job_chain_node          ( job_chain::Node*, bool is_error_state = false );
@@ -269,8 +269,8 @@ struct Order : Com_order,
     bool                       _priority_modified;
     string                     _title;
     bool                       _title_modified;
-    Path                       _job_chain_path;
-    Path                       _outer_job_chain_path;
+    Absolute_path              _job_chain_path;
+    Absolute_path              _outer_job_chain_path;
     State                      _outer_job_chain_state;
     Payload                    _payload;
     string                     _xml_payload;
@@ -300,7 +300,7 @@ struct Order : Com_order,
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
     job_chain::Node*           _job_chain_node;       // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
 
-    string                     _removed_from_job_chain_name; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
+    Absolute_path              _removed_from_job_chain_path; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
     string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
@@ -543,7 +543,7 @@ struct Job_node : Order_queue_node,
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
 
 
-                                Job_node                    ( Job_chain*, const Order::State&, const string& job_path );
+                                Job_node                    ( Job_chain*, const Order::State&, const Absolute_path& job_path );
                                ~Job_node                    ();
 
     void                        close                       ();
@@ -568,7 +568,7 @@ struct Job_node : Order_queue_node,
     void                        disconnect_job              ();
 
   private:
-    string                     _job_path;
+    Absolute_path              _job_path;
     Job*                       _job;
 };
 
@@ -580,14 +580,14 @@ struct Nested_job_chain_node : Node
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Nested_job_chain_node, n_job_chain )
 
 
-                                Nested_job_chain_node       ( Job_chain*, const Order::State&, const string& job_chain_path );
+                                Nested_job_chain_node       ( Job_chain*, const Order::State&, const Absolute_path& job_chain_path );
                                ~Nested_job_chain_node       ();
 
     void                        close                       ();
     void                        initialize                  ();
   //void                        replace                     ( Node* old_node );
 
-    string                      nested_job_chain_path       () const                                { return _nested_job_chain_path; }
+    Absolute_path               nested_job_chain_path       () const                                { return _nested_job_chain_path; }
     Job_chain*                  nested_job_chain            () const                                { return _nested_job_chain; }
     void                        on_releasing_referenced_object( const reference< Nested_job_chain_node, Job_chain >& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -596,7 +596,7 @@ struct Nested_job_chain_node : Node
   private:
     friend struct ::sos::scheduler::Job_chain;
 
-    Path                       _nested_job_chain_path; 
+    Absolute_path              _nested_job_chain_path; 
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
   //Job_chain_set              _using_job_chains_set;
 };
@@ -609,7 +609,7 @@ struct Sink_node : Job_node
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Sink_node, n_file_order_sink )
 
 
-                                Sink_node                   ( Job_chain*, const Order::State&, const string& job_path, const string& move_to, bool remove );
+                                Sink_node                   ( Job_chain*, const Order::State&, const Absolute_path& job_path, const string& move_to, bool remove );
 
 
     bool                        file_order_sink_remove      () const                                { return _file_order_sink_remove; }
@@ -697,7 +697,7 @@ struct Job_chain : Com_job_chain,
     void                        complete_nested_job_chains  ( Order_id_space* );
 
 
-    job_chain::Node*            add_job_node                ( const string& job_path, const Order::State& input_state, 
+    job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 
                                                               const Order::State& next_state, 
                                                               const Order::State& error_state );
     
@@ -864,11 +864,10 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
                                 Job_chain_folder_interface  ( Folder* );
 
 
-    Job_chain*                  job_chain                   ( const folder::Path& path ) const      { return file_based( path ); }
-    Job_chain*                  job_chain_or_null           ( const folder::Path& path ) const      { return file_based_or_null( path ); }
+    Job_chain*                  job_chain                   ( const string& name ) const            { return file_based( name ); }
+    Job_chain*                  job_chain_or_null           ( const string& name ) const            { return file_based_or_null( name ); }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
-    virtual Job_chain*          job_chain_or_null           ( const folder::Path& )                 = 0;
     virtual void                add_job_chain               ( Job_chain* )                          = 0;
     virtual void                remove_job_chain            ( Job_chain* )                          = 0;
   //virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -896,14 +895,14 @@ struct Order_subsystem_interface: Object,
     virtual bool                orders_are_distributed      ()                                      = 0;
 
     virtual void                request_order               ()                                      = 0;
-    virtual ptr<Order>          load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
-    virtual ptr<Order>      try_load_order_from_database    ( Transaction*, const string& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
-    virtual string              order_db_where_condition    ( const string& job_chain_path, const string& order_id ) = 0;
+    virtual ptr<Order>          load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual ptr<Order>      try_load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags = lo_none ) = 0;
+    virtual string              order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id ) = 0;
 
     virtual bool                has_any_order               ()                                      = 0;
 
-    virtual Job_chain*          job_chain                   ( const folder::Path& path )            = 0;
-    virtual Job_chain*          job_chain_or_null           ( const folder::Path& path )            = 0;
+    virtual Job_chain*          job_chain                   ( const Absolute_path& )                = 0;
+    virtual Job_chain*          job_chain_or_null           ( const Absolute_path& )                = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
 
     virtual int                 finished_orders_count       () const                                = 0;

@@ -2658,7 +2658,7 @@
 
         <message code="SCHEDULER-433">
             <text xml:lang="en">
-                <title>'<p1>object</p1>' is not in any folder and cannot be removed</title>
+                <title>'<p1>object</p1>' is not in any folder and cannot be replaced or removed</title>
             </text>
         </message>
 

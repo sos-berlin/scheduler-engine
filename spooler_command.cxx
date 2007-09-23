@@ -380,7 +380,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     int id, next;
     get_id_and_next( element, &id, &next );
     
-    ptr<Job> job = _spooler->job_subsystem()->job( job_name );
+    ptr<Job> job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_name ) );
 
     return job->read_history( _answer, id, next, show );
 }
@@ -487,12 +487,12 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= show_description | show_task_queue | show_orders;
 
-    Job_chain*  job_chain      = NULL;
-    string      job_chain_path = element.getAttribute( "job_chain" );
+    Job_chain*    job_chain      = NULL;
+    Absolute_path job_chain_path = Absolute_path( root_path, element.getAttribute( "job_chain" ) );
     
     if( job_chain_path != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     
-    return _spooler->job_subsystem()->job( element.getAttribute( "job" ) ) -> dom_element( _answer, show, job_chain );
+    return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> dom_element( _answer, show, job_chain );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -502,13 +502,13 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string job_name = element.getAttribute( "job" );
-    string cmd_name = element.getAttribute( "cmd" );
+    Absolute_path job_path = Absolute_path( root_path, element.getAttribute( "job" ) );
+    string        cmd_name =                     element.getAttribute( "cmd" );
 
     Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
                                          : Job::as_state_cmd( cmd_name );
 
-    Job* job = _spooler->job_subsystem()->job( job_name );
+    Job* job = _spooler->job_subsystem()->job( job_path );
 
 
     DOM_FOR_EACH_ELEMENT( element, e )
@@ -564,11 +564,11 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
     _spooler->assert_is_activated( __FUNCTION__ );
 
     int    id          = element. int_getAttribute( "id" );
-    string job_name    = element.     getAttribute( "job" );              // Hilfsweise
+    string job_path    = element.     getAttribute( "job" );              // Hilfsweise
     bool   immediately = element.bool_getAttribute( "immediately", false );
     
 
-    _spooler->job_subsystem()->job( job_name )->kill_task( id, immediately );
+    _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) )->kill_task( id, immediately );
     
     return _answer.createElement( "ok" );
 }
@@ -580,7 +580,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string job_name        = element.getAttribute( "job"   );
+    string job_path        = element.getAttribute( "job"   );
     string task_name       = element.getAttribute( "name"  );
     string after_str       = element.getAttribute( "after" );
     string at_str          = element.getAttribute( "at"    );
@@ -601,7 +601,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e, &_variable_set_map );  break; }
     }
 
-    Job* job = _spooler->job_subsystem()->job( job_name );
+    Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) );
     ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at );
     task->set_web_service( web_service_name );
     job->enqueue_task( task );
@@ -718,6 +718,7 @@ xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& j
     // Siehe auch Spooler::set_dom()
 
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
+    job_chain->set_folder_path( root_path );
     job_chain->set_name( job_chain_element.getAttribute( "name" ) );
     job_chain->set_dom( job_chain_element );
 
@@ -751,7 +752,7 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
     if( show.is_set( show_all_   ) )  show |= show._what | show_description | show_orders;
     if( show.is_set( show_orders ) )  show |= show_job_chain_orders;
 
-    string job_chain_path = show_job_chain_element.getAttribute( "job_chain" );
+    Absolute_path job_chain_path = Absolute_path( root_path, show_job_chain_element.getAttribute( "job_chain" ) );
 
     return _spooler->order_subsystem()->job_chain( job_chain_path )->dom_element( _answer, show );
 }
@@ -767,10 +768,10 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show = Show_what( show_standard );
 
-    string     job_chain_path = show_order_element.getAttribute( "job_chain" );
-    Order::Id  id             = show_order_element.getAttribute( "order"     );
-    string     history_id     = show_order_element.getAttribute( "history_id" );
-    string     id_string      = string_from_variant( id );
+    Absolute_path job_chain_path = Absolute_path( root_path, show_order_element.getAttribute( "job_chain" ) );
+    Order::Id     id             = show_order_element.getAttribute( "order"     );
+    string        history_id     = show_order_element.getAttribute( "history_id" );
+    string        id_string      = string_from_variant( id );
 
     if( history_id == "" )
     {
@@ -866,7 +867,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     //if( job_name == "" )
     //{
         bool       replace   = add_order_element.bool_getAttribute( "replace", false );
-        Job_chain* job_chain = _spooler->order_subsystem()->job_chain( add_order_element.getAttribute( "job_chain" ) );
+        Job_chain* job_chain = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, add_order_element.getAttribute( "job_chain" ) ) );
 
         if( replace )  order->place_or_replace_in_job_chain( job_chain );
                  else  order->place_in_job_chain( job_chain );
@@ -889,11 +890,11 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string    job_chain_path = modify_order_element.getAttribute( "job_chain" );
-    Order::Id id             = modify_order_element.getAttribute( "order"     );
-    string    priority       = modify_order_element.getAttribute( "priority"  );
-    string    state          = modify_order_element.getAttribute( "state"     );
-    string    at             = modify_order_element.getAttribute( "at"        );
+    Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
+    Order::Id     id             = modify_order_element.getAttribute( "order"     );
+    string        priority       = modify_order_element.getAttribute( "priority"  );
+    string        state          = modify_order_element.getAttribute( "state"     );
+    string        at             = modify_order_element.getAttribute( "at"        );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order;
@@ -985,8 +986,8 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string    job_chain_path = modify_order_element.getAttribute( "job_chain" );
-    Order::Id id             = modify_order_element.getAttribute( "order"     );
+    Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
+    Order::Id     id             = modify_order_element.getAttribute( "order"     );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order     = job_chain->is_distributed()? job_chain->order_or_null( id ) 
@@ -1035,7 +1036,7 @@ xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( __FUNCTION__ );
 
-    string job_chain_path = modify_order_element.getAttribute( "job_chain" );
+    Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
 
     _spooler->order_subsystem()->job_chain( job_chain_path )->remove( File_based::rm_base_file_too );
 
@@ -1216,12 +1217,13 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     
     if( string_begins_with( element_name, "job_chain_node." ) )
     {
-        result = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) )->node_from_state( element.getAttribute( "state" ) )->execute_xml( this, element, show );
+        result = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) ) ->
+                    node_from_state( element.getAttribute( "state" ) )->execute_xml( this, element, show );
     }
     else
     if( string_begins_with( element_name, "job_chain." ) )
     {
-        result = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) )->execute_xml( this, element, show );
+        result = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, element.getAttribute( "job_chain" ) ) )->execute_xml( this, element, show );
     }
     else
     if( element_name == "lock"  ||  string_begins_with( element_name, "lock." ) )
@@ -1369,7 +1371,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
                     if( http_request->has_parameter( "job"   ) )
                     {
-                        log = _spooler->job_subsystem()->job( http_request->parameter( "job" ) )->_log;
+                        log = _spooler->job_subsystem()->job( Absolute_path( root_path, http_request->parameter( "job" ) ) )->_log;
                     }
                     else
                     if( http_request->has_parameter( "task"  ) )
@@ -1401,9 +1403,9 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                     else
                     if( http_request->has_parameter( "order" ) )
                     {
-                        string     job_chain_path = http_request->parameter( "job_chain" );
-                        string     order_id       = http_request->parameter( "order" );
-                        string     history_id     = http_request->parameter( "history_id" );
+                        Absolute_path job_chain_path = Absolute_path( root_path, http_request->parameter( "job_chain" ) );
+                        string        order_id       = http_request->parameter( "order" );
+                        string        history_id     = http_request->parameter( "history_id" );
                         
 
                         if( history_id == "" )
@@ -1474,7 +1476,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                 else
                 if( string_ends_with( path, "/job_description?" ) )
                 {
-                    Job* job = _spooler->job_subsystem()->job( http_request->parameter( "job" ) );;
+                    Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, http_request->parameter( "job" ) ) );
                     
                     if( job->_description == "" )  throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 

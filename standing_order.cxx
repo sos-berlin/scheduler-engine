@@ -211,7 +211,7 @@ void Standing_order::close()
     if( _order )  set_order( NULL );
 
     if( _job_chain_path != "" )  remove_dependant( order_subsystem(), _job_chain_path );
-    _job_chain_path = "";
+    _job_chain_path.clear();
 }
 
 //-------------------------------------------------------------------------Standing_order::set_name

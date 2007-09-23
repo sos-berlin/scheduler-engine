@@ -76,6 +76,7 @@
                         <xsd:attribute name="main_scheduler"        type="String"/>  <!-- veraltet -->
                         <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
                         <xsd:attribute name="supervisor"            type="String"/>
+                        <xsd:attribute name="configuration_directory" type="File"/>
                     </xsd:complexType>
                 </xsd:element>
 

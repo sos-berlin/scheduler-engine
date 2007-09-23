@@ -3390,7 +3390,7 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
     try
     {
         if( !_spooler )  return E_POINTER;
-        *com_job = _spooler->job_subsystem()->job( bstr_as_string( job_name ) )->com_job();
+        *com_job = _spooler->job_subsystem()->job( Absolute_path( root_path, bstr_as_string( job_name ) ) )->com_job();
         (*com_job)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
@@ -3524,6 +3524,8 @@ STDMETHODIMP Com_spooler::Create_job_chain( spooler_com::Ijob_chain** result )
 {
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
 
+    job_chain->set_folder_path( root_path );
+
     *result = job_chain;
     (*result)->AddRef();
 
@@ -3564,7 +3566,7 @@ STDMETHODIMP Com_spooler::get_Job_chain( BSTR name, spooler_com::Ijob_chain** re
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = _spooler->order_subsystem()->job_chain( string_from_bstr(name) ); //->com_job_chain();
+        *result = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, string_from_bstr(name) ) ); //->com_job_chain();
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
@@ -3655,7 +3657,7 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = _spooler->order_subsystem()->job_chain_or_null( string_from_bstr(name) ) != NULL;
+        *result = _spooler->order_subsystem()->job_chain_or_null( Absolute_path( root_path, name ) ) != NULL;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
@@ -4184,7 +4186,7 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
                 string jobname = string_from_variant(*job_or_jobname);
                 
                 job = jobname == ""  ||  stricmp( jobname.c_str(), "*end" ) == 0? NULL
-                                                                                : _job_chain->_spooler->job_subsystem()->job( jobname );
+                                                                                : _job_chain->_spooler->job_subsystem()->job( Absolute_path( root_path, jobname ) );
                 break;
             }
 
@@ -4816,7 +4818,7 @@ STDMETHODIMP Com_order::put_Job( VARIANT* job_or_jobname )
         switch( job_or_jobname->vt )
         {
             case VT_BSTR:       
-                _order->set_job_by_name( string_from_bstr( V_BSTR(job_or_jobname) ) ); 
+                _order->set_job_by_name( Absolute_path( root_path, string_from_bstr( V_BSTR(job_or_jobname) ) ) ); 
                 break;
 
             default:            

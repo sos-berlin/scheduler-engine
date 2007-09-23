@@ -12,11 +12,12 @@ using namespace zschimmer::file;
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
+const Absolute_path             root_path                   ( "/" );
 
 #ifdef Z_WINDOWS
-    const int                       directory_watch_interval    = 60;
+    const int                   directory_watch_interval    = 60;
 #else
-    const int                       directory_watch_interval    = 10;
+    const int                   directory_watch_interval    = 10;
 #endif
 
 //---------------------------------------------------------------------------------------Path::Path
@@ -77,21 +78,38 @@ void Path::set_folder_path( const string& folder_path )
 
 //-------------------------------------------------------------------Path::set_absolute_if_relative
 
-void Path::set_absolute_if_relative( const Path& absolute_folder_path )
-{
-    if( !is_absolute_path() )  
-    {
-        set_folder_path( absolute_folder_path );
-        if( !is_absolute_path() )  set_path( "/" + to_string() );
-    }
-}                           
+//void Path::set_absolute_if_relative( const Absolute_path& absolute_folder_path )
+//{
+//    if( !is_absolute_path() )  
+//    {
+//        set_folder_path( absolute_folder_path );
+//    }
+//
+//    assert( is_absolute_path() );
+//}                           
 
 //-------------------------------------------------------------------------------Path::set_absolute
 
-void Path::set_absolute( const Path& absolute_base, const Path& relative )
+void Path::set_absolute( const Absolute_path& absolute_base, const Path& relative )
 {
-    set_path( relative );
-    set_absolute_if_relative( absolute_base );
+    assert( !absolute_base.empty() );
+    if( absolute_base.empty() )  z::throw_xc( __FUNCTION__, relative );
+
+    if( relative.empty() )
+    {
+        set_path( "" );
+    }
+    else
+    {
+        if( relative.is_absolute_path() )
+        {
+            set_path( relative );
+        }
+        else
+        {
+            set_path( Path( absolute_base, relative ) );
+        }
+    }
 }
 
 //--------------------------------------------------------------------------------Path::folder_path
@@ -152,6 +170,47 @@ string Path::to_filename() const
 //    return strcmp( path1.c_str(), path2.c_str() );
 //}
 
+//---------------------------------------------------------------------Absolute_path::Absolute_path
+
+Absolute_path::Absolute_path( const Path& path )
+{
+    assert( path.empty()  ||  path.is_absolute_path() );
+    if( !path.empty()  &&  !path.is_absolute_path() )  z::throw_xc( __FUNCTION__, path );
+
+    set_path( path );
+}
+
+//------------------------------------------------------------------------Absolute_path::with_slash
+
+string Absolute_path::with_slash() const
+{
+    assert( empty() || is_absolute_path() );
+    return to_string();
+}
+
+//---------------------------------------------------------------------Absolute_path::without_slash
+
+string Absolute_path::without_slash() const
+{
+    if( empty() )
+    {
+        return "";
+    }
+    else
+    {
+        assert( string_begins_with( to_string(), "/" ) );
+        return to_string().substr( 1 );
+    }
+}
+
+//--------------------------------------------------------------------------Absolute_path::set_path
+
+void Absolute_path::set_path( const string& path )
+{ 
+    Path::set_path( path ); 
+    assert( empty() || is_absolute_path() );
+}
+
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
@@ -192,6 +251,7 @@ void Folder_subsystem::close()
 
 void Folder_subsystem::set_directory( const File_path& directory )
 {
+    assert_subsystem_state( subsys_initialized, __FUNCTION__ );
     _directory = directory;
 }
 
@@ -243,12 +303,13 @@ bool Folder_subsystem::subsystem_activate()
         set_async_manager( _spooler->_connection_manager );
         _subsystem_state = subsys_active;
 
+        _root_folder->activate();
         async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
 
         result = true;
     }
     else
-        log()->info( message_string( "SCHEDULER-895", _directory ) );
+        log()->warn( message_string( "SCHEDULER-895", _directory ) );
 
 
     return result;
@@ -300,8 +361,6 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     _parent(parent),
     _zero_(this+1)
 {
-    if( !_parent )  _directory = subsystem()->directory();
-
     _process_class_folder  = spooler()->process_class_subsystem ()->new_process_class_folder ( this );
     _lock_folder           = spooler()->lock_subsystem          ()->new_lock_folder          ( this );
     _job_folder            = spooler()->job_subsystem           ()->new_job_folder           ( this );
@@ -343,10 +402,7 @@ void Folder::close()
 
 void Folder::set_name( const string& name )
 {
-    assert( _parent );
-
     My_file_based::set_name( name );
-    _directory = File_path( _parent->_directory, name );
 
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
     {
@@ -366,6 +422,9 @@ bool Folder::on_initialize()
 
 bool Folder::on_load()
 {
+    _directory = _parent? File_path( _parent->_directory, name() )
+                        : subsystem()->directory();
+
     return true;
 }
 
@@ -408,9 +467,9 @@ string Folder::extension_of_filename( const string& filename )
 
 //--------------------------------------------------------------------------------Folder::make_path
 
-Path Folder::make_path( const string& name )
+Absolute_path Folder::make_path( const string& name )
 {
-    return Path( path(), name );
+    return Absolute_path( path(), name );
 }
 
 //--------------------------------------------------------------------Folder::adjust_with_directory
@@ -556,7 +615,7 @@ string Folder::obj_name() const
 {
     S result;
     result << Scheduler_object::obj_name();
-    if( path() != "" )  result << " " << path_without_slash();
+    if( path() != "" )  result << " " << path().without_slash();
     return result;
 }
 
@@ -788,14 +847,12 @@ File_based* Typed_folder::on_base_file_changed( File_based* old_file_based, cons
                 if( !is_removed )
                 {
                     file_based = subsystem()->call_new_file_based();
-                    file_based->_folder_path = folder()->path();
-                    file_based->set_name( name );
                     file_based->set_base_file_info( *base_file_info );
+                    file_based->set_folder_path( folder()->path() );
+                    file_based->set_name( name );
 
-                    if( !old_file_based )  add_file_based( file_based );
-                    else
-                    //if( file_based != old_file_based )  
-                        old_file_based->set_replacement( file_based );
+                    if( old_file_based )  old_file_based->set_replacement( file_based );
+                                    else  add_file_based( file_based );
 
                     string relative_file_path = folder()->make_path( base_file_info->_filename );
                     if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
@@ -881,7 +938,7 @@ File_based* Typed_folder::on_base_file_changed( File_based* old_file_based, cons
 
 //------------------------------------------------Typed_folder::add_to_replace_or_remove_candidates
 
-void Typed_folder::add_to_replace_or_remove_candidates( const Path& path )             
+void Typed_folder::add_to_replace_or_remove_candidates( const Absolute_path& path )             
 { 
     _replace_or_remove_candidates_set.insert( path ); 
     spooler()->folder_subsystem()->set_signaled( __FUNCTION__ );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
@@ -1059,7 +1116,7 @@ string Typed_folder::obj_name() const
 
     if( _folder )
     {
-        if( _folder->path() != "" )  result << " " << _folder->path_without_slash();
+        if( _folder->path() != "" )  result << " " << _folder->path().without_slash();
                                else  result << " /";
     }
 
@@ -1130,7 +1187,7 @@ bool File_based::load()
 
 bool File_based::load2()
 {
-    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+    if( !is_in_folder()  &&  this != spooler()->root_folder() )  z::throw_xc( "NOT-IN-FOLDER", __FUNCTION__, obj_name() );
 
     bool ok = _state >= s_loaded;
     if( !ok )
@@ -1280,6 +1337,8 @@ void File_based::set_to_be_removed( bool b )
 
 void File_based::set_replacement( File_based* replacement )             
 { 
+    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+
     _replacement = replacement; 
     if( _replacement )  set_to_be_removed( false ); 
 }
@@ -1288,6 +1347,8 @@ void File_based::set_replacement( File_based* replacement )
 
 bool File_based::prepare_to_remove()
 { 
+    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+
     set_to_be_removed( true );
     subsystem()->dependencies()->announce_dependant_to_be_removed( this ); 
     return can_be_removed_now(); 
@@ -1311,6 +1372,9 @@ void File_based::remove_now()
 
 bool File_based::remove( Remove_flags remove_flag )
 {
+    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+
+
     if( remove_flag == rm_base_file_too  &&  has_base_file() )
     {
         remove_base_file();
@@ -1462,19 +1526,44 @@ string File_based::file_based_state_name( State state )
     }
 }
 
+//----------------------------------------------------------------------File_based::set_folder_path
+
+void File_based::set_folder_path( const Absolute_path& folder_path )
+{
+    assert( !folder_path.empty() );
+    assert( !_typed_folder );
+    assert( _folder_path.empty() );
+
+    _folder_path = folder_path;
+}
+
 //--------------------------------------------------------------------------File_based::folder_path
 
-Path File_based::folder_path() const
+Absolute_path File_based::folder_path() const
 {
     assert( !is_in_folder()  ||  _folder_path == folder()->path() );
     return _folder_path;
+}
+
+//---------------------------------------------------------------------File_based::set_typed_folder
+
+void File_based::set_typed_folder( Typed_folder* typed_folder )
+{ 
+    if( _typed_folder )
+    {
+        assert( _folder_path.empty()  ||  _folder_path == typed_folder->folder()->path() );
+        _typed_folder = typed_folder; 
+        _folder_path = _typed_folder->folder()->path();
+    }
+    else
+        _typed_folder = NULL;
 }
 
 //----------------------------------------------------------File_based::fill_file_based_dom_element
 
 void File_based::fill_file_based_dom_element( const xml::Element_ptr& element, const Show_what& show_what )
 {
-    element.setAttribute         ( "path", path_with_slash() );
+    element.setAttribute         ( "path", path().with_slash() );
     element.setAttribute_optional( "name", name() );
 
     if( has_base_file() )  element.appendChild( File_based::dom_element( element.ownerDocument(), show_what ) );
@@ -1510,24 +1599,11 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
 //---------------------------------------------------------------------------------File_based::path
 
-Path File_based::path() const
+Absolute_path File_based::path() const
 { 
-    return path_without_slash();
-}
-
-//-------------------------------------------------------------------File_based::path_without_slash
-
-Path File_based::path_without_slash() const
-{
-    return _typed_folder? _typed_folder->folder()->make_path( _name ) 
-                        : _name; 
-}
-
-//----------------------------------------------------------------------File_based::path_with_slash
-
-Path File_based::path_with_slash() const
-{
-    return "/" + path_without_slash();
+    return _typed_folder? _typed_folder->folder()->make_path( _name ) : 
+           _name == ""  ? root_path
+                        : Absolute_path( Absolute_path( "/(not in a folder)" ), _name ); 
 }
 
 //----------------------------------------------------------------------File_based::normalized_name
@@ -1552,7 +1628,7 @@ string File_based::obj_name() const
     
     result << _file_based_subsystem->object_type_name();
     result << " ";
-    result << path_without_slash(); 
+    result << path().without_slash(); 
 
     return result;
 }
@@ -1634,7 +1710,7 @@ void Pendant::remove_dependants()
 
 //---------------------------------------------------------------------------Pendant::add_dependant
 
-void Pendant::add_dependant( File_based_subsystem* subsystem, const Path& path )
+void Pendant::add_dependant( File_based_subsystem* subsystem, const Absolute_path& path )
 {
     _dependants_sets[ subsystem ].insert( subsystem->normalized_path( path ) );
     subsystem->dependencies()->add_dependant( this, path );
@@ -1642,7 +1718,7 @@ void Pendant::add_dependant( File_based_subsystem* subsystem, const Path& path )
 
 //------------------------------------------------------------------------Pendant::remove_dependant
 
-void Pendant::remove_dependant( File_based_subsystem* subsystem, const Path& path )
+void Pendant::remove_dependant( File_based_subsystem* subsystem, const Absolute_path& path )
 {
     _dependants_sets[ subsystem ].erase( subsystem->normalized_path( path ) );
     subsystem->dependencies()->remove_dependant( this, path );

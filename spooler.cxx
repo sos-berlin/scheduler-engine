@@ -708,10 +708,13 @@ Spooler::~Spooler()
     spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
-    _folder_subsystem = NULL;
-    _task_subsystem   = NULL;
-    _job_subsystem    = NULL;
-    _lock_subsystem   = NULL;
+    _task_subsystem          = NULL;
+    _job_subsystem           = NULL;
+    _lock_subsystem          = NULL;
+    _process_class_subsystem = NULL;
+    _order_subsystem         = NULL;
+    _folder_subsystem        = NULL;
+    _db                      = NULL;
     _security.clear();
 
     _waitable_timer.close();
@@ -1542,7 +1545,6 @@ void Spooler::load()
         _cluster->switch_subsystem_state( subsys_initialized );
     }
 
-    _folder_subsystem->set_directory( _configuration_directory );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
@@ -1565,7 +1567,6 @@ void Spooler::load()
             "<?xml version='1.0'?>\n" 
             "<spooler>\n" 
             "    <config>\n"
-            "        <process_classes/>\n"
             "        <jobs>\n"
             "            <job name='" << xml::encode_attribute_value( _configuration_file_path.base_name() ) << "'>\n"
             "                <script language='" << xml::encode_attribute_value( _configuration_job_script_language ) << "'>\n"
@@ -1581,6 +1582,7 @@ void Spooler::load()
     }
     else
         cp.execute_config_file( _configuration_file_path );
+
 
 
 #   ifdef Z_WINDOWS
@@ -1950,7 +1952,6 @@ void Spooler::stop( const exception* )
 
     _db->spooler_stop();
     _db->close();
-    _db = NULL;
 
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
@@ -2988,6 +2989,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         // Nachdem argv und profile gelesen sind und config geladen ist:
 
+        _folder_subsystem->set_directory( _configuration_directory );
         _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
         _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 

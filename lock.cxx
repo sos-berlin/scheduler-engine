@@ -100,7 +100,7 @@ STDMETHODIMP Lock_subsystem::get_Lock( BSTR path_bstr, spooler_com::Ilock** resu
 
     try
     {
-        *result = lock( string_from_bstr( path_bstr ) );
+        *result = lock( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -116,7 +116,7 @@ STDMETHODIMP Lock_subsystem::get_Lock_or_null( BSTR path_bstr, spooler_com::Iloc
 
     try
     {
-        *result = lock_or_null( string_from_bstr( path_bstr ) );
+        *result = lock_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -133,6 +133,7 @@ STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
     try
     {
         ptr<Lock> lock = Z_NEW( Lock( this ) );
+        //nicht nötig  lock->set_folder_path( root_path );
         *result = lock.take();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -167,7 +168,7 @@ xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_process
     else
     if( string_begins_with( element.nodeName(), "lock." ) ) 
     {
-        lock( element.getAttribute( "lock" ) )->execute_xml( element, show_what );
+        lock( Absolute_path( root_path, element.getAttribute( "lock" ) ) )->execute_xml( element, show_what );
     }
     else
         z::throw_xc( "SCHEDULER-113", element.nodeName() );
@@ -213,7 +214,9 @@ void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
     if( !lock )  
     {
         lock = Z_NEW( Lock( subsystem(), lock_name ) );
+        lock->set_folder_path( folder()->path() );
         lock->set_dom( lock_element );
+        lock->initialize();
         add_lock( lock );
         lock->activate();
     }
@@ -641,7 +644,7 @@ string Lock::string_from_uses() const
 //{
 //    S result;
 //
-//    result << "Lock " << path_without_slash();
+//    result << "Lock " << path().without_slash();
 //
 //    return result;
 //}
@@ -770,7 +773,7 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 
 //-----------------------------------------------------------------------Requestor::set_folder_path
 
-void Requestor::set_folder_path( const Path& folder_path )
+void Requestor::set_folder_path( const Absolute_path& folder_path )
 { 
     Z_FOR_EACH( Use_list, _use_list, it )
     {
@@ -985,7 +988,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
 {
     if( !lock_use_element.nodeName_is( "lock.use" ) )  z::throw_xc( "SCHEDULER-409", "lock.use", lock_use_element.nodeName() );
 
-    string lock_path = lock_use_element.getAttribute( "lock" );
+    Absolute_path lock_path ( _folder_path, lock_use_element.getAttribute( "lock" ) );
     if( lock_path == "" )  z::throw_xc( "SCHEDULER-407", "lock" );
 
     Lock::Lock_mode lock_mode = lock_use_element.bool_getAttribute( "exclusive", _lock_mode == Lock::lk_exclusive )? 
@@ -999,7 +1002,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     }
     else
     {
-        if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
+        //if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
         if( _lock_path != lock_path )  z::throw_xc( __FUNCTION__ );
         if( _lock_mode != lock_mode )  z::throw_xc( "SCHEDULER-408", "lock.use", "exclusive" );
     }

@@ -153,7 +153,7 @@ struct Use : Object,
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                    set_folder_path                 ( const Path& p )                       { _folder_path = p;  _lock_path.set_absolute_if_relative( p ); }
+    void                    set_folder_path                 ( const Absolute_path& p )              { _folder_path = p; }
 
 
     // Pendant:
@@ -163,15 +163,15 @@ struct Use : Object,
     Lock*                       lock                        () const;
     Lock*                       lock_or_null                () const;
     Requestor*                  requestor                   () const                                { return _requestor; }
-    folder::Path                lock_path                   () const                                { return _lock_path; }
+    Absolute_path               lock_path                   () const                                { return _lock_path; }
     Lock::Lock_mode             lock_mode                   () const                                { return _lock_mode; }
 
     string                      obj_name                    () const;
 
   private:
     Fill_zero                  _zero_;
-    Path                       _lock_path;
-    Path                       _folder_path;
+    Absolute_path              _folder_path;
+    Absolute_path              _lock_path;
     Lock::Lock_mode            _lock_mode;
     Requestor* const           _requestor;
 };
@@ -188,7 +188,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                    set_dom                         ( const xml::Element_ptr& );            // Für <lock.use>, Use
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                    set_folder_path                 ( const Path& );
+    void                    set_folder_path                 ( const Absolute_path& );
 
     void                        initialize                  ();
     void                        load                        ();
@@ -278,8 +278,8 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
 
 
 
-    Lock*                       lock                        ( const string& path ) const            { return file_based( path ); }
-    Lock*                       lock_or_null                ( const string& path ) const            { return file_based_or_null( path ); }
+    Lock*                       lock                        ( const Absolute_path& path ) const     { return file_based( path ); }
+    Lock*                       lock_or_null                ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 

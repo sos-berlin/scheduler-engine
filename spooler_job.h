@@ -123,9 +123,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     // Scheduler_object:
-    virtual string              obj_name                    () const                                { return "Job " + path_without_slash(); }
+    virtual string              obj_name                    () const                                { return "Job " + path().without_slash(); }
     virtual IDispatch*          idispatch                   ()                                      { return _com_job; }
-    virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path_with_slash() ); }
+    virtual void                write_element_attributes    ( const xml::Element_ptr& element ) const { element.setAttribute( "job", path().with_slash() ); }
 
 
     // File_based:
@@ -428,8 +428,8 @@ struct Job_subsystem_interface: Object,
     virtual int                 remove_temporary_jobs       ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
-    Job*                        job                         ( const string& job_path )              { return file_based( job_path ); } 
-    Job*                        job_or_null                 ( const string& job_path )              { return file_based_or_null( job_path ); }
+    Job*                        job                         ( const Absolute_path& job_path )       { return file_based( job_path ); } 
+    Job*                        job_or_null                 ( const Absolute_path& job_path )       { return file_based_or_null( job_path ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "jobs" ); }
 };
 

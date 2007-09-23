@@ -28,6 +28,16 @@
         </dd>
 
         <dt>
+            <scheduler_a href="dynamic_configuration.xml"/>
+        </dt>
+        <dd>
+            <p>
+                Die einzelnen Objekte (Jobs usw.) werden in einem Konfigurationsverzeichnis 
+                in einzelnen Dateien definiert.
+            </p>
+        </dd>
+
+        <dt>
             <scheduler_a href="factory_ini.xml">Datei factory.ini</scheduler_a>
         </dt>
         <dd>

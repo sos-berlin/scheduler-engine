@@ -289,7 +289,9 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
 
     if( _use_process_class )
-    set_checked_attribute( &_process_class_path, element, "process_class"    );
+    {
+        set_checked_attribute( &_process_class_string, element, "process_class"    );
+    }
 
     bool separate_process_default = false;
 
@@ -365,7 +367,7 @@ void Module::init()
     {
         if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
 
-        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_path = "";
+        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_path.clear();
 
         if( _separate_process )
         {
@@ -374,8 +376,8 @@ void Module::init()
 
         if( _use_process_class )  
         {
-            if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
-        //    _spooler->process_class_subsystem()->process_class( _process_class_path );     // Fehler, wenn der Name nicht bekannt ist. (Könnte auch eine Warnung sein)
+            _process_class_path = Absolute_path( _folder_path, _process_class_string );
+            //if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
         }
     }
     else

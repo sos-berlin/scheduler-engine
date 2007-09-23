@@ -305,8 +305,8 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 
     ptr<Process_class_folder>   new_process_class_folder    ( Folder* folder )                      { return Z_NEW( Process_class_folder( folder ) ); }
-    Process_class*              process_class               ( const folder::Path& path )            { return file_based( path ); }
-    Process_class*              process_class_or_null       ( const folder::Path& path )            { return file_based_or_null( path ); }
+    Process_class*              process_class               ( const Absolute_path& path )           { return file_based( path ); }
+    Process_class*              process_class_or_null       ( const Absolute_path& path )           { return file_based_or_null( path ); }
     Process*                    new_temporary_process       ();
     Process_class*              temporary_process_class     ();
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );

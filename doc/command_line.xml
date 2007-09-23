@@ -24,7 +24,7 @@
                 </p>
                 <p>
                     Die Option gibt die Konfigurationsdatei oder das Konfigurationsverzeichnis an.
-                    Mit letzteren Fall erwartet der Scheduler die Konfigurationsdatei im
+                    Im letzteren Fall erwartet der Scheduler die Konfigurationsdatei im
                     Konfigurationsverzeichnis unter dem Namen <code>scheduler.xml</code>.
                 </p>
             </description>

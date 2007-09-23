@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
 
 <description
-    title               = "Dynamische Konfiguration: Scheduler-Objekte in eigenen XML-Dateien"
-    base_dir            = "../"
+    title               = "Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien"
+    base_dir            = ""
     parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
-    document_state      = "proposal"
 >
     <p>
         Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren (das alles hier Objekte genannt)
@@ -242,12 +241,19 @@
         Fehlt der Jobkette ein Job, dann sammeln sich die Aufträge im Jobkettenknoten,
         als wäre der Job nicht zur Auftragsausführung bereit.
     </p>
+
+    <h4>Verschachtelte Jobketten</h4>
     <p>
         Fehlt der Jobkette eine verschachtelte Jobkette <scheduler_element name="job_chain_node.job_chain"/>,
         dann ist die gesamte Jobkette nicht bereit.
         Alle untergeordneten Jobketten müssen bekannt sein, 
         damit der Scheduler die Eindeutigkeit der Auftragskennungen sicherstellen kann.
     </p>
+    <p>
+        Ebenso wird eine untergeordnete Jobkette erst gelöscht,
+        wenn auch die übergeordnete Jobkette gelöscht ist.
+    </p>
+    
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

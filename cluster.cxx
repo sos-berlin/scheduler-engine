@@ -654,15 +654,15 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
 
             while( !result_set.eof() )
             {
-                Record record         = result_set.get_record();
+                Record        record         = result_set.get_record();
 
-                string job_chain_name = record.as_string( 0 );
-                string order_id       = record.as_string( 1 );
-                string state          = record.as_string( 2 );
+                Absolute_path job_chain_path ( root_path, record.as_string( 0 ) );
+                string        order_id       = record.as_string( 1 );
+                string        state          = record.as_string( 2 );
 
-                _log->warn( message_string( "SCHEDULER-829", job_chain_name, order_id ) );
+                _log->warn( message_string( "SCHEDULER-829", job_chain_path, order_id ) );
 
-                if( Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_name ) )
+                if( Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_path ) )
                     job_chain->tip_for_new_distributed_order( state, Time(0) );
             }
 

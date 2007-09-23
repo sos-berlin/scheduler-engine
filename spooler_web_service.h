@@ -100,7 +100,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     bool                       _log_xml;
     bool                       _debug;
 
-    string                     _job_chain_name;
+    Absolute_path              _job_chain_path;
 
     string                     _request_xslt_stylesheet_path;
     Xslt_stylesheet            _request_xslt_stylesheet;

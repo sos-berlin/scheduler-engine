@@ -24,12 +24,12 @@ using namespace job_chain;
 
 //--------------------------------------------------------------------------------------------const
 
-const string    scheduler_file_path_variable_name         = "scheduler_file_path";
-const string    file_order_sink_job_path                  = "scheduler_file_order_sink";
-const int       delay_after_error_default                 = INT_MAX;
-const int       file_order_sink_job_idle_timeout_default  = 60;
-const int       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
-const int       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
+const string                    scheduler_file_path_variable_name         = "scheduler_file_path";
+const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
+const int                       delay_after_error_default                 = INT_MAX;
+const int                       file_order_sink_job_idle_timeout_default  = 60;
+const int                       directory_file_order_source_max_default   = 100;      // Nicht zuviele Aufträge, sonst wird der Scheduler langsam (in remove_order?)
+const int                       max_tries                                 = 2;        // Nach Fehler machen wie sofort einen zweiten Versuch
 
 #ifdef Z_WINDOWS
     const int   directory_file_order_source_repeat_default  = 60;
@@ -216,7 +216,7 @@ struct File_order_sink_job : Internal_job
 {
     File_order_sink_job( Scheduler* scheduler )
     :
-        Internal_job( scheduler, file_order_sink_job_path, +Z_NEW( File_order_sink_module( scheduler ) ) )
+        Internal_job( scheduler, file_order_sink_job_path.without_slash(), +Z_NEW( File_order_sink_module( scheduler ) ) )
     {
     }
 };

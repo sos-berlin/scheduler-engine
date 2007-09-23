@@ -285,7 +285,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-430", "'$1 $2' is unknown" },
     { "SCHEDULER-431", "Error when processing configuration directory:\n$1" },
     { "SCHEDULER-432", "$1 has no name" },
-    { "SCHEDULER-433", "'$1' is not in any folder and cannot be removed" },
+    { "SCHEDULER-433", "'$1' is not in any folder and cannot be replaced or removed" },
     { "SCHEDULER-434", "Error when closing '$1':\n$2" },
     { "SCHEDULER-435", "Standing order filename has not expected syntax jobchain,orderid.job.xml: $1" },
     { "SCHEDULER-436", "Order id in <order> is different from order id in filename" },
@@ -460,7 +460,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-892", "Changed configuration file '$1' is going to replace this $2" },
     { "SCHEDULER-893", "$1 is $2 now" },
     { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
-    { "SCHEDULER-895", "Configuration directory '$1' does not exists, it will be ignored" },
+    { "SCHEDULER-895", "Configuration directory '$1' does not exist, it will be ignored" },
     {}
 };
 } //namespace sos

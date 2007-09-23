@@ -35,6 +35,8 @@ Task_subsystem::~Task_subsystem()
 
 void Task_subsystem::close() 
 {
+    Z_FOR_EACH( Task_list, _task_list, t )  (*t)->job_close();
+
     _prioritized_order_job_array.clear();
     _task_list.clear();
     _event = NULL;

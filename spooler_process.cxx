@@ -850,7 +850,7 @@ string Process_class_configuration::obj_name() const
 {
     S result;
 
-    result << "Process_class " << path_without_slash();
+    result << "Process_class " << path().without_slash();
 
     return result;
 }
@@ -1360,6 +1360,7 @@ xml::Element_ptr Process_class_folder::execute_xml_process_class( Command_proces
     else
     {
         ptr<Process_class> new_process_class = Z_NEW( Process_class( spooler() ) );
+        new_process_class->set_folder_path( folder()->path() );
         new_process_class->set_dom( element );
 
         if( process_class  &&  replace )  process_class->replace_with( new_process_class );
@@ -1496,7 +1497,7 @@ xml::Element_ptr Process_class_subsystem::execute_xml( Command_processor* comman
     else
     if( string_begins_with( element.nodeName(), "process_class." ) ) 
     {
-        result = process_class( element.getAttribute( "process_class" ) )->execute_xml( command_processor, element, show_what );
+        result = process_class( Absolute_path( root_path, element.getAttribute( "process_class" ) ) )->execute_xml( command_processor, element, show_what );
     }
     else
         z::throw_xc( "SCHEDULER-113", element.nodeName() );
@@ -1512,7 +1513,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class( BSTR path_bstr, spooler
 
     try
     {
-        *result = process_class( string_from_bstr( path_bstr ) );
+        *result = process_class( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( *result )  (*result)->AddRef();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -1528,7 +1529,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class_or_null( BSTR path_bstr,
 
     try
     {
-        *result = process_class_or_null( string_from_bstr( path_bstr ) );
+        *result = process_class_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( *result )  (*result)->AddRef();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -1545,6 +1546,7 @@ STDMETHODIMP Process_class_subsystem::Create_process_class( spooler_com::Iproces
     try
     {
         ptr<Process_class> process_class = Z_NEW( Process_class( spooler() ) );
+        //nicht nötig  process_class->set_folder_path( root_path );
         *result = process_class.take();
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }

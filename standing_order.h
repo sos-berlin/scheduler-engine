@@ -64,7 +64,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
 
     Fill_zero                  _zero_;
     string                     _job_chain_name;
-    string                     _job_chain_path;
+    Absolute_path              _job_chain_path;
     string                     _order_id;
     ptr<Order>                 _order;
     bool                       _its_me_removing;
@@ -117,8 +117,8 @@ struct Standing_order_subsystem : file_based_subsystem< Standing_order >,
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
 
 
-    Standing_order*             standing_order              ( const folder::Path& path ) const      { return file_based( path ); }
-    Standing_order*             standing_order_or_null      ( const folder::Path& path ) const      { return file_based_or_null( path ); }
+    Standing_order*             standing_order              ( const Absolute_path& path ) const     { return file_based( path ); }
+    Standing_order*             standing_order_or_null      ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 };

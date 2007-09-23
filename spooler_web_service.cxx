@@ -380,7 +380,7 @@ void Web_service::activate()
         if( _debug )  _log_xml = true;
     }
 
-    if( _job_chain_name != ""  ||  _timeout != INT_MAX )
+    if( _job_chain_path != ""  ||  _timeout != INT_MAX )
     {
         if( _request_xslt_stylesheet_path != "" 
          || _response_xslt_stylesheet_path != "" 
@@ -406,7 +406,7 @@ void Web_service::load_xslt_stylesheet( Xslt_stylesheet* stylesheet, const strin
 
 void Web_service::check()
 {
-    if( _job_chain_name != "" )  _spooler->order_subsystem()->job_chain( _job_chain_name );  // Jobkette ist bekannt?
+    if( _job_chain_path != "" )  _spooler->order_subsystem()->job_chain( _job_chain_path );  // Jobkette ist bekannt?
 }
 
 //-----------------------------------------------------------------------------Web_service::set_dom
@@ -422,7 +422,7 @@ void Web_service::set_dom( const xml::Element_ptr& element )
     _request_xslt_stylesheet_path  = subst_env( element.     getAttribute( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  ) );
     _response_xslt_stylesheet_path = subst_env( element.     getAttribute( "response_xslt_stylesheet", _response_xslt_stylesheet_path ) );
     _forward_xslt_stylesheet_path  = subst_env( element.     getAttribute( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  ) );
-    _job_chain_name                =            element.     getAttribute( "job_chain"               , _job_chain_name                );
+    _job_chain_path      = Absolute_path( root_path,  element.     getAttribute( "job_chain"               , _job_chain_path                ) );
     _timeout                       =            element. int_getAttribute( "timeout"                 , _timeout                       );
     _debug                         =            element.bool_getAttribute( "debug"                   , _debug                         );
     if( url_path != "" )  _url_path = url_path;
@@ -454,7 +454,7 @@ xml::Element_ptr Web_service::dom_element( const xml::Document_ptr& document, co
     web_service_element.setAttribute_optional( "request_xslt_stylesheet" , _request_xslt_stylesheet_path  );
     web_service_element.setAttribute_optional( "response_xslt_stylesheet", _response_xslt_stylesheet_path );
     web_service_element.setAttribute_optional( "forward_xslt_stylesheet" , _forward_xslt_stylesheet_path  );
-    web_service_element.setAttribute_optional( "job_chain"               , _job_chain_name                );
+    web_service_element.setAttribute_optional( "job_chain"               , _job_chain_path                );
 
     if( _debug )
     web_service_element.setAttribute         ( "debug"                   , _debug? "yes" : "no" );
@@ -642,7 +642,7 @@ void Web_service_operation::begin()
 
     if( _web_service->_log_xml )  File( _log_filename_prefix + ".raw_request.txt", "w" ).print( http_request()->body() );
     
-    if( _web_service->_job_chain_name == "" )
+    if( _web_service->_job_chain_path == "" )
     {
         execute_stylesheets();
     }
@@ -655,7 +655,7 @@ void Web_service_operation::begin()
 
         order->inhibit_distribution();
         order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt
-        order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_name ) );
+        order->place_in_job_chain( _spooler->order_subsystem()->job_chain( _web_service->_job_chain_path ) );
         _http_operation->link_order( order );                // ~Order ruft Http_operation::unlink_order()
         
         _log->info( message_string( "SCHEDULER-964", order->obj_name() ) );
