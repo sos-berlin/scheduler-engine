@@ -289,7 +289,13 @@ bool Folder_subsystem::subsystem_activate()
             //{
 
                 Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-                HANDLE h = FindFirstChangeNotification( _directory.c_str(), TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+                
+                HANDLE h = FindFirstChangeNotification( _directory.c_str(), 
+                                                        TRUE,                               // Mit Unterverzeichnissen
+                                                        FILE_NOTIFY_CHANGE_FILE_NAME  |  
+                                                        FILE_NOTIFY_CHANGE_DIR_NAME   |
+                                                        FILE_NOTIFY_CHANGE_LAST_WRITE );
+
                 if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
 
                 _directory_event._handle = h;
@@ -339,6 +345,7 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 #   endif
 
     bool something_changed = _root_folder->adjust_with_directory();
+if( something_changed )  log()->warn( "SOMETHING_CHANGED" );
 
     _directory_watch_interval = something_changed? directory_watch_interval_min
                                                  : min( directory_watch_interval_max, 2 * _directory_watch_interval );
@@ -660,9 +667,10 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         new_subfolder->set_name( base_file_info->_normalized_name );
         new_subfolder->set_base_file_info( *base_file_info );
         add_file_based( new_subfolder );
+        something_changed = true;
+
         bool ok = new_subfolder->activate();
         if( ok )  new_subfolder->adjust_with_directory();
-        something_changed = true;
     }
     else
     if( base_file_info )
@@ -671,16 +679,11 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         something_changed = subfolder->adjust_with_directory();
     }
     else
+    if( !subfolder->is_to_be_removed() ) 
     {
         subfolder->remove();
         something_changed = true;
     }
-
-    //Z_FOR_EACH( File_based_map, _file_based_map, it )
-    //{
-    //    Folder* folder = dynamic_cast<Folder*>( it->second );
-    //    folder->adjust_with_directory();       int REKURSIONSTIEFE_ODER_ANZAHL_ORDNER_BEGRENZEN;
-    //}
 
     return something_changed;
 }
@@ -769,15 +772,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
                fi != ordered_file_infos.end()  &&
                (*fb)->_base_file_info._normalized_name == (*fi)->_normalized_name )
         {
-            //File_based* current_file_based = (*fb)->replacement()? (*fb)->replacement() 
-            //                                                     : (*fb);
-
-            //if( (*fb)->_file_is_removed )  ||
-            //    current_file_based->_base_file_info._timestamp_utc != (*fi)->_timestamp_utc )
-            {
-                something_changed = on_base_file_changed( *fb, *fi );
-            }
-
+            something_changed |= on_base_file_changed( *fb, *fi );
             fi++, fb++;
         }
 
@@ -788,7 +783,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         while( fi != ordered_file_infos.end()  &&
                ( fb == ordered_file_baseds.end()  ||  (*fi)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
         {
-            something_changed = on_base_file_changed( (File_based*)NULL, (*fi) );
+            something_changed |= on_base_file_changed( (File_based*)NULL, (*fi) );
             fi++;
         }
 
@@ -805,7 +800,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         {
             if( !(*fb)->_file_is_removed )
             {
-                something_changed = on_base_file_changed( *fb, NULL );
+                something_changed |= on_base_file_changed( *fb, NULL );
             }
             fb++;
         }

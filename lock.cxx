@@ -299,17 +299,6 @@ void Lock::close()
     _use_set.clear();
 }
 
-//-----------------------------------------------------------------------Lock::on_base_file_changed
-
-//Lock* Lock::on_base_file_changed( Lock* new_lock )
-//{
-//    set_max_non_exclusive( new_lock->_config._max_non_exclusive );
-//
-//    set_replacement( NULL );
-//
-//    return this;
-//}
-
 //------------------------------------------------------------------------Lock::can_be_replaced_now
 
 bool Lock::can_be_replaced_now()

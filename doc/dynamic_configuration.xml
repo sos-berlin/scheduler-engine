@@ -47,10 +47,12 @@
     <p>
         Unter Windows verwendet der Scheduler die Verzeichnisüberwachung des Betriebsystems, 
         bemerkt Änderungen also sofort.
-        Außerdem liest der die Verzeichnisse im Minutenabstand.
+        Außerdem prüft der die Verzeichnisse im Minutenabstand.
     </p>
     <p>
-        Unter Unix überwacht der Scheduler die Verzeichnisse im Abstand von (zurzeit) 10 Sekunden.
+        Unter Unix überwacht der Scheduler die Verzeichnisse im Abstand von zwischen 5 und 60 Sekunden.
+        Nach einer Änderung verkürzt er den Abstand auf fünf Sekunden und 
+        verdoppelt ihn dann jedesmal, wenn keine Änderung vorliegt, bis 60 Sekunden erreicht sind.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

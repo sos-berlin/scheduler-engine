@@ -365,9 +365,6 @@ struct typed_folder : Typed_folder
 
     FILE_BASED*                 replace_file_based          ( FILE_BASED* file_based )              { return static_cast<FILE_BASED*>( Typed_folder::replace_file_based( file_based ) ); }
 
-    //File_based*                 on_base_file_changed        ( File_based* file_based, const Base_file_info* file_info )   
-    //                                                                                                { return static_cast<FILE_BASED*>( on_base_file_changed( static_cast<FILE_BASED*>( file_based ), file_info ) ); }
-    //virtual FILE_BASED*         on_base_file_changed        ( FILE_BASED*, const Base_file_info* )  { zschimmer::throw_xc( __FUNCTION__, "not implemented" ); }
   private:
     My_subsystem*              _subsystem;
 };
