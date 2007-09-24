@@ -669,7 +669,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
     {
         subfolder->set_base_file_info( *base_file_info );
         something_changed = subfolder->adjust_with_directory();
-        result = subfolder;
     }
     else
     {
