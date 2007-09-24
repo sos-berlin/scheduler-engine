@@ -1168,7 +1168,7 @@
 
         <message code="SCHEDULER-232">
             <text xml:lang="en">
-                <title>Attribute &lt;<p1>xml_element_name</p1> <p2/>="<p3/>" is not allowed in configuration file</title>
+                <title>Attribute &lt;<p1>xml_element_name</p1> <p2/>="<p3/>"> is not allowed here</title>
             </text>
         </message>
 

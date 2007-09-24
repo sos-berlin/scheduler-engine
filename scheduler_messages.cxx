@@ -100,7 +100,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-227", "Scheduler script has logged an error: $1" },
     { "SCHEDULER-230", "Job \"$1\" is to be removed - it is not longer usable" },
     { "SCHEDULER-231", "Missing attribute $2 in XML element <$1>" },
-    { "SCHEDULER-232", "Attribute <$1 $2=\"$3\" is not allowed in configuration file" },
+    { "SCHEDULER-232", "Attribute <$1 $2=\"$3\"> is not allowed here" },
     { "SCHEDULER-234", "The <job $1=\"...\"> attribute cannot be overwritten" },
     { "SCHEDULER-235", "Unknown web service: \"$1\"" },
     { "SCHEDULER-236", "Web service \"$1\" has already been declared" },

@@ -1209,19 +1209,19 @@ zschimmer::Xc Job::remove_error()
 
 //--------------------------------------------------------------------------Job::prepare_to_replace
 
-void Job::prepare_to_replace()
-{
-    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-
-    stop( true );
-}
+//void Job::prepare_to_replace()
+//{
+//    if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+//
+//    stop( true );
+//}
 
 //-------------------------------------------------------------------------Job::can_be_replaced_now
 
-bool Job::can_be_replaced_now()
-{
-    return _running_tasks.size() == 0;
-}
+//bool Job::can_be_replaced_now()
+//{
+//    return _running_tasks.size() == 0;
+//}
 
 //------------------------------------------------------------------------------Job::on_replace_now
 

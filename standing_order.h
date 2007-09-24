@@ -39,9 +39,9 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     bool                        can_be_removed_now          ();
     void                        on_remove_now               ();
 
-    void                        prepare_to_replace          ();
-    bool                        can_be_replaced_now         ();
-    Standing_order*             on_replace_now              ();
+    //void                        prepare_to_replace          ();
+    //bool                        can_be_replaced_now         ();
+    //Standing_order*             on_replace_now              ();
 
 
     //

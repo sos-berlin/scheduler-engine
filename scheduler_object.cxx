@@ -110,13 +110,13 @@ void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const
 
 //---------------------------------------------Scheduler_object::complain_about_non_empty_attribute
 
-void Scheduler_object::complain_about_non_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
-{
-    if( element.getAttribute( attribute_name ) != "" )
-    {
-        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), attribute_name, element.getAttribute( attribute_name ) ) );
-    }
-}
+//void Scheduler_object::complain_about_non_empty_attribute( const xml::Element_ptr& element, const string& attribute_name )
+//{
+//    if( element.getAttribute( attribute_name ) != "" )
+//    {
+//        log()->warn( message_string( "SCHEDULER-232", element.nodeName(), attribute_name, element.getAttribute( attribute_name ) ) );
+//    }
+//}
 
 //---------------------------------------------------------Scheduler_object::assert_empty_attribute
 

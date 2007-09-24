@@ -345,7 +345,6 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 #   endif
 
     bool something_changed = _root_folder->adjust_with_directory();
-if( something_changed )  log()->warn( "SOMETHING_CHANGED" );
 
     _directory_watch_interval = something_changed? directory_watch_interval_min
                                                  : min( directory_watch_interval_max, 2 * _directory_watch_interval );
@@ -536,7 +535,22 @@ bool Folder::adjust_with_directory()
 
                     if( normalized_name == last_normalized_name )
                     {
-                        log()->warn( message_string( "SCHEDULER-889", last_filename, filename ) );
+                        zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
+
+                        log()->warn( x.what() );
+
+                        // Liefert minütlich eine eMail:
+                        //if( _spooler->_mail_on_error )
+                        //{
+                        //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                        //    scheduler_event.set_error( x );
+
+                        //    Mail_defaults mail_defaults( spooler() );
+                        //    mail_defaults.set( "subject", x.what() );
+                        //    mail_defaults.set( "body"   , x.what() );
+
+                        //    scheduler_event.send_mail( mail_defaults );
+                        //}
                     }
                     else
                     {
@@ -631,7 +645,8 @@ string Folder::obj_name() const
 {
     S result;
     result << Scheduler_object::obj_name();
-    if( path() != "" )  result << " " << path().without_slash();
+    //if( path_without_slash() != "" )  
+        result << " " << path().without_slash();
     return result;
 }
 
@@ -878,7 +893,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                     if( old_file_based )  
                     {
-                        assert( old_file_based->replacement() );
+                        assert( old_file_based->replacement() );    // Oben gesetzt
                         old_file_based->prepare_to_replace();
 
                         if( old_file_based->can_be_replaced_now() ) 
@@ -1208,8 +1223,9 @@ string Typed_folder::obj_name() const
 
     if( _folder )
     {
-        if( _folder->path() != "" )  result << " " << _folder->path().without_slash();
-                               else  result << " /";
+        //if( _folder->path_without_slash() != "" )  
+            result << " " << _folder->path().without_slash();
+        //                                     else  result << " /";
     }
 
     return result;
@@ -1599,7 +1615,7 @@ File_based* File_based::on_replace_now()
     ptr<File_based> replacement  = this->replacement();
     State           wished_state = _wished_state;
 
-    assert( can_be_removed_now() );
+    assert( can_be_replaced_now() );
 
     typed_folder->remove_file_based( this );
     // this ist ungültig
@@ -1825,10 +1841,10 @@ void Pendant::remove_dependants()
 {
     Z_FOR_EACH( Dependant_sets, _dependants_sets, it )
     {
-        File_based_subsystem* subsystem   = it->first;
-        Dependant_set&          missing_set = it->second;
+        File_based_subsystem* subsystem     = it->first;
+        Dependant_set&        dependant_set = it->second;
 
-        Z_FOR_EACH( Dependant_set, missing_set, it2 )
+        Z_FOR_EACH( Dependant_set, dependant_set, it2 )
         {
             subsystem->dependencies()->remove_dependant( this, *it2 );
         }

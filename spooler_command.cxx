@@ -234,6 +234,18 @@ Xc_copy xc_from_dom_error( const xml::Element_ptr& element )
     return x;
 }
 
+//------------------------------------------------------------------------------how_what::Show_what
+
+Show_what::Show_what( Show_what_enum what ) 
+: 
+    _zero_(this+1), 
+    _what(what), 
+    _max_orders(INT_MAX),
+    _max_task_history(10),
+    _folder_path( root_path )
+{
+}
+
 //-------------------------------------------------------------Command_processor::Command_processor
 
 Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, Communication::Operation* cp )
@@ -1195,6 +1207,10 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "operations"       ) )  show |= show_operations;
         else
         if( string_equals_prefix_then_skip( &p, "folders"          ) )  show |= show_folders;
+        else
+        if( string_equals_prefix_then_skip( &p, "no_subfolders"    ) )  show &= ~show_subfolders;
+        else
+        if( string_equals_prefix_then_skip( &p, "subfolders"       ) )  show |= show_subfolders;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else

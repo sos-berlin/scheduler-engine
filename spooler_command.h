@@ -46,6 +46,8 @@ enum Show_what_enum
     show_cluster            = 0x200000,
     show_operations         = 0x400000,
     show_folders            = 0x800000,
+    show_subfolders         = 0x1000000,
+
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
 
@@ -55,19 +57,18 @@ enum Show_what_enum
 };
 
 inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
+inline Show_what_enum operator & ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a & (int)b ); } 
+inline Show_what_enum operator ~ ( Show_what_enum a )                    { return (Show_what_enum) ~(int)a; } 
 
 //----------------------------------------------------------------------------------------Show_what
 
 struct Show_what
 {
-                                Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), 
-                                                                                                      _max_orders(INT_MAX),
-                                                                                                      _max_task_history(10) {}
+                                Show_what                   ( Show_what_enum = show_standard | show_subfolders );
 
-                              //operator Show_what_enum     () const                                { return _what; }
-  //int                         operator &                  ( Show_what_enum w ) const              { return _what & w; }
     Show_what                   operator |                  ( Show_what_enum w ) const              { Show_what ww = *this; ww |= w; return ww;; }
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
+    void                        operator &=                 ( Show_what_enum w )                    { _what = _what & w; }
     bool                        is_set                      ( Show_what_enum w ) const              { return ( _what & w ) != 0; }
 
 
@@ -78,6 +79,7 @@ struct Show_what
     int                        _max_task_history;
     string                     _job_name;
     int                        _task_id;
+    Absolute_path              _folder_path;
 };
 
 //----------------------------------------------------------------------------Show_calendar_options

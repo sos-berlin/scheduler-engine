@@ -708,13 +708,16 @@ Spooler::~Spooler()
     spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
-    _task_subsystem          = NULL;
-    _job_subsystem           = NULL;
-    _lock_subsystem          = NULL;
-    _process_class_subsystem = NULL;
-    _order_subsystem         = NULL;
-    _folder_subsystem        = NULL;
-    _db                      = NULL;
+    // In der Reihenfolder der Abhängigkeiten löschen:
+    _standing_order_subsystem = NULL;
+    _order_subsystem          = NULL;
+    _task_subsystem           = NULL;
+    _job_subsystem            = NULL;
+    _lock_subsystem           = NULL;
+    _process_class_subsystem  = NULL;
+    _folder_subsystem         = NULL;
+    _db                       = NULL;
+    
     _security.clear();
 
     _waitable_timer.close();
@@ -796,7 +799,7 @@ string Spooler::string_need_db() const
 
 //-----------------------------------------------------------------------Spooler::state_dom_element
 
-xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show )
+xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show_what )
 {
     xml::Element_ptr state_element = dom.createElement( "state" );
  
@@ -880,30 +883,32 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 //    }
 //#   endif
 
-    if( !show.is_set( show_folders ) )
+    if( !show_what.is_set( show_folders ) )
     {
-        if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->file_baseds_dom_element( dom, show ) );
+        if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->file_baseds_dom_element( dom, show_what ) );
 
-        if( show.is_set( show_jobs ) )  state_element.appendChild( job_subsystem()->file_baseds_dom_element( dom, show ) );
+        if( show_what.is_set( show_jobs ) )  state_element.appendChild( job_subsystem()->file_baseds_dom_element( dom, show_what ) );
                                   else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
-        if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show ) );
+        if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show_what ) );
     
         if( _order_subsystem )
         {
-            state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show ) );
-
-            if( !_order_subsystem->order_id_spaces_interface()->is_empty() )
-                state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show ) );
+            state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show_what ) );
         }
     }
     else
     if( _folder_subsystem )  
-        state_element.appendChild( root_folder()->dom_element( dom, show ) );
+    {
+        if( Folder* folder = folder_subsystem()->folder_or_null( show_what._folder_path ) )
+        {
+            state_element.appendChild( folder->dom_element( dom, show_what ) );
+        }
+    }
 
 
     if( _order_subsystem  &&  !_order_subsystem->order_id_spaces_interface()->is_empty() )
-         state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show ) );
+         state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show_what ) );
 
     {
         xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );
@@ -923,13 +928,13 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
 
-    state_element.appendChild( _supervisor->dom_element( dom, show ) );
-    if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show ) );
-    state_element.appendChild( _web_services->dom_element( dom, show ) );
+    state_element.appendChild( _supervisor->dom_element( dom, show_what ) );
+    if( _cluster )  state_element.appendChild( _cluster->dom_element( dom, show_what ) );
+    state_element.appendChild( _web_services->dom_element( dom, show_what ) );
 
-    state_element.appendChild( _communication.dom_element( dom, show ) );
+    state_element.appendChild( _communication.dom_element( dom, show_what ) );
 
-    if( show.is_set( show_operations ) )
+    if( show_what.is_set( show_operations ) )
     {
         state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
     }
@@ -1928,10 +1933,10 @@ void Spooler::stop( const exception* )
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
-    _lock_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _job_subsystem           ->switch_subsystem_state( subsys_stopped );
   //_order_subsystem = NULL;
     _task_subsystem          ->switch_subsystem_state( subsys_stopped );
-    _job_subsystem           ->switch_subsystem_state( subsys_stopped );
+    _lock_subsystem          ->switch_subsystem_state( subsys_stopped );
     _process_class_subsystem ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem        ->switch_subsystem_state( subsys_stopped );
     _java_subsystem          ->switch_subsystem_state( subsys_stopped );

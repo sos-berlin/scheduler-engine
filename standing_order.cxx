@@ -345,46 +345,46 @@ void Standing_order::on_remove_now()
 
 //--------------------------------------------------------------Standing_order::can_be_replaced_now
 
-bool Standing_order::can_be_replaced_now()
-{
-    //return replacement()  &&  
-    //       ( !_order  ||
-    //         _order->job_chain_path() == ""  ||  
-    //         _order->end_state_reached()        );
-
-    return replacement()  &&  order_is_removable_or_replaceable();
-}
+//bool Standing_order::can_be_replaced_now()
+//{
+//    //return replacement()  &&  
+//    //       ( !_order  ||
+//    //         _order->job_chain_path() == ""  ||  
+//    //         _order->end_state_reached()        );
+//
+//    return replacement()  &&  order_is_removable_or_replaceable();
+//}
 
 //---------------------------------------------------------------Standing_order::prepare_to_replace
 
-void Standing_order::prepare_to_replace()
-{
-    //if( _order )
-    //{
-    //    if( order_is_removable_or_replaceable() )
-    //    {
-    //        if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )    // Jobkette bekannt?
-    //        {
-    //            result = true;
-    //        }
-    //    }
-    //}
-}
+//void Standing_order::prepare_to_replace()
+//{
+//    //if( _order )
+//    //{
+//    //    if( order_is_removable_or_replaceable() )
+//    //    {
+//    //        if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )    // Jobkette bekannt?
+//    //        {
+//    //            result = true;
+//    //        }
+//    //    }
+//    //}
+//}
 
 //-------------------------------------------------------------------Standing_order::on_replace_now
 
-Standing_order* Standing_order::on_replace_now()
-{
-    ptr<Order> order = replacement()->_order;
-
-    replacement()->_order = NULL;
-    set_replacement( NULL );
-
-    set_order( order );
-    set_file_based_state( s_loaded );
-
-    return this;
-}
+//Standing_order* Standing_order::on_replace_now()
+//{
+//    ptr<Order> order = replacement()->_order;
+//
+//    replacement()->_order = NULL;
+//    set_replacement( NULL );
+//
+//    set_order( order );
+//    set_file_based_state( s_loaded );
+//
+//    return this;
+//}
 
 //-------------------------------------------------------------Standing_order::on_order_carried_out
 
