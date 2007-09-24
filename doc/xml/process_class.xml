@@ -119,7 +119,7 @@
             </messages>
         </xml_attribute>
 
-        <xml_attribute name="replace" type="yes|no" initial="no">
+        <xml_attribute name="replace" type="yes|no" initial="yes">
             <description>
                 <p>
                     <code>replace="yes"</code> ersetzt die vorhandene Prozessklasse.

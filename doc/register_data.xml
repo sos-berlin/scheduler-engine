@@ -2837,6 +2837,7 @@
 <register_keyword keyword='replace'>
     <register_keyword_display><code>replace=</code></register_keyword_display>
     <register_entry register_file='xml/add_order.xml#attribute_replace' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='replace' type='definition'/>
+    <register_entry register_file='xml/job.xml#attribute_replace' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='replace' type='definition'/>
     <register_entry register_file='xml/process_class.xml#attribute_replace' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='replace' type='definition'/>
 </register_keyword>
 <register_keyword keyword='replaced'>

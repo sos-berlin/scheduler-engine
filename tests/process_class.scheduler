@@ -108,7 +108,14 @@ public class My_job  extends sos.spooler.Job_impl
         
         process_classes.process_class( "Tiflis" ).set_max_processes( 1 );
         process_classes.process_class( "Tiflis" ).set_max_processes( 0 );
+        
+        String remote_scheduler = "localhost:9999";
+        process_classes.process_class( "Tiflis" ).set_remote_scheduler( remote_scheduler );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  " + remote_scheduler );
+        spooler_log.info( spooler.execute_xml( "<process_class replace='no' name='Tiflis' max_processes='0'/>" ) );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  " + remote_scheduler );
         spooler_log.info( spooler.execute_xml( "<process_class name='Tiflis' max_processes='0'/>" ) );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  \"\""  );
         spooler_log.info( spooler.execute_xml( "<process_class.remove process_class='Caracas'/>" ) );
         //process_classes.process_class( "Caracas" ).remove();
         

@@ -969,13 +969,16 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 
     if( ptr<File_based> file_based = file_based_or_null( element.getAttribute( "name" ) ) )
     {
-        //if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-441", obj_name() );   // replace="no" und Objekt ist bekannt
+        bool replace_yes        =  element.bool_getAttribute( "replace", false );                   // replace="yes"
+        bool replace_no         = !element.bool_getAttribute( "replace", true  );                   // replace="no"
+        bool use_base_mechanism = file_based_subsystem()->subsystem_state() <= subsys_initialized;  // Wird noch die Scheduler-Konfigurationsdatei geladen?
 
-        if( file_based_subsystem()->subsystem_state() <= subsys_initialized  &&     // Wird noch die Scheduler-Konfigurationsdatei geladen?
-            !element.bool_getAttribute( "replace", false ) )                        // Nicht replace="yes"?
+        //if( replace_no )  z::throw_xc( "SCHEDULER-441", obj_name() );   // replace="no" und Objekt ist bekannt
+
+        if( replace_no  ||  
+            use_base_mechanism  &&  !replace_yes )
         {
-            //Process_class erlaubt das. assert( file_based->file_based_state() < File_based::s_active );    
-            file_based->set_dom( element );                     // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
+            file_based->set_dom( element );     // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
         }
         else
         {
@@ -985,6 +988,12 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
     }
     else
     {
+        //if( replace_no  && 
+        //    file_based_subsystem()->subsystem_state() > subsys_initialized )   // Wird nicht die Scheduler-Konfigurationsdatei geladen? (Sonst <base> erlauben)
+        //{
+        //    z::throw_xc( SCHEDULER-441, obj_name() );   // replace="no" und Objekt ist nicht bekannt
+        //}
+
         add_file_based_xml( element );
     }
 }
