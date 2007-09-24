@@ -377,7 +377,7 @@
             <xsd:attribute name="timeout"               type="Duration"/>                   <!-- Für ap, 1.4.06 timeout="0" soll erlaubt sein (kein Aprilscherz) -->
             <xsd:attribute name="idle_timeout"          type="Duration_or_never"/>
             <xsd:attribute name="force_idle_timeout"    type="Yes_no"/>
-            <xsd:attribute name="process_class"         type="Name"/>
+            <xsd:attribute name="process_class"         type="Path"/>
             <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
             <xsd:attribute name="java_options"          type="String"/>
             <xsd:attribute name="stop_on_error"         type="Yes_no"/>
@@ -431,7 +431,7 @@
                         <xsd:element name="file_order_source" minOccurs="0" maxOccurs="unbounded">
                             <xsd:complexType>
                                 <xsd:attribute name="directory"         type="String" use="required"/>
-                                <xsd:attribute name="regex"             type="Name"/>
+                                <xsd:attribute name="regex"             type="String"/>
                                 <xsd:attribute name="delay_after_error" type="xsd:positiveInteger"/>
                                 
                                 <xsd:attribute name="repeat">
@@ -458,7 +458,7 @@
                             <xsd:element name="job_chain_node">
                                 <xsd:complexType>
                                     <xsd:attribute name="state"         type="String" use="required"/>
-                                    <xsd:attribute name="job"           type="Name"/>
+                                    <xsd:attribute name="job"           type="Path"/>
                                     <xsd:attribute name="next_state"    type="String"/>
                                     <xsd:attribute name="error_state"   type="String"/>
                                     <xsd:attribute name="suspend"       type="Yes_no"/>
@@ -506,7 +506,7 @@
 
     <xsd:complexType name="job_chain_node.job_chain">
         <xsd:attribute name="state"         type="String" use="required"/>
-        <xsd:attribute name="job_chain"     type="Name"/>
+        <xsd:attribute name="job_chain"     type="Path"/>
         <xsd:attribute name="next_state"    type="String"/>
         <xsd:attribute name="error_state"   type="String"/>
     </xsd:complexType>
@@ -543,7 +543,7 @@
     
     <xsd:element name="kill_task">
         <xsd:complexType>
-            <xsd:attribute name="job"           type="Name"         use="required"/>
+            <xsd:attribute name="job"           type="Path"         use="required"/>
             <xsd:attribute name="id"            type="Task_id"      use="required"/>
             <xsd:attribute name="immediately"   type="Yes_no"/>
         </xsd:complexType>
@@ -556,7 +556,7 @@
                 <xsd:element ref="run_time" minOccurs="0"/>
             </xsd:sequence>
             
-            <xsd:attribute name="job" type="Name" use="required"/>
+            <xsd:attribute name="job" type="Path" use="required"/>
             
             <xsd:attribute name="cmd">
                 <xsd:simpleType>
@@ -580,7 +580,7 @@
 
     <xsd:element name="job_chain.modify">
         <xsd:complexType>
-            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            <xsd:attribute name="job_chain" type="Path"         use="required"/>
 
             <xsd:attribute name="state">
                 <xsd:simpleType>
@@ -597,7 +597,7 @@
 
     <xsd:element name="job_chain_node.modify">
         <xsd:complexType>
-            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            <xsd:attribute name="job_chain" type="Path"         use="required"/>
             <xsd:attribute name="state"     type="String"       use="required"/>
             <xsd:attribute name="action"    type="Job_chain_node.Action"/>
         </xsd:complexType>
@@ -615,7 +615,7 @@
                 <xsd:element ref="run_time"                        minOccurs="0"/>
             </xsd:sequence>
 
-            <xsd:attribute name="job_chain" type="Name"         use="required"/>
+            <xsd:attribute name="job_chain" type="Path"         use="required"/>
             <xsd:attribute name="order"     type="Order_id"     use="required"/>
             <xsd:attribute name="priority"  type="xsd:integer"/>
             <xsd:attribute name="title"     type="String"/>
@@ -697,7 +697,7 @@
             <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
         </xsd:sequence>
 
-        <xsd:attribute name="job_chain"         type="Name"/>           <!-- use="required", nur für <add_order> -->
+        <xsd:attribute name="job_chain"         type="Path"/>           <!-- use="required", nur für <add_order> -->
         <xsd:attribute name="id"                type="Order_id"/>
         <xsd:attribute name="priority"          type="xsd:integer"/>
         <xsd:attribute name="title"             type="String"/>
@@ -796,14 +796,14 @@
 
     <xsd:element name="remove_job_chain">
         <xsd:complexType>
-            <xsd:attribute name="job_chain"     type="Name" use="required"/>
+            <xsd:attribute name="job_chain"     type="Path" use="required"/>
         </xsd:complexType>
     </xsd:element>
 
     
     <xsd:element name="remove_order">
         <xsd:complexType>
-            <xsd:attribute name="job_chain"     type="Name"         use="required"/>
+            <xsd:attribute name="job_chain"     type="Path"         use="required"/>
             <xsd:attribute name="order"         type="Order_id"     use="required"/>
         </xsd:complexType>
     </xsd:element>
@@ -982,7 +982,7 @@
             <xsd:attribute name="filename"              type="File"/>
             <xsd:attribute name="java_class"            type="String"/>
             <xsd:attribute name="recompile"             type="Yes_no"/>
-            <xsd:attribute name="process_class"         type="Name"/>
+            <xsd:attribute name="process_class"         type="Path"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1070,7 +1070,7 @@
 
     <xsd:element name="show_history">
         <xsd:complexType>
-            <xsd:attribute name="job"               type="Name"                     use="required"/>
+            <xsd:attribute name="job"               type="Path"                     use="required"/>
             <xsd:attribute name="id"                type="Task_id"/>
             <xsd:attribute name="prev"              type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="next"              type="xsd:nonNegativeInteger"/>
@@ -1082,8 +1082,8 @@
     
     <xsd:element name="show_job">
         <xsd:complexType>
-            <xsd:attribute name="job"               type="Name"                     use="required"/>
-            <xsd:attribute name="job_chain"         type="Name"/>
+            <xsd:attribute name="job"               type="Path"                     use="required"/>
+            <xsd:attribute name="job_chain"         type="Path"/>
             <xsd:attribute name="what"              type="What"/>
             <xsd:attribute name="max_orders"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="max_task_history"  type="xsd:nonNegativeInteger"/>
@@ -1093,7 +1093,7 @@
     
     <xsd:element name="show_job_chain">
         <xsd:complexType>
-            <xsd:attribute name="job_chain"         type="Name"                     use="required"/>
+            <xsd:attribute name="job_chain"         type="Path"                     use="required"/>
             <xsd:attribute name="what"              type="What"/>
             <xsd:attribute name="max_orders"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="max_order_history" type="xsd:nonNegativeInteger"/>
@@ -1103,7 +1103,7 @@
     
     <xsd:element name="show_job_chains">
         <xsd:complexType>
-            <xsd:attribute name="what"              type="What"/>
+            <xsd:attribute name="what"              type="Path"/>
             <xsd:attribute name="max_orders"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="max_order_history" type="xsd:nonNegativeInteger"/>
         </xsd:complexType>
@@ -1121,7 +1121,7 @@
     
     <xsd:element name="show_order">
         <xsd:complexType>
-            <xsd:attribute name="job_chain"         type="Name"                     use="required"/>
+            <xsd:attribute name="job_chain"         type="Path"                     use="required"/>
             <xsd:attribute name="order"             type="Order_id"/>
             <xsd:attribute name="history_id"        type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="what"              type="What"/>
@@ -1156,7 +1156,7 @@
             <xsd:sequence>
                 <xsd:element ref="params" minOccurs="0"/>
             </xsd:sequence>
-            <xsd:attribute name="job"               type="Name"                     use="required"/>
+            <xsd:attribute name="job"               type="Path"                     use="required"/>
             <xsd:attribute name="name"              type="Name"/>
             <xsd:attribute name="at"                type="Date_time_with_now_or_period"/>
             <xsd:attribute name="after"             type="xsd:nonNegativeInteger"/>
@@ -1276,7 +1276,7 @@
 
     
     <xsd:complexType name="lock.remove">
-        <xsd:attribute name="lock"                      type="Name"                     use="required"/>
+        <xsd:attribute name="lock"                      type="Path"                     use="required"/>
     </xsd:complexType>
 
     
@@ -1293,7 +1293,7 @@
 
 
     <xsd:complexType name="process_class.remove">
-        <xsd:attribute name="process_class"             type="Name"/>
+        <xsd:attribute name="process_class"             type="Path"/>
     </xsd:complexType>
 
 
@@ -1339,7 +1339,7 @@
         <xsd:attribute name="response_xslt_stylesheet"  type="File"             />
         <xsd:attribute name="forward_xslt_stylesheet"   type="File"/>
 
-        <xsd:attribute name="job_chain"                 type="Name"/>
+        <xsd:attribute name="job_chain"                 type="Path"/>
         <xsd:attribute name="timeout"                   type="xsd:positiveInteger"/>
     </xsd:complexType>
 
@@ -1391,13 +1391,18 @@
    
     <xsd:simpleType name="Name">
         <!-- Eine engere Beschränkung wäre gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->
+        <!-- Regulärer Ausdruck wie bei Path -->
         <xsd:restriction base="String">
+            <xsd:pattern value="[^/]+"/>
         </xsd:restriction>
     </xsd:simpleType>
 
 
     <xsd:simpleType name="Path">
-        <xsd:restriction base="Name"/>
+        <!-- Eine Folge von Name. Regulärer Ausdruck wie bei Name -->
+        <xsd:restriction base="String">
+            <xsd:pattern value="/?([^/]+/)*([^/]+)"/>    <!--  /?  ( Name / )+  Name  -->
+        </xsd:restriction>
     </xsd:simpleType>
 
 

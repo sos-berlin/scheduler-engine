@@ -197,6 +197,7 @@ struct File_based : Scheduler_object,
     void                        assert_is_initialized       ();
     void                        assert_is_loaded            ();
     void                        assert_is_active            ();
+    void                        assert_is_not_initialized   ();
 
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }

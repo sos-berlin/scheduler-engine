@@ -126,7 +126,7 @@ struct Lock_folder : typed_folder< Lock >
 
 
   //void                        set_dom                     ( const xml::Element_ptr& );
-    void                        execute_xml_lock            ( const xml::Element_ptr& );
+  //void                        execute_xml_lock            ( const xml::Element_ptr& );
     void                        add_lock                    ( Lock* lock )                          { add_file_based( lock ); }
     void                        remove_lock                 ( Lock* lock )                          { remove_file_based( lock ); }
     Lock*                       lock                        ( const string& name )                  { return file_based( name ); }

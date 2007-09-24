@@ -805,6 +805,8 @@ bool Job::on_activate()
 
 void Job::set_dom( const xml::Element_ptr& element )
 {
+    assert_is_not_initialized();
+
     if( !element )  return;
     if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
 

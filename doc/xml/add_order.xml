@@ -50,7 +50,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="replace" type="yes|no" initial="no">
+        <xml_attribute name="replace" type="yes|no" initial="yes">
             <description>
                 <p>
                     <code>replace="no"</code>: <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order" />

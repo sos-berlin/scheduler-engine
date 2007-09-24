@@ -375,12 +375,10 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= show_log;
 
-    string job_name = element.getAttribute( "job" );
-
     int id, next;
     get_id_and_next( element, &id, &next );
     
-    ptr<Job> job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_name ) );
+    ptr<Job> job = _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) );
 
     return job->read_history( _answer, id, next, show );
 }
@@ -866,7 +864,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 
     //if( job_name == "" )
     //{
-        bool       replace   = add_order_element.bool_getAttribute( "replace", false );
+        bool       replace   = add_order_element.bool_getAttribute( "replace", true );
         Job_chain* job_chain = _spooler->order_subsystem()->job_chain( Absolute_path( root_path, add_order_element.getAttribute( "job_chain" ) ) );
 
         if( replace )  order->place_or_replace_in_job_chain( job_chain );

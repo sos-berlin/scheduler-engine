@@ -180,7 +180,7 @@ xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_process
 {
     xml::Element_ptr result;
 
-    if( element.nodeName_is( "lock" ) )  spooler()->root_folder()->lock_folder()->execute_xml_lock( element );
+    if( element.nodeName_is( "lock" ) )  spooler()->root_folder()->lock_folder()->add_or_replace_file_based_xml( element );
     else
     if( string_begins_with( element.nodeName(), "lock." ) ) 
     {
@@ -220,21 +220,21 @@ Lock_folder::~Lock_folder()
 
 //--------------------------------------------------------------------Lock_folder::execute_xml_lock
 
-void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
-{
-    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
-
-    string lock_name = lock_element.getAttribute( "name" );
-    
-    if( ptr<Lock> lock = lock_or_null( lock_name ) )
-    {
-        lock->set_dom( lock_element );
-    }
-    else
-    {
-        add_file_based_xml( lock_element );
-    }
-}
+//void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
+//{
+//    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
+//
+//    string lock_name = lock_element.getAttribute( "name" );
+//    
+//    if( ptr<Lock> lock = lock_or_null( lock_name ) )
+//    {
+//        lock->set_dom( lock_element );
+//    }
+//    else
+//    {
+//        add_file_based_xml( lock_element );
+//    }
+//}
 
 //-------------------------------------------------------------------------Lock_folder::dom_element
 

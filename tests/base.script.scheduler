@@ -21,7 +21,6 @@ base();
         
         ]]></script>
 
-
         <jobs>
 
             <job name="perl">
@@ -80,8 +79,13 @@ function spooler_process()
             </job>
         
         </jobs>
-        
-            
+
+        <!--job_chains>
+            <job_chain name="my_job_chain">
+                <job_chain_node state="2" job="java"/>
+            </job_chain>
+        </job_chains-->
+
         <commands>
             <start_job job="perl"/>
             <start_job job="javascript"/>

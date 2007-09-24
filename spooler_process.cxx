@@ -1344,31 +1344,31 @@ Process_class_folder::~Process_class_folder()
 
 //--------------------------------------------------Process_class_folder::execute_xml_process_class
 
-xml::Element_ptr Process_class_folder::execute_xml_process_class( Command_processor* command_processor, const xml::Element_ptr& element )
-{
-    if( !element.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", element.nodeName() );
-
-    string process_class_name = element.     getAttribute( "name"    );
-    bool   replace            = element.bool_getAttribute( "replace" );
-    
-    ptr<Process_class> process_class = process_class_or_null( process_class_name );
-
-    if( process_class  &&  !replace )
-    {
-        process_class->set_dom( element );
-    }
-    else
-    {
-        ptr<Process_class> new_process_class = Z_NEW( Process_class( spooler() ) );
-        new_process_class->set_folder_path( folder()->path() );
-        new_process_class->set_dom( element );
-
-        if( process_class  &&  replace )  process_class->replace_with( new_process_class );
-                                    else  add_process_class( new_process_class );
-    }
-
-    return command_processor->_answer.createElement( "ok" );
-}
+//xml::Element_ptr Process_class_folder::execute_xml_process_class( Command_processor* command_processor, const xml::Element_ptr& element )
+//{
+//    if( !element.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", element.nodeName() );
+//
+//    string process_class_name = element.     getAttribute( "name"    );
+//    bool   replace            = element.bool_getAttribute( "replace" );
+//    
+//    ptr<Process_class> process_class = process_class_or_null( process_class_name );
+//
+//    if( process_class  &&  !replace )
+//    {
+//        process_class->set_dom( element );
+//    }
+//    else
+//    {
+//        ptr<Process_class> new_process_class = Z_NEW( Process_class( spooler() ) );
+//        new_process_class->set_folder_path( folder()->path() );
+//        new_process_class->set_dom( element );
+//
+//        if( process_class  &&  replace )  process_class->replace_with( new_process_class );
+//                                    else  add_process_class( new_process_class );
+//    }
+//
+//    return command_processor->_answer.createElement( "ok" );
+//}
 
 //--------------------------------------------------------------------Process_class_folder::set_dom
 
@@ -1492,7 +1492,9 @@ xml::Element_ptr Process_class_subsystem::execute_xml( Command_processor* comman
 
     if( element.nodeName_is( "process_class" ) ) 
     {
-        result = spooler()->root_folder()->process_class_folder()->execute_xml_process_class( command_processor, element );
+        //result = spooler()->root_folder()->process_class_folder()->execute_xml_process_class( command_processor, element );
+        spooler()->root_folder()->process_class_folder()->add_or_replace_file_based_xml( element );
+        result = command_processor->_answer.createElement( "ok" );
     }
     else
     if( string_begins_with( element.nodeName(), "process_class." ) ) 

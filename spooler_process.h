@@ -279,7 +279,7 @@ struct Process_class_folder : typed_folder<Process_class>
     void                        remove_process_class        ( Process_class* process_class )        { remove_file_based( process_class ); }
     Process_class*              process_class               ( const string& name )                  { return file_based( name ); }
     Process_class*              process_class_or_null       ( const string& name )                  { return file_based_or_null( name ); }
-    xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
+  //xml::Element_ptr            execute_xml_process_class   ( Command_processor*, const xml::Element_ptr& );
   //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "process_classes" ); }
 };

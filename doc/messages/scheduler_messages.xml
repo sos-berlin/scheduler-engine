@@ -127,11 +127,11 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-109">
+        <!--message code="SCHEDULER-109">
             <text xml:lang="en">
-                <title>Job '<p1/>' has not been initialized</title>
+                <title>'<p1>object</p1>' has been initialized and cannot be modified</title>
             </text>
-        </message>
+        </message-->
 
 
         <message code="SCHEDULER-110">
@@ -471,11 +471,8 @@
         </message>
 
         <message code="SCHEDULER-148">
-            <text xml:lang="de">
-                <title>Jobkette ist abgeschlossen (mit add_job_chain()) und kann nicht mehr erweitert werden</title>
-            </text>
             <text xml:lang="en">
-                <title>Job chain has finished (with add_job_chain()) and cannot be modified</title>
+                <title>'<p1>object</p1>' has been initialized already and cannot be modified</title>
             </text>
         </message>
 
@@ -2703,6 +2700,12 @@
                 <title>Definition of <p1>object</p1> is incomplete</title>
             </text>
         </message>
+
+        <!--message code="SCHEDULER-441">
+            <text xml:lang="en">
+                <title>replace="no" inhibits replacing of existent <p1>object</p1></title>
+            </text>
+        </message-->
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

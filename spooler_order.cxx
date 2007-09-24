@@ -1596,6 +1596,7 @@ string Job_chain::state_name( State state )
 
 void Job_chain::set_dom( const xml::Element_ptr& element )
 {
+    assert_is_not_initialized();
     if( !element )  return;
     if( !element.nodeName_is( "job_chain" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", element.nodeName() );
 
@@ -1864,7 +1865,8 @@ Order::State normalized_state( const Order::State& state )
 
 Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_, const Order::State& next_state, const Order::State& error_state )
 {
-    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
+    assert_is_not_initialized();
+    //if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
     if( job_path == "" )  z::throw_xc( __FUNCTION__ );
 
     Order::State state = state_;
@@ -1883,54 +1885,12 @@ Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_,
     return node;
 }
 
-//--------------------------------------------------------------------Job_chain::add_job_chain_node
-
-//Node* Job_chain::add_job_chain_node( const string& nested_job_chain_path, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
-//{
-//    if( _is_distributed )  z::throw_xc( "SCHEDULER-413" );
-//
-//    Job_chain* nested_job_chain = order_subsystem()->job_chain( nested_job_chain_path );
-//    if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
-//
-//    Z_FOR_EACH( Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
-//    {
-//        if( (*it)->_nested_job_chain_path != "" )  z::throw_xc( "SCHEDULER-412", obj_name() );
-//        // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
-//    }
-//
-//    if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << nested_job_chain_path << "->" << nested_job_chain_path );
-//    if( state.is_null_or_empty_string() )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "state" );
-//
-//    Node* result = add_node( Node::n_job_chain, state, next_state, error_state );
-//
-//    result->_nested_job_chain_path = nested_job_chain_path;
-//
-//    return result;
-//}
-
-//------------------------------------------------------------------------------Job_chain::add_node
-
-//Node* Job_chain::add_node( Node::Type type, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
-//{
-//    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
-//
-//    ptr<Node> node = new Node( this, type, state );
-//    node->set_next_state ( next_state );
-//    node->set_error_state( error_state );
-//
-//    // Bis initialize() bleibt nicht angegebener Zustand als VT_ERROR/is_missing() (fehlender Parameter) stehen.
-//    // initialize() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY (außer <file_order_sink>)
-//
-//    _node_list.push_back( node );
-//
-//    return node;
-//}
-
 //--------------------------------------------------------------------------Job_chain::add_end_node
 
 Node* Job_chain::add_end_node( const Order::State& state )
 {
-    if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
+    assert_is_not_initialized();
+    //if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
 
     Order::check_state( state );
 

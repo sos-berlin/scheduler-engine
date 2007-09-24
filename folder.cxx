@@ -969,16 +969,13 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 
     if( ptr<File_based> file_based = file_based_or_null( element.getAttribute( "name" ) ) )
     {
-        //if( !element.bool_getAttribute( "replace", true ) )     // replace="no", aber Job ist bekannt?
-        //{
-        //    log()->warn( message_string( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) ) );
-        //}
+        //if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-441", obj_name() );   // replace="no" und Objekt ist bekannt
 
-        if( !element.bool_getAttribute( "replace", false )  &&  // Nicht replace="yes"?
-            file_based_subsystem()->subsystem_state() < subsys_active )    // Wird noch die Scheduler-Konfigurationsdatei geladen?
+        if( file_based_subsystem()->subsystem_state() <= subsys_initialized  &&     // Wird noch die Scheduler-Konfigurationsdatei geladen?
+            !element.bool_getAttribute( "replace", false ) )                        // Nicht replace="yes"?
         {
-            assert( file_based->file_based_state() < File_based::s_active );    
-            file_based->set_dom( element );                     // Objekt ergänzen. Siehe XML-Element <base>
+            //Process_class erlaubt das. assert( file_based->file_based_state() < File_based::s_active );    
+            file_based->set_dom( element );                     // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
         }
         else
         {
@@ -1410,6 +1407,16 @@ void File_based::assert_is_active()
     {
         if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_active ), _base_file_xc );
                                else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_active ) );
+    }
+}
+
+//------------------------------------------------------------File_based::assert_is_not_initialized
+
+void File_based::assert_is_not_initialized()
+{
+    if( _state >= s_initialized )
+    {
+        z::throw_xc( "SCHEDULER-148", obj_name() );
     }
 }
 
