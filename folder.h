@@ -272,6 +272,7 @@ struct File_based : Scheduler_object,
     State                      _state;
     State                      _wished_state;
     Base_file_info             _base_file_info;
+    double                     _base_file_info_timestamp;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
