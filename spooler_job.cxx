@@ -2897,6 +2897,8 @@ void Job::set_state( State new_state )
             _lock_requestor->dequeue_lock_requests();
         }
     }
+
+    if( _state == s_stopped )  check_for_replacing_or_removing();
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd

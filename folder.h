@@ -325,7 +325,7 @@ struct Typed_folder : Scheduler_object,
     ptr<File_based>             new_initialized_file_based_xml( const xml::Element_ptr& );
     void                        add_file_based_xml          ( const xml::Element_ptr& );
     void                        add_or_replace_file_based_xml( const xml::Element_ptr& );
-    void                        add_to_replace_or_remove_candidates( const Absolute_path& );
+    void                        add_to_replace_or_remove_candidates( const string& name );
     void                        handle_replace_or_remove_candidates();
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;

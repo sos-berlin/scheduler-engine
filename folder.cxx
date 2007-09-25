@@ -835,6 +835,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;
     File_based*     current_file_based = old_file_based;        // File_based der zuletzt geladenen Datei
+    bool            file_was_removed   = old_file_based  &&  old_file_based->_file_is_removed;
 
     if( old_file_based )  
     {
@@ -850,6 +851,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         {
             if( !old_file_based  ||
                 old_file_based->_file_is_removed  ||
+                file_was_removed ||
                 current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc )
             {
                 something_changed = true;
@@ -1026,9 +1028,9 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 
 //------------------------------------------------Typed_folder::add_to_replace_or_remove_candidates
 
-void Typed_folder::add_to_replace_or_remove_candidates( const Absolute_path& path )             
+void Typed_folder::add_to_replace_or_remove_candidates( const string& name )             
 { 
-    _replace_or_remove_candidates_set.insert( path ); 
+    _replace_or_remove_candidates_set.insert( name ); 
     spooler()->folder_subsystem()->set_signaled( __FUNCTION__ );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
 }
 
@@ -1588,13 +1590,13 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
         if( replacement()  &&  can_be_replaced_now() )
         {
             if( when_to_act == act_now )  replace_now();
-                                    else  typed_folder()->add_to_replace_or_remove_candidates( path() );
+                                    else  typed_folder()->add_to_replace_or_remove_candidates( name() );
         }
         else
         if( is_to_be_removed()  &&  can_be_removed_now()   )
         {
             if( when_to_act == act_now )  remove_now();
-                                    else  typed_folder()->add_to_replace_or_remove_candidates( path() );
+                                    else  typed_folder()->add_to_replace_or_remove_candidates( name() );
         }
     }
 }
@@ -1603,7 +1605,12 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
 
 void File_based::prepare_to_replace()
 {
-    prepare_to_remove();
+    ptr<File_based> replacement = _replacement;     // prepare_to_remove() entfernt _replacement
+    assert( replacement );
+
+    prepare_to_remove();        
+
+    _replacement = replacement;
 }
 
 //------------------------------------------------------------------File_based::can_be_replaced_now
@@ -1619,7 +1626,6 @@ File_based* File_based::on_replace_now()
 {
     Typed_folder*   typed_folder = this->typed_folder();
     ptr<File_based> replacement  = this->replacement();
-    State           wished_state = _wished_state;
 
     assert( can_be_replaced_now() );
 
@@ -1627,7 +1633,6 @@ File_based* File_based::on_replace_now()
     // this ist ungültig
 
     typed_folder->add_file_based( replacement );
-    replacement->switch_file_based_state( wished_state );
 
     return replacement;
 }
@@ -1777,11 +1782,19 @@ void File_based::set_name( const string& name )
 {
     _spooler->check_name( name );
 
-    if( normalized_name() != _file_based_subsystem->normalized_name( name ) )
+    string normalized_name = this->normalized_name();
+
+    if( normalized_name != _file_based_subsystem->normalized_name( name ) )
     {
         if( is_in_folder() )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
         _name = name;
         log()->set_prefix( obj_name() );    // Noch ohne Pfad
+
+        if( !has_base_file() )
+        {
+            assert( _base_file_info._normalized_name == ""  ||  _base_file_info._normalized_name == normalized_name );
+            _base_file_info._normalized_name = subsystem()->normalized_name( name );
+        }
     }
 }
 
