@@ -750,6 +750,8 @@ void Prefix_log::open()
             io_error( _spooler, _filename );
         }
 
+        _instance_number++;
+
         if( !_log_buffer.empty() )
         {
             write( _log_buffer.c_str(), _log_buffer.length() );
@@ -804,7 +806,7 @@ void Prefix_log::close()
         catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }  // Kann bei "http://.../show_log?" passieren
     }
 
-    signal_events();
+    //signal_events();
     _events.clear();
 }
 
@@ -838,6 +840,8 @@ void Prefix_log::close_file()
             //if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );
             _new_filename = "";
         }
+
+        signal_events();
     }
 }
 

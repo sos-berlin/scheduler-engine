@@ -52,7 +52,7 @@
     <p>
         Unter Unix überwacht der Scheduler die Verzeichnisse im Abstand von zwischen 5 und 60 Sekunden.
         Nach einer Änderung verkürzt er den Abstand auf fünf Sekunden und 
-        verdoppelt ihn dann jedesmal, wenn keine Änderung vorliegt, bis 60 Sekunden erreicht sind.
+        verlängert ihn, wenn keine Änderung vorliegt, bis auf 60 Sekunden.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

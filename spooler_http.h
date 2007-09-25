@@ -139,6 +139,7 @@ struct Log_chunk_reader : Chunk_reader
     ptr<String_chunk_reader>   _string_chunk_reader;
     size_t                     _file_seek;
     File                       _file;
+    int                        _log_instance_number;
     string                     _html_insertion;
 };
 

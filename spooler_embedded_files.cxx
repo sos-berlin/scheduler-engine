@@ -1402,7 +1402,7 @@ const char file_scheduler_xsd[] =
     "<!-- Eine engere Beschr\xc3" "\xa4" "nkung w\xc3" "\xa4" "re gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->\n"
     "<!-- Regul\xc3" "\xa4" "rer Ausdruck wie bei Path -->\n"
     "<xsd:restriction base=\"String\">\n"
-    "<xsd:pattern value=\"[^/]+\"/>\n"
+    "<xsd:pattern value=\"[^/]*\"/>\n"
     "</xsd:restriction>\n"
     "</xsd:simpleType>\n"
     "\n"
@@ -1410,7 +1410,7 @@ const char file_scheduler_xsd[] =
     "<xsd:simpleType name=\"Path\">\n"
     "<!-- Eine Folge von Name. Regul\xc3" "\xa4" "rer Ausdruck wie bei Name -->\n"
     "<xsd:restriction base=\"String\">\n"
-    "<xsd:pattern value=\"/?([^/]+/)*([^/]+)\"/>    <!--  /?  ( Name / )+  Name  -->\n"
+    "<xsd:pattern value=\"/?([^/]+/)*([^/]*)\"/>    <!--  /?  ( Name / )+  Name  -->\n"
     "</xsd:restriction>\n"
     "</xsd:simpleType>\n"
     "\n"
@@ -1666,7 +1666,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190633324 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190705619 },
     { NULL, NULL, 0 }
 };
 

@@ -86,6 +86,7 @@ struct Prefix_log : Object, Has_log
     void                        reset_highest_level         ()                                  { _highest_level = (Log_level)-999; }
     Log_level                   highest_level               () const                            { return _highest_level; }
     string                      highest_msg                 () const                            { return _highest_msg; }
+    int                         instance_number             () const                            { return _instance_number; }
 
     void                    set_collect_within              ( Time time )                       { _collect_within = time; }
     Time                        collect_within              ()                                  { return _collect_within; }
@@ -198,6 +199,7 @@ struct Prefix_log : Object, Has_log
     string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
+    int                        _instance_number;
     int                        _err_no;
     bool                       _started;                    // open() gerufen
     bool                       _closed;

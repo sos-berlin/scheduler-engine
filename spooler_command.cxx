@@ -1448,11 +1448,11 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                             if( history_id == "" )
                             {
                                 S select_sql;
-                                select_sql << "select max(\"HISTORY_ID\") as history_id_max "
+                                select_sql << "select max( `history_id` ) as history_id_max "
                                                "  from " + _spooler->_order_history_tablename +
-                                               "  where \"SPOOLER_ID\"=" << sql::quoted( _spooler->id_for_db() ) + 
-                                                 " and \"JOB_CHAIN\"=" << sql::quoted( job_chain_path ) +
-                                                 " and \"ORDER_ID\"=" << sql::quoted( order_id );
+                                               "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) + 
+                                                 " and `job_chain`="   << sql::quoted( job_chain_path.without_slash() ) +
+                                                 " and `order_id`="    << sql::quoted( order_id );
                                 if( order_id != "" )  select_sql << " and `order_id`=" << sql::quoted( order_id );
 
                                 Any_file sel = ta.open_result_set( select_sql, __FUNCTION__ );
@@ -1466,7 +1466,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                             if( history_id != "" )
                             {
                                 string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
-                                                                " where \"HISTORY_ID\"=" + history_id );
+                                                                  " where `history_id`=" + history_id );
                                 string title = "Auftrag " + order_id;
                                 //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
                                 http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( log_text ) ), title ) ) );

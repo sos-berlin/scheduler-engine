@@ -1393,7 +1393,7 @@
         <!-- Eine engere Beschränkung wäre gut: Buchstabe gefolgt von (Buchstabe, Ziffer, _ und vielleicht -)*  -->
         <!-- Regulärer Ausdruck wie bei Path -->
         <xsd:restriction base="String">
-            <xsd:pattern value="[^/]+"/>
+            <xsd:pattern value="[^/]*"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -1401,7 +1401,7 @@
     <xsd:simpleType name="Path">
         <!-- Eine Folge von Name. Regulärer Ausdruck wie bei Name -->
         <xsd:restriction base="String">
-            <xsd:pattern value="/?([^/]+/)*([^/]+)"/>    <!--  /?  ( Name / )+  Name  -->
+            <xsd:pattern value="/?([^/]+/)*([^/]*)"/>    <!--  /?  ( Name / )+  Name  -->
         </xsd:restriction>
     </xsd:simpleType>
 

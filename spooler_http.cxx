@@ -1519,6 +1519,7 @@ bool Log_chunk_reader::next_chunk_is_ready()
                     if( !_file.opened() )
                     {
                         _file.open( _log->filename(), "rb" );
+                        _log_instance_number = _log->instance_number();
                         if( _file_seek )  _file.seek( _file_seek ),  _file_seek = 0;
                     }
 
@@ -1535,9 +1536,15 @@ bool Log_chunk_reader::next_chunk_is_ready()
                             loop = true;
                         }
                         else
-                        if( _log->filename() != _file.path() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
+                        if( _log->filename() != _file.path()  ||  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
+                            _log->instance_number() != _log_instance_number )  // Dateiname gewechselt (Log.start_new_file)? Neue Datei begonnen? 
                         {
+                            // Wenn dieselbe Datei erneut beschrieben wird (bei Nested_job_chain_node), dann kann der Rest der bisherigen Datei 
+                            // im HTTP-Protokoll verloren gehen. Wenn die Datei schneller beschrieben als gelesen wird.
+                            // Lösung: Eigene Datei (Warteschlange) fürs HTTP-Protokoll
+
                             _file.close();
+                            _file_seek = 0;
                             _html_insertion = "<hr size='1'/>";
                             result = true;
                             break;

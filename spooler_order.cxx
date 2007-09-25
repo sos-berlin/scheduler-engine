@@ -1775,7 +1775,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                            "select %limit(" << show_what._max_order_history << ")"
                            " `order_id` as `id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
                            " from " << _spooler->_order_history_tablename <<
-                           " where `job_chain`=" << sql::quoted( name() ) <<
+                           " where `job_chain`=" << sql::quoted( path().without_slash() ) <<
                              " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                            " order by `history_id` desc",
                            __FUNCTION__ );
@@ -4684,7 +4684,7 @@ void Order::close_log_and_write_history()
         _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
     }
 
-    _log->close();
+    //2007-09-25 HTTP-Protokoll weiterlaufen lassen   _log->close();
 }
 
 //--------------------------------------------------------Order::calculate_db_distributed_next_time
@@ -6111,7 +6111,6 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
     close_log_and_write_history();  // Historie schreiben, aber Auftrag beibehalten
     _start_time = 0;
     _end_time = 0;
-    open_log();
 
     try
     {
@@ -6127,6 +6126,9 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
             set_state( _initial_state, next_start );
     }
     catch( exception& x ) { _log->error( x.what() ); }
+
+
+    open_log();     // Erst jetzt, weil _job_chain_path gesetzt sein muss
 }
 
 //----------------------------------------------------------------------------Order::on_carried_out
