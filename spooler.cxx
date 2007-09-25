@@ -1628,7 +1628,9 @@ void Spooler::update_console_title( int level )
             if( level )
             {
                 title << name() << "  ";
-                title << _configuration_file_path;
+
+                if( _configuration_directory != "" )  title << _configuration_directory;
+                                                else  title << _configuration_file_path;
                 title << "  pid=" << getpid() << "  ";
                 title << state_name();
 

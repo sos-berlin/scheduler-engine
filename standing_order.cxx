@@ -278,24 +278,6 @@ bool Standing_order::on_activate()
     return result;
 }
 
-//-----------------------------------------------------------------Standing_order::on_dependant_loaded
-
-//bool Standing_order::on_dependant_loaded( File_based* file_based )
-//{
-//    Order_subsystem_interface* order_subsystem = spooler()->order_subsystem();
-//
-//    assert( file_based->subsystem() == order_subsystem );
-//    assert( file_based->normalized_path() == order_subsystem->normalized_name( _missing_job_chain_path ) );
-//
-//    Job_chain* job_chain = dynamic_cast<Job_chain*>( file_based );
-//    assert( job_chain );
-//
-//    bool ok = on_activate();
-//    assert( ok );
-//
-//    return ok;
-//}
-
 //------------------------------------------------Standing_order::order_is_removable_or_replaceable
 
 bool Standing_order::order_is_removable_or_replaceable()
@@ -335,12 +317,22 @@ bool Standing_order::prepare_to_remove()
 
 void Standing_order::on_remove_now()
 {
-    if( _order )  
+    if( _order )
     {
-        _its_me_removing = true;
-        _order->remove_from_job_chain();
-        _its_me_removing = false;
+        ptr<Order> order = _order;
+        
+        set_order( NULL );                  // Verbindung zwischen Order und Standing_order lösen,
+                                            // dass remove_job_chain() nicht check_for_replacing_or_removing() rufe!
+
+        order->remove_from_job_chain();
     }
+
+    //if( !_its_me_removing  &&  _order )  
+    //{
+    //    _its_me_removing = true;                // Rekursion abklemmen
+    //    _order->remove_from_job_chain();        
+    //    _its_me_removing = false;
+    //}
 }
 
 //--------------------------------------------------------------Standing_order::can_be_replaced_now
@@ -388,22 +380,23 @@ void Standing_order::on_remove_now()
 
 //-------------------------------------------------------------Standing_order::on_order_carried_out
 
-void Standing_order::on_order_carried_out()
-{
-    // Wird auch von on_order_removed() gerufen
-
-    check_for_replacing_or_removing();
-}
+//void Standing_order::on_order_carried_out()
+//{
+//    // Wird auch von on_order_removed() gerufen
+//
+//    check_for_replacing_or_removing();
+//}
 
 //-----------------------------------------------------------------Standing_order::on_order_removed
 
-void Standing_order::on_order_removed()
-{
-    if( !_its_me_removing )
-    {
-        on_order_carried_out();
-    }
-}
+//void Standing_order::on_order_removed()
+//{
+//    if( !_its_me_removing )
+//    {
+//        check_for_replacing_or_removing();
+//        //on_order_carried_out();
+//    }
+//}
 
 //--------------------------------------------------------------------------Standing_order::set_dom
 

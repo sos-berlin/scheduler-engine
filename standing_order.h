@@ -51,8 +51,8 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     string                      order_id                    () const                                { return _order_id; }
 
     
-    void                        on_order_carried_out        ();                                     // Gerufen von Order::on_carried_out()
-    void                        on_order_removed            ();                                     // Gerufen von Order::remove_from_job_chain()
+  //void                        on_order_carried_out        ();                                     // Gerufen von Order::on_carried_out()
+  //void                        on_order_removed            ();                                     // Gerufen von Order::remove_from_job_chain()
 
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 

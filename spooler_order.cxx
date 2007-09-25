@@ -5695,7 +5695,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     if( job_chain_stack_option == jc_remove_from_job_chain_stack )  
     {
         remove_from_job_chain_stack();
-        if( _standing_order )  _standing_order->on_order_removed();
+        if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );  // Kann Auftrag aus der Jobkette nehmen
 
         if( !_task )  close();      // 2007-09-16
     }
@@ -6033,7 +6033,7 @@ void Order::handle_end_state()
             }
         }
 
-        on_carried_out();
+        on_carried_out();   // Kann Auftrag aus der Jobkette nehmen
     }
 }
 
@@ -6096,8 +6096,6 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 {
     // Auftrag wird wegen <run_time> wiederholt
 
-    _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
-    
     Absolute_path first_nested_job_chain_path;
 
     if( _outer_job_chain_path != "" )
@@ -6108,6 +6106,8 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
         remove_from_job_chain( jc_leave_in_job_chain_stack );  
     }
 
+    _log->info( message_string( "SCHEDULER-944", _initial_state, next_start ) );        // "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=<p1/> wiederholt um <p2/>"
+    
     close_log_and_write_history();  // Historie schreiben, aber Auftrag beibehalten
     _start_time = 0;
     _end_time = 0;
@@ -6137,7 +6137,7 @@ void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
 
-    if( _standing_order )  _standing_order->on_order_carried_out();
+    if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );     // Kann Auftrag aus der Jobkette nehmen
 }
 
 //--------------------------------------------------------------------------Order::processing_error

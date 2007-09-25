@@ -1581,14 +1581,20 @@ bool File_based::replace_with( File_based* file_based_replacement )
 
 //------------------------------------------------------File_based::check_for_replacing_or_removing
 
-void File_based::check_for_replacing_or_removing()
+void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
 {
     if( is_in_folder() )
     {
-        if( replacement()       &&  can_be_replaced_now()  ||  
-            is_to_be_removed()  &&  can_be_removed_now()   )
+        if( replacement()  &&  can_be_replaced_now() )
         {
-            typed_folder()->add_to_replace_or_remove_candidates( path() );
+            if( when_to_act == act_now )  replace_now();
+                                    else  typed_folder()->add_to_replace_or_remove_candidates( path() );
+        }
+        else
+        if( is_to_be_removed()  &&  can_be_removed_now()   )
+        {
+            if( when_to_act == act_now )  remove_now();
+                                    else  typed_folder()->add_to_replace_or_remove_candidates( path() );
         }
     }
 }
