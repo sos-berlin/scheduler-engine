@@ -347,7 +347,7 @@ bool Folder_subsystem::async_continue_( Continue_flags )
     
     _try_again_delay = INT_MAX;
 
-    bool something_changed = _root_folder->adjust_with_directory();
+    bool something_changed = _root_folder->adjust_with_directory( double_from_gmtime() );
 
     _directory_watch_interval = something_changed? directory_watch_interval_min
                                                  : min( directory_watch_interval_max, 2 * _directory_watch_interval );
@@ -488,7 +488,7 @@ Absolute_path Folder::make_path( const string& name )
 
 //--------------------------------------------------------------------Folder::adjust_with_directory
 
-bool Folder::adjust_with_directory()
+bool Folder::adjust_with_directory( double now )
 {
     bool something_changed = false;
 
@@ -557,7 +557,7 @@ bool Folder::adjust_with_directory()
                     }
                     else
                     {
-                        file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name ) );
+                        file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
                     }
 
                     last_normalized_name = normalized_name;
@@ -579,7 +579,7 @@ bool Folder::adjust_with_directory()
         {
             Typed_folder* typed_folder = it->second;
 
-            something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
+            something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ], now );
         }
     }
     catch( exception& x ) 
@@ -646,7 +646,7 @@ Subfolder_folder::~Subfolder_folder()
 
 //-----------------------------------------------------------Subfolder_folder::on_base_file_changed
 
-bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_file_info* base_file_info )
+bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_file_info* base_file_info, double now )
 {
     bool    something_changed = false;
     Folder* subfolder         = static_cast<Folder*>( file_based );
@@ -660,13 +660,13 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         something_changed = true;
 
         bool ok = new_subfolder->activate();
-        if( ok )  new_subfolder->adjust_with_directory();
+        if( ok )  new_subfolder->adjust_with_directory( now );
     }
     else
     if( base_file_info )
     {
         subfolder->set_base_file_info( *base_file_info );
-        something_changed = subfolder->adjust_with_directory();
+        something_changed = subfolder->adjust_with_directory( now );
     }
     else
     if( !subfolder->is_to_be_removed() ) 
@@ -721,7 +721,7 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
     
-bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_list )
+bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_list, double now )
 {
     bool                          something_changed  = false;
     vector<const Base_file_info*> ordered_file_infos;     // Geordnete Liste der vorgefundenen Dateien    
@@ -749,7 +749,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
                fi != ordered_file_infos.end()  &&
                (*fb)->_base_file_info._normalized_name == (*fi)->_normalized_name )
         {
-            something_changed |= on_base_file_changed( *fb, *fi );
+            something_changed |= on_base_file_changed( *fb, *fi, now );
             fi++, fb++;
         }
 
@@ -760,7 +760,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         while( fi != ordered_file_infos.end()  &&
                ( fb == ordered_file_baseds.end()  ||  (*fi)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
         {
-            something_changed |= on_base_file_changed( (File_based*)NULL, (*fi) );
+            something_changed |= on_base_file_changed( (File_based*)NULL, (*fi), now );
             fi++;
         }
 
@@ -777,7 +777,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         {
             if( !(*fb)->_file_is_removed )
             {
-                something_changed |= on_base_file_changed( *fb, NULL );
+                something_changed |= on_base_file_changed( *fb, NULL, now );
             }
             fb++;
         }
@@ -792,7 +792,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 //---------------------------------------------------------------Typed_folder::on_base_file_changed
 
-bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info )
+bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info, double now )
 {
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;
@@ -820,7 +820,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                 current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc ||     // Geänderter Zeitstempel?
 
                 ( current_file_based->_read_again &&                                                        // Nochmal lesen, 
-                  current_file_based->_base_file_xc_time + file_timestamp_delay < double_from_gmtime() ) )  // falls Datei geändert, aber Zeitstempel nicht
+                  current_file_based->_base_file_info._info_timestamp + file_timestamp_delay < now ) )      // falls Datei geändert, aber Zeitstempel nicht
             {
                 something_changed = true;
 
@@ -837,7 +837,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                 if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )    // ERRNO-2 (Datei gelöscht)?
                 {
-                    if( old_file_based )  old_file_based->remove();
+                    if( old_file_based )  old_file_based->remove(),  old_file_based = NULL;
                 }
                 else
                 if( !current_file_based  ||  content_md5 != current_file_based->_md5 )   // Neue Datei oder Inhalt hat sich geändert?

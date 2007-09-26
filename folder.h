@@ -138,9 +138,10 @@ struct Base_file_info
 {
                                 Base_file_info              ()                                      : _timestamp_utc(0) {}
 
-                                Base_file_info              ( const string& filename, double timestamp_utc, const string& normalized_name ) 
+                                Base_file_info              ( const string& filename, double timestamp_utc, const string& normalized_name, double clock ) 
                                                                                                     : _filename(filename), _timestamp_utc(timestamp_utc),
-                                                                                                      _normalized_name(normalized_name) {}
+                                                                                                      _normalized_name(normalized_name), 
+                                                                                                      _info_timestamp(clock) {}
 
     bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
     static bool                 less_dereferenced           ( const Base_file_info* a, const Base_file_info* b )  { return *a < *b; }
@@ -148,6 +149,7 @@ struct Base_file_info
     string                     _filename;                   // Ohne Verzeichnis
     double                     _timestamp_utc;
     string                     _normalized_name;            // Ohne Dateinamenserweiterung
+    double                     _info_timestamp;             // Wann dieses Base_file_info erstellt worden ist
 };
 
 //---------------------------------------------------------------------------------------File_based
@@ -314,7 +316,7 @@ struct Typed_folder : Scheduler_object,
     Folder*                     folder                      () const                                { return _folder; }
     File_based_subsystem*       subsystem                   () const                                { return file_based_subsystem(); }
 
-    bool                        adjust_with_directory       ( const list<Base_file_info>& );
+    bool                        adjust_with_directory       ( const list<Base_file_info>&, double now );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
     void                        remove_all                  ();
@@ -334,7 +336,7 @@ struct Typed_folder : Scheduler_object,
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
-    virtual bool                on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
+    virtual bool                on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info, double now );
     virtual void                set_dom                     ( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -421,7 +423,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
   //Path                        path                        () const                                { return _path; }
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
-    bool                        adjust_with_directory       ();
+    bool                        adjust_with_directory       ( double now );
 
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
@@ -463,7 +465,7 @@ struct Subfolder_folder : typed_folder< Folder >
 
 
     // Typed_folder
-    bool                        on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info );
+    bool                        on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info, double now );
 
 
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "folders" ); }

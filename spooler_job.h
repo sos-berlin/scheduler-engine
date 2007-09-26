@@ -148,7 +148,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
 

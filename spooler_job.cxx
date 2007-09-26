@@ -3090,8 +3090,6 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     xml::Element_ptr result = document.createElement( "job" );
 
     fill_file_based_dom_element( result, show_what );
-    //if( has_base_file() )  result.appendChild( File_based::dom_element( document, show_what ) );
-    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
 
     result.setAttribute( "job"       , name()                   );
     result.setAttribute( "state"     , state_name()            );
