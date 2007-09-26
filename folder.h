@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_FOLDER_H
 #define __SCHEDULER_FOLDER_H
 
+#include "../zschimmer/z_md5.h"
+
 namespace sos {
 namespace scheduler {
 namespace folder {
@@ -272,7 +274,8 @@ struct File_based : Scheduler_object,
     State                      _state;
     State                      _wished_state;
     Base_file_info             _base_file_info;
-    bool                       _try_again_after_error;
+    bool                       _read_again;
+    Md5                        _md5;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
