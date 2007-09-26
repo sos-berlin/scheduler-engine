@@ -604,27 +604,6 @@ Prefix_log::Prefix_log( Scheduler_object* o )
 Prefix_log::~Prefix_log()
 {
     close();
-
-    //if( _remove_after_close )
-    //{
-    //    _remove_after_close = false;
-
-    //    try
-    //    {
-    //        if( _file != -1 )   // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
-    //        { 
-    //            Z_LOG2( "scheduler", "extra close("<<_file<<")\n" ); 
-    //            ::close( _file );
-    //            _file = -1; 
-    //        }    
-
-    //        z_unlink( _filename );
-    //        //Z_LOG2( "scheduler.log", "unlink " << _filename << "\n" );
-    //        //int ret = unlink( _filename.c_str() );
-    //        //if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
-    //    }
-    //    catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }
-    //}
 }
 
 //---------------------------------------------------------------------------------Prefix_log::init
@@ -798,12 +777,7 @@ void Prefix_log::close()
     if( _remove_after_close )
     {
         _remove_after_close = false;
-
-        try
-        {
-            z_unlink( _filename );
-        }
-        catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }  // Kann bei "http://.../show_log?" passieren
+        remove_file();
     }
 
     //signal_events();
@@ -843,6 +817,17 @@ void Prefix_log::close_file()
 
         signal_events();
     }
+}
+
+//--------------------------------------------------------------------------Prefix_log::remove_file
+
+void Prefix_log::remove_file()
+{
+    try
+    {
+        z_unlink( _filename );
+    }
+    catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }  // Kann bei "http://.../show_log?" passieren
 }
 
 //--------------------------------------------------------------------------------Prefix_log::write
