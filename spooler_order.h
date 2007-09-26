@@ -393,7 +393,7 @@ struct Node : Com_job_chain_node,
         static MY_CLASS* cast( Node* node )                                                         \
         {                                                                                           \
             MY_CLASS* result = try_cast( node );                                                    \
-            if( !result )  z::throw_xc( __FUNCTION__, node? node->obj_name() : "(Node*)NULL" );     \
+            if( !result )  assert(0), z::throw_xc( __FUNCTION__, node? node->obj_name() : "(Node*)NULL" );  \
             return result;                                                                          \
         }                                                                                           \
                                                                                                     \

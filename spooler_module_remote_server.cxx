@@ -146,7 +146,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
     if( *class_object_ptr )
     {
         _class_data = dynamic_cast<Class_data*>( +*class_object_ptr );
-        if( !_class_data )  z::throw_xc( __FUNCTION__ );
+        if( !_class_data )  assert(0), z::throw_xc( __FUNCTION__ );
     }
     else
     {
@@ -236,10 +236,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         {
             if( params[i].vt != VT_EMPTY )
             {
-                if( params[i].vt != VT_BSTR )  throw_xc( "_spooler_construct" );
+                if( params[i].vt != VT_BSTR )  assert(0), throw_xc( "_spooler_construct" );
 
                 const OLECHAR* ole_value = wcschr( V_BSTR( &params[i] ), '=' );
-                if( !ole_value )  throw_xc( "_spooler_construct" );
+                if( !ole_value )  assert(0), throw_xc( "_spooler_construct" );
                 string key_word = string_from_ole( V_BSTR( &params[i] ), ole_value - V_BSTR( &params[i] ) );
                 ole_value++;
                 string value = string_from_ole( ole_value );
@@ -275,7 +275,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "monitor.script"     )  _server->_module->_monitor->set_xml_text_with_includes( value );
                 else
-                    throw_xc( "server::construct", as_string(i), key_word );
+                    assert(0), throw_xc( "server::construct", as_string(i), key_word );
             }
         }
 
@@ -486,7 +486,7 @@ STDMETHODIMP Com_remote_module_instance_server::Wait_for_subprocesses()
         //com_query_interface( _server->_module_instance->object( "spooler_task" ), &task_proxy );
         
         Com_task_proxy* task_proxy = dynamic_cast< Com_task_proxy* >( _server->_module_instance->object( "spooler_task" ) );
-        if( !task_proxy )  throw_xc( "Wait_for_subprocesses" );
+        if( !task_proxy )  assert(0), throw_xc( "Wait_for_subprocesses" );
 
         task_proxy->wait_for_subprocesses();
     }

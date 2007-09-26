@@ -308,7 +308,7 @@ void Process::close__end()
 
 void Process::add_module_instance( Module_instance* module_instance )
 { 
-    if( _module_instance_count != 0 )  throw_xc( "Process::add_module_instance" );
+    if( _module_instance_count != 0 )  assert(0), throw_xc( "Process::add_module_instance" );
 
     InterlockedIncrement( &_module_instance_count ); 
 
@@ -375,7 +375,7 @@ void Process::start()
     
 void Process::start_local()
 {
-    if( started() )  throw_xc( __FUNCTION__ );
+    if( started() )  assert(0), throw_xc( __FUNCTION__ );
 
 
     //if( !_server_hostname.empty() )
@@ -962,7 +962,7 @@ Process_class::~Process_class()
 
 void Process_class::set_configuration( const Process_class_configuration& configuration )
 {
-    if( normalized_path() != configuration.normalized_path() )  z::throw_xc( __FUNCTION__ );
+    if( normalized_path() != configuration.normalized_path() )  assert(0), z::throw_xc( __FUNCTION__ );
 
     // Erst die Warnungen
     check_max_processes   ( configuration.max_processes() );
@@ -1281,130 +1281,6 @@ Process_class_folder::Process_class_folder( Folder* folder )
 Process_class_folder::~Process_class_folder()
 {
 }
-
-//----------------------------------------------------------------Process_class_folder::dom_element
-
-//xml::Element_ptr Process_class_folder::dom_element( const xml::Document_ptr& document, const Show_what& show )
-//{
-//    xml::Element_ptr element = document.createElement( "process_classes" );
-//
-//    FOR_EACH( File_based_map, _file_based_map, it )
-//    {
-//        Process_class* process_class = static_cast<Process_class*>( it->second );
-//        //if( it->second->module_use_count() > 0 )
-//            element.appendChild( process_class->dom_element( document, show ) );
-//    }
-//
-//    return element;
-//}
-
-//----------------------------------------------------------Process_class_folder::add_process_class
-
-//void Process_class_folder::add_process_class( Process_class* process_class, bool replace )
-//{
-//    if( !process_class )  z::throw_xc( __FUNCTION__ );
-//    if( process_class->is_in_folder() )  z::throw_xc( "SCHEDULER-422", process_class->obj_name() );
-//    //Evtl. Nicht kompatibel:  _spooler->check_name( process_class->name() );
-//
-//    if( Process_class* other_process_class = process_class_or_null( process_class->path() ) )
-//    {
-//        if( !replace  &&  !other_process_class->_remove )  z::throw_xc( "SCHEDULER-416", other_process_class->obj_name() );
-//        other_process_class->_remove   = false;
-//        other_process_class->set_configuration( *process_class );
-//        if( _spooler->state() > Spooler::s_loading )  other_process_class->log()->info( message_string( "SCHEDULER-869" ) );
-//    }
-//    else
-//    {
-//        _process_class_map[ process_class->name() ] = process_class;
-//
-//        if( _spooler->state() > Spooler::s_loading )  process_class->log()->info( message_string( "SCHEDULER-870" ) );
-//    }
-//}
-
-//-------------------------------------------------------Process_class_folder::remove_process_class
-
-//void Process_class_folder::remove_process_class( Process_class* process_class )
-//{
-//    string                      path = process_class->path();
-//    Process_class_map::iterator it   = _process_class_map.find( path );
-//
-//    if( it->second != process_class )  z::throw_xc( "SCHEDULER-418", process_class->obj_name() );
-//
-//    bool ok = process_class->prepare_to_remove();
-//    if( ok )  
-//    {
-//        process_class->log()->info( message_string( "SCHEDULER-868" ) );
-//        _process_class_map.erase( it );
-//    }
-//    else
-//    {
-//        process_class->log()->info( message_string( "SCHEDULER-867" ) );
-//        process_class->_remove = true;
-//    }
-//}
-
-//--------------------------------------------------Process_class_folder::execute_xml_process_class
-
-//xml::Element_ptr Process_class_folder::execute_xml_process_class( Command_processor* command_processor, const xml::Element_ptr& element )
-//{
-//    if( !element.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", element.nodeName() );
-//
-//    string process_class_name = element.     getAttribute( "name"    );
-//    bool   replace            = element.bool_getAttribute( "replace" );
-//    
-//    ptr<Process_class> process_class = process_class_or_null( process_class_name );
-//
-//    if( process_class  &&  !replace )
-//    {
-//        process_class->set_dom( element );
-//    }
-//    else
-//    {
-//        ptr<Process_class> new_process_class = Z_NEW( Process_class( spooler() ) );
-//        new_process_class->set_folder_path( folder()->path() );
-//        new_process_class->set_dom( element );
-//
-//        if( process_class  &&  replace )  process_class->replace_with( new_process_class );
-//                                    else  add_process_class( new_process_class );
-//    }
-//
-//    return command_processor->_answer.createElement( "ok" );
-//}
-
-//--------------------------------------------------------------------Process_class_folder::set_dom
-
-//void Process_class_folder::set_dom( const xml::Element_ptr& element )
-//{
-//    //if( !process_class_or_null( "" ) )
-//    //{
-//    //    // has_process_classes() => true
-//    //    add_process_class( Z_NEW( Process_class( spooler() ) ) );    int NAMENLOSE_PROCESSKLASSE;  int FRÜHER_EINRICHEN;
-//    //}
-//
-//    DOM_FOR_EACH_ELEMENT( element, e )
-//    {
-//        if( e.nodeName_is( "process_class" ) )
-//        {
-//            string spooler_id = e.getAttribute( "spooler_id" );
-//
-//            if( spooler_id.empty() || spooler_id == _spooler->id() )
-//            {
-//                string process_class_name = e.getAttribute( "name" );
-//
-//                if( ptr<Process_class> process_class = process_class_or_null( process_class_name ) )
-//                {
-//                    process_class->set_dom( e );
-//                }
-//                else
-//                {
-//                    process_class = Z_NEW( Process_class( spooler() ) );
-//                    process_class->set_dom( e );
-//                    add_process_class( process_class );
-//                }
-//            }
-//        }
-//    }
-//}
 
 //-------------------------------------------------Process_class_subsystem::Process_class_subsystem
 

@@ -479,7 +479,7 @@ void Task::write_element_attributes( const xml::Element_ptr& element ) const
 
 Job* Task::job()
 {
-    if( !_job )  throw_xc( "TASK-WITHOUT-JOB", obj_name() );
+    if( !_job )  assert(0), throw_xc( "TASK-WITHOUT-JOB", obj_name() );
     return _job;
 }
 
@@ -1529,7 +1529,7 @@ bool Task::do_something()
 
                         case s_none:
                         case s__max:
-                            throw_xc( "state=none?" );
+                            assert(0), throw_xc( "state=none?" );
                     }
 
 
@@ -1734,7 +1734,7 @@ bool Task::operation__end()
 
             case s_ending_waiting_for_subprocesses: if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
                                                         m->_remote_instance->call__end();
-                                                    else throw_xc( "NO_REMOTE_INSTANCE" );
+                                                    else assert(0), throw_xc( "NO_REMOTE_INSTANCE" );
                                                     break;
 
             case s_on_error:                        result = do_call__end();     break;
@@ -1742,7 +1742,7 @@ bool Task::operation__end()
             case s_exit:                            result = do_call__end();     break;
             case s_release:                                  do_release__end();  break;
             case s_ended:                                    do_close__end();    break;
-            default:                                throw_xc( "Task::operation__end" );
+            default:                                assert(0), throw_xc( "Task::operation__end" );
         }
     }
     catch( const exception& x ) { set_error(x); result = false; }
@@ -2093,7 +2093,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
                     case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
                     case fl_first_and_last_only:    if( !_is_first_job_delay_after_error  
                                                     &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
-                    default: z::throw_xc( __FUNCTION__ );
+                    default: assert(0), z::throw_xc( __FUNCTION__ );
                 }
             }
 
@@ -2302,84 +2302,6 @@ void Module_task::do_close__end()
     }
 }
 
-//------------------------------------------------------------------------Object_set_task::do_close
-// Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
-/*
-void Object_set_task::do_close()
-{
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_object_set )  _com_object_set->clear();
-}
-*/
-//----------------------------------------------------------------------------Object_set_task::load
-/*
-bool Object_set_task::do_load()
-{
-    bool ok = true;
-
-    if( !_object_set )
-    {
-        _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
-        _com_object_set = new Com_object_set( _object_set );
-    }
-
-    if( !_module_instance->loaded() )
-    {
-        //ok = _module_instance->load();
-        //if( !ok || _job->has_error() )  return false;
-        throw_xc( "Object_set_task::do_load" );  //ok = do_load();
-        if( !ok || has_error() )  return false;
-    }
-
-    return ok;
-}
-*/
-//-------------------------------------------------------------------Object_set_task::do_begin__end
-/*
-bool Object_set_task::do_begin__end()
-{
-    if( !loaded() )
-    {
-        bool ok = true;
-
-        if( !_object_set )
-        {
-            _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
-            _com_object_set = new Com_object_set( _object_set );
-        }
-
-        if( !_module_instance->loaded() )
-        {
-            //ok = _module_instance->load();
-            //if( !ok || _job->has_error() )  return false;
-            throw_xc( "Object_set_task::do_start" );  //ok = do_load();
-            if( !ok || has_error() )  return false;
-        }
-
-        if( !ok )  return false;
-    }
-
-
-    set_state( s_running );
-
-    return _object_set->open();
-}
-
-//---------------------------------------------------------------------Object_set_task::do_end__end
-
-void Object_set_task::do_end__end()
-{
-    _object_set->close();
-    _object_set = NULL;
-}
-
-//--------------------------------------------------------------------Object_set_task::do_step__end
-
-bool Object_set_task::do_step__end()
-{
-    return _object_set->step( _job->_output_level );
-}
-*/
 //--------------------------------------------------------------------------Job_module_task::do_kill
 
 bool Job_module_task::do_kill()

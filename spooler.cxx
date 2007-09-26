@@ -1058,7 +1058,7 @@ Process_class_subsystem* Spooler::process_class_subsystem()
 
 Order_subsystem_interface* Spooler::order_subsystem()
 { 
-    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Order_subsystem is not initialized" );
+    if( !_order_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Order_subsystem is not initialized" );
 
     return _order_subsystem; 
 }
@@ -1067,7 +1067,7 @@ Order_subsystem_interface* Spooler::order_subsystem()
 
 Standing_order_subsystem* Spooler::standing_order_subsystem()
 { 
-    if( !_order_subsystem )  z::throw_xc( __FUNCTION__, "Standing_order_subsystem is not initialized" );
+    if( !_order_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Standing_order_subsystem is not initialized" );
 
     return _standing_order_subsystem; 
 }
@@ -1076,7 +1076,7 @@ Standing_order_subsystem* Spooler::standing_order_subsystem()
 
 Job_subsystem_interface* Spooler::job_subsystem()
 { 
-    if( !_job_subsystem )  z::throw_xc( __FUNCTION__, "Job_subsystem is not initialized" );
+    if( !_job_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Job_subsystem is not initialized" );
 
     return _job_subsystem; 
 }
@@ -1085,7 +1085,7 @@ Job_subsystem_interface* Spooler::job_subsystem()
 
 Task_subsystem* Spooler::task_subsystem()
 { 
-    if( !_task_subsystem )  z::throw_xc( __FUNCTION__, "Task_subsystem is not initialized" );
+    if( !_task_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Task_subsystem is not initialized" );
 
     return _task_subsystem; 
 }

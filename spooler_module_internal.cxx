@@ -81,7 +81,7 @@ Variant Internal_module_instance::call( const string& name )
 
 Variant Internal_module_instance::call( const string&, const Variant&, const Variant& )
 {
-    z::throw_xc( __FUNCTION__ );
+    assert(0), z::throw_xc( __FUNCTION__ );
 }
 
 //------------------------------------------------------------Internal_module_instance::name_exists

@@ -68,7 +68,7 @@ bool Xml_client_connection::is_send_possible()
 
 void Xml_client_connection::send( const string& s )
 {
-    if( !is_send_possible() )  z::throw_xc( __FUNCTION__, "Connection is currently in use" );
+    if( !is_send_possible() )  assert(0), z::throw_xc( __FUNCTION__, "Connection is currently in use" );
 
     _received_data.clear();
     _send_data = s;

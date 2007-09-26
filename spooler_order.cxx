@@ -836,7 +836,7 @@ Prefix_log* Order_source::log()
 
 void Order_source::initialize()
 {
-    if( !_job_chain )  z::throw_xc( __FUNCTION__ );
+    if( !_job_chain )  assert(0), z::throw_xc( __FUNCTION__ );
 
     if( _next_state.is_missing() )  _next_state = _job_chain->first_node()->order_state();
 
@@ -1198,7 +1198,7 @@ Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absol
     Order_queue_node( job_chain, state, n_job ),
     _job_path( job_path )
 {
-    if( job_path == "" )  z::throw_xc( __FUNCTION__, "no job path" );
+    if( job_path == "" )  assert(0), z::throw_xc( __FUNCTION__, "no job path" );
 }
 
 //------------------------------------------------------------------------------Job_node::~Job_node
@@ -2154,7 +2154,7 @@ Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
 
 Node* Job_chain::first_node()
 {
-    if( _node_list.empty() )  z::throw_xc( __FUNCTION__ );
+    if( _node_list.empty() )  assert(0), z::throw_xc( __FUNCTION__ );
     return *_node_list.begin();
 }
 
@@ -2710,8 +2710,8 @@ Job_chain* Job_chain::on_replace_now()
 {               
     ptr<Job_chain> holder = this;
 
-    if( !replacement() )  z::throw_xc( __FUNCTION__, obj_name() );
-    if( !can_be_replaced_now() )   z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
+    if( !replacement()         )  assert(0), z::throw_xc( __FUNCTION__, obj_name() );
+    if( !can_be_replaced_now() )  assert(0), z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
 
 
     replacement()->_order_id_space = _order_id_space;
@@ -4186,7 +4186,7 @@ void Order::assert_no_task( const string& debug_text )
 
 void Order::assert_task( const string& debug_text )
 {
-    if( !_task )  z::throw_xc( "ORDER-HAS-NO-TASK", obj_name(), debug_text );
+    if( !_task )  assert(0), z::throw_xc( "ORDER-HAS-NO-TASK", obj_name(), debug_text );
 }
 
 //---------------------------------------------------------------------------Order::occupy_for_task
@@ -4206,7 +4206,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
     }
 
 
-    if( _moved )  z::throw_xc( "SCHEDULER-0", obj_name() + " _moved=true?" );
+    if( _moved )  assert(0), z::throw_xc( "SCHEDULER-0", obj_name() + " _moved=true?" );
 
     _setback        = 0;
     _setback_called = false;
@@ -5804,7 +5804,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( _delay_storing_until_processing ) 
         {
-            if( _is_distributed )  z::throw_xc( __FUNCTION__, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            if( _is_distributed )  assert(0), z::throw_xc( __FUNCTION__, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
@@ -6458,7 +6458,7 @@ void Order::set_replacement( bool b )
 
 void Order::set_on_blacklist()
 {
-    if( !_job_chain )  z::throw_xc( __FUNCTION__, "no _job_chain" );        // Wenn _is_distributed
+    if( !_job_chain )  assert(0), z::throw_xc( __FUNCTION__, "no _job_chain" );        // Wenn _is_distributed
 
     _job_chain->add_order_to_blacklist( this );
 

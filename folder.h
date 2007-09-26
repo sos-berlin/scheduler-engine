@@ -653,7 +653,7 @@ struct file_based_subsystem : File_based_subsystem
         assert( !file_based_or_null( file_based->path() ) );
 
         FILE_BASED* casted_file_based = dynamic_cast<FILE_BASED*>( file_based );
-        if( !casted_file_based )  z::throw_xc( __FUNCTION__ );
+        if( !casted_file_based )  assert(0), z::throw_xc( __FUNCTION__ );
 
         _file_based_map[ file_based->normalized_path() ] = casted_file_based;
         _file_based_map_version++;
@@ -665,7 +665,7 @@ struct file_based_subsystem : File_based_subsystem
         assert( file_based_or_null( file_based->path() ) );
 
         FILE_BASED* casted_file_based = dynamic_cast<FILE_BASED*>( file_based );
-        if( !casted_file_based )  z::throw_xc( __FUNCTION__ );
+        if( !casted_file_based )  assert(0), z::throw_xc( __FUNCTION__ );
 
         _file_based_map.erase( casted_file_based->normalized_path() );
         _file_based_map_version++;
@@ -677,10 +677,10 @@ struct file_based_subsystem : File_based_subsystem
         assert( file_based_or_null( old_file_based->path() ) );
 
         FILE_BASED* casted_old_file_based = dynamic_cast<FILE_BASED*>( old_file_based );
-        if( !casted_old_file_based )  z::throw_xc( __FUNCTION__ );
+        if( !casted_old_file_based )  assert(0), z::throw_xc( __FUNCTION__ );
 
         FILE_BASED* casted_new_file_based = dynamic_cast<FILE_BASED*>( new_file_based );
-        if( !casted_new_file_based )  z::throw_xc( __FUNCTION__ );
+        if( !casted_new_file_based )  assert(0), z::throw_xc( __FUNCTION__ );
 
         _file_based_map[ casted_old_file_based->normalized_path() ] = casted_new_file_based;
         _file_based_map_version++;
@@ -715,8 +715,8 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     // file_based_subsystem
     string                      object_type_name            () const                                { return "Folder"; }
     string                      filename_extension          () const                                { return "/"; }             // Wird nicht verwendet
-    string                      xml_element_name            () const                                { z::throw_xc( __FUNCTION__ ); }
-    string                      xml_elements_name           () const                                { z::throw_xc( __FUNCTION__ ); }
+    string                      xml_element_name            () const                                { assert(0), z::throw_xc( __FUNCTION__ ); }
+    string                      xml_elements_name           () const                                { assert(0), z::throw_xc( __FUNCTION__ ); }
   //string                      normalized_name             ( const string& name ) const            { return name; }
     ptr<Folder>                 new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }

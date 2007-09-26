@@ -146,7 +146,7 @@ struct File_order_sink_module_instance : Internal_module_instance
         else
         {
             Sink_node* sink_node = Sink_node::cast( order->job_chain_node() );
-            if( !sink_node )  z::throw_xc( __FUNCTION__ );
+            if( !sink_node )  assert(0), z::throw_xc( __FUNCTION__ );
 
             if( !path.file_exists() )
             {
@@ -175,7 +175,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                         result = true;
                     }
                     else
-                        z::throw_xc( __FUNCTION__ );
+                        assert(0), z::throw_xc( __FUNCTION__ );
                 }
                 catch( exception& x )
                 {
@@ -1061,7 +1061,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
             }
 
             default:
-                z::throw_xc( __FUNCTION__ );
+                assert(0), z::throw_xc( __FUNCTION__ );
         }
     }
     catch( const exception& x )  { log()->warn( x.what() ); }

@@ -407,7 +407,7 @@ void Module::init()
                                         break;
 #       endif
 
-        default:                        z::throw_xc( __FUNCTION__ );
+        default:                        assert(0), z::throw_xc( __FUNCTION__ );
     }
 
     _initialized = true;
@@ -515,7 +515,7 @@ Process_class* Module::process_class_or_null() const
 
 Process_class* Module::process_class() const
 { 
-    if( !_use_process_class )  z::throw_xc( "NO_PROCESS_CLASS", __FUNCTION__ );
+    if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", __FUNCTION__ );
 
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
@@ -688,7 +688,7 @@ void Module_instance::add_obj( IDispatch* object, const string& name )
 IDispatch* Module_instance::object( const string& name )
 {
     IDispatch* result = object( name, NULL );
-    if( !result )  throw_xc( "Module_instance::object", name );
+    if( !result )  assert(0), throw_xc( "Module_instance::object", name );
     return result;
 }
 

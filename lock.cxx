@@ -850,7 +850,7 @@ bool Requestor::enqueue_lock_requests()
 { 
     bool result = false;
 
-    if( _is_enqueued )  z::throw_xc( __FUNCTION__ );
+    if( _is_enqueued )  assert(0), z::throw_xc( __FUNCTION__ );
 
 
     bool all_locks_are_there = true;
@@ -1004,7 +1004,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     else
     {
         //if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
-        if( _lock_path != lock_path )  z::throw_xc( __FUNCTION__ );
+        if( _lock_path != lock_path )  assert(0), z::throw_xc( __FUNCTION__ );
         if( _lock_mode != lock_mode )  z::throw_xc( "SCHEDULER-408", "lock.use", "exclusive" );
     }
 }
