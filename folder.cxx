@@ -13,7 +13,7 @@ using namespace zschimmer::file;
 
 const char                      folder_separator            = '/';
 const Absolute_path             root_path                   ( "/" );
-
+const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
 #ifdef Z_WINDOWS
     const int                   directory_watch_interval_min = 60;
     const int                   directory_watch_interval_max = 60;
@@ -344,11 +344,14 @@ bool Folder_subsystem::async_continue_( Continue_flags )
         if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 #   endif
 
+    
+    _try_again_delay = INT_MAX;
+
     bool something_changed = _root_folder->adjust_with_directory();
 
     _directory_watch_interval = something_changed? directory_watch_interval_min
                                                  : min( directory_watch_interval_max, 2 * _directory_watch_interval );
-    set_async_delay( _directory_watch_interval );
+    set_async_delay( min( _directory_watch_interval, _try_again_delay ) );
 
     return true;
 }
@@ -555,7 +558,6 @@ bool Folder::adjust_with_directory()
                     else
                     {
                         file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name ) );
-                        //typed_folder->adjust_with_directory( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name ) );
                     }
 
                     last_normalized_name = normalized_name;
@@ -569,20 +571,6 @@ bool Folder::adjust_with_directory()
             
             _log->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
 
-            //Besser alles stehen lassen, nicht löschen!
-            //Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-            //{
-            //    Typed_folder*        typed_folder         = it->second;
-            //    list<Base_file_info> empty_file_info_list;
-
-            //    typed_folder->adjust_with_directory( empty_file_info_list );
-            //}
-            ////Z_FOR_EACH( Folder_set, _child_folder_set, it )
-            ////{
-            ////    Folder* child_folder = *it;
-            ////    child_folder->remove_all_objects();
-            ////}
-            
             // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
         }
 
@@ -605,19 +593,6 @@ bool Folder::adjust_with_directory()
 
     return something_changed;
 }
-
-//----------------------------------------------------------------------Folder::remove_all_objectes
-
-//void Folder::remove_all_objectes()
-//{
-//    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-//    {
-//        Typed_folder*        typed_folder         = it->second;
-//        list<Base_file_info> empty_file_info_list;
-//
-//        typed_folder->adjust_with_directory( empty_file_info_list );
-//    }
-//}
 
 //------------------------------------------------------------------------------Folder::dom_element
 
@@ -733,19 +708,6 @@ bool Folder::can_be_removed_now()
     return result;
 }
 
-//----------------------------------------------------------------------------Folder::on_remove_now
-
-//void Folder::on_remove_now()
-//{
-//}
-
-//-----------------------------------------------------------------------------Folder::remove_error
-
-//zschimmer::Xc Folder::remove_error()
-//{
-//    return My_file_based::remove_error();
-//}
-
 //-----------------------------------------------------------------------Typed_folder::Typed_folder
 
 Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
@@ -830,12 +792,13 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 //---------------------------------------------------------------Typed_folder::on_base_file_changed
 
-bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info, double now )
+bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info )
 {
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;
-    File_based*     current_file_based = old_file_based;        // File_based der zuletzt geladenen Datei
+    File_based*     current_file_based = old_file_based;        // File_based der zuletzt gelesenen Datei
     bool            file_was_removed   = old_file_based  &&  old_file_based->_file_is_removed;
+    File_path       file_path;
 
     if( old_file_based )  
     {
@@ -844,84 +807,79 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         if( old_file_based->replacement() )  current_file_based = old_file_based->replacement();   // File_based der zuletzt geladenen Datei
     }
 
+    //int error_count = current_file_based? current_file_based->_base_file_error_count : 0;
+
+
     try
     {
         if( base_file_info )
         {
-            if( !old_file_based  ||
-                old_file_based->_file_is_removed  ||
-                file_was_removed ||
-                current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc )
+            file_path = File_path( folder()->directory(), base_file_info->_filename );
+
+            if( !old_file_based                     ||      // Datei ist neu?
+              //old_file_based->_file_is_removed    ||
+                file_was_removed                    ||      // Datei ist wieder aufgetaucht?
+                current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc ||     // Geänderter Zeitstempel?
+
+                ( current_file_based->_try_again_after_error &&                                             // Nach Fehler noch ein Versuch, 
+                  current_file_based->_base_file_xc_time + file_timestamp_delay < double_from_gmtime() ) )  // falls Datei geändert, aber Zeitstempel nicht
             {
-                //if( current_file_based  && 
-                //    current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc  && 
-                //    current_file_based->_base_file_info_timestamp + file_timestamp_delay < now )        // Dateiänderung ist noch nicht alt genug?
-                //{
-                //    spooler()->folder_subsystem()->
-                //}
-                //else
+                something_changed = true;
+
+
+                file_based = subsystem()->call_new_file_based();
+                file_based->_try_again_after_error = !current_file_based  ||  current_file_based->base_file_info()._timestamp_utc != base_file_info->_timestamp_utc;
+                file_based->set_base_file_info( *base_file_info );
+                file_based->set_folder_path( folder()->path() );
+                file_based->set_name( Folder::object_name_of_filename( base_file_info->_filename ) );
+
+                string rel_path = folder()->make_path( base_file_info->_filename );
+
+                if( old_file_based ) 
                 {
-                    something_changed = true;
+                    old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, subsystem()->object_type_name() ) );
+                    old_file_based->set_replacement( file_based );
+                }
+                else
+                {
+                    file_based->log()->info( message_string( "SCHEDULER-891", rel_path, subsystem()->object_type_name() ) );
+                    add_file_based( file_based );
+                }
 
-                    string name       = Folder::object_name_of_filename( base_file_info->_filename );
-                    string content;
-                    bool   is_removed = false;
 
-                    try
+                xml::Document_ptr dom_document ( string_from_file( file_path ) );
+                if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+
+                assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
+                assert_empty_attribute( dom_document.documentElement(), "replace"    );
+
+                file_based->set_dom( dom_document.documentElement() );
+                file_based->initialize();
+
+                file_based->_try_again_after_error = false;
+
+
+                if( old_file_based )  
+                {
+                    old_file_based->prepare_to_replace();
+
+                    if( old_file_based->can_be_replaced_now() ) 
                     {
-                        content = string_from_file( File_path( folder()->directory(), base_file_info->_filename ) );
-                    }
-                    catch( zschimmer::Xc& x )
-                    {
-                        if( x.code() != ( S() << "ERRNO-" << ENOENT ).to_string() )  throw;   // != "ERRNO-2" ?
-                        is_removed = true;      // Datei ist nach dem Lesen des Verzeichnisses gelöscht worden, oder Link ins Leere
-                    }
+                        file_based = old_file_based->replace_now();     assert( !file_based->replacement() );
 
-                    if( !is_removed )
-                    {
-                        file_based = subsystem()->call_new_file_based();
-                        file_based->set_base_file_info( *base_file_info );
-                        file_based->set_folder_path( folder()->path() );
-                        file_based->set_name( name );
-
-                        if( old_file_based )  old_file_based->set_replacement( file_based );
-                                        else  add_file_based( file_based );
-
-                        string relative_file_path = folder()->make_path( base_file_info->_filename );
-                        if( old_file_based )  old_file_based->log()->info( message_string( "SCHEDULER-892", relative_file_path, subsystem()->object_type_name() ) );
-                                        else  file_based    ->log()->info( message_string( "SCHEDULER-891", relative_file_path, subsystem()->object_type_name() ) );
-
-                        xml::Document_ptr dom_document ( content );
-                        if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
-
-                        assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
-                        assert_empty_attribute( dom_document.documentElement(), "replace"    );
-
-                        file_based->set_dom( dom_document.documentElement() );
-                        file_based->initialize();
-
-                        if( old_file_based )  
-                        {
-                            assert( old_file_based->replacement() );    // Oben gesetzt
-                            old_file_based->prepare_to_replace();
-
-                            if( old_file_based->can_be_replaced_now() ) 
-                            {
-                                file_based = old_file_based->replace_now();
-                                assert( !file_based->replacement() );
-                                if( file_based == old_file_based )  
-                                {
-                                    file_based->set_base_file_info( *base_file_info );
-                                    file_based->_base_file_xc      = zschimmer::Xc();
-                                    file_based->_base_file_xc_time = 0;
-                                    file_based->activate();
-                                }
-                            }
+                        if( file_based == old_file_based )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
+                        {                                       
+                            file_based->set_base_file_info( *base_file_info );
+                            file_based->_base_file_xc      = zschimmer::Xc();
+                            file_based->_base_file_xc_time = 0;
+                            //file_based->activate();
                         }
-                        else
-                            file_based->activate();
                     }
                 }
+                //else
+                //    file_based->activate();
+
+                file_based->activate();
             }
         }
         else                                    // Datei ist gelöscht
@@ -929,8 +887,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         {
             something_changed = true;
 
-            string relative_file_path = folder()->make_path( old_file_based->base_file_info()._filename );
-            old_file_based->log()->info( message_string( "SCHEDULER-890", relative_file_path, subsystem()->object_type_name() ) );
+            string p = folder()->make_path( old_file_based->base_file_info()._filename );
+            old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
             file_based = old_file_based;                // Für catch()
             file_based->remove();
@@ -943,20 +901,30 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
         if( !file_based )  throw;   // Sollte nicht passieren
 
-        if( base_file_info )    // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
+        if( base_file_info )        // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
         {
-            //Im selben Zustand lassen.  file_based->set_file_based_state( File_based::s_error );
             file_based->_base_file_xc      = x;
             file_based->_base_file_xc_time = double_from_gmtime();
+
+            // Falls Datei gerade geändert wird, aber der Zeitstempel in derselben Sekunde bleibt:
+            if( file_based->_try_again_after_error )  folder()->subsystem()->set_try_again_delay( file_timestamp_delay );  
+            //file_based->_base_file_error_count = error_count + 1;
+            //if( file_based->_base_file_error_count == 1 )  folder()->subsystem()->set_try_again_delay( file_timestamp_delay );  
+
             msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), x );
+            file_based->log()->error( msg );
+
+            if( !file_path.exists() )  file_based->remove(),  msg = "";     // Datei zwischenzeitlich gelöscht?
         }
         else
+        {
             msg = message_string( "SCHEDULER-439", File_path( folder()->directory(), file_based->base_file_info()._filename ), 
                                                    file_based->subsystem()->object_type_name(), x );
+            file_based->log()->error( msg );
+        }
 
-        file_based->log()->error( msg );
 
-        if( _spooler->_mail_on_error )
+        if( msg != ""  &&  _spooler->_mail_on_error )
         {
             Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
             scheduler_event.set_error( x );
@@ -1613,8 +1581,8 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
 
 void File_based::prepare_to_replace()
 {
+    assert( _replacement );
     ptr<File_based> replacement = _replacement;     // prepare_to_remove() entfernt _replacement
-    assert( replacement );
 
     prepare_to_remove();        
 

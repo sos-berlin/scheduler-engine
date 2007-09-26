@@ -382,6 +382,7 @@ zschimmer::Xc Lock::remove_error()
 
 void Lock::prepare_to_replace()
 {
+    assert( replacement() );
 }
 
 //-----------------------------------------------------------------------------Lock::on_replace_now

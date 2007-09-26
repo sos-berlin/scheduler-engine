@@ -272,7 +272,7 @@ struct File_based : Scheduler_object,
     State                      _state;
     State                      _wished_state;
     Base_file_info             _base_file_info;
-  //double                     _base_file_info_timestamp;
+    bool                       _try_again_after_error;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
@@ -734,12 +734,15 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
     void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
 
+    void                        set_try_again_delay         ( int d )                               { _try_again_delay = d; }
+
   private:
     Fill_zero                  _zero_;
     file::File_path            _directory;
     ptr<Folder>                _root_folder;
     Event                      _directory_event;
     int                        _directory_watch_interval;
+    int                        _try_again_delay;
 };
 
 

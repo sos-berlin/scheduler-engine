@@ -2692,6 +2692,7 @@ zschimmer::Xc Job_chain::remove_error()
 
 void Job_chain::prepare_to_replace()
 {
+    assert( replacement() );
 }
 
 //-------------------------------------------------------------------Job_chain::can_be_replaced_now

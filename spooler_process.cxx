@@ -1040,6 +1040,7 @@ bool Process_class::can_be_removed_now()
 
 void Process_class::prepare_to_replace()
 {
+    assert( replacement() );
 }
 
 //---------------------------------------------------------------Process_class::can_be_replaced_now

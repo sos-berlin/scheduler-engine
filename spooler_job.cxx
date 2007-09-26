@@ -2209,7 +2209,7 @@ void Job::calculate_next_time( const Time& now )
 {
     Time next_time = Time::never;
 
-    if( _state > s_not_initialized ) 
+    if( _state == s_running || _state == s_pending ) //_state > s_not_initialized ) 
     {
         //is_waiting |= _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  ! _lock_requestor->locks_are_available();
         //is_waiting |= _waiting_for_process && !_waiting_for_process_try_again;
