@@ -2214,11 +2214,11 @@ void Job::calculate_next_time( const Time& now )
         //is_waiting |= _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  ! _lock_requestor->locks_are_available();
         //is_waiting |= _waiting_for_process && !_waiting_for_process_try_again;
 
-        if( _lock_requestor )  // &&  _lock_requestor->is_enqueued() )
+        if( _lock_requestor &&  _lock_requestor->is_enqueued() )
         {
             if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
-            else
-            if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
+            //else
+            //if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
         }
         else
         if( _waiting_for_process )
@@ -2508,7 +2508,7 @@ ptr<Task> Job::task_to_start()
                 // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
                 task = NULL, cause = cause_none, has_order = false;      
 
-                //if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
+                if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
             }
         }
     }
@@ -2892,7 +2892,7 @@ void Job::set_state( State new_state )
             remove_waiting_job_from_process_list();
         }
 
-        if( _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  _lock_requestor->locks_are_available() )
+        if( _lock_requestor  &&  _lock_requestor->is_enqueued() )  // &&  _lock_requestor->locks_are_available() )
         {
             _lock_requestor->dequeue_lock_requests();
         }
