@@ -95,7 +95,7 @@ void Path::set_folder_path( const string& folder_path )
 void Path::set_absolute( const Absolute_path& absolute_base, const Path& relative )
 {
     assert( !absolute_base.empty() );
-    if( absolute_base.empty() )  z::throw_xc( __FUNCTION__, relative );
+    if( absolute_base.empty() )  assert(0), z::throw_xc( __FUNCTION__, relative );
 
     if( relative.empty() )
     {
@@ -177,7 +177,7 @@ string Path::to_filename() const
 Absolute_path::Absolute_path( const Path& path )
 {
     assert( path.empty()  ||  path.is_absolute_path() );
-    if( !path.empty()  &&  !path.is_absolute_path() )  z::throw_xc( __FUNCTION__, path );
+    if( !path.empty()  &&  !path.is_absolute_path() )  assert(0), z::throw_xc( __FUNCTION__, path );
 
     set_path( path );
 }
@@ -328,6 +328,7 @@ bool Folder_subsystem::subsystem_activate()
 
 ptr<Folder> Folder_subsystem::new_file_based()
 {
+    assert(0);
     zschimmer::throw_xc( __FUNCTION__ );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an
     //return Z_NEW( Folder( spooler()->folder_subsystem() ) );
 }
@@ -1061,7 +1062,7 @@ void Typed_folder::handle_replace_or_remove_candidates()
 
 void Typed_folder::add_file_based( File_based* file_based )
 {
-    if( !file_based )  z::throw_xc( __FUNCTION__, "NULL" );
+    if( !file_based )  assert(0), z::throw_xc( __FUNCTION__, "NULL" );
     assert( !file_based->typed_folder() );
 
     string normalized_name = file_based->normalized_name();
@@ -1291,7 +1292,7 @@ bool File_based::load()
 
 bool File_based::load2()
 {
-    if( !is_in_folder()  &&  this != spooler()->root_folder() )  z::throw_xc( "NOT-IN-FOLDER", __FUNCTION__, obj_name() );
+    if( !is_in_folder()  &&  this != spooler()->root_folder() )  assert(0), z::throw_xc( "NOT-IN-FOLDER", __FUNCTION__, obj_name() );
 
     bool ok = _state >= s_loaded;
     if( !ok )
