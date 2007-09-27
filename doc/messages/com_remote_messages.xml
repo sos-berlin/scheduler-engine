@@ -7,8 +7,8 @@
     name     = "com_remote_messages"
     package  = "Separate processes"
     base_dir = "../" 
-    author   = "$Author: jz $"
-    date     = "$Date: 2006-03-10 08:26:38 +0100 (Fr, 10 Mrz 2006) $"
+    author   = "$Author$"
+    date     = "$Date$"
 >
     <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
     <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
