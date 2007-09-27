@@ -35,13 +35,8 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     bool                        on_load                     (); 
     bool                        on_activate                 ();
 
-    bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
     void                        on_remove_now               ();
-
-    //void                        prepare_to_replace          ();
-    //bool                        can_be_replaced_now         ();
-    //Standing_order*             on_replace_now              ();
 
 
     //
@@ -51,15 +46,9 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     string                      order_id                    () const                                { return _order_id; }
 
     
-  //void                        on_order_carried_out        ();                                     // Gerufen von Order::on_carried_out()
-  //void                        on_order_removed            ();                                     // Gerufen von Order::remove_from_job_chain()
-
-  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
-
-
   private:
     bool                        order_is_removable_or_replaceable();
-    void                        set_order                   ( Order* );
+  //void                        set_order                   ( Order* );
 
 
     Fill_zero                  _zero_;

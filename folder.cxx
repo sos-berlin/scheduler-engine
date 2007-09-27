@@ -898,7 +898,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                     file_based->initialize();
 
 
-                    if( old_file_based )  
+                    if( !old_file_based )           // Neues Objekt?
+                    {
+                        file_based->activate();     
+                    }
+                    else
                     {
                         old_file_based->prepare_to_replace();
 
@@ -908,16 +912,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                             if( file_based == old_file_based )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
                             {                                       
-                                file_based->set_base_file_info( *base_file_info );
+                                file_based->set_base_file_info( *base_file_info );      // Alte Werte geänderten Objekts überschreiben
                                 file_based->_base_file_xc      = zschimmer::Xc();
                                 file_based->_base_file_xc_time = 0;
                             }
-
-                            //file_based->activate();
                         }
                     }
-                    else
-                        file_based->activate();
                 }
             }
         }

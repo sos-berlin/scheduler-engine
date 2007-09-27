@@ -74,7 +74,7 @@
     <register_entry register_file='xml.xml#use_element__add_order' register_title='Alle XML-Elemente'  register_keyword='add_order'/>
     <register_entry register_file='xml/add_order.xml#' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='add_order' type='definition'/>
     <register_entry register_file='xml/modify_order.xml#use_element__add_order' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='add_order'/>
-    <register_entry register_file='xml/order.xml#use_element__add_order' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='add_order'/>
+    <register_entry register_file='xml/order.xml#use_element__add_order' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='add_order'/>
     <register_entry register_file='xml/web_service.xml#use_element__add_order' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='add_order'/>
 </register_keyword>
 <register_keyword keyword='add_order'>
@@ -430,7 +430,7 @@
     <register_entry register_file='xml/commands.xml#use_element__copy_params' register_title='&lt;commands&gt;'  register_keyword='copy_params'/>
     <register_entry register_file='xml/copy_params.xml#' register_title='&lt;copy_params&gt;'  register_keyword='copy_params' type='definition'/>
     <register_entry register_file='xml/copy_params.xml#use_element__copy_params' register_title='&lt;copy_params&gt;'  register_keyword='copy_params'/>
-    <register_entry register_file='xml/order.xml#use_element__copy_params' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='copy_params'/>
+    <register_entry register_file='xml/order.xml#use_element__copy_params' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='copy_params'/>
     <register_entry register_file='xml/start_job.xml#use_element__copy_params' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='copy_params'/>
 </register_keyword>
 <register_keyword keyword='count'>
@@ -1407,7 +1407,7 @@
     <register_entry register_file='xml/copy_params.xml#use_element__job' register_title='&lt;copy_params&gt;'  register_keyword='job'/>
     <register_entry register_file='xml/job.xml#' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/job.xml#use_element__job' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='job'/>
-    <register_entry register_file='xml/order.xml#use_element__job' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='job'/>
+    <register_entry register_file='xml/order.xml#use_element__job' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/process.xml#use_element__job' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/process_class.xml#use_element__job' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/show_jobs.xml#use_element__job' register_title='&lt;show_jobs&gt; (Kommando)'  register_keyword='job'/>
@@ -2344,7 +2344,7 @@
     <register_entry register_file='xml.xml#use_element__order' register_title='Alle XML-Elemente'  register_keyword='order'/>
     <register_entry register_file='xml/add_order.xml#use_element__order' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='order'/>
     <register_entry register_file='xml/answer/order.xml#' register_title='&lt;order&gt; (Antwort)'  register_keyword='order' type='definition'/>
-    <register_entry register_file='xml/order.xml#' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='order' type='definition'/>
+    <register_entry register_file='xml/order.xml#' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='order' type='definition'/>
     <register_entry register_file='xml/web_service.xml#use_element__order' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='order'/>
 </register_keyword>
 <register_keyword keyword='order'>
@@ -2575,7 +2575,7 @@
     <register_entry register_file='xml/answer/task.xml#attribute_priority' register_title='&lt;task&gt; (Antwort)'  register_keyword='priority' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_priority' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='priority' type='definition'/>
     <register_entry register_file='xml/modify_order.xml#attribute_priority' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='priority' type='definition'/>
-    <register_entry register_file='xml/order.xml#attribute_priority' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='priority' type='definition'/>
+    <register_entry register_file='xml/order.xml#attribute_priority' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='priority' type='definition'/>
 </register_keyword>
 <register_keyword keyword='priority (property)'>
     <register_keyword_display><code>priority</code> (property)</register_keyword_display>
@@ -3628,7 +3628,7 @@
     <register_entry register_file='xml/answer/order.xml#attribute_title' register_title='&lt;order&gt; (Antwort)'  register_keyword='title' type='definition'/>
     <register_entry register_file='xml/job.xml#attribute_title' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='title' type='definition'/>
     <register_entry register_file='xml/modify_order.xml#attribute_title' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='title' type='definition'/>
-    <register_entry register_file='xml/order.xml#attribute_title' register_title='&lt;order&gt; (Konfiguratioin)'  register_keyword='title' type='definition'/>
+    <register_entry register_file='xml/order.xml#attribute_title' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='title' type='definition'/>
 </register_keyword>
 <register_keyword keyword='title (property)'>
     <register_keyword_display><code>title</code> (property)</register_keyword_display>
