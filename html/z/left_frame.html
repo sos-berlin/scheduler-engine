@@ -231,7 +231,7 @@ function show_card( what )
          || what == "remote_schedulers"
          || what == "cluster"           )
         {
-            window.parent.details_frame.hide();
+            if( window.parent._details_frame_loaded )  window.parent.details_frame.hide();
             //window.parent.details_frame.clear();
             
             //_saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
@@ -258,7 +258,7 @@ function show_task_details( job_path, task_id )
     var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
     update_jobs_frame();
-    window.parent.details_frame.show_task_details( job_element, task_element );
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_task_details( job_element, task_element );
 }
 
 //---------------------------------------------------------------------------------show_job_details
@@ -284,7 +284,7 @@ function show_job_details( job_path, job_chain_path )
     }
     */
 
-    window.parent.details_frame.show_job_details( job_element, job_chain_path );
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_job_details( job_element, job_chain_path );
     update_jobs_frame();
 }
 
@@ -294,7 +294,7 @@ function show_job_chain_details( job_chain_path )
 {
     var job_chain_element = _response.selectSingleNode( ".//job_chain[@path='" + job_chain_path + "']" );
 
-    window.parent.details_frame.show_job_chain_details( job_chain_element );
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_job_chain_details( job_chain_element );
     update();
 }
 

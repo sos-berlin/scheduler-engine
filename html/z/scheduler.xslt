@@ -889,8 +889,9 @@
                 <!-- Nichtauftragsjobs zeigen -->
 
                 <!--xsl:if test="/spooler/@show_job_chain_jobs_checkbox and not( $single ) and /spooler/answer/state/jobs/job [ not( @order='yes' ) ]"-->
-                    
-                    <tr>
+                <xsl:if test="/spooler/@show_job_chain_jobs_checkbox and not( $single ) ">
+
+                <tr>
                         <td colspan="6" class="job_chains_gap">&#160;</td>
                     </tr>
 
@@ -979,7 +980,7 @@
 
                         </xsl:if>
                     </xsl:for-each>
-                <!--/xsl:if-->
+                </xsl:if>
             </tbody>
         </table>
 

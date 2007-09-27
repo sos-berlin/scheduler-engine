@@ -34,6 +34,8 @@
 
 
 
+<p id="error_message" class="small" style="margin-top: 0px; color: #e00000; font-weight: bold;"></p>
+
 <span id="stylesheet_output"></span>
 
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
@@ -123,8 +125,8 @@ function show()
             _hidden = false;
         }
     }
-    else
-        hide();
+//    else
+//        hide();
 }
 
 //--------------------------------------------------------------------------------show_task_details
@@ -209,12 +211,23 @@ function show_job_description()
 
 function update( force )
 {
-    if( force == undefined )  force = false;
-    if( ( _hidden || _description_popup ) &&  !force )  return false;
+    return call_error_checked( update2, force );
+}
 
+//-------------------------------------------------------------------------------------------update
+
+function update2( force )
+{
     var ok = false;
     
+    var e = document.getElementById( "error_message" );
+    if( e )  e.innerHTML = "";
     
+    if( force == undefined )  force = false;
+    if( ( _hidden || _description_popup ) &&  !force )  return false;
+    if( !_scheduler )  return false;
+
+
     if( _task_id != undefined )
     {
         var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
@@ -269,7 +282,7 @@ function update( force )
     }
 
     if( _scheduler != undefined )  _scheduler._time_log.log( "details.innerHTML" );
-    
+
     return ok;
 }
 

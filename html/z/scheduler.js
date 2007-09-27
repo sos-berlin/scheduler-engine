@@ -297,16 +297,17 @@ Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3
 {
     if( debug )
     {
-        this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
+        return this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
     }
     else
     try
     {
-        this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
+        return this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
     }
     catch( x )
     {
-        return handle_exception( x );
+        //return 
+        handle_exception( x );
     }
 }
 
@@ -555,23 +556,24 @@ function Scheduler_html_configuration( url )
 
 function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
 {
-    _scheduler._time_log = new Time_log;
+    if( _scheduler )  _scheduler._time_log = new Time_log;
 
     if( debug )
     {
-        f( arg1, arg2, arg3, arg4, arg5 );
+        return f( arg1, arg2, arg3, arg4, arg5 );
     }
     else
     try
     {
-        f( arg1, arg2, arg3, arg4, arg5 );
+        return f( arg1, arg2, arg3, arg4, arg5 );
     }
     catch( x )
     {
-        return handle_exception( x );
+        //return 
+        handle_exception( x );
     }
 
-    if( is_logging_times )  window.status = _scheduler._time_log.get_line();
+    if( is_logging_times  &&  _scheduler )  window.status = _scheduler._time_log.get_line();
 }
 
 //---------------------------------------------------------------------------------handle_exception
@@ -594,7 +596,8 @@ function handle_exception( x )
         error.message = msg;
     }
 
-    var e = window.parent.left_frame.document.getElementById( "error_message" );
+    var e = document.getElementById( "error_message" );
+    if( !e )  window.parent.left_frame.document.getElementById( "error_message" );
     if( e )
     {
         e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
@@ -672,7 +675,7 @@ function modify_response( response )
         spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^\/]*$/, "/" ) );   // Pfad bis zum letzten Schräger
     }
 
-    _scheduler._time_log.log( "modify_response" );
+    if( _scheduler )  _scheduler._time_log.log( "modify_response" );
 }
 
 //------------------------------------------------------------------------------save_checkbox_state
