@@ -1651,12 +1651,13 @@ File_based* File_based::replace_now()
 {
     assert( replacement() );
 
-    State wished_state = _wished_state;
+    //State wished_state = _wished_state;
 
     File_based* new_file_based = on_replace_now();
     // this ist ungültig
 
-    new_file_based->switch_file_based_state( wished_state );
+    //new_file_based->switch_file_based_state( wished_state );
+    new_file_based->activate();
     return new_file_based;
 }
 

@@ -749,27 +749,6 @@ Job_chain_folder::Job_chain_folder( Folder* folder )
 {
 }
 
-//------------------------------------------------------------------------Job_chain_folder::set_dom
-
-//void Job_chain_folder::set_dom( const xml::Element_ptr& element )
-//{
-//    DOM_FOR_EACH_ELEMENT( element, e )
-//    {
-//        if( e.nodeName_is( "job_chain" ) )
-//        {
-//            // Siehe auch Command_processor::execute_job_chain()
-//            add_file_based_xml( e );
-//            //ptr<Job_chain> job_chain = new Job_chain( _spooler );
-//            //job_chain->set_folder_path( folder()->path() );
-//            //job_chain->set_name( e.getAttribute( "name" ) );
-//            //job_chain->set_dom( e );
-//            //job_chain->initialize();
-//            //add_job_chain( job_chain );
-//            //job_chain->activate();
-//        }
-//    }
-//}
-
 //------------------------------------------------------------------Job_chain_folder::add_job_chain
 
 void Job_chain_folder::add_job_chain( Job_chain* job_chain )
@@ -790,29 +769,6 @@ void Job_chain_folder::remove_job_chain( Job_chain* job_chain )
 
     remove_file_based( job_chain );
 }
-
-//--------------------------------------------------------------------Job_chain_folder::dom_element
-
-//xml::Element_ptr Job_chain_folder::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
-//{
-//    xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
-//
-//    job_chains_element.setAttribute( "count", (int)_file_based_map.size() );
-//
-//    if( show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
-//    {
-//        FOR_EACH( File_based_map, _file_based_map, it )
-//        {
-//            Job_chain* job_chain = static_cast<Job_chain*>( +it->second );
-//            if( job_chain->visible() )
-//            {
-//                job_chains_element.appendChild( job_chain->dom_element( document, show_what ) );
-//            }
-//        }
-//    }
-//
-//    return job_chains_element;
-//}
 
 //-----------------------------------------------------------------------Order_source::Order_source
 
@@ -1585,6 +1541,7 @@ string Job_chain::state_name( State state )
     switch( state )
     {
         case s_under_construction:  return "under_construction";
+        case s_initialized:         return "initialized";
         case s_loaded:              return "loaded";
         case s_active:              return "running";   //"active";
         case s_stopped:             return "stopped";
@@ -1658,7 +1615,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
                 if( _is_distributed )  z::throw_xc( "SCHEDULER-413" );
                 if( state == "" )  z::throw_xc( "SCHEDULER-231", "job_chain_node.job_chain", "empty state" );
 
-                Absolute_path nested_job_chain_path ( folder()->path(), e.getAttribute( "job_chain" ) );
+                Absolute_path nested_job_chain_path ( folder_path(), e.getAttribute( "job_chain" ) );
                 ptr<Nested_job_chain_node> nested_job_chain_node = new Nested_job_chain_node( this, state, nested_job_chain_path );
                 nested_job_chain_node->set_next_state ( next_state  );
                 nested_job_chain_node->set_error_state( error_state );
@@ -5724,13 +5681,14 @@ void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option jo
 
 bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option job_chain_stack_option, bool exists_exception )
 {
+    // Sollte mit assert_is_loaded() überflüssig geworden sein:
     if( job_chain->state() != Job_chain::s_loaded  &&  
         job_chain->state() != Job_chain::s_active  &&
         job_chain->state() != Job_chain::s_stopped )  z::throw_xc( "SCHEDULER-151" );
 
-    bool is_new = true;
-
     job_chain->assert_is_loaded();
+
+    bool is_new = true;
 
     if( _id.vt == VT_EMPTY )  set_default_id();
     _id_locked = true;
