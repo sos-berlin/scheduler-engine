@@ -98,7 +98,7 @@ struct Standing_order_subsystem : file_based_subsystem< Standing_order >,
 
     string                      object_type_name            () const                                { return "Standing_order"; }
     string                      filename_extension          () const                                { return ".order.xml"; }
-    string                      xml_element_name            () const                                { assert(0), z::throw_xc( __FUNCTION__ ); }
+    string                      xml_element_name            () const                                { return "order"; }
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( __FUNCTION__ ); }
     string                      normalized_name             ( const string& ) const;
     ptr<Standing_order>         new_file_based              ();

@@ -887,6 +887,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
 
                     xml::Document_ptr dom_document ( content );
+                    if( !dom_document.documentElement().nodeName_is( subsystem()->xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_element_name(), dom_document.documentElement().nodeName() );
                     if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
                     assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
