@@ -892,6 +892,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                     assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
                     assert_empty_attribute( dom_document.documentElement(), "replace"    );
 
+                    Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
+
                     file_based->set_dom( dom_document.documentElement() );
                     file_based->initialize();
 

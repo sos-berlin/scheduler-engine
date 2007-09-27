@@ -2042,6 +2042,9 @@ Time Job::next_start_time()
 
 void Job::calculate_next_time( const Time& now )
 {
+    // Algorithmus ist mit task_to_start() abgestimmt.
+    // (Schön wäre ja, wenn man beide zusammenfassen könnte und wenn ein String geliefert würde, warum der Job noch nicht startet, worauf er wartet.)
+
     Time next_time = Time::never;
 
     if( _state == s_running || _state == s_pending ) //_state > s_not_initialized ) 
@@ -2049,7 +2052,8 @@ void Job::calculate_next_time( const Time& now )
         //is_waiting |= _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  ! _lock_requestor->locks_are_available();
         //is_waiting |= _waiting_for_process && !_waiting_for_process_try_again;
 
-        if( _lock_requestor &&  _lock_requestor->is_enqueued() )
+        if( _lock_requestor  &&  
+            ( _lock_requestor->is_enqueued()  ||  !_lock_requestor->locks_are_known() ) )
         {
             if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
             //else

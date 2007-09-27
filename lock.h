@@ -194,6 +194,7 @@ struct Requestor : Object, Scheduler_object, Non_cloneable
     void                        load                        ();
 
     bool                        is_enqueued                 () const                                { return _is_enqueued; }
+    bool                        locks_are_known             () const;
     bool                        locks_are_available         () const;
     bool                        enqueue_lock_requests       ();
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );

@@ -844,6 +844,26 @@ bool Requestor::locks_are_available() const
     return all_locks_are_free  &&  its_my_turn;   
 }
 
+//-----------------------------------------------------------------------Requestor::locks_are_known
+
+bool Requestor::locks_are_known() const
+{
+    bool result = true;
+
+    Z_FOR_EACH_CONST( Use_list, _use_list, it )
+    {
+        Use* lock_use = *it;
+        
+        if( !lock_use->lock_or_null() )  
+        { 
+            result = false; 
+            break; 
+        }
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------Requestor::enqueue_lock_requests
 
 bool Requestor::enqueue_lock_requests()
@@ -853,15 +873,7 @@ bool Requestor::enqueue_lock_requests()
     if( _is_enqueued )  assert(0), z::throw_xc( __FUNCTION__ );
 
 
-    bool all_locks_are_there = true;
-
-    Z_FOR_EACH( Use_list, _use_list, it )
-    {
-        Use*  lock_use = *it;
-        if( !lock_use->lock_or_null() )  { all_locks_are_there = false; break; }
-    }
-
-    if( all_locks_are_there )
+    if( locks_are_known() )
     {
         _is_enqueued = true; 
 
@@ -1069,13 +1081,13 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
     result.setAttribute( "lock"     , _lock_path );
     result.setAttribute( "exclusive", _lock_mode == Lock::lk_exclusive? "yes" : "no" );
 
-    if( _requestor->is_enqueued() )
+    if( Lock* lock = lock_or_null() )
     {
-        if( Lock* lock = lock_or_null() )
-            result.setAttribute( "is_available", lock->is_free_for( _lock_mode )? "yes" : "no" );
-        else
-            result.setAttribute( "is_missing", "yes" );
+        if( _requestor->is_enqueued() )  result.setAttribute( "is_available", lock->is_free_for( _lock_mode )? "yes" : "no" );
     }
+    else
+        result.setAttribute( "is_missing", "yes" );
+
 
     return result;
 }

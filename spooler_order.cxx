@@ -37,12 +37,8 @@ struct Job_chain_folder : Job_chain_folder_interface
 {
                                 Job_chain_folder            ( Folder* );
 
-
-    // Job_chain_folder_interface:
-  //void                        set_dom                     ( const xml::Element_ptr& );
     void                        add_job_chain               ( Job_chain* );
     void                        remove_job_chain            ( Job_chain* );
-  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 };
 
 //-----------------------------------------------------------------------------------Order_id_space
