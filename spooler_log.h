@@ -64,6 +64,7 @@ struct Prefix_log : Object, Has_log
     void                        open                        ();
     void                        close                       ();
     void                        close_file                  ();
+    void                        remove_file                 ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        opened                      () const                            { return _file != -1; }
     bool                        closed                      () const                            { return _closed; }
