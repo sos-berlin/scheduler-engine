@@ -19,7 +19,7 @@
     <xml_attributes>
         <xml_attribute name="lock" title="Pfad der Sperre"/>
         <xml_attribute name="exclusive" type="yes|no"/>
-        <xml_attribute name="is_available" type="yes|no" title="Sperre ist verfügbar"/>
+        <xml_attribute name="is_available" type="yes|no" title="Sperre ist angefordert und verfügbar"/>
         <xml_attribute name="is_missing" type="yes|no" title="Sperre ist unbekannt"/>
     </xml_attributes>
 
