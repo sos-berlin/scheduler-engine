@@ -65,6 +65,9 @@
     <table cellspacing="0" cellpadding="0">
         <tr>
             <th style="padding-right: 2ex">
+                Objekt
+            </th>
+            <th style="padding-right: 2ex">
                 Dateiname
             </th>
             <th style="padding-right: 2ex">
@@ -73,17 +76,21 @@
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                <i>name</i>
-                <code>.process_class.xml</code>
+                Prozessklasse
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.process_class.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="process_class"/>
             </td>
         </tr>
         <tr>
+            <td style="padding-right: 2ex">
+                Sperre
+            </td>
             <td>
-                <i>name</i>
-                <code>.lock.xml</code>
+                <code><i>name</i>.lock.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="lock"/>
@@ -91,7 +98,10 @@
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                <i>name</i><code>.job.xml</code>
+                Job
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.job.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="job"/>
@@ -99,7 +109,10 @@
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                <i>name</i><code>.job_chain.xml</code>
+                Jobkette
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.job_chain.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="job_chain"/>
@@ -107,7 +120,10 @@
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                <i>jobchainname</i><code>,</code><i>orderid</i><code>.order.xml</code>
+                Dauerauftrag
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>jobchainname</i>,<i>orderid</i>.order.xml</code>
             </td>
             <td style="padding-right: 2ex">
                 <scheduler_element name="order"/>
@@ -117,7 +133,7 @@
 
     <p>
         Das Attribut <code>name=</code> 
-        (oder <code>job_chain=</code> und <code>id=</code> bei Aufträgen)
+        <!--(oder <code>job_chain=</code> und <code>id=</code> bei Aufträgen)-->
         sollte nicht angegeben werden.
         Wird es angegeben, muss es dem Dateinamen entsprechen.
     </p>
@@ -137,7 +153,7 @@
     
     <ul class="big">
         <li>
-            Ein hinzugefügter Dateiname führt zu Anlage eines neuen, noch leeren Objekts im Scheduler,
+            Ein hinzugefügter Dateiname führt zur Anlage eines neuen, noch leeren Objekts im Scheduler,
             das mit der Datei verbunden ist.
             Das Objekt ist mit <scheduler_element name="show_state"/> sichtbar.
             Z.B. wird eine Datei <code>xxx.job.xml</code> im Scheduler gespiegelt als ein Job
@@ -151,14 +167,14 @@
         </li>
         <li>
             Wenn während des Löschens die Datei wieder angelegt wird,
-            geht der Scheduler wie beim Ändern der Datei vor.
+            geht der Scheduler wie bei einer geänderten Datei vor.
         </li>
         <li>
             Nach einer Änderung einer Datei (der Zeitstempel hat sich geändert) liest der Scheduler die Datei.
             Kann die Datei geladen werden, 
             dann tauscht er Prozessklassen und Sperren direkt,
             während er Jobs, Jobklassen und Daueraufträge verzögert tauscht,
-            weil noch die laufende Operation des zu ersetzenden Objekts abgewartet werden muss (Details unten).
+            weil noch die laufenden Operationen des zu ersetzenden Objekts abgewartet werden muss (Details unten).
         </li>
         <li>
             Ein Fehler beim Lesen einer Datei beeinflusst nicht ein bereits vorhandenes Objekt.
@@ -193,7 +209,7 @@
     <p>
         Beim Löschen einer Prozessklasse beendet der Scheduler alle zugehörigen Tasks.
         Erst wenn keine Task mehr läuft, löscht er die Prozessklasse.
-        Bis dahin startet der Scheduler keine weiteren Tasks, wie wenn die Prozessklasse erschöpft wäre.
+        Bis dahin startet der Scheduler keine weiteren Tasks, als wenn die Prozessklasse erschöpft wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -206,7 +222,7 @@
     <p>
         Beim Löschen einer Sperre beendet der Scheduler alle zugehörigen Tasks.
         Erst wenn keine Task mehr läuft, löscht er die Sperre.
-        Bis dahin startet der Scheduler keine weiteren Tasks, wie wenn die bereits Sperre belegt wäre.
+        Bis dahin startet der Scheduler keine weiteren Tasks, als wenn die Sperre belegt wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -222,7 +238,7 @@
     </p>
     <p>
         Fehlt dem Job die Prozessklasse oder eine Sperre, wirkt das so, 
-        wie wenn die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.
+        als wenn die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

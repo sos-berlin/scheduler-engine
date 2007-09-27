@@ -243,7 +243,7 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"add_order\" type=\"order\"/>\n"
+    "<xsd:element name=\"add_order\" type=\"add_order\"/>\n"
     "\n"
     "\n"
     "<xsd:element name=\"holiday\">\n"
@@ -689,7 +689,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"order\" type=\"order\"/>\n"
     "\n"
     "\n"
-    "<xsd:complexType name=\"order\">\n"
+    "<xsd:complexType name=\"add_order\">\n"
     "<xsd:sequence>\n"
     "<xsd:element ref=\"params\" minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"run_time\" minOccurs=\"0\"/>\n"
@@ -706,7 +706,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"xml_payload\" type=\"Xml_payload\" minOccurs=\"0\"/>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"job_chain\"         type=\"Path\"/>           <!-- use=\"required\", nur f\xc3" "\xbc" "r <add_order> -->\n"
+    "<xsd:attribute name=\"job_chain\"         type=\"Path\"                 use=\"required\"/>\n"
     "<xsd:attribute name=\"id\"                type=\"Order_id\"/>\n"
     "<xsd:attribute name=\"priority\"          type=\"xsd:integer\"/>\n"
     "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
@@ -714,6 +714,28 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"web_service\"       type=\"Name\"/>\n"
     "<xsd:attribute name=\"replace\"           type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"at\"                type=\"Date_time_with_now\"/>\n"
+    "<xsd:attribute name=\"suspended\"         type=\"Yes_no\"/>\n"
+    "</xsd:complexType>\n"
+    "\n"
+    "\n"
+    "<xsd:complexType name=\"order\">\n"
+    "<xsd:sequence>\n"
+    "<xsd:element ref=\"params\"   minOccurs=\"0\"/>\n"
+    "<xsd:element ref=\"run_time\" minOccurs=\"0\"/>\n"
+    "\n"
+    "<xsd:element name=\"payload\" minOccurs=\"0\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:any processContents=\"skip\"/>\n"
+    "</xsd:sequence>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "<xsd:element name=\"xml_payload\" type=\"Xml_payload\" minOccurs=\"0\"/>\n"
+    "</xsd:sequence>\n"
+    "\n"
+    "<xsd:attribute name=\"priority\"          type=\"xsd:integer\"/>\n"
+    "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
     "<xsd:attribute name=\"suspended\"         type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
     "\n"
@@ -1666,7 +1688,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190721598 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190909728 },
     { NULL, NULL, 0 }
 };
 

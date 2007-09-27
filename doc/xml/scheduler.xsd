@@ -234,7 +234,7 @@
     </xsd:element>
 
     
-    <xsd:element name="add_order" type="order"/>
+    <xsd:element name="add_order" type="add_order"/>
 
     
     <xsd:element name="holiday">
@@ -680,7 +680,7 @@
     <xsd:element name="order" type="order"/>
 
     
-    <xsd:complexType name="order">
+    <xsd:complexType name="add_order">
         <xsd:sequence>
             <xsd:element ref="params" minOccurs="0"/>
             <xsd:element ref="run_time" minOccurs="0"/>
@@ -697,7 +697,7 @@
             <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
         </xsd:sequence>
 
-        <xsd:attribute name="job_chain"         type="Path"/>           <!-- use="required", nur für <add_order> -->
+        <xsd:attribute name="job_chain"         type="Path"                 use="required"/>
         <xsd:attribute name="id"                type="Order_id"/>
         <xsd:attribute name="priority"          type="xsd:integer"/>
         <xsd:attribute name="title"             type="String"/>
@@ -707,7 +707,29 @@
         <xsd:attribute name="at"                type="Date_time_with_now"/>
         <xsd:attribute name="suspended"         type="Yes_no"/>
     </xsd:complexType>
-    
+
+
+    <xsd:complexType name="order">
+        <xsd:sequence>
+            <xsd:element ref="params"   minOccurs="0"/>
+            <xsd:element ref="run_time" minOccurs="0"/>
+
+            <xsd:element name="payload" minOccurs="0">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:any processContents="skip"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="xml_payload" type="Xml_payload" minOccurs="0"/>
+        </xsd:sequence>
+
+        <xsd:attribute name="priority"          type="xsd:integer"/>
+        <xsd:attribute name="title"             type="String"/>
+        <xsd:attribute name="suspended"         type="Yes_no"/>
+    </xsd:complexType>
+
     
     <xsd:element name="params">
         <xsd:complexType>
