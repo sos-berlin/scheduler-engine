@@ -736,6 +736,8 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:attribute name=\"priority\"          type=\"xsd:integer\"/>\n"
     "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
+    "<xsd:attribute name=\"state\"             type=\"String\"/>\n"
+    "<xsd:attribute name=\"at\"                type=\"Date_time_with_now\"/>\n"
     "<xsd:attribute name=\"suspended\"         type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
     "\n"
@@ -1171,6 +1173,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"max_orders\"            type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"max_order_history\"     type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"max_task_history\"      type=\"xsd:nonNegativeInteger\"/>\n"
+    "<xsd:attribute name=\"path\"                  type=\"Path\"/>\n"
     "</xsd:complexType>\n"
     "\n"
     "\n"
@@ -1688,7 +1691,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190910354 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190989820 },
     { NULL, NULL, 0 }
 };
 

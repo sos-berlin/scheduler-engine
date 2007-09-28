@@ -727,6 +727,8 @@
 
         <xsd:attribute name="priority"          type="xsd:integer"/>
         <xsd:attribute name="title"             type="String"/>
+        <xsd:attribute name="state"             type="String"/>
+        <xsd:attribute name="at"                type="Date_time_with_now"/>
         <xsd:attribute name="suspended"         type="Yes_no"/>
     </xsd:complexType>
 
@@ -1162,6 +1164,7 @@
         <xsd:attribute name="max_orders"            type="xsd:nonNegativeInteger"/>
         <xsd:attribute name="max_order_history"     type="xsd:nonNegativeInteger"/>
         <xsd:attribute name="max_task_history"      type="xsd:nonNegativeInteger"/>
+        <xsd:attribute name="path"                  type="Path"/>
     </xsd:complexType>
 
 

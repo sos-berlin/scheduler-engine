@@ -71,25 +71,6 @@ void Path::set_folder_path( const string& folder_path )
     set_path( Path( folder_path, name() ) );
 }
 
-//------------------------------------------------------------------------Path::prepend_folder_path
-
-//void Path::prepend_folder_path( const string& folder_path )
-//{
-//    set_path( Path( folder_path, to_string() ) );
-//}
-
-//-------------------------------------------------------------------Path::set_absolute_if_relative
-
-//void Path::set_absolute_if_relative( const Absolute_path& absolute_folder_path )
-//{
-//    if( !is_absolute_path() )  
-//    {
-//        set_folder_path( absolute_folder_path );
-//    }
-//
-//    assert( is_absolute_path() );
-//}                           
-
 //-------------------------------------------------------------------------------Path::set_absolute
 
 void Path::set_absolute( const Absolute_path& absolute_base, const Path& relative )
@@ -163,15 +144,6 @@ string Path::to_filename() const
     return result;
 }
 
-//------------------------------------------------------------------------------------Path::compare
-
-//int Path::compare( const Path& path ) const
-//{
-//    string path1 = normalized();
-//    string path2 = path.normalized();
-//    return strcmp( path1.c_str(), path2.c_str() );
-//}
-
 //---------------------------------------------------------------------Absolute_path::Absolute_path
 
 Absolute_path::Absolute_path( const Path& path )
@@ -241,13 +213,19 @@ void Folder_subsystem::close()
     _subsystem_state = subsys_stopped;
     set_async_manager( NULL );
 
-    // Sollten wir alle Ordner schließen?
 
 #   ifdef Z_WINDOWS
         Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
         FindCloseChangeNotification( _directory_event._handle );
         _directory_event._handle = NULL;
 #   endif
+
+    if( _root_folder )  
+    {
+        _root_folder->remove_all_file_baseds();
+        remove_file_based( _root_folder );
+        _root_folder = false;
+    }
 }
 
 //------------------------------------------------------------------Folder_subsystem::set_directory
@@ -263,6 +241,7 @@ void Folder_subsystem::set_directory( const File_path& directory )
 bool Folder_subsystem::subsystem_initialize()
 {
     _root_folder = Z_NEW( Folder( this, (Folder*)NULL ) );
+    add_file_based( _root_folder );
 
     _subsystem_state = subsys_initialized;
     return true;
@@ -285,27 +264,19 @@ bool Folder_subsystem::subsystem_activate()
     if( _directory.exists() )
     {
 #       ifdef Z_WINDOWS
-            //try
-            //{
 
-                Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-                
-                HANDLE h = FindFirstChangeNotification( _directory.c_str(), 
-                                                        TRUE,                               // Mit Unterverzeichnissen
-                                                        FILE_NOTIFY_CHANGE_FILE_NAME  |  
-                                                        FILE_NOTIFY_CHANGE_DIR_NAME   |
-                                                        FILE_NOTIFY_CHANGE_LAST_WRITE );
+            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+            
+            HANDLE h = FindFirstChangeNotification( _directory.c_str(), 
+                                                    TRUE,                               // Mit Unterverzeichnissen
+                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
+                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
+                                                    FILE_NOTIFY_CHANGE_LAST_WRITE );
 
-                if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
+            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
 
-                _directory_event._handle = h;
-                _directory_event.add_to( &_spooler->_wait_handles );
-            //}
-            //catch( exception& x )
-            //{
-            //    log()->error( x.what() );
-            //    result = false;
-            //}
+            _directory_event._handle = h;
+            _directory_event.add_to( &_spooler->_wait_handles );
 
 #       endif
 
@@ -330,7 +301,6 @@ ptr<Folder> Folder_subsystem::new_file_based()
 {
     assert(0);
     zschimmer::throw_xc( __FUNCTION__ );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an
-    //return Z_NEW( Folder( spooler()->folder_subsystem() ) );
 }
 
 //----------------------------------------------------------------Folder_subsystem::async_continue_
@@ -617,7 +587,15 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
 
         if( !typed_folder->is_empty() )
         {
-            result.appendChild( typed_folder->dom_element( dom_document, show_what ) );
+            if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
+                result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+            else
+            if( show_what.is_set( show_no_subfolders )  &&  typed_folder->subsystem() == spooler()->folder_subsystem() )
+            {
+                // nix
+            }
+            else
+                result.appendChild( typed_folder->dom_element( dom_document, show_what ) );
         }
     }
 
@@ -688,16 +666,22 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
     return something_changed;
 }
 
-//------------------------------------------------------------------------Folder::prepare_to_remove
+//-------------------------------------------------------------------Folder::remove_all_file_baseds
 
-bool Folder::prepare_to_remove()
+void Folder::remove_all_file_baseds()
 {
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
     {
         Typed_folder* typed_folder = it->second;
-        typed_folder->remove_all();
+        typed_folder->remove_all_file_baseds();
     }
+}
 
+//------------------------------------------------------------------------Folder::prepare_to_remove
+
+bool Folder::prepare_to_remove()
+{
+    remove_all_file_baseds();
     return can_be_removed_now();
 }
 
@@ -1156,9 +1140,9 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
     return new_file_based;
 }
 
-//-------------------------------------------------------------------------Typed_folder::remove_all
+//-------------------------------------------------------------Typed_folder::remove_all_file_baseds
 
-void Typed_folder::remove_all()
+void Typed_folder::remove_all_file_baseds()
 {
     for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
     {

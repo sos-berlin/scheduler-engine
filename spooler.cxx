@@ -888,7 +888,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
         if( !lock_subsystem()->is_empty() )  state_element.appendChild( lock_subsystem()->file_baseds_dom_element( dom, show_what ) );
 
         if( show_what.is_set( show_jobs ) )  state_element.appendChild( job_subsystem()->file_baseds_dom_element( dom, show_what ) );
-                                  else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+                                       else  state_element.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
 
         if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show_what ) );
     
@@ -909,6 +909,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     if( _order_subsystem  &&  !_order_subsystem->order_id_spaces_interface()->is_empty() )
          state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show_what ) );
+
 
     {
         xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );

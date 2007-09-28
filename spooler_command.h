@@ -46,7 +46,7 @@ enum Show_what_enum
     show_cluster            = 0x200000,
     show_operations         = 0x400000,
     show_folders            = 0x800000,
-    show_subfolders         = 0x1000000,
+    show_no_subfolders      = 0x1000000,
 
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,
@@ -64,7 +64,7 @@ inline Show_what_enum operator ~ ( Show_what_enum a )                    { retur
 
 struct Show_what
 {
-                                Show_what                   ( Show_what_enum = show_standard | show_subfolders );
+                                Show_what                   ( Show_what_enum = show_standard );
 
     Show_what                   operator |                  ( Show_what_enum w ) const              { Show_what ww = *this; ww |= w; return ww;; }
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }

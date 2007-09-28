@@ -319,7 +319,7 @@ struct Typed_folder : Scheduler_object,
     bool                        adjust_with_directory       ( const list<Base_file_info>&, double now );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
-    void                        remove_all                  ();
+    void                        remove_all_file_baseds      ();
 
     string                      obj_name                    () const;
 
@@ -409,18 +409,10 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
     bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
-  //void                        on_remove_now               ();
-  //zschimmer::Xc               remove_error                ();
-
-  //bool                        replace_with                ( File_based* );
-  //void                        prepare_to_replace          ();
-  //bool                        can_be_replaced_now         ();
-  //File_based*                 on_replace_now              ();
 
 
-
+    void                        remove_all_file_baseds      ();
     file::File_path             directory                   () const                                { return _directory; }
-  //Path                        path                        () const                                { return _path; }
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
     bool                        adjust_with_directory       ( double now );
@@ -437,8 +429,6 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     void                        add_to_typed_folder_map     ( Typed_folder* );
 
     Fill_zero                  _zero_;
-    //string                     _path;
-    //string                     _name;
     file::File_path            _directory;
 
     typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
@@ -646,6 +636,7 @@ struct file_based_subsystem : File_based_subsystem
 
   private:
     friend struct               Typed_folder;
+    friend struct               Folder_subsystem;
 
 
     void add_file_based( File_based* file_based )                   // Nur für Typed_folder::add_file_based()

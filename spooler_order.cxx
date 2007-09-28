@@ -3858,56 +3858,6 @@ Order::Order( Spooler* spooler )
     set_run_time( NULL );
 }
 
-//-------------------------------------------------------------------------------------Order::Order
-//
-//Order::Order( Spooler* spooler, const VARIANT& payload )
-//:
-//    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
-//    Com_order(this),
-//    _zero_(this+1),
-//    _payload(payload)
-//{
-//    init();
-//}
-//
-//-------------------------------------------------------------------------------------Order::Order
-
-//Order::Order( Spooler* spooler, const Record& record, const string& job_chain_path )
-//:
-//    Com_order(this),
-//    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
-//    _zero_(this+1)
-//{
-//    init();
-//
-//    _job_chain_path = job_chain_path;
-//
-//    set_id      ( record.as_string( "id"         ) );   _id_locked = true;
-//    _state      = record.as_string( "state"      );
-//    _state_text = record.as_string( "state_text" );
-//    _title      = record.as_string( "title"      );
-//    _priority   = record.as_int   ( "priority"   );
-//
-//    string initial_state = record.as_string( "initial_state" );
-//    if( initial_state != "" )
-//    {
-//        _initial_state = initial_state;
-//        _initial_state_set = true;
-//    }
-//
-//    _created.set_datetime( record.as_string( "created_time" ) );
-//
-//    if( record.has_field( "distributed_next_time" ) )  _setback.set_datetime( record.as_string( "distributed_next_time" ) );
-//
-//    _log->set_prefix( obj_name() );
-//
-//    _order_xml_modified  = false;            
-//    _state_text_modified = false; 
-//    _title_modified      = false;
-//    _state_text_modified = false;
-//    _is_in_database      = true;
-//}
-
 //------------------------------------------------------------------------------------Order::~Order
 
 Order::~Order()
@@ -3935,25 +3885,6 @@ Order::~Order()
     if( _run_time )  _run_time->close();
     if( _com_log  )  _com_log->set_log( NULL );
 }
-
-//--------------------------------------------------------------------------------------Order::init
-
-//void Order::init()
-//{
-//    //_recoverable = true;
-//
-//    _log = Z_NEW( Prefix_log( this ) );
-//    _log->set_prefix( obj_name() );
-//
-//    _com_log = new Com_log;
-//    _com_log->set_log( _log );
-//
-//    _created       = Time::now();
-//    _is_virgin     = true;
-//    _signaled_next_time = Time::never;
-//
-//    set_run_time( NULL );
-//}
 
 //-------------------------------------------------------------------------------Order::load_record
 
