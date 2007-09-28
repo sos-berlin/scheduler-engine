@@ -28,7 +28,6 @@ objects = \
  spooler_command.o\
  spooler_communication.o\
  spooler_config.o\
- spooler_dtd.o\
  spooler_event.o\
  spooler_embedded_files.o\
  spooler_embedded_files_z.o\
