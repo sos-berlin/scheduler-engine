@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Der Scheduler als Dienst"
+    title               = "Der Job Scheduler als Dienst"
     base_dir            = ""
     author              = "$Author$"
     date                = "$Date$"
@@ -19,12 +19,21 @@
     </tr>
 </table>
 
+<p>
+Der Job Scheduler wird unter Windows als Dienst betrieben. Die Einrichtung erfolgt
+automatisch mit dem Installationsprogramm. Nachstehend sind die Kommandozeilenoptionen
+beschrieben, die für die Einrichtung relevant sind. Diese Optionen werden vom
+Installationsprogramm ins Start-Script <code>.\bin\jobscheduler.cmd</code> (Windows)
+bzw. <code>./bin/jobscheduler.sh</code> (Unix) übernommen.
+
+</p>
+
 <p class="zwischentitel">Aufruf
 </p>
-<p><font class="mono">spooler&#160; -remove-service</font> &#160; [<font class="mono">-service-name=</font><i>name</i>]&#160;&#160;
+<p><font class="mono">scheduler&#160; -remove-service</font> &#160; [<font class="mono">-service-name=</font><i>name</i>]&#160;&#160;
 [<font class="mono">-id=</font><i>id</i>]
 </p>
-<p><font class="mono">spooler&#160; </font>[<font class="mono">-remove-service</font>]
+<p><font class="mono">scheduler&#160; </font>[<font class="mono">-remove-service</font>]
 &#160; <font class="mono">-install-service</font><br/>
 <font class="mono">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; </font>[<font class="mono">-service-name=</font><i>name</i>]&#160;&#160;
 [<font class="mono">-service-display=</font><i>gezeigtername</i>]&#160; &#160; [<font class="mono">-service-descr=</font><i>beschreibung</i>]<br/>
@@ -43,8 +52,8 @@
 <font class="mono">
 -install-service</font></p>
 
-<p class="indent">Installiert den Dienst. Die Optionen <i>optionen</i>, die hier nicht aufgeführt
-sind, werden beim Start des Dienst dem Spooler übergeben (v.a. <font class="mono">-id=</font>,
+<p class="indent">Installiert den Dienst. Weitere Kommandozeilenoptionen, die hier nicht aufgeführt
+sind, werden beim Start des Dienstes dem Job Scheduler übergeben (v.a. <font class="mono">-id=</font>,
 <font class="mono">-log-dir=</font>)</p>
 
 <p><br/>
@@ -55,7 +64,7 @@ oder <font class="mono">-install-service</font>.</p>
 
 <p class="indent">Voreinstellung ist <font class="mono">sos_scheduler</font>. Wenn die Option
 <font class="mono">
--id=</font> angegeben ist: <font class="mono">SOS Scheduler</font><i>id</i></p>
+-id=</font> angegeben ist: <font class="mono">sos_scheduler_</font><i>id</i></p>
 
 <p><br/>
 <font class="mono">
@@ -63,16 +72,16 @@ oder <font class="mono">-install-service</font>.</p>
 
 <p class="indent">Gibt den angezeigten Namen des Dienstes an.</p>
 
-<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;DocumentFactory Spooler&quot;.
-Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;DocumentFactory Spooler -id=<i>id</i>&quot;.
+<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;SOS Job Scheduler&quot;.
+Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;SOS Job Scheduler -id=<i>id</i>&quot;.
 Wenn <font class="mono"> -service-name=</font> angegeben ist, ist dies als angezeigter Name voreinstellt.</p>
 
 <p><br/>
 <font class="mono">-service-descr=</font><i>beschreibung</i></p>
 
-<p class="indent">Setzt die Beschreibung des Dienstes. Voreinstellung ist &quot;Hintergrund-Jobs der Document Factory&quot;.&#160;</p>
+<p class="indent">Setzt die Beschreibung des Dienstes. Voreinstellung ist &quot;Job Automation Processor&quot;.&#160;</p>
 
-<p class="indent">In Windows NT 4 ignoriert der Spooler diese Option.</p>
+<p class="indent">In Windows NT 4 ignoriert der Job Scheduler diese Option.</p>
 
 <p><br/>
 <font class="mono">-need-service=</font><i>dienst</i></p>
@@ -81,6 +90,10 @@ Wenn <font class="mono"> -service-name=</font> angegeben ist, ist dies als angez
 ist. Windows startet diesen Dienst erst, wenn der andere Dienst läuft. Die
 Option kann mehrfach angegeben werden. Ein unbekannter Dienstname wird von
 Windows nicht bemängelt.&#160;</p>
+<p class="indent">
+Diese Option kann bspw. eingesetzt werden, wenn Job Scheduler und Datenbank auf demselben Server ablaufen
+und sichergestellt werden soll, dass die Datenbank zuerst gestartet ist bevor der Job Scheduler startet.
+</p>
 
 <p class="indent">Der Name eines Dienstes wird in der Dialogbox zum Dienst in
 der Dienststeuerung angezeigt.</p>
@@ -89,17 +102,16 @@ der Dienststeuerung angezeigt.</p>
 </p>
 <p class="indent">Die Dienststeuerung in Windows erlaubt es dem Dienst nicht,
 eine Fehlermeldung zurückzugeben, wenn der Dienst nicht starten kann. Deshalb
-schreibt der Dienst einen einfachen Eintrag in die Ereignissteuerung (auch das
-wird von Windows nicht einfach gemacht).
+schreibt der Dienst einen einfachen Eintrag in die Ereignissteuerung.
 </p>
 
-<p class="indent">Außerdem wird eine eMail mit der Fehlermeldung verschickt.
+<p class="indent">Außerdem wird eine E-Mail mit der Fehlermeldung verschickt.
 Dazu werden die Einträge aus der Datei <font class="mono">factory.ini</font> <font class="mono">log_mail_from</font>,
 <font class="mono">log_mail_to</font>, <font class="mono">log_mail_cc</font>, <font class="mono">log_mail_bcc</font>
 und <font class="mono">smtp</font> verwendet. Eine mit <font class="mono">-ini=</font>
 eingestellte Konfigurationsdatei wird <i>nicht</i> verwendet. Die Einstellungen
-in der <font class="mono">sos.ini</font>, Abschnitt <font class="mono">[mail]</font>
-werden auch verwendet (s.a. <a href="../dateitypen/dateityp_mail.html">Dateityp <font class="mono">mail</font></a>).
+in der Datei <font class="mono">sos.ini</font>, Abschnitt <font class="mono">[mail]</font>
+werden alternativ verwendet (s.a. <a href="email.xml"><code>sos.ini</code>, Abschnitt <code>[spooler]</code></a>).
 </p>
 
 <p>&#160;

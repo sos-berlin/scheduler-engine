@@ -13,7 +13,7 @@
     <scheduler_keyword keyword="Datei"/>
 
     <p>
-        Wenn eine Jobkette Dateien aus einem Verzeichnis verarbeiten soll,
+        Wenn eine Job-Kette Dateien aus einem Verzeichnis verarbeiten soll,
         können Sie Dateiaufträge verwenden.
         Ein Dateiauftrag ist ein Auftrag mit einem Verweis auf eine Datei.
         Der Scheduler überwacht das Verzeichnis und erzeugt zu jeder neuen Datei einen Dateiauftrag.
@@ -60,7 +60,7 @@
             <scheduler_method class="Order" object="order" property="state"/>
         </dt>
         <dd>
-            Status des Auftrags ist der des ersten Jobs der Jobkette
+            Status des Auftrags ist der des ersten Jobs der Job-Kette
             oder der mit <scheduler_element name="file_order_source" attribute="next_state"/> eingestellte Zustand.
         </dd>
         <dt>
@@ -88,7 +88,7 @@
     
     <h3>Mehrere Auftragsquellen</h3>
     <p>
-        Eine Jobkette kann mehrere Auftragsquellen haben. 
+        Eine Job-Kette kann mehrere Auftragsquellen haben. 
         Der Scheduler berücksichtigt sie in der angegebenen Reihenfolge.
     </p>
 

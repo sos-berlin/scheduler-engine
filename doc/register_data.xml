@@ -773,8 +773,8 @@
     <register_keyword_display><code>end_time=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_end_time' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='end_time' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Ende einer Jobkette'>
-    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Ende einer Jobkette'/>
+<register_keyword keyword='Ende einer Job-Kette'>
+    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Ende einer Job-Kette'/>
 </register_keyword>
 <register_keyword keyword='ended'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='ended'/>
@@ -1579,14 +1579,14 @@
     <register_keyword_display><code>job_name=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_job_name' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='job_name' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Jobkette'>
-    <register_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='Jobkette'/>
-    <register_entry register_file='xml/job_chains.xml' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='Jobkette'/>
+<register_keyword keyword='Job-Kette'>
+    <register_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='Job-Kette'/>
+    <register_entry register_file='xml/job_chains.xml' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='Job-Kette'/>
 </register_keyword>
-<register_keyword keyword='Jobkettenknoten'>
-    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
-    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
-    <register_entry register_file='xml/job_chain_node.xml' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
+<register_keyword keyword='Job-Kettenknoten'>
+    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
+    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
+    <register_entry register_file='xml/job_chain_node.xml' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
 </register_keyword>
 <register_keyword keyword='Jobprotokoll'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Jobprotokoll'/>
@@ -3748,8 +3748,8 @@
     <register_keyword_display><code>variables</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='variables' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Verschachtelte Jobketten'>
-    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Verschachtelte Jobketten'/>
+<register_keyword keyword='Verschachtelte Job-Ketten'>
+    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Verschachtelte Job-Ketten'/>
 </register_keyword>
 <register_keyword keyword='version'>
     <register_keyword_display><code>version=</code></register_keyword_display>

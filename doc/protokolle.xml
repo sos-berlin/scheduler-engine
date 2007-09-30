@@ -66,8 +66,8 @@
 <p>
     Für jeden Auftrag erstellt der Scheduler ein Auftragsprotokoll
     mit den Ausgaben aller Tasks, die der Auftrag durchläuft.
-    Der Dateiname wird aus der Jobkette und der Auftrags-Id gebildet,
-    z.B.: <code>order.meine_jobkette.9876.log</code>.
+    Der Dateiname wird aus der Job-Kette und der Auftrags-Id gebildet,
+    z.B.: <code>order.meine_Job-Kette.9876.log</code>.
     Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
 </p>
 

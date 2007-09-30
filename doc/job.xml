@@ -11,8 +11,184 @@
 >
     <scheduler_keyword keyword="Job"/>
 
+    Ein Job bestimmt das auszuführende Programm, seine Laufzeit und das Verhalten im Fehlerfall.
+    Darüber hinaus können die Parametrisierung, Vor- und Nachverarbeitung,
+    konkurrierender Zugriff auf Sperren und mögliche Folge-Jobs Teil einer Job-Konfiguration sein.
+    <br/><br/>
     Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
-    Hier werden u.a. der Programmcode und die Laufzeit bestimmt.
+
+
+    <h2>Konfiguration</h2>
+    
+    <p>
+        Die <scheduler_element name="job">XML-Konfiguration eines Jobs</scheduler_element>
+        kann in der zentralen Startkonfigurationsdatei 
+        (meist <code>./config/scheduler.xml</code>) oder in Form einer separaten Datei
+        in dem vom Job Scheduler überwachten Konfigurationsverzeichnis (meist <code>./config/live</code>)
+        vorgenommen werden, siehe <scheduler_a href="dynamic_configuration.xml"/>
+    </p>
+    
+    
+    <h2>Implementierung</h2>
+    <p>
+        Der Job Scheduler startet ausführbare Programme und kann
+        Jobs mit individuellen Implementierungen starten, die das 
+        API des Job Schedulers nutzen.
+    </p>
+
+    <p><b>Ausführbare Programme</b></p>
+    <div class="indent">
+        <p>
+            Sie können beliebig implementiert sein als
+        		<i>executable</i>, <i>shell scripte</i>, <i>batch files</i>.
+        		Dies bezieht Programme ein, die per Interpreter gestartet werden, z.B.
+        		JavaScript, VBScript, Perl, PHP, Ruby etc., für die ggf. ein Interpreter
+        		mit der auszuführenden Programmdatei gestartet werden muss.
+        		Java-Klassen können mit der für den Job Scheduler konfigurierten JVM gestartet werden.
+    		</p>
+    		<p>
+        		Ausführbare Programme können mit folgenden Elementen konfiguriert werden:
+        		<br/><br/>
+        		<p><b><scheduler_element name="script" attribute="language"/></b></p>
+        		<br/>
+        	  <div class="indent">
+            		<p><scheduler_element name="script" attribute="language">&lt;script language="shell"&gt;</scheduler_element></p>
+            		<div class="indent">
+        						<p>
+        								Der Job Scheduler erzeugt eine Shell für die Ausführung des Programms. 
+        						</p>
+        						<p>
+        				    		<u>Beispiele:</u>
+<pre>&lt;job name="simple_shell"&gt;
+  &lt;script language="shell"&gt;&lt;![CDATA[
+    echo hello world
+    call my_script.cmd
+    my_prog.exe
+  ]]&gt;&lt;/script&gt;
+&lt;/job&gt;  
+
+&lt;job name="simple_command"&gt;
+  &lt;script language="shell"&gt;
+    &lt;include file="my_script.cmd"/&gt;
+  &lt;/script&gt;
+&lt;/job&gt;</pre>
+        								Kommandos des Kommandozeileninterpreters können direkt als Inhalt des <code>&lt;script&gt;</code>
+        								Elements einngegeben werden. Alternativ können Shell Scripte mittels <code>&lt;include&gt;</code>
+        								angegeben werden.
+        						</p>
+        				</div>
+        				
+            		<p><scheduler_element name="script" attribute="language">&lt;script language="java"&gt;</scheduler_element></p>
+            		<div class="indent">
+        						<p>
+        								Der Job Scheduler startet eine JVM für die Ausführung der Java-Klasse. 
+        						</p>
+        						<p>
+        				    		<u>Beispiel:</u>
+<pre>&lt;job name="simple_java"&gt;
+  &lt;script language   = "java" 
+          java_class = "sos.scheduler.ftp.JobSchedulerFTPReceive"/&gt;
+&lt;/job&gt;</pre>
+                		</p>
+                </div>
+        		</div>
+
+        		<p><b><scheduler_element name="process" attribute="file"/></b></p>
+        		<br/>
+        	  <div class="indent">
+        				<p>
+        				    Der Job Scheduler startet das Programm ohne separate Shell.
+        				</p>
+        				<p>
+        						<u>Beispiele:</u>
+<pre>&lt;job name="simple_job"&gt;
+  &lt;process file="c:\my_prog.exe"/&gt;
+&lt;/job&gt;
+
+&lt;job name="interpreter_job"&gt;
+  &lt;process file="c:\php\php.exe"
+           param="-f 'c:\test\phpinfo.php'"/&gt;
+&lt;/job&gt;</pre>
+                    Für Programmdateien, die per Interpreter gestartet werden, muss dieser als auszuführendes Programm
+                    konfiguriert sein.
+        				</p>
+        		</div>
+    		</p>
+    </div>
+
+    <p><b>Implementierungen mit dem Job Scheduler API</b></p>
+    <div class="indent">
+      <p>
+        		Job-Implementierungen können das API des Job Schedulers nutzen,
+        		z.B. zur Protokollierung, Benachrichtigung per eMail, Zugriff auf
+        		Job-, Task- und Auftragsobjekte etc.
+      </p>
+      <p>
+            Der Job Scheduler startet diese Scripte nicht per Interpreter (s.o.) sondern
+            implementiert eine Unterprogrammschnittstelle für den Aufruf von Scripten
+            in diesen Sprachen und stellt ihnen Objekte und Methoden zur Verfügung.
+      </p>
+
+      <p><b><a href="api/api-java.xml">Java</a></b></p>
+      <div class="indent">
+        <p>
+            Ein Job in Java ist eine Implementierung der abstrakten Oberklasse
+            <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
+        </p>
+        <p>
+            Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
+            Sie gilt entsprechend für die COM- und Perl-Schnittstellen,
+            wenn Sie Ihren Job in einer anderen Sprache implementieren.
+        </p>
+        <p>
+            Den Pfad der implementierten Klasse geben Sie in
+            <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>
+            an.
+        </p>
+      </div>
+
+      <p><b><a href="script_language_javascript.xml">JavaScript und JScript</a></b></p>
+      <div class="indent">
+        <p>
+          JavaScript ist in der Implementierung von SpiderMonkey (http://developer.mozilla.org/en/docs/SpiderMonkey)
+          im Auslieferungsumfang des Job Schedulers für alle Plattformen enthalten.
+        </p>
+        <p>
+          Microsoft JScript ist auf Windows Plattformen verfügbar.
+        </p>
+      </div>
+
+      <p><b><a href="api/api-vbscript.xml">VBScript</a></b></p>
+      <div class="indent">
+        <p>
+        <p>
+          Microsoft VBScript ist auf Windows Plattformen verfügbar.
+        </p>
+        </p>
+      </div>
+
+      <p><b><a href="api/api-perl.xml">Perl</a></b></p>
+      <div class="indent">
+        <p>
+          Perl ist auf Unix-Plattformen i.d.R. vorinstalliert. Das Installationsprogramm
+          des Job Schedulers versucht die Unterprogrammschnittstelle passend
+          zur vorhandenen Perl Version zu installieren.
+        </p>
+        <p>
+          Auf Windows-Plattformen kann eine Perl-Implementierung, z.B. von http://www.activestate.com,
+          nachinstalliert werden. 
+        </p>
+      </div>
+
+      <p><b><scheduler_a href="job_com.xml">COM</scheduler_a></b></p>
+      <div class="indent">
+        <p>
+            Sie können auch (unter Windows) einen Job in jeder beliebigen Programmiersprache
+            als COM-Server implementieren.
+            Weiteres siehe <a href="job_com.xml">hier</a>.
+        </p>
+      </div>
+    </div>
 
 
     <h2>Zustand eines Jobs</h2>
@@ -76,6 +252,7 @@
     <h2>Zustand des Jobs ändern</h2>
     <p>
         Mit dem Kommando <scheduler_element name="modify_job"/> können Sie den Zustand des Jobs ändern.
+        Die eingebaute <scheduler_a href="http.xml">HTML-Oberfläche</scheduler_a> des Job Schedulers bietet hierfür die  entsprechenden Operationen an.
     </p>
 
 
@@ -85,7 +262,7 @@
     </p>
     <p>
         Das Kommando <scheduler_element name="start_job"/> startet eine Task,
-        ebenso <scheduler_method class="Job" method="start"/>.
+        ebenso die API-Methode <scheduler_method class="Job" method="start"/>.
     </p>
 
 
@@ -162,75 +339,53 @@
 
     <h2>Verzeichnisüberwachung</h2>
     <p>
-        Der Scheduler kann einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.
+        Der Job Scheduler kann einen Job bei Änderungen in einem Dateiverzeichnis starten.
         Näheres im Kapitel <a href="directory_watch.xml">Verzeichnisüberwachung</a>.
     </p>
-
-
-
-    <h2>Implementierung</h2>
-
-    <p>
-        Ein Job lässt sich auf verschiedene Weise implementieren.
-    </p>
-
-    <p><b>Java</b></p>
-    <div class="indent">
-        <p>
-            Ein Job in Java ist eine Implementierung der abstrakten Oberklasse
-            <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
-        </p>
-        <p>
-            Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
-            Sie gilt entsprechend für die COM- und Perl-Schnittstellen,
-            wenn Sie Ihren Job in einer anderen Sprache implementieren.
-        </p>
-        <p>
-            Den Pfad der implementierten Klasse geben Sie in
-            <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>
-            an.
-        </p>
-    </div>
-
-    <p><b><a href="script_language_javascript.xml">JavaScript und JScript</a></b></p>
-    <div class="indent">
-        <p>
-        </p>
-    </div>
-
-    <p><b>VBScript</b></p>
-    <div class="indent">
-        <p>
-        </p>
-    </div>
-
-    <p><b>Perl</b></p>
-    <div class="indent">
-        <p>
-        </p>
-    </div>
-
-    <p><b><scheduler_a href="job_com.xml">COM</scheduler_a></b></p>
-    
-    <div class="indent">
-        <p>
-            Sie können auch (unter Windows) einen Job in jeder beliebigen Programmiersprache
-            als COM-Server implementieren.
-            Weiteres siehe <a href="job_com.xml">hier</a>.
-        </p>
-    </div>
 
 
 
     <h2>Monitor</h2>
 
     <p>
-        Ein Job kann ein Monitor-Skript haben. 
-        Der Scheduler ruft Funktionen des Monitor-Skripts auf bei Start und Ende der Task 
-        sowie vor und nach von <scheduler_method class="Job_impl" method="spooler_process"/>.
+        Für einen Job kann ein Monitor Script konfiguriert werden. 
+        Der Job Scheduler ruft Funktionen des Monitor Scripts  bei Start und Ende der Task auf
+        sowie vor und nach der Methode <scheduler_method class="Job_impl" method="spooler_process"/>.
     </p>
     <p>
         Den Monitor bestimmen Sie mit <scheduler_element name="monitor"/>.
+    </p>
+    <p>
+        <u>Beispiel</u><pre>
+        
+&lt;job name  = "simple_ftp"
+  &lt;params&gt;
+    &lt;param name = "ftp_host"            value = "localhost"/&gt;
+    &lt;param name = "ftp_user"            value = "anonymous"/&gt;
+    &lt;param name = "ftp_password"        value = "anonymous"/&gt;
+  &lt;/params&gt;
+
+  &lt;script language   = "java" 
+          java_class = "sos.scheduler.ftp.JobSchedulerFTPReceive"/&gt;
+
+  &lt;monitor&gt;
+    &lt;script language="javascript">&lt;![CDATA[<![CDATA[
+      function spooler_task_before() { 
+        var today = yy = mm = dd = "";
+        today = new Date();
+        yy = today.getYear() + 1900;
+        mm = today.getMonth() + 1;
+        dd = today.getDate();
+        if (parseInt(mm) < 10) mm = "0" + mm;
+        if (parseInt(dd) < 10) dd = "0" + dd;
+        spooler_task.params.set_var("ftp_file_path", "^test_" + yy + "-" + mm + "-" + dd + "\.csv$" );
+        return true;
+      } 
+    ]]>]]&gt;&lt;/script&gt;
+  &lt;/monitor&gt;
+&lt;/job&gt;</pre>
+       Das Monitor Script verwendet einen Standard-Job der Auslieferung für den FTP-Transfer einer Datei.
+       Dabei wird der Job-Parameter für den Namen der zu übertragenden Datei dynamisch aus dem Tagesdatum zusammengesetzt.
     </p>
 
 

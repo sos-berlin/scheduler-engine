@@ -17,23 +17,23 @@
 
     <description>
         <p>
-            In der Datei factory.ini können Einstellungen für den Scheduler vorgenommen werden.
+            In der Datei factory.ini können Einstellungen für den Job Scheduler vorgenommen werden.
             <br/>
             Hinweis: Leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden und 
             überschreiben keine Einstellung der <scheduler_a href="konfiguration.xml">XML-Konfiguration</scheduler_a>.
         </p>
 
         <p>
-            Beim Aufruf des Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="ini"/> angeben, z.B.:
+            Beim Aufruf des Job Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="ini"/> angeben, z.B.:
             <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -ini=C:/Programme/scheduler/config/factory.ini</pre>
         </p>
         <p>
-          Bei der Installation durch den Scheduler-Setup wird die Datei factory.ini im Verzeichnis
+          Bei der Installation durch das Setup-Programm des Job Schedulers wird die Datei factory.ini im Verzeichnis
           <pre>…<i>scheduler installation path</i>…\config</pre>
           abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.
         </p>   
         <p>
-                    Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
+                    Falls beim Aufruf des Job Schedulers der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
         </p>
         
     </description>

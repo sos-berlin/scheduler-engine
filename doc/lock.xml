@@ -15,9 +15,9 @@
     <scheduler_keyword keyword="Semaphor"/>
 
     <p>
-			Sperren im Scheduler verhindern die Ausführung eines Jobs, 
+			Sperren im Job Scheduler verhindern die Ausführung eines Jobs, 
 			solange eine bestimmte Sperre von einem oder mehreren anderen Job(s) belegt ist. 
-			Sperren stehen für Jobs in Jobketten und für einzelne Jobs zur Verfügung. 
+			Sperren stehen für Jobs in Job-Ketten und für einzelne Jobs zur Verfügung. 
 			Wartet ein Job auf die Freigabe einer Sperre, wird er automatisch gestartet,
 			sobald die Sperre freigegeben wird.
     </p>
@@ -31,7 +31,7 @@
     <h2>Konfiguration</h2>
     
     <p>
-      Damit Jobs Sperren belegen können, müssen sie zunächst bekanntgemacht werden.
+      Damit Jobs Sperren belegen können, müssen die Sperren zunächst bekanntgemacht werden.
     </p>
     <pre>&lt;config>
     <scheduler_element name="locks"/>
@@ -54,7 +54,8 @@
     </p>
     
     <p>
-      Wenn eine Sperre verwendet wird, die nicht deklariert wurde, startet der Scheduler nicht.
+      Wenn eine Sperre verwendet wird, die nicht deklariert wurde, startet der Job Scheduler 
+      den Job nicht.
     </p>
     
     <p>
@@ -94,7 +95,7 @@
     <p><b>Nicht exklusives Sperren</b></p>
 
     <p>
-        Eine Sperre kann nicht-exklusiv von vielen Jobs belegt werden.
+        Eine Sperre kann nicht-exklusiv von mehreren Jobs belegt werden.
     </p>
     <p>
         Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen.
@@ -112,17 +113,17 @@
     &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/> …&lt;/job></pre>
 
     <p>
-        Die ersten beiden Jobs können gleichzeitig laufen, 
-        aber keine der ersten beiden Jobs kann mit dem dritten zusammen laufen,
+        Die ersten beiden Jobs können gleichzeitig ablaufen, 
+        aber keiner der ersten beiden Jobs kann mit dem dritten zusammen ablaufen,
         der die Sperre exklusiv beansprucht.
     </p>
     
     
-    <h2>Sperren in Jobketten</h2>
+    <h2>Sperren in Job-Ketten</h2>
     
-    <p>Da Sperren von Tasks belegt werden, können sie in Jobketten verwendet werden, wenn  
-       die Tasks der einzelnen Jobknoten sich nach Ausführung beenden. Dazu muss das Attribut 
-       idle_timeout idealerweise auf 0 gesetzt sein.
+    <p>Da Sperren von Tasks belegt werden, können sie in Job-Ketten verwendet werden, wenn  
+       die Tasks der einzelnen Job-Knoten sich nach Ausführung beenden. Dazu muss das Attribut 
+       <code>idle_timeout</code> idealerweise auf 0 gesetzt sein.
     </p>
     
     <p>&#160;</p>

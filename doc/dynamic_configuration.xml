@@ -4,15 +4,15 @@
 <!--$Id$-->
 
 <description
-    title               = "Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien"
+    title               = "Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien"
     base_dir            = ""
     parent_page         = "index.xml"
     author              = "$Author$"
     date                = "$Date$"
 >
     <p>
-        Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren (das alles hier Objekte genannt)
-        können in einzelnen Dateien gehalten werden, die der Scheduler automatisch nach Änderung übernimmt.
+        Jobs, Job-Ketten, Daueraufträge, Prozessklassen und Sperren (im folgenden Objekte genannt)
+        können in einzelnen Dateien gehalten werden, die der Job Scheduler automatisch nach Änderung übernimmt.
     </p>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -23,7 +23,7 @@
     <h2>Konfigurationsverzeichnis</h2>
     
     <p>
-        Die Dateien liest der Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnisse.
+        Die Dateien liest der Job Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnisse.
         Das Konfigurationsverzeichnis kann eingestellt werden mit
     </p>
     <ul>
@@ -39,25 +39,25 @@
     </ul>
     
     <p>
-        Der Scheduler überwacht das Konfigurationsverzeichnis und seine Unterverzeichnisse
+        Der Job Scheduler überwacht das Konfigurationsverzeichnis und seine Unterverzeichnisse
         und übernimmt hinzugefügte und geänderte Dateien.
         Löschen einer Datei führt zum Löschen des entsprechenden Objekts im Scheduler.
     </p>
 
     <p>
-        Unter Windows verwendet der Scheduler die Verzeichnisüberwachung des Betriebsystems, 
+        Unter Windows verwendet der Job Scheduler die Verzeichnisüberwachung des Betriebsystems, 
         bemerkt Änderungen also sofort.
-        Außerdem prüft der die Verzeichnisse im Minutenabstand.
+        Außerdem prüft er die Verzeichnisse im Minutenabstand.
     </p>
     <p>
-        Unter Unix überwacht der Scheduler die Verzeichnisse im Abstand von zwischen 5 und 60 Sekunden.
+        Unter Unix überwacht der Job Scheduler die Verzeichnisse im Abstand von zwischen 5 und 60 Sekunden.
         Nach einer Änderung verkürzt er den Abstand auf fünf Sekunden und 
         verlängert ihn, wenn keine Änderung vorliegt, bis auf 60 Sekunden.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <h2>Dateien für Prozessklassen, Sperren, Jobs, Jobketten und Daueraufträge</h2>
+    <h2>Dateien für Prozessklassen, Sperren, Jobs, Job-Ketten und Daueraufträge</h2>
 
     <p style="margin-bottom: 1em;">
         Die Dateien enthalten die XML-Elemente für die Definition des Objekts:        
@@ -109,7 +109,7 @@
         </tr>
         <tr>
             <td style="padding-right: 2ex">
-                Jobkette
+                Job-Kette
             </td>
             <td style="padding-right: 2ex">
                 <code><i>name</i>.job_chain.xml</code>
@@ -143,20 +143,20 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
     
-    <h2>Spiegelung des Verzeichnisses im Scheduler</h2>
+    <h2>Spiegelung des Verzeichnisses im Job Scheduler</h2>
 
     <p>
-        Der Scheduler legt für jede Datei mit bekannter Dateinamensendung (<code>.job</code> usw.)
-        ein entsprechendes Objekt im Scheduler an und verbindet es mit der Datei.
-        Der Scheduler überwacht den Zeitstempel der Datei und geht bei Änderung wie folgt vor.
+        Der Job Scheduler legt für jede Datei mit bekannter Dateinamensendung (<code>.job</code> usw.)
+        ein entsprechendes Objekt im Job Scheduler an und verbindet es mit der Datei.
+        Der Job Scheduler überwacht den Zeitstempel der Datei und geht bei Änderung wie folgt vor.
     </p>
     
     <ul class="big">
         <li>
-            Ein hinzugefügter Dateiname führt zur Anlage eines neuen, noch leeren Objekts im Scheduler,
+            Ein hinzugefügter Dateiname führt zur Anlage eines neuen, noch leeren Objekts im Job Scheduler,
             das mit der Datei verbunden ist.
             Das Objekt ist mit <scheduler_element name="show_state"/> sichtbar.
-            Z.B. wird eine Datei <code>xxx.job.xml</code> im Scheduler gespiegelt als ein Job
+            Z.B. wird eine Datei <code>xxx.job.xml</code> im Job Scheduler gespiegelt als ein Job
             <scheduler_element name="job" attribute="name" value="xxx"/>,
             auch wenn die Datei nicht lesbar ist.
         </li>
@@ -167,18 +167,18 @@
         </li>
         <li>
             Wenn während des Löschens die Datei wieder angelegt wird,
-            geht der Scheduler wie bei einer geänderten Datei vor.
+            geht der Job Scheduler wie bei einer geänderten Datei vor.
         </li>
         <li>
-            Nach einer Änderung einer Datei (der Zeitstempel hat sich geändert) liest der Scheduler die Datei.
+            Nach einer Änderung einer Datei (der Zeitstempel hat sich geändert) liest der Job Scheduler die Datei.
             Kann die Datei geladen werden, 
             dann tauscht er Prozessklassen und Sperren direkt,
-            während er Jobs, Jobklassen und Daueraufträge verzögert tauscht,
-            weil noch die laufenden Operationen des zu ersetzenden Objekts abgewartet werden muss (Details unten).
+            während er Jobs, Job-Klassen und Daueraufträge verzögert tauscht,
+            weil noch die laufenden Operationen des zu ersetzenden Objekts abgewartet werden müssen (Details unten).
         </li>
         <li>
             Ein Fehler beim Lesen einer Datei beeinflusst nicht ein bereits vorhandenes Objekt.
-            Der Scheduler vermerkt den Fehler im Objekt und verschickt eine eMail.
+            Der Job Scheduler vermerkt den Fehler im Objekt und verschickt eine eMail.
             <scheduler_element name="show_state"/> zeigt den Fehler.
         </li>
     </ul>
@@ -204,12 +204,12 @@
     <h3>Prozessklassen</h3>
 
     <p>
-        Änderungen an einer Prozessklasse übernimmt der Scheduler sofort.
+        Änderungen an einer Prozessklasse übernimmt der Job Scheduler sofort.
     </p>
     <p>
-        Beim Löschen einer Prozessklasse beendet der Scheduler alle zugehörigen Tasks.
+        Beim Löschen einer Prozessklasse beendet der Job Scheduler alle zugehörigen Tasks.
         Erst wenn keine Task mehr läuft, löscht er die Prozessklasse.
-        Bis dahin startet der Scheduler keine weiteren Tasks, als wenn die Prozessklasse erschöpft wäre.
+        Bis dahin startet der Job Scheduler keine weiteren Tasks, uns verhält sich als ob die Prozessklasse erschöpft wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -217,12 +217,12 @@
     <h3>Sperren</h3>
 
     <p>
-        Änderungen an einer Prozessklasse übernimmt der Scheduler sofort.
+        Änderungen an einer Sperre übernimmt der Job Scheduler sofort.
     </p>
     <p>
-        Beim Löschen einer Sperre beendet der Scheduler alle zugehörigen Tasks.
+        Beim Löschen einer Sperre beendet der Job Scheduler alle zugehörigen Tasks.
         Erst wenn keine Task mehr läuft, löscht er die Sperre.
-        Bis dahin startet der Scheduler keine weiteren Tasks, als wenn die Sperre belegt wäre.
+        Bis dahin startet der Job Scheduler keine weiteren Tasks, und verhält sich als ob die Sperre belegt wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -230,46 +230,46 @@
     <h3>Jobs</h3>
 
     <p>
-        Einen geänderten Job übernimmt der Scheduler, nachdem er alle Tasks beendet hat.
+        Einen geänderten Job übernimmt der Job Scheduler, nachdem er alle Tasks beendet hat.
     </p>
     <p>
-        Beim Löschen verfährt der Scheduler ebenso.
+        Beim Löschen verfährt der Job Scheduler ebenso.
         Keine neue Tasks werden gestartet.
     </p>
     <p>
         Fehlt dem Job die Prozessklasse oder eine Sperre, wirkt das so, 
-        als wenn die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.
+        als ob die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <h3>Jobketten</h3>
+    <h3>Job-Ketten</h3>
 
     <p>
-        Eine geänderte Jobkette übernimmt der Scheduler, nachdem alle Aufträge ihren Jobschritt beendet haben.
-        Weitere Jobschritte werden solange verhindert.
+        Eine geänderte Job-Kette übernimmt der Job Scheduler, nachdem alle Aufträge ihren Job-Schritt beendet haben.
+        Weitere Job-Schritte werden solange verhindert.
     </p>
     <p>
-        Aufträge in Jobkettenknoten mit gleichem Auftragszustand übernimmt der Scheduler in die geänderte Jobkette.
+        Aufträge in Job-Kettenknoten mit gleichem Auftragszustand übernimmt der Job Scheduler in die geänderte Job-Kette.
     </p>
     <p>
-        Beim Löschen verfährt der Scheduler ebenso.
+        Beim Löschen verfährt der Job Scheduler ebenso.
     </p>
     <p>
-        Fehlt der Jobkette ein Job, dann sammeln sich die Aufträge im Jobkettenknoten,
+        Fehlt der Job-Kette ein Job, dann sammeln sich die Aufträge im Job-Kettenknoten,
         als wäre der Job nicht zur Auftragsausführung bereit.
     </p>
 
-    <h4>Verschachtelte Jobketten</h4>
+    <h4>Verschachtelte Job-Ketten</h4>
     <p>
-        Fehlt der Jobkette eine verschachtelte Jobkette <scheduler_element name="job_chain_node.job_chain"/>,
-        dann ist die gesamte Jobkette nicht bereit.
-        Alle untergeordneten Jobketten müssen bekannt sein, 
-        damit der Scheduler die Eindeutigkeit der Auftragskennungen sicherstellen kann.
+        Fehlt der Job-Kette eine verschachtelte Job-Kette <scheduler_element name="job_chain_node.job_chain"/>,
+        dann ist die gesamte Job-Kette nicht bereit.
+        Alle untergeordneten Job-Ketten müssen bekannt sein, 
+        damit der Job Scheduler die Eindeutigkeit der Auftragskennungen sicherstellen kann.
     </p>
     <p>
-        Ebenso wird eine untergeordnete Jobkette erst gelöscht,
-        wenn auch die übergeordnete Jobkette gelöscht ist.
+        Ebenso wird eine untergeordnete Job-Kette erst gelöscht,
+        wenn auch die übergeordnete Job-Kette gelöscht ist.
     </p>
     
 

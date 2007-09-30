@@ -21,12 +21,12 @@
 
     <setting setting        = "scheduler_log"
              type           = "dateiname"
-             title          = "Dateiname des scheduler.log">
+             title          = "Dateiname des Protokolls scheduler.log">
 
         <description>
             <p>
                 Wenn diese Einstellung gesetzt ist,
-                schreibt der Scheduler ein detailliertes Protokoll zur Fehlerdiagnose in die Datei.
+                schreibt der Job Scheduler ein detailliertes Protokoll zur Fehlerdiagnose in die Datei.
                 Geben Sie den Dateinamen absolut an (als vollständigen Pfad).
             </p>
             <p>
@@ -35,17 +35,18 @@
             </p>
             <h3>Kategorien</h3>
             <p>
-                Sie können das Log mit Kategorien erweitern oder einschränken.
+                Sie können das Protokoll mit Kategorien erweitern oder einschränken.
                 Schreiben Sie die Namen der Kategorien mit Zwischenräumen getrennt vor den Dateinamen,
                 den Sie mit einem Größerzeichen (>) einleiten.
             </p>
             <p>
-                Hier ist eine <a href="log_categories.xml">Liste der Kategorien</a>.
+                Hier ist die <a href="log_categories.xml">Liste der Kategorien</a>.
             </p>
         </description>
 
         <example>
-            <pre>log = c:/tmp/scheduler.log
+            <pre>
+log = c:/tmp/scheduler.log
 log = scheduler.wait >scheduler.log
 log = scheduler.wait com_server.* >scheduler.log</pre>
         </example>
@@ -75,11 +76,11 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
         <description>
             <p>
-                In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
+                In dieses Verzeichnis schreibt der Job Scheduler seine Protokolle.
             </p>
             <p>
-                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler
-                die Protokollausgabe nach stderr (auf den Schirm) schreiben.
+                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Job Scheduler
+                die Protokollausgabe nach <code>stderr</code> (auf den Bildschirm) schreiben.
             </p>
         </description>
     </setting>
@@ -116,16 +117,16 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
     <setting setting= "option_id"
              type   = "scheduler_id"
-             title  = "Kennung des Schedulers">
+             title  = "Kennung des Job Schedulers">
 
         <description>
             <p>
-                Der Scheduler wählt nur die Elemente der XML-Konfiguration aus,
+                Der Job Scheduler wählt nur die Elemente der XML-Konfiguration aus,
                 deren Attribut <code>spooler_id</code> leer ist oder denselben Wert
                 wie in dieser Einstellung enthält.
             </p>
             <p>
-                Wenn die Scheduler-Id nicht angegeben ist, beachtet der Scheduler das XML-Attribut <code>spooler_id=</code> nicht
+                Wenn die Scheduler-ID nicht angegeben ist, beachtet der Job Scheduler das XML-Attribut <code>spooler_id=</code> nicht
                 und wählt alle Elemente der XML-Konfiguration aus.
             </p>
             <p>
@@ -141,8 +142,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         <description>
             <p>
                 Das Element ist nur wirksam, wenn dieses Attribut leer oder gleich dem
-                Parameter <code>-id=</code> vom Scheduler-Start ist,
-                oder wenn beim Scheduler-Start die Option <scheduler_option name="id"/> nicht angegeben worden ist.
+                Parameter <code>-id=</code> vom Job Scheduler Start ist,
+                oder wenn beim Job Scheduler Start die Option <scheduler_option name="id"/> nicht angegeben worden ist.
 <!--
                 Gibt die Scheduler-Id an.
                 Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut
@@ -158,7 +159,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     <setting setting= "port"
              type   = "number"
              initial= "0"
-             title  = "HTTP-, TCP- und UDP-Port für Kommandos an den Schedulers">
+             title  = "HTTP-, TCP- und UDP-Port für Kommandos an den Job Schedulers">
 
             <description>
                 <p>
@@ -171,21 +172,21 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     <setting setting= "tcp_port"
              type   = "number"
              initial= "0"
-             title  = "HTTP- und TCP-Port für Kommandos an den Scheduler">
+             title  = "HTTP- und TCP-Port für Kommandos an den Job Scheduler">
 
         <description>
             <p>
-                Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein
-                Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und
-                65535. In dieser Dokumentation verwenden wir 4444.
+                Der Job Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann eine
+                Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen 2048 (betriebssystemabhängig) und
+                65535. Die Voreinstellung lautet 4444.
             </p>
             <p>
-                Über denselben Port betreibt der Scheduler auch einen HTTP/HTML-Server, sodass er über einen Browser ansprechbar ist,
-                z.B.: http://localhost:4444.
+                Über denselben Port betreibt der Job Scheduler einen HTTP/HTML-Server, so dass er über einen Browser ansprechbar ist,
+                z.B. <code>http://localhost:4444</code>.
             </p>
             <p>
-                Bei <code>tcp_port=0</code> (voreingestellt) ist der Scheduler nicht über TCP oder HTTP ansprechbar.
-                Damit kann die Steuerung des Schedulers per TCP-Kommando, z.B. über eine Web-Seite, unterbunden werden.
+                Bei <code>tcp_port=0</code> (voreingestellt) ist der Job Scheduler nicht über TCP oder HTTP ansprechbar.
+                Damit kann die Steuerung des Job Schedulers per TCP-Kommando, z.B. über eine Web-Seite, unterbunden werden.
             </p>
         </description>
     </setting>
@@ -194,16 +195,16 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     <setting setting= "udp_port"
              type   = "number"
              initial= "0"
-             title  = "UDP-Port für Kommandos an den Scheduler">
+             title  = "UDP-Port für Kommandos an den Job Scheduler">
 
         <description>
             <p>
-                Auch über UDP kann der Scheduler Kommandos entgegennehmen.
+                Auch über UDP kann der Job Scheduler Kommandos entgegennehmen.
                 Hier wird die Portnummer angegeben.
-                Ein Kommando muss in eine Nachricht passen. Der Scheduler schickt keine Antwort.
+                Ein Kommando muss in eine Nachricht passen. Der Job Scheduler schickt keine Antwort.
             </p>
             <p>
-                Bei <code>udp_port=0</code> (voreingestellt) öffnet der Scheduler keinen UDP-Port.
+                Bei <code>udp_port=0</code> (voreingestellt) öffnet der Job Scheduler keinen UDP-Port.
             </p>
         </description>
     </setting>
@@ -216,7 +217,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         <description>
             <p>
                 Die IP-Adresse, an die TCP- und UDP-Port gebunden werden.
-                Der Scheduler ist dann nur über diese IP-Adresse erreichbar.
+                Der Job Scheduler ist dann nur über diese IP-Adresse erreichbar.
             </p>
             <p>
                 Ein Hostname kann angegeben werden.
@@ -226,7 +227,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
             </p>
             <p>
                 Wenn eine andere IP-Adresse als 127.0.0.1 oder localhost angegeben ist,
-                kann der Scheduler nicht über localhost erreicht werden.
+                kann der Job Scheduler nicht über localhost erreicht werden.
             </p>
         </description>
     </setting>
@@ -238,7 +239,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title  = "Protokollausgaben beschränken">
         <description>
             <p>
-                Legt fest, ab welcher Stufe der Scheduler Protokollzeilen ausgibt.
+                Legt fest, ab welcher Stufe der Job Scheduler Protokollzeilen ausgibt.
                 Jede Protokollzeile ist auf einer der folgenden Stufen:
                 <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code>
                 (<code>debug1</code> ist dasselbe wie <code>debug</code>).
@@ -266,10 +267,10 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     >
         <description>
             <p>
-                In diesem Verzeichnis stehen die HTML-Dateien für den HTTP-Server im Scheduler.
+                In diesem Verzeichnis stehen die HTML-Dateien für den HTTP-Server im Job Scheduler.
             </p>
             <p>
-                Wenn die Angabe fehlt, nimmt der Scheduler das Verzeichnis <code>html</code> im Verzeichnis der Konfigurationsdatei.
+                Wenn die Angabe fehlt, nimmt der Job Scheduler das Verzeichnis <code>html</code> im Verzeichnis der Konfigurationsdatei.
             </p>
         </description>
     </setting>
@@ -306,11 +307,11 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     <setting setting = "db_variables_table"
              type    = "name"
              initial = "SCHEDULER_VARIABLES"
-             title   = "Name der Datenbanktabelle für die internen Variablen des Schedulers">
+             title   = "Name der Datenbanktabelle für die internen Variablen des Job Schedulers">
         <description>
             <p>
-                Der Scheduler hält in dieser Tabelle interne Zähler,
-                zum Beispiel für die nächste freie Task-Id.
+                Der Job Scheduler hält in dieser Tabelle interne Zähler,
+                zum Beispiel für die nächste freie Task-ID.
             </p>
         </description>
     </setting>
@@ -342,7 +343,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
         <description>
             <p>
                 Gibt ein, ob eine Task-Historie geschrieben werden soll.
-                Der Scheduler schreibt dann für jede Task einen Satz in die Datenbank, oder, wenn der Scheduler ohne Datenbank arbeitet,
+                Der Job Scheduler schreibt dann für jede Task einen Satz in die Datenbank, oder, wenn der Job Scheduler ohne Datenbank arbeitet,
                 in eine Datei im mit <scheduler_option name="log-dir"/> angegebenen Verzeichnis.
             </p>
         </description>
@@ -354,10 +355,10 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
         <description>
             <p>
-                Der Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt.
-                Die Option <scheduler_option name="log-dir"/> muss gesetzt sein - andernfalls schreibt der Scheduler die Datei nicht.
-                In diese Datei wird, wenn die Option <code>history=yes</code> gesetzt ist und der Scheduler keine Datenbank verwendet,
-                für jede gelaufende Task ein Satz geschrieben.
+                Der Job Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt.
+                Die Option <scheduler_option name="log-dir"/> muss gesetzt sein - andernfalls schreibt der Job Scheduler die Datei nicht.
+                In diese Datei wird, wenn die Option <code>history=yes</code> gesetzt ist und der Job Scheduler keine Datenbank verwendet,
+                für jede abgelaufene Task ein Satz geschrieben.
             </p>
         </description>
     </setting>
@@ -369,18 +370,18 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
             <p>
-                Bei <code>history_on_process=no</code> oder <code>=0</code> schreibt der Scheduler beim Start der Task
-                einen Satz in die Historie (wenn eine geführt wird).
+                Bei <code>history_on_process=no</code> oder <code>=0</code> schreibt der Job Scheduler beim Start der Task
+                einen Satz in die Historie, wenn eine geführt wird.
             </p>
             <p>
-                Bei <code>history_on_process=yes</code> oder <code>=1</code> schreibt der Scheduler erst beim ersten Aufruf
+                Bei <code>history_on_process=yes</code> oder <code>=1</code> schreibt der Job Scheduler erst beim ersten Aufruf
                 von <scheduler_method class="Job_impl" method="spooler_process"/> den Satz.
                 Damit wird kein Satz geschrieben, wenn <scheduler_method class="Job_impl" method="spooler_open"/>
                 <code>false</code> liefert.
             </p>
             <p>
-                Wenn eine Zahl angegeben ist, schreibt der Scheduler erst vor dem
-                soundsovielten Aufruf von <scheduler_method class="Job_impl" method="spooler_process"/> einen Satz in die Historie.
+                Wenn eine Zahl angegeben ist, schreibt der Job Scheduler erst vor der
+                angegebenen Anzahl von Aufrufen von <scheduler_method class="Job_impl" method="spooler_process"/> einen Satz in die Historie.
             </p>
         </description>
         
@@ -396,8 +397,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Historiendateien archivieren?">
         <description>
             <p>
-                Wenn die Historie in einer Datei (also nicht in einer Datenbank) geführt wird,
-                kann der Scheduler die Historien des letzten Scheduler-Laufs archivieren und mit gzip komprimieren.
+                Wenn die Historie in einer Datei, d.h. nicht in einer Datenbank, geführt wird,
+                kann der Job Scheduler die Historien des letzten Job Scheduler Laufs archivieren und mit <code>gzip</code> komprimieren.
             </p>
         </description>
     </setting>
@@ -409,8 +410,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Protokoll in die Historie schreiben?">
         <description>
             <p>
-                Der Scheduler kann auch das Task-Protokoll in die Historie (in der Datenbank) schreiben,
-                auch mit gzip komprimiert (prüfen Sie, ob Ihre Datenbank das dann binär gespeicherte Protokoll wieder hergibt!).
+                Der Job Scheduler kann das Task-Protokoll in die Historie in der Datenbank schreiben,
+                auch mit <code>gzip</code> komprimiert.
                 <br/>
             </p>
             <p>
@@ -437,8 +438,8 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Auftragsprotokolle in die Historie schreiben?">
         <description>
             <p>
-                Der Scheduler kann das Auftragsprotokoll in die Datenbank schreiben,
-                auch mit gzip komprimiert (prüfen Sie, ob Ihre Datenbank das dann binär gespeicherte Protokoll wieder hergibt!).
+                Der Job Scheduler kann das Auftragsprotokoll in die Datenbank schreiben,
+                auch mit <code>gzip</code> komprimiert.
             </p>
             <p>
                 Siehe Kommando <scheduler_element name="show_order" attribute="what" value="log"/>.
@@ -448,36 +449,54 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
 
 
     <setting setting = "db"
-             type    = "hostware_filename"
-             title   = "Hostware-Dateiname der Datenbank">
+             type    = "verbindungszeichenfolge"
+             title   = "Verbindungszeichenfolge der Datenbank">
         <description>
             <p>
-                Hostware-Dateiname der Datenbank für die Historienführung.
+                Verbindungszeichenfolge der Datenbank für die Historienführung.
+                Der Job Scheduler unterstützt ODBC (Windows) und JDBC für den Zugriff auf Datenbanken.
                 Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_file"/>.
             </p>
             <p>
-                Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
-                Der Scheduler verwendet dann eine Microsoft-Access-Datenbank dieses Namens,
+                Unter Windows kann ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
+                Der Job Scheduler verwendet dann eine Microsoft MS-Access Datenbank dieses Namens,
                 die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
-                Der Scheduler richtet die Datei ein, wenn sie fehlt.
+                Der Job Scheduler richtet die Datei ein, wenn sie fehlt.
             </p>
             <p>
-                Der Scheduler richtet die Tabellen selbständig ein.
+                Der Job Scheduler richtet die Tabellen selbständig ein.
             </p>
         </description>
 
         <example>
 
-<pre>db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
-db = odbc -db=factory_sql -user=factory -password=factory
+<pre>
+;    SQL Server 2000 via msbase.jar, msutil.jar, mssqlserver.jar
+db = jdbc -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=scheduler -user=scheduler -password=secret
+;    SQL Server 2000, 2005 via sqljdbc.jar
+db = jdbc -class=com.microsoft.sqlserver.jdbc.SQLServerDriver jdbc:sqlserver://localhost:1433;sendStringParametersAsUnicode=false;selectMethod=cursor;databaseName=scheduler -user=scheduler -password=secret
 
-db = jdbc -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
-db = odbc -db=factory_mysql -user=factory -password=factory
+;    MySQL 4.1.7, 5.x
+db = jdbc -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/scheduler:3306 -user=scheduler -password=secret
 
-db = jdbc -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
-db = odbc -db=factory_oracle -user=factory -password=factory
+;    Oracle 8.1.7, 9i, 10g
+db = jdbc -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@localhost:1521:orcl -user=scheduler -password=secret
 
-;db = scheduler.mdb</pre>
+;    PostgreSQL 8.x
+db   = jdbc -class=org.postgresql.Driver jdbc:postgresql://localhost:5432/scheduler -user=scheduler -password=secret
+
+;    IBM DB2 8
+db   = jdbc -class=com.ibm.db2.jcc.DB2Driver jdbc:db2://localhost:50000/scheduler:driverType=2;retrieveMessagesFromServerOnGetMessage=true; -user=scheduler -password=secret
+
+;    Firebird 1.5
+db   = jdbc -class=org.firebirdsql.jdbc.FBDriver jdbc:firebirdsql://localhost:3050/scheduler -user=scheduler -password=secret
+
+;    ODBC
+db = odbc -db=scheduler_datasource -user=scheduler -password=secret
+
+;    MS Access Datenbank
+db = scheduler.mdb
+</pre>
 
         </example>
     </setting>
@@ -493,20 +512,20 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <dd>
                     <p>
                         Wenn die Einstellung <scheduler_setting setting="db"/> fehlt,
-                        gibt der Scheduler eine Warnung aus und arbeitet ohne Datenbank.
+                        gibt der Job Scheduler eine Warnung aus und arbeitet ohne Datenbank.
                     </p>
                     <p>
                         Wenn das Öffnen der Datenbank oder das automatische Anlegen der Tabellen fehlschlägt,
-                        gibt der Scheduler eine Warnung aus und arbeitet ohne Datenbank.
+                        gibt der Job Scheduler eine Warnung aus und arbeitet ohne Datenbank.
                     </p>
                     <p>
-                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        Bei einem Datenbankfehler während des Betriebs schließt der Job Scheduler die Datenbank und
                         öffnet sie erneut.
-                        Wenn das fehlschlägt, arbeitet der Scheduler ohne Datenbank weiter.
+                        Wenn das fehlschlägt, arbeitet der Job Scheduler ohne Datenbank weiter.
                     </p>
                     <p>
                         Im Cluster-Betrieb (<scheduler_option name="exclusive"/> oder <scheduler_option name="distributed-orders"/>)
-                        lehnt der Scheduler <code>need_db=no</code> ab mit der Meldung:
+                        lehnt der Job Scheduler <code>need_db=no</code> ab mit der Meldung:
                         <scheduler_message code="SCHEDULER-358" show_text="yes"/>
                     </p>
                 </dd>
@@ -515,13 +534,13 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 <dd>
                     <p>
                         Wenn die Einstellung <scheduler_setting setting="db"/> fehlt,
-                        startet der Scheduler nicht und gibt die Meldung
+                        startet der Job Scheduler nicht und gibt die Meldung
                         <scheduler_error code="SCHEDULER-205"/> aus.
                     </p>
                     <p>
-                        Bei einem Datenbankfehler schließt der Scheduler die Datenbank und
+                        Bei einem Datenbankfehler schließt der Job Scheduler die Datenbank und
                         öffnet sie erneut.
-                        Wenn das fehlschlägt, versucht der Scheduler endlos im Abstand von einer Minute
+                        Wenn das fehlschlägt, versucht der Job Scheduler endlos im Abstand von einer Minute
                         die Datenbank erneut zu öffnen.
                         Die Tasks werden währenddessen nicht bedient.
                     </p>
@@ -537,7 +556,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                         Wie <code>need_db=yes</code> mit folgender Ausnahme.
                     </p>
                     <p>
-                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        Bei einem Datenbankfehler während des Betriebs schließt der Job Scheduler die Datenbank und
                         öffnet sie erneut.
                         Bei einem erneuten Fehler wiederholt der Scheduler den Versuch so oft,
                         wie mit <scheduler_setting setting="max_db_errors"/> eingestellt.
@@ -552,20 +571,21 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     <setting setting = "max_db_errors"
              type    = "zahl"
              initial = "5"
-             title   = "Anzahl Datenbank-Fehler, bevor Scheduler aufgibt">
+             title   = "Anzahl Datenbank-Fehler, bevor Job Scheduler aufgibt">
         <description>
             <p>
-                Der Scheduler toleriert diese Anzahl Datenbankfehler.
+                Der Job Scheduler toleriert diese Anzahl Datenbankfehler.
                 Wird sie überschritten, dann setzt er bei <code>need_db=no</code> ohne Datenbank fort,
                 anderfalls beendet er sich sofort.
             </p>
             <p>
                 Bei <scheduler_setting setting="need_db" value="yes"/> werden Fehler, die beim Versuch, die Datenbank zu öffnen, auftreten, nicht gezählt.
-                Damit kann er Scheduler auf eine Datenbank warten, die noch nicht angelaufen ist.
+                Damit kann er Job Scheduler auf eine Datenbank warten, die noch nicht angelaufen ist.
             </p>
         </description>
     </setting>
 
+<!-- deprecated:
     <setting setting = "mail_encoding"
              type    = "quoted-printable|base64"
              initial = "quoted-printable"
@@ -573,12 +593,12 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         <description>
             <p>
                 Das Protokoll wird beim Versand mit quoted-printable codiert. Diese Codierung
-                kann in der factory.ini auf einen anderen von Jmail akzeptierten Wert geändert
+                kann in der Konfigurationsdatei <code>factory.ini</code> auf einen anderen von JMail akzeptierten Wert geändert
                 werden (für JMail von Dimac).
             </p>
         </description>
     </setting>
-
+-->
 
     <setting setting = "mail_on_error"
              type    = "yes|no"
@@ -626,8 +646,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                     <code>mail_on_delay_after_error=all</code>
                 </dt>
                 <dd>
-                    Nach jedem fehlerhaften Job-Lauf wird eine eMail verschickt 
-                    (das ist das Verhalten des vorangegangenen Version des Schedulers).
+                    Nach jedem fehlerhaften Job-Lauf wird eine eMail verschickt.
                 </dd>
 
                 <dt>
@@ -649,7 +668,6 @@ db = odbc -db=factory_oracle -user=factory -password=factory
                 </dt>
                 <dd>
                     Nur der erste und der letzte fehlerhafte Lauf veranlassen je eine eMail.
-                    Das ist die Voreinstellung (seit Version 2.0.163.4759 von 2007-01-19).
                 </dd>
             </dl>
             
@@ -668,7 +686,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
     >
         <description>
             <p>
-                eMails, die der Scheduler nicht verschicken kann (weil z.B. der SMTP-Server nicht läuft),
+                eMails, die der Job Scheduler nicht verschicken kann (weil z.B. der SMTP-Server nicht erreichbar ist),
                 werden hier abgelegt.
             </p>
             <p>
@@ -685,11 +703,11 @@ db = odbc -db=factory_oracle -user=factory -password=factory
 
     <setting setting = "mail_queue_only"
              type    = "yes|no"
-             title   = "Mail nicht versenden, nur in die eMail-Warteschlange hängen">
+             title   = "eMail nicht versenden, nur in die eMail-Warteschlange hängen">
         <description>
             <p>
                 Wenn <code>yes</code>, dann werden eMails nicht versendet,
-                sondern in eMail-Warteschlange geschrieben,
+                sondern in die eMail-Warteschlange geschrieben,
                 siehe <scheduler_ini_entry file="sos.ini" section="mail" entry="queue_dir"/>.
             </p>
             <p>
@@ -706,7 +724,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         <description>
             <p>
                 Der Pfad eines XSLT-Stylesheets.
-                Der Scheduler verwendet das XSLT-Stylesheet zum Aufbereiten der eMails.
+                Der Job Scheduler verwendet das XSLT-Stylesheet zum Aufbereiten der eMails.
                 (Die Dokumentation hierzu ist noch nicht geschrieben.)
             </p>
         </description>
@@ -729,7 +747,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
             </p>
             <p>
                 In den einzelnen Pfaden können Joker benutzt werden.  
-                Der Scheduler ersetzt diese Pfade durch die tatsächlichen, im Dateisystem vorhandenen.
+                Der Job Scheduler ersetzt diese Pfade durch die tatsächlichen, im Dateisystem vorhandenen.
             </p>
             <ul>
                 <li>
@@ -792,7 +810,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
         <description>
             <p>
                 Hier können Sie z.B. mit <code>-Djava.library.path=</code> das Verzeichnis angeben,
-                in dem Hostjava installiert ist.
+                in dem HostJava installiert ist.
             </p>
             <p>
                 Die Optionen werden der Java Virtual Machine übergeben.
@@ -871,7 +889,7 @@ db = odbc -db=factory_oracle -user=factory -password=factory
 
     <setting setting = "smtp"
              type    = "host_address"
-             title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
+             title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail Versand">
         <description>
             <p>
                 Der allgemeine Platz für diese Einstellung ist 

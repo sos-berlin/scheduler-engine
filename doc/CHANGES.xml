@@ -43,11 +43,11 @@
 
         <revision jira="JS-129" type="new" title="Datenbankspalte EXIT_CODE wird nachträglich angelegt"/>
 
-        <revision jira="JS-116" type="correction" title="&lt;run_time> für Aufträge in verschachtelter Jobkette">
+        <revision jira="JS-116" type="correction" title="&lt;run_time> für Aufträge in verschachtelter Job-Kette">
             <description>
                 <p>
                     <scheduler_element name="run_time"/> wiederholt jetzt einen Auftrag korrekt,
-                    auch wenn er in einer verschachtelten Jobkette (<scheduler_element name="job_chain_node.job_chain"/>) ist.
+                    auch wenn er in einer verschachtelten Job-Kette (<scheduler_element name="job_chain_node.job_chain"/>) ist.
                 </p>
             </description>
         </revision>
@@ -382,9 +382,9 @@
                     führt Jobs lokal im einzelnen Scheduler aus.
                 </p>
                 <p>
-                    Für eine Jobkette kann mit <scheduler_element name="job_chain" attribute="distributed"/>
+                    Für eine Job-Kette kann mit <scheduler_element name="job_chain" attribute="distributed"/>
                     eingestellt werden, ob sie lokal im einzelnen Scheduler oder verteilt im ganzen Cluster gilt.
-                    Lokale Jobketten <i>müssen</i> im Cluster einen eindeutigen Namen haben
+                    Lokale Job-Ketten <i>müssen</i> im Cluster einen eindeutigen Namen haben
                     (das wird nicht geprüft).
                 </p>
                 <p>
@@ -460,7 +460,7 @@
     </change>
 
     <change date="2007-06-06" version="2.0.176" subversion_revision="5087">
-        <revision type="new" title="Aufträgskennungen werden in allen verschachtelten Jobketten auf Eindeutigkeit geprüft">
+        <revision type="new" title="Aufträgskennungen werden in allen verschachtelten Job-Ketten auf Eindeutigkeit geprüft">
             <description>
                 <ul>
                     <li>
@@ -468,15 +468,15 @@
                     </li>
                 </ul>
                 <p>
-                    Miteinander durch Verschachtelung verbundene Jobkettenn bilden einen gemeinsamen <i>Order_id_space</i>,
+                    Miteinander durch Verschachtelung verbundene Job-Kettenn bilden einen gemeinsamen <i>Order_id_space</i>,
                     um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
                 </p>
                 <p>
-                    Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab,
+                    Der Scheduler lehnt das Einfügen eines Auftrags in eine Job-Kette ab,
                     wenn die Auftragskennung im Order_id_space bereits vergeben ist.
                 </p>
                 <p>
-                    Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette,
+                    Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Job-Kette,
                     die demselben Order_id_space angehört,
                     ersetzt.
                 </p>
@@ -592,11 +592,11 @@
 
 
     <change date="2007-04-16" version="2.0.172" subversion_revision="4983">
-        <revision type="new" title="Verschachtelte Jobketten">
+        <revision type="new" title="Verschachtelte Job-Ketten">
             <description>
                 <p>
-                    Ein Auftrag kann nacheinander durch mehrere Jobketten geschleust werden.
-                    Diese Jobketten werden in einer eigenen, übergeordneten Jobkette aufgeführt.
+                    Ein Auftrag kann nacheinander durch mehrere Job-Ketten geschleust werden.
+                    Diese Job-Ketten werden in einer eigenen, übergeordneten Job-Kette aufgeführt.
                 </p>
                 <ul>
                     <li>
@@ -629,14 +629,14 @@
 
 
     <change date="2007-04-09" version="2.0.171" subversion_revision="4961">
-        <revision type="new" title="Jobkette und Jobkettenknoten stoppen">
+        <revision type="new" title="Job-Kette und Job-Kettenknoten stoppen">
             <description>
                 <p>
-                    Eine Jobkette kann gestoppt werden, so dass keine Aufträge mehr ausgeführt werden.
+                    Eine Job-Kette kann gestoppt werden, so dass keine Aufträge mehr ausgeführt werden.
                 </p>
                 <p>
-                    Ein Jobkettenknoten kann gestoppt werden, so dass Aufträge nicht mehr ausgeführt werden.
-                    Oder die Aufträge überspringen den Jobkettenknoten.
+                    Ein Job-Kettenknoten kann gestoppt werden, so dass Aufträge nicht mehr ausgeführt werden.
+                    Oder die Aufträge überspringen den Job-Kettenknoten.
                 </p>
                 <ul>
                     <li>
@@ -813,7 +813,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Verzögernde Jobkettenknoten">
+        <revision type="new" title="Verzögernde Job-Kettenknoten">
             <description>
                 <ul>
                     <li>
@@ -2677,7 +2677,7 @@
         <revision type="new" title="&lt;web_service job_chain=''&gt;">
             <description>
                 <p>
-                    Ein Web-Service kann mit einer Jobkette implementiert werden.
+                    Ein Web-Service kann mit einer Job-Kette implementiert werden.
                 </p>
                 <p>Neue XML-Elemente, neue Attribute:</p>
                 <ul>
@@ -3040,7 +3040,7 @@
     </change>
 
     <!--change date="2005-08-28" version="2.0.137" subversion_revision="3851">
-        <revision type="correction" title="Scheduler beendet sich wieder, wenn eine Jobkette gefüllt ist (Folge der Implementierung von remove_job)"/>
+        <revision type="correction" title="Scheduler beendet sich wieder, wenn eine Job-Kette gefüllt ist (Folge der Implementierung von remove_job)"/>
     </change-->
 
     <change date="2005-08-24" version="2.0.137" subversion_revision="3844">
@@ -3080,11 +3080,11 @@
     </change>
 
     <change date="2005-08-12" version="2.0.134" subversion_revision="3832">
-        <revision type="modification" title="Änderung der &lt;run_time&gt; eines Auftrags wirkt nur am Beginn der Jobkette">
+        <revision type="modification" title="Änderung der &lt;run_time&gt; eines Auftrags wirkt nur am Beginn der Job-Kette">
             <description>
                 <p>
                     Eine Änderung der &lt;run_time&gt; eines Auftrags wirkt nur,
-                    wenn er am Anfang der Jobkette steht und noch nicht ausgeführt wird.
+                    wenn er am Anfang der Job-Kette steht und noch nicht ausgeführt wird.
                     Sonst wird die Wirkung verzögert, bis der Auftrag einen Endzustand erreicht hat.
                 </p>
             </description>
@@ -3107,11 +3107,11 @@
                     <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order" />
                     wirkt wie
                     <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order" />,
-                    wenn die Jobkette keinen Auftrag mit gleicher Kennung hat.
+                    wenn die Job-Kette keinen Auftrag mit gleicher Kennung hat.
                 </p>
                 <p>
-                    Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
-                    Genauer: er wird aus der Jobkette entfernt
+                    Hat die Job-Kette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
+                    Genauer: er wird aus der Job-Kette entfernt
                     (wie mit <scheduler_method class="Order" method="remove_from_job_chain"/>),
                     und der neue Auftrag wird hinzugefügt.
                 </p>
@@ -3146,9 +3146,9 @@
                 <p>
                     Wenn der Auftrag gerade von einer Task ausgeführt wird,
                     liefert die Eigenschaft <scheduler_method class="Order" property="job_chain" />
-                    weiterhin die Jobkette, aus der der Auftrag gerade entfernt wird.
+                    weiterhin die Job-Kette, aus der der Auftrag gerade entfernt wird.
                     Erst wenn die Ausführung beendet ist, liefert die Eigenschaft <code>null</code>
-                    (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
+                    (außer der Auftrag ist wieder in eine Job-Kette eingetragen worden).
                     Damit bleibt die Eigenschaft <code>job_chain</code> während der Ausführung durch die Task stabil.
                 </p>
                 <p>
