@@ -15,7 +15,7 @@
         
         <process_classes/>
 
-        <script language="javascript">
+        <!--script language="javascript">
     <![CDATA[
 
 for( var i = 1; i <= 100; i++ )
@@ -30,7 +30,7 @@ for( var i = 1; i <= 100; i++ )
 }
         
         
-        ]]></script>
+        ]]></script-->
 
         <jobs>
 

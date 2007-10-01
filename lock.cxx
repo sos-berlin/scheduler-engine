@@ -303,7 +303,9 @@ void Lock::close()
 
 bool Lock::can_be_replaced_now()
 {
-    return replacement()  &&  _holder_set.empty();
+    return replacement()  &&  
+           replacement()->file_based_state() == File_based::s_initialized &&
+           _holder_set.empty();
 }
 
 //------------------------------------------------------------------------------Lock::on_initialize

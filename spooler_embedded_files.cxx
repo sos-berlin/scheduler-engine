@@ -706,7 +706,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"xml_payload\" type=\"Xml_payload\" minOccurs=\"0\"/>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"job_chain\"         type=\"Path\"                 use=\"required\"/>\n"
+    "<xsd:attribute name=\"job_chain\"         type=\"Path\"/>         <!-- P\xc3" "\xbc" "schel will <add_order> in Konfigurationsdatei zulassen. use=\"required\" -->        \n"
     "<xsd:attribute name=\"id\"                type=\"Order_id\"/>\n"
     "<xsd:attribute name=\"priority\"          type=\"xsd:integer\"/>\n"
     "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
@@ -1691,7 +1691,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1190989820 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1191230784 },
     { NULL, NULL, 0 }
 };
 

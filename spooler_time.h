@@ -106,7 +106,7 @@ struct Time
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );
-    void                        set_utc                     ( double );
+    Time&                       set_utc                     ( double );
     double                      as_double                   () const;
     double                      as_utc_double               () const;
 

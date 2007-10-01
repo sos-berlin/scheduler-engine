@@ -278,7 +278,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-424", "'$1' is being removed before '$2'" },
     { "SCHEDULER-426", "'$2' and '$3' cannot be combined, because of duplicate order id '$1'" },
     { "SCHEDULER-427", "Invalid MD5 hexadecimal coded password for HTTP user '$1'" },
-    { "SCHEDULER-428", "Error when loading base file '$1':\n$2" },
+    { "SCHEDULER-428", "Error when loading base file '$1' from '$2:\n$3" },
     { "SCHEDULER-429", "Current name of '$1' is fixed and cannot be changed to '$2'" },
     { "SCHEDULER-430", "'$1 $2' is unknown" },
     { "SCHEDULER-431", "Error when processing configuration directory:\n$1" },
@@ -289,7 +289,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-436", "Order id in <order> is different from order id in filename" },
     { "SCHEDULER-437", "Attribute job_chain= is not allowed in file based order" },
     { "SCHEDULER-438", "Invalid Job_chain_node for add_order() with state='$1'" },
-    { "SCHEDULER-439", "Error when removing $2 after base file '$1' has been removed:\n$3" },
+    { "SCHEDULER-439", "Error when removing after base file '$1' has been removed:\n$3" },
     { "SCHEDULER-440", "Definition of $1 is incomplete" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
@@ -460,6 +460,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-893", "$1 is $2 now" },
     { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
     { "SCHEDULER-895", "Configuration directory '$1' does not exist, it will be ignored" },
+    { "SCHEDULER-896", "File will be read again after $1 seconds" },
     {}
 };
 } //namespace sos

@@ -844,9 +844,7 @@
                 <xsl:choose>
                     <xsl:when test="not( $job_chain_select )">
                         <tr>
-                            <td colspan="6">
-                                (no job chains)
-                            </td>
+                            <td colspan="6" class="small">(no job chains)</td>
                         </tr>
                     </xsl:when>
 

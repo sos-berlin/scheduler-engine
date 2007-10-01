@@ -27,10 +27,12 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-static const string spooler_get_name        = "spooler_get";
-static const string spooler_level_name      = "spooler_level";
+static const string             spooler_get_name                = "spooler_get";
+static const string             spooler_level_name              = "spooler_level";
 
-const int max_stdout_state_text_length      = 100;                      // Für Job.state_text und Order.state_text
+const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
+const double                    delete_temporary_files_delay    = 5;                                //0.5
+const double                    delete_temporary_files_retry    = 0.1;                              
 
 //----------------------------------------------------------------------------Spooler_object::level
 /*
@@ -1499,8 +1501,8 @@ bool Task::do_something()
                                         else
                                         {
                                             // Funktioniert in lokaler Zeit. Zum Beginn der Winterzeit: +1h, zum Beginn der Sommerzeit: 0s.
-                                            if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + 0.5;
-                                            _next_time = min( now + 0.1, _trying_deleting_files_until );
+                                            if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay;
+                                            _next_time = min( now + delete_temporary_files_retry, _trying_deleting_files_until );
                                         }
                                     }
 

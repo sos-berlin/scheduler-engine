@@ -88,6 +88,13 @@ string Standing_order_subsystem::normalized_name( const string& name ) const
            order_id;
 }
 
+//------------------------------------------------Standing_order_subsystem::assert_xml_element_name
+
+void Standing_order_subsystem::assert_xml_element_name( const xml::Element_ptr& e ) const
+{ 
+    if( !e.nodeName_is( "add_order" ) )  File_based_subsystem::assert_xml_element_name( e );
+}
+
 //-----------------------------------------------------Standing_order_folder::Standing_order_folder
 
 Standing_order_folder::Standing_order_folder( Folder* folder )
@@ -132,8 +139,7 @@ void Standing_order::close()
         _order = NULL;
     }
 
-    if( _job_chain_path != "" )  remove_dependant( order_subsystem(), _job_chain_path );
-    _job_chain_path.clear();
+    remove_dependant( order_subsystem(), _job_chain_path );
 }
 
 //-------------------------------------------------------------------------Standing_order::set_name
@@ -145,12 +151,15 @@ void Standing_order::set_name( const string& name )
     split_standing_order_name( name, &_job_chain_name, &_order_id );
 
     if( _job_chain_name == ""  ||  _order_id == "" )  z::throw_xc( "SCHEDULER-435", base_file_info()._filename );
+
+    _job_chain_path = Absolute_path( folder_path(), _job_chain_name );
 }
 
 //--------------------------------------------------------------------Standing_order::on_initialize
 
 bool Standing_order::on_initialize()
 {
+    add_dependant( order_subsystem(), _job_chain_path );
     return true;
 }
 
@@ -158,9 +167,6 @@ bool Standing_order::on_initialize()
 
 bool Standing_order::on_load()
 {
-    _job_chain_path = folder()->make_path( _job_chain_name );
-    add_dependant( order_subsystem(), _job_chain_path );
-
     return true;
 }
 
@@ -168,6 +174,8 @@ bool Standing_order::on_load()
 
 bool Standing_order::on_activate()
 {
+    if( !_order )  assert(0), z::throw_xc( __FUNCTION__, "noorder" );
+
     bool result = false;
 
     if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
@@ -220,14 +228,18 @@ void Standing_order::on_remove_now()
 void Standing_order::set_dom( const xml::Element_ptr& element )
 {
     assert( !_order );
-    if( !element.nodeName_is( "order" ) )  z::throw_xc( "SCHEDULER-409", "order", element.nodeName() );
+
+    subsystem()->assert_xml_element_name( element );
 
     ptr<Order> order = new Order( spooler() );
     order->set_id( order_id() ); 
     order->set_dom( element );
 
-    if( order->string_id() != order_id() )  z::throw_xc( "SCHEDULER-436" );
-    if( order->job_chain_path() != ""    )  z::throw_xc( "SCHEDULER-437" );
+    if( order->string_id() != order_id() )  z::throw_xc( "SCHEDULER-436" );     // Bei <add_order> vom Schema erlaubt
+    if( order->job_chain_path() != ""    )  z::throw_xc( "SCHEDULER-437" );     // Bei <add_order> vom Schema erlaubt
+
+    Absolute_path job_chain_path ( folder_path(), element.getAttribute( "job_chain" ) );  // Bei <add_order> vom Schema erlaubt
+    if( !job_chain_path.empty()  &&  subsystem()->normalized_path( job_chain_path ) != subsystem()->normalized_path( _job_chain_path ) )  z::throw_xc( "SCHEDULER-437" );
 
     _order = order;
 }

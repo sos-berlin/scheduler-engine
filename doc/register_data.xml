@@ -70,7 +70,7 @@
     <register_entry register_file='api/Order.xml#use_element__add_order' register_title='Order'  register_keyword='add_order'/>
     <register_entry register_file='command_line.xml#use_element__add_order' register_title='Kommandozeilenoptionen'  register_keyword='add_order'/>
     <register_entry register_file='distributed_orders.xml#use_element__add_order' register_title='Verteilte Aufträge'  register_keyword='add_order'/>
-    <register_entry register_file='order.xml#use_element__add_order' register_title='Aufträge'  register_keyword='add_order'/>
+    <register_entry register_file='order.xml#use_element__add_order' register_title='Aufträge und Job-Ketten'  register_keyword='add_order'/>
     <register_entry register_file='xml.xml#use_element__add_order' register_title='Alle XML-Elemente'  register_keyword='add_order'/>
     <register_entry register_file='xml/add_order.xml#' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='add_order' type='definition'/>
     <register_entry register_file='xml/modify_order.xml#use_element__add_order' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='add_order'/>
@@ -111,7 +111,7 @@
 </register_keyword>
 <register_keyword keyword='allowed_host'>
     <register_keyword_display><code>&lt;allowed_host&gt;</code></register_keyword_display>
-    <register_entry register_file='http.xml#use_element__allowed_host' register_title='HTTP-Server und Web-Services'  register_keyword='allowed_host'/>
+    <register_entry register_file='http.xml#use_element__allowed_host' register_title='HTTP Server und Web Services'  register_keyword='allowed_host'/>
     <register_entry register_file='xml.xml#use_element__allowed_host' register_title='Alle XML-Elemente'  register_keyword='allowed_host'/>
     <register_entry register_file='xml/allowed_host.xml#' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='allowed_host' type='definition'/>
     <register_entry register_file='xml/base.xml#use_element__allowed_host' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='allowed_host'/>
@@ -351,9 +351,9 @@
     <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
     <register_entry register_file='command_line.xml#use_element__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
     <register_entry register_file='directory_watch.xml#use_element__config' register_title='Verzeichnisüberwachung'  register_keyword='config'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__config' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='config'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__config' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='config'/>
     <register_entry register_file='email.xml#use_element__config' register_title='eMail-Versand'  register_keyword='config'/>
-    <register_entry register_file='http.xml#use_element__config' register_title='HTTP-Server und Web-Services'  register_keyword='config'/>
+    <register_entry register_file='http.xml#use_element__config' register_title='HTTP Server und Web Services'  register_keyword='config'/>
     <register_entry register_file='index.xml#use_element__config' register_title='Dokumentation'  register_keyword='config'/>
     <register_entry register_file='settings.xml#use_element__config' register_title='Einstellungen'  register_keyword='config'/>
     <register_entry register_file='xml.xml#use_element__config' register_title='Alle XML-Elemente'  register_keyword='config'/>
@@ -368,7 +368,7 @@
     <register_keyword_display><code>-config=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_config' register_title='Kommandozeilenoptionen'  register_keyword='config' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
-    <register_entry register_file='dynamic_configuration.xml#use_option__config' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='config'/>
+    <register_entry register_file='dynamic_configuration.xml#use_option__config' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='config'/>
     <register_entry register_file='xml/config.xml#use_option__config' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/holidays.xml#use_option__config' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/include.xml#use_option__config' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='config'/>
@@ -479,7 +479,7 @@
     <register_entry register_file='xml/answer/order.xml#attribute_created' register_title='&lt;order&gt; (Antwort)'  register_keyword='created' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Daemon'>
-    <register_entry register_file='service.xml' register_title='Der Scheduler als Dienst'  register_keyword='Daemon'/>
+    <register_entry register_file='service.xml' register_title='Der Job Scheduler als Dienst'  register_keyword='Daemon'/>
 </register_keyword>
 <register_keyword keyword='date'>
     <register_keyword_display><code>&lt;date&gt;</code></register_keyword_display>
@@ -703,7 +703,7 @@
 <register_keyword keyword='description'>
     <register_keyword_display><code>&lt;description&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__description' register_title='Änderungsprotokoll'  register_keyword='description'/>
-    <register_entry register_file='http.xml#use_element__description' register_title='HTTP-Server und Web-Services'  register_keyword='description'/>
+    <register_entry register_file='http.xml#use_element__description' register_title='HTTP Server und Web Services'  register_keyword='description'/>
     <register_entry register_file='xml.xml#use_element__description' register_title='Alle XML-Elemente'  register_keyword='description'/>
     <register_entry register_file='xml/answer/description.xml#' register_title='&lt;description&gt; (Antwort)'  register_keyword='description' type='definition'/>
     <register_entry register_file='xml/description.xml#' register_title='&lt;description&gt; (Konfiguration)'  register_keyword='description' type='definition'/>
@@ -711,7 +711,7 @@
 </register_keyword>
 <register_keyword keyword='Dienst'>
     <register_entry register_file='command_line.xml' register_title='Kommandozeilenoptionen'  register_keyword='Dienst'/>
-    <register_entry register_file='service.xml' register_title='Der Scheduler als Dienst'  register_keyword='Dienst'/>
+    <register_entry register_file='service.xml' register_title='Der Job Scheduler als Dienst'  register_keyword='Dienst'/>
 </register_keyword>
 <register_keyword keyword='directory'>
     <register_keyword_display><code>directory=</code></register_keyword_display>
@@ -773,8 +773,8 @@
     <register_keyword_display><code>end_time=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_end_time' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='end_time' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Ende einer Job-Kette'>
-    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Ende einer Job-Kette'/>
+<register_keyword keyword='Ende einer Jobkette'>
+    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Ende einer Jobkette'/>
 </register_keyword>
 <register_keyword keyword='ended'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='ended'/>
@@ -941,7 +941,7 @@
 </register_keyword>
 <register_keyword keyword='file_based'>
     <register_keyword_display><code>&lt;file_based&gt;</code></register_keyword_display>
-    <register_entry register_file='dynamic_configuration.xml#use_element__file_based' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='file_based'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__file_based' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='file_based'/>
     <register_entry register_file='xml/answer/file_based.xml#' register_title='&lt;file_based&gt; (Antwort)'  register_keyword='file_based' type='definition'/>
 </register_keyword>
 <register_keyword keyword='file_order_sink'>
@@ -1145,19 +1145,20 @@
     <register_entry register_file='api/Supervisor_client.xml#method__hostname' register_title='Supervisor_client.hostname' register_keyword='hostname' type='definition'/>
 </register_keyword>
 <register_keyword keyword='HTML'>
-    <register_entry register_file='http.xml' register_title='HTTP-Server und Web-Services'  register_keyword='HTML'/>
+    <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='HTML'/>
 </register_keyword>
 <register_keyword keyword='html_dir'>
     <register_keyword_display><code>html_dir=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_html_dir' register_title='file factory.ini, section [spooler]'  register_keyword='html_dir' type='definition'/>
-    <register_ini_entry register_file='http.xml' register_title='HTTP-Server und Web-Services' file='factory.ini' section='spooler' entry='html_dir'/>
+    <register_ini_entry register_file='http.xml' register_title='HTTP Server und Web Services' file='factory.ini' section='spooler' entry='html_dir'/>
 </register_keyword>
-<register_keyword keyword='HTTP-Server'>
-    <register_entry register_file='http.xml' register_title='HTTP-Server und Web-Services'  register_keyword='HTTP-Server'/>
+<register_keyword keyword='HTTP Server'>
+    <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='HTTP Server'/>
 </register_keyword>
 <register_keyword keyword='http.authentication'>
     <register_keyword_display><code>&lt;http.authentication&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__http.authentication' register_title='Änderungsprotokoll'  register_keyword='http.authentication'/>
+    <register_entry register_file='http.xml#use_element__http.authentication' register_title='HTTP Server und Web Services'  register_keyword='http.authentication'/>
     <register_entry register_file='xml.xml#use_element__http.authentication' register_title='Alle XML-Elemente'  register_keyword='http.authentication'/>
     <register_entry register_file='xml/http.authentication.xml#' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='http.authentication' type='definition'/>
     <register_entry register_file='xml/http.user.xml#use_element__http.authentication' register_title='&lt;http.user&gt; (Konfiguration)'  register_keyword='http.authentication'/>
@@ -1392,11 +1393,11 @@
     <register_entry register_file='api/Order_queue.xml#use_element__job' register_title='Order_queue'  register_keyword='job'/>
     <register_entry register_file='api/Task.xml#use_element__job' register_title='Task'  register_keyword='job'/>
     <register_entry register_file='command_line.xml#use_element__job' register_title='Kommandozeilenoptionen'  register_keyword='job'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__job' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='job'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__job' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='job'/>
     <register_entry register_file='job.xml#use_element__job' register_title='Was ist ein Job?'  register_keyword='job'/>
     <register_entry register_file='lock.xml#use_element__job' register_title='Sperren'  register_keyword='job'/>
-    <register_entry register_file='order.xml#use_element__job' register_title='Aufträge'  register_keyword='job'/>
-    <register_entry register_file='remote_execution.xml#use_element__job' register_title='XXX'  register_keyword='job'/>
+    <register_entry register_file='order.xml#use_element__job' register_title='Aufträge und Job-Ketten'  register_keyword='job'/>
+    <register_entry register_file='remote_execution.xml#use_element__job' register_title='Externe Job-Verarbeitung'  register_keyword='job'/>
     <register_entry register_file='xml.xml#use_element__job' register_title='Alle XML-Elemente'  register_keyword='job'/>
     <register_entry register_file='xml/add_order.xml#use_element__job' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='job'/>
     <register_entry register_file='xml/answer/history.entry.xml#use_element__job' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='job'/>
@@ -1463,7 +1464,7 @@
     <register_entry register_file='api/Job_chain.xml#use_element__job_chain' register_title='Job_chain'  register_keyword='job_chain'/>
     <register_entry register_file='api/Spooler.xml#use_element__job_chain' register_title='Spooler'  register_keyword='job_chain'/>
     <register_entry register_file='command_line.xml#use_element__job_chain' register_title='Kommandozeilenoptionen'  register_keyword='job_chain'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__job_chain' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='job_chain'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__job_chain' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='job_chain'/>
     <register_entry register_file='file_orders.xml#use_element__job_chain' register_title='Verzeichnisüberwachung mit Dateiaufträgen'  register_keyword='job_chain'/>
     <register_entry register_file='xml.xml#use_element__job_chain' register_title='Alle XML-Elemente'  register_keyword='job_chain'/>
     <register_entry register_file='xml/answer/job_chain.xml#' register_title='&lt;job_chain&gt; (Antwort)'  register_keyword='job_chain' type='definition'/>
@@ -1544,7 +1545,7 @@
 <register_keyword keyword='job_chain_node.job_chain'>
     <register_keyword_display><code>&lt;job_chain_node.job_chain&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__job_chain_node.job_chain' register_title='Änderungsprotokoll'  register_keyword='job_chain_node.job_chain'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__job_chain_node.job_chain' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='job_chain_node.job_chain'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__job_chain_node.job_chain' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='job_chain_node.job_chain'/>
     <register_entry register_file='xml.xml#use_element__job_chain_node.job_chain' register_title='Alle XML-Elemente'  register_keyword='job_chain_node.job_chain'/>
     <register_entry register_file='xml/job_chain.xml#use_element__job_chain_node.job_chain' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='job_chain_node.job_chain'/>
     <register_entry register_file='xml/job_chain_node.job_chain.xml#' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='job_chain_node.job_chain' type='definition'/>
@@ -1560,7 +1561,7 @@
 <register_keyword keyword='job_chains'>
     <register_keyword_display><code>&lt;job_chains&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__job_chains' register_title='Änderungsprotokoll'  register_keyword='job_chains'/>
-    <register_entry register_file='order.xml#use_element__job_chains' register_title='Aufträge'  register_keyword='job_chains'/>
+    <register_entry register_file='order.xml#use_element__job_chains' register_title='Aufträge und Job-Ketten'  register_keyword='job_chains'/>
     <register_entry register_file='xml.xml#use_element__job_chains' register_title='Alle XML-Elemente'  register_keyword='job_chains'/>
     <register_entry register_file='xml/answer/job_chains.xml#' register_title='&lt;job_chains&gt; (Antwort)'  register_keyword='job_chains' type='definition'/>
     <register_entry register_file='xml/job_chains.xml#' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='job_chains' type='definition'/>
@@ -1579,14 +1580,14 @@
     <register_keyword_display><code>job_name=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_job_name' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='job_name' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Job-Kette'>
-    <register_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='Job-Kette'/>
-    <register_entry register_file='xml/job_chains.xml' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='Job-Kette'/>
+<register_keyword keyword='Jobkette'>
+    <register_entry register_file='xml/job_chain.xml' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='Jobkette'/>
+    <register_entry register_file='xml/job_chains.xml' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='Jobkette'/>
 </register_keyword>
-<register_keyword keyword='Job-Kettenknoten'>
-    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
-    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
-    <register_entry register_file='xml/job_chain_node.xml' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='Job-Kettenknoten'/>
+<register_keyword keyword='Jobkettenknoten'>
+    <register_entry register_file='xml/job_chain_node.end.xml' register_title='&lt;job_chain_node.end&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
+    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
+    <register_entry register_file='xml/job_chain_node.xml' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='Jobkettenknoten'/>
 </register_keyword>
 <register_keyword keyword='Jobprotokoll'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Jobprotokoll'/>
@@ -1616,7 +1617,7 @@
     <register_keyword_display><code>&lt;kill_task&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__kill_task' register_title='Änderungsprotokoll'  register_keyword='kill_task'/>
     <register_entry register_file='api/Task.xml#use_element__kill_task' register_title='Task'  register_keyword='kill_task'/>
-    <register_entry register_file='order.xml#use_element__kill_task' register_title='Aufträge'  register_keyword='kill_task'/>
+    <register_entry register_file='order.xml#use_element__kill_task' register_title='Aufträge und Job-Ketten'  register_keyword='kill_task'/>
     <register_entry register_file='xml.xml#use_element__kill_task' register_title='Alle XML-Elemente'  register_keyword='kill_task'/>
     <register_entry register_file='xml/answer/subprocesses.xml#use_element__kill_task' register_title='&lt;subprocesses&gt; (Antwort)'  register_keyword='kill_task'/>
     <register_entry register_file='xml/answer/task.xml#use_element__kill_task' register_title='&lt;task&gt; (Antwort)'  register_keyword='kill_task'/>
@@ -1743,7 +1744,7 @@
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
     <register_entry register_file='api/Lock.xml#use_element__lock' register_title='Lock'  register_keyword='lock'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__lock' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='lock'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__lock' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='lock'/>
     <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
     <register_entry register_file='xml/answer/lock.holder.xml#use_element__lock' register_title='&lt;holder&gt; (Antwort)'  register_keyword='lock'/>
     <register_entry register_file='xml/answer/lock.holders.xml#use_element__lock' register_title='&lt;lock.holders&gt; (Antwort)'  register_keyword='lock'/>
@@ -2160,7 +2161,7 @@
     <register_entry register_file='CHANGES.xml#use_element__modify_job' register_title='Änderungsprotokoll'  register_keyword='modify_job'/>
     <register_entry register_file='api/Job.xml#use_element__modify_job' register_title='Job'  register_keyword='modify_job'/>
     <register_entry register_file='job.xml#use_element__modify_job' register_title='Was ist ein Job?'  register_keyword='modify_job'/>
-    <register_entry register_file='order.xml#use_element__modify_job' register_title='Aufträge'  register_keyword='modify_job'/>
+    <register_entry register_file='order.xml#use_element__modify_job' register_title='Aufträge und Job-Ketten'  register_keyword='modify_job'/>
     <register_entry register_file='xml.xml#use_element__modify_job' register_title='Alle XML-Elemente'  register_keyword='modify_job'/>
     <register_entry register_file='xml/answer/job.xml#use_element__modify_job' register_title='&lt;job&gt; (Antwort)'  register_keyword='modify_job'/>
     <register_entry register_file='xml/answer/task.xml#use_element__modify_job' register_title='&lt;task&gt; (Antwort)'  register_keyword='modify_job'/>
@@ -2340,7 +2341,7 @@
     <register_keyword_display><code>&lt;order&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__order' register_title='Änderungsprotokoll'  register_keyword='order'/>
     <register_entry register_file='api/Order.xml#use_element__order' register_title='Order'  register_keyword='order'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__order' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='order'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__order' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='order'/>
     <register_entry register_file='xml.xml#use_element__order' register_title='Alle XML-Elemente'  register_keyword='order'/>
     <register_entry register_file='xml/add_order.xml#use_element__order' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='order'/>
     <register_entry register_file='xml/answer/order.xml#' register_title='&lt;order&gt; (Antwort)'  register_keyword='order' type='definition'/>
@@ -2589,7 +2590,7 @@
     <register_entry register_file='api/Task.xml#method__priority_class' register_title='Task.priority_class' register_keyword='priority_class' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Priorität'>
-    <register_entry register_file='order.xml' register_title='Aufträge'  register_keyword='Priorität'/>
+    <register_entry register_file='order.xml' register_title='Aufträge und Job-Ketten'  register_keyword='Priorität'/>
 </register_keyword>
 <register_keyword keyword='process'>
     <register_keyword_display><code>&lt;process&gt;</code></register_keyword_display>
@@ -2597,6 +2598,7 @@
     <register_entry register_file='api/Task.xml#use_element__process' register_title='Task'  register_keyword='process'/>
     <register_entry register_file='directory_watch.xml#use_element__process' register_title='Verzeichnisüberwachung'  register_keyword='process'/>
     <register_entry register_file='file_orders.xml#use_element__process' register_title='Verzeichnisüberwachung mit Dateiaufträgen'  register_keyword='process'/>
+    <register_entry register_file='job.xml#use_element__process' register_title='Was ist ein Job?'  register_keyword='process'/>
     <register_entry register_file='xml.xml#use_element__process' register_title='Alle XML-Elemente'  register_keyword='process'/>
     <register_entry register_file='xml/answer/process.xml#' register_title='&lt;process&gt; (Antwort)'  register_keyword='process' type='definition'/>
     <register_entry register_file='xml/answer/task.xml#use_element__process' register_title='&lt;task&gt; (Antwort)'  register_keyword='process'/>
@@ -2617,8 +2619,8 @@
     <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='Process_class'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__process_class' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='process_class'/>
-    <register_entry register_file='remote_execution.xml#use_element__process_class' register_title='XXX'  register_keyword='process_class'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__process_class' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='process_class'/>
+    <register_entry register_file='remote_execution.xml#use_element__process_class' register_title='Externe Job-Verarbeitung'  register_keyword='process_class'/>
     <register_entry register_file='xml.xml#use_element__process_class' register_title='Alle XML-Elemente'  register_keyword='process_class'/>
     <register_entry register_file='xml/answer/process_class.xml#' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='process_class' type='definition'/>
     <register_entry register_file='xml/include.xml#use_element__process_class' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='process_class'/>
@@ -2696,7 +2698,7 @@
 </register_keyword>
 <register_keyword keyword='Protokoll'>
     <register_entry register_file='datenbank.xml' register_title='Datenbank'  register_keyword='Protokoll'/>
-    <register_entry register_file='http.xml' register_title='HTTP-Server und Web-Services'  register_keyword='Protokoll'/>
+    <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='Protokoll'/>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Protokoll'/>
 </register_keyword>
 <register_keyword keyword='proxy'>
@@ -2747,13 +2749,13 @@
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='release'/>
 </register_keyword>
 <register_keyword keyword='Remote'>
-    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='Remote'/>
+    <register_entry register_file='remote_execution.xml' register_title='Externe Job-Verarbeitung'  register_keyword='Remote'/>
 </register_keyword>
 <register_keyword keyword='Remote Execution'>
-    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='Remote Execution'/>
+    <register_entry register_file='remote_execution.xml' register_title='Externe Job-Verarbeitung'  register_keyword='Remote Execution'/>
 </register_keyword>
 <register_keyword keyword='remote_scheduler'>
-    <register_entry register_file='remote_execution.xml' register_title='XXX'  register_keyword='remote_scheduler'/>
+    <register_entry register_file='remote_execution.xml' register_title='Externe Job-Verarbeitung'  register_keyword='remote_scheduler'/>
 </register_keyword>
 <register_keyword keyword='remote_scheduler'>
     <register_keyword_display><code>&lt;remote_scheduler&gt;</code></register_keyword_display>
@@ -2814,7 +2816,7 @@
 </register_keyword>
 <register_keyword keyword='removed'>
     <register_keyword_display><code>&lt;removed&gt;</code></register_keyword_display>
-    <register_entry register_file='dynamic_configuration.xml#use_element__removed' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='removed'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__removed' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='removed'/>
     <register_entry register_file='xml/answer/removed.xml#' register_title='&lt;removed&gt; (Antwort)'  register_keyword='removed' type='definition'/>
 </register_keyword>
 <register_keyword keyword='removed'>
@@ -2851,7 +2853,7 @@
 </register_keyword>
 <register_keyword keyword='replacement'>
     <register_keyword_display><code>&lt;replacement&gt;</code></register_keyword_display>
-    <register_entry register_file='dynamic_configuration.xml#use_element__replacement' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='replacement'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__replacement' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='replacement'/>
     <register_entry register_file='xml/answer/replacement.xml#' register_title='&lt;replacement&gt; (Antwort)'  register_keyword='replacement' type='definition'/>
 </register_keyword>
 <register_keyword keyword='replacement'>
@@ -2894,9 +2896,9 @@
     <register_entry register_file='api/Run_time.xml#use_element__run_time' register_title='Run_time'  register_keyword='run_time'/>
     <register_entry register_file='api/Task.xml#use_element__run_time' register_title='Task'  register_keyword='run_time'/>
     <register_entry register_file='directory_watch.xml#use_element__run_time' register_title='Verzeichnisüberwachung'  register_keyword='run_time'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__run_time' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='run_time'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__run_time' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='run_time'/>
     <register_entry register_file='job.xml#use_element__run_time' register_title='Was ist ein Job?'  register_keyword='run_time'/>
-    <register_entry register_file='order.xml#use_element__run_time' register_title='Aufträge'  register_keyword='run_time'/>
+    <register_entry register_file='order.xml#use_element__run_time' register_title='Aufträge und Job-Ketten'  register_keyword='run_time'/>
     <register_entry register_file='xml.xml#use_element__run_time' register_title='Alle XML-Elemente'  register_keyword='run_time'/>
     <register_entry register_file='xml/answer/run_time.xml#' register_title='&lt;run_time&gt; (Antwort)'  register_keyword='run_time' type='definition'/>
     <register_entry register_file='xml/answer/task.xml#use_element__run_time' register_title='&lt;task&gt; (Antwort)'  register_keyword='run_time'/>
@@ -2969,6 +2971,7 @@
     <register_entry register_file='CHANGES.xml#use_element__script' register_title='Änderungsprotokoll'  register_keyword='script'/>
     <register_entry register_file='api/Task.xml#use_element__script' register_title='Task'  register_keyword='script'/>
     <register_entry register_file='command_line.xml#use_element__script' register_title='Kommandozeilenoptionen'  register_keyword='script'/>
+    <register_entry register_file='job.xml#use_element__script' register_title='Was ist ein Job?'  register_keyword='script'/>
     <register_entry register_file='script_language_javascript.xml#use_element__script' register_title='Skripte in JavaScript'  register_keyword='script'/>
     <register_entry register_file='sos_ini_java.xml#use_element__script' register_title='file sos.ini, section [java]'  register_keyword='script'/>
     <register_entry register_file='xml.xml#use_element__script' register_title='Alle XML-Elemente'  register_keyword='script'/>
@@ -3120,7 +3123,7 @@
 <register_keyword keyword='show_state'>
     <register_keyword_display><code>&lt;show_state&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__show_state' register_title='Änderungsprotokoll'  register_keyword='show_state'/>
-    <register_entry register_file='dynamic_configuration.xml#use_element__show_state' register_title='Konfiguration der Scheduler-Objekte in einzelnen XML-Dateien'  register_keyword='show_state'/>
+    <register_entry register_file='dynamic_configuration.xml#use_element__show_state' register_title='Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien'  register_keyword='show_state'/>
     <register_entry register_file='protokolle.xml#use_element__show_state' register_title='Protokolle'  register_keyword='show_state'/>
     <register_entry register_file='xml.xml#use_element__show_state' register_title='Alle XML-Elemente'  register_keyword='show_state'/>
     <register_entry register_file='xml/job.xml#use_element__show_state' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='show_state'/>
@@ -3748,8 +3751,8 @@
     <register_keyword_display><code>variables</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='variables' type='definition'/>
 </register_keyword>
-<register_keyword keyword='Verschachtelte Job-Ketten'>
-    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Verschachtelte Job-Ketten'/>
+<register_keyword keyword='Verschachtelte Jobketten'>
+    <register_entry register_file='xml/job_chain_node.job_chain.xml' register_title='&lt;job_chain_node.job_chain&gt; (Konfiguration)'  register_keyword='Verschachtelte Jobketten'/>
 </register_keyword>
 <register_keyword keyword='version'>
     <register_keyword_display><code>version=</code></register_keyword_display>
@@ -3820,7 +3823,7 @@
     <register_entry register_file='api/Web_service.xml#use_element__web_service' register_title='Web_service'  register_keyword='web_service'/>
     <register_entry register_file='api/Web_service_operation.xml#use_element__web_service' register_title='Web_service_operation'  register_keyword='web_service'/>
     <register_entry register_file='api/Web_service_response.xml#use_element__web_service' register_title='Web_service_response'  register_keyword='web_service'/>
-    <register_entry register_file='http.xml#use_element__web_service' register_title='HTTP-Server und Web-Services'  register_keyword='web_service'/>
+    <register_entry register_file='http.xml#use_element__web_service' register_title='HTTP Server und Web Services'  register_keyword='web_service'/>
     <register_entry register_file='xml.xml#use_element__web_service' register_title='Alle XML-Elemente'  register_keyword='web_service'/>
     <register_entry register_file='xml/add_order.xml#use_element__web_service' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='web_service'/>
     <register_entry register_file='xml/http.authentication.xml#use_element__web_service' register_title='&lt;http.authentication&gt; (Konfiguration)'  register_keyword='web_service'/>

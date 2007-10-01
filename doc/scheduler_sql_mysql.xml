@@ -6,6 +6,7 @@
 <description
     title               = "Vom Scheduler verwendete SQL-Anweisungen für MySQL®"
     base_dir            = ""
+    parent_page         = "scheduler_sql.xml"
     author              = "$Author$"
     date                = "$Date$"
 >

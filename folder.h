@@ -276,7 +276,8 @@ struct File_based : Scheduler_object,
     State                      _state;
     State                      _wished_state;
     Base_file_info             _base_file_info;
-    bool                       _read_again;
+    bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
+    bool                       _error_ignored;
     Md5                        _md5;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
@@ -474,6 +475,7 @@ struct File_based_subsystem : Subsystem
     virtual void                check_file_based_element    ( const xml::Element_ptr& );
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
+    virtual void                assert_xml_element_name     ( const xml::Element_ptr& ) const;
     virtual string              xml_element_name            () const                                = 0;
     virtual string              xml_elements_name           () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }

@@ -2625,7 +2625,7 @@
 
         <message code="SCHEDULER-428">
             <text xml:lang="en">
-                <title>Error when loading base file '<p1>path</p1>':<br/><p2>error</p2></title>
+                <title>Error when loading base file '<p1>path</p1>' from '<p2>timestamp</p2>:<br/><p3>error</p3></title>
             </text>
         </message>
 
@@ -2691,7 +2691,7 @@
 
         <message code="SCHEDULER-439">
             <text xml:lang="en">
-                <title>Error when removing <p2>type</p2> after base file '<p1>path</p1>' has been removed:<br/><p3>error</p3></title>
+                <title>Error when removing after base file '<p1>path</p1>' has been removed:<br/><p3>error</p3></title>
             </text>
         </message>
 
@@ -4004,6 +4004,12 @@
         <message code="SCHEDULER-895">
             <text xml:lang="en">
                 <title>Configuration directory '<p1/>' does not exist, it will be ignored</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-896">
+            <text xml:lang="en">
+                <title>File will be read again after <p1/> seconds</title>
             </text>
         </message>
     </messages>

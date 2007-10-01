@@ -349,10 +349,11 @@ double Time::as_utc_double() const
 
 //------------------------------------------------------------------------------------Time::set_utc
 
-void Time::set_utc( double t )
+Time& Time::set_utc( double t )
 {
     set( t );
     if( !is_null()  &&  !is_never() )  _is_utc = true;
+    return *this;
 }
 
 //-------------------------------------------------------------------------------Time::set_datetime
