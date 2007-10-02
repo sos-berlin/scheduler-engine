@@ -597,10 +597,10 @@
                         </tr>
                     </xsl:if>
 
-                    <xsl:if test="file_based/ERROR or file_based/removed/ERROR or replacement/job/file_based/ERROR">
+                    <xsl:if test="file_based/ERROR or file_based/removed or replacement">
                         <tr>
                             <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                                <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                                <xsl:apply-templates mode="file_based_line" select="."/>
                             </td>
                         </tr>
                     </xsl:if>
@@ -967,11 +967,11 @@
                                 </td>
                             </xsl:element>
 
-                            <xsl:if test="file_based/removed/ERROR or replacement/job/file_based/ERROR">
+                            <xsl:if test="file_based/removed or replacement">
                                 <tr class="job">
                                     <td colspan="2" class="right_border"></td>
                                     <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                                        <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                                        <xsl:apply-templates mode="file_based_line" select="."/>
                                     </td>
                                 </tr>
                             </xsl:if>
@@ -1085,11 +1085,11 @@
             </xsl:element>
         </xsl:if>
 
-        <xsl:if test="file_based/removed/ERROR or replacement/job_chain/file_based/ERROR">
+        <xsl:if test="file_based/removed or replacement">
             <tr>
                 <td></td>
                 <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                    <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                    <xsl:apply-templates mode="file_based_line" select="."/>
                 </td>
             </tr>
         </xsl:if>
@@ -1402,10 +1402,10 @@
                     </xsl:choose>
                 </xsl:element>
 
-                <xsl:if test="$job/file_based/removed/ERROR or $job/replacement/job/file_based/ERROR">
-                    <tr>
-                        <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                            <xsl:apply-templates mode="file_based_error_with_label" select="$job"/>
+                <xsl:if test="$job/file_based/removed or $job/replacement">
+                    <tr class="job">
+                        <td colspan="6" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <xsl:apply-templates mode="file_based_line" select="$job"/>
                         </td>
                     </tr>
                 </xsl:if>
@@ -1520,7 +1520,7 @@
             </xsl:if>
         </xsl:if>
 
-        <xsl:if test="replacement">
+        <!--xsl:if test="replacement">
             <xsl:choose>
                 <xsl:when test="replacement/job/file_based/ERROR">
                     <xsl:text>, </xsl:text>
@@ -1530,7 +1530,7 @@
                     <xsl:text>, is being replaced</xsl:text>
                 </xsl:otherwise>
             </xsl:choose>
-        </xsl:if>
+        </xsl:if-->
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~lock.use-->
@@ -1795,6 +1795,15 @@
 
                 </xsl:element>
 
+                
+                <xsl:if test="file_based/removed or replacement">
+                    <tr>
+                        <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                            <xsl:apply-templates mode="file_based_line" select="."/>
+                        </td>
+                    </tr>
+                </xsl:if>
+
             </xsl:for-each>
         </table>
     </xsl:template>
@@ -1881,10 +1890,10 @@
                     </td>
                 </tr>
 
-                <xsl:if test="file_based/removed/ERROR or replacement/lock/file_based/ERROR">
+                <xsl:if test="file_based/removed or replacement">
                     <tr>
                         <td colspan="5" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                            <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                            <xsl:apply-templates mode="file_based_line" select="."/>
                         </td>
                     </tr>
                 </xsl:if>
@@ -2090,10 +2099,10 @@
                         </td>
                     </tr>
 
-                    <xsl:if test="file_based/removed/ERROR or replacement/process_class/file_based/ERROR">
+                    <xsl:if test="file_based/removed or replacement">
                         <tr>
                             <td colspan="6" style="padding-left: 4ex; padding-bottom: 0.5em;">
-                                <xsl:apply-templates mode="file_based_error_with_label" select="."/>
+                                <xsl:apply-templates mode="file_based_line" select="."/>
                             </td>
                         </tr>
                     </xsl:if>
@@ -3437,9 +3446,9 @@
         </xsl:if>
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based_line-->
     
-    <xsl:template mode="file_based_error_with_label" match="*">
+    <xsl:template mode="file_based_line" match="*">
         <xsl:choose>
             <xsl:when test="file_based/ERROR">
                 <span class="label" style="white-space: nowrap">Error in configuration file: </span>
@@ -3453,6 +3462,9 @@
                 <span class="file_based_error_message">
                 <xsl:apply-templates select="replacement/*/file_based/ERROR"/>
                 </span>
+            </xsl:when>
+            <xsl:when test="replacement">
+                <span class="label">Replacement is standing by</span>
             </xsl:when>
             <xsl:when test="file_based/removed/ERROR">
                 <span class="label" style="white-space: nowrap">Removing delayed: </span>

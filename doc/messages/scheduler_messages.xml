@@ -2625,7 +2625,7 @@
 
         <message code="SCHEDULER-428">
             <text xml:lang="en">
-                <title>Error when loading base file '<p1>path</p1>' from '<p2>timestamp</p2>:<br/><p3>error</p3></title>
+                <title>Error when loading base file '<p1>path</p1>' (<p2>timestamp</p2>):<br/><p3>error</p3></title>
             </text>
         </message>
 
@@ -3978,20 +3978,20 @@
         
         <message code="SCHEDULER-891">
             <text xml:lang="en">
-                <title>Configuration file '<p1/>' is going to be be loaded into this new <p2>type</p2></title>
+                <title>Configuration file '<p1/>' (<p2>timestamp</p2>) is going to be be loaded into this new <p3>type</p3></title>
                 <!--title>File '<p1/>' is going to be be loaded into new '<p2>type</p2> <p3>name</p3>'</title-->
             </text>
         </message>
         
         <message code="SCHEDULER-892">
             <text xml:lang="en">
-                <title>Changed configuration file '<p1/>' is going to replace this <p2>type</p2></title>
+                <title>Changed configuration file '<p1/>' (<p2>timestamp</p2>) is going to replace this <p3>type</p3></title>
             </text>
         </message>
         
         <message code="SCHEDULER-893">
             <text xml:lang="en">
-                <title><p1>objecttype</p1> is <p2>state</p2> now</title>
+                <title><p1>objecttype</p1> is '<p2>state</p2>' now</title>
             </text>
         </message>
         

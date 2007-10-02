@@ -125,7 +125,7 @@ struct Order_subsystem : Order_subsystem_interface
 
     bool                        has_any_order               ();
 
-  //Job_chain*                  active_job_chain            ( const string& path )                  { return active_file_based( path ); }
+    Job_chain*                  active_job_chain            ( const Absolute_path& path )           { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const Absolute_path& path )           { return file_based( path ); }
     Job_chain*                  job_chain_or_null           ( const Absolute_path& path )           { return file_based_or_null( path ); }
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
@@ -894,13 +894,15 @@ void Node::close()
 
 //---------------------------------------------------------------------------------Node::initialize
 
-void Node::initialize()
+bool Node::initialize()
 {
     if( _state != s_initialized )
     {
         assert( _state == s_none );
         set_state( s_initialized );
     }
+
+    return true;
 }
 
 //-------------------------------------------------------------------------Node::action_from_string
@@ -1176,10 +1178,16 @@ void Job_node::close()
 
 //-----------------------------------------------------------------------------Job_node::initialize
 
-void Job_node::initialize()
+bool Job_node::initialize()
 {
-    Base_class::initialize();
-    add_dependant( job_subsystem(), _job_path );
+    bool ok = Base_class::initialize();
+
+    if( ok )
+    {
+        add_dependant( job_subsystem(), _job_path );
+    }
+
+    return ok;
 }
 
 //-------------------------------------------------------------------------------Job_node::activate
@@ -1368,10 +1376,29 @@ void Nested_job_chain_node::close()
 
 //----------------------------------------------------------------Nested_job_chain_node::initialize
     
-void Nested_job_chain_node::initialize()
+bool Nested_job_chain_node::initialize()
 {
-    Base_class::initialize();
+    bool ok = Base_class::initialize();
     _job_chain->add_dependant( _spooler->order_subsystem(), _nested_job_chain_path );
+
+    if( ok )
+    {
+        if( Job_chain* nested_job_chain = order_subsystem()->job_chain_or_null( _nested_job_chain_path ) )
+        {
+            if( nested_job_chain == _job_chain )  z::throw_xc( "SCHEDULER-414", S() << _nested_job_chain_path << "->" << _job_chain->path() );
+            if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
+
+            Z_FOR_EACH( Job_chain::Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
+            {
+                if( Nested_job_chain_node::try_cast( *it ) )  z::throw_xc( "SCHEDULER-412", _job_chain->obj_name() );
+                // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
+            }
+        }
+        else 
+            ok = false;
+    }
+
+    return ok;
 }
 
 //-------------------------------------------------------------------Nested_job_chain_node::replace
@@ -1525,7 +1552,7 @@ void Job_chain::disconnected_nested_job_chains_and_rebuild_order_id_space()
 
     if( !disconnected_job_chains.empty() )
     {
-        disconnected_job_chains.insert( this  );
+        disconnected_job_chains.insert( this );
         order_subsystem()->order_id_spaces()->recompute_order_id_spaces( disconnected_job_chains, this );
     }
 }    
@@ -1865,34 +1892,30 @@ Node* Job_chain::add_end_node( const Order::State& state )
 
 bool Job_chain::on_initialize()
 {
-    bool result = false;
+    bool ok = true;
 
-    if( _state == s_under_construction ) 
+    if( _state != s_under_construction )   ok = false;
+
+    if( ok )
     {
         fill_holes();
 
-        Z_FOR_EACH( Node_list, _node_list, it )  (*it)->initialize();
-
-        bool ok = initialize_nested_job_chains();
+        Z_FOR_EACH( Node_list, _node_list, it ) 
+        {
+            ok = (*it)->initialize();
+            if( !ok )  break;
+        }
 
         if( ok )
         {
-            ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( order_subsystem() ) );
-            add_nested_job_chains_to_order_id_space( order_id_space );
-          
             Z_FOR_EACH( Node_list, _node_list, it )  check_job_chain_node( *it );
             _order_sources.initialize();
 
-            /// Jetzt kann nichts mehr schiefgehen. Keine Exception ab hier! ///
-
-            complete_nested_job_chains( order_id_space );
-
             set_state( s_initialized );
-            result = true;
         }
     }
 
-    return result;
+    return ok;
 }
 
 //----------------------------------------------------------------------------Job_chain::fill_holes
@@ -1931,41 +1954,6 @@ void Job_chain::fill_holes()
                                                           else  node->_error_node  = node_from_state( node->error_state() );
         }
     }
-}
-
-//----------------------------------------------------------Job_chain::initialize_nested_job_chains
-// Prüft, ob alle verschachtelten Jobketten da sind
-
-bool Job_chain::initialize_nested_job_chains()
-{
-    bool result = true;
-
-    Z_FOR_EACH( Node_list, _node_list, it )
-    {
-        Node* node = *it;
-
-        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( node ) )
-        {
-            if( Job_chain* nested_job_chain = order_subsystem()->job_chain_or_null( n->nested_job_chain_path() ) )
-            {
-                if( nested_job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-413" );
-
-                Z_FOR_EACH( Node_list, nested_job_chain->_node_list, it )   // Nur einfache Verschachtelung ist erlaubt
-                {
-                    if( Nested_job_chain_node::try_cast( *it ) )  z::throw_xc( "SCHEDULER-412", obj_name() );
-                    // Bei mehrfacher Verschachtelung die Order_id_spaces prüfen, insbesondere connected_job_chains() und disconnect_job_chains().
-                }
-
-                if( nested_job_chain == this )  z::throw_xc( "SCHEDULER-414", S() << n->nested_job_chain_path() << "->" << path() );
-            }
-            else
-            {
-                result = false;
-            }
-        }
-    }
-
-    return result;
 }
 
 //------------------------------------------------------------------Job_chain::check_job_chain_node
@@ -2007,9 +1995,11 @@ void Job_chain::add_nested_job_chains_to_order_id_space( Order_id_space* order_i
 
 //------------------------------------------------------------Job_chain::complete_nested_job_chains
 
-void Job_chain::complete_nested_job_chains( Order_id_space* order_id_space )
+void Job_chain::complete_nested_job_chains()
 {
-    // Keine Exception auslösen!
+    ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( order_subsystem() ) );
+    add_nested_job_chains_to_order_id_space( order_id_space );
+
 
     Z_FOR_EACH( Node_list, _node_list, it )
     {
@@ -2197,7 +2187,7 @@ void Job_chain::remove_order( Order* order )
 
     order->_job_chain      = NULL;
     order->_job_chain_path.clear();
-    order->_log->set_prefix( obj_name() );
+    order->_log->set_prefix( order->obj_name() );
 
     unregister_order( order );
 
@@ -2218,6 +2208,9 @@ bool Job_chain::on_load()  // Read_transaction* ta )
 
     if( !is_to_be_removed()  && _state < s_loaded )
     {
+        complete_nested_job_chains();   // Exception bei doppelter Auftragskennung in den verschachtelten Jobketten
+
+
         if( _spooler->db()  &&  
             _spooler->db()->opened()  &&
             orders_are_recoverable()  &&  
@@ -2667,8 +2660,8 @@ Job_chain* Job_chain::on_replace_now()
     if( !can_be_replaced_now() )  assert(0), z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
 
 
-    replacement()->_order_id_space = _order_id_space;
-    _order_id_space = NULL;
+    //replacement()->_order_id_space = _order_id_space;
+    //_order_id_space = NULL;
 
 
     Z_FOR_EACH( Node_list, replacement()->_node_list, it )
@@ -2977,12 +2970,14 @@ void Order_id_space::complete_and_add( Job_chain* causing_job_chain )
 
 void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_ids )
 {
+    assert( _job_chain_set.find( job_chain->normalized_path() ) == _job_chain_set.end() );  //if( _job_chain_set.find( job_chain->normalized_path() ) == _job_chain_set.end() )
+
     if( check_ids )
     {
         check_for_unique_order_ids_of( job_chain );
     }
 
-    _job_chain_set.insert( job_chain->path() );
+    _job_chain_set.insert( job_chain->normalized_path() );
 }
 
 //----------------------------------------------------Order_id_space::check_for_unique_order_ids_of
@@ -2992,7 +2987,7 @@ void Order_id_space::check_for_unique_order_ids_of( Job_chain* job_chain ) const
     Z_FOR_EACH( Job_chain::Order_map, job_chain->_order_map, it )
     {
         if( Job_chain* other_job_chain = job_chain_by_order_id_or_null( it->first ) )
-            z::throw_xc( "SCHEDULER-426", it->first, job_chain, other_job_chain );
+            z::throw_xc( "SCHEDULER-426", it->first, job_chain->obj_name(), other_job_chain->obj_name() );
     }
 }
 
@@ -3034,7 +3029,7 @@ void Order_id_space::remove_job_chain( Job_chain* job_chain )
     Z_DEBUG_ONLY( assert( job_chain->order_id_space() == this ) );
 
     job_chain->set_order_id_space( NULL );
-    _job_chain_set.erase( job_chain->path() );
+    _job_chain_set.erase( job_chain->normalized_path() );
 }
 
 //----------------------------------------------------------------------Order_id_space::dom_element
@@ -3043,14 +3038,14 @@ xml::Element_ptr Order_id_space::dom_element( const xml::Document_ptr& document,
 {
     xml::Element_ptr result = document.createElement( "order_id_space" );
 
-    result.setAttribute( "name" , name() );
+    result.setAttribute( "name", name() );
 
     Z_FOR_EACH( String_set, _job_chain_set, it )
     {
         Absolute_path job_chain_path = Absolute_path( *it );
 
         xml::Element_ptr job_chain_element = result.append_new_element( "job_chain" );
-        job_chain_element.setAttribute( "job_chain", job_chain_path);
+        job_chain_element.setAttribute( "job_chain", job_chain_path );
     }
 
     return result;
@@ -5986,7 +5981,7 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 
     if( _outer_job_chain_path != "" )
     {
-        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->job_chain( _outer_job_chain_path )->first_node() ) )
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->active_job_chain( _outer_job_chain_path )->first_node() ) )
             first_nested_job_chain_path = n->nested_job_chain_path();
 
         remove_from_job_chain( jc_leave_in_job_chain_stack );  

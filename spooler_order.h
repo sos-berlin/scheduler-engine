@@ -446,7 +446,7 @@ struct Node : Com_job_chain_node,
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    virtual void                initialize                  ();
+    virtual bool                initialize                  ();
     virtual void                activate                    ();
   //virtual void                replace                     ( Node* )                               {}
 
@@ -547,7 +547,7 @@ struct Job_node : Order_queue_node,
                                ~Job_node                    ();
 
     void                        close                       ();
-    void                        initialize                  ();
+    bool                        initialize                  ();
     void                        activate                    ();
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -584,7 +584,7 @@ struct Nested_job_chain_node : Node
                                ~Nested_job_chain_node       ();
 
     void                        close                       ();
-    void                        initialize                  ();
+    bool                        initialize                  ();
   //void                        replace                     ( Node* old_node );
 
     Absolute_path               nested_job_chain_path       () const                                { return _nested_job_chain_path; }
@@ -690,11 +690,11 @@ struct Job_chain : Com_job_chain,
 
 
     void                        fill_holes                  ();
-    bool                        initialize_nested_job_chains();
+  //bool                        initialize_nested_job_chains();
     bool                        check_nested_job_chains     ();
     void                        check_job_chain_node        ( job_chain::Node* );
     void                        add_nested_job_chains_to_order_id_space( Order_id_space* );
-    void                        complete_nested_job_chains  ( Order_id_space* );
+    void                        complete_nested_job_chains  ();
 
 
     job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 

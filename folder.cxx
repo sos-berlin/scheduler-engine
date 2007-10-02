@@ -843,41 +843,54 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                     current_file_based->_read_again = false;
                 }
                 else
-                {
+                {   
+                    string rel_path = folder()->make_path( base_file_info->_filename );
+
                     something_changed = true;
 
+
                     file_based = subsystem()->call_new_file_based();
-
                     file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._timestamp_utc != base_file_info->_timestamp_utc;
-                    if( file_based->_read_again )  folder()->subsystem()->set_try_again_delay( file_timestamp_delay );  
-
-                    file_based->_md5 = content_md5;
+                    file_based->_md5        = content_md5;
                     file_based->set_base_file_info( *base_file_info );
                     file_based->set_folder_path( folder()->path() );
                     file_based->set_name( Folder::object_name_of_filename( base_file_info->_filename ) );
-
-                    string rel_path = folder()->make_path( base_file_info->_filename );
-
+                    
                     if( old_file_based ) 
                     {
-                        old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, subsystem()->object_type_name() ) );
+                        old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, 
+                                                                                      Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
+                                                                                      subsystem()->object_type_name() ) );
                         old_file_based->set_replacement( file_based );
+                        current_file_based = NULL;
                     }
                     else
                     {
-                        file_based->log()->info( message_string( "SCHEDULER-891", rel_path, subsystem()->object_type_name() ) );
+                        file_based->log()->info( message_string( "SCHEDULER-891", rel_path, 
+                                                                                  Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
+                                                                                  subsystem()->object_type_name() ) );
                         add_file_based( file_based );
+                        current_file_based = NULL;
                     }
+
+
+                    if( file_based->_read_again )  
+                    {
+                        folder()->subsystem()->set_try_again_delay( file_timestamp_delay );  
+                        file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay ) );
+                    }
+
 
                     if( !content_xc.is_empty() )  throw content_xc;
 
 
                     xml::Document_ptr dom_document ( content );
-                    subsystem()->assert_xml_element_name( dom_document.documentElement() );      //Weil Püschel auch <add_order> haben will.  if( !dom_document.documentElement().nodeName_is( subsystem()->xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_element_name(), dom_document.documentElement().nodeName() );
+                    xml::Element_ptr  element      = dom_document.documentElement();
+                    subsystem()->assert_xml_element_name( element );      //Weil Püschel auch <add_order> haben will.  if( !dom_document.documentElement().nodeName_is( subsystem()->xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_element_name(), dom_document.documentElement().nodeName() );
                     if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
-                    assert_empty_attribute( dom_document.documentElement(), "spooler_id" );
-                    assert_empty_attribute( dom_document.documentElement(), "replace"    );
+                    assert_empty_attribute( element, "spooler_id" );
+                    if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
 
                     Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
 
@@ -947,7 +960,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         }
 
         file_based->log()->log( log_level, msg );
-        if( file_based->_error_ignored )  file_based->log()->info( message_string( "SCHEDULER-896", file_timestamp_delay ) );
 
         if( msg != ""  &&  _spooler->_mail_on_error  &&  log_level > log_info )
         {

@@ -645,13 +645,13 @@
                 <code>"now"</code>
             </li>
             <li>
-                <code>"</code><i>yyyy</i><code>-</code><i>mm</i><code>-</code><i>dd</i> <i>HH</i><code>:</code><i>MM</i>[<code>:</code><i>SS</i>]<code>"</code>
+                <code>"<i>yyyy</i>-<i>mm</i>-<i>dd</i> <i>HH</i>:<i>MM</i>[:<i>SS</i>]"</code>
             </li>
             <li>
-                <code>"now + </code><i>HH</i><code>:</code>:<i>MM</i>[<code>:</code><i>SS</i>]<code>"</code>
+                <code>"now + <i>HH</i>:<i>MM</i>[:<i>SS</i>]"</code>
             </li>
             <li>
-                <code>"now + </code><i>seconds</i><code>"</code>
+                <code>"now + <i>seconds</i>"</code>
             </li>
         </ul>
         <p>
