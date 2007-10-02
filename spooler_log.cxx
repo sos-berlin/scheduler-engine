@@ -478,7 +478,7 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
         if( !log_category_is_set( "scheduler" ) )  return;
 
 #       ifndef Z_DEBUG
-            if( !is_enabled_log_level( level )  &&  !_spooler->_zschimmer_mode )  return;   // eMail von Uwe Risse 2007-07-12 15:18, Jira JS-50
+            if( !_spooler->_zschimmer_mode )  return;   // eMail von Uwe Risse 2007-07-12 15:18, Jira JS-50
 #       endif
     }
 
