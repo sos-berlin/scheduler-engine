@@ -222,8 +222,8 @@ void Folder_subsystem::close()
 
     if( _root_folder )  
     {
-        _root_folder->remove_all_file_baseds();
-        remove_file_based( _root_folder );
+        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  _root_folder->remove_all_file_baseds();
+        //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  remove_file_based( _root_folder );
         _root_folder = false;
     }
 }
