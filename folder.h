@@ -723,6 +723,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     ptr<Folder>                _root_folder;
     Event                      _directory_event;
     int                        _directory_watch_interval;
+    double                     _last_changed_at;
     double                     _read_again_at;
 };
 

@@ -322,9 +322,13 @@ bool Folder_subsystem::async_continue_( Continue_flags )
     if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
 
     bool something_changed = _root_folder->adjust_with_directory( now );
+    
+    if( something_changed )  _last_changed_at = now;
 
-    _directory_watch_interval = something_changed? directory_watch_interval_min
-                                                 : min( directory_watch_interval_max, 2 * _directory_watch_interval );
+    _directory_watch_interval = now - _last_changed_at < directory_watch_interval_max? directory_watch_interval_min
+                                                                                     : directory_watch_interval_max;
+    //_directory_watch_interval = something_changed? directory_watch_interval_min
+    //                                             : min( directory_watch_interval_max, ( _directory_watch_interval + 1 ) + ( _directory_watch_interval / 10 ) );
 
     if( _read_again_at )  set_async_next_gmtime( _read_again_at );
                     else  set_async_delay( _directory_watch_interval );
