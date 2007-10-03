@@ -504,8 +504,8 @@ bool Job::on_initialize()
 
     if( _state < s_initialized )
     {
-        try
-        {
+        //try
+        //{
             Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
             if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
@@ -531,12 +531,12 @@ bool Job::on_initialize()
             }
 
             _state = s_initialized;
-        }
-        catch( exception& x )
-        {
-            _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
-            throw;
-        }
+        //}
+        //catch( exception& x )
+        //{
+        //    _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
+        //    throw;
+        //}
 
         result = true;
     }
