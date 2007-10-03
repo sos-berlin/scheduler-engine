@@ -76,7 +76,7 @@ void Path::set_folder_path( const string& folder_path )
 void Path::set_absolute( const Absolute_path& absolute_base, const Path& relative )
 {
     assert( !absolute_base.empty() );
-    if( absolute_base.empty() )  assert(0), z::throw_xc( __FUNCTION__, relative );
+    if( absolute_base.empty() )  assert(0), z::throw_xc( Z_FUNCTION, relative );
 
     if( relative.empty() )
     {
@@ -149,7 +149,7 @@ string Path::to_filename() const
 Absolute_path::Absolute_path( const Path& path )
 {
     assert( path.empty()  ||  path.is_absolute_path() );
-    if( !path.empty()  &&  !path.is_absolute_path() )  assert(0), z::throw_xc( __FUNCTION__, path );
+    if( !path.empty()  &&  !path.is_absolute_path() )  assert(0), z::throw_xc( Z_FUNCTION, path );
 
     set_path( path );
 }
@@ -203,7 +203,7 @@ Folder_subsystem::~Folder_subsystem()
     {
         close();
     }
-    catch( exception& x )  { Z_LOG( __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x )  { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------------------------Folder_subsystem::close
@@ -232,7 +232,7 @@ void Folder_subsystem::close()
 
 void Folder_subsystem::set_directory( const File_path& directory )
 {
-    assert_subsystem_state( subsys_initialized, __FUNCTION__ );
+    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
     _directory = directory;
 }
 
@@ -300,13 +300,15 @@ bool Folder_subsystem::subsystem_activate()
 ptr<Folder> Folder_subsystem::new_file_based()
 {
     assert(0);
-    zschimmer::throw_xc( __FUNCTION__ );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an
+    zschimmer::throw_xc( Z_FUNCTION );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an
 }
 
 //----------------------------------------------------------------Folder_subsystem::async_continue_
 
 bool Folder_subsystem::async_continue_( Continue_flags )
 {
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
+
     _directory_event.reset();
 
 #   ifdef Z_WINDOWS
@@ -629,7 +631,7 @@ Subfolder_folder::~Subfolder_folder()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG( __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //-----------------------------------------------------------Subfolder_folder::on_base_file_changed
@@ -816,7 +818,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
             bool read_again = !timestamp_changed  &&  
                               current_file_based  &&
                               current_file_based->_read_again  &&
-                              current_file_based->_base_file_info._info_timestamp + file_timestamp_delay < now;     // Falls Datei geändert, aber Zeitstempel nicht
+                              current_file_based->_base_file_info._info_timestamp + file_timestamp_delay <= now;    // Falls Datei geändert, aber Zeitstempel nicht
 
             if( is_new  ||  timestamp_changed  ||  read_again )
             {
@@ -870,7 +872,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                                                                                   Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                   subsystem()->object_type_name() ) );
                         add_file_based( file_based );
-                        current_file_based = NULL;
                     }
 
 
@@ -1045,7 +1046,7 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 void Typed_folder::add_to_replace_or_remove_candidates( const string& name )             
 { 
     _replace_or_remove_candidates_set.insert( name ); 
-    spooler()->folder_subsystem()->set_signaled( __FUNCTION__ );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
+    spooler()->folder_subsystem()->set_signaled( Z_FUNCTION );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
 }
 
 //------------------------------------------------Typed_folder::handle_replace_or_remove_candidates
@@ -1081,7 +1082,7 @@ void Typed_folder::handle_replace_or_remove_candidates()
 
 void Typed_folder::add_file_based( File_based* file_based )
 {
-    if( !file_based )  assert(0), z::throw_xc( __FUNCTION__, "NULL" );
+    if( !file_based )  assert(0), z::throw_xc( Z_FUNCTION, "NULL" );
     assert( !file_based->typed_folder() );
 
     string normalized_name = file_based->normalized_name();
@@ -1101,7 +1102,7 @@ void Typed_folder::add_file_based( File_based* file_based )
 
 void Typed_folder::remove_file_based( File_based* file_based )
 {
-    if( !file_based )  assert(0), z::throw_xc( __FUNCTION__, "NULL" );
+    if( !file_based )  assert(0), z::throw_xc( Z_FUNCTION, "NULL" );
     assert( file_based->typed_folder() == this );
     assert( file_based->can_be_removed_now() );
     
@@ -1144,9 +1145,9 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
     File_based* new_file_based  = old_file_based->replacement();
     string      normalized_name = new_file_based->normalized_name();
 
-    if( old_file_based->normalized_name() != normalized_name )  assert(0), z::throw_xc( __FUNCTION__ );
-    if( file_based( normalized_name ) != old_file_based )       assert(0), z::throw_xc( __FUNCTION__ );
-    if( new_file_based->typed_folder() )                        assert(0), z::throw_xc( __FUNCTION__ );
+    if( old_file_based->normalized_name() != normalized_name )  assert(0), z::throw_xc( Z_FUNCTION );
+    if( file_based( normalized_name ) != old_file_based )       assert(0), z::throw_xc( Z_FUNCTION );
+    if( new_file_based->typed_folder() )                        assert(0), z::throw_xc( Z_FUNCTION );
 
     _replace_or_remove_candidates_set.erase( old_file_based->path() );
 
@@ -1265,7 +1266,7 @@ File_based::~File_based()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------------------------------File_based::close
@@ -1311,7 +1312,7 @@ bool File_based::load()
 
 bool File_based::load2()
 {
-    if( !is_in_folder()  &&  this != spooler()->root_folder() )  assert(0), z::throw_xc( "NOT-IN-FOLDER", __FUNCTION__, obj_name() );
+    if( !is_in_folder()  &&  this != spooler()->root_folder() )  assert(0), z::throw_xc( "NOT-IN-FOLDER", Z_FUNCTION, obj_name() );
 
     bool ok = _state >= s_loaded;
     if( !ok )
@@ -1555,7 +1556,7 @@ zschimmer::Xc File_based::remove_error()
 
 void File_based::remove_base_file()
 {
-    if( !has_base_file() )  assert(0), z::throw_xc( __FUNCTION__ );
+    if( !has_base_file() )  assert(0), z::throw_xc( Z_FUNCTION );
 
     File_path file_path ( folder()->directory(), base_file_info()._filename );
 
@@ -1819,7 +1820,7 @@ void File_based::set_name( const string& name )
     
 Folder* File_based::folder() const
 { 
-    if( !_typed_folder )  assert(0), z::throw_xc( __FUNCTION__, "no folder" );
+    if( !_typed_folder )  assert(0), z::throw_xc( Z_FUNCTION, "no folder" );
 
     return _typed_folder->folder(); 
 }
@@ -1875,7 +1876,7 @@ Pendant::~Pendant()
     {
         remove_dependants();
     }
-    catch( exception& x )  { Z_LOG( __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x )  { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //-----------------------------------------------------------------------Pendant::remove_dependants

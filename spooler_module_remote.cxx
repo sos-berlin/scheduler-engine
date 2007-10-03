@@ -447,7 +447,7 @@ AGAIN:
         {
             // PROVISORISCH
             //_remote_scheduler_server = _spooler->_supervisor_connection;        
-            //if( !_remote_scheduler_server  ||  _remote_scheduler_server->state() != Supervisor_client_connection::s_finished )  z::throw_xc( __FUNCTION__, "_remote_scheduler_server" );
+            //if( !_remote_scheduler_server  ||  _remote_scheduler_server->state() != Supervisor_client_connection::s_finished )  z::throw_xc( Z_FUNCTION, "_remote_scheduler_server" );
             //_remote_scheduler_server->send__start( "<remote_scheduler.start_task tcp_port='" << tcp_port << "'/>" );
 
             ptr<Async_operation> connection_operation = _session->connect_server__start();

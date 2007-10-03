@@ -140,7 +140,7 @@ bool Process_module_instance::name_exists( const string& )
 Variant Process_module_instance::call( const string& name )
 {
     assert(0);
-    z::throw_xc( __FUNCTION__, name );
+    z::throw_xc( Z_FUNCTION, name );
 }
 
 //----------------------------------------------------------------------Process_module_instance::call
@@ -148,7 +148,7 @@ Variant Process_module_instance::call( const string& name )
 Variant Process_module_instance::call( const string& name, const Variant&, const Variant& )
 {
     assert(0);
-    z::throw_xc( __FUNCTION__, name );
+    z::throw_xc( Z_FUNCTION, name );
 }
 
 //------------------------------------------------------------Process_module_instance::program_path

@@ -177,7 +177,7 @@ void Web_services::set_dom( const xml::Element_ptr& web_services_element )
             if( !string_begins_with( url_path, "/" ) )  z::throw_xc( "SCHEDULER-252", url_path );
             if( !string_ends_with( url_path, "/" ) )  url_path += "/";
 
-            if( url_path.substr( 0, url_path.length() - 1 ).find( "/", 1 ) != string::npos )  z::throw_xc( __FUNCTION__, "http_files: Only single directory is allowed" );  // Wird vom Schema sichergestellt
+            if( url_path.substr( 0, url_path.length() - 1 ).find( "/", 1 ) != string::npos )  z::throw_xc( Z_FUNCTION, "http_files: Only single directory is allowed" );  // Wird vom Schema sichergestellt
             
             if( web_service_by_url_path_or_null        ( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
             if( http_file_directory_by_url_path_or_null( url_path ) )  z::throw_xc( "SCHEDULER-238", url_path );
@@ -262,7 +262,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
     
     if( !string_begins_with( authorization, "Basic " ) )
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  Nur Basic wird akzeptiert: " << authorization << "\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Nur Basic wird akzeptiert: " << authorization << "\n" );
         return false;
     }
 
@@ -271,7 +271,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
 
     if( colon == string::npos )  
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  Doppelpunkt fehlt im decodiertem Text: " << authorization << "\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Doppelpunkt fehlt im decodiertem Text: " << authorization << "\n" );
         return false;
     }
 
@@ -281,13 +281,13 @@ bool Web_services::is_request_authorized( http::Request* http_request )
     Users_map::iterator it = _users_map.find( user_name );
     if( it == _users_map.end() )
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  Benutzer '" << user_name << "' ist unbekannt\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Benutzer '" << user_name << "' ist unbekannt\n" );
         return false;
     }
 
     if( it->second->_password_md5 != password_md5 )
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  Kennwort für Benutzer '" << user_name << "' stimmt nicht\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  Kennwort für Benutzer '" << user_name << "' stimmt nicht\n" );
         return false;
     }
 
@@ -623,7 +623,7 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
 
 Web_service_operation::~Web_service_operation()
 {
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
     close();
 }
 
@@ -712,7 +712,7 @@ STDMETHODIMP Web_service_operation::get_Peer_ip( BSTR* result )
 
         hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().ip_string(), result );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -730,7 +730,7 @@ STDMETHODIMP Web_service_operation::get_Peer_hostname( BSTR* result )
 
         hr = String_to_bstr( _http_operation->_connection->_peer_host_and_port.host().get_name(), result );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -745,7 +745,7 @@ STDMETHODIMP Web_service_operation::Execute_stylesheets()
     {
         execute_stylesheets();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -893,7 +893,7 @@ STDMETHODIMP Web_service_operation::Assert_is_usable()
     {
         assert_usable();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -957,7 +957,7 @@ STDMETHODIMP Web_service_request::Assert_is_usable()
     {
         assert_usable();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1077,7 +1077,7 @@ STDMETHODIMP Web_service_response::Assert_is_usable()
     {
         assert_usable();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1196,7 +1196,7 @@ File_path Http_file_directory::file_path_from_url_path( const string& url_path )
 {
     File_path result;
 
-    if( !string_begins_with( url_path, _url_path ) )  z::throw_xc( __FUNCTION__, url_path, _directory );
+    if( !string_begins_with( url_path, _url_path ) )  z::throw_xc( Z_FUNCTION, url_path, _directory );
 
     result = _directory + url_path.substr( _url_path.length() );
     return result;

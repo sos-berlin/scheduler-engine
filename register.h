@@ -113,7 +113,7 @@ struct reg : Register
 
     void add_registered( REGISTERED_* registered )
     {
-        if( !registered )  z::throw_xc( __FUNCTION__ );
+        if( !registered )  z::throw_xc( Z_FUNCTION );
 
         if( registered->is_registered() )  z::throw_xc( "SCHEDULER-416", registered->obj_name() );
         _spooler->check_name( registered->name() );

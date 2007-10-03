@@ -405,7 +405,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 #   ifdef Z_DEBUG
         if( z::Log_ptr log = "scheduler.wait" )
         {
-            *log << __FUNCTION__ << " ";
+            *log << Z_FUNCTION << " ";
             *log << " until=" << until << ", ";
             if( wait_for_object )  *log << "  for " << wait_for_object->obj_name() << ", ";
             *log << *this << "\n";
@@ -701,10 +701,10 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get()
         if( name == ".." )  continue;
         if( !_regex || _regex->match( name ) )  break;
 
-        Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << "    " << name << " nicht übernommen\n" ); ) 
+        Z_DEBUG_ONLY( Z_LOG2( "joacim", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
     }
 
-    //Z_DEBUG_ONLY( Z_LOG2( "joacim", __FUNCTION__ << " => " << result << "\n" ); ) 
+    //Z_DEBUG_ONLY( Z_LOG2( "joacim", Z_FUNCTION << " => " << result << "\n" ); ) 
 
     if( result )  result->path().set_directory( _directory_path );
     return result;
@@ -935,14 +935,14 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         // Für diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
         // Das bremst leider den Scheduler ein wenig.
 
-        Z_LOGI2( "joacim", __FUNCTION__ << "  WaitForSingleObject()\n" );
+        Z_LOGI2( "joacim", Z_FUNCTION << "  WaitForSingleObject()\n" );
         int ret = WaitForSingleObject( _handle, 0 );
         if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
         return ret == WAIT_OBJECT_0;
 
 #   else
 
-        Z_LOGI2( "joacim", __FUNCTION__ << "\n" );
+        Z_LOGI2( "joacim", Z_FUNCTION << "\n" );
 
         bool changed = false;
 
@@ -967,13 +967,13 @@ bool Directory_watcher::has_changed_2( bool throw_error )
                 if( o == old_f->end()  ||  filename < *o )  // Datei hinzugefügt?
                 {
                     changed = true; 
-                    Z_LOG2( "scheduler", __FUNCTION__ << " new file     " << filename << "\n" ); 
+                    Z_LOG2( "scheduler", Z_FUNCTION << " new file     " << filename << "\n" ); 
                 }
                 else
                 for(; o != old_f->end()  &&  *o < filename; o++ )  
                 { 
                     if( _filename_pattern == "" )  changed = true; 
-                    Z_LOG2( "scheduler", __FUNCTION__ << " deleted file " << *o << "\n" ); 
+                    Z_LOG2( "scheduler", Z_FUNCTION << " deleted file " << *o << "\n" ); 
                 }
 
                 if( o != old_f->end()  &&  *o == filename )  o++;
@@ -982,7 +982,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
             for(; o != old_f->end(); o++ )  
             { 
                 if( _filename_pattern == "" )  changed = true; 
-                Z_LOG2( "scheduler", __FUNCTION__ << " deleted_file " << *o << "\n" ); 
+                Z_LOG2( "scheduler", Z_FUNCTION << " deleted_file " << *o << "\n" ); 
             }
 
             dir.close();

@@ -146,7 +146,7 @@ struct File_order_sink_module_instance : Internal_module_instance
         else
         {
             Sink_node* sink_node = Sink_node::cast( order->job_chain_node() );
-            if( !sink_node )  assert(0), z::throw_xc( __FUNCTION__ );
+            if( !sink_node )  assert(0), z::throw_xc( Z_FUNCTION );
 
             if( !path.file_exists() )
             {
@@ -175,7 +175,7 @@ struct File_order_sink_module_instance : Internal_module_instance
                         result = true;
                     }
                     else
-                        assert(0), z::throw_xc( __FUNCTION__ );
+                        assert(0), z::throw_xc( Z_FUNCTION );
                 }
                 catch( exception& x )
                 {
@@ -405,7 +405,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
             if( _notification_event.signaled() )      
             {
                 _notification_event.set_signaled();     
-                Z_LOG2( "scheduler.file_order", __FUNCTION__ << " Signal der alten ‹berwachung auf die neue ¸bertragen.\n" );
+                Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Signal der alten ‹berwachung auf die neue ¸bertragen.\n" );
             }
 
             close_notification();
@@ -512,7 +512,7 @@ bool Directory_file_order_source::request_order( const string& cause )
     if( _expecting_request_order 
      || async_next_gmtime_reached() )       // 2007-01-09 nicht l‰nger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
-        Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << "\n" );
+        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
 
         result = _new_files_index < _new_files.size();
 
@@ -525,7 +525,7 @@ bool Directory_file_order_source::request_order( const string& cause )
     }
     else
     {
-        //Z_LOG2( "scheduler.file_order", __FUNCTION__ << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
+        //Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
     }
 
     return result;
@@ -535,7 +535,7 @@ bool Directory_file_order_source::request_order( const string& cause )
 
 void Directory_file_order_source::withdraw_order_request()
 {
-    Z_LOGI2( "joacim", __FUNCTION__ << " " << _path << "\n" );
+    Z_LOGI2( "joacim", Z_FUNCTION << " " << _path << "\n" );
 
     _expecting_request_order = false;
     set_async_next_gmtime( double_time_max );
@@ -742,14 +742,14 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
     {
         known_orders->clear();
 
-        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
+        Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION );
         while( !result_set.eof() )
         {
             Record record = result_set.get_record();
             known_orders->insert( record.as_string( 0 ) );
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 }
 
 //-----------------------------Directory_file_order_source::read_new_files_and_handle_deleted_files
@@ -761,7 +761,7 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
 //    hash_set<string> virgin_known_files;
 //
 //
-//    Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
+//    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << " wird gelesen wegen \"" << cause << "\" ...\n" );
 //
 //
 //    read_new_files();
@@ -833,14 +833,14 @@ bool Directory_file_order_source::read_new_files()
     clear_new_files();
     _new_files_time  = Time::now();
 
-    Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "\n" );
+    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "\n" );
     bool is_first_file = true;
 
     for( Directory_watcher::Directory_reader dir ( _path, _regex_string == ""? NULL : &_regex );; )
     {
-        if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( __FUNCTION__ );    // PROVISORISCH F‹R LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
+        if( _spooler->_cluster )  _spooler->_cluster->do_a_heart_beat_when_needed( Z_FUNCTION );    // PROVISORISCH F‹R LANGE VERZEICHNISSE AUF ENTFERNTEM RECHNER, macht bei Bedarf einen Herzschlag
 
-        //Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+        //Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
         ptr<zschimmer::file::File_info> file_info = dir.get();
         if( !file_info )  break;
@@ -855,11 +855,11 @@ bool Directory_file_order_source::read_new_files()
         if( is_first_file ) 
         {
             is_first_file = false;
-            Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << file_info->path() << ", erste Datei\n" );
+            Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << file_info->path() << ", erste Datei\n" );
         }
     }
 
-    Z_LOG2( "scheduler.file_order", __FUNCTION__ << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
+    Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << _path << "  " << _new_files.size() << " Dateinamen gelesen\n" );
 
     sort( _new_files.begin(), _new_files.end(), zschimmer::file::File_info::quick_last_write_less );
 
@@ -881,7 +881,7 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
         {
             blacklisted_files = _job_chain->db_get_blacklisted_order_id_set( _path, _regex );
         }
-        catch( exception& x )  { _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", db_get_blacklisted_order_id_set()\n" ); }
+        catch( exception& x )  { _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", db_get_blacklisted_order_id_set()\n" ); }
 
 
         if( !blacklisted_files.empty() )
@@ -919,12 +919,12 @@ bool Directory_file_order_source::clean_up_blacklisted_files()
                             order->db_delete( Order::update_not_occupied, &ta );
                         }
 
-                        ta.commit( __FUNCTION__ );
+                        ta.commit( Z_FUNCTION );
                     }
                 }
                 catch( exception& x )
                 {
-                    _log->error( S() << x.what() << ", in " << __FUNCTION__ << ", " << path << "\n" );
+                    _log->error( S() << x.what() << ", in " << Z_FUNCTION << ", " << path << "\n" );
                 }
             }
         }
@@ -1061,7 +1061,7 @@ void Directory_file_order_source::send_mail( Scheduler_event_type event_code, co
             }
 
             default:
-                assert(0), z::throw_xc( __FUNCTION__ );
+                assert(0), z::throw_xc( Z_FUNCTION );
         }
     }
     catch( const exception& x )  { log()->warn( x.what() ); }
@@ -1075,7 +1075,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
 
     string  cause = was_notified                    ? "Notification" :
                     flags & cont_next_gmtime_reached? "Wartezeit abgelaufen"   // Das Flag ist doch immer gesetzt, oder?
-                                                    : __FUNCTION__;
+                                                    : Z_FUNCTION;
 
     _notification_event.reset();
 
@@ -1088,7 +1088,7 @@ bool Directory_file_order_source::async_continue_( Async_operation::Continue_fla
                 _expecting_request_order? INT_MAX                // N‰chstes request_order() abwarten
                                         : _repeat;               // Unter Unix funktioniert's _nur_ durch wiederkehrendes Nachsehen
     set_async_delay( max( 1, delay ) );     // Falls ein Spaﬂvogel es geschafft hat, repeat="0" anzugeben
-    //Z_LOG2( "scheduler.file_order", __FUNCTION__  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
+    //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 
     return true;

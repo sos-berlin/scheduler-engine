@@ -120,7 +120,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                     _dom_document.documentElement().appendChild( include_element );
                 }
                 else
-                    z::throw_xc( __FUNCTION__, e.nodeName() );
+                    z::throw_xc( Z_FUNCTION, e.nodeName() );
 
                 break;
             }
@@ -165,7 +165,7 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
         catch( exception& x )  { z::throw_xc( message_string( "SCHEDULER-399", x ) ); }
     }
     else
-        z::throw_xc( __FUNCTION__, element.nodeName() );
+        z::throw_xc( Z_FUNCTION, element.nodeName() );
 
     return result;
 }
@@ -407,7 +407,7 @@ void Module::init()
                                         break;
 #       endif
 
-        default:                        assert(0), z::throw_xc( __FUNCTION__ );
+        default:                        assert(0), z::throw_xc( Z_FUNCTION );
     }
 
     _initialized = true;
@@ -515,7 +515,7 @@ Process_class* Module::process_class_or_null() const
 
 Process_class* Module::process_class() const
 { 
-    if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", __FUNCTION__ );
+    if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
 
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }

@@ -145,7 +145,7 @@ STDMETHODIMP Subprocess::put_Environment( BSTR name_bstr, BSTR value_bstr )
         hr = _environment->put_Value( &name_vt, &value_vt );
         //_process.set_environment_entry( string_from_bstr( name_bstr ), string_from_bstr( value_bstr ) );
     }
-    catch( exception& x ) { Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x ) { Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -218,7 +218,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
         hr = Update_register_entry();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
 
 #   ifdef Z_WINDOWSxxx // Test
@@ -255,7 +255,7 @@ STDMETHODIMP Subprocess::Wait_for_termination( VARIANT* seconds, VARIANT_BOOL* r
 
         *result = ok? VARIANT_TRUE : VARIANT_FALSE;
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -313,7 +313,7 @@ STDMETHODIMP Subprocess::get_Ignore_signal( VARIANT_BOOL* result )
 
 STDMETHODIMP Subprocess::put_Timeout( double* timeout )
 {
-    Z_LOG2( "scheduler", __FUNCTION__ << "=" << *timeout << "\n" );
+    Z_LOG2( "scheduler", Z_FUNCTION << "=" << *timeout << "\n" );
     _timeout = *timeout;
     return Update_register_entry();
 }
@@ -334,7 +334,7 @@ STDMETHODIMP Subprocess::put_Show_window( VARIANT* value )
         else
             hr = DISP_E_TYPEMISMATCH;
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 
@@ -387,7 +387,7 @@ HRESULT Subprocess::Update_register_entry()
             }
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -418,7 +418,7 @@ STDMETHODIMP Subprocess_register::Create_subprocess( VARIANT* program_and_parame
 
         *result = subprocess.take();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }

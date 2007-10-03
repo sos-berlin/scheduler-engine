@@ -797,8 +797,8 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
         }
 
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -813,8 +813,8 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
     {
         hr = String_to_bstr( dom( xml_element_name(), "variable" ).xml(), xml_doc );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -839,8 +839,8 @@ STDMETHODIMP Com_variable_set::get_Names_array( SAFEARRAY** result )
             a[ i++ ] = m->first;
         }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -878,8 +878,8 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
             assert( p == *result + length + 1 );
         }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -895,7 +895,7 @@ STDMETHODIMP Com_variable_set::Substitute( BSTR bstr, BSTR* result )
     {
         hr = String_to_bstr( subst_env( string_from_bstr( bstr ), this ), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1164,8 +1164,8 @@ STDMETHODIMP Com_log::Log_file( BSTR path )
 
         _log->log_file( bstr_as_string( path ) ); 
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1241,8 +1241,8 @@ STDMETHODIMP Com_log::put_Mail_on_warning( VARIANT_BOOL b )
 
         _log->set_mail_on_warning( b != 0 );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1260,8 +1260,8 @@ STDMETHODIMP Com_log::get_Mail_on_warning( VARIANT_BOOL* b )
 
         *b = _log->mail_on_warning();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1582,8 +1582,8 @@ STDMETHODIMP Com_log::Start_new_file()
 
         _log->start_new_file();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2060,8 +2060,8 @@ STDMETHODIMP Com_job::Remove()
 
         _job->remove( File_based::rm_base_file_too );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2079,8 +2079,8 @@ STDMETHODIMP Com_job::Execute_command( BSTR command_bstr )
 
         _job->set_state_cmd( Job::as_state_cmd( string_from_bstr( command_bstr ) ) );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2157,8 +2157,8 @@ STDMETHODIMP Com_job::put_Machine_resumable( VARIANT_BOOL machine_resumable )
 
         _job->set_machine_resumable( machine_resumable != 0 );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2177,7 +2177,7 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
         *result = _job->module()->process_class();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2618,8 +2618,8 @@ STDMETHODIMP Com_task::get_Changed_directories( BSTR* result )
 
         hr = String_to_bstr( _task->_changed_directories, result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2637,8 +2637,8 @@ STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
 
         hr = String_to_bstr( _task->_trigger_files, result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2660,8 +2660,8 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
                                                                                 : time_from_variant( *timeout );
         _task->add_pid( pid, t );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2681,8 +2681,8 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
 
         _task->remove_pid( pid );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2708,8 +2708,8 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
         if( get_text )  hr = String_to_bstr( string_from_file( filename ), result );
                   else  hr = String_to_bstr( filename, result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2779,8 +2779,8 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double* timeout, VARIANT_BOOL ig
                                is_process_group != 0,
                                string_from_bstr( title ) );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2831,7 +2831,7 @@ STDMETHODIMP Com_task::put_Exit_code( int exit_code )
 
         _task->set_exit_code( exit_code );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2849,7 +2849,7 @@ STDMETHODIMP Com_task::get_Exit_code( int* result )
 
         *result = _task->exit_code();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2866,8 +2866,8 @@ STDMETHODIMP Com_task::get_Step_count( int* result )
 
         *result = _task->_step_count;
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2899,8 +2899,8 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
             _task->set_error( *(const exception*)&x );
         }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -2919,7 +2919,7 @@ STDMETHODIMP Com_task::get_Web_service( Iweb_service** result )
         *result = _task->web_service();
         (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2938,7 +2938,7 @@ STDMETHODIMP Com_task::get_Web_service_or_null( Iweb_service** result )
         *result = _task->web_service_or_null();
         (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -2995,7 +2995,7 @@ void Com_task_proxy::set_property( const string& name, const Variant& value )
     //else
     //if( name == "stderr_path" )  _stderr_path = value.as_string();
     else  
-        z::throw_xc( __FUNCTION__, name );
+        z::throw_xc( Z_FUNCTION, name );
 }
 
 //----------------------------------------------------------------Com_task_proxy::Create_subprocess
@@ -3050,7 +3050,7 @@ STDMETHODIMP Com_task_proxy::get_Stderr_text( BSTR* result )
             hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stderr_path" ) ), result );
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3072,7 +3072,7 @@ STDMETHODIMP Com_task_proxy::get_Stderr_path( BSTR* result )
             hr = String_to_bstr( task_process_element.getAttribute( "stderr_path" ), result );
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3094,7 +3094,7 @@ STDMETHODIMP Com_task_proxy::get_Stdout_text( BSTR* result )
             hr = String_to_bstr( string_from_file( task_process_element.getAttribute( "stdout_path" ) ), result );
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3116,7 +3116,7 @@ STDMETHODIMP Com_task_proxy::get_Stdout_path( BSTR* result )
             hr = String_to_bstr( task_process_element.getAttribute( "stdout_path" ), result );
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3720,8 +3720,8 @@ STDMETHODIMP Com_spooler::Terminate( VARIANT* timeout_v, VARIANT* restart_v, VAR
 
         if( !FAILED(hr) )  _spooler->cmd_terminate( restart, timeout, continue_exclusive_operation, all_schedulers );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3742,8 +3742,8 @@ STDMETHODIMP Com_spooler::Terminate_and_restart( VARIANT* timeout_vt )
 
         _spooler->cmd_terminate_and_restart( timeout );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3760,8 +3760,8 @@ STDMETHODIMP Com_spooler::Abort_immediately()
     {
         _spooler->abort_immediately( false );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3778,8 +3778,8 @@ STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
     {
         _spooler->abort_immediately( true );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3845,8 +3845,8 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
         Command_processor cp ( _spooler, Security::seclev_all );
         hr = String_to_bstr( cp.execute( string_from_bstr( xml ) ), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3884,7 +3884,7 @@ HRESULT Com_spooler::Create_xslt_stylesheet( Ixslt_stylesheet** result )
         ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
         *result = stylesheet.take();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3901,7 +3901,7 @@ HRESULT Com_spooler::put_Suspend_after_resume( VARIANT_BOOL b )
     {
         if( _spooler->_zschimmer_mode )  _spooler->_suspend_after_resume = b != 0;
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3919,7 +3919,7 @@ STDMETHODIMP Com_spooler::get_Locks( Ilocks** result )
         *result = _spooler->lock_subsystem();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3937,7 +3937,7 @@ STDMETHODIMP Com_spooler::get_Process_classes( Iprocess_classes** result )
         *result = _spooler->process_class_subsystem();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -3955,7 +3955,7 @@ STDMETHODIMP Com_spooler::get_Supervisor_client( Isupervisor_client** result )
         *result = _spooler->supervisor_client();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4005,7 +4005,7 @@ STDMETHODIMP Com_spooler_proxy::Create_xslt_stylesheet( spooler_com::Ixslt_style
         ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
         *result = stylesheet.take();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4161,10 +4161,10 @@ STDMETHODIMP Com_job_chain::get_Order_count( int* result )
         {
             *result = _job_chain->order_count( &ta );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
+        catch( exception& x ) { ta.reopen_database_after_error( x, Z_FUNCTION ); }
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4305,8 +4305,8 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         order->place_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     //Z_LOG2( "scheduler", "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
@@ -4335,8 +4335,8 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         *result = order->try_place_in_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     //Z_LOG2( "scheduler", "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
@@ -4430,8 +4430,8 @@ STDMETHODIMP Com_job_chain::Remove_all_pending_orders( int* result )
 
         *result = _job_chain->remove_all_pending_orders();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4448,8 +4448,8 @@ STDMETHODIMP Com_job_chain::Remove()
 
         _job_chain->remove( File_based::rm_base_file_too );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4560,7 +4560,7 @@ STDMETHODIMP Com_job_chain_node::put_Action( BSTR action_bstr )
     {
         set_action( string_from_bstr( action_bstr ) );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -4575,7 +4575,7 @@ STDMETHODIMP Com_job_chain_node::get_Action( BSTR* result )
     {
         hr = String_to_bstr( string_action(), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5098,8 +5098,8 @@ STDMETHODIMP Com_order::put_At( VARIANT* datetime )
 
         _order->set_at( Time::time_with_now( string_from_variant( *datetime ) ) );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
                 
     return hr;
 }
@@ -5117,8 +5117,8 @@ STDMETHODIMP Com_order::get_At( DATE* result )
 
         *result = _order->at().as_local_com_date();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5137,8 +5137,8 @@ STDMETHODIMP Com_order::get_Run_time( Irun_time** result )
         *result = +_order->run_time();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5156,7 +5156,7 @@ STDMETHODIMP Com_order::Remove_from_job_chain()
 
         _order->remove( File_based::rm_base_file_too );  
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5174,7 +5174,7 @@ STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
 
         hr = String_to_bstr( _order->at().as_string(), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5192,7 +5192,7 @@ STDMETHODIMP Com_order::get_Xml( BSTR, BSTR* result )
 
         hr = String_to_bstr( _order->dom( Show_what( show_payload | show_run_time | show_log ) ).xml(), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5211,7 +5211,7 @@ STDMETHODIMP Com_order::get_Web_service( Iweb_service** result )
         *result = _order->web_service();
         (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5230,7 +5230,7 @@ STDMETHODIMP Com_order::get_Web_service_or_null( Iweb_service** result )
         *result = _order->web_service_or_null();
         (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5249,7 +5249,7 @@ STDMETHODIMP Com_order::get_Web_service_operation( Iweb_service_operation** resu
         *result = _order->web_service_operation();
         (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5268,7 +5268,7 @@ STDMETHODIMP Com_order::get_Web_service_operation_or_null( Iweb_service_operatio
         *result = _order->web_service_operation_or_null();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5286,8 +5286,8 @@ STDMETHODIMP Com_order::put_Xml_payload( BSTR xml_payload )
 
         _order->set_xml_payload( string_from_bstr( xml_payload ) );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5305,8 +5305,8 @@ STDMETHODIMP Com_order::get_Xml_payload( BSTR* result )
 
         hr = String_to_bstr( _order->xml_payload(), result );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5325,8 +5325,8 @@ STDMETHODIMP Com_order::put_Params( Ivariable_set* variable_set )
         Variant v = variable_set;
         _order->set_payload( v );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5346,8 +5346,8 @@ STDMETHODIMP Com_order::get_Params( Ivariable_set** result )
 
         *result = _order->params().copy();      // Legt automatisch ein Variable_set an. Exception, wenn payload etwas anderes ist
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5365,7 +5365,7 @@ STDMETHODIMP Com_order::put_Suspended( VARIANT_BOOL suspended )
 
         _order->set_suspended( suspended != 0 );
     }
-    catch( const exception& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5385,7 +5385,7 @@ STDMETHODIMP Com_order::get_Suspended( VARIANT_BOOL* result )
 
         *result = _order->suspended()? VARIANT_TRUE : VARIANT_FALSE;
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5404,7 +5404,7 @@ STDMETHODIMP Com_order::get_Log( Ilog** result )
         *result = _order->com_log();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5422,7 +5422,7 @@ STDMETHODIMP Com_order::Start_now()
 
         _order->start_now();
     }
-    catch( const exception& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5470,7 +5470,7 @@ STDMETHODIMP Com_order_queue::get_Length( int* result )
         {
             *result = order_queue->order_count( &ta );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
+        catch( exception& x ) { ta.reopen_database_after_error( x, Z_FUNCTION ); }
     }
 
     return S_OK;

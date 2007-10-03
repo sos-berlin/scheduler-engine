@@ -1050,7 +1050,7 @@ void Spooler::check_name( const string& name )
 
 Process_class_subsystem* Spooler::process_class_subsystem()
 {
-    if( !_process_class_subsystem )  z::throw_xc( __FUNCTION__, "Process_class_subsystem is not initialized" );
+    if( !_process_class_subsystem )  z::throw_xc( Z_FUNCTION, "Process_class_subsystem is not initialized" );
 
     return _process_class_subsystem; 
 }
@@ -1059,7 +1059,7 @@ Process_class_subsystem* Spooler::process_class_subsystem()
 
 Order_subsystem_interface* Spooler::order_subsystem()
 { 
-    if( !_order_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Order_subsystem is not initialized" );
+    if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Order_subsystem is not initialized" );
 
     return _order_subsystem; 
 }
@@ -1068,7 +1068,7 @@ Order_subsystem_interface* Spooler::order_subsystem()
 
 Standing_order_subsystem* Spooler::standing_order_subsystem()
 { 
-    if( !_order_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Standing_order_subsystem is not initialized" );
+    if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Standing_order_subsystem is not initialized" );
 
     return _standing_order_subsystem; 
 }
@@ -1077,7 +1077,7 @@ Standing_order_subsystem* Spooler::standing_order_subsystem()
 
 Job_subsystem_interface* Spooler::job_subsystem()
 { 
-    if( !_job_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Job_subsystem is not initialized" );
+    if( !_job_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Job_subsystem is not initialized" );
 
     return _job_subsystem; 
 }
@@ -1086,7 +1086,7 @@ Job_subsystem_interface* Spooler::job_subsystem()
 
 Task_subsystem* Spooler::task_subsystem()
 { 
-    if( !_task_subsystem )  assert(0), z::throw_xc( __FUNCTION__, "Task_subsystem is not initialized" );
+    if( !_task_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Task_subsystem is not initialized" );
 
     return _task_subsystem; 
 }
@@ -2019,7 +2019,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
     }
 
     double t = 1;
-    Z_LOG2( "scheduler", __FUNCTION__ << " sleep(" << t << ")...\n" );
+    Z_LOG2( "scheduler", Z_FUNCTION << " sleep(" << t << ")...\n" );
     sos_sleep( t );
 }
 
@@ -2459,7 +2459,7 @@ bool Spooler::run_continue( const Time& now )
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
-    //Z_LOG2( "joacim", __FUNCTION__ << "  something_done=" << something_done << "\n" );
+    //Z_LOG2( "joacim", Z_FUNCTION << "  something_done=" << something_done << "\n" );
 
     return something_done;
 }

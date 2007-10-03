@@ -299,11 +299,11 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
     }
     catch( exception& x )
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << ":\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << ":\n" );
         _spooler->log()->warn( message_string( "SCHEDULER-302", x ) );
     }
 
-    _spooler->assert_is_still_active( __FUNCTION__ );
+    _spooler->assert_is_still_active( Z_FUNCTION );
 
     return 0; //?
 }
@@ -382,7 +382,7 @@ void Scheduler_event::make_xml()
 
 #   ifdef Z_DEBUG
         try { xml::Document_ptr doc = _xml; }
-        catch( exception& x )  { _spooler->log()->error( S() << __FUNCTION__ << " " << x.what() << "\n" << _xml );  assert(("Scheduler_event::make_xml()",false)); }
+        catch( exception& x )  { _spooler->log()->error( S() << Z_FUNCTION << " " << x.what() << "\n" << _xml );  assert(("Scheduler_event::make_xml()",false)); }
 #   endif
 }
 
@@ -498,8 +498,8 @@ File_based_array_imlementation::~File_based_array_imlementation()
     
 void File_based_array_imlementation::set_page_size( int page_size )
 {
-    if( _page )  z::throw_xc( __FUNCTION__ );
-    if( page_size <= 0 )  z::throw_xc( __FUNCTION__, page_size );
+    if( _page )  z::throw_xc( Z_FUNCTION );
+    if( page_size <= 0 )  z::throw_xc( Z_FUNCTION, page_size );
 
     assert( _item_size > 0 );
     _item_per_page = ( page_size + _item_size - 1 ) / _item_size;
@@ -530,7 +530,7 @@ void* File_based_array_imlementation::page_in( int64 index )
 {
     if( index < _page_index  ||  index >= _page_index + _items_per_page )
     {
-        if( index < _first_index )  z::throw_xc( __FUNCTION__, index, _first_index );
+        if( index < _first_index )  z::throw_xc( Z_FUNCTION, index, _first_index );
         page_out();
 
         int new_page_index = index / _items_per_page * _items_per_page;
@@ -543,7 +543,7 @@ void* File_based_array_imlementation::page_in( int64 index )
         {
             _file.seek( new_page_index );
             int length = _file.read( _page, _page_size );
-            if( length != _page_size )  z::throw_xc( __FUNCTION__, "file " + _file.path() + " is truncated" );
+            if( length != _page_size )  z::throw_xc( Z_FUNCTION, "file " + _file.path() + " is truncated" );
 
             _page_index = new_page_index;
         }

@@ -523,7 +523,7 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
         //    ...
         //}
         //else
-            z::throw_xc( __FUNCTION__, " Call is not implemented in scheduler java interface", name );
+            z::throw_xc( Z_FUNCTION, " Call is not implemented in scheduler java interface", name );
     }
 
     if( env->ExceptionCheck() )  env.throw_java( name );

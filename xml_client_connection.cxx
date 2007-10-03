@@ -26,7 +26,7 @@ Xml_client_connection::~Xml_client_connection()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " ERROR " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
 
     if( _socket_operation )
     {
@@ -68,7 +68,7 @@ bool Xml_client_connection::is_send_possible()
 
 void Xml_client_connection::send( const string& s )
 {
-    if( !is_send_possible() )  assert(0), z::throw_xc( __FUNCTION__, "Connection is currently in use" );
+    if( !is_send_possible() )  assert(0), z::throw_xc( Z_FUNCTION, "Connection is currently in use" );
 
     _received_data.clear();
     _send_data = s;
@@ -105,7 +105,7 @@ xml::Document_ptr Xml_client_connection::received_dom_document()
     
 bool Xml_client_connection::async_continue_( Continue_flags flags )
 {
-    Z_DEBUG_ONLY( Z_LOGI2( "joacim", __FUNCTION__ << "\n" ); )
+    Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
 
     bool something_done = false;
 
@@ -117,7 +117,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
             //if( !_socket_operation->async_finished() ) 
             //{
-            //    Z_DEBUG_ONLY( Z_LOG2( "scheduler", __FUNCTION__ << " !_socket_operation->async_finished()\n" ); )
+            //    Z_DEBUG_ONLY( Z_LOG2( "scheduler", Z_FUNCTION << " !_socket_operation->async_finished()\n" ); )
             //    return false;
             //}
 
@@ -132,7 +132,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             {
                 if( !( flags & cont_next_gmtime_reached ) )  
                 { 
-                    Z_DEBUG_ONLY( Z_LOG( "*** " << __FUNCTION__ << " !cont_next_gmtime_reached\n" ); 
+                    Z_DEBUG_ONLY( Z_LOG( "*** " << Z_FUNCTION << " !cont_next_gmtime_reached\n" ); 
                     Z_WINDOWS_ONLY( DebugBreak(); ) ) 
                     break;
                 }
@@ -200,7 +200,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                     something_done = true;
 
                     _socket_operation->recv_clear();
-                    Z_LOG2( "scheduler", __FUNCTION__ << ": " << data << "\n" );
+                    Z_LOG2( "scheduler", Z_FUNCTION << ": " << data << "\n" );
                     _received_data.append( data );
 
                     if( _xml_end_finder.is_complete( data.data(), data.length() ) )  break;
@@ -216,7 +216,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 }
                 else
                 {
-                    Z_LOG2( "scheduler", __FUNCTION__ << ", waiting for XML-response\n" );
+                    Z_LOG2( "scheduler", Z_FUNCTION << ", waiting for XML-response\n" );
                 }
 
                 break;

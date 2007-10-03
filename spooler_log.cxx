@@ -1176,7 +1176,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     
     if( !_log )  
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  _log==NULL  " << line << "\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  _log==NULL  " << line << "\n" );
         return;
     }
 
@@ -1322,7 +1322,7 @@ void Prefix_log::continue_with_text( const string& text )
 {
     if( opened() )
     {
-        z::throw_xc( __FUNCTION__, "log file shall not be opened" );
+        z::throw_xc( Z_FUNCTION, "log file shall not be opened" );
     }
     else
     {

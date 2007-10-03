@@ -74,7 +74,7 @@ struct Job_lock_requestor : lock::Requestor
                                 Job_lock_requestor          ( Job* job )                            : Requestor( job ), _job(job) {}
 
     // Requestor:
-    void                        on_locks_are_available      ()                                      { _job->signal( __FUNCTION__ ); }
+    void                        on_locks_are_available      ()                                      { _job->signal( Z_FUNCTION ); }
   //void                        on_removing_lock            ( lock::Lock* l )                       { _job->on_removing_lock( l ); }
 
   private:
@@ -136,7 +136,7 @@ bool Job_subsystem::subsystem_load()
     file_based_subsystem<Job>::subsystem_load();
     //FOR_EACH_JOB( job )  job->load( &ta );
 
-    //ta.commit( __FUNCTION__ );
+    //ta.commit( Z_FUNCTION );
 
     return true;
 }
@@ -243,7 +243,7 @@ Combined_job_nodes::~Combined_job_nodes()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //------------------------------------------------------------------------Combined_job_nodes::close
@@ -270,7 +270,7 @@ void Combined_job_nodes::close()
 
 void Combined_job_nodes::connect_job_node( Job_node* job_node )
 {
-    _job->log()->debug( S() << __FUNCTION__ << "  " << job_node->obj_name() );
+    _job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
 
     _job_node_set.insert( job_node );
 }
@@ -279,7 +279,7 @@ void Combined_job_nodes::connect_job_node( Job_node* job_node )
 
 void Combined_job_nodes::disconnect_job_node( Job_node* job_node )
 {
-    _job->log()->debug( S() << __FUNCTION__ << "  " << job_node->obj_name() );
+    _job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
 
     _job_node_set.erase( job_node );
 }
@@ -312,7 +312,7 @@ bool Combined_job_nodes::request_order( const Time& now, const string& cause )
 
 void Combined_job_nodes::withdraw_order_requests()
 {
-    //Z_LOGI2( "joacim", obj_name() << " " << __FUNCTION__ << "\n" );
+    //Z_LOGI2( "joacim", obj_name() << " " << Z_FUNCTION << "\n" );
 
     // Jetzt prüfen wir die verteilten Aufträge.
     // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
@@ -576,7 +576,7 @@ bool Job::on_load() // Transaction* ta )
 
                 set_state( s_loaded );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
         }
         catch( exception& x )
         {
@@ -1131,7 +1131,7 @@ void Job::signal( const string& signal_name )
 
     _next_time = 0;
     
-    Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " " << signal_name << "\n" );
+    Z_LOG2( "joacim", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
@@ -1147,7 +1147,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
       //case s_read_error:  z::throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", name(), _error.what() );
         case s_stopped:     if( _spooler->state() != Spooler::s_stopping )  set_state( s_pending );  break;
-        default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), __FUNCTION__, state_name() );
+        default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), Z_FUNCTION, state_name() );
     }
 
     ptr<Job_module_task> task = Z_NEW( Job_module_task( this ) );
@@ -1175,7 +1175,7 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 void Job::load_tasks_from_db( Transaction* outer_transaction )
 {
-    //_spooler->assert_has_exclusiveness( obj_name() + " " + __FUNCTION__ );
+    //_spooler->assert_has_exclusiveness( obj_name() + " " + Z_FUNCTION );
 
     Time now = Time::now();
 
@@ -1189,7 +1189,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
                <<    " and `job_name`=" << sql::quoted( name() ) 
                << "  order by `task_id`";
 
-    Any_file sel = ta.open_result_set( select_sql, __FUNCTION__ );
+    Any_file sel = ta.open_result_set( select_sql, Z_FUNCTION );
     
     while( !sel.eof() )
     {
@@ -1266,7 +1266,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task->_start_at )
                 insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
 
-                ta.execute( insert, __FUNCTION__ );
+                ta.execute( insert, Z_FUNCTION );
 
                 if( task->has_parameters() )
                 {
@@ -1282,7 +1282,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task_element.hasAttributes()  ||  task_element.firstChild() )
                     ta.update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
 
-                ta.commit( __FUNCTION__ );
+                ta.commit( Z_FUNCTION );
 
                 task->_is_in_database = true;
             }
@@ -1290,7 +1290,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x, __FUNCTION__ );
+            _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
         }
     }
 
@@ -1316,15 +1316,15 @@ void Job::Task_queue::remove_task_from_db( int task_id )
 
                 ta.execute( "DELETE from " + _spooler->_tasks_tablename +
                             "  where \"TASK_ID\"=" + as_string( task_id ),
-                            __FUNCTION__ );
-                ta.commit( __FUNCTION__);
+                            Z_FUNCTION );
+                ta.commit( Z_FUNCTION);
             }
 
             break;
         }
         catch( exception& x )
         {
-            _spooler->_db->try_reopen_after_error( x, __FUNCTION__ );
+            _spooler->_db->try_reopen_after_error( x, Z_FUNCTION );
         }
     }
 }
@@ -1477,7 +1477,7 @@ void Job::remove_running_task( Task* task )
         set_next_start_time( Time::now(), true );
     }
 
-    if( _running_tasks.size() < _max_tasks )  signal( S() << __FUNCTION__ << "  " << task->obj_name() );
+    if( _running_tasks.size() < _max_tasks )  signal( S() << Z_FUNCTION << "  " << task->obj_name() );
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -1755,7 +1755,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
             if( old_directory_watcher->signaled() ) 
             {
                 new_dw->_signaled = true;  // Ist gerade etwas passiert? Dann in die neue Überwachung hinüberretten
-                Z_LOG2( "scheduler",  __FUNCTION__ << " Signal der alten Überwachung auf die neue übertragen.\n" );
+                Z_LOG2( "scheduler",  Z_FUNCTION << " Signal der alten Überwachung auf die neue übertragen.\n" );
             }
         }
         catch( exception& x ) { log()->warn( string(x.what()) + ", in old_directory_watcher->wait(0)" ); }      // Vorsichtshalber
@@ -1807,7 +1807,7 @@ bool Job::check_for_changed_directory( const Time& now )
 #   ifdef Z_UNIX
         if( now < _directory_watcher_next_time )  
         { 
-            //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
+            //Z_LOG2( "joacim", obj_name() << " " << Z_FUNCTION << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
             return false; 
         }
 #   endif
@@ -1832,7 +1832,7 @@ bool Job::check_for_changed_directory( const Time& now )
 
         if( directory_watcher->signaled_then_reset() )
         {
-            Z_LOG2( "joacim", __FUNCTION__ << " something_done=true\n" );
+            Z_LOG2( "joacim", Z_FUNCTION << " something_done=true\n" );
             something_done = true;
 
             update_changed_directories( directory_watcher );
@@ -1847,7 +1847,7 @@ bool Job::check_for_changed_directory( const Time& now )
         it++;
     }
 
-    //Z_LOG2( "joacim", obj_name() << " " << __FUNCTION__ << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
+    //Z_LOG2( "joacim", obj_name() << " " << Z_FUNCTION << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
     return something_done;
 }
 
@@ -2066,7 +2066,7 @@ void Job::calculate_next_time( const Time& now )
 
                 if( in_period  &&  is_order_controlled() )  
                 {
-                    bool ok = request_order( now, __FUNCTION__ );
+                    bool ok = request_order( now, Z_FUNCTION );
                     if( ok )  next_time = now;
                 }
 
@@ -2123,7 +2123,7 @@ void Job::calculate_next_time( const Time& now )
     //Time old_next_time = _next_time;
     _next_time = next_time;
 
-    //Z_LOG2( "joacim", obj_name() << "  " << __FUNCTION__ << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+    //Z_LOG2( "joacim", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
     //                                                                                               _next_time > old_next_time? " > " : " = " ) 
     //                                                                << "old " << old_next_time << "\n" );
 }
@@ -2132,7 +2132,7 @@ void Job::calculate_next_time( const Time& now )
 
 void Job::signal_earlier_order( Order* order )
 {
-    Z_LOG2( "scheduler.signal", __FUNCTION__ << "  " << obj_name() << "  " << order->obj_name() << " " << order->next_time().as_string() << "\n" );
+    Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << obj_name() << "  " << order->obj_name() << " " << order->next_time().as_string() << "\n" );
 
     if( _next_time > 0   &&  _next_time > order->next_time() )
     {
@@ -2208,7 +2208,7 @@ bool Job::request_order( const Time& now, const string& cause )
 
 void Job::withdraw_order_request()
 {
-    Z_LOGI2( "joacim", obj_name() << " " << __FUNCTION__ << "\n" );
+    Z_LOGI2( "joacim", obj_name() << " " << Z_FUNCTION << "\n" );
 
     _combined_job_nodes->withdraw_order_requests();
 }
@@ -2253,7 +2253,7 @@ bool Job::on_dependant_loaded( File_based* file_based )
         if( _waiting_for_process )
         {
             _waiting_for_process_try_again = true;
-            signal( __FUNCTION__ );
+            signal( Z_FUNCTION );
         }
     }
 
@@ -2403,7 +2403,7 @@ ptr<Task> Job::task_to_start()
 
                 if( has_order ) 
                 {
-                    Order* order = task->fetch_and_occupy_order( now, __FUNCTION__ );   // Versuchen, den Auftrag für die neue Task zu belegen
+                    Order* order = task->fetch_and_occupy_order( now, Z_FUNCTION );   // Versuchen, den Auftrag für die neue Task zu belegen
                     
                     if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
                     {
@@ -2501,7 +2501,7 @@ bool Job::do_something()
                         Task* task = *t;
                         if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() ) 
                         {
-                            if( task->fetch_and_occupy_order( now, __FUNCTION__ ) )
+                            if( task->fetch_and_occupy_order( now, Z_FUNCTION ) )
                             {
                                 something_done |= task->do_something();
                                 //break;   Jetzt müssten wir doch fertig sein. 2007-01-31

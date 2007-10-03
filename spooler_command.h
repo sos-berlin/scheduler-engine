@@ -123,7 +123,7 @@ struct Synchronous_command_response : Command_response
                                 Synchronous_command_response( const string& text ) : _response_text(text) {}
 
     // Async_operation
-    virtual bool                async_continue_             ( Continue_flags )                      { z::throw_xc( __FUNCTION__ ); }
+    virtual bool                async_continue_             ( Continue_flags )                      { z::throw_xc( Z_FUNCTION ); }
     virtual bool                async_finished_             () const                                { return true; }
     virtual string              async_state_text_           () const                                { return "Synchronous_command_response"; }
 

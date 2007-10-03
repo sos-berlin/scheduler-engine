@@ -103,7 +103,7 @@ STDMETHODIMP Lock_subsystem::get_Lock( BSTR path_bstr, spooler_com::Ilock** resu
         *result = lock( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -119,7 +119,7 @@ STDMETHODIMP Lock_subsystem::get_Lock_or_null( BSTR path_bstr, spooler_com::Iloc
         *result = lock_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -136,7 +136,7 @@ STDMETHODIMP Lock_subsystem::Create_lock( spooler_com::Ilock** result )
         //nicht nötig  lock->set_folder_path( root_path );
         *result = lock.take();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -169,7 +169,7 @@ STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* ilock )
             lock->activate();
         }
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -273,7 +273,7 @@ Lock::~Lock()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << ": " << x.what() ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << ": " << x.what() ); }
 }
 
 //--------------------------------------------------------------------------------------Lock::close
@@ -661,7 +661,7 @@ STDMETHODIMP Lock::put_Name( BSTR name_bstr )
     {
         set_name( string_from_bstr( name_bstr ) );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -676,7 +676,7 @@ STDMETHODIMP Lock::put_Max_non_exclusive( int max_non_exclusive )
     {
         set_max_non_exclusive( max_non_exclusive );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -691,7 +691,7 @@ STDMETHODIMP Lock::Remove()
     {
         remove( rm_base_file_too );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -727,7 +727,7 @@ Requestor::~Requestor()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR " << x.what() << "\n" ); }
 }
 
 //---------------------------------------------------------------------------------Requestor::close
@@ -872,7 +872,7 @@ bool Requestor::enqueue_lock_requests()
 { 
     bool result = false;
 
-    if( _is_enqueued )  assert(0), z::throw_xc( __FUNCTION__ );
+    if( _is_enqueued )  assert(0), z::throw_xc( Z_FUNCTION );
 
 
     if( locks_are_known() )
@@ -981,7 +981,7 @@ Use::~Use()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR " << x.what() << "\n" ); }
 }
 
 //---------------------------------------------------------------------------------------Use::close
@@ -1018,7 +1018,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     else
     {
         //if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
-        if( _lock_path != lock_path )  assert(0), z::throw_xc( __FUNCTION__ );
+        if( _lock_path != lock_path )  assert(0), z::throw_xc( Z_FUNCTION );
         if( _lock_mode != lock_mode )  z::throw_xc( "SCHEDULER-408", "lock.use", "exclusive" );
     }
 }
@@ -1132,7 +1132,7 @@ Holder::~Holder()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << " ERROR " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
 }
 
 //------------------------------------------------------------------------------------Holder::close
@@ -1195,7 +1195,7 @@ void Holder::release_locks()
             }
             catch( exception& x )
             {
-                log()->error( S() << x.what() << ", in " << __FUNCTION__ );
+                log()->error( S() << x.what() << ", in " << Z_FUNCTION );
             }
         }
 

@@ -217,7 +217,7 @@ bool Http_server::subsystem_initialize()
 //
 //    if( _base_directory.empty() )  z::throw_xc( "SCHEDULER-212" );
 //    
-//    if( !string_begins_with( url_path, "/" ) )  z::throw_xc( __FUNCTION__ );
+//    if( !string_begins_with( url_path, "/" ) )  z::throw_xc( Z_FUNCTION );
 //    size_t slash = url_path.find( '/', 1 );
 //    
 //    if( slash != string::npos )
@@ -243,8 +243,8 @@ string Headers::get( const string& name ) const
 
 void Headers::set( const string& name, const string& value )
 {
-    if( name == "" )  z::throw_xc( __FUNCTION__, "Name is empty" );
-    if( value.find( '\n' ) != string::npos )  z::throw_xc( __FUNCTION__, "Value has multiple lines" );
+    if( name == "" )  z::throw_xc( Z_FUNCTION, "Name is empty" );
+    if( value.find( '\n' ) != string::npos )  z::throw_xc( Z_FUNCTION, "Value has multiple lines" );
 
     set_unchecked( name, value );
 }
@@ -388,7 +388,7 @@ STDMETHODIMP Headers::put_Header( BSTR name, BSTR value )
     {
         set( string_from_bstr( name ), string_from_bstr( value ) );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -403,7 +403,7 @@ STDMETHODIMP Headers::get_Header( BSTR name, BSTR* result )
     {
         hr = String_to_bstr( get( string_from_bstr( name ) ), result ); 
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -418,7 +418,7 @@ STDMETHODIMP Headers::put_Content_type( BSTR value )
     {
         set_content_type( string_from_bstr( value ) );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -433,7 +433,7 @@ STDMETHODIMP Headers::get_Content_type( BSTR* result )
     {
         hr = String_to_bstr( content_type(), result );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -448,7 +448,7 @@ STDMETHODIMP Headers::put_Charset_name( BSTR value )
     {
         set_content_type_parameter( "charset", string_from_bstr( value ) );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -463,7 +463,7 @@ STDMETHODIMP Headers::get_Charset_name( BSTR* result )
     {
         hr = String_to_bstr( charset_name(), result );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     
     return hr;
 }
@@ -983,7 +983,7 @@ STDMETHODIMP Request::get_String_content( BSTR* result )
 
         charset->Encoded_to_bstr( _body, result );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1000,7 +1000,7 @@ STDMETHODIMP Request::get_Binary_content( SAFEARRAY** result )
         memcpy( safearray.data(), _body.data(), _body.length() );
         *result = safearray.take_safearray();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1262,7 +1262,7 @@ STDMETHODIMP Response::Assert_is_not_ready()
     {
         if( is_ready() )  z::throw_xc( "SCHEDULER-247" );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1277,7 +1277,7 @@ STDMETHODIMP Response::put_Status_code( int code )
     {
         set_status( (Status_code)code );  
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1331,7 +1331,7 @@ STDMETHODIMP Response::put_String_content( BSTR content_bstr )
 
         set_chunk_reader( Z_NEW( String_chunk_reader( charset->encoded_from_bstr( content_bstr ), "" ) ) );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1350,7 +1350,7 @@ STDMETHODIMP Response::put_Binary_content( SAFEARRAY* safearray )
 
         set_chunk_reader( Z_NEW( Byte_chunk_reader( a.data(), a.count(), "" ) ) );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1402,7 +1402,7 @@ STDMETHODIMP Response::Send() // VARIANT* content, BSTR content_type_bstr )
         http_response()->set_chunk_reader( chunk_reader );
         */
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1562,7 +1562,7 @@ bool Log_chunk_reader::next_chunk_is_ready()
             }
 
             default:
-                throw_xc( __FUNCTION__ );
+                throw_xc( Z_FUNCTION );
         }
     }
 

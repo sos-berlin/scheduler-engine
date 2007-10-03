@@ -98,7 +98,7 @@ Scheduler_object::~Scheduler_object()
     
 IDispatch* Scheduler_object::idispatch()
 {
-    z::throw_xc( __FUNCTION__, obj_name() );
+    z::throw_xc( Z_FUNCTION, obj_name() );
 }
 
 //-------------------------------------------------------Scheduler_object::write_element_attributes

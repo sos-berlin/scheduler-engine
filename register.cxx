@@ -76,7 +76,7 @@ STDMETHODIMP Registered::put_Name( BSTR name_bstr )
     {
         set_name( string_from_bstr( name_bstr ) );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -98,7 +98,7 @@ STDMETHODIMP Registered::Remove()
     {
         remove();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -134,7 +134,7 @@ STDMETHODIMP Register::get_Registered_( BSTR path_bstr, Registered** result )
         *result = registered_( string_from_bstr( path_bstr ) );
         if( result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -150,7 +150,7 @@ STDMETHODIMP Register::get_Registered_or_null_( BSTR path_bstr, Registered** res
         *result = registered_or_null_( string_from_bstr( path_bstr ) );
         if( result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -165,7 +165,7 @@ STDMETHODIMP Register::Create_registered_( Registered** result )
     {
         *result = new_registered_().take();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -180,7 +180,7 @@ STDMETHODIMP Register::Add_registered_( Registered* registered )
     {
         add_registered_( registered );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }

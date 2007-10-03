@@ -270,8 +270,8 @@ string Database_order_detector::async_state_text_() const
 
 bool Database_order_detector::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler.order", __FUNCTION__ << "  " << async_state_text() << "\n" );
-    _spooler->assert_are_orders_distributed( __FUNCTION__ );
+    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << async_state_text() << "\n" );
+    _spooler->assert_are_orders_distributed( Z_FUNCTION );
 
 
     _now     = Time::now();
@@ -321,7 +321,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
             }
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
     set_alarm();
 
@@ -390,7 +390,7 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
 int Database_order_detector::read_result_set( Read_transaction* ta, const string& select_sql )
 {
     int      count      = 0;
-    Any_file result_set = ta->open_result_set( select_sql, __FUNCTION__ );
+    Any_file result_set = ta->open_result_set( select_sql, Z_FUNCTION );
 
     while( !result_set.eof() )
     {
@@ -468,7 +468,7 @@ Order_subsystem::Order_subsystem( Spooler* spooler )
 
 void Order_subsystem::close()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
     set_subsystem_state( subsys_stopped );
 
@@ -575,7 +575,7 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
         
         //select_sql << "  order by `distributed_next_time`";
 
-        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); 
+        Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); 
 
         while( options->_count < options->_limit  &&  !result_set.eof() )
         {
@@ -592,7 +592,7 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
                 if( order->run_time() )
                     order->run_time()->append_calendar_dom_elements( element, options );
             }
-            catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
+            catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
         }
     }
 }
@@ -637,7 +637,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         if( flag & lo_blacklisted )  select_sql << " and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
                                else  select_sql << " and `distributed_next_time` is not null";
 
-        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
+        Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION );
 
         if( !result_set.eof() )
         {
@@ -660,7 +660,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
     catch( exception& x ) 
     { 
         if( result )  result->close(),  result = NULL;
-        ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); 
+        ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); 
     }
 
     return result;
@@ -756,7 +756,7 @@ void Job_chain_folder::add_job_chain( Job_chain* job_chain )
 
 void Job_chain_folder::remove_job_chain( Job_chain* job_chain )
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
 #   ifdef Z_DEBUG
         //assert( job_chain->_order_map.empty() );
@@ -788,7 +788,7 @@ Prefix_log* Order_source::log()
 
 void Order_source::initialize()
 {
-    if( !_job_chain )  assert(0), z::throw_xc( __FUNCTION__ );
+    if( !_job_chain )  assert(0), z::throw_xc( Z_FUNCTION );
 
     if( _next_state.is_missing() )  _next_state = _job_chain->first_node()->order_state();
 
@@ -802,7 +802,7 @@ void Order_source::initialize()
 
 void Order_sources::close()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
@@ -815,7 +815,7 @@ void Order_sources::close()
 
 void Order_sources::initialize()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
@@ -828,7 +828,7 @@ void Order_sources::initialize()
 
 void Order_sources::activate()
 {
-    Z_LOGI2( "scheduler", __FUNCTION__ << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
     Z_FOR_EACH( Order_source_list, _order_source_list, it )
     {
@@ -1152,7 +1152,7 @@ Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absol
     Order_queue_node( job_chain, state, n_job ),
     _job_path( job_path )
 {
-    if( job_path == "" )  assert(0), z::throw_xc( __FUNCTION__, "no job path" );
+    if( job_path == "" )  assert(0), z::throw_xc( Z_FUNCTION, "no job path" );
 }
 
 //------------------------------------------------------------------------------Job_node::~Job_node
@@ -1163,7 +1163,7 @@ Job_node::~Job_node()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  ERROR  " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
 //----------------------------------------------------------------------------------Job_node::close
@@ -1352,7 +1352,7 @@ Nested_job_chain_node::~Nested_job_chain_node()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG( __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  ERROR " << x.what() << "\n" ); }
 }
 //---------------------------------------------------------------------Nested_job_chain_node::close
     
@@ -1481,13 +1481,13 @@ Job_chain::Job_chain( Scheduler* scheduler )
 
 Job_chain::~Job_chain()
 {
-    Z_LOGI2( "joacim", obj_name() << "." << __FUNCTION__ << "\n" );
+    Z_LOGI2( "joacim", obj_name() << "." << Z_FUNCTION << "\n" );
 
     try
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << ": " << x.what() << '\n' ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << ": " << x.what() << '\n' ); }
 }
 
 //---------------------------------------------------------------------------------Job_chain::close
@@ -1758,7 +1758,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                            " where `job_chain`=" << sql::quoted( path().without_slash() ) <<
                              " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
                            " order by `history_id` desc",
-                           __FUNCTION__ );
+                           Z_FUNCTION );
 
             while( !sel.eof() )
             {
@@ -1847,7 +1847,7 @@ Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_,
 {
     assert_is_not_initialized();
     //if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
-    if( job_path == "" )  z::throw_xc( __FUNCTION__ );
+    if( job_path == "" )  z::throw_xc( Z_FUNCTION );
 
     Order::State state = state_;
 
@@ -2097,7 +2097,7 @@ Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
 
 Node* Job_chain::first_node()
 {
-    if( _node_list.empty() )  assert(0), z::throw_xc( __FUNCTION__ );
+    if( _node_list.empty() )  assert(0), z::throw_xc( Z_FUNCTION );
     return *_node_list.begin();
 }
 
@@ -2243,13 +2243,13 @@ bool Job_chain::on_load()  // Read_transaction* ta )
                             "  where " << db_where_condition() <<
                                " and `state` in ( " << join( ", ", state_sql_list ) << " )"
                             "  order by `ordering`",
-                            __FUNCTION__
+                            Z_FUNCTION
                         );
 
                     int count = load_orders_from_result_set( &ta, &result_set );
                     log()->debug( message_string( "SCHEDULER-935", count ) );
                 }
-                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
             }
 
 
@@ -2359,7 +2359,7 @@ int Job_chain::remove_all_pending_orders( bool leave_in_database )
         {
             string task = "(deleted task)";
             if( _spooler->_task_subsystem  &&  _spooler->_task_subsystem->has_tasks() )  task = order->_task->obj_name();  
-            Z_LOG2( "scheduler", __FUNCTION__ << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << task << "\n" );
+            Z_LOG2( "scheduler", Z_FUNCTION << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << task << "\n" );
         }
     }
 
@@ -2431,7 +2431,7 @@ int Job_chain::order_count( Read_transaction* ta )
                    <<    " and `distributed_next_time` " << ( _is_distributed? " is not null" 
                                                                              : " is null"     );
 
-        result = ta->open_result_set( select_sql, __FUNCTION__ ).get_record().as_int( 0 );
+        result = ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
     }
     else
     {
@@ -2464,7 +2464,7 @@ bool Job_chain::has_order_id( Read_transaction* ta, const Order::Id& order_id )
             ( 
                 S() << "select count(*)  from " << _spooler->_orders_tablename << 
                        "  where " << order_subsystem()->order_db_where_condition( path(), order_id.as_string() ),
-                __FUNCTION__
+                Z_FUNCTION
             )
             .get_record().as_int( 0 );
 
@@ -2492,14 +2492,14 @@ void Job_chain::unregister_order( Order* order )
 
     Order_map::iterator it = _order_map.find( order->string_id() );
     if( it != _order_map.end() )  _order_map.erase( it );
-                            else  Z_LOG2( "scheduler", __FUNCTION__ << " " << order->obj_name() << " ist nicht registriert.\n" );
+                            else  Z_LOG2( "scheduler", Z_FUNCTION << " " << order->obj_name() << " ist nicht registriert.\n" );
 }
 
 //----------------------------------------------------------------Job_chain::add_order_to_blacklist
 
 void Job_chain::add_order_to_blacklist( Order* order )
 {
-    //if( order->_suspended || !node_from_state_or_null( order->_state ) || !node_from_state_or_null( order->_state )->_job )  z::throw_xc( __FUNCTION__ );
+    //if( order->_suspended || !node_from_state_or_null( order->_state ) || !node_from_state_or_null( order->_state )->_job )  z::throw_xc( Z_FUNCTION );
 
     _blacklist_map[ order->string_id() ] = order;
 }
@@ -2558,7 +2558,7 @@ hash_set<string> Job_chain::db_get_blacklisted_order_id_set( const File_path& di
                       "  where " << db_where_condition() << 
                       "  and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
 
-        for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); !result_set.eof(); )
+        for( Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof(); )
         {
             Record record = result_set.get_record();
             File_path path = record.as_string( 0 );
@@ -2656,8 +2656,8 @@ Job_chain* Job_chain::on_replace_now()
 {               
     ptr<Job_chain> holder = this;
 
-    if( !replacement()         )  assert(0), z::throw_xc( __FUNCTION__, obj_name() );
-    if( !can_be_replaced_now() )  assert(0), z::throw_xc( __FUNCTION__, obj_name(), "!can_be_removed_now" );
+    if( !replacement()         )  assert(0), z::throw_xc( Z_FUNCTION, obj_name() );
+    if( !can_be_replaced_now() )  assert(0), z::throw_xc( Z_FUNCTION, obj_name(), "!can_be_removed_now" );
 
 
     //replacement()->_order_id_space = _order_id_space;
@@ -3239,7 +3239,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                                   " `occupying_cluster_member_id` is null )"
                         "  order by `distributed_next_time`, `priority`, `ordering`";
 
-            for( Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ ); 
+            for( Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); 
                  remaining > 0 &&  !result_set.eof(); 
                  --remaining )
             {
@@ -3268,7 +3268,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     element.appendChild( order_element );
                     dom_append_nl( element );
                 }
-                catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
+                catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
             }
         }
     }
@@ -3317,7 +3317,7 @@ int Order_queue::order_count( Read_transaction* ta )
                                   //" and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
                                   //      " `occupying_cluster_member_id` is null )"
                                     " and " << db_where_expression(),
-                          __FUNCTION__
+                          Z_FUNCTION
                       )
                       .get_record().as_int( 0 );
 
@@ -3442,7 +3442,7 @@ void Order_queue::update_priorities()
 
 bool Order_queue::request_order( const Time& now, const string& cause )
 {
-    // Diese Methode weniger oft aufgerufen werden.  Z_LOGI2( "joacim", _job->obj_name() << " " << __FUNCTION__ << "  " << cause << "\n" );
+    // Diese Methode weniger oft aufgerufen werden.  Z_LOGI2( "joacim", _job->obj_name() << " " << Z_FUNCTION << "  " << cause << "\n" );
 
     bool result = false;
 
@@ -3524,7 +3524,7 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
 { 
     if( _next_announced_distributed_order_time != t  &&  !is_now )
     {
-        Z_LOG2( "scheduler.order", obj_name() << "  " << __FUNCTION__ << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
+        Z_LOG2( "scheduler.order", obj_name() << "  " << Z_FUNCTION << "(" << t << ( is_now? ",is_now" : "" ) << ")  vorher: " << _next_announced_distributed_order_time << "\n" );
     }
 
     _next_announced_distributed_order_time = t; 
@@ -3535,7 +3535,7 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
     {
         //_is_distributed_order_requested = false;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( __FUNCTION__ );
+            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
     }
 }
 
@@ -3567,13 +3567,13 @@ Time Order_queue::next_announced_distributed_order_time()
 
 void Order_queue::tip_for_new_distributed_order()
 {
-    Z_LOG2( "scheduler.order", obj_name() << "  " << __FUNCTION__ << "\n" );
+    Z_LOG2( "scheduler.order", obj_name() << "  " << Z_FUNCTION << "\n" );
 
     if( !_has_tip_for_new_order )
     {
         _has_tip_for_new_order = true;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( __FUNCTION__ );
+            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
     }
 }
 
@@ -3653,7 +3653,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
     if( order ) 
     {
-        order->assert_task( __FUNCTION__ );
+        order->assert_task( Z_FUNCTION );
         order->_is_success_state = true;
     }
 
@@ -3683,14 +3683,14 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
     {
-        Any_file result_set = ta.open_result_set( select_sql, __FUNCTION__ );
+        Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION );
         if( !result_set.eof() )
         {
             record = result_set.get_record();
             record_filled = true;
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
 
     if( record_filled )
@@ -4048,7 +4048,7 @@ void Order::set_distributed( bool distributed )
 #     ifndef Z_DEBUG  //test
         //2007-07-27 if( _run_time->set() )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
 #     endif
-        //if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( __FUNCTION__, obj_name(), "no job_chain or job_chain is not distributed" );
+        //if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( Z_FUNCTION, obj_name(), "no job_chain or job_chain is not distributed" );
     }
 
     _is_distributed = distributed;
@@ -4073,7 +4073,7 @@ void Order::assert_task( const string& debug_text )
 void Order::occupy_for_task( Task* task, const Time& now )
 {
     assert( task );
-    assert_no_task( __FUNCTION__ );   // Vorsichtshalber
+    assert_no_task( Z_FUNCTION );   // Vorsichtshalber
     
 
     if( !_log->opened() )  open_log();
@@ -4110,7 +4110,7 @@ bool Order::db_occupy_for_processing()
     assert( _is_distributed );
     assert( _job_chain == NULL );   // Der Auftrag kommt erst nach der Belegung in die Jobkette, deshalb ist _job_chain == NULL
 
-    _spooler->assert_are_orders_distributed( __FUNCTION__ );
+    _spooler->assert_are_orders_distributed( Z_FUNCTION );
 
     sql::Update_stmt update = db_update_stmt();
 
@@ -4127,10 +4127,10 @@ bool Order::db_occupy_for_processing()
 
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
     {
-        update_ok = ta.try_execute_single( update, __FUNCTION__ );
-        ta.commit( __FUNCTION__ );
+        update_ok = ta.try_execute_single( update, Z_FUNCTION );
+        ta.commit( Z_FUNCTION );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
     
     if( update_ok )
@@ -4160,7 +4160,7 @@ void Order::db_show_occupation( Log_level log_level )
                 S() << "select `occupying_cluster_member_id`"
                        "  from " << _spooler->_orders_tablename
                        << db_where_clause().where_string(),
-                __FUNCTION__ );
+                Z_FUNCTION );
 
         if( result_set.eof() )
         {
@@ -4175,7 +4175,7 @@ void Order::db_show_occupation( Log_level log_level )
     }
     catch( exception& x ) 
     { 
-        _log->error( S() << x.what() << ", in " << __FUNCTION__ );
+        _log->error( S() << x.what() << ", in " << Z_FUNCTION );
     }
 }
 
@@ -4206,7 +4206,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
                     S() << "select `occupying_cluster_member_id`"
                            "  from " << _spooler->_orders_tablename << " %update_lock" 
                            << db_update_stmt().where_string(), 
-                    __FUNCTION__ 
+                    Z_FUNCTION 
                 );
 
             if( result_set.eof() )
@@ -4225,13 +4225,13 @@ bool Order::db_try_insert( bool throw_exists_exception )
                     _log->info( message_string( "SCHEDULER-942", "Scheduler member " + record.as_string( "occupying_cluster_member_id" ), "replaced order" ) );
                 }
 
-                ta.execute_single( db_update_stmt().make_delete_stmt(), __FUNCTION__ );
+                ta.execute_single( db_update_stmt().make_delete_stmt(), Z_FUNCTION );
             }
         }
         else
         if( !_is_distributed )
         {
-            ta.execute( db_update_stmt().make_delete_stmt() + " and `distributed_next_time` is null", __FUNCTION__ );
+            ta.execute( db_update_stmt().make_delete_stmt() + " and `distributed_next_time` is null", Z_FUNCTION );
         }
         else
         {
@@ -4262,12 +4262,12 @@ bool Order::db_try_insert( bool throw_exists_exception )
         {
             try
             {
-                ta.execute( insert, __FUNCTION__ );
+                ta.execute( insert, Z_FUNCTION );
                 insert_ok = true;
             }
             catch( exception& x )     // Datensatz ist bereits vorhanden?
             {
-                ta.intermediate_rollback( __FUNCTION__ );      // Postgres verlangt nach Fehler ein Rollback
+                ta.intermediate_rollback( Z_FUNCTION );      // Postgres verlangt nach Fehler ein Rollback
 
                 if( insert_race_retry_count > max_insert_race_retry_count )  throw;
 
@@ -4276,7 +4276,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
                         S() << "select `distributed_next_time`" 
                                " from " << _spooler->_orders_tablename << 
                                db_where_clause().where_string(), 
-                        __FUNCTION__ 
+                        Z_FUNCTION 
                     );
 
                 if( !result_set.eof() )
@@ -4309,12 +4309,12 @@ bool Order::db_try_insert( bool throw_exists_exception )
                 if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
             }
 
-            ta.commit( __FUNCTION__ );
+            ta.commit( Z_FUNCTION );
 
             _is_in_database = true;
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+    catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
 
     if( insert_ok )  tip_own_job_for_new_distributed_order_state();
@@ -4338,9 +4338,9 @@ bool Order::db_release_occupation()
             update.and_where_condition( "occupying_cluster_member_id", _spooler->cluster_member_id() );
             update.and_where_condition( "state"                      , _occupied_state.as_string()   );
 
-            update_ok = ta.try_execute_single( update, __FUNCTION__ );
+            update_ok = ta.try_execute_single( update, Z_FUNCTION );
 
-            ta.commit( __FUNCTION__ );
+            ta.commit( Z_FUNCTION );
 
             if( !update_ok ) 
             {
@@ -4350,7 +4350,7 @@ bool Order::db_release_occupation()
 
             _is_db_occupied = false; 
         }
-        catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+        catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
     }
 
     return update_ok;
@@ -4372,7 +4372,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
     else
     if( _is_in_database &&  _spooler->_db->opened() )
     {
-        if( update_option == update_not_occupied  &&  _is_db_occupied )  z::throw_xc( __FUNCTION__, "is_db_occupied" );
+        if( update_option == update_not_occupied  &&  _is_db_occupied )  z::throw_xc( Z_FUNCTION, "is_db_occupied" );
 
 
         string           state_string = state().as_string();    // Kann Exception auslösen;
@@ -4400,14 +4400,14 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 delete_sql << update.make_delete_stmt();
                 delete_sql << " and `distributed_next_time` is " << ( _is_distributed? "not null" : " null" );  // update_ok=false, wenn das nicht stimmt
 
-                update_ok = ta.try_execute_single( delete_sql, __FUNCTION__ );
+                update_ok = ta.try_execute_single( delete_sql, Z_FUNCTION );
                 if( !update_ok )  update_ok = db_handle_modified_order( &ta );  //int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
 
                 db()->write_order_history( this, &ta );
 
-                ta.commit( __FUNCTION__ );
+                ta.commit( Z_FUNCTION );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), __FUNCTION__ ); }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), Z_FUNCTION ); }
 
             if( !update_ok )  _log->warn( message_string( "SCHEDULER-385" ) );
 
@@ -4434,7 +4434,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             {
                 if( !_spooler->_db->opened() )  break;
 
-                update_ok = ta.try_execute_single( update, __FUNCTION__ );
+                update_ok = ta.try_execute_single( update, Z_FUNCTION );
 
                 if( !update_ok )
                 {
@@ -4470,9 +4470,9 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     }
                 }
 
-                ta.commit( __FUNCTION__ );
+                ta.commit( Z_FUNCTION );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+            catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
         }
 
         if( update_option == update_and_release_occupation )
@@ -4536,7 +4536,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
     }
     catch( exception& x ) 
     {
-        _log->error( S() << x.what() << ", in " << __FUNCTION__ );
+        _log->error( S() << x.what() << ", in " << Z_FUNCTION );
     }
 
     return result;
@@ -4595,7 +4595,7 @@ string Order::calculate_db_distributed_next_time()
 
 string Order::db_read_clob( Read_transaction* ta, const string& column_name )
 {
-    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
     return ta->read_clob( _spooler->_orders_tablename, column_name, db_where_clause().where_string() );
 }
@@ -4604,13 +4604,13 @@ string Order::db_read_clob( Read_transaction* ta, const string& column_name )
 
 void Order::db_update_clob( Transaction* ta, const string& column_name, const string& value )
 {
-    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", __FUNCTION__ );
+    if( _spooler->_db->db_name() == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
     if( value == "" )
     {
         sql::Update_stmt update = db_update_stmt();
         update[ column_name ].set_direct( "null" );
-        ta->execute( update, __FUNCTION__ );
+        ta->execute( update, Z_FUNCTION );
     }
     else
     {
@@ -4708,10 +4708,10 @@ void Order::close()
     {
         try
         {
-            Z_LOGI2( "scheduler", __FUNCTION__ << "  db_release_occupation()\n" );
+            Z_LOGI2( "scheduler", Z_FUNCTION << "  db_release_occupation()\n" );
             db_release_occupation();
         }
-        catch( exception& x ) { Z_LOG( __FUNCTION__ << "  ERROR " << x.what() << "\n" ); }
+        catch( exception& x ) { Z_LOG( Z_FUNCTION << "  ERROR " << x.what() << "\n" ); }
     }
 
     //if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
@@ -5156,7 +5156,7 @@ File_path Order::file_path()
             result.set_path( string_from_variant( path ) );
         }
     }
-    catch( exception& x )  { Z_LOG2( "scheduler", __FUNCTION__ << " " << x.what() << "\n" ); }
+    catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() << "\n" ); }
 
     return result;
 }
@@ -5236,7 +5236,7 @@ void Order::set_param( const string& name, const Variant& value )
 
     Variant name_vt = variant_from_string( name );
     hr = params()->put_Value( &name_vt, const_cast<Variant*>( &value ) );
-    if( FAILED(hr) )  throw_com( hr, __FUNCTION__, name );
+    if( FAILED(hr) )  throw_com( hr, Z_FUNCTION, name );
 }
 
 //-------------------------------------------------------------------------------------Order::param
@@ -5248,7 +5248,7 @@ Variant Order::param( const string& name )
     if( ptr<Com_variable_set> params = params_or_null() )  
     {
         HRESULT hr = params->get_Var( Bstr( name ), &result );
-        if( FAILED(hr) )  throw_com( hr, __FUNCTION__, name );
+        if( FAILED(hr) )  throw_com( hr, Z_FUNCTION, name );
     }
 
     return result;
@@ -5634,7 +5634,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         {
             is_new = !job_chain->has_order_id( &ta, id() );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( x, __FUNCTION__ ); }
+        catch( exception& x ) { ta.reopen_database_after_error( x, Z_FUNCTION ); }
 
         if( !is_new  &&  exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), other_job_chain->path().to_string() );
     }
@@ -5684,7 +5684,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( _delay_storing_until_processing ) 
         {
-            if( _is_distributed )  assert(0), z::throw_xc( __FUNCTION__, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
+            if( _is_distributed )  assert(0), z::throw_xc( Z_FUNCTION, "_delay_storing_until_processing & _is_distributed not possible" );   // db_try_insert() muss Datenbanksatz prüfen können
         }
         else
         if( job_chain->_orders_are_recoverable  &&  !_is_in_database )
@@ -6188,7 +6188,7 @@ void Order::clear_setback( bool keep_setback_count )
 
 void Order::set_at( const Time& time )
 {
-    assert_no_task( __FUNCTION__ );
+    assert_no_task( Z_FUNCTION );
     if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
 
     set_setback( time );
@@ -6224,7 +6224,7 @@ Time Order::next_start_time( bool first_call )
             if( result >= _period.end() )       // Periode abgelaufen?
             {
                 Period next_period = _run_time->next_period( _period.end(), time::wss_next_begin );
-                //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", __FUNCTION__, next_period.obj_name().c_str() ) );
+                //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
                 if( _period.repeat() == Time::never
                  || _period.end()    != next_period.begin()
@@ -6338,7 +6338,7 @@ void Order::set_replacement( bool b )
 
 void Order::set_on_blacklist()
 {
-    if( !_job_chain )  assert(0), z::throw_xc( __FUNCTION__, "no _job_chain" );        // Wenn _is_distributed
+    if( !_job_chain )  assert(0), z::throw_xc( Z_FUNCTION, "no _job_chain" );        // Wenn _is_distributed
 
     _job_chain->add_order_to_blacklist( this );
 

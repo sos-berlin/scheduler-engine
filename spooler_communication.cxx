@@ -76,7 +76,7 @@ Process* Communication::Operation_connection::get_task_process( pid_t pid )
     assert( pid );
 
     Task_process_register::iterator it = _task_process_register.find( pid );
-    if( it == _task_process_register.end() )  z::throw_xc( __FUNCTION__, "unknown pid", pid );
+    if( it == _task_process_register.end() )  z::throw_xc( Z_FUNCTION, "unknown pid", pid );
 
     return it->second;
 }
@@ -218,7 +218,7 @@ void Xml_response::signal_new_data()
     {
         if( _connection->state() == zschimmer::Buffered_socket_operation::s_ready )
         {
-            _connection->_socket_event.signal( __FUNCTION__ ); 
+            _connection->_socket_event.signal( Z_FUNCTION ); 
         }
     }
 }
@@ -511,7 +511,7 @@ bool Communication::Connection::do_recv()
 
 bool Communication::Connection::async_continue_( Continue_flags )
 {
-    //Z_LOG2( "joacim", __FUNCTION__ << state() << "\n" );
+    //Z_LOG2( "joacim", Z_FUNCTION << state() << "\n" );
 
     bool something_done = false;
 
@@ -724,7 +724,7 @@ void Communication::close( double wait_time )
 
     if( connection_was_open ) 
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << "  sleep(" << wait_time << ")\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << "  sleep(" << wait_time << ")\n" );
         sleep( wait_time );
     }
 

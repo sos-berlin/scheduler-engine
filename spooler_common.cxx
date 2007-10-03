@@ -10,7 +10,7 @@ namespace scheduler {
 
 ptr<Com_variable_set> variable_set_from_environment()
 {
-    Z_LOG2( "scheduler", __FUNCTION__ << "\n" );   // Um zu sehen, ob wir im richtigen Prozess sind (Haupt- oder Task-Prozess?)
+    Z_LOG2( "scheduler", Z_FUNCTION << "\n" );   // Um zu sehen, ob wir im richtigen Prozess sind (Haupt- oder Task-Prozess?)
 
     ptr<Com_variable_set> result = new Com_variable_set();
     for( char** e = environ; *e; e++ )

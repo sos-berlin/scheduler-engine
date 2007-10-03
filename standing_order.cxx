@@ -126,7 +126,7 @@ Standing_order::~Standing_order()
     {
         close();
     }
-    catch( exception& x ) { Z_LOG2( "scheduler", __FUNCTION__ << ": " << x.what() ); }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << ": " << x.what() ); }
 }
 
 //----------------------------------------------------------------------------Standing_order::close
@@ -174,7 +174,7 @@ bool Standing_order::on_load()
 
 bool Standing_order::on_activate()
 {
-    if( !_order )  assert(0), z::throw_xc( __FUNCTION__, "noorder" );
+    if( !_order )  assert(0), z::throw_xc( Z_FUNCTION, "noorder" );
 
     bool result = false;
 

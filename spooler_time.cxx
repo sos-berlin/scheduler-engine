@@ -178,7 +178,7 @@ void Time::set_current_difference_to_utc( time_t now )
 
     if( static_current_difference_to_utc != new_difference )
     {
-        Z_LOG2( "scheduler", __FUNCTION__ << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
+        Z_LOG2( "scheduler", Z_FUNCTION << " " << new_difference << " tz=" << timezone << " is_dst=" << is_dst << " dstbias=" << _dstbias << " (old=" << static_current_difference_to_utc << ")\n" );
         static_current_difference_to_utc = new_difference;
     }
 }
@@ -331,7 +331,7 @@ void Time::set( double t )
 
 double Time::as_double() const
 {
-    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( __FUNCTION__ << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
+    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
     return _is_utc? _time - current_difference_to_utc()
                   : _time;    
@@ -341,7 +341,7 @@ double Time::as_double() const
 
 double Time::as_utc_double() const
 {
-    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( __FUNCTION__ << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
+    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
     return _is_utc? _time 
                   : _time + current_difference_to_utc();    
@@ -678,14 +678,14 @@ bool Daylight_saving_time_transition_detector::async_continue_( Continue_flags )
     {
         if( now < until - 2 )   // Paranoid
         {
-            Z_LOG( __FUNCTION__ << " Aufruf zu früh *******\n" );   // Sonst würden wir zu lange schlafen
+            Z_LOG( Z_FUNCTION << " Aufruf zu früh *******\n" );   // Sonst würden wir zu lange schlafen
         }
         else
         {
             while( now < until )                      // Warten von 01:59:59 bis 02:00:01
             {
                 time_t t = until - now;
-                Z_LOG2( "scheduler", __FUNCTION__ << "  sleep " << t << "s\n"  );
+                Z_LOG2( "scheduler", Z_FUNCTION << "  sleep " << t << "s\n"  );
                 sleep( (double)t );
                 now = ::time(NULL);
             }
@@ -794,7 +794,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     }
 
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
-    //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( __FUNCTION__, "Attribute start_once is not supported" );
+    //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( Z_FUNCTION, "Attribute start_once is not supported" );
 
     check( w );
 }
@@ -1031,7 +1031,7 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
                 int weekday = get_weekday_number( element );
                 int which   = element.int_getAttribute( "which" );
 
-                if( which == 0  ||  abs( which ) > max_weekdays_per_month )  z::throw_xc( __FUNCTION__, S() << "Invalid value for which=" << which );    // XML-Schema hat schon geprüft
+                if( which == 0  ||  abs( which ) > max_weekdays_per_month )  z::throw_xc( Z_FUNCTION, S() << "Invalid value for which=" << which );    // XML-Schema hat schon geprüft
 
                 Month_weekdays* m = which > 0? &_month_weekdays : &_reverse_month_weekdays;
                 m->day( abs(which), weekday ) -> set_dom_periods( element, &my_default_day, default_period );
@@ -1154,7 +1154,7 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
                     if( !file.is_absolute_path() )  file.prepend_directory( _spooler->_configuration_file_path.directory() );
                     
                     string xml_text = string_from_file( file );
-                    Z_LOG2( "scheduler", __FUNCTION__ << "  " << xml_text << "\n" );
+                    Z_LOG2( "scheduler", Z_FUNCTION << "  " << xml_text << "\n" );
 
                     xml::Document_ptr doc;
                     doc.load_xml( xml_text );
@@ -1182,7 +1182,7 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
         include( dt.as_time_t() );
     }
     else
-        z::throw_xc( "SCHEDULER-319", e.nodeName(), __FUNCTION__ );
+        z::throw_xc( "SCHEDULER-319", e.nodeName(), Z_FUNCTION );
 }
 
 //--------------------------------------------------------------------------------------Date::print
@@ -1445,7 +1445,7 @@ Period Run_time::call_function( const Time& requested_beginning )
     {
         try
         {
-            if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", __FUNCTION__, _start_time_function );
+            if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", Z_FUNCTION, _start_time_function );
 
             string date_string = requested_beginning.as_string( Time::without_ms );
             string param2 = !_host_object? "" :
@@ -1649,7 +1649,7 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
         {
             if( _spooler->scheduler_script()->subsystem_state() != subsys_active  &&  _log  &&  !is_no_function_warning_logged )
             {
-                _log->warn( message_string( "SCHEDULER-844", _start_time_function, __FUNCTION__ ) );
+                _log->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
                 is_no_function_warning_logged = true;
             }
             else

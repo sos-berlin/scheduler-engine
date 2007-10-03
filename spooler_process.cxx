@@ -375,7 +375,7 @@ void Process::start()
     
 void Process::start_local()
 {
-    if( started() )  assert(0), throw_xc( __FUNCTION__ );
+    if( started() )  assert(0), throw_xc( Z_FUNCTION );
 
 
     //if( !_server_hostname.empty() )
@@ -479,7 +479,7 @@ bool Process::is_started()
 
     if( _async_remote_operation )
     {
-        _async_remote_operation->async_check_exception( __FUNCTION__ );
+        _async_remote_operation->async_check_exception( Z_FUNCTION );
 
         result = _async_remote_operation->async_finished();
      
@@ -539,7 +539,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml::Document_ptr dom_document = _xml_client_connection->received_dom_document();
             if( !dom_document )  break;
 
-            Z_LOG2( "scheduler", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
+            Z_LOG2( "scheduler", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
 
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
 
@@ -552,7 +552,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
         case Async_remote_operation::s_running:    
         {
-            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->signal( __FUNCTION__ );
+            if( _module_instance  &&  _module_instance->_task )  _module_instance->_task->signal( Z_FUNCTION );
             break;
         }
 
@@ -560,7 +560,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             if( xml::Document_ptr dom_document = _xml_client_connection->received_dom_document() )  
             {
-                Z_LOG2( "joacim", __FUNCTION__ << " XML-Antwort: " << dom_document.xml() );
+                Z_LOG2( "joacim", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 
                 _remote_stdout_file.open_temporary( File::open_unlink_later );
@@ -893,7 +893,7 @@ STDMETHODIMP Process_class_configuration::put_Name( BSTR name_bstr )
     {
         set_name( string_from_bstr( name_bstr ) );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -908,7 +908,7 @@ STDMETHODIMP Process_class_configuration::put_Remote_scheduler( BSTR remote_sche
     {
         set_remote_scheduler( string_from_bstr( remote_scheduler_bstr ) );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -923,7 +923,7 @@ STDMETHODIMP Process_class_configuration::put_Max_processes( int max_processes )
     {
         set_max_processes( max_processes );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -938,7 +938,7 @@ STDMETHODIMP Process_class_configuration::Remove()
     {
         remove( File_based::rm_base_file_too );
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -962,7 +962,7 @@ Process_class::~Process_class()
 
 void Process_class::set_configuration( const Process_class_configuration& configuration )
 {
-    if( normalized_path() != configuration.normalized_path() )  assert(0), z::throw_xc( __FUNCTION__ );
+    if( normalized_path() != configuration.normalized_path() )  assert(0), z::throw_xc( Z_FUNCTION );
 
     // Erst die Warnungen
     check_max_processes   ( configuration.max_processes() );
@@ -1098,7 +1098,7 @@ void Process_class::add_process( Process* process )
 void Process_class::remove_process( Process* process )
 {
     Process_set::iterator it = _process_set.find( process );
-    if( it == _process_set.end() )  z::throw_xc( __FUNCTION__ );
+    if( it == _process_set.end() )  z::throw_xc( Z_FUNCTION );
 
     process->_process_class = NULL; 
     _process_set.erase( it ); 
@@ -1395,7 +1395,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class( BSTR path_bstr, spooler
         *result = process_class( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1411,7 +1411,7 @@ STDMETHODIMP Process_class_subsystem::get_Process_class_or_null( BSTR path_bstr,
         *result = process_class_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1428,7 +1428,7 @@ STDMETHODIMP Process_class_subsystem::Create_process_class( spooler_com::Iproces
         //nicht nötig  process_class->set_folder_path( root_path );
         *result = process_class.take();
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -1459,7 +1459,7 @@ STDMETHODIMP Process_class_subsystem::Add_process_class( spooler_com::Iprocess_c
             process_class->activate();
         }
     }
-    catch( const exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }

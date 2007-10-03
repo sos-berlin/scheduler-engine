@@ -389,7 +389,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     }
                     catch( exception& x )
                     {
-                        Z_LOG2( "scheduler", __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                        Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
                     }
                 }
             }
@@ -419,7 +419,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                     }
                     catch( exception& x )
                     {
-                        Z_LOG2( "scheduler", __FUNCTION__ << " priority_class() ==> " << x.what() << "\n" );
+                        Z_LOG2( "scheduler", Z_FUNCTION << " priority_class() ==> " << x.what() << "\n" );
                     }
 
 
@@ -896,8 +896,8 @@ void Task::remove_pid( int pid )
 
 void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, bool is_process_group, const string& title )
 {
-    Z_LOG2( "scheduler", __FUNCTION__ << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
-    Z_LOG2( "scheduler", __FUNCTION__ << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
+    Z_LOG2( "scheduler", Z_FUNCTION << " " << pid << "," << timeout << "," << ignore_exitcode << "," << ignore_signal << "," << is_process_group << "\n" );
+    Z_LOG2( "scheduler", Z_FUNCTION << "   title=" << title << "\n" );   // Getrennt, falls Parameterübergabe fehlerhaft ist und es zum Abbruch kommt (com_server.cxx)
     
     if( _module_instance->is_remote_host() )
     {
@@ -1785,7 +1785,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
         }
     }
 
-    if( _order )  _order->assert_task( __FUNCTION__ );
+    if( _order )  _order->assert_task( Z_FUNCTION );
 
     return _order;
 }
@@ -2095,7 +2095,7 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
                     case fl_last_only:              if( !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
                     case fl_first_and_last_only:    if( !_is_first_job_delay_after_error  
                                                     &&  !_is_last_job_delay_after_error  )  mail_due_to_error_or_warning = false;  break;
-                    default: assert(0), z::throw_xc( __FUNCTION__ );
+                    default: assert(0), z::throw_xc( Z_FUNCTION );
                 }
             }
 

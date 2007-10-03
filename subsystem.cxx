@@ -53,7 +53,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
             {
                 case subsys_initialized:
                 {
-                    assert_subsystem_state( subsys_not_initialized, __FUNCTION__ );
+                    assert_subsystem_state( subsys_not_initialized, Z_FUNCTION );
 
                     result = subsystem_initialize();
                     break;
@@ -61,7 +61,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
 
                 case subsys_loaded:
                 {
-                    assert_subsystem_state( subsys_initialized, __FUNCTION__ );
+                    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
 
                     result = subsystem_load();
                     break;
@@ -69,7 +69,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
 
                 case subsys_active:
                 {
-                    assert_subsystem_state( subsys_loaded, __FUNCTION__ );
+                    assert_subsystem_state( subsys_loaded, Z_FUNCTION );
 
                     result = subsystem_activate();
                     break;
@@ -82,7 +82,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
                 }
 
                 default:
-                    throw_subsystem_state_error( new_state, __FUNCTION__ );
+                    throw_subsystem_state_error( new_state, Z_FUNCTION );
             }
 
             Z_LOG2( "scheduler", obj_name() << ": state=" << string_from_subsystem_state( _subsystem_state ) << "\n" );
@@ -101,21 +101,21 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
 
 bool Subsystem::subsystem_initialize()
 {
-    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+    z::throw_xc( Z_FUNCTION, obj_name(), "not implemented" );
 }
 
 //------------------------------------------------------------------------Subsystem::subsystem_load
 
 bool Subsystem::subsystem_load()
 {
-    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+    z::throw_xc( Z_FUNCTION, obj_name(), "not implemented" );
 }
 
 //--------------------------------------------------------------------Subsystem::subsystem_activate
 
 bool Subsystem::subsystem_activate()
 {
-    z::throw_xc( __FUNCTION__, obj_name(), "not implemented" );
+    z::throw_xc( Z_FUNCTION, obj_name(), "not implemented" );
 }
 
 //-------------------------------------------------------------------------------------------------

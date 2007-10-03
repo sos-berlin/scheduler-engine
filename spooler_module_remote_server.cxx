@@ -106,12 +106,12 @@ void Com_remote_module_instance_server::Class_data::initialize()
     string stdin_text = File( STDIN_FILENO ).read_all();
     if( stdin_text != "" )
     {
-        //Z_LOG2( "joacim", __FUNCTION__ << " STDIN: " << stdin_text << "\n" );
+        //Z_LOG2( "joacim", Z_FUNCTION << " STDIN: " << stdin_text << "\n" );
         
         _stdin_dom_document.load_xml( stdin_text );
 
         _task_process_element = _stdin_dom_document.documentElement();
-        if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( __FUNCTION__, "<task_process> expected" );
+        if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( Z_FUNCTION, "<task_process> expected" );
     }
 
     //::close( STDIN_FILENO );  // 2007-07-09 Brauchen wir nicht mehr, also schließen, bevor ein Enkelprozess den Handle erbt und dann die Datei nicht löschbar ist.
@@ -146,7 +146,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
     if( *class_object_ptr )
     {
         _class_data = dynamic_cast<Class_data*>( +*class_object_ptr );
-        if( !_class_data )  assert(0), z::throw_xc( __FUNCTION__ );
+        if( !_class_data )  assert(0), z::throw_xc( Z_FUNCTION );
     }
     else
     {
@@ -279,10 +279,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             }
         }
 
-        //Z_LOG2( "joacim", __FUNCTION__ << " java_class_path=" << java_class_path << "\n" );;
-        //Z_LOG2( "joacim", __FUNCTION__ << " java_work_dir  =" << java_work_dir << "\n" );;
-        //Z_LOG2( "joacim", __FUNCTION__ << " java_options   =" << java_options << "\n" );;
-        //Z_LOG2( "joacim", __FUNCTION__ << " javac          =" << javac << "\n" );;
+        //Z_LOG2( "joacim", Z_FUNCTION << " java_class_path=" << java_class_path << "\n" );;
+        //Z_LOG2( "joacim", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
+        //Z_LOG2( "joacim", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
+        //Z_LOG2( "joacim", Z_FUNCTION << " javac          =" << javac << "\n" );;
 
         _server->_module->init();
 

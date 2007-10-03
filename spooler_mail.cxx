@@ -724,7 +724,7 @@ int Com_mail::send( const Mail_defaults& defaults )
 
     _spooler->_last_mail_timestamp = Time::now();
 
-    _spooler->assert_is_still_active( __FUNCTION__ );
+    _spooler->assert_is_still_active( Z_FUNCTION );
 
     return result;
 }

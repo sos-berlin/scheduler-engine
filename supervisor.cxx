@@ -274,7 +274,7 @@ void Supervisor_client_connection::connect()
     
 bool Supervisor_client_connection::async_continue_( Continue_flags )
 {
-    Z_DEBUG_ONLY( Z_LOGI2( "joacim", __FUNCTION__ << "\n" ); )
+    Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
 
     bool something_done = false;
 
@@ -582,7 +582,7 @@ STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
         if( hostname == "" )  hostname = _client_connection->host_and_port().host().ip_string();
         hr = String_to_bstr( hostname, result );
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -597,7 +597,7 @@ STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
     {
         *result = _client_connection->host_and_port().port();
     }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }

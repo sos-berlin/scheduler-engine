@@ -467,7 +467,7 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     }
     else
     {
-        if( !_spooler->_cluster )  z::throw_xc( __FUNCTION__, "no cluster" );
+        if( !_spooler->_cluster )  z::throw_xc( Z_FUNCTION, "no cluster" );
 
         if( delete_dead )
         {
@@ -510,7 +510,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     Absolute_path job_path = Absolute_path( root_path, element.getAttribute( "job" ) );
     string        cmd_name =                     element.getAttribute( "cmd" );
@@ -571,7 +571,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     int    id          = element. int_getAttribute( "id" );
     string job_path    = element.     getAttribute( "job" );              // Hilfsweise
@@ -588,7 +588,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     string job_path        = element.getAttribute( "job"   );
     string task_name       = element.getAttribute( "name"  );
@@ -626,7 +626,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
 
@@ -662,7 +662,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& close_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     int  pid  = close_element. int_getAttribute( "pid" );
     bool kill = close_element.bool_getAttribute( "kill", false );
@@ -808,7 +808,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_path ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ),
-                            __FUNCTION__ );
+                            Z_FUNCTION );
 
             if( sel.eof() )  goto NO_ORDER;
 
@@ -822,7 +822,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                        "  where \"HISTORY_ID\"=" << history_id;
         if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
 
-        Any_file sel = ta.open_result_set( S() << select_sql, __FUNCTION__ );
+        Any_file sel = ta.open_result_set( S() << select_sql, Z_FUNCTION );
 
         if( sel.eof() )  goto NO_ORDER;
         Record record = sel.get_record();
@@ -866,7 +866,7 @@ NO_ORDER:
 xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& add_order_element )
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     //string job_name = add_order_element.getAttribute( "job" );
 
@@ -898,7 +898,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
     Order::Id     id             = modify_order_element.getAttribute( "order"     );
@@ -938,7 +938,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
         if( state != "" )  
         {
-            order->assert_no_task( __FUNCTION__ );
+            order->assert_no_task( Z_FUNCTION );
             order->set_state( state );
         }
 
@@ -953,7 +953,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             }
             else
             {
-                order->assert_no_task( __FUNCTION__ );
+                order->assert_no_task( Z_FUNCTION );
                 order->clear_setback( true );        // order->_setback_count belassen
             }
         }
@@ -994,7 +994,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
     Order::Id     id             = modify_order_element.getAttribute( "order"     );
@@ -1018,7 +1018,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_path, id.as_string() ) );
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
             
-            ta.execute( delete_stmt, __FUNCTION__ );
+            ta.execute( delete_stmt, Z_FUNCTION );
             if( ta.record_count() == 0 )  z::throw_xc( "SCHEDULER-162", id.as_string() );
             
             //if( ta.record_count() == 0 )
@@ -1028,12 +1028,12 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
             //    
             //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
-            //    ta.execute_single( delete_stmt, __FUNCTION__ ); 
+            //    ta.execute_single( delete_stmt, Z_FUNCTION ); 
             //}
 
-            ta.commit( __FUNCTION__ );
+            ta.commit( Z_FUNCTION );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), __FUNCTION__ ); }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
     }
 
     return _answer.createElement( "ok" );
@@ -1044,7 +1044,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 xml::Element_ptr Command_processor::execute_remove_job_chain( const xml::Element_ptr& modify_order_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     Absolute_path job_chain_path = Absolute_path( root_path, modify_order_element.getAttribute( "job_chain" ) );
 
@@ -1071,7 +1071,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
 xml::Element_ptr Command_processor::execute_service_request( const xml::Element_ptr& service_request_element )
 {
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-    _spooler->assert_is_activated( __FUNCTION__ );
+    _spooler->assert_is_activated( Z_FUNCTION );
 
     ptr<Order> order = new Order( _spooler );
 
@@ -1457,7 +1457,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                                                  " and `order_id`="    << sql::quoted( order_id );
                                 if( order_id != "" )  select_sql << " and `order_id`=" << sql::quoted( order_id );
 
-                                Any_file sel = ta.open_result_set( select_sql, __FUNCTION__ );
+                                Any_file sel = ta.open_result_set( select_sql, Z_FUNCTION );
 
                                 if( !sel.eof() )
                                 {
@@ -1688,7 +1688,7 @@ xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_d
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
 
-    //if( !_spooler->check_is_active() )  _spooler->abort_immediately( __FUNCTION__ );
+    //if( !_spooler->check_is_active() )  _spooler->abort_immediately( Z_FUNCTION );
 
     return _answer;
 }
@@ -1703,7 +1703,7 @@ void Command_processor::execute_config_file( const string& filename )
 
         string content = string_from_file( filename );
 
-        Z_LOGI2( "scheduler", __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
+        Z_LOGI2( "scheduler", Z_FUNCTION << "\n" << filename << ":\n" << content << "\n" );
 
         xml::Document_ptr dom_document = dom_from_xml( content );
         dom_document.select_node_strict( "/spooler/config" );
@@ -1770,7 +1770,7 @@ void Command_processor::execute_2( const xml::Document_ptr& command_doc )
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 
     // Eigentlich nur für einige möglicherweise langlaufende <show_xxx>-Kommandos nötig, z.B. <show_state>, <show_history> (mit Datenbank)
-    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( __FUNCTION__, command_doc.xml( scheduler_character_encoding ) );
+    if( !_spooler->check_is_active() )  _spooler->cmd_terminate_after_error( Z_FUNCTION, command_doc.xml( scheduler_character_encoding ) );
 }
 
 //---------------------------------------------------------------------Command_processor::execute_2
@@ -1920,7 +1920,7 @@ void File_buffered_command_response::flush()
 
 bool File_buffered_command_response::async_continue_( Continue_flags )
 {
-    z::throw_xc( __FUNCTION__ );
+    z::throw_xc( Z_FUNCTION );
     return false;
 }
 
@@ -1930,7 +1930,7 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
 {
     if( _close )
     {
-        Z_LOG( "*** " << __FUNCTION__ << "  closed: " << seq << "\n" );
+        Z_LOG( "*** " << Z_FUNCTION << "  closed: " << seq << "\n" );
         return;
     }
 
@@ -2023,7 +2023,7 @@ string File_buffered_command_response::get_part()
             break;
 
         default:
-            z::throw_xc( __FUNCTION__, _state );
+            z::throw_xc( Z_FUNCTION, _state );
     }
 
     if( _close  &&  _state == s_ready  &&  _buffer == "" )  _state = s_finished;

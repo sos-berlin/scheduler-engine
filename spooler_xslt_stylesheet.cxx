@@ -86,7 +86,7 @@ Xslt_stylesheet::Xslt_stylesheet( const BSTR xml_or_filename_bstr )
 
 Xslt_stylesheet::~Xslt_stylesheet() 
 {
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
 }
 
 //------------------------------------------------------------------Xslt_stylesheet::QueryInterface
@@ -110,7 +110,7 @@ STDMETHODIMP Xslt_stylesheet::Close()
     {
         release();
     }
-    catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -121,13 +121,13 @@ STDMETHODIMP Xslt_stylesheet::Load_xml( BSTR xml_bstr, Ixslt_stylesheet** result
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
 
     try
     {
         load( xml::Document_ptr( xml_bstr ) );
     }
-    catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     *result = this;
     (*result)->AddRef();
@@ -141,13 +141,13 @@ STDMETHODIMP Xslt_stylesheet::Load_file( BSTR filename_bstr, Ixslt_stylesheet** 
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
 
     try
     {
         load_file( string_from_bstr( filename_bstr ) );
     }
-    catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     *result = this;
     (*result)->AddRef();
@@ -161,13 +161,13 @@ STDMETHODIMP Xslt_stylesheet::Apply_xml( BSTR xml_or_file_bstr, BSTR* result )
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", __FUNCTION__ << "\n" );
+    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
 
     try
     {
         hr = String_to_bstr( apply( xml::Document_ptr( xml_or_file_bstr ) ).xml(), result );
     }
-    catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -184,7 +184,7 @@ STDMETHODIMP Xslt_stylesheet::Transform_xml_to_file( BSTR xml_or_file_bstr, BSTR
         load( string_from_bstr( xml_or_file ) );
         write_result_to_file( result_document, string_from_bstr( filename ) );
     }
-    catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    catch( exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
