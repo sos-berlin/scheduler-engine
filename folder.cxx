@@ -307,7 +307,7 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 bool Folder_subsystem::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
+    Z_LOGI2( "scheduler", "Prüfe Konfigurationsverzeichnis " << _directory << "\n" );
 
     _directory_event.reset();
 
@@ -318,13 +318,16 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 #   endif
 
     
-    _try_again_delay = INT_MAX;
+    double now = double_from_gmtime();
+    if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
 
-    bool something_changed = _root_folder->adjust_with_directory( double_from_gmtime() );
+    bool something_changed = _root_folder->adjust_with_directory( now );
 
     _directory_watch_interval = something_changed? directory_watch_interval_min
                                                  : min( directory_watch_interval_max, 2 * _directory_watch_interval );
-    set_async_delay( min( _directory_watch_interval, _try_again_delay ) );
+
+    if( _read_again_at )  set_async_next_gmtime( _read_again_at );
+                    else  set_async_delay( _directory_watch_interval );
 
     return true;
 }
@@ -728,7 +731,6 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
     Z_FOR_EACH_CONST( list<Base_file_info>, file_info_list, it )  ordered_file_infos.push_back( &*it );
     sort( ordered_file_infos.begin(), ordered_file_infos.end(), Base_file_info::less_dereferenced );
 
-    // Mögliche Verbesserung: Nicht jedesmal ordnen. Nicht nötig, wenn Typed_folder nicht verändert worden ist.
     ordered_file_baseds.reserve( _file_based_map.size() );
     Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
     sort( ordered_file_baseds.begin(), ordered_file_baseds.end(), File_based::less_dereferenced );
@@ -815,6 +817,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
             bool timestamp_changed = current_file_based  &&
                                      current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc;
 
+            if( current_file_based )
+            {
+                Z_LOG2( "scheduler", Time().set_utc(current_file_based->_base_file_info._info_timestamp+file_timestamp_delay ).as_string() << " " <<
+                                     Time().set_utc(now).as_string() << " " << file_path << "\n" );
+            }
+
             bool read_again = !timestamp_changed  &&  
                               current_file_based  &&
                               current_file_based->_read_again  &&
@@ -872,13 +880,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                                                                                   Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                   subsystem()->object_type_name() ) );
                         add_file_based( file_based );
-                    }
-
-
-                    if( file_based->_read_again )  
-                    {
-                        folder()->subsystem()->set_try_again_delay( file_timestamp_delay );  
-                        file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay ) );
                     }
 
 
@@ -973,8 +974,16 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
             scheduler_event.send_mail( mail_defaults );
         }
-
     }
+
+
+    if( file_based  &&  file_based->_read_again )  
+    {
+        double at = now + file_timestamp_delay;
+        folder()->subsystem()->set_read_again_at( at );  
+        file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay, Time().set_utc( at ).as_string() ) );
+    }
+
 
     return something_changed;
 }

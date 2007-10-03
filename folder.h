@@ -715,7 +715,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
     void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
 
-    void                        set_try_again_delay         ( int d )                               { _try_again_delay = d; }
+    void                        set_read_again_at           ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
 
   private:
     Fill_zero                  _zero_;
@@ -723,7 +723,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     ptr<Folder>                _root_folder;
     Event                      _directory_event;
     int                        _directory_watch_interval;
-    int                        _try_again_delay;
+    double                     _read_again_at;
 };
 
 
