@@ -2171,6 +2171,8 @@ bool Job::connect_job_node( Job_node* job_node )
 {
     bool result = false;
 
+    if( !is_order_controlled() )  z::throw_xc( "SCHEDULER-147", obj_name() );
+
     if( _state >= s_initialized )
     {
         _combined_job_nodes->connect_job_node( job_node );

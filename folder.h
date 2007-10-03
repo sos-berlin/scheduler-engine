@@ -164,7 +164,6 @@ struct File_based : Scheduler_object,
         s_initialized,
         s_loaded,
         s_active,
-      //s_error,
         s_closed
     };
 
@@ -237,7 +236,6 @@ struct File_based : Scheduler_object,
 
     void                        remove_now                  ();
     File_based*                 replace_now                 ();
-  //void                        set_file_based_incomplete   ( bool b )                              { _is_incomplete = true; }
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual bool                on_initialize               ()                                      = 0;
@@ -345,7 +343,6 @@ struct Typed_folder : Scheduler_object,
   private:
     Fill_zero                  _zero_;
     Folder*                    _folder;
-  //File_based_subsystem*      _file_based_subsystem;
     String_set                 _replace_or_remove_candidates_set;
 
   protected:
@@ -523,20 +520,6 @@ struct file_based_subsystem : File_based_subsystem
 
             it = next_it;
         }
-
-        //Z_FOR_EACH( File_based_map, _file_based_map, it )       // _file_based_map sollte leer sein
-        //{
-        //    File_based* file_based = it->second;
-
-        //    try
-        //    {
-        //        file_based->close();
-        //    }
-        //    catch( exception&  x ) { log()->error( message_string( "SCHEDULER-434", file_based->obj_name(), x ) ); }
-        //    catch( _com_error& x ) { log()->error( message_string( "SCHEDULER-434", file_based->obj_name(), x.Description() ) ); }
-        //}
-
-        //typed_folder<> verweist noch auf File_based*    _file_based_map.clear();
     }
     
 
@@ -685,7 +668,7 @@ struct file_based_subsystem : File_based_subsystem
     typedef stdext::hash_map< string, ptr< FILE_BASED > >  File_based_map;
     File_based_map             _file_based_map;
 
-  protected:
+  private:
     int                        _file_based_map_version;
 };
 

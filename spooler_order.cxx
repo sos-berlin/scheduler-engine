@@ -1131,11 +1131,11 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
 {
     xml::Element_ptr element = Base_class::dom_element( document, show_what );
 
-    {
-        Read_transaction ta ( spooler()->_db );
+    //{
+    //    Read_transaction ta ( spooler()->_db );
 
-        element.setAttribute( "orders", _order_queue->order_count( &ta ) );
-    }
+    //    element.setAttribute( "orders", _order_queue->order_count( &ta ) );
+    //}
 
     if( show_what.is_set( show_job_chain_orders ) )
     {
@@ -1198,14 +1198,14 @@ void Job_node::activate()
 
     if( Job* job = spooler()->job_subsystem()->job_or_null( _job_path ) )
     {
-        if( !job->is_order_controlled() )  
-        {
-            log()->warn( message_string( "SCHEDULER-147", job->obj_name() ) );
-        }
-        else
-        {
+        //if( !job->is_order_controlled() )  
+        //{
+        //    log()->warn( message_string( "SCHEDULER-147", job->obj_name() ) );    Ist schon geprüft
+        //}
+        //else
+        //{
             connect_job( job );
-        }
+        //}
     }
 }
 
