@@ -323,10 +323,10 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 
     bool something_changed = _root_folder->adjust_with_directory( now );
     
-    if( something_changed )  _last_changed_at = now;
+    if( something_changed )  _last_change_at = now;
 
-    _directory_watch_interval = now - _last_changed_at < directory_watch_interval_max? directory_watch_interval_min
-                                                                                     : directory_watch_interval_max;
+    _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
+                                                                                    : directory_watch_interval_max;
     //_directory_watch_interval = something_changed? directory_watch_interval_min
     //                                             : min( directory_watch_interval_max, ( _directory_watch_interval + 1 ) + ( _directory_watch_interval / 10 ) );
 
