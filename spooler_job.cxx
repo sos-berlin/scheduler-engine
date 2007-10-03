@@ -513,8 +513,8 @@ bool Job::on_initialize()
             add_dependant( spooler()->process_class_subsystem(), _module->_process_class_path );
 
             //_module->set_folder_path( folder_path() );
-            //if( _module->set() )  
-                _module->init();
+            _module->init();
+            if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
             if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
             _next_start_time = Time::never;
