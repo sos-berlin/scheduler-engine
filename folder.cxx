@@ -821,11 +821,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
             bool timestamp_changed = current_file_based  &&
                                      current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc;
 
-            if( current_file_based )
-            {
-                Z_LOG2( "scheduler", Time().set_utc(current_file_based->_base_file_info._info_timestamp+file_timestamp_delay ).as_string() << " " <<
-                                     Time().set_utc(now).as_string() << " " << file_path << "\n" );
-            }
+            //if( current_file_based )
+            //{
+            //    Z_LOG2( "scheduler", Time().set_utc(current_file_based->_base_file_info._info_timestamp+file_timestamp_delay ).as_string() << " " <<
+            //                         Time().set_utc(now).as_string() << " " << file_path << "\n" );
+            //}
 
             bool read_again = !timestamp_changed  &&  
                               current_file_based  &&
