@@ -399,9 +399,10 @@ void Log::start_new_file()
     string old_filename = _filename;
     info( message_string( "SCHEDULER-967" ) );   // "start_new_file(): Die Protokolldatei wird geschlossen"
 
+    string old_log_categories = current_log_categories();
     string old_log_filename = log_filename();
     log_stop();
-    log_start( old_log_filename );
+    log_start( S() << old_log_categories << " >" << old_log_filename );
 
     open_new();
 
