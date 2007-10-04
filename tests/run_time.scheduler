@@ -24,52 +24,100 @@ spooler_log.info( "hallo" );
                 ]]>
                 </script>
 
-                <run_time begin="07:00">
-                    <period begin="02:00" end="02:01"/>
-                    <period begin="02:02" end="02:03"/>
-                    <weekdays>
-                        <day day="monday"/>
-                        <day day="tuesday"/>
-                        <day day="wednesday"/>
-                        <day day="thursday"/>
-                        <day day="friday"/>
-                        <day day="saturday"/>
-                        <day day="sunday"/>
-                        <day day="mon"/>
-                        <day day="tue"/>
-                        <day day="wed"/>
-                        <day day="thu"/>
-                        <day day="fri"/>
-                        <day day="sat"/>
-                        <day day="sun"/>
-                        <day day="mo"/>
-                        <day day="di"/>
-                        <day day="mi"/>
-                        <day day="do"/>
-                        <day day="fr"/>
-                        <day day="sa"/>
-                        <day day="so"/>
-                        <day day="montag"/>
-                        <day day="dienstag"/>
-                        <day day="mittwoch"/>
-                        <day day="donnerstag"/>
-                        <day day="freitag"/>
-                        <day day="samstag"/>
-                        <day day="sonntag"/>
-                    </weekdays>
-                    <monthdays>
-                        <day day="7">
-                            <period single_start="12:00"/>
-                        </day>
-                    </monthdays>
-                    <ultimos>
-                        <day day="0">
-                            <period single_start="00:00"/>
-                        </day>
-                        <day day="3">
-                            <period begin="01:11" end="02:22" repeat="00:00:33"/>
-                        </day>
-                    </ultimos>
+                <run_time begin="07:00" repeat="60">
+                    <month month="november">
+                        <period begin="02:00" end="02:01" absolute_repeat="60"/>
+                        <period begin="02:02" end="02:03" absolute_repeat="60"/>
+                        <weekdays>
+                            <day day="tuesday friday"/>
+                        </weekdays>
+                        <monthdays>
+                            <day day="12">
+                                <period single_start="12:00"/>
+                            </day>
+                        </monthdays>
+                        <ultimos>
+                            <day day="0">
+                                <period single_start="23:59"/>
+                            </day>
+                            <day day="3">
+                                <period begin="01:11" end="02:22" repeat="00:00:33"/>
+                            </day>
+                        </ultimos>
+                    </month>
+
+                    <month month="december">
+                        <ultimos>
+                            <day day="0">
+                                <period single_start="12:00"/>
+                            </day>
+                        </ultimos>
+                    </month>
+
+                    <month month="january">
+                        <monthdays>
+                            <day day="1">
+                                <period single_start="01:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="february">
+                        <weekdays>
+                            <day day="monday">
+                                <period single_start="02:00"/>
+                            </day>
+                        </weekdays>
+                    </month>
+
+                    <month month="march may">
+                        <ultimos>
+                            <day day="0 2 4">
+                                <period single_start="03:00"/>
+                            </day>
+                        </ultimos>
+                    </month>
+
+                    <month month="april">
+                        <monthdays>
+                            <day day="4">
+                                <period single_start="04:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="june">
+                        <monthdays>
+                            <day day="6">
+                                <period single_start="06:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="july">
+                        <monthdays>
+                            <day day="7 17">
+                                <period single_start="07:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="august">
+                        <monthdays>
+                            <day day="8">
+                                <period single_start="08:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="september">
+                        <monthdays>
+                            <day day="9">
+                                <period single_start="09:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
                 </run_time>
             </job>
 
@@ -134,5 +182,9 @@ function spooler_process()
             </job>
             
         </jobs>
+
+        <commands>
+            <show_calendar before="2008-10-06T00:00:00" limit="1000"/>
+        </commands>
     </config>
 </spooler>

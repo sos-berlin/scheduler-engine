@@ -152,6 +152,7 @@
             <xsd:element ref="modify_spooler"/>
             <xsd:element ref="job_chain.modify"/>
             <xsd:element ref="job_chain_node.modify"/>
+            <xsd:element name="order"                       type="order"/>                  <!-- Nicht für den Scheduler, sondern für Mürüvet Öksüzs Konfigurations-Editor. 2007-10-04 -->
             <xsd:element name="process_class"               type="process_class"/>
             <xsd:element name="process_class.remove"        type="process_class.remove"/>
             <xsd:element ref="register_remote_scheduler"/>
@@ -772,6 +773,7 @@
             <xsd:attribute name="end"           type="Time_of_day"/>
             <xsd:attribute name="let_run"       type="Yes_no"/>
             <xsd:attribute name="repeat"        type="Duration"/>
+            <xsd:attribute name="absolute_repeat" type="Duration"/>
             <xsd:attribute name="start_once"    type="Yes_no" default="no">
                 <xsd:annotation>
                     <xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>
@@ -852,110 +854,45 @@
                         <xsd:attribute name="date" type="String" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
-                
-                <xsd:element name="weekdays" minOccurs="0">
-                    <xsd:complexType>
-                        <xsd:sequence>
-                            <xsd:element name="day" maxOccurs="unbounded">
-                                <xsd:complexType>
-                                    <xsd:sequence>
-                                        <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-                                    </xsd:sequence>
-                                    <xsd:attribute name="day" use="required" type="Weekday"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                        </xsd:sequence>
-                    </xsd:complexType>
 
+                <xsd:element name="weekdays" type="weekdays" minOccurs="0">
                     <!--libxslt xsd:key name="weekdays">
                         <xsd:selector xpath="day"/>
                         <xsd:field xpath="@day"/>
                     </xsd:key-->
                 </xsd:element>
                 
-                <xsd:element name="monthdays" minOccurs="0">
-                    <xsd:complexType>
-                        <xsd:sequence maxOccurs="unbounded">
-                            <xsd:choice>
-                                <xsd:element name="day" maxOccurs="unbounded">
-                                    <xsd:complexType>
-                                        <xsd:sequence>
-                                            <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-                                        </xsd:sequence>
-
-                                        <xsd:attribute name="day" use="required">
-                                            <xsd:simpleType>
-                                                <xsd:restriction base="xsd:positiveInteger">
-                                                    <xsd:maxInclusive value="31"/>
-                                                </xsd:restriction>
-                                            </xsd:simpleType>
-                                        </xsd:attribute>
-                                    </xsd:complexType>
-                                </xsd:element>
-
-                                <xsd:element name="weekday" maxOccurs="unbounded">
-                                    <xsd:complexType>
-                                        <xsd:sequence>
-                                            <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-                                        </xsd:sequence>
-
-                                        <xsd:attribute name="day" use="required" type="Weekday"/>
-
-                                        <xsd:attribute name="which" use="required">
-                                            <xsd:simpleType>
-                                                <xsd:union>
-                                                    <xsd:simpleType>
-                                                        <xsd:restriction base="xsd:positiveInteger">
-                                                            <xsd:maxInclusive value="4"/>
-                                                        </xsd:restriction>
-                                                    </xsd:simpleType>
-                                                    <xsd:simpleType>
-                                                        <xsd:restriction base="xsd:negativeInteger">
-                                                            <xsd:minInclusive value="-4"/>
-                                                        </xsd:restriction>
-                                                    </xsd:simpleType>
-                                                </xsd:union>
-                                            </xsd:simpleType>
-                                        </xsd:attribute>
-                                    </xsd:complexType>
-                                </xsd:element>
-                            </xsd:choice>
-                        </xsd:sequence>
-                    </xsd:complexType>
-
+                <xsd:element name="monthdays" type="monthdays" minOccurs="0">
                     <!--libxslt xsd:key name="monthdays">
                         <xsd:selector xpath="day"/>
                         <xsd:field xpath="@day"/>
                     </xsd:key-->
                 </xsd:element>
                 
-                <xsd:element name="ultimos" minOccurs="0">
-                    <xsd:complexType>
-                        <xsd:sequence>
-                            <xsd:element name="day" maxOccurs="unbounded">
-                                <xsd:complexType>
-                                    <xsd:sequence>
-                                        <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
-                                    </xsd:sequence>
-
-                                    <xsd:attribute name="day" use="required">
-                                        <xsd:simpleType>
-                                            <xsd:restriction base="xsd:nonNegativeInteger">
-                                                <xsd:maxInclusive value="30"/>
-                                            </xsd:restriction>
-                                        </xsd:simpleType>
-                                    </xsd:attribute>
-                                </xsd:complexType>
-                            </xsd:element>
-                        </xsd:sequence>
-                    </xsd:complexType>
-
+                <xsd:element name="ultimos" type="ultimos" minOccurs="0">
                     <!--libxslt xsd:key name="ultimos">
                         <xsd:selector xpath="day"/>
                         <xsd:field xpath="@day"/>
                     </xsd:key-->
                 </xsd:element>
-                
+
+                <xsd:element name="month" minOccurs="0" maxOccurs="12">
+                    <xsd:complexType>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                            <xsd:element name="weekdays"  type="weekdays"/>
+                            <xsd:element name="monthdays" type="monthdays"/>
+                            <xsd:element name="ultimos"   type="ultimos"/>
+                        </xsd:choice>
+                        
+                        <xsd:attribute name="month">
+                            <xsd:simpleType>
+                                <xsd:list itemType="Month_name"/>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
+
                 <xsd:choice>
                     <xsd:element ref="holidays"/>
                     <xsd:element ref="holiday" minOccurs="0" maxOccurs="unbounded"/>
@@ -982,7 +919,7 @@
         </xsd:key-->
     </xsd:element>
 
-    
+
     <xsd:element name="s" type="Show_state"/>
 
     
@@ -1279,50 +1216,6 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
-    <xsd:complexType name="http_directory">
-        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
-        
-        <xsd:attribute name="path" use="required">
-            <xsd:simpleType>
-                <xsd:restriction base="String">
-                    <xsd:pattern value=".+"/>
-                </xsd:restriction>
-            </xsd:simpleType>
-        </xsd:attribute>
-    </xsd:complexType>
-
-
-
-    <xsd:complexType name="lock">
-        <xsd:attribute name="name"                      type="Name"/>
-        <xsd:attribute name="max_non_exclusive"         type="xsd:nonNegativeInteger"/>
-    </xsd:complexType>
-
-
-    
-    <xsd:complexType name="lock.remove">
-        <xsd:attribute name="lock"                      type="Path"                     use="required"/>
-    </xsd:complexType>
-
-    
-    
-    <xsd:complexType name="process_class">
-        <xsd:attribute name="name"                      type="Name"/>
-        <xsd:attribute name="max_processes"             type="xsd:nonNegativeInteger"/>
-        <xsd:attribute name="remote_scheduler"          type="String"/>
-
-        <xsd:attribute name="spooler_id"                type="Name"/>
-        <xsd:attribute name="replace"                   type="Yes_no"/>
-    </xsd:complexType>
-
-
-
-    <xsd:complexType name="process_class.remove">
-        <xsd:attribute name="process_class"             type="Path"/>
-    </xsd:complexType>
-
-
-
     <xsd:complexType name="http.authentication">
         <xsd:sequence>
             <xsd:element name="http.users">
@@ -1348,6 +1241,135 @@
         </xsd:attribute>
     </xsd:complexType>
 
+
+
+    <xsd:complexType name="http_directory">
+        <xsd:attribute name="url_path"                  type="Url_path"         use="required"/>
+        
+        <xsd:attribute name="path" use="required">
+            <xsd:simpleType>
+                <xsd:restriction base="String">
+                    <xsd:pattern value=".+"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="lock">
+        <xsd:attribute name="name"                      type="Name"/>
+        <xsd:attribute name="max_non_exclusive"         type="xsd:nonNegativeInteger"/>
+    </xsd:complexType>
+
+
+    
+    <xsd:complexType name="lock.remove">
+        <xsd:attribute name="lock"                      type="Path"                     use="required"/>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="monthdays">
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element name="day" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                        </xsd:sequence>
+
+                        <xsd:attribute name="day" use="required">
+                            <xsd:simpleType>
+                                <xsd:list>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:positiveInteger">
+                                            <xsd:maxInclusive value="31"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                </xsd:list>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
+
+                <xsd:element name="weekday" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                        </xsd:sequence>
+
+                        <xsd:attribute name="day" use="required">
+                            <xsd:simpleType>
+                                <xsd:list itemType="Weekday"/>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+
+                        <xsd:attribute name="which" use="required">
+                            <xsd:simpleType>
+                                <xsd:union>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:positiveInteger">
+                                            <xsd:maxInclusive value="4"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:negativeInteger">
+                                            <xsd:minInclusive value="-4"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                </xsd:union>
+                            </xsd:simpleType>
+                        </xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    
+    
+    <xsd:complexType name="process_class">
+        <xsd:attribute name="name"                      type="Name"/>
+        <xsd:attribute name="max_processes"             type="xsd:nonNegativeInteger"/>
+        <xsd:attribute name="remote_scheduler"          type="String"/>
+
+        <xsd:attribute name="spooler_id"                type="Name"/>
+        <xsd:attribute name="replace"                   type="Yes_no"/>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="process_class.remove">
+        <xsd:attribute name="process_class"             type="Path"/>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType  name="ultimos">
+        <xsd:sequence>
+            <xsd:element name="day" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+
+                    <xsd:attribute name="day" use="required">
+                        <xsd:simpleType>
+                            <xsd:list>
+                                <xsd:simpleType>
+                                    <xsd:restriction base="xsd:nonNegativeInteger">
+                                        <xsd:maxInclusive value="30"/>
+                                    </xsd:restriction>
+                                </xsd:simpleType>
+                            </xsd:list>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
     
     
     <xsd:complexType name="web_service">
@@ -1369,13 +1391,33 @@
     </xsd:complexType>
 
 
+
+    <xsd:complexType name="weekdays">
+        <xsd:sequence>
+            <xsd:element name="day" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element ref="period" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+
+                    <xsd:attribute name="day" use="required">
+                        <xsd:simpleType>
+                            <xsd:list itemType="Weekday"/>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType >
+
+    
     
     <xsd:complexType name="Xml_payload">
         <xsd:sequence minOccurs="0">
             <xsd:any processContents="skip"/>
         </xsd:sequence>
     </xsd:complexType>
-
+   
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
 
     <xsd:simpleType name="Job_chain_node.Action">
@@ -1557,6 +1599,36 @@
                 </xsd:restriction>
             </xsd:simpleType>
         </xsd:union>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Month_name">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="january"/>
+            <xsd:enumeration value="february"/>
+            <xsd:enumeration value="march"/>
+            <xsd:enumeration value="april"/>
+            <xsd:enumeration value="may"/>
+            <xsd:enumeration value="june"/>
+            <xsd:enumeration value="july"/>
+            <xsd:enumeration value="august"/>
+            <xsd:enumeration value="september"/>
+            <xsd:enumeration value="october"/>
+            <xsd:enumeration value="november"/>
+            <xsd:enumeration value="december"/>
+            <xsd:enumeration value="1"/>
+            <xsd:enumeration value="2"/>
+            <xsd:enumeration value="3"/>
+            <xsd:enumeration value="4"/>
+            <xsd:enumeration value="5"/>
+            <xsd:enumeration value="6"/>
+            <xsd:enumeration value="7"/>
+            <xsd:enumeration value="8"/>
+            <xsd:enumeration value="9"/>
+            <xsd:enumeration value="10"/>
+            <xsd:enumeration value="11"/>
+            <xsd:enumeration value="12"/>
+        </xsd:restriction>
     </xsd:simpleType>
 
     

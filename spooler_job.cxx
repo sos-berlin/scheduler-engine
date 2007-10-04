@@ -1903,8 +1903,7 @@ void Job::select_period( const Time& now )
 
         if( _period.begin() != Time::never )
         {
-            string rep; if( _period.has_repeat_or_once() )  rep = _period._repeat.as_string();
-            _log->debug( message_string( "SCHEDULER-921", _period.begin(), _period.end(), rep ) );
+            _log->debug( message_string( "SCHEDULER-921", _period.to_xml() ) );
         }
         else 
             _log->debug( message_string( "SCHEDULER-922" ) );
@@ -1968,16 +1967,19 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     _repeat = 0;
                 }
                 else
-                if( now >= _period.begin()  &&  _period.repeat() < Time::never )
+                if( now >= _period.begin()  &&  ( !_period.repeat().is_never() || !_period.absolute_repeat().is_never() ) )
                 {
-                    next_start_time = now + _period.repeat();
+                    next_start_time = _period.next_repeated( now );
 
-                    if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period._repeat, next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+                    if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
 
                     if( next_start_time >= _period.end() )
                     {
                         Period next_period = _run_time->next_period( _period.end() );
-                        if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
+
+                        if( _period.end()             == next_period.begin()  &&  
+                            _period.repeat()          == next_period.repeat()  &&
+                            _period.absolute_repeat() == next_period.absolute_repeat() )
                         {
                             if( _spooler->_debug )  msg += " (in the following period)";
                         }
@@ -3084,7 +3086,7 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
         {
             if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
             {
-                e.setAttribute( "job", path().without_slash() );
+                e.setAttribute( "job", path() );
             }
         }
 

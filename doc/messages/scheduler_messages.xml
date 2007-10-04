@@ -2625,7 +2625,7 @@
 
         <message code="SCHEDULER-428">
             <text xml:lang="en">
-                <title>Error when loading base file '<p1>path</p1>' (<p2>timestamp</p2>):<br/><p3>error</p3></title>
+                <title>Error when reading base file '<p1>path</p1>' (<p2>timestamp</p2>):<br/><p3>error</p3></title>
             </text>
         </message>
 
@@ -2701,11 +2701,41 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-441">
+        <message code="SCHEDULER-441">
             <text xml:lang="en">
-                <title>replace="no" inhibits replacing of existent <p1>object</p1></title>
+                <title>Invalid value in &lt;<p1>element</p1> <p2>attribute</p2>="<p3/>"></title>
             </text>
-        </message-->
+        </message>
+        
+        <message code="SCHEDULER-442">
+            <text xml:lang="en">
+                <title>Attribute <p1>attribute</p1> cannot be combined with <p2>attribute</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-443">
+            <text xml:lang="en">
+                <title>&lt;month month="<p1/>"> has been defined already</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-444">
+            <text xml:lang="en">
+                <title>&lt;day day="<p1/>"> has been defined already</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-445">
+            <text xml:lang="en">
+                <title>Invalid weekday '<p1/>'</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-446">
+            <text xml:lang="en">
+                <title>&lt;weekday day="<p1/>" which="<p2/>" has been defined already</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -2857,11 +2887,8 @@
         </message>
 
         <message code="SCHEDULER-921">
-            <text xml:lang="de">
-                <title>Nächste Periode ist &lt;period begin="<p1/>" end="<p2/>" repeat="<p3/>"></title>
-            </text>
             <text xml:lang="en">
-                <title>Next period is &lt;period begin="<p1/>" end="<p2/>" repeat="<p3/>"></title>
+                <title>Next period is <p1/></title>
             </text>
         </message>
 

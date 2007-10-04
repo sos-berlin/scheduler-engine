@@ -1287,8 +1287,6 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "job_chain"        ) )  result = execute_job_chain( element );
     else
-    //if( element.nodeName_is( "signal_object"    ) )  result = execute_signal_object( element );
-    //else
     if( element.nodeName_is( "config"           ) )  result = execute_config( element );
     else
     if( element.nodeName_is( "show_job_chains"  ) )  result = execute_show_job_chains( element, show );

@@ -121,17 +121,18 @@ struct Time
     Time                        time_of_day                 () const                        { return as_double() - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(as_double()) / (24*60*60); }
+    int                         month_nr                    () const;
     time_t                      as_time_t                   () const                        { return (time_t)( as_double    () + 0.0001 ); }
     time_t                      as_utc_time_t               () const                        { return (time_t)( as_utc_double() + 0.0001 ); }
     DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( as_double() ) ); }
-    int64                       int64_filetime              () const;
+  //int64                       int64_filetime              () const;
     double                      cut_fraction                ( string* datetime_string );
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
     string                      jdbc_value                  () const;
     string                      xml_value                   ( With_ms = with_ms ) const;                        
-    void                        print                       ( ostream& s ) const            { s << as_string(); }
-    friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
+  //void                        print                       ( ostream& s ) const            { s << as_string(); }
+  //friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
 
     static Time                 now                         ();
 
@@ -171,7 +172,7 @@ struct Period
                                 Period                      ()                                      : _zero_(this+1) { init(); }
     explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, without_date, deflt ); }
     
-    void                        init                        ()                                      { _begin = _end = _repeat = Time::never; }
+    void                        init                        ()                                      { _begin = _end = _repeat = _absolute_repeat = Time::never; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
 
@@ -195,13 +196,16 @@ struct Period
     Time                        begin                       () const                                { return _begin; }
     Time                        end                         () const                                { return _end; }
     Time                        repeat                      () const                                { return _repeat; }
+    Time                        absolute_repeat             () const                                { return _absolute_repeat; }
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
-    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
+    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _absolute_repeat < Time::never || _start_once; }
+    Time                        next_repeated               ( const Time& ) const;
 
   //void                        set_next_start_time         ( const Time& );
 
     void                        check                       ( With_or_without_date ) const;
+    string                      to_xml                      () const;
     void                        print                       ( ostream& ) const;
     string                      obj_name                    () const;
     friend ostream&             operator <<                 ( ostream& s, const Period& o )         { o.print(s); return s; }
@@ -212,6 +216,7 @@ struct Period
     Time                       _begin;                      // Sekunden seit Mitternacht, manchmal auch mit Datum
     Time                       _end;                        // Sekunden seit Mitternacht, manchmal auch mit Datum
     Time                       _repeat;
+    Time                       _absolute_repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
     bool                       _start_once;                 // Für Joacim Zschimmer
@@ -223,7 +228,7 @@ typedef set<Period>             Period_set;
 
 //----------------------------------------------------------------------------------------------Day
 
-struct Day
+struct Day : Object
 {
                                 Day                         ()                                      {}
                                 Day                         ( const Period_set& t )                 { _period_set = t; }
@@ -251,15 +256,16 @@ struct Day
 
 struct Day_set
 {
-                                Day_set                     ( int minimum, int maximum )                             : _zero_(this+1), _minimum(minimum), _maximum(maximum) {} 
-    explicit                    Day_set                     ( int minimum, int maximum, const xml::Element_ptr& e )  : _zero_(this+1), _minimum(minimum), _maximum(maximum) { set_dom(e); }
+                                Day_set                     ( int minimum, int maximum );
+    explicit                    Day_set                     ( int minimum, int maximum, const xml::Element_ptr& );
 
     void                        set_dom                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
-    int                         get_day_number              ( const xml::Element_ptr& );
-    int                         get_weekday_number          ( const xml::Element_ptr& );
+    int                         get_day_number              ( const string& );
+    list<int>                   get_day_numbers             ( const string& );
+    int                         get_weekday_number          ( const string& );
+    list<int>                   get_weekday_numbers         ( const string& );
 
     bool                        is_filled                   () const                                { return _is_day_set_filled; }
-    char                        operator []                 ( int i )                               { return _days[i]; }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Day_set& o )        { o.print(s); return s; }
@@ -269,7 +275,7 @@ struct Day_set
     Fill_zero                  _zero_;
     int                        _minimum;
     int                        _maximum;
-    Day                        _days                        [1+31];
+    vector< ptr<Day> >         _days;
     bool                       _is_day_set_filled;
 };
 
@@ -318,9 +324,10 @@ struct Monthday_set : Day_set
 
     struct Month_weekdays
     {
-        Day*                    day                         ( int which, int weekday_number );
+                                Month_weekdays              ()                                      : _days( 7 * max_weekdays_per_month ), _is_filled(false) {}
+        ptr<Day>&               day                         ( int which, int weekday_number );
 
-        Day                    _days                        [ 7 * max_weekdays_per_month ];
+        vector< ptr<Day> >     _days;
         bool                   _is_filled;
     };
 
@@ -339,6 +346,26 @@ struct Ultimo_set : Day_set
 
     void                        print                       ( ostream& s ) const                    { s << "Ultimo_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Ultimo_set& o )     { o.print(s); return s; }
+};
+
+//--------------------------------------------------------------------------------------------Month
+
+struct Month : Object
+{
+                                Month                       ()                                      : _zero_(this+1) {}
+
+    void                        set_dom                     ( const xml::Element_ptr& );
+    void                        set_default                 ();
+    bool                        is_filled                   () const                                { return _weekday_set .is_filled() ||
+                                                                                                             _monthday_set.is_filled() ||
+                                                                                                             _ultimo_set  .is_filled();   }
+    Period                      next_period                 ( const Time&, With_single_start );
+
+    Fill_zero                  _zero_;
+  //int                        _month_index;
+    Weekday_set                _weekday_set;
+    Monthday_set               _monthday_set;
+    Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
 };
 
 //-----------------------------------------------------------------------------------------Holidays
@@ -444,13 +471,14 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
 
+    int                         month_index_by_name         ( const string& );
+    list<int>                   month_indices_by_names      ( const string& );
     void                        check                       ();                              
 
     bool                        set                         () const                                { return _set; }
 
     void                        set_holidays                ( const Holidays& h )                   { _holidays = h; }
     void                        set_default                 ();
-    void                        set_default_days            ();
 
     bool                        once                        ()                                      { return _once; }
     void                    set_once                        ( bool b = true )                       { _once = b; }
@@ -488,6 +516,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
+    vector< ptr<Month> >       _months;
     Holidays                   _holidays;
   //string                     _xml;
     xml::Document_ptr          _dom;

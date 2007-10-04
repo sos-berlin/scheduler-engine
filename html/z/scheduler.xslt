@@ -2575,12 +2575,13 @@
 
             <tbody>
             
-                <xsl:for-each select="at">
-                    <xsl:sort select="@at"/>
+                <xsl:for-each select="at | period">
+                    <xsl:sort select="concat( self::at/@at, self::period/@begin )"/>
 
                     <tr>
                         <td style="padding-right: 2ex">
                             <xsl:value-of select="@at__xslt_datetime_with_diff_plus"/>
+                            <xsl:value-of select="@begin__xslt_datetime_with_diff_plus"/>
                         </td>
                         <xsl:choose>
                             <xsl:when test="@job_chain">

@@ -4937,7 +4937,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
     if( show_what.is_set( show_for_database_only ) )
     {
         // Nach <run_time> setzen!
-        if( _period.repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <run_time>
+        if( _period.repeat() < Time::never ||
+            _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <run_time>
     }
 
     if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
@@ -6219,16 +6220,16 @@ Time Order::next_start_time( bool first_call )
         }
         else
         {
-            result = now + _period.repeat();
+            result = _period.next_repeated( now );
 
             if( result >= _period.end() )       // Periode abgelaufen?
             {
                 Period next_period = _run_time->next_period( _period.end(), time::wss_next_begin );
                 //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
-                if( _period.repeat() == Time::never
+                if( _period.repeat().is_never()  &&  _period.absolute_repeat().is_never() 
                  || _period.end()    != next_period.begin()
-                 || _period.repeat() != next_period.repeat() )
+                 || _period.repeat() != next_period.repeat()  &&  _period.absolute_repeat() != next_period.absolute_repeat() )
                 {
                     result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
                 }

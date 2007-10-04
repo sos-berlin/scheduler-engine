@@ -269,6 +269,7 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     if( datetime )  now = date_from_datetime( datetime.nodeValue );
 
     this.add_datetime_attributes_for_xslt( response, now, "at"                    );
+    this.add_datetime_attributes_for_xslt( response, now, "begin"                 );
     this.add_datetime_attributes_for_xslt( response, now, "time"                  );
     this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
     this.add_datetime_attributes_for_xslt( response, now, "running_since"         );

@@ -8,6 +8,7 @@
     Monthday_set
     Ultimo_set
     Date_set
+    Month
     Run_time
 
     XML-Methoden sind in spooler_config.cxx
@@ -53,6 +54,7 @@ const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "d
                                 "sunday" , "monday", "tuesday" , "wednesday", "thursday"  , "friday" , "saturday",
                                 NULL };
 
+const char* month_names[] = { "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december" };
 
 //-------------------------------------------------------------------------------------------------
 
@@ -326,6 +328,13 @@ void Time::set( double t )
 //}
 
 #endif
+
+//-----------------------------------------------------------------------------------Time::month_nr
+
+int Time::month_nr() const
+{
+    return Sos_optional_date_time( as_time_t() ).month();
+}
 
 //----------------------------------------------------------------------------------Time::as_double
 
@@ -724,20 +733,22 @@ string Daylight_saving_time_transition_detector::async_state_text_() const
 
 void Period::set_default()
 {
-    _begin  = 0;             // = "00:00:00";
-    _end    = 24*60*60;      // = "24:00:00";
-    _repeat = Time::never;
+    _begin           = 0;             // = "00:00:00";
+    _end             = 24*60*60;      // = "24:00:00";
+    _repeat          = Time::never;
+    _absolute_repeat = Time::never;
 }
 
 //-------------------------------------------------------------------------Period::set_single_start
 
 void Period::set_single_start( const Time& t )
 {
-    _begin        = t;
-    _end          = t;
-    _repeat       = Time::never;
-    _single_start = true;
-    _let_run      = true;
+    _begin           = t;
+    _end             = t;
+    _repeat          = Time::never;
+    _absolute_repeat = Time::never;
+    _single_start    = true;
+    _let_run         = true;
 }
 
 //----------------------------------------------------------------------------------Period::set_dom
@@ -783,6 +794,24 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
         }
 
         if( _repeat == 0 )  _repeat = Time::never;
+
+
+        string absolute_repeat = element.getAttribute( "absolute_repeat" );
+        if( !absolute_repeat.empty() )
+        {
+            if( absolute_repeat.find( ':' ) != string::npos )
+            {
+                Sos_optional_date_time dt;
+                dt.set_time( absolute_repeat );
+                _absolute_repeat = dt.time_as_double();
+            }
+            else
+                _absolute_repeat = as_double( absolute_repeat );
+
+            if( _absolute_repeat == 0 )  z::throw_xc( "SCHEDULER-441", element.nodeName(), "absolute_repeat", "0" );
+            if( !_absolute_repeat.is_never() )  _repeat = Time::never;
+          //if( !_repeat.is_never()   )  z::throw_xc( "SCHEDULER-442", "absolute_repeat", "repeat" );
+        }
     }
 
     string end = element.getAttribute( "end" , "24:00:00" );
@@ -827,8 +856,8 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     if( single_start & wss_next_single_start  &&  _single_start  &&  time_of_day <= _begin )  result = true;
                                                                               // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
-    if( single_start & wss_next_any_start  &&  ( ( _single_start || _start_once || _repeat < Time::never ) && time_of_day <= _begin ) )  result = true;
-                                                                                                                       // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
+                                                                                                       // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
         result = false;
 
@@ -841,20 +870,31 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
 
 Time Period::next_try( const Time& t )
 {
-/* 30.5.03
-    Time result = Time::never;
-
-    if( _repeat )
-    {
-        result = min( Time( t + _repeat ), Time::never );
-        if( result >= end() )  result = Time::never;
-    }
-*/
     Time result = t;
 
     if( result >= end() )  result = Time::never;
 
     return result;
+}
+
+//----------------------------------------------------------------------------Period::next_repeated
+
+Time Period::next_repeated( const Time& t ) const
+{
+    Time result = Time::never;
+    
+    if( !_repeat.is_never() )
+    {
+        result = t + _repeat;
+    }
+    else
+    if( !_absolute_repeat.is_never() )
+    {
+        int n = (int)( ( t - _begin ) / _absolute_repeat );
+        result = t + ( n + 1 ) * _absolute_repeat;
+    }
+
+    return result;  // result >= _period._end ist möglich.
 }
 
 //------------------------------------------------------------------------------------Period::print
@@ -863,7 +903,8 @@ void Period::print( ostream& s ) const
 {
     s << "Period(" << _begin << ".." << _end;
     if( _single_start )  s << " single_start";
-                   else  s << " repeat=" << _repeat;
+    if( !_repeat.is_never() )  s << " repeat=" << _repeat;
+    if( !_absolute_repeat.is_never() )  s << " absolute_repeat=" << _absolute_repeat;
     if( _let_run )  s << " let_run";
     s << ")";
 }
@@ -886,8 +927,25 @@ xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) co
         result.setAttribute( "end"  , _end  .xml_value( Time::without_ms ) );
         if( _let_run )  result.setAttribute( "let_run", "yes" );
 
-        if( _repeat != Time::never )  result.setAttribute( "repeat", _repeat.as_time_t() );
+        if( _repeat          != Time::never )  result.setAttribute( "repeat"         , _repeat.as_time_t() );
+        if( _absolute_repeat != Time::never )  result.setAttribute( "absolute_repeat", _absolute_repeat.as_time_t() );
     }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------------Period::to_xml
+
+string Period::to_xml() const
+{
+    S result;
+
+    result << "<period ";
+    result << " begin=" << _begin.as_string();
+    result << " end=" << _begin.as_string();
+    if( !_repeat.is_never() )  result << " repeat=" << _repeat.as_string();
+    if( !_absolute_repeat.is_never() )  result << " absolute_repeat=" << _absolute_repeat.as_string();
+    result << "/>";
 
     return result;
 }
@@ -968,13 +1026,36 @@ void Day::print( ostream& s ) const
     s << ")";
 }
 
+//---------------------------------------------------------------------------------Day_set::Day_set
+
+Day_set::Day_set( int minimum, int maximum )
+: 
+    _zero_(this+1), 
+    _minimum(minimum), 
+    _maximum(maximum),
+    _days(1+maximum)
+{
+} 
+
+//---------------------------------------------------------------------------------Day_set::Day_set
+    
+Day_set::Day_set( int minimum, int maximum, const xml::Element_ptr& e )  
+: 
+    _zero_(this+1), 
+    _minimum(minimum), 
+    _maximum(maximum),
+    _days(1+maximum)
+{ 
+    set_dom(e); 
+}
+
 //-----------------------------------------------------------------------------------Day_set::print
 
 void Day_set::print( ostream& s ) const
 {
-    for( int i = 0; i < NO_OF(_days); i++ )
+    for( int i = 0; i < _days.size(); i++ )
     {
-        if( _days[i] )  s << ' ' << i << "=" << _days[i];
+        if( _days[i] )  s << ' ' << i << "=" << *_days[i];
     }
 }
 
@@ -982,8 +1063,11 @@ void Day_set::print( ostream& s ) const
 
 void Weekday_set::fill_with_default( const Day& default_day )
 { 
+    ptr<Day> day = Z_NEW( Day( default_day ) );
+
+    for( int i = 0; i < 7; i++ )  _days[i] = day;
+
     _is_day_set_filled = true;
-    for( int i = 0; i < 7; i++ )  _days[i] = default_day;
 }
 
 //--------------------------------------------------------------------------------Weekday_set::next
@@ -998,8 +1082,12 @@ Period Weekday_set::next_period( const Time& tim, With_single_start single_start
 
         for( int i = weekday; i <= weekday+7; i++ )
         {
-            Period period = _days[ i % 7 ].next_period( time_of_day, single_start );
-            if( !period.empty() )  return day_nr*(24*60*60) + period;
+            if( const Day* day = _days[ i % 7 ] )
+            {
+                Period period = day->next_period( time_of_day, single_start );
+                if( !period.empty() )  return day_nr*(24*60*60) + period;
+            }
+
             day_nr++;
             time_of_day = 0;
         }
@@ -1018,23 +1106,36 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
         {
             if( element.nodeName_is( "day" ) )
             {
-                Day my_default_day ( element, default_day, default_period );
-                int day_number     = get_day_number( element );
+                Day       my_default_day ( element, default_day, default_period );
+                list<int> day_numbers    = get_day_numbers( element.getAttribute( "day" ) );
+                ptr<Day>  day            = Z_NEW( Day( element, &my_default_day, default_period ) );
+                
+                Z_FOR_EACH( list<int>, day_numbers, d )
+                {
+                    if( _days[ *d ] )  z::throw_xc( "SCHEDULER-444", *d );
+                    _days[ *d ] = day;
+                }
 
-                _days[ day_number ].set_dom_periods( element, &my_default_day, default_period );
                 _is_day_set_filled = true;
             }
             else
             if( element.nodeName_is( "weekday" ) )
             {
-                Day my_default_day ( element, default_day, default_period );
-                int weekday = get_weekday_number( element );
-                int which   = element.int_getAttribute( "which" );
+                Day       my_default_day ( element, default_day, default_period );
+                list<int> weekdays       = get_weekday_numbers( element.getAttribute( "day" ) );
+                int       which          = element.int_getAttribute( "which" );
 
                 if( which == 0  ||  abs( which ) > max_weekdays_per_month )  z::throw_xc( Z_FUNCTION, S() << "Invalid value for which=" << which );    // XML-Schema hat schon geprüft
 
-                Month_weekdays* m = which > 0? &_month_weekdays : &_reverse_month_weekdays;
-                m->day( abs(which), weekday ) -> set_dom_periods( element, &my_default_day, default_period );
+                Month_weekdays* m   = which > 0? &_month_weekdays : &_reverse_month_weekdays;
+                ptr<Day>        day = Z_NEW( Day( element, &my_default_day, default_period ) );
+                
+                Z_FOR_EACH( list<int>, weekdays, w )
+                {
+                    if( m->day( abs(which), *w ) )  z::throw_xc( "SCHEDULER-446", *w, which );
+                    m->day( abs(which), *w ) = day;
+                }
+
                 m->_is_filled = true;
             }
         }
@@ -1060,7 +1161,10 @@ Period Monthday_set::next_period( const Time& tim, With_single_start single_star
 
             if( _is_day_set_filled )
             {
-                period = _days[ date.day() ].next_period( time_of_day, single_start );
+                if( const Day* day = _days[ date.day() ] )
+                {
+                    period = day->next_period( time_of_day, single_start );
+                }
             }
 
             if( _month_weekdays._is_filled )
@@ -1095,14 +1199,14 @@ Period Monthday_set::next_period( const Time& tim, With_single_start single_star
 
 //----------------------------------------------------------------Monthday_set::Month_weekdays::day
 
-Day* Monthday_set::Month_weekdays::day( int which, int weekday_number ) 
+ptr<Day>& Monthday_set::Month_weekdays::day( int which, int weekday_number ) 
 { 
     assert( which != 0  && which <= max_weekdays_per_month );
     assert( weekday_number >= 0  &&  weekday_number < 7 );
 
     int index = 7 * ( which - 1 ) + weekday_number;
 
-    return &_days[ index ]; 
+    return _days[ index ]; 
 }
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
@@ -1117,8 +1221,12 @@ Period Ultimo_set::next_period( const Time& tim, With_single_start single_start 
 
         for( int i = 0; i < 31; i++ )
         {
-            const Period& period = _days[ last_day_of_month( date ) - date.day() ].next_period( time_of_day, single_start );
-            if( !period.empty() )  return day_nr*(24*60*60) + period;
+            if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
+            {
+                const Period& period = day->next_period( time_of_day, single_start );
+                if( !period.empty() )  return day_nr*(24*60*60) + period;
+            }
+
             day_nr++;
             date.add_days(1);
             time_of_day = 0;
@@ -1244,11 +1352,12 @@ Period At_set::next_period( const Time& tim, With_single_start single_start )
             {
                 Period result;
                 
-                result._begin        = time;
-                result._end          = time;
-                result._single_start = true;
-                result._let_run      = true;
-                result._repeat       = Time::never;
+                result._begin           = time;
+                result._end             = time;
+                result._single_start    = true;
+                result._let_run         = true;
+                result._repeat          = Time::never;
+                result._absolute_repeat = Time::never;
 
                 return result;
             }
@@ -1284,10 +1393,16 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
     {
         if( e.nodeName_is( "day" ) )
         {
-            Day my_default_day ( e, default_day, default_period );
-            int day            = get_day_number( e );
+            Day       my_default_day ( e, default_day, default_period );
+            ptr<Day>  day            = Z_NEW( Day( e, &my_default_day, default_period ) );
+            list<int> day_numbers    = get_day_numbers( e.getAttribute( "day" ) );
 
-            _days[ day ].set_dom_periods( e, &my_default_day, default_period );
+            Z_FOR_EACH( list<int>, day_numbers, it )
+            {
+                if( _days[ *it ] )  z::throw_xc( "SCHEDULER-444", *it );
+                _days[ *it ] = day;
+            }
+
             _is_day_set_filled = true;
         }
     }
@@ -1295,40 +1410,146 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 
 //---------------------------------------------------------------------------------Day::set_dom_day
 
-int Day_set::get_day_number( const xml::Element_ptr& day_element )
+int Day_set::get_day_number( const string& day_string )
 {
     int result;
 
     if( _minimum == 0  &&  _maximum == 6 )      // Es ist ein Wochentag
     {
-        result = get_weekday_number( day_element );
+        result = get_weekday_number( day_string );
     }
     else
     {
-        result = day_element.int_getAttribute( "day" );
+        result = as_int( day_string );
 
-        if( result < _minimum  ||  result > _maximum )  z::throw_xc( "SCHEDULER-221", as_string( result ), as_string( _minimum ), as_string( _maximum ) );
-        if( (uint)result >= NO_OF(_days) )  z::throw_xc( "SCHEDULER-INVALID-DAY", result );
+        if( result < _minimum  ||  result > _maximum )  z::throw_xc( "SCHEDULER-221", day_string, as_string( _minimum ), as_string( _maximum ) );
+        //if( (uint)result >= NO_OF(_days) )  z::throw_xc( "SCHEDULER-INVALID-DAY", result );
     }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Day_set::get_day_numbers
+
+list<int> Day_set::get_day_numbers( const string& days_string )
+{
+    list<int>      result;
+    vector<string> names  = vector_split( " +", days_string );
+
+    Z_FOR_EACH( vector<string>, names, it )  result.push_back( get_day_number( *it ) );
 
     return result;
 }
 
 //----------------------------------------------------------------------Day_set::get_weekday_number
 
-int Day_set::get_weekday_number( const xml::Element_ptr& day_element )
+int Day_set::get_weekday_number( const string& weekday_name )
 {
     int    result     = -1;
-    string day_string = lcase( day_element.getAttribute( "day" ) );
+    string day_string = lcase( weekday_name );
     
     for( const char** p = weekday_names; *p && result == -1; p++ )
         if( day_string == *p )  result = ( p - weekday_names ) % 7;
 
     if( result == -1 )
     {
-        result = day_element.int_getAttribute( "day" );
+        result = as_int( weekday_name );
         if( result == 7 )  result = 0;      // Sonntag darf auch 7 sein
     }
+
+    if( result < 0  ||  result > 6 )  z::throw_xc( "SCHEDULER-445", weekday_name );
+
+    return result;
+}
+
+//---------------------------------------------------------------------Day_set::get_weekday_numbers
+
+list<int> Day_set::get_weekday_numbers( const string& weekday_names )
+{
+    list<int>      result;
+    vector<string> names  = vector_split( " +", weekday_names );
+
+    Z_FOR_EACH( vector<string>, names, it )  result.push_back( get_weekday_number( *it ) );
+
+    return result;
+}
+
+//-------------------------------------------------------------------------------Month::set_default
+
+void Month::set_default()
+{
+    Day default_day;
+
+    default_day.set_default();
+    _weekday_set.fill_with_default( default_day );
+}
+
+//-----------------------------------------------------------------------------------Month::set_dom
+
+void Month::set_dom( const xml::Element_ptr& element )
+{
+    Period  default_period;
+    Day     default_day;
+    bool    period_seen    = false;
+
+    default_period.set_dom( element );
+    default_day = default_period;
+
+    bool a_day_is_set = false;
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "period" ) )
+        {
+            if( !period_seen )  period_seen = true, default_day = Day();
+            default_day.add( Period( e, &default_period ) );
+        }
+        else
+        if( e.nodeName_is( "weekdays" ) )
+        {
+            a_day_is_set = true;
+            _weekday_set.set_dom( e, &default_day, &default_period );
+        }
+        else
+        if( e.nodeName_is( "monthdays" ) )
+        {
+            a_day_is_set = true;
+            _monthday_set.set_dom( e, &default_day, &default_period );
+        }
+        else
+        if( e.nodeName_is( "ultimos" ) )
+        {
+            a_day_is_set = true;
+            _ultimo_set.set_dom( e, &default_day, &default_period );
+        }
+    }
+
+    if( !a_day_is_set )  _weekday_set.fill_with_default( default_day );
+}
+
+//-------------------------------------------------------------------------------Month::next_period
+
+Period Month::next_period( const Time& tim_, With_single_start single_start )
+{
+    Time   tim           = tim_;
+    Period result;
+    int    current_month = tim.month_nr();
+
+    while( tim < Time::never )
+    {
+        int m = tim.month_nr();
+        if( m != current_month )  break;
+
+        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
+        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
+        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
+        
+        if( result.begin() != Time::never )  break;
+
+        tim = tim.midnight() + 24*60*60;                        // Keine Periode? Dann nächsten Tag probieren
+    }
+
+    if( !result.begin().is_never()  &&  result.begin().month_nr() != current_month )  result = Period();
 
     return result;
 }
@@ -1352,7 +1573,8 @@ Run_time::Run_time( Scheduler_object* host_object )
     _zero_(this+1),
     _spooler(host_object->_spooler),
     _host_object(host_object),
-    _holidays(host_object->_spooler)
+    _holidays(host_object->_spooler),
+    _months(12)
 {
     _log = host_object->log();  //Z_NEW( Prefix_log( host_object ) );
 
@@ -1403,17 +1625,18 @@ bool Run_time::operator == ( const Run_time& r )
 
 void Run_time::set_default()
 {
-    set_default_days();
-}
-
-//-----------------------------------------------------------------------Run_time::set_default_days
-
-void Run_time::set_default_days()
-{
     Day default_day;
 
     default_day.set_default();
     _weekday_set.fill_with_default( default_day );
+    //for( int i = 0; i < 12; i++ )
+    //{
+    //    if( !_months[ i ] )
+    //    {
+    //        _months[ i ] = Z_NEW( Month() );
+    //        _months[ i ]->set_default();
+    //    }
+    //}
 }
 
 //--------------------------------------------------------------------------------Run_time::set_xml
@@ -1457,10 +1680,6 @@ Period Run_time::call_function( const Time& requested_beginning )
             if( _spooler->scheduler_script()->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
 
             Variant v = _spooler->scheduler_script()->module_instance()->call( function_name, date_string, param2 );
-            //Variant date_v;
-            //V_VT( &date_v ) = VT_DATE;
-            //V_DATE( &date_v ) = com::com_date_from_seconds_since_1970( requested_beginning );
-            //Variant v = _spooler->scheduler_script()->module_instance()->call( _start_time_function, date_v, _host_object? _host_object->idispatch() : NULL );
             
             if( !v.is_null_or_empty_string() )
             {
@@ -1493,6 +1712,38 @@ Period Run_time::call_function( const Time& requested_beginning )
     return result;
 }
 
+//--------------------------------------------------------------------Run_time::month_index_by_name
+
+int Run_time::month_index_by_name( const string& mm )
+{
+    string m = lcase( mm );
+
+    for( int i = 0; i < 12; i++ )
+    {
+        if( m == month_names[ i ] )  return i;
+    }
+
+    int result = as_int( m );
+    if( result >= 1  &&  result <= 12 )  return result - 1;
+
+    z::throw_xc( "INVALID-MONTH", mm );      // Sollte wegen XML-Schemas nicht passieren
+}
+
+//-----------------------------------------------------------------Run_time::month_indices_by_names
+
+list<int> Run_time::month_indices_by_names( const string& mm )
+{
+    list<int>      result;
+    vector<string> names  = vector_split( " +", mm );
+
+    Z_FOR_EACH( vector<string>, names, it )
+    {
+        result.push_back( month_index_by_name( *it ) );
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------------------Run_time::set_dom
 
 void Run_time::set_dom( const xml::Element_ptr& element )
@@ -1505,7 +1756,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     Sos_optional_date_time  dt;
     Period                  default_period;
     Day                     default_day;
-    bool                    period_seen = false;
+    bool                    period_seen    = false;
 
 
     _dom.create();
@@ -1539,7 +1790,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
             if( at == "now" )  _once = true;   // "now" wirkt nicht in _at_set, weil der Zeitpunkt gleich verstrichen sein wird
             Time at_time;
             at_time.set_datetime( at );
-            _at_set.add( at_time ); 
+            _at_set.add( at_time );
         }
         else
         if( e.nodeName_is( "date" ) )
@@ -1571,6 +1822,19 @@ void Run_time::set_dom( const xml::Element_ptr& element )
             _ultimo_set.set_dom( e, &default_day, &default_period );
         }
         else
+        if( e.nodeName_is( "month" ) )
+        {
+            ptr<Month> month = Z_NEW( Month() );
+            month->set_dom( e );
+
+            list<int> months = month_indices_by_names( e.getAttribute( "month" ) );
+            
+            Z_FOR_EACH( list<int>, months, it )
+            {
+                if( _months[ *it ] )  z::throw_xc( "SCHEDULER-443", month_names[ *it ] );
+                _months[ *it ] = month;
+            }
+        }
         if( e.nodeName_is( "holidays" ) )
         {
             _holidays.clear();
@@ -1583,7 +1847,14 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         }
     }
 
+
     if( !a_day_set )  _weekday_set.fill_with_default( default_day );
+    //if( !a_day_is_set ) 
+    //{
+    //    ptr<Month> default_month = Z_NEW( Month() );
+    //    default_month->_weekday_set.fill_with_default( default_day );
+    //    for( int i = 0; i < 12; i++ )  if( !_months[ i ] )  _months[ i ] = default_month;
+    //}
 
     if( _modified_event_handler )  _modified_event_handler->run_time_modified_event();
 }
@@ -1593,11 +1864,6 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 xml::Element_ptr Run_time::dom_element( const xml::Document_ptr& document ) const
 {
     return document.clone( _dom.documentElement() );
-
-/*
-    xml::Element_ptr run_time_element = document.createElement( "run_time" );
-    return run_time_element;
-*/
 }
 
 //---------------------------------------------------------------------------Run_time::dom_document
@@ -1623,11 +1889,19 @@ Period Run_time::first_period( const Time& beginning_time )
 
 bool Run_time::is_filled() const
 {
-    return _at_set      .is_filled() 
-        || _date_set    .is_filled()
-        || _weekday_set .is_filled()
-        || _monthday_set.is_filled()
-        || _ultimo_set  .is_filled();
+    bool result = _at_set  .is_filled() 
+               || _date_set.is_filled();
+
+    if( !result )
+    {
+        for( int i = 0; i < 12; i++ )
+        {
+            result = _months[ i ]  &&  _months[ i ]->is_filled();
+            if( result )  break;
+        }
+    }
+
+    return result;
 }
 
 //----------------------------------------------------------------------------Run_time::next_period
@@ -1674,9 +1948,19 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
         {
             if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
             if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
-            if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
-            if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
-            if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
+
+            int m = tim.month_nr() - 1;
+            if( _months[ m ] )
+            {
+                result = min( result, _months[ m ]->next_period( tim, single_start ) );
+            }
+            else
+            {
+                if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
+                if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
+                if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
+            }
+
             something_called = true;
         }
 
@@ -1735,15 +2019,15 @@ void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Sh
 
 //----------------------------------------------------------------------------------Run_time::print
 
-void Run_time::print( ostream& s ) const
-{
-    s << "Run_time(\n"
-         "    date_set     =" << _date_set     << "\n"
-         "    weekday_set  =" << _weekday_set  << "\n"
-         "    monthday_set =" << _monthday_set << "\n"
-         "    ultimo_set   =" << _ultimo_set   << "\n"
-         ")\n";
-}
+//void Run_time::print( ostream& s ) const
+//{
+//    s << "Run_time(\n"
+//         "    date_set     =" << _date_set     << "\n"
+//         "    weekday_set  =" << _weekday_set  << "\n"
+//         "    monthday_set =" << _monthday_set << "\n"
+//         "    ultimo_set   =" << _ultimo_set   << "\n"
+//         ")\n";
+//}
 
 //-------------------------------------------------------------------------------------------------
 
