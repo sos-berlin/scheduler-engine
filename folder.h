@@ -35,13 +35,6 @@ struct Path : string
     Path&                       operator =                  ( const string& path )                  { set_path( path );  return *this; }
     Path&                       operator =                  ( const char* path )                    { set_path( path );  return *this; }
 
-  //bool                        operator <                  ( const File_path& path ) const         { return compare( path ) <  0; }
-  //bool                        operator <=                 ( const File_path& path ) const         { return compare( path ) <= 0; }
-  //bool                        operator ==                 ( const File_path& path ) const         { return compare( path ) == 0; }
-  //bool                        operator !=                 ( const File_path& path ) const         { return compare( path ) != 0; }
-  //bool                        operator >=                 ( const File_path& path ) const         { return compare( path ) >= 0; }
-  //bool                        operator >                  ( const File_path& path ) const         { return compare( path ) >  0; }
-  //int                         compare                     ( const File_path& ) const;
 
     void                    set_name                        ( const string& );                                
     string                      name                        () const;
@@ -55,6 +48,15 @@ struct Path : string
     bool                     is_absolute_path               () const;
     string                      absolute_path               () const;
     string                      to_filename                 () const;
+
+  private:
+    bool                        operator <                  ( const File_path& path ) const         { return compare( path ) <  0; }
+    bool                        operator <=                 ( const File_path& path ) const         { return compare( path ) <= 0; }
+    bool                        operator ==                 ( const File_path& path ) const         { return compare( path ) == 0; }
+    bool                        operator !=                 ( const File_path& path ) const         { return compare( path ) != 0; }
+    bool                        operator >=                 ( const File_path& path ) const         { return compare( path ) >= 0; }
+    bool                        operator >                  ( const File_path& path ) const         { return compare( path ) >  0; }
+    int                         compare                     ( const File_path& ) const;             // Nicht implementiert, weil Groﬂkleinschreibung manchmal beachtet werden muss
 };
 
 
@@ -229,7 +231,7 @@ struct File_based : Scheduler_object,
     bool                        load                        ();
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
-    bool                        try_switch_wished_file_based_state();
+  //bool                        try_switch_wished_file_based_state();
     enum Remove_flags { rm_default, rm_base_file_too };
     bool                        remove                      ( Remove_flags = rm_default );
     void                        remove_base_file            ();
@@ -272,7 +274,7 @@ struct File_based : Scheduler_object,
 
     string                     _name;
     State                      _state;
-    State                      _wished_state;
+    //State                      _wished_state;
     Base_file_info             _base_file_info;
     bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
     bool                       _error_ignored;
@@ -476,7 +478,7 @@ struct File_based_subsystem : Subsystem
     virtual string              xml_element_name            () const                                = 0;
     virtual string              xml_elements_name           () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }
-    virtual Path                normalized_path             ( const Path& path ) const;
+    virtual string              normalized_path             ( const Path& path ) const;
     virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
 

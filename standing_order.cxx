@@ -165,7 +165,7 @@ bool Standing_order::on_initialize()
 
     if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
     {
-        result = job_chain->file_based_state() >= File_based::s_active;
+        result = job_chain->file_based_state() >= File_based::s_loaded;
     }
     else
         result = false;
@@ -246,10 +246,11 @@ void Standing_order::set_dom( const xml::Element_ptr& element )
     order->set_dom( element );
 
     if( order->string_id() != order_id() )  z::throw_xc( "SCHEDULER-436" );     // Bei <add_order> vom Schema erlaubt
-    if( order->job_chain_path() != ""    )  z::throw_xc( "SCHEDULER-437" );     // Bei <add_order> vom Schema erlaubt
+    
+    if( !order->job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", order->job_chain_path(), _job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
 
     Absolute_path job_chain_path ( folder_path(), element.getAttribute( "job_chain" ) );  // Bei <add_order> vom Schema erlaubt
-    if( !job_chain_path.empty()  &&  subsystem()->normalized_path( job_chain_path ) != subsystem()->normalized_path( _job_chain_path ) )  z::throw_xc( "SCHEDULER-437" );
+    if( !job_chain_path.empty()  &&  subsystem()->normalized_path( job_chain_path ) != subsystem()->normalized_path( _job_chain_path ) )  z::throw_xc( "SCHEDULER-437", order->job_chain_path(), _job_chain_path );
 
     _order = order;
 }

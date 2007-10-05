@@ -164,6 +164,7 @@ struct Use : Object,
     Lock*                       lock_or_null                () const;
     Requestor*                  requestor                   () const                                { return _requestor; }
     Absolute_path               lock_path                   () const                                { return _lock_path; }
+    string                      lock_normalized_path        () const;
     Lock::Lock_mode             lock_mode                   () const                                { return _lock_mode; }
 
     string                      obj_name                    () const;

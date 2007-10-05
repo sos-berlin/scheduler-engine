@@ -1289,7 +1289,7 @@ File_based::~File_based()
     
 void File_based::close()
 {
-    _wished_state = s_closed;
+    //_wished_state = s_closed;
     _state = s_closed;   //pure virtual function called: set_file_based_state( s_closed );
 }
 
@@ -1297,7 +1297,7 @@ void File_based::close()
 
 bool File_based::initialize()
 {
-    if( _wished_state < s_initialized )  _wished_state = s_initialized;
+    //if( _wished_state < s_initialized )  _wished_state = s_initialized;
     return initialize2();
 }
 
@@ -1320,7 +1320,7 @@ bool File_based::initialize2()
 
 bool File_based::load()
 {
-    if( _wished_state < s_loaded )  _wished_state = s_loaded;
+    //if( _wished_state < s_loaded )  _wished_state = s_loaded;
     return load2();
 }
 
@@ -1354,7 +1354,7 @@ bool File_based::load2()
 
 bool File_based::activate()
 {
-    if( _wished_state < s_active )  _wished_state = s_active;
+    //if( _wished_state < s_active )  _wished_state = s_active;
     return activate2();
 }
 
@@ -1396,10 +1396,10 @@ void File_based::set_file_based_state( State state )
 
 //--------------------------------------------------------------File_based::try_set_to_wished_state
 
-bool File_based::try_switch_wished_file_based_state()
-{
-    return switch_file_based_state( _wished_state );
-}
+//bool File_based::try_switch_wished_file_based_state()
+//{
+//    return switch_file_based_state( _wished_state );
+//}
 
 //--------------------------------------------------------------File_based::switch_file_based_state
 
@@ -1425,7 +1425,8 @@ bool File_based::switch_file_based_state( State state )
 
 bool File_based::on_dependant_loaded( File_based* )
 {
-    return try_switch_wished_file_based_state();
+    return activate();
+    //return try_switch_wished_file_based_state();
 }
 
 //-----------------------------------------------------------File_based::on_dependant_to_be_removed
@@ -1719,7 +1720,7 @@ void File_based::set_folder_path( const Absolute_path& folder_path )
 {
     assert( !folder_path.empty() );
     assert( !_typed_folder );
-    assert( _folder_path.empty() || _folder_path == folder_path );
+    assert( _folder_path.empty()  ||  spooler()->folder_subsystem()->normalized_path( _folder_path ) == spooler()->folder_subsystem()->normalized_path( folder_path ) );
 
     _folder_path = folder_path;
 }
@@ -1728,7 +1729,7 @@ void File_based::set_folder_path( const Absolute_path& folder_path )
 
 Absolute_path File_based::folder_path() const
 {
-    assert( !is_in_folder()  ||  _folder_path == folder()->path() );
+    assert( !is_in_folder()  ||  spooler()->folder_subsystem()->normalized_path( _folder_path ) == folder()->normalized_path() );
     return _folder_path;
 }
 
@@ -1738,7 +1739,7 @@ void File_based::set_typed_folder( Typed_folder* typed_folder )
 { 
     if( typed_folder )
     {
-        assert( _folder_path.empty()  ||  _folder_path == typed_folder->folder()->path() );
+        assert( _folder_path.empty()  ||  spooler()->folder_subsystem()->normalized_path( _folder_path ) == typed_folder->folder()->normalized_path() );
         _typed_folder = typed_folder; 
         _folder_path = _typed_folder->folder()->path();
     }
@@ -1863,7 +1864,7 @@ File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown
 
 //------------------------------------------------------------File_based_subsystem::normalized_path
     
-Path File_based_subsystem::normalized_path( const Path& path ) const
+string File_based_subsystem::normalized_path( const Path& path ) const
 {
     return Path( spooler()->folder_subsystem()->normalized_name( path.folder_path() ), 
                  normalized_name( path.name() ) );

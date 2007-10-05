@@ -751,13 +751,13 @@ void Requestor::close()
 
 void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 {
-    Path path = lock_use_element.getAttribute( "lock" );
+    string normalized_path = Absolute_path( _folder_path, spooler()->lock_subsystem()->normalized_path( lock_use_element.getAttribute( "lock" ) ) );
 
     ptr<Use> lock_use;
 
     Z_FOR_EACH( Use_list, _use_list, it )
     {
-        if( (*it)->lock_path() == path )
+        if( (*it)->lock_normalized_path() == normalized_path )
         {
             lock_use = *it;
             break;
@@ -1018,7 +1018,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
     else
     {
         //if( _folder_path != "" )  _lock_path.set_absolute_if_relative( _folder_path );
-        if( _lock_path != lock_path )  assert(0), z::throw_xc( Z_FUNCTION );
+        if( lock_normalized_path() != spooler()->lock_subsystem()->normalized_path( lock_path ) )  assert(0), z::throw_xc( Z_FUNCTION );
         if( _lock_mode != lock_mode )  z::throw_xc( "SCHEDULER-408", "lock.use", "exclusive" );
     }
 }
@@ -1072,6 +1072,13 @@ Lock* Use::lock() const
 Lock* Use::lock_or_null() const
 { 
     return _spooler->lock_subsystem()->lock_or_null( _lock_path ); 
+}
+
+//-----------------------------------------------------------------------Lock::lock_normalized_path
+
+string Use::lock_normalized_path() const
+{ 
+    return spooler()->lock_subsystem()->normalized_path( _lock_path ); 
 }
 
 //---------------------------------------------------------------------------------Use::dom_element

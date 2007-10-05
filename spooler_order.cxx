@@ -2161,7 +2161,7 @@ void Job_chain::add_order( Order* order )
 
 void Job_chain::remove_order( Order* order )
 {
-    assert( order->_job_chain_path == path().with_slash() );
+    assert( subsystem()->normalized_path( order->_job_chain_path ) == normalized_path() );
     assert( order->_job_chain == this );
 
     ptr<Order> hold_order = order;   // Halten
@@ -5628,7 +5628,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( job_chain->_order_id_space )
         {
             Order* other_order = job_chain->_order_id_space->order_or_null( string_id() );
-            is_new = !other_order  ||  other_order == this && _job_chain_path != job_chain->path();  // is_new, wenn Auftragskennung neu oder derselbe Auftrag nicht in job_chain ist.
+            is_new = !other_order  ||  other_order == this && job_chain->subsystem()->normalized_path( _job_chain_path ) != job_chain->normalized_path();  // is_new, wenn Auftragskennung neu oder derselbe Auftrag nicht in job_chain ist.
         }
         else
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try

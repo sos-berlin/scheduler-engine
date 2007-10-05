@@ -320,7 +320,7 @@ bool Task_subsystem::try_to_free_process( Job* for_job, Process_class* process_c
     Z_FOR_EACH_REVERSE( vector<Job*>, prioritized_order_job_array, it )
     {
         Job* job = *it;
-        if( job->_module->_process_class_path == process_class->path() )
+        if( spooler()->process_class_subsystem()->normalized_path( job->_module->_process_class_path ) == process_class->normalized_path() )
         {
             FOR_EACH_TASK( it, task )
             {
