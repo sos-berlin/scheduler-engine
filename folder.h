@@ -245,7 +245,7 @@ struct File_based : Scheduler_object,
     virtual bool                on_activate                 ()                                      = 0;
 
     virtual void                on_remove_now               ();
-    virtual bool                prepare_to_remove           ();
+    virtual void                prepare_to_remove           ();
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();
 
@@ -407,7 +407,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     void                        set_dom                     ( const xml::Element_ptr& )             { zschimmer::throw_xc( Z_FUNCTION ); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    bool                        prepare_to_remove           ();
+    void                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
 

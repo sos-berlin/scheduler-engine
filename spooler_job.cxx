@@ -1005,11 +1005,11 @@ void Job::set_run_time( const xml::Element_ptr& element )
 
 //---------------------------------------------------------------------------Job::prepare_to_remove
 
-bool Job::prepare_to_remove()
+void Job::prepare_to_remove()
 { 
     stop( true );
 
-    return My_file_based::prepare_to_remove();
+    My_file_based::prepare_to_remove();
 }
 
 //--------------------------------------------------------------------------Job::can_be_removed_now

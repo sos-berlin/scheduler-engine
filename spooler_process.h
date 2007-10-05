@@ -222,7 +222,6 @@ struct Process_class : Process_class_configuration
     bool                        on_load                     ();
     bool                        on_activate                 ();
 
-    bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
 
     void                        prepare_to_replace          ();

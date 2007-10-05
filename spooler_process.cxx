@@ -1007,28 +1007,6 @@ bool Process_class::on_activate()
     return true;
 }
 
-//-----------------------------------------------------------------Process_class::prepare_to_remove
-
-bool Process_class::prepare_to_remove()
-{
-    //FOR_EACH( Process_set, _process_set, p )
-    //{
-    //    Process* process = *p;
-    //    process->end_task();
-    //}
-
-    //FOR_EACH_JOB( job )
-    //{
-    //    if( subsystem()->normalized_path( job->process_class_path() ) == normalized_path() )
-    //    {
-    //        job->on_removing_process_class( this );
-    //    }
-    //}
-
-    //_remove = true;
-    return My_file_based::prepare_to_remove();
-}
-
 //----------------------------------------------------------------Process_class::can_be_removed_now
 
 bool Process_class::can_be_removed_now()

@@ -224,7 +224,7 @@ void Folder_subsystem::close()
     {
         //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  _root_folder->remove_all_file_baseds();
         //typed_folder<>::_file_based_map hat keine ptr<>!  Zeiger können also ungültig sein:  remove_file_based( _root_folder );
-        _root_folder = false;
+        _root_folder = NULL;
     }
 }
 
@@ -694,10 +694,9 @@ void Folder::remove_all_file_baseds()
 
 //------------------------------------------------------------------------Folder::prepare_to_remove
 
-bool Folder::prepare_to_remove()
+void Folder::prepare_to_remove()
 {
     remove_all_file_baseds();
-    return can_be_removed_now();
 }
 
 //-----------------------------------------------------------------------Folder::can_be_removed_now
@@ -710,7 +709,7 @@ bool Folder::can_be_removed_now()
     {
         Typed_folder* typed_folder = it->second;
 
-        result |= typed_folder->is_empty();
+        result = typed_folder->is_empty();
         if( !result )  break;
     }
 
@@ -1508,13 +1507,12 @@ void File_based::set_replacement( File_based* replacement )
 
 //--------------------------------------------------------------------File_based::prepare_to_remove
 
-bool File_based::prepare_to_remove()
+void File_based::prepare_to_remove()
 { 
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
     set_to_be_removed( true );
     subsystem()->dependencies()->announce_dependant_to_be_removed( this ); 
-    return can_be_removed_now(); 
 }
 
 //------------------------------------------------------------------------File_based::on_remove_now
@@ -1535,6 +1533,8 @@ void File_based::remove_now()
 
 bool File_based::remove( Remove_flags remove_flag )
 {
+    bool result = false;
+
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
 
@@ -1543,13 +1543,15 @@ bool File_based::remove( Remove_flags remove_flag )
         remove_base_file();
     }
 
-    bool is_removable = prepare_to_remove();
 
-    if( is_removable )  
+    prepare_to_remove();
+
+    if( can_be_removed_now() )  
     {
         _remove_xc = zschimmer::Xc();
 
         remove_now();
+        result = true;
     }
     else  
     {
@@ -1557,7 +1559,8 @@ bool File_based::remove( Remove_flags remove_flag )
         log()->info( _remove_xc.what() );   // Kein Fehler, Löschen ist nur verzögert
     }
 
-    return is_removable;
+
+    return result;
 }
 
 //-------------------------------------------------------------------------File_based::remove_error
@@ -1854,9 +1857,8 @@ void File_based::set_name( const string& name )
     
 Folder* File_based::folder() const
 { 
-    if( !_typed_folder )  assert(0), z::throw_xc( Z_FUNCTION, "no folder" );
-
-    return _typed_folder->folder(); 
+    return _typed_folder? _typed_folder->folder()
+                        : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingehängt, replacement()
 }
 
 //-------------------------------------------------------File_based_subsystem::File_based_subsystem

@@ -2600,18 +2600,18 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
 
 //---------------------------------------------------------------------Job_chain::prepare_to_remove
 
-bool Job_chain::prepare_to_remove()
-{
-    //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-  //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-151" );
-
-    //_remove = true;
-
-    //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
-    //if( !can_be_removed_now() )  return false;
-
-    return My_file_based::prepare_to_remove();
-}
+//void Job_chain::prepare_to_remove()
+//{
+//    //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+//  //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-151" );
+//
+//    //_remove = true;
+//
+//    //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
+//    //if( !can_be_removed_now() )  return false;
+//
+//    My_file_based::prepare_to_remove();
+//}
 
 //--------------------------------------------------------------------Job_chain::can_be_removed_now
 

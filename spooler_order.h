@@ -666,7 +666,6 @@ struct Job_chain : Com_job_chain,
 
     File_based*                 new_base_file               ( const Base_file_info& );
 
-    bool                        prepare_to_remove           ();
     bool                        can_be_removed_now          ();
     zschimmer::Xc               remove_error                ();
 

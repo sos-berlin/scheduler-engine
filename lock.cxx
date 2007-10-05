@@ -338,7 +338,7 @@ bool Lock::can_be_removed_now()
 
 //--------------------------------------------------------------------------Lock::prepare_to_remove
 
-bool Lock::prepare_to_remove()
+void Lock::prepare_to_remove()
 {
     if( !is_to_be_removed() )
     {
@@ -370,7 +370,7 @@ bool Lock::prepare_to_remove()
         }
     }
 
-    return My_file_based::prepare_to_remove();
+    My_file_based::prepare_to_remove();
 }
 
 //-------------------------------------------------------------------------------Lock::remove_error
