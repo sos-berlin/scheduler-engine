@@ -199,8 +199,9 @@ struct Period
     Time                        absolute_repeat             () const                                { return _absolute_repeat; }
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
-    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _absolute_repeat < Time::never || _start_once; }
+    bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
     Time                        next_repeated               ( const Time& ) const;
+  //Time                        next_repeated_before_end    ( const Time& ) const;
 
   //void                        set_next_start_time         ( const Time& );
 
@@ -492,8 +493,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
 
     bool                        period_follows              ( const Time& time )                    { return next_period(time).begin() != Time::never; }
 
-    Time                        next_single_start           ( const Time& time )                    { return next_period(time,wss_next_single_start).begin(); }
-    Time                        next_any_start              ( const Time& time )                    { return next_period(time,wss_next_any_start).begin(); }
+    Time                        next_single_start           ( const Time& );
+    Time                        next_any_start              ( const Time& );
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Run_time& o )       { o.print(s); return s; }

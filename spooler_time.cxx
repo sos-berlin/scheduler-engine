@@ -858,6 +858,8 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     else
     if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    //else
+    //if( !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
     else
         result = false;
 
@@ -885,18 +887,36 @@ Time Period::next_repeated( const Time& t ) const
     
     if( !_repeat.is_never() )
     {
-        result = t + _repeat;
+        result = t < _begin? _begin 
+                           : t + _repeat;
     }
     else
     if( !_absolute_repeat.is_never() )
     {
-        int n = (int)( ( t - _begin ) / _absolute_repeat );
-        result = t + ( n + 1 ) * _absolute_repeat;
+        if( t < _begin )
+        {
+            result = _begin;
+        }
+        else
+        {
+            int n = (int)( ( t - _begin ) / _absolute_repeat );
+            result = _begin + ( n + 1 ) * _absolute_repeat;
+        }
+
+        assert( result > t );
     }
 
-    return result;  // result >= _period._end ist möglich.
+    return result < _end? result : Time::never;  
 }
 
+////-----------------------------------------------------------------Period::next_repeated_before_end
+//
+//Time Period::next_repeated_before_end( const Time& t ) const
+//{
+//    Time next = next_repeated( t );
+//    return next < _end? next : Time::never;
+//}
+//
 //------------------------------------------------------------------------------------Period::print
 
 void Period::print( ostream& s ) const
@@ -1984,6 +2004,26 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
 
 
     return result;
+}
+
+//----------------------------------------------------------------------Run_time::next_single_start
+
+Time Run_time::next_single_start( const Time& time )
+{ 
+    Period period = next_period( time, wss_next_single_start );
+    
+    return !period.absolute_repeat().is_never()? period.next_repeated( time )
+                                               : period.begin();
+}
+
+//-------------------------------------------------------------------------Run_time::next_any_start
+
+Time Run_time::next_any_start( const Time& time )
+{ 
+    Period period = next_period( time, wss_next_any_start);
+
+    return !period.absolute_repeat().is_never()? period.next_repeated( time )
+                                               : period.begin();
 }
 
 //-----------------------------------------------------------Run_time::append_calendar_dom_elements

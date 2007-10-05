@@ -485,6 +485,7 @@ bool Folder::adjust_with_directory( double now )
         try
         {
             string last_normalized_name;
+            string last_extension;
             string last_filename;
 
             for( file::Directory_lister dir ( _directory );; )
@@ -502,6 +503,8 @@ bool Folder::adjust_with_directory( double now )
                 {
                     string        filename     = file_info->path().name();
                     string        name;
+                    string        extension    = extension_of_filename( filename );
+                    string        normalized_extension = lcase( extension );
                     Typed_folder* typed_folder = NULL;
 
                     if( file_info->is_directory() )
@@ -515,7 +518,7 @@ bool Folder::adjust_with_directory( double now )
                         
                         if( name != "" )
                         {
-                            Typed_folder_map::iterator it = _typed_folder_map.find( extension_of_filename( filename ) );
+                            Typed_folder_map::iterator it = _typed_folder_map.find( extension );
                             if( it != _typed_folder_map.end() )  typed_folder = it->second;
                         }
                     }
@@ -524,7 +527,8 @@ bool Folder::adjust_with_directory( double now )
                     {
                         string normalized_name = typed_folder->subsystem()->normalized_name( name );
 
-                        if( normalized_name == last_normalized_name )
+                        if( normalized_name == last_normalized_name  &&
+                            extension       == last_extension           )
                         {
                             zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
 
@@ -549,7 +553,8 @@ bool Folder::adjust_with_directory( double now )
                         }
 
                         last_normalized_name = normalized_name;
-                        last_filename = filename;
+                        last_extension       = normalized_extension;
+                        last_filename        = filename;
                     }
                 }
             }

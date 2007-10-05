@@ -1923,7 +1923,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
 {
     select_period( now );
 
-    Time   next_start_time = Time::never;  //_next_start_time;
+    Time   next_start_time = Time::never;
     string msg;
 
     _next_single_start = Time::never;
@@ -1945,7 +1945,9 @@ void Job::set_next_start_time( const Time& now, bool repeat )
         {
             if( !_repeat )  _next_single_start = _spooler->_zschimmer_mode? _run_time->next_any_start( now ) : _run_time->next_single_start( now );
 
-            if( _start_once  ||  _start_min_tasks  ||  !repeat && _period.has_repeat_or_once() )
+            if( _start_once  ||  
+                _start_min_tasks  ||  
+                !repeat  &&  ( _period.has_repeat_or_once() || !_period.absolute_repeat().is_never() ) )
             {
                 if( _period.begin() > now )
                 {
@@ -1977,9 +1979,14 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     {
                         Period next_period = _run_time->next_period( _period.end() );
 
-                        if( _period.end()             == next_period.begin()  &&  
-                            _period.repeat()          == next_period.repeat()  &&
-                            _period.absolute_repeat() == next_period.absolute_repeat() )
+                        if( _period.absolute_repeat().is_never() )
+                        {
+                            _period = next_period;      // Könnte auch sonst gemacht werden, statt SCHEDULER-927?
+                            next_start_time = _period.begin();
+                        }
+                        else
+                        if( _period.end()    == next_period.begin()  &&  
+                            _period.repeat() == next_period.repeat() )
                         {
                             if( _spooler->_debug )  msg += " (in the following period)";
                         }
@@ -1991,6 +1998,12 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         }
                     }
                 }
+            }
+            else  
+            if( !_period.absolute_repeat().is_never() )
+            {
+                Time t = _period.next_repeated( now );
+                if( t < _period.end() )  next_start_time = t;
             }
         }
     }

@@ -160,31 +160,36 @@ spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
                 <run_time/>
 
             </job>
-        
-        
-            <job name="job_b">
-                <script language="JavaScript"><![CDATA[
+
+
+            <!--job name="repeat">
+                <script language="JavaScript">
+                    <![CDATA[
     
 var hostware = new ActiveXObject( "hostware.global" );
                
 function spooler_process() 
 {               
-    spooler_log.info( "spooler_process()" );
-    hostware.sleep( 3 );
+    spooler_log.info( "*** REPEAT" );
+    hostware.sleep( 2 );
     
-    return true;
+    return false;
 }
 
-                ]]></script>
-     
-                <run_time/>
-                
-            </job>
+                ]]>
+                </script>
+
+                <run_time>
+                    <period repeat="5"/>
+                </run_time>
+
+            </job-->
+
             
         </jobs>
 
         <commands>
-            <show_calendar before="2008-10-06T00:00:00" limit="1000"/>
+            <!--show_calendar before="2008-10-06T00:00:00" limit="1000"/-->
         </commands>
     </config>
 </spooler>

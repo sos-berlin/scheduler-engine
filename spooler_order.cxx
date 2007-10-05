@@ -6227,9 +6227,9 @@ Time Order::next_start_time( bool first_call )
                 Period next_period = _run_time->next_period( _period.end(), time::wss_next_begin );
                 //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
-                if( _period.repeat().is_never()  &&  _period.absolute_repeat().is_never() 
+                if( _period.repeat().is_never()
                  || _period.end()    != next_period.begin()
-                 || _period.repeat() != next_period.repeat()  &&  _period.absolute_repeat() != next_period.absolute_repeat() )
+                 || _period.repeat() != next_period.repeat() )
                 {
                     result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
                 }
