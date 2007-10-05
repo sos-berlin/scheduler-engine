@@ -3949,6 +3949,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-882">
+            <text xml:lang="en">
+                <title>Configuration directory '<p1/>' has been removed:<br/><p2>error</p2></title>
+            </text>
+        </message>
+        
         <!--message code="SCHEDULER-882">
             <text xml:lang="en">
                 <title>Unknown database '<p1/>', database script has not be runned</title>

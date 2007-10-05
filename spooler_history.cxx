@@ -576,44 +576,44 @@ void Database::open2( const string& db_name )
 }
 
 //----------------------------------------------------------------Database::run_create_table_script
-/*
-void Database::run_create_table_script()
-{
-    string filename;
 
-    switch( _db.dbms_kind() )
-    {
-        case dbms_access:       filename = "create_tables.access.sql";                break;
-        case dbms_db2:          filename = "create_tables.db2.sql";                   break;
-        case dbms_firebird:     filename = "create_tables.firebird.sql";              break;
-        case dbms_mysql:        filename = "create_tables.mysql.sql";                 break;
-        case dbms_oracle:
-        case dbms_oracle_thin:  filename = "create_tables.oracle.sql";                break;
-        case dbms_sql_server:   filename = "create_tables.microsoft_sql_server.sql";  break;
-        case dbms_postgresql:   filename = "create_tables.postgresql.sqk";            break;
-        default: ;
-    }
+//void Database::run_create_table_script()
+//{
+//    string filename;
+//
+//    switch( _db.dbms_kind() )
+//    {
+//        case dbms_access:       filename = "create_tables.access.sql";                break;
+//        case dbms_db2:          filename = "create_tables.db2.sql";                   break;
+//        case dbms_firebird:     filename = "create_tables.firebird.sql";              break;
+//        case dbms_mysql:        filename = "create_tables.mysql.sql";                 break;
+//        case dbms_oracle:
+//        case dbms_oracle_thin:  filename = "create_tables.oracle.sql";                break;
+//        case dbms_sql_server:   filename = "create_tables.microsoft_sql_server.sql";  break;
+//        case dbms_postgresql:   filename = "create_tables.postgresql.sqk";            break;
+//        default: ;
+//    }
+//
+//    if( const Embedded_file* embedded_file = embedded_files.get_embedded_file_or_null( "database/" + filename ) )
+//    {
+//        try
+//        {
+//            Transaction ta ( this );
+//            //string cmd = sql::without_comments_regardless_quotes( embedded_file->_content );
+//            //for( int i = 0; i < cmd.length(); i++ )  if( cmd[i] == '\r'  ||  cmd[i] == '\n' )  cmd[i] = ' ';
+//            //ta.execute( cmd, Z_FUNCTION, Transaction::ex_native );
+//            ta.execute( embedded_file->_content , Z_FUNCTION, Transaction::ex_native );
+//            ta.commit( Z_FUNCTION );
+//        }
+//        catch( exception& x )
+//        {
+//            _log->warn( message_string( "SCHEDULER-883", embedded_file->_filename, x ) );
+//        }
+//    }
+//    else
+//        _log->info( message_string( "SCHEDULER-882", _db.dbms_name() ) );
+//}
 
-    if( const Embedded_file* embedded_file = embedded_files.get_embedded_file_or_null( "database/" + filename ) )
-    {
-        try
-        {
-            Transaction ta ( this );
-            //string cmd = sql::without_comments_regardless_quotes( embedded_file->_content );
-            //for( int i = 0; i < cmd.length(); i++ )  if( cmd[i] == '\r'  ||  cmd[i] == '\n' )  cmd[i] = ' ';
-            //ta.execute( cmd, Z_FUNCTION, Transaction::ex_native );
-            ta.execute( embedded_file->_content , Z_FUNCTION, Transaction::ex_native );
-            ta.commit( Z_FUNCTION );
-        }
-        catch( exception& x )
-        {
-            _log->warn( message_string( "SCHEDULER-883", embedded_file->_filename, x ) );
-        }
-    }
-    else
-        _log->info( message_string( "SCHEDULER-882", _db.dbms_name() ) );
-}
-*/
 //--------------------------------------------------------------Database::create_tables_when_needed
 
 void Database::create_tables_when_needed()

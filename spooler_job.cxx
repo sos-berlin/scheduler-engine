@@ -500,7 +500,7 @@ void Job::close()
 
 bool Job::on_initialize()
 {
-    bool result = false;
+    bool result = true;
 
     if( _state < s_initialized )
     {

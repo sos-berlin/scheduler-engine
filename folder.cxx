@@ -558,7 +558,7 @@ bool Folder::adjust_with_directory( double now )
         {
             if( _directory.exists() )  throw;                                   // Problem beim Lesen des Verzeichnisses
             
-            _log->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
+            if( !_parent )  _log->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
 
             // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
         }
@@ -904,23 +904,26 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                     file_based->initialize();
 
 
-                    if( !old_file_based )           // Neues Objekt?
+                    if( file_based->file_based_state() == File_based::s_initialized )
                     {
-                        file_based->activate();     
-                    }
-                    else
-                    {
-                        old_file_based->prepare_to_replace();
-
-                        if( old_file_based->can_be_replaced_now() ) 
+                        if( !old_file_based )           // Neues Objekt?
                         {
-                            file_based = old_file_based->replace_now();     assert( !file_based->replacement() );
+                            file_based->activate();     
+                        }
+                        else
+                        {
+                            old_file_based->prepare_to_replace();
 
-                            if( file_based == old_file_based )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
-                            {                                       
-                                file_based->set_base_file_info( *base_file_info );      // Alte Werte geänderten Objekts überschreiben
-                                file_based->_base_file_xc      = zschimmer::Xc();
-                                file_based->_base_file_xc_time = 0;
+                            if( old_file_based->can_be_replaced_now() ) 
+                            {
+                                file_based = old_file_based->replace_now();     assert( !file_based->replacement() );
+
+                                if( file_based == old_file_based )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
+                                {                                       
+                                    file_based->set_base_file_info( *base_file_info );      // Alte Werte geänderten Objekts überschreiben
+                                    file_based->_base_file_xc      = zschimmer::Xc();
+                                    file_based->_base_file_xc_time = 0;
+                                }
                             }
                         }
                     }
@@ -1615,10 +1618,21 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
 {
     if( is_in_folder() )
     {
-        if( replacement()  &&  can_be_replaced_now() )
+        if( replacement() )
         {
-            if( when_to_act == act_now )  replace_now();
-                                    else  typed_folder()->add_to_replace_or_remove_candidates( name() );
+            bool ok = replacement()->file_based_state() == File_based::s_initialized;
+
+            if( !ok )
+            {
+                ok = replacement()->initialize();
+                if( ok )  prepare_to_replace();
+            }
+            
+            if( ok  &&  can_be_replaced_now() )
+            {
+                if( when_to_act == act_now )  replace_now();
+                                        else  typed_folder()->add_to_replace_or_remove_candidates( name() );
+            }
         }
         else
         if( is_to_be_removed()  &&  can_be_removed_now()   )

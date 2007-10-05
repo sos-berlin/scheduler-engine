@@ -1295,7 +1295,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "show_order"       ) )  result = execute_show_order( element, show );
     else
-    if( element.nodeName_is( "add_order"        ) )  result = execute_add_order( element );
+    if( element.nodeName_is( "add_order"        ) ||
+        element.nodeName_is( "order"            ) )  result = execute_add_order( element );
     else
     if( element.nodeName_is( "modify_order"     ) )  result = execute_modify_order( element );
   //else

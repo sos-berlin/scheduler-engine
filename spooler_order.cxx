@@ -5604,12 +5604,12 @@ void Order::place_in_job_chain( Job_chain* job_chain,  Job_chain_stack_option jo
 
 bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option job_chain_stack_option, bool exists_exception )
 {
+    job_chain->assert_is_loaded();
+
     // Sollte mit assert_is_loaded() überflüssig geworden sein:
     if( job_chain->state() != Job_chain::s_loaded  &&  
         job_chain->state() != Job_chain::s_active  &&
         job_chain->state() != Job_chain::s_stopped )  z::throw_xc( "SCHEDULER-151" );
-
-    job_chain->assert_is_loaded();
 
     bool is_new = true;
 

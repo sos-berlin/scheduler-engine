@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-09-24" version="2.0.187" subversion_revision="5275">
+    <change date="2007-10-05" version="2.0.187" subversion_revision="5290">
         <revision type="modification" title="Neue Voreinstellung &lt;add_order replace='yes'>">
             <description>
                 <ul>

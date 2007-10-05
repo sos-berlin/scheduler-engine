@@ -454,6 +454,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-879", "Deactivating old cluster member with same ID" },
     { "SCHEDULER-880", "Error when creating database index is ignored" },
     { "SCHEDULER-881", "Error when reading stdout file is ignored: $1, $2" },
+    { "SCHEDULER-882", "Configuration directory '$1' has been removed:\n$2" },
     { "SCHEDULER-884", "Configuration directory has been deleted" },
     { "SCHEDULER-885", "Task ends because '$1' is being removed" },
     { "SCHEDULER-886", "Lock will be removed later, it is held by '$1'" },

@@ -159,8 +159,18 @@ void Standing_order::set_name( const string& name )
 
 bool Standing_order::on_initialize()
 {
+    bool result = true;
+
     add_dependant( order_subsystem(), _job_chain_path );
-    return true;
+
+    if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
+    {
+        result = job_chain->file_based_state() >= File_based::s_active;
+    }
+    else
+        result = false;
+
+    return result;
 }
 
 //--------------------------------------------------------------------------Standing_order::on_load
@@ -174,7 +184,7 @@ bool Standing_order::on_load()
 
 bool Standing_order::on_activate()
 {
-    if( !_order )  assert(0), z::throw_xc( Z_FUNCTION, "noorder" );
+    if( !_order )  assert(0), z::throw_xc( Z_FUNCTION, "no order" );
 
     bool result = false;
 
