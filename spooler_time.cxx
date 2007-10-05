@@ -888,7 +888,7 @@ Time Period::next_repeated( const Time& t ) const
     if( !_repeat.is_never() )
     {
         result = t < _begin? _begin 
-                           : t + _repeat;
+                           : Time( t + _repeat );
     }
     else
     if( !_absolute_repeat.is_never() )
