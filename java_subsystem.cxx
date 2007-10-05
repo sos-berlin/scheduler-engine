@@ -75,11 +75,12 @@ bool Java_subsystem::subsystem_initialize()
 bool Java_subsystem::subsystem_load()
 {
     _java_vm->set_log( _log );
-    _java_vm->prepend_class_path( _spooler->_config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
+    _java_vm->prepend_class_path( _spooler->_config_java_class_path );
     _java_vm->set_options( _spooler->_config_java_options );
 
     //if( _spooler->_has_java_source )
-    if( _spooler->_ignore_process_classes )     // Die Java-Jobs laufen mit unserer JVM
+    if( _spooler->_ignore_process_classes ||
+        _spooler->_scheduler_script  &&  _spooler->_scheduler_script->module()->kind() == Module::kind_java )     // Die Java-Jobs laufen mit unserer JVM
     {
         string java_work_dir = _spooler->java_work_dir();
         _java_vm->set_work_dir( java_work_dir );
