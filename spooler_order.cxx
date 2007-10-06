@@ -1194,19 +1194,20 @@ bool Job_node::initialize()
     
 void Job_node::activate()
 {
-    Base_class::activate();
-
     if( Job* job = spooler()->job_subsystem()->job_or_null( _job_path ) )
     {
-        //if( !job->is_order_controlled() )  
-        //{
-        //    log()->warn( message_string( "SCHEDULER-147", job->obj_name() ) );    Ist schon geprüft
-        //}
-        //else
-        //{
+        try
+        {
             connect_job( job );
-        //}
+        }
+        catch( exception& x )
+        {
+            log()->error( x.what() );
+            // Exception für <show_state> aufheben? (Node ist fast sowas wie File_based)
+        }
     }
+
+    Base_class::activate();
 }
 
 //----------------------------------------------------------------------------Job_node::connect_job
@@ -1425,13 +1426,6 @@ xml::Element_ptr Nested_job_chain_node::dom_element( const xml::Document_ptr& do
 
     return element;
 }
-
-//------------------------------------------------------------------Nested_job_chain_node::activate
-
-//void Nested_job_chain_node::activate()
-//{
-//    Base_class::activate();
-//}
 
 //-----------------------------------------------------------------------------Sink_node::Sink_node
 
