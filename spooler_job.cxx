@@ -2004,7 +2004,6 @@ void Job::set_next_start_time( const Time& now, bool repeat )
             {
                 Time t = _period.next_repeated( now );
                 if( t < _period.end() )  next_start_time = t;
-                else  next_start_time = _run_time.next_period( _period.end() ).begin();
             }
         }
     }

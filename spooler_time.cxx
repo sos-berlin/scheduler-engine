@@ -858,8 +858,8 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     else
     if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
-    //else
-    //if( !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
+    else
+    if( !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
     else
         result = false;
 
