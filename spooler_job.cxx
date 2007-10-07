@@ -1969,7 +1969,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     _repeat = 0;
                 }
                 else
-                if( now >= _period.begin()  &&  ( !_period.repeat().is_never() || !_period.absolute_repeat().is_never() ) )
+                if( now >= _period.begin()  &&  !_period.repeat().is_never() )
                 {
                     next_start_time = _period.next_repeated( now );
 
@@ -1994,12 +1994,12 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     }
                 }
             }
-            else  
-            if( !_period.absolute_repeat().is_never() )
-            {
-                Time t = _period.next_repeated( now );
-                if( t < _period.end() )  next_start_time = t;
-            }
+            //else  
+            //if( !_period.absolute_repeat().is_never() )
+            //{
+            //    Time t = _period.next_repeated( now );
+            //    if( t < _period.end() )  next_start_time = t;
+            //}
         }
     }
     else
@@ -2499,8 +2499,11 @@ bool Job::do_something()
                 if( now > _period.end() )
                 {
                     select_period( now );
-                    if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
-                    //if( is_in_period( now ) )  check_min_tasks( "a new period has begun" );
+                    if( !_period.is_in_time( _next_start_time )  &&
+                        _next_single_start.is_never() ) // Wenn aus absolute_repeat errechnet, stimmt _period vielleicht nicht, dann nicht set_next_start_time() rufen
+                    {
+                        set_next_start_time( now );
+                    }
                 }
 
 

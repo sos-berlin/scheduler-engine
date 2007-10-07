@@ -201,6 +201,7 @@ struct Period
     bool                        let_run                     () const                                { return _let_run; }
     bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
     Time                        next_repeated               ( const Time& ) const;
+    Time                        next_absolute_repeated      ( const Time&, int next ) const;
   //Time                        next_repeated_before_end    ( const Time& ) const;
 
   //void                        set_next_start_time         ( const Time& );

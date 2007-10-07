@@ -859,7 +859,8 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
-    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
+    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
+                                                                                                                                                // ^ Falls zwei Perioden direkt aufeinander folgen
     else
         result = false;
 
@@ -893,30 +894,38 @@ Time Period::next_repeated( const Time& t ) const
     else
     if( !_absolute_repeat.is_never() )
     {
-        if( t < _begin )
-        {
-            result = _begin;
-        }
-        else
-        {
-            int n = (int)( ( t - _begin ) / _absolute_repeat );
-            result = _begin + ( n + 1 ) * _absolute_repeat;
-        }
-
-        assert( result > t );
+        result = next_absolute_repeated( t, 1 );
     }
 
     return result < _end? result : Time::never;  
 }
 
-////-----------------------------------------------------------------Period::next_repeated_before_end
-//
-//Time Period::next_repeated_before_end( const Time& t ) const
-//{
-//    Time next = next_repeated( t );
-//    return next < _end? next : Time::never;
-//}
-//
+//-------------------------------------------------------------------Period::next_absolute_repeated
+
+Time Period::next_absolute_repeated( const Time& t, int next ) const
+{
+    assert( next == 0  ||  next == 1 );
+    assert( !_absolute_repeat.is_never() );
+
+
+    Time result = Time::never;
+
+    if( t < _begin )
+    {
+        result = _begin;
+    }
+    else
+    {
+        int n = (int)( ( t - _begin ) / _absolute_repeat );
+        result = _begin + ( n + 1 ) * _absolute_repeat;
+        if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
+    }
+
+    assert( next == 0? result >= t : result > t );
+
+    return result < _end? result : Time::never;  
+}
+
 //------------------------------------------------------------------------------------Period::print
 
 void Period::print( ostream& s ) const
