@@ -2038,7 +2038,8 @@ Time Run_time::next_any_start( const Time& time )
 
 void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
-    Time t = options->_from;
+    Time t          = options->_from;
+    Time last_begin;
 
     //bool check_for_once = _once;
 
@@ -2054,10 +2055,12 @@ void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Sh
         {
             //check_for_once = false;
 
-            if( period.begin() >= options->_from )
+            if( period.begin() >= options->_from  &&  period.begin() != last_begin )
             {
                 element.appendChild( period.dom_element( element.ownerDocument() ) );
                 options->_count++;
+
+                last_begin = period.begin();
             }
         }
 

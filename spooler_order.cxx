@@ -6258,7 +6258,7 @@ Time Order::next_start_time( bool first_call )
             // Aber gibt es ein single_start vorher?
 
             Period next_single_start_period = _run_time->next_period( now, time::wss_next_single_start );
-            if( result > next_single_start_period.begin() )
+            if( next_single_start_period._single_start  &&  result > next_single_start_period.begin() )
             {
                 _period = next_single_start_period;
                 result  = next_single_start_period.begin();
