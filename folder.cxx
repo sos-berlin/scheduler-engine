@@ -1676,31 +1676,35 @@ bool File_based::replace_with( File_based* file_based_replacement )
 
 void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
 {
-    if( is_in_folder() )
+    try
     {
-        if( replacement() )
+        if( is_in_folder() )
         {
-            bool ok = replacement()->file_based_state() == File_based::s_initialized;
+            if( replacement() )
+            {
+                bool ok = replacement()->file_based_state() == File_based::s_initialized;
 
-            if( !ok )
-            {
-                ok = replacement()->initialize();
-                if( ok )  prepare_to_replace();
+                if( !ok )
+                {
+                    ok = replacement()->initialize();
+                    if( ok )  prepare_to_replace();
+                }
+                
+                if( ok  &&  can_be_replaced_now() )
+                {
+                    if( when_to_act == act_now )  replace_now();
+                                            else  typed_folder()->add_to_replace_or_remove_candidates( name() );
+                }
             }
-            
-            if( ok  &&  can_be_replaced_now() )
+            else
+            if( is_to_be_removed()  &&  can_be_removed_now() )
             {
-                if( when_to_act == act_now )  replace_now();
+                if( when_to_act == act_now )  remove_now();
                                         else  typed_folder()->add_to_replace_or_remove_candidates( name() );
             }
         }
-        else
-        if( is_to_be_removed()  &&  can_be_removed_now() )
-        {
-            if( when_to_act == act_now )  remove_now();
-                                    else  typed_folder()->add_to_replace_or_remove_candidates( name() );
-        }
     }
+    catch( exception& x ) { log()->debug( message_string( "SCHEDULER-897", x ) ); }
 }
 
 //-------------------------------------------------------------------File_based::prepare_to_replace

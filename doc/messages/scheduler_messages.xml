@@ -4045,6 +4045,12 @@
                 <title>File will be read again after <p1/> seconds</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-897">
+            <text xml:lang="en">
+                <title>Error in replacement ignored::<br/><p2>error</p2></title>
+            </text>
+        </message>
     </messages>
     
 </messages>
