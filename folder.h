@@ -322,7 +322,7 @@ struct Typed_folder : Scheduler_object,
     bool                        adjust_with_directory       ( const list<Base_file_info>&, double now );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
-    void                        remove_all_file_baseds      ();
+  //void                        remove_all_file_baseds      ();
 
     string                      obj_name                    () const;
 
@@ -413,7 +413,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     bool                        can_be_removed_now          ();
 
 
-    void                        remove_all_file_baseds      ();
+  //void                        remove_all_file_baseds      ();
     file::File_path             directory                   () const                                { return _directory; }
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
 
@@ -646,6 +646,8 @@ struct file_based_subsystem : File_based_subsystem
 
         FILE_BASED* casted_file_based = dynamic_cast<FILE_BASED*>( file_based );
         if( !casted_file_based )  assert(0), z::throw_xc( Z_FUNCTION );
+
+        //casted_file_based->log( subsystem_state() < subsys_stopped? log_info : log_debug9, message_string( "SCHEDULER-861", object_type_name() ) );
 
         _file_based_map.erase( casted_file_based->normalized_path() );
         _file_based_map_version++;

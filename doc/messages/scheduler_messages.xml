@@ -3428,11 +3428,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-988">
+        <!--message code="SCHEDULER-988">
             <text xml:lang="en">
                 <title>Job is being replaced now</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-989">
             <text xml:lang="en">
@@ -3871,17 +3871,17 @@
             </text>
         </message-->
 
-        <message code="SCHEDULER-869" weight="info" object="Process_class">
+        <!--message code="SCHEDULER-869" weight="info" object="Process_class">
             <text xml:lang="en">
                 <title>Process class has been replaced</title>
             </text>
-        </message>
+        </message-->
 
-        <message code="SCHEDULER-870" weight="info" object="Process_class">
+        <!--message code="SCHEDULER-870" weight="info" object="Process_class">
             <text xml:lang="en">
                 <title>Process class has been added</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-871" weight="warn" object="Process_class">
             <text xml:lang="en">
@@ -3993,7 +3993,7 @@
         
         <message code="SCHEDULER-888">
             <text xml:lang="en">
-                <title><p1>object_type</p1> cannot be repalced now, it will be done later</title>
+                <title><p1>object_type</p1> cannot be replaced now, it will be done later</title>
             </text>
         </message>
         

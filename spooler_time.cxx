@@ -859,7 +859,7 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
-    if( !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
+    if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_repeated( time_of_day ).is_never() )  result = true;
     else
         result = false;
 
@@ -960,11 +960,11 @@ string Period::to_xml() const
 {
     S result;
 
-    result << "<period ";
-    result << " begin=" << _begin.as_string();
-    result << " end=" << _begin.as_string();
-    if( !_repeat.is_never() )  result << " repeat=" << _repeat.as_string();
-    if( !_absolute_repeat.is_never() )  result << " absolute_repeat=" << _absolute_repeat.as_string();
+    result << "<period";
+    result << " begin=\"" << _begin.as_string() << "\"";
+    result << " end=\""   << _end  .as_string() << "\"";
+    if( !_repeat         .is_never() )  result << " repeat=\""          << _repeat         .as_string() << "\"";
+    if( !_absolute_repeat.is_never() )  result << " absolute_repeat=\"" << _absolute_repeat.as_string() << "\"";
     result << "/>";
 
     return result;
@@ -2012,15 +2012,14 @@ Time Run_time::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
     
-    return !period.absolute_repeat().is_never()? period.next_repeated( time )
-                                               : period.begin();
+    return period.begin();
 }
 
 //-------------------------------------------------------------------------Run_time::next_any_start
 
 Time Run_time::next_any_start( const Time& time )
 { 
-    Period period = next_period( time, wss_next_any_start);
+    Period period = next_period( time, wss_next_any_start );
 
     return !period.absolute_repeat().is_never()? period.next_repeated( time )
                                                : period.begin();

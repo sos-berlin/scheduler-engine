@@ -484,6 +484,7 @@ bool Folder::adjust_with_directory( double now )
     {
         // DATEINAMEN EINSAMMELN
 
+        if( !base_file_is_removed() )
         try
         {
             string last_normalized_name;
@@ -565,7 +566,7 @@ bool Folder::adjust_with_directory( double now )
         {
             if( _directory.exists() )  throw;                                   // Problem beim Lesen des Verzeichnisses
             
-            if( !_parent )  _log->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
+            if( !_parent )  log()->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
 
             // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
         }
@@ -580,7 +581,7 @@ bool Folder::adjust_with_directory( double now )
     }
     catch( exception& x ) 
     {
-        _log->error( message_string( "SCHEDULER-431", x ) );
+        log()->error( message_string( "SCHEDULER-431", x ) );
         //? Fehler merken für <show_state>, oder was machen wir mit dem Fehler? Später wiederholen
     }
 
@@ -661,7 +662,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         new_subfolder->set_folder_path( folder()->path() );
         new_subfolder->set_name( base_file_info->_normalized_name );
         new_subfolder->set_base_file_info( *base_file_info );
-      //new_subfolder->set_file_based_state( File_based::s_not_initialized );
         add_file_based( new_subfolder );
         something_changed = true;
 
@@ -669,16 +669,33 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         if( ok )  new_subfolder->adjust_with_directory( now );
     }
     else
-    if( base_file_info )
     {
-        subfolder->set_base_file_info( *base_file_info );
-        something_changed = subfolder->adjust_with_directory( now );
-    }
-    else
-    if( !subfolder->is_to_be_removed() ) 
-    {
-        subfolder->remove();
-        something_changed = true;
+        subfolder->_file_is_removed = base_file_info == NULL;
+        subfolder->_remove_xc       = zschimmer::Xc();
+
+        if( base_file_info )
+        {
+            subfolder->set_base_file_info( *base_file_info );
+            subfolder->set_to_be_removed( false ); 
+            something_changed = subfolder->adjust_with_directory( now );    
+        }
+        else
+        if( !subfolder->is_to_be_removed() ) 
+        {
+            string p = folder()->make_path( subfolder->base_file_info()._filename );
+            subfolder->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
+
+            subfolder->adjust_with_directory( now );
+            subfolder->remove();
+
+            something_changed = true;
+        }
+        else
+        {
+            // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
+            // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
+            something_changed = subfolder->adjust_with_directory( now );    
+        }
     }
 
     return something_changed;
@@ -686,20 +703,21 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
 
 //-------------------------------------------------------------------Folder::remove_all_file_baseds
 
-void Folder::remove_all_file_baseds()
-{
-    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-    {
-        Typed_folder* typed_folder = it->second;
-        typed_folder->remove_all_file_baseds();
-    }
-}
+//void Folder::remove_all_file_baseds()
+//{
+//    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
+//    {
+//        Typed_folder* typed_folder = it->second;
+//        typed_folder->remove_all_file_baseds();
+//    }
+//}
 
 //------------------------------------------------------------------------Folder::prepare_to_remove
 
 void Folder::prepare_to_remove()
 {
-    remove_all_file_baseds();
+    //Das wird besser von adjust_with_directory() erledigt: remove_all_file_baseds();
+    My_file_based::prepare_to_remove();
 }
 
 //-----------------------------------------------------------------------Folder::can_be_removed_now
@@ -727,7 +745,7 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
     _zero_(this+1),
     _folder(folder)
 {
-    _log->set_prefix( obj_name() );     // Noch ohne Pfad
+    log()->set_prefix( obj_name() );     // Noch ohne Pfad
 }
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
@@ -785,10 +803,7 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
         while( fb != ordered_file_baseds.end()  &&
                ( fi == ordered_file_infos.end()  ||  (*fi)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
         {
-            if( !(*fb)->_file_is_removed )
-            {
-                something_changed |= on_base_file_changed( *fb, NULL, now );
-            }
+            something_changed |= on_base_file_changed( *fb, NULL, now );
             fb++;
         }
 
@@ -804,6 +819,20 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info, double now )
 {
+#   ifdef Z_DEBUG
+        if( zschimmer::Log_ptr log = "joacim" )
+        {
+            log << __FUNCTION__ << "( ";
+            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._timestamp_utc ).as_string()
+                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
+                            else  log << "new";
+            log << ", ";
+            if( base_file_info )  log << Time().set_utc( base_file_info->_timestamp_utc ).as_string();
+                            else  log << "removed file";
+            log << " )\n";
+        }
+#   endif
+
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;
     File_based*     current_file_based = old_file_based;        // File_based der zuletzt gelesenen Datei
@@ -813,9 +842,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
     if( old_file_based )  
     {
+        if( !old_file_based->_file_is_removed )  old_file_based->_remove_xc = zschimmer::Xc();      // Datei ist wieder da
         old_file_based->_file_is_removed = base_file_info == NULL;
-        old_file_based->_remove_xc       = zschimmer::Xc();
-        if( old_file_based->replacement() )  current_file_based = old_file_based->replacement();   // File_based der zuletzt geladenen Datei
+        if( old_file_based->replacement() )  current_file_based = old_file_based->replacement();    // File_based der zuletzt geladenen Datei
     }
 
 
@@ -825,7 +854,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         {
             file_path = File_path( folder()->directory(), base_file_info->_filename );
 
-            bool timestamp_changed = current_file_based  &&
+            bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
+                                     current_file_based  &&
                                      current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc;
 
             //if( current_file_based )
@@ -854,7 +884,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                 if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )    // ERRNO-2 (Datei gelöscht)?
                 {
-                    if( old_file_based )  old_file_based->remove(),  old_file_based = NULL;
+                    if( old_file_based )  
+                    {
+                        old_file_based->_file_is_removed = true;
+                        old_file_based->remove();
+                        old_file_based = NULL;
+                    }
                 }
                 else
                 if( read_again  &&                                              // Inhalt nach file_timestamp_delay nochmal prüfen?
@@ -933,8 +968,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                 }
             }
         }
-        else                                    // Datei ist gelöscht
-        if( old_file_based->has_base_file() )   // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht löschen
+        else                                        // Datei ist gelöscht
+        if( old_file_based->has_base_file()  &&     // Nicht dateibasiertes Objekt, also aus anderer Quelle, nicht löschen
+            !old_file_based->is_to_be_removed() )
         {
             something_changed = true;
 
@@ -942,6 +978,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
             old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
             file_based = old_file_based;                // Für catch()
+            assert( file_based->_file_is_removed );
             file_based->remove();
             file_based = NULL;
         }
@@ -1150,6 +1187,8 @@ void Typed_folder::remove_file_based( File_based* file_based )
 
         file_based->set_typed_folder( NULL );
         _file_based_map.erase( it );
+
+        if( _file_based_map.empty() )  folder()->check_for_replacing_or_removing();
     }
 
 
@@ -1182,18 +1221,18 @@ File_based* Typed_folder::replace_file_based( File_based* old_file_based )
 
 //-------------------------------------------------------------Typed_folder::remove_all_file_baseds
 
-void Typed_folder::remove_all_file_baseds()
-{
-    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
-    {
-        File_based_map::iterator next_it = it;  next_it++;
-
-        File_based* file_based = it->second;
-        file_based->remove();
-
-        it = next_it;
-    }
-}
+//void Typed_folder::remove_all_file_baseds()
+//{
+//    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
+//    {
+//        File_based_map::iterator next_it = it;  next_it++;
+//
+//        File_based* file_based = it->second;
+//        if( !file_based->is_to_be_removed() )  file_based->remove();
+//
+//        it = next_it;
+//    }
+//}
 
 //-------------------------------------------------------------------------Typed_folder::file_based
 
@@ -1656,7 +1695,7 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
             }
         }
         else
-        if( is_to_be_removed()  &&  can_be_removed_now()   )
+        if( is_to_be_removed()  &&  can_be_removed_now() )
         {
             if( when_to_act == act_now )  remove_now();
                                     else  typed_folder()->add_to_replace_or_remove_candidates( name() );

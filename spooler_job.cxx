@@ -1979,14 +1979,9 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                     {
                         Period next_period = _run_time->next_period( _period.end() );
 
-                        if( _period.absolute_repeat().is_never() )
-                        {
-                            _period = next_period;      // Könnte auch sonst gemacht werden, statt SCHEDULER-927?
-                            next_start_time = _period.begin();
-                        }
-                        else
                         if( _period.end()    == next_period.begin()  &&  
-                            _period.repeat() == next_period.repeat() )
+                            _period.repeat() == next_period.repeat()  &&  
+                            _period.absolute_repeat().is_never() )
                         {
                             if( _spooler->_debug )  msg += " (in the following period)";
                         }
