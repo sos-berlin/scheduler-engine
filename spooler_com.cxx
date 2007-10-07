@@ -3546,6 +3546,7 @@ STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* ijob_chain )
         Job_chain* job_chain = dynamic_cast<Job_chain*>( ijob_chain );
         if( !job_chain)  return E_POINTER;
 
+        //job_chain->set_defined();
         Folder* folder = _spooler->root_folder();
         job_chain->set_folder_path( folder->path() );
         job_chain->initialize();

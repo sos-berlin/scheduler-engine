@@ -154,6 +154,7 @@ STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* ilock )
         Lock* lock = dynamic_cast<Lock*>( ilock );
         if( !lock)  return E_POINTER;
 
+        //lock->set_defined();
         Folder* folder = spooler()->root_folder();
         lock->set_folder_path( folder->path() );
         lock->initialize();
@@ -205,51 +206,6 @@ Lock_folder::Lock_folder( Folder* folder )
 Lock_folder::~Lock_folder()
 {
 }
-
-//-----------------------------------------------------------------------------Lock_folder::set_dom
-
-//void Lock_folder::set_dom( const xml::Element_ptr& locks_element )
-//{
-//    if( !locks_element.nodeName_is( "locks" ) )  z::throw_xc( "SCHEDULER-409", "locks", locks_element.nodeName() );
-//
-//    DOM_FOR_EACH_ELEMENT( locks_element, lock_element )
-//    {
-//        execute_xml_lock( lock_element );
-//    }
-//}
-
-//--------------------------------------------------------------------Lock_folder::execute_xml_lock
-
-//void Lock_folder::execute_xml_lock( const xml::Element_ptr& lock_element )
-//{
-//    if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
-//
-//    string lock_name = lock_element.getAttribute( "name" );
-//    
-//    if( ptr<Lock> lock = lock_or_null( lock_name ) )
-//    {
-//        lock->set_dom( lock_element );
-//    }
-//    else
-//    {
-//        add_file_based_xml( lock_element );
-//    }
-//}
-
-//-------------------------------------------------------------------------Lock_folder::dom_element
-
-//xml::Element_ptr Lock_folder::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-//{
-//    xml::Element_ptr result = dom_document.createElement( "locks" );
-//
-//    for( File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); it++ )
-//    {
-//        Lock* lock = static_cast<Lock*>( +it->second );
-//        result.appendChild( lock->dom_element( dom_document, show_what ) );
-//    }
-//
-//    return result;
-//}
 
 //---------------------------------------------------------------------------------------Lock::Lock
 
@@ -550,15 +506,10 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
     xml::Element_ptr result = dom_document.createElement( "lock" );
 
     fill_file_based_dom_element( result, show_what );
-    //if( has_base_file() )  result.appendChild_if( File_based::dom_element( dom_document, show_what ) );
-    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( dom_document, show_what ) );
 
-    //result.setAttribute( "name", name() );
     if( _config._max_non_exclusive < INT_MAX )  result.setAttribute( "max_non_exclusive", _config._max_non_exclusive );
 
     if( is_free() )  result.setAttribute( "is_free", "yes" );
-
-    //result.setAttribute( "state", state_name() );
 
     if( !_holder_set.empty() )
     {

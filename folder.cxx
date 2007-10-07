@@ -370,6 +370,8 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     add_to_typed_folder_map( _subfolder_folder      );
 
     _log->set_prefix( obj_name() );     // Noch ohne Pfad
+
+    //set_file_based_state( File_based::s_not_initialized );      // s_undefined überspringen wir, denn Folder hat keine XML-Definition
 }
 
 //--------------------------------------------------------------------------add_to_typed_folder_map
@@ -659,6 +661,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         new_subfolder->set_folder_path( folder()->path() );
         new_subfolder->set_name( base_file_info->_normalized_name );
         new_subfolder->set_base_file_info( *base_file_info );
+      //new_subfolder->set_file_based_state( File_based::s_not_initialized );
         add_file_based( new_subfolder );
         something_changed = true;
 
@@ -868,6 +871,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
 
                     file_based = subsystem()->call_new_file_based();
+                    file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
                     file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._timestamp_utc != base_file_info->_timestamp_utc;
                     file_based->_md5        = content_md5;
                     file_based->set_base_file_info( *base_file_info );
@@ -904,7 +908,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                     Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
 
-                    file_based->set_dom( dom_document.documentElement() );
+                    file_based->set_dom( element );
+                    file_based->set_file_based_state( File_based::s_not_initialized );
+
                     file_based->initialize();
 
 
@@ -1003,6 +1009,7 @@ ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element
     file_based->set_folder_path( folder()->path() );
     file_based->set_name( element.getAttribute( "name" ) );
     file_based->set_dom( element );
+  //file_based->set_file_based_state( File_based::s_not_initialized );
     file_based->initialize();
 
     return file_based;
@@ -1267,7 +1274,8 @@ File_based::File_based( File_based_subsystem* subsystem, IUnknown* iunknown, Typ
 : 
     Scheduler_object( subsystem->spooler(), iunknown, type_code ), 
     _zero_(this+1),
-    _file_based_subsystem(subsystem)
+    _file_based_subsystem(subsystem),
+    _state(s_not_initialized)
 {
 }
 
@@ -1384,12 +1392,22 @@ void File_based::set_file_based_state( State state )
 { 
     if( _state != state )
     {
+        assert( _state == s_not_initialized && state == s_undefined  ||  _state < state );
         _state = state; 
 
         log()->log( _state == s_active? log_info : log_debug9,
                     message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name() ) );
     }
 }
+
+//--------------------------------------------------------------------------File_based::set_defined
+
+//void File_based::set_defined()
+//{
+//    if( _state != s_undefined )  assert(0), z::throw_xc( __FUNCTION__, obj_name() );
+//
+//    set_file_based_state( s_not_initialized );
+//}
 
 //--------------------------------------------------------------File_based::try_set_to_wished_state
 
@@ -1406,7 +1424,8 @@ bool File_based::switch_file_based_state( State state )
 
     switch( state )
     {
-        case s_not_initialized: break;
+        case s_undefined:        break;
+        case s_not_initialized:  break;
         case s_initialized: result = initialize();  break;
         case s_loaded:      result = load();        break;
         case s_active:      result = activate();    break;
@@ -1713,6 +1732,7 @@ string File_based::file_based_state_name( State state )
 {
     switch( state )
     {
+        case s_undefined:       return "undefined";
         case s_not_initialized: return "not_initialized";
         case s_initialized:     return "initialized";
         case s_loaded:          return "loaded";

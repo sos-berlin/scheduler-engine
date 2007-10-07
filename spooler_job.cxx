@@ -1947,7 +1947,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
 
             if( _start_once  ||  
                 _start_min_tasks  ||  
-                !repeat  &&  ( _period.has_repeat_or_once() || !_period.absolute_repeat().is_never() ) )
+                !repeat  &&  _period.has_repeat_or_once() )
             {
                 if( _period.begin() > now )
                 {
@@ -2004,6 +2004,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
             {
                 Time t = _period.next_repeated( now );
                 if( t < _period.end() )  next_start_time = t;
+                else  next_start_time = _run_time.next_period( _period.end() ).begin();
             }
         }
     }

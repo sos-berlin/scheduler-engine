@@ -162,9 +162,10 @@ struct File_based : Scheduler_object,
 {
     enum State
     {
-        s_not_initialized,
-        s_initialized,
-        s_loaded,
+        s_undefined,     // Fehler in XML-Definition
+        s_not_initialized,      // on_initialized() gscheitert
+        s_initialized,          // on_initiailzed() ok, Objekt sieht gut aus
+        s_loaded,               // Mit Daten gefüllt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
         s_active,
         s_closed
     };
@@ -213,6 +214,7 @@ struct File_based : Scheduler_object,
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
+  //void                    set_defined                     ();                                     // Für Objekte, die kein XML brauchen
 
     void                    set_to_be_removed               ( bool );
     bool                     is_to_be_removed               () const                                { return _is_to_be_removed; }

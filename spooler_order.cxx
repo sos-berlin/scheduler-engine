@@ -1196,14 +1196,17 @@ void Job_node::activate()
 {
     if( Job* job = spooler()->job_subsystem()->job_or_null( _job_path ) )
     {
-        try
+        if( job->file_based_state() >= File_based::s_loaded )
         {
-            connect_job( job );
-        }
-        catch( exception& x )
-        {
-            log()->error( x.what() );
-            // Exception für <show_state> aufheben? (Node ist fast sowas wie File_based)
+            try
+            {
+                connect_job( job );
+            }
+            catch( exception& x )
+            {
+                log()->error( x.what() );
+                // Exception für <show_state> aufheben? (Node ist fast sowas wie File_based)
+            }
         }
     }
 
@@ -6210,7 +6213,21 @@ Time Order::next_start_time( bool first_call )
         if( first_call )
         {
             _period = _run_time->next_period( now, time::wss_next_period_or_single_start );
-            result = _period.begin();
+
+            if( !_period.absolute_repeat().is_never() )
+            {
+                result = _period.next_repeated( now );
+
+                if( result.is_never() )
+                {
+                    _period = _run_time->next_period( _period.end(), time::wss_next_period_or_single_start );
+                    result = _period.begin();
+                }
+            }
+            else
+            {
+                result = _period.begin();
+            }
         }
         else
         {
