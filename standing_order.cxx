@@ -205,10 +205,22 @@ bool Standing_order::on_activate()
 
 bool Standing_order::order_is_removable_or_replaceable()
 {
-    return !_order  ||
-           _order->job_chain_path() == ""  ||  
-           _order->is_virgin()  || 
-           _order->end_state_reached();
+    bool result;
+
+    result = !_order  ||
+             _order->job_chain_path() == ""  ||  
+             _order->is_virgin()  || 
+             _order->end_state_reached();
+
+    if( !result )
+    {
+        if( Job_chain* job_chain = spooler()->order_subsystem()->job_chain_or_null( _order->job_chain_path() ) )
+        {
+            result = job_chain->is_to_be_removed();
+        }
+    }
+
+    return result;
 }
 
 //---------------------------------------------------------------Standing_order::can_be_removed_now

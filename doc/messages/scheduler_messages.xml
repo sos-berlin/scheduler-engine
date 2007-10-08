@@ -4051,6 +4051,12 @@
                 <title>Error in replacement ignored::<br/><p2>error</p2></title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-898">
+            <text xml:lang="en">
+                <title>Folder is going to be removed because its configuration directory has been removed</title>
+            </text>
+        </message>
     </messages>
     
 </messages>

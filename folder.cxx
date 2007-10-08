@@ -683,7 +683,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         if( !subfolder->is_to_be_removed() ) 
         {
             string p = folder()->make_path( subfolder->base_file_info()._filename );
-            subfolder->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
+            subfolder->log()->info( message_string( "SCHEDULER-898" ) );
 
             subfolder->adjust_with_directory( now );
             subfolder->remove();

@@ -1932,7 +1932,7 @@ void Task::finish()
 
 void Task::set_state_texts_from_stdout()
 {
-    if( _module_instance )
+    if( _module_instance  &&  _module_instance->stdout_path() != "" )
     {
         try
         {

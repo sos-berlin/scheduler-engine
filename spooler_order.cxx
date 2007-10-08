@@ -3167,6 +3167,7 @@ void Order_queue::close()
     {
         Order* order = *it;
         _log->info( message_string( "SCHEDULER-937", order->obj_name() ) );
+
         order->close();
         order->_is_in_order_queue = false;
         it = _queue.erase( it );
@@ -3862,6 +3863,7 @@ Order::~Order()
         assert( !_job_chain );
         assert( !_is_on_blacklist );
         assert( !_is_in_order_queue );
+        assert( !_standing_order );
       //assert( !_is_replacement );
       //assert( !_replaced_by );
       //assert( !_order_queue );
@@ -4717,6 +4719,8 @@ void Order::close()
 
     if( _run_time )  _run_time->close(), _run_time = NULL;
 
+    if( _standing_order )  _standing_order->check_for_replacing_or_removing();
+
     _log->close();
 }
 
@@ -4838,12 +4842,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 {
     xml::Element_ptr result = dom_document.createElement( "order" );
 
-    if( _standing_order )  
-    {
-        _standing_order->fill_file_based_dom_element( result, show_what );
-        //if( _standing_order->has_base_file() )  result.appendChild_if( _standing_order->File_based::dom_element( dom_document, show_what ) );
-        //if( _standing_order->replacement()   )  result.append_new_element( "replacement" ).appendChild( _standing_order->replacement()->dom_element( dom_document, show_what ) );
-    }
+    if( _standing_order )  _standing_order->fill_file_based_dom_element( result, show_what );
 
     if( !show_what.is_set( show_for_database_only ) )
     {
@@ -5573,7 +5572,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     if( job_chain_stack_option == jc_remove_from_job_chain_stack )  
     {
         remove_from_job_chain_stack();
-        if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );  // Kann Auftrag aus der Jobkette nehmen
+        //if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );  // Kann Auftrag aus der Jobkette nehmen
 
         if( !_task )  close();      // 2007-09-16
     }
@@ -5962,8 +5961,9 @@ bool Order::handle_end_state_of_nested_job_chain()
     catch( exception& x ) 
     { 
         _log->error( message_string( "SCHEDULER-415", x ) );  
-        if( _job_chain )  _job_chain->remove_order( this );
-        end_state_reached = true;
+        remove_from_job_chain();
+        close();
+        //end_state_reached = true;
     }
 
     return end_state_reached;
@@ -6084,6 +6084,8 @@ void Order::postprocessing2( Job* last_job )
     {
         close();
     }
+
+    if( _job_chain )  _job_chain->check_for_replacing_or_removing();
 }
 
 //-----------------------------------------------------------------------------Order::set_suspended
@@ -6206,7 +6208,7 @@ Time Order::next_start_time( bool first_call )
 {
     Time result = Time::never;
 
-    if( _run_time->set() )
+    if( _run_time  &&  _run_time->set() )
     {
         Time now = Time::now();
 

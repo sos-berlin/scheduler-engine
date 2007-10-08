@@ -298,7 +298,7 @@ struct Order : Com_order,
     // Flüchtige Variablen, nicht für die Datenbank:
 
     Job_chain*                 _job_chain;              // Nur gesetzt, wenn !_is_distributed oder in Verarbeitung (_task). Sonst wird der Auftrag nur in der Datenbank gehalten
-    job_chain::Node*           _job_chain_node;       // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
+    job_chain::Node*           _job_chain_node;         // if( _job_chain)  Nächste Stelle, falls in einer Jobkette
 
     Absolute_path              _removed_from_job_chain_path; // Ehemaliges _job_chain->name(), nach remove_from_job_chain(), wenn _task != NULL
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
