@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -715,13 +715,13 @@
             der hier beschriebenen Kommandozeilenoptionen
             können in Anführungszeichen oder in Apostrophe
             gesetzt werden.
-            <br/><br/>
         </p>
         <p>
             Das Installationsprogramm erzeugt das Startskript <code>.\bin\jobscheduler.cmd</code> (Windows)
             bzw. <code>./bin/jobscheduler.sh</code> (Unix), in dem Kommandozeilenoptionen und Umgebungsvariablen
             bereits gesetzt werden. Das Startskript kann bei Bedarf angepasst werden.
-            <br/><br/>
+        </p>
+        <p>
             Startskript und Umgebungsvariablen sind im Handbuch »Installation und Konfiguration« beschrieben.
 
             <!-- TODO Welche? Das sollte hier kurz aufgeführt werden und steht jetzt sicher ausführlich in einer Installationsbeschreibung.
