@@ -484,101 +484,132 @@ bool Folder::adjust_with_directory( double now )
     {
         // DATEINAMEN EINSAMMELN
 
-        if( !base_file_is_removed() )
-        try
+        bool                   directory_is_removed = false;
+        bool                   directory_is_ok      = false;
+
+        if( base_file_is_removed() )
         {
-            string last_normalized_name;
-            string last_extension;
-            string last_filename;
+            directory_is_removed = true;
+        }
+        else
+        {
+            file::Directory_lister dir;
 
-            for( file::Directory_lister dir ( _directory );; )
+            try
             {
-                ptr<file::File_info> file_info   = dir.get();
-                if( !file_info )  break;
+                dir.open( _directory );
+                directory_is_ok = true;
+            }
+            catch( zschimmer::Xc& x )
+            {
+                if( !_parent  &&  !_directory.exists() )  z::throw_xc( "SCHEDULER-882", _directory, x );    // Jemand hat das Konfigurationsverzeichnis entfernt
 
-#               ifdef Z_UNIX
-                    bool file_exists = file_info->try_call_stat();
-#                else
-                    bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
-#               endif
+                if( x.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )  // ERRNO-2  Verzeichnis gelöscht
+                    directory_is_removed = true, log()->debug3( x.what() );
+                else
+                if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt.
+                    log()->info( x.what() ); 
+                else  
+                    throw;
+            }
 
-                if( file_exists )
+            if( directory_is_ok )
+            {
+                string last_normalized_name;
+                string last_extension;
+                string last_filename;
+
+                while(1)
                 {
-                    string        filename     = file_info->path().name();
-                    string        name;
-                    string        extension    = extension_of_filename( filename );
-                    string        normalized_extension = lcase( extension );
-                    Typed_folder* typed_folder = NULL;
+                    ptr<file::File_info> file_info   = dir.get();
+                    if( !file_info )  break;
 
-                    if( file_info->is_directory() )
+    #               ifdef Z_UNIX
+                        bool file_exists = file_info->try_call_stat();
+    #                else
+                        bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
+    #               endif
+
+                    if( file_exists )
                     {
-                        name         = filename;
-                        typed_folder = _subfolder_folder;
-                    }
-                    else
-                    {
-                        name = object_name_of_filename( filename );
-                        
-                        if( name != "" )
+                        string        filename     = file_info->path().name();
+                        string        name;
+                        string        extension    = extension_of_filename( filename );
+                        string        normalized_extension = lcase( extension );
+                        Typed_folder* typed_folder = NULL;
+
+                        if( file_info->is_directory() )
                         {
-                            Typed_folder_map::iterator it = _typed_folder_map.find( extension );
-                            if( it != _typed_folder_map.end() )  typed_folder = it->second;
-                        }
-                    }
-
-                    if( typed_folder )
-                    {
-                        string normalized_name = typed_folder->subsystem()->normalized_name( name );
-
-                        if( normalized_name == last_normalized_name  &&
-                            extension       == last_extension           )
-                        {
-                            zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
-
-                            log()->warn( x.what() );
-
-                            // Liefert minütlich eine eMail:
-                            //if( _spooler->_mail_on_error )
-                            //{
-                            //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
-                            //    scheduler_event.set_error( x );
-
-                            //    Mail_defaults mail_defaults( spooler() );
-                            //    mail_defaults.set( "subject", x.what() );
-                            //    mail_defaults.set( "body"   , x.what() );
-
-                            //    scheduler_event.send_mail( mail_defaults );
-                            //}
+                            name         = filename;
+                            typed_folder = _subfolder_folder;
                         }
                         else
                         {
-                            file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
+                            name = object_name_of_filename( filename );
+                            
+                            if( name != "" )
+                            {
+                                Typed_folder_map::iterator it = _typed_folder_map.find( extension );
+                                if( it != _typed_folder_map.end() )  typed_folder = it->second;
+                            }
                         }
 
-                        last_normalized_name = normalized_name;
-                        last_extension       = normalized_extension;
-                        last_filename        = filename;
+                        if( typed_folder )
+                        {
+                            string normalized_name = typed_folder->subsystem()->normalized_name( name );
+
+                            if( normalized_name == last_normalized_name  &&
+                                extension       == last_extension           )
+                            {
+                                zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
+
+                                log()->warn( x.what() );
+
+                                // Liefert minütlich eine eMail:
+                                //if( _spooler->_mail_on_error )
+                                //{
+                                //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                                //    scheduler_event.set_error( x );
+
+                                //    Mail_defaults mail_defaults( spooler() );
+                                //    mail_defaults.set( "subject", x.what() );
+                                //    mail_defaults.set( "body"   , x.what() );
+
+                                //    scheduler_event.send_mail( mail_defaults );
+                                //}
+                            }
+                            else
+                            {
+                                file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
+                            }
+
+                            last_normalized_name = normalized_name;
+                            last_extension       = normalized_extension;
+                            last_filename        = filename;
+                        }
                     }
                 }
             }
         }
-        catch( exception& x )
+
+        if( directory_is_ok  ||  directory_is_removed )
         {
-            if( _directory.exists() )  throw;                                   // Problem beim Lesen des Verzeichnisses
-            
-            if( !_parent )  log()->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
+            Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
+            {
+                Typed_folder* typed_folder = it->second;
 
-            // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
-        }
-
-
-        Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-        {
-            Typed_folder* typed_folder = it->second;
-
-            something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ], now );
+                something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ], now );
+            }
         }
     }
+    //catch( exception& x )
+    //{
+    //    if( _directory.exists() )  throw;                                   // Problem beim Lesen des Verzeichnisses
+    //    
+    //    if( !_parent )  log()->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
+
+    //    // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
+    //}
     catch( exception& x ) 
     {
         log()->error( message_string( "SCHEDULER-431", x ) );
