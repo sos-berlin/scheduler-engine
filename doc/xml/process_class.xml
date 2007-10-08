@@ -49,6 +49,11 @@
                     Manche Betriebsysteme limitieren die Zahl der Prozesse, die der Scheduler starten darf.
                     Es sollten nicht mehr Prozesse konfiguriert werden als das Betriebssystem erlaubt.
                 </p>
+                <p>
+                    Für Microsoft Windows Betriebssysteme gilt derzeit eine Beschränkung von max. 30
+                    für die parallele Ausführung zugelassenen Prozessen.
+                </p>
+                </p>
             </description>
         </xml_attribute>
 
