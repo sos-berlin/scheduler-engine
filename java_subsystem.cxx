@@ -80,7 +80,7 @@ bool Java_subsystem::subsystem_load()
 
     //if( _spooler->_has_java_source )
     if( _spooler->_ignore_process_classes ||
-        _spooler->_scheduler_script  &&  _spooler->_scheduler_script->module()->kind() == Module::kind_java )     // Die Java-Jobs laufen mit unserer JVM
+        _spooler->scheduler_script_subsystem()->needs_java() )     // Die Java-Jobs laufen mit unserer JVM
     {
         string java_work_dir = _spooler->java_work_dir();
         _java_vm->set_work_dir( java_work_dir );

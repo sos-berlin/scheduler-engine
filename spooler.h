@@ -1,5 +1,4 @@
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-// §1172
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -132,6 +131,7 @@ struct Process;
 struct Process_class;
 struct Process_class_folder;
 struct Remote_scheduler_interface;
+struct Scheduler_script_folder;
 struct Scheduler_object;
 struct Scheduler_event;
 struct Show_what;
@@ -219,11 +219,11 @@ typedef stdext::hash_set<string> String_set;
 #include "scheduler_object.h"
 #include "subsystem.h"
 #include "register.h"
-#include "scheduler_script.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
 #include "folder.h"
+#include "scheduler_script.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"
 #include "spooler_command.h"
@@ -441,9 +441,10 @@ struct Spooler : Object,
     Database*                   db                          ()                                  { return _db; }
     sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
-    Scheduler_script_interface* scheduler_script            () const                            { return _scheduler_script; }
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
+    Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
+    Folder_subsystem*           folder_subsystem            ()                                  { return _folder_subsystem; }
     Process_class_subsystem*    process_class_subsystem     ();
     Task_subsystem*             task_subsystem              ();
     Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }
@@ -451,7 +452,6 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
     Standing_order_subsystem*   standing_order_subsystem    ();
-    Folder_subsystem*           folder_subsystem            ()                                  { return _folder_subsystem; }
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
 
@@ -560,6 +560,7 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+    ptr<Scheduler_script_subsystem_interface> _scheduler_script_subsystem;
     ptr<Folder_subsystem>            _folder_subsystem;
     ptr<Process_class_subsystem>     _process_class_subsystem;
     ptr<Job_subsystem_interface>     _job_subsystem;
@@ -618,7 +619,6 @@ struct Spooler : Object,
     ptr<Supervisor_client_interface> _supervisor_client;
     ptr<Scheduler_event_manager> _scheduler_event_manager;
 
-    ptr<Scheduler_script_interface> _scheduler_script;
 
     bool                       _ignore_process_classes;
     bool                       _ignore_process_classes_set;

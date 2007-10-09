@@ -652,20 +652,20 @@ Spooler::Spooler()
 {
     Z_DEBUG_ONLY( self_test() );
 
-    _scheduler_event_manager  = Z_NEW( Scheduler_event_manager( this ) );
-    _folder_subsystem         = new_folder_subsystem( this );
-    _scheduler_script         = new_scheduler_script( this );
-    _process_class_subsystem  = Z_NEW( Process_class_subsystem( this ) );
-    _lock_subsystem           = Z_NEW( lock::Lock_subsystem( this ) );
-    _job_subsystem            = new_job_subsystem( this );
-    _task_subsystem           = Z_NEW( Task_subsystem( this ) );
-    _order_subsystem          = new_order_subsystem( this );
-    _standing_order_subsystem = new_standing_order_subsystem( this );
-    _java_subsystem           = new_java_subsystem( this );
-    _db                       = Z_NEW( Database( this ) );
-    _http_server              = http::new_http_server( this );
-    _web_services             = new_web_services( this );
-    _supervisor               = new_supervisor( this );
+    _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
+    _folder_subsystem           = new_folder_subsystem( this );
+    _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
+    _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
+    _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
+    _job_subsystem              = new_job_subsystem( this );
+    _task_subsystem             = Z_NEW( Task_subsystem( this ) );
+    _order_subsystem            = new_order_subsystem( this );
+    _standing_order_subsystem   = new_standing_order_subsystem( this );
+    _java_subsystem             = new_java_subsystem( this );
+    _db                         = Z_NEW( Database( this ) );
+    _http_server                = http::new_http_server( this );
+    _web_services               = new_web_services( this );
+    _supervisor                 = new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -709,14 +709,15 @@ Spooler::~Spooler()
     set_ctrl_c_handler( false );
 
     // In der Reihenfolder der Abhängigkeiten löschen:
-    _standing_order_subsystem = NULL;
-    _order_subsystem          = NULL;
-    _task_subsystem           = NULL;
-    _job_subsystem            = NULL;
-    _lock_subsystem           = NULL;
-    _process_class_subsystem  = NULL;
-    _folder_subsystem         = NULL;
-    _db                       = NULL;
+    _standing_order_subsystem   = NULL;
+    _order_subsystem            = NULL;
+    _task_subsystem             = NULL;
+    _job_subsystem              = NULL;
+    _lock_subsystem             = NULL;
+    _process_class_subsystem    = NULL;
+    _scheduler_script_subsystem = NULL;
+    _folder_subsystem           = NULL;
+    _db                         = NULL;
     
     _security.clear();
 
@@ -892,10 +893,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
         if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show_what ) );
     
-        if( _order_subsystem )
-        {
-            state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show_what ) );
-        }
+        state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show_what ) );
     }
     else
     if( _folder_subsystem )  
@@ -907,7 +905,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     }
 
 
-    if( _order_subsystem  &&  !_order_subsystem->order_id_spaces_interface()->is_empty() )
+    if( !_order_subsystem->order_id_spaces_interface()->is_empty() )
          state_element.appendChild( _order_subsystem->order_id_spaces_interface()->dom_element( dom, show_what ) );
 
 
@@ -1722,8 +1720,8 @@ void Spooler::start()
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
 
-    _job_subsystem   ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
-    _scheduler_script->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
+    _job_subsystem             ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
     
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
 
@@ -1788,8 +1786,9 @@ void Spooler::activate()
     _order_subsystem         ->switch_subsystem_state( subsys_loaded );
     _standing_order_subsystem->switch_subsystem_state( subsys_loaded );
 
-    bool ok = _scheduler_script->switch_subsystem_state( subsys_loaded );
-    if( ok )  _scheduler_script->switch_subsystem_state( subsys_active );       // Hier passiert eigentlich nichts mehr (jedenfalls nicht bei Spidermonkey)
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_loaded );
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
+    detect_warning_and_send_mail();
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
 
@@ -1925,24 +1924,18 @@ void Spooler::stop( const exception* )
         }
     }
 
-    _scheduler_script->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
-
-
-    _standing_order_subsystem->switch_subsystem_state( subsys_stopped );
-    if( _order_subsystem )  
-     _order_subsystem        ->switch_subsystem_state( subsys_stopped );
-
-    //_job_subsystem->close_jobs();       // Löst die Sperren ( Job::_requestor=NULL)
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
+    _order_subsystem           ->switch_subsystem_state( subsys_stopped );
 
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
 
-    _job_subsystem           ->switch_subsystem_state( subsys_stopped );
-  //_order_subsystem = NULL;
-    _task_subsystem          ->switch_subsystem_state( subsys_stopped );
-    _lock_subsystem          ->switch_subsystem_state( subsys_stopped );
-    _process_class_subsystem ->switch_subsystem_state( subsys_stopped );
-    _folder_subsystem        ->switch_subsystem_state( subsys_stopped );
-    _java_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _job_subsystem             ->switch_subsystem_state( subsys_stopped );
+    _task_subsystem            ->switch_subsystem_state( subsys_stopped );
+    _lock_subsystem            ->switch_subsystem_state( subsys_stopped );
+    _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
+    _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _java_subsystem            ->switch_subsystem_state( subsys_stopped );
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
 
 

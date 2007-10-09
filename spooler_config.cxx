@@ -208,9 +208,10 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
                 root_folder()->lock_folder()->set_dom( e );
             }
             else
-            if( e.nodeName_is( "script" ) )
+            if( e.nodeName_is( "scheduler_script" )  ||
+                e.nodeName_is( "script" )               )
             {
-                _scheduler_script->set_dom_script( e );
+                _scheduler_script_subsystem->set_dom( e );
             }
             else
             if( e.nodeName_is( "jobs" ) )

@@ -327,8 +327,6 @@ bool Folder_subsystem::async_continue_( Continue_flags )
 
     _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
                                                                                     : directory_watch_interval_max;
-    //_directory_watch_interval = something_changed? directory_watch_interval_min
-    //                                             : min( directory_watch_interval_max, ( _directory_watch_interval + 1 ) + ( _directory_watch_interval / 10 ) );
 
     if( _read_again_at )  set_async_next_gmtime( _read_again_at );
                     else  set_async_delay( _directory_watch_interval );
@@ -355,30 +353,35 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     _parent(parent),
     _zero_(this+1)
 {
-    _process_class_folder  = spooler()->process_class_subsystem ()->new_process_class_folder ( this );
-    _lock_folder           = spooler()->lock_subsystem          ()->new_lock_folder          ( this );
-    _job_folder            = spooler()->job_subsystem           ()->new_job_folder           ( this );
-    _job_chain_folder      = spooler()->order_subsystem         ()->new_job_chain_folder     ( this );
-    _standing_order_folder = spooler()->standing_order_subsystem()->new_standing_order_folder( this );
-    _subfolder_folder      = spooler()->folder_subsystem        ()->new_subfolder_folder     ( this );
+    if( !_parent )
+    _scheduler_script_folder = spooler()->scheduler_script_subsystem()->new_scheduler_script_folder( this );
 
-    add_to_typed_folder_map( _process_class_folder  );
-    add_to_typed_folder_map( _lock_folder           );
-    add_to_typed_folder_map( _job_folder            );
-    add_to_typed_folder_map( _job_chain_folder      );
-    add_to_typed_folder_map( _standing_order_folder );
-    add_to_typed_folder_map( _subfolder_folder      );
+    _process_class_folder    = spooler()->process_class_subsystem   ()->new_process_class_folder ( this );
+    _lock_folder             = spooler()->lock_subsystem            ()->new_lock_folder          ( this );
+    _job_folder              = spooler()->job_subsystem             ()->new_job_folder           ( this );
+    _job_chain_folder        = spooler()->order_subsystem           ()->new_job_chain_folder     ( this );
+    _standing_order_folder   = spooler()->standing_order_subsystem  ()->new_standing_order_folder( this );
+    _subfolder_folder        = spooler()->folder_subsystem          ()->new_subfolder_folder     ( this );
+
+  //add_to_typed_folder_map( _scheduler_script_folder );
+    add_to_typed_folder_map( _process_class_folder    );
+    add_to_typed_folder_map( _lock_folder             );
+    add_to_typed_folder_map( _job_folder              );
+    add_to_typed_folder_map( _job_chain_folder        );
+    add_to_typed_folder_map( _standing_order_folder   );
+    add_to_typed_folder_map( _subfolder_folder        );
 
     _log->set_prefix( obj_name() );     // Noch ohne Pfad
-
-    //set_file_based_state( File_based::s_not_initialized );      // s_undefined überspringen wir, denn Folder hat keine XML-Definition
 }
 
 //--------------------------------------------------------------------------add_to_typed_folder_map
     
 void Folder::add_to_typed_folder_map( Typed_folder* typed_folder )
 {
-    _typed_folder_map[ typed_folder->subsystem()->filename_extension() ] = typed_folder;
+    if( typed_folder )
+    {
+        _typed_folder_map[ typed_folder->subsystem()->filename_extension() ] = typed_folder;
+    }
 }
 
 //----------------------------------------------------------------------------------Folder::~Folder
@@ -392,6 +395,14 @@ Folder::~Folder()
 
 void Folder::close()
 {
+}
+
+//------------------------------------------------------------------Folder::scheduler_script_folder
+
+Scheduler_script_folder* Folder::scheduler_script_folder()
+{
+    if( !_scheduler_script_folder )  z::throw_xc( Z_FUNCTION );
+    return _scheduler_script_folder;
 }
 
 //---------------------------------------------------------------------------------Folder::set_name
@@ -484,8 +495,8 @@ bool Folder::adjust_with_directory( double now )
     {
         // DATEINAMEN EINSAMMELN
 
-        bool                   directory_is_removed = false;
-        bool                   directory_is_ok      = false;
+        bool directory_is_removed = false;
+        bool directory_is_ok      = false;
 
         if( base_file_is_removed() )
         {
@@ -524,19 +535,19 @@ bool Folder::adjust_with_directory( double now )
                     ptr<file::File_info> file_info   = dir.get();
                     if( !file_info )  break;
 
-    #               ifdef Z_UNIX
+#                   ifdef Z_UNIX
                         bool file_exists = file_info->try_call_stat();
-    #                else
+#                    else
                         bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
-    #               endif
+#                   endif
 
                     if( file_exists )
                     {
-                        string        filename     = file_info->path().name();
+                        string        filename             = file_info->path().name();
                         string        name;
-                        string        extension    = extension_of_filename( filename );
+                        string        extension            = extension_of_filename( filename );
                         string        normalized_extension = lcase( extension );
-                        Typed_folder* typed_folder = NULL;
+                        Typed_folder* typed_folder         = NULL;
 
                         if( file_info->is_directory() )
                         {
@@ -602,14 +613,6 @@ bool Folder::adjust_with_directory( double now )
             }
         }
     }
-    //catch( exception& x )
-    //{
-    //    if( _directory.exists() )  throw;                                   // Problem beim Lesen des Verzeichnisses
-    //    
-    //    if( !_parent )  log()->error( message_string( "SCHEDULER-882", _directory, x ) );    // Jemand hat das Verzeichnis entfernt
-
-    //    // Die Objekte dieses Ordners werden von adjust_with_directory() gelöscht, denn file_list_map enthält leere File_info_list.
-    //}
     catch( exception& x ) 
     {
         log()->error( message_string( "SCHEDULER-431", x ) );
@@ -656,8 +659,7 @@ string Folder::obj_name() const
 {
     S result;
     result << Scheduler_object::obj_name();
-    //if( path_without_slash() != "" )  
-        result << " " << path();
+    result << " " << path();
     return result;
 }
 
@@ -853,7 +855,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 #   ifdef Z_DEBUG
         if( zschimmer::Log_ptr log = "joacim" )
         {
-            log << __FUNCTION__ << "( ";
+            log << Z_FUNCTION << "( ";
             if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._timestamp_utc ).as_string()
                                       << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
                             else  log << "new";
@@ -888,12 +890,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
             bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                      current_file_based  &&
                                      current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc;
-
-            //if( current_file_based )
-            //{
-            //    Z_LOG2( "scheduler", Time().set_utc(current_file_based->_base_file_info._info_timestamp+file_timestamp_delay ).as_string() << " " <<
-            //                         Time().set_utc(now).as_string() << " " << file_path << "\n" );
-            //}
 
             bool read_again = !timestamp_changed  &&  
                               current_file_based  &&
@@ -966,7 +962,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
                     xml::Document_ptr dom_document ( content );
                     xml::Element_ptr  element      = dom_document.documentElement();
-                    subsystem()->assert_xml_element_name( element );      //Weil Püschel auch <add_order> haben will.  if( !dom_document.documentElement().nodeName_is( subsystem()->xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_element_name(), dom_document.documentElement().nodeName() );
+                    subsystem()->assert_xml_element_name( element );
                     if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
 
                     assert_empty_attribute( element, "spooler_id" );
@@ -1068,16 +1064,17 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
 //-----------------------------------------------------Typed_folder::new_initialized_file_based_xml
 
-ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element_ptr& element )
+ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element_ptr& element, const string& default_name )
 {
     subsystem()->check_file_based_element( element );
     //assert_empty_attribute( element, "replace"    );
 
     ptr<File_based> file_based = subsystem()->call_new_file_based();
+    file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
     file_based->set_folder_path( folder()->path() );
-    file_based->set_name( element.getAttribute( "name" ) );
+    file_based->set_name( element.getAttribute( "name", default_name ) );
     file_based->set_dom( element );
-  //file_based->set_file_based_state( File_based::s_not_initialized );
+    file_based->set_file_based_state( File_based::s_not_initialized );
     file_based->initialize();
 
     return file_based;
@@ -1085,20 +1082,20 @@ ptr<File_based> Typed_folder::new_initialized_file_based_xml( const xml::Element
 
 //-----------------------------------------------------------------Typed_folder::add_file_based_xml
 
-void Typed_folder::add_file_based_xml( const xml::Element_ptr& element )
+void Typed_folder::add_file_based_xml( const xml::Element_ptr& element, const string& default_name )
 {
-    ptr<File_based> file_based = new_initialized_file_based_xml( element );
+    ptr<File_based> file_based = new_initialized_file_based_xml( element, default_name );
     add_file_based( file_based );
     file_based->activate();
 }
 
 //------------------------------------------------------Typed_folder::add_or_replace_file_based_xml
 
-void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& element )
+void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& element, const string& default_name )
 {
     subsystem()->check_file_based_element( element );
 
-    if( ptr<File_based> file_based = file_based_or_null( element.getAttribute( "name" ) ) )
+    if( ptr<File_based> file_based = file_based_or_null( element.getAttribute( "name", default_name ) ) )
     {
         bool replace_yes        =  element.bool_getAttribute( "replace", false );                   // replace="yes"
         bool replace_no         = !element.bool_getAttribute( "replace", true  );                   // replace="no"
@@ -1109,7 +1106,9 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
         if( replace_no  ||  
             use_base_mechanism  &&  !replace_yes )
         {
-            file_based->set_dom( element );     // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
+            file_based->set_file_based_state( File_based::s_undefined ); 
+            file_based->set_dom( element );         // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
+            file_based->set_file_based_state( File_based::s_not_initialized );
         }
         else
         {
@@ -1125,7 +1124,7 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
         //    z::throw_xc( SCHEDULER-441, obj_name() );   // replace="no" und Objekt ist nicht bekannt
         //}
 
-        add_file_based_xml( element );
+        add_file_based_xml( element, default_name );
     }
 }
 
@@ -1812,7 +1811,6 @@ string File_based::file_based_state_name( State state )
         case s_loaded:          return "loaded";
         case s_active:          return "active";
         case s_closed:          return "closed";
-      //case s_error:           return "error";
         default:                return S() << "File_based_state-" << state;
     }
 }
@@ -1976,7 +1974,7 @@ string File_based_subsystem::normalized_path( const Path& path ) const
 
 void File_based_subsystem::check_file_based_element( const xml::Element_ptr& element )
 {
-    if( !element.nodeName_is( xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", xml_element_name(), element.nodeName() );
+    assert_xml_element_name( element );
 
     if( element.getAttribute( "spooler_id" ) != ""  &&
         element.getAttribute( "spooler_id" ) != _spooler->id() )

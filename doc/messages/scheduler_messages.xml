@@ -741,11 +741,8 @@
         </message>
 
         <message code="SCHEDULER-183">
-            <text xml:lang="de">
-                <title>Scheduler wird nicht gestartet, weil spooler_init() false liefert</title>
-            </text>
             <text xml:lang="en">
-                <title>Scheduler cannot start because spooler_init() returned false</title>
+                <title>Scheduler cannot start because spooler_init() in '<p1>scheduler_script</p1>' returned false</title>
             </text>
         </message>
 

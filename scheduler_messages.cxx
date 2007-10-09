@@ -60,7 +60,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-177", "Java is not available (see error message when Scheduler started)" },
     { "SCHEDULER-179", "<process> task did not terminate. pid=$1" },
     { "SCHEDULER-182", "Expecting XML element <variable>" },
-    { "SCHEDULER-183", "Scheduler cannot start because spooler_init() returned false" },
+    { "SCHEDULER-183", "Scheduler cannot start because spooler_init() in '$1' returned false" },
     { "SCHEDULER-184", "Scheduler database cannot be accessed due to a database problem" },
     { "SCHEDULER-186", "$1 is already in job chain $2" },
     { "SCHEDULER-187", "Order.setback(): An order can only be set back when it is being executed by a task" },

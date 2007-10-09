@@ -71,6 +71,7 @@ struct Absolute_path : Path
                               //Absolute_path               ( const char* path )                    { set_path( path ); }
                                 Absolute_path               ( const Absolute_path& absolute_directory, const string& path )  { set_absolute( absolute_directory, path ); }
                                 Absolute_path               ( const Absolute_path& absolute_directory, const Bstr&   path )  { set_absolute( absolute_directory, string_from_bstr( path ) ); }
+                                Absolute_path               ( const Absolute_path& absolute_directory, const char*   path )  { set_absolute( absolute_directory, path ); }
     explicit                    Absolute_path               ( const Path& );
 
     void                    set_path                        ( const string& path );
@@ -331,9 +332,9 @@ struct Typed_folder : Scheduler_object,
     File_based*                 replace_file_based          ( File_based* );
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
 
-    ptr<File_based>             new_initialized_file_based_xml( const xml::Element_ptr& );
-    void                        add_file_based_xml          ( const xml::Element_ptr& );
-    void                        add_or_replace_file_based_xml( const xml::Element_ptr& );
+    ptr<File_based>             new_initialized_file_based_xml( const xml::Element_ptr&, const string& default_name = "" );
+    void                        add_file_based_xml            ( const xml::Element_ptr&, const string& default_name = "" );
+    void                        add_or_replace_file_based_xml ( const xml::Element_ptr&, const string& default_name = "" );
     void                        add_to_replace_or_remove_candidates( const string& name );
     void                        handle_replace_or_remove_candidates();
 
@@ -424,6 +425,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
     Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
     Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
+    Scheduler_script_folder*    scheduler_script_folder     ();
 
     string                      obj_name                    () const;
 
@@ -440,6 +442,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     Folder*                    _parent;
     Folder_set                 _child_folder_set;
 
+    ptr<Scheduler_script_folder>    _scheduler_script_folder;
     ptr<Process_class_folder>       _process_class_folder;
     ptr<lock::Lock_folder>          _lock_folder;
     ptr<Job_folder>                 _job_folder;
@@ -511,27 +514,28 @@ struct file_based_subsystem : File_based_subsystem
 
     void close()
     {
-        for( typename File_based_map::iterator it = _file_based_map.begin(); it != _file_based_map.end(); )
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+
+        Z_FOR_EACH_REVERSE( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            typename File_based_map::iterator next_it    = it;  next_it++;
-            ptr<File_based>                   file_based = +it->second;
+            ptr<File_based> file_based = *it;
             
             try
             {
                 file_based->remove();
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
-
-            it = next_it;
         }
     }
     
 
     bool subsystem_initialize()
     {
-        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            File_based* file_based = it->second;
+            File_based* file_based = +*it;
 
             try
             {
@@ -546,9 +550,11 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_load()
     {
-        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            File_based* file_based = it->second;
+            File_based* file_based = +*it;
 
             try
             {
@@ -563,9 +569,11 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_activate()
     {
-        Z_FOR_EACH( typename File_based_map, _file_based_map, it )
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            File_based* file_based = it->second;
+            File_based* file_based = +*it;
 
             try
             {
@@ -577,6 +585,19 @@ struct file_based_subsystem : File_based_subsystem
         return true;
     }
     
+
+    virtual vector<FILE_BASED*> ordered_file_baseds()
+    {
+        vector<FILE_BASED*> result;
+        
+        result.reserve( _file_based_map.size() );
+        Z_FOR_EACH( File_based_map, _file_based_map, fb )  result.push_back( fb->second );
+
+        //Wir müssen nicht ordnen und ordering_is_less() betrachtet nicht den Pfad: sort( result, result.begin(), result.end(), File_based::ordering_is_less );
+
+        return result;
+    }
+
 
     FILE_BASED* file_based_or_null( const Absolute_path& path ) const
     {

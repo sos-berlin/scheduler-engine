@@ -1697,7 +1697,7 @@ Period Run_time::call_function( const Time& requested_beginning )
     {
         try
         {
-            if( !_spooler->scheduler_script()->module_instance() )  z::throw_xc( "SCHEDULER-395", Z_FUNCTION, _start_time_function );
+            if( !_spooler->scheduler_script_subsystem()->default_scheduler_script_or_null() )  z::throw_xc( "SCHEDULER-395", Z_FUNCTION, _start_time_function );
 
             string date_string = requested_beginning.as_string( Time::without_ms );
             string param2 = !_host_object? "" :
@@ -1706,9 +1706,9 @@ Period Run_time::call_function( const Time& requested_beginning )
                                                                                                : "";
 
             string function_name = _start_time_function;
-            if( _spooler->scheduler_script()->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+            if( _spooler->scheduler_script_subsystem()->default_scheduler_script()->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
 
-            Variant v = _spooler->scheduler_script()->module_instance()->call( function_name, date_string, param2 );
+            Variant v = _spooler->scheduler_script_subsystem()->default_scheduler_script()->module_instance()->call( function_name, date_string, param2 );
             
             if( !v.is_null_or_empty_string() )
             {
@@ -1950,7 +1950,7 @@ Period Run_time::next_period( const Time& beginning_time, With_single_start sing
 
         if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
         {
-            if( _spooler->scheduler_script()->subsystem_state() != subsys_active  &&  _log  &&  !is_no_function_warning_logged )
+            if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  _log  &&  !is_no_function_warning_logged )
             {
                 _log->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
                 is_no_function_warning_logged = true;

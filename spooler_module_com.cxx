@@ -277,11 +277,6 @@ bool Scripting_engine_module_instance::load()
         }
     }
 
-    //Z_FOR_EACH_CONST( Source_with_parts::Parts, _module->_source._parts, it )
-    //{
-    //    _script_site->parse( it->_text, it->_linenr );
-    //}
-
     _idispatch = _script_site->dispatch();
 
     return true;

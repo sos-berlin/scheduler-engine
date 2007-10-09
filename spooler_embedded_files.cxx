@@ -54,7 +54,10 @@ const char file_scheduler_xsd[] =
     "</xsd:key-->\n"
     "</xsd:element>\n"
     "\n"
-    "<xsd:element ref=\"script\"           minOccurs=\"0\"/>\n"
+    "<xsd:choice>\n"
+    "<xsd:element ref=\"script\"       minOccurs=\"0\"/>\n"
+    "<xsd:element name=\"scheduler_script\" type=\"scheduler_script\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
+    "</xsd:choice>\n"
     "\n"
     "<xsd:choice minOccurs=\"0\">\n"
     "<xsd:element ref=\"http_server\"/>\n"
@@ -320,11 +323,14 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "</xsd:choice>\n"
     "\n"
-    "<xsd:element name=\"monitor\" minOccurs=\"0\">\n"
+    "<xsd:element name=\"monitor\" minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
     "<xsd:element ref=\"script\"/>\n"
     "</xsd:sequence>\n"
+    "\n"
+    "<xsd:attribute name=\"name\"                      type=\"Name\"/>\n"
+    "<xsd:attribute name=\"ordering\"                  type=\"xsd:nonNegativeInteger\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -938,7 +944,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"include\"/>\n"
     "</xsd:choice>\n"
     "\n"
-    "<xsd:attribute name=\"language\" type=\"Name\"/>\n"
+    "<xsd:attribute name=\"language\"              type=\"Name\"/>\n"
     "\n"
     "<xsd:attribute name=\"use_engine\">\n"
     "<xsd:simpleType>\n"
@@ -1355,6 +1361,16 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "\n"
+    "<xsd:complexType name=\"scheduler_script\">\n"
+    "<xsd:sequence>\n"
+    "<xsd:element ref=\"script\"/>\n"
+    "</xsd:sequence>\n"
+    "\n"
+    "<xsd:attribute name=\"name\"                      type=\"Name\"/>\n"
+    "<xsd:attribute name=\"ordering\"                  type=\"xsd:nonNegativeInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "\n"
+    "\n"
     "<xsd:complexType  name=\"ultimos\">\n"
     "<xsd:sequence>\n"
     "<xsd:element name=\"day\" maxOccurs=\"unbounded\">\n"
@@ -1763,7 +1779,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1191579639 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1191930624 },
     { NULL, NULL, 0 }
 };
 

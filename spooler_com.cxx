@@ -3371,9 +3371,9 @@ STDMETHODIMP Com_spooler::get_Script( IDispatch** script_object )
     THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
-        if( !_spooler->scheduler_script()->module_instance() )  return E_ACCESSDENIED;
+        if( !_spooler->scheduler_script_subsystem()->default_scheduler_script_or_null() )  return E_ACCESSDENIED;
 
-        *script_object = _spooler->scheduler_script()->module_instance()->dispatch();
+        *script_object = _spooler->scheduler_script_subsystem()->default_scheduler_script()->module_instance()->dispatch();
         if( *script_object )  (*script_object)->AddRef();
     }
 

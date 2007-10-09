@@ -44,9 +44,12 @@
                                     <xsd:field xpath="@name"/>
                                 </xsd:key-->
                             </xsd:element>
-                            
-                            <xsd:element ref="script"           minOccurs="0"/>
 
+                            <xsd:choice>
+                                <xsd:element ref="script"       minOccurs="0"/>
+                                <xsd:element name="scheduler_script" type="scheduler_script" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:choice>
+                            
                             <xsd:choice minOccurs="0">
                                 <xsd:element ref="http_server"/>
                                 <xsd:element ref="web_services"/>   <!-- veraltet -->
@@ -311,11 +314,14 @@
                     </xsd:element>
                 </xsd:choice>
 
-                <xsd:element name="monitor" minOccurs="0">
+                <xsd:element name="monitor" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:sequence>
                             <xsd:element ref="script"/>
                         </xsd:sequence>
+                        
+                        <xsd:attribute name="name"                      type="Name"/>
+                        <xsd:attribute name="ordering"                  type="xsd:nonNegativeInteger"/>
                     </xsd:complexType>
                 </xsd:element>
 
@@ -928,8 +934,8 @@
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element ref="include"/>
             </xsd:choice>
-            
-            <xsd:attribute name="language" type="Name"/>
+
+            <xsd:attribute name="language"              type="Name"/>
             
             <xsd:attribute name="use_engine">
                 <xsd:simpleType>
@@ -1344,6 +1350,16 @@
         <xsd:attribute name="process_class"             type="Path"/>
     </xsd:complexType>
 
+    
+    
+    <xsd:complexType name="scheduler_script">
+        <xsd:sequence>
+            <xsd:element ref="script"/>
+        </xsd:sequence>
+        
+        <xsd:attribute name="name"                      type="Name"/>
+        <xsd:attribute name="ordering"                  type="xsd:nonNegativeInteger"/>
+    </xsd:complexType>
 
 
     <xsd:complexType  name="ultimos">

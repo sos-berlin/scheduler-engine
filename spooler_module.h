@@ -28,7 +28,9 @@ extern const string spooler_api_version_name;
 
 //-------------------------------------------------------------------------------------------------
 
-struct Module_instance;
+struct                                  Module_instance;
+typedef list< ptr<Module> >             Module_list;
+typedef list< ptr<Module_instance> >    Module_instance_list;
 
 //-------------------------------------------------------------------------------Text_with_includes
 

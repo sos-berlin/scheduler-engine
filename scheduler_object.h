@@ -56,6 +56,8 @@ struct Scheduler_object
         type_scheduler,
         type_scheduler_event_manager,
         type_scheduler_script,
+        type_scheduler_script_folder,
+        type_scheduler_script_subsystem,
         type_standing_order,
         type_standing_order_folder,
         type_standing_order_subsystem,
