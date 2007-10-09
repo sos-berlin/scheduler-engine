@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -356,7 +356,7 @@
         Den Monitor bestimmen Sie mit <scheduler_element name="monitor"/>.
     </p>
     <p>
-        <u>Beispiel</u><pre>
+        <u>Beispiel:</u><pre>
         
 &lt;job name  = "simple_ftp"
   &lt;params&gt;
