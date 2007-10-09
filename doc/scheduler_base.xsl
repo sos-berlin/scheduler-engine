@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding="utf-8"?>
+﻿<?xml version='1.0' encoding="utf-8"?>
 <!-- $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <!--
@@ -3186,7 +3186,7 @@
 
         <head>
             <title>
-                <xsl:text>Scheduler: </xsl:text>
+                <xsl:text>Job Scheduler: </xsl:text>
                 <xsl:value-of select="$title"/>
             </title>
 
