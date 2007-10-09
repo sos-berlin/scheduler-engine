@@ -417,7 +417,7 @@
 		</p>
 		
 		<p>
-			Um <i>anzahl</i> Einträge vor der <i>id</i> zu erhaltenß:
+			Um <i>anzahl</i> Einträge vor der <i>id</i> zu erhalten:
 		</p>
 		
 		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>anzahl</i>&quot;/&gt;
