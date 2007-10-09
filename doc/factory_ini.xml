@@ -28,12 +28,12 @@
             <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -ini=C:/Programme/scheduler/config/factory.ini</pre>
         </p>
         <p>
-          Bei der Installation durch das Setup-Programm des Job Schedulers wird die Datei factory.ini im Verzeichnis
-          <pre>…<i>scheduler installation path</i>…\config</pre>
-          abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.
-        </p>   
+           Bei der Installation durch das Setup-Programm des Job Schedulers wird die Datei factory.ini im Verzeichnis
+           <pre>…<i>scheduler installation path</i>…\config</pre> abgelegt. 
+           Aufrufe über das Startskript setzen den Pfad automatisch richtig.
+        </p>
         <p>
-                    Falls beim Aufruf des Job Schedulers der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
+           Falls beim Aufruf des Job Schedulers der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:
         </p>
         
     </description>
