@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -10,117 +10,118 @@
     date     = "$Date$"
 >
 
-<scheduler_keyword keyword="HTTP Server"/>
-<scheduler_keyword keyword="HTML"/>
-
-
-<h2>Web Services</h2>
-<p>
-    Der Job Scheduler kann die Ausführung von Jobs und Job-Ketten als Web Services kapseln.
-    Dazu nimmt der Job Scheduler über den eingebauten HTTP-Server SOAP Anfragen entgegen.
-</p>
-<p>
-    Mit <scheduler_element name="web_service"/> können Web Services eingerichtet werden.
-</p>
-<p>
-    Verwendung und Beispiele zur Konfiguration sind in der Dokumentation  »Web Service Tutorial« beschrieben.
-</p>
-
-
-<h2>Bedienung über einen Browser</h2>
-<p>
-    Der Job Scheduler verfügt über einen HTTP Server und stellt HTML-Seiten zu seiner Bedienung bereit.
-    Sie können den Job Scheduler über einen Browser (Microsoft Internet Explorer und Firefox)
-    steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
-    <code>localhost</code> kann auch ein anderer Rechnername sein,
-    und <code>4444</code> ist die konfigurierte TCP-Portnummer des Job Schedulers.
-</p>
-<p>
-    Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
-    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="html_dir"/>.<br/>
-</p>
-
-
-<h2>Zugriffsschutz</h2>
-<p>
-    Der Job Scheduler lässt nur TCP- und HTTP-Verbindung zu von Rechnern,
-    die mit <scheduler_element name="allowed_host"/> die Erlaubnis bekommen haben.
-</p>
-<p>
-    Darüber hinaus kann HTTP-Authentifizierung mit dem Element <scheduler_element name="http.authentication"/>
-    vereinbart werden.
-</p>
-
-
-<scheduler_keyword keyword="Protokoll"/>
-
-<h2>Protokolle mit einem Browser zeigen</h2>
-<p>
-    Während der Job Scheduler ein Protokoll schreibt, können Sie es sich anzeigen lassen.
-    Sie sehen stets den neuesten Stand.
-    <br/><br/>
-    Die HTML-Oberfläche des Job Schedulers bietet hierfür die entsprechenden Operationen an.
-    Der Job Scheduler verwendet folgende URLs für Protokolle:
-</p>
-
-<p>
-    <table cellspacing="0" cellpadding="0">
-        <col valign="baseline"/>
-        <col valign="baseline" style="padding-left: 2ex"/>
-        <tr>
-            <td>
-                Hauptprotokoll
-            </td>
-            <td>
-                <code>http://<i>localhost:4444</i>/show_log?</code>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Jobprotokoll
-            </td>
-            <td>
-                <code>http://<i>localhost:4444</i>/show_log?job=<i>jobname</i></code>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Taskprotokoll
-            </td>
-            <td>
-                <code>http://<i>localhost:4444</i>/show_log?task=<i>task_id</i></code>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Auftragsprotokoll
-            </td>
-            <td>
-                <code>http://<i>localhost:4444</i>/show_log?job_chain=<i>Job-Kette</i>&amp;order=<i>order_id</i></code>
-            </td>
-        </tr>
-    </table>
-</p>
-<p>
-    <i>localhost</i> ist <code>localhost</code> oder 127.0.0.1 oder der Name des Rechners, auf dem der Job Scheduler abläuft.
-</p>
-
-
-<h2>Job-Beschreibung</h2>
-<p>
-    Die Job-Beschreibung aus <scheduler_element name="description"/> kann mit diesem URL abgerufen werden:
-</p>
-<p>
-    <code>http://<i>localhost:4444</i>/job_description?job=<i>job</i></code>
-</p>
-<p>
-    Die Beschreibung wird in HTML codiert erwartet.
-</p>
-<p>
-
-</p>
-
-
-
-
+    <scheduler_keyword keyword="HTTP Server"/>
+    <scheduler_keyword keyword="HTML"/>
+    
+    
+    <h2>Web Services</h2>
+    <p>
+        Der Job Scheduler kann die Ausführung von Jobs und Job-Ketten als Web Services kapseln.
+        Dazu nimmt der Job Scheduler über den eingebauten HTTP-Server SOAP Anfragen entgegen.
+    </p>
+    <p>
+        Mit <scheduler_element name="web_service"/> können Web Services eingerichtet werden.
+    </p>
+    <p>
+        Verwendung und Beispiele zur Konfiguration sind in der Dokumentation  »Web Service Tutorial« beschrieben.
+    </p>
+    
+    
+    <h2>Bedienung über einen Browser</h2>
+    <p>
+        Der Job Scheduler verfügt über einen HTTP Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+        Sie können den Job Scheduler über einen Browser (Microsoft Internet Explorer und Firefox)
+        steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+        <code>localhost</code> kann auch ein anderer Rechnername sein,
+        und <code>4444</code> ist die konfigurierte TCP-Portnummer des Job Schedulers.
+    </p>
+    <p>
+        Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
+        Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="html_dir"/>.<br/>
+    </p>
+    
+    
+    <h2>Zugriffsschutz</h2>
+    <p>
+        Der Job Scheduler lässt nur TCP- und HTTP-Verbindung zu von Rechnern,
+        die mit <scheduler_element name="allowed_host"/> die Erlaubnis bekommen haben.
+    </p>
+    <p>
+        Darüber hinaus kann HTTP-Authentifizierung mit dem Element <scheduler_element name="http.authentication"/>
+        vereinbart werden.
+    </p>
+    
+    
+    <scheduler_keyword keyword="Protokoll"/>
+    
+    <h2>Protokolle mit einem Browser zeigen</h2>
+    <p>
+        Während der Job Scheduler ein Protokoll schreibt, können Sie es sich anzeigen lassen.
+        Sie sehen stets den neuesten Stand.
+    </p>
+    <p>
+        Die HTML-Oberfläche des Job Schedulers bietet hierfür die entsprechenden Operationen an.
+        Der Job Scheduler verwendet folgende URLs für Protokolle:
+    </p>
+    
+    <p>
+        <table cellspacing="0" cellpadding="0">
+            <col valign="baseline"/>
+            <col valign="baseline" style="padding-left: 2ex"/>
+            <tr>
+                <td>
+                    Hauptprotokoll
+                </td>
+                <td>
+                    <code>http://<i>localhost:4444</i>/show_log?</code>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Jobprotokoll
+                </td>
+                <td>
+                    <code>http://<i>localhost:4444</i>/show_log?job=<i>jobname</i></code>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Taskprotokoll
+                </td>
+                <td>
+                    <code>http://<i>localhost:4444</i>/show_log?task=<i>task_id</i></code>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Auftragsprotokoll
+                </td>
+                <td>
+                    <code>http://<i>localhost:4444</i>/show_log?job_chain=<i>Job-Kette</i>&amp;order=<i>order_id</i></code>
+                </td>
+            </tr>
+        </table>
+    </p>
+    <p>
+        <i>localhost</i> ist <code>localhost</code> oder 127.0.0.1 oder der Name des Rechners, auf dem der Job Scheduler abläuft.
+    </p>
+    
+    
+    <h2>Job-Beschreibung</h2>
+    <p>
+        Die Job-Beschreibung aus <scheduler_element name="description"/> kann mit diesem URL abgerufen werden:
+    </p>
+    <p>
+        <code>http://<i>localhost:4444</i>/job_description?job=<i>job</i></code>
+    </p>
+    <p>
+        Die Beschreibung wird in HTML codiert erwartet.
+    </p>
+    <p>
+    
+    </p>
+    
+    
+    
+    
 </description>
