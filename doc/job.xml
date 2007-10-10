@@ -41,9 +41,9 @@
         <p>
             Sie können beliebig implementiert sein als
         		<i>executable</i>, <i>shell scripte</i>, <i>batch files</i>.
-        		Dies bezieht Programme ein, die per Interpreter gestartet werden, z.B.
-        		JavaScript, VBScript, Perl, PHP, Ruby etc., für die ggf. ein Interpreter
-        		mit der auszuführenden Programmdatei gestartet werden muss.
+        		Dies bezieht Programme ein, 
+        		z.B. JavaScript, VBScript, Perl, PHP, Ruby etc., 
+        		für die ggf. ein Interpreter mit der auszuführenden Programmdatei gestartet werden muss.
         		Java-Klassen können mit der für den Job Scheduler konfigurierten JVM gestartet werden.
     		</p>
     		<p>
