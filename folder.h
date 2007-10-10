@@ -516,16 +516,15 @@ struct file_based_subsystem : File_based_subsystem
 
     void close()
     {
-        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        //Z_FOR_EACH_REVERSE( vector<FILE_BASED*>, ordered_file_baseds, it )
-        for( int i = ordered_file_baseds.size() - 1; i >= 0; --i )
+        Z_FOR_EACH_REVERSE( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            //ptr<File_based> file_based = *it;
+            ptr<File_based> file_based = *it;
             
             try
             {
-                ordered_file_baseds[ i ]->remove();
+                file_based->remove();
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
@@ -534,16 +533,15 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_initialize()
     {
-        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        //Z_FOR_EACH( vector<FILE_BASED*>, ordered_file_baseds, it )
-        for( int i = 0; i < ordered_file_baseds.size(); i++ )
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            //File_based* file_based = +*it;
+            File_based* file_based = +*it;
 
             try
             {
-                ordered_file_baseds[ i ]->initialize();
+                file_based->initialize();
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
@@ -554,16 +552,15 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_load()
     {
-        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        //Z_FOR_EACH( vector<FILE_BASED*>, ordered_file_baseds, it )
-        for( int i = 0; i < ordered_file_baseds.size(); i++ )
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            //File_based* file_based = +*it;
+            File_based* file_based = +*it;
 
             try
             {
-                ordered_file_baseds[ i ]->load();
+                file_based->load();
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
@@ -574,16 +571,15 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_activate()
     {
-        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        //Z_FOR_EACH( vector<FILE_BASED*>, ordered_file_baseds, it )
-        for( int i = 0; i < ordered_file_baseds.size(); i++ )
+        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
         {
-            //File_based* file_based = +*it;
+            File_based* file_based = +*it;
 
             try
             {
-                ordered_file_baseds[ i ]->activate();
+                file_based->activate();
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
         }
