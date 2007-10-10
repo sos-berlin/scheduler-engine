@@ -1,4 +1,0 @@
-openodbc-devel
-zlib-devel
-perl
-java sdk

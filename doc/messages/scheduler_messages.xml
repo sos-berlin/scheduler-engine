@@ -2733,6 +2733,12 @@
                 <title>&lt;weekday day="<p1/>" which="<p2/>" has been defined already</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-447">
+            <text xml:lang="en">
+                <title>Error in <p1>job_monitor</p1>: <br/><p2>error</p2></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
