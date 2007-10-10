@@ -468,7 +468,7 @@
                     </li>
                 </ul>
                 <p>
-                    Miteinander durch Verschachtelung verbundene Job-Kettenn bilden einen gemeinsamen <i>Order_id_space</i>,
+                    Miteinander durch Verschachtelung verbundene Job-Ketten bilden einen gemeinsamen <i>Order_id_space</i>,
                     um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
                 </p>
                 <p>
