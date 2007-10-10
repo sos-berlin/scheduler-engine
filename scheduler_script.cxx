@@ -10,7 +10,7 @@ struct Scheduler_script_subsystem;
 
 //--------------------------------------------------------------------------------------------const
 
-const Absolute_path             default_scheduler_script_path ( root_path, "scheduler" );
+const Absolute_path             default_scheduler_script_path ( "/scheduler" );
 
 //-----------------------------------------------------------------------Scheduler_script_subsystem
 
