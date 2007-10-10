@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2007-10-05" version="2.0.187" subversion_revision="5290">
+    <change date="2007-10-10" version="2.0.187" subversion_revision="5325">
         <revision jira="JS-134" type="new" title="Mehrere Scheduler-Skripte">
             <description>
                 <p>
