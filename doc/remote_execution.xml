@@ -37,7 +37,10 @@
     <h2>Verwendung</h2>
     
     <p>
-      Überwiegend werden Job Scheduler mit der Ausführung von Jobs beauftragt, die auf einem anderen physikalischen Rechner installiert sind.<br/><br/>Beispiele für die Verwendung:
+      Überwiegend werden Job Scheduler mit der Ausführung von Jobs beauftragt, die auf einem anderen physikalischen Rechner installiert sind.
+    </p>
+    <p>
+      Beispiele für die Verwendung:
       
       <ol>
         <li>
