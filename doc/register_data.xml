@@ -2256,8 +2256,10 @@
     <register_entry register_file='xml/job.xml#attribute_name' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/job_chain.xml#attribute_name' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/lock.xml#attribute_name' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
+    <register_entry register_file='xml/monitor.xml#attribute_name' register_title='&lt;monitor&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/param.xml#attribute_name' register_title='&lt;param&gt;'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/process_class.xml#attribute_name' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
+    <register_entry register_file='xml/scheduler_script.xml#attribute_name' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/start_job.xml#attribute_name' register_title='&lt;start_job&gt; (Kommando)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/variable.xml#attribute_name' register_title='&lt;variable&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
     <register_entry register_file='xml/web_service.xml#attribute_name' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='name' type='definition'/>
@@ -2429,6 +2431,11 @@
     <register_keyword_display><code>order_queue</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__order_queue' register_title='Job.order_queue' register_keyword='order_queue' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__order_queue' register_title='Job_chain.order_queue' register_keyword='order_queue' type='definition'/>
+</register_keyword>
+<register_keyword keyword='ordering'>
+    <register_keyword_display><code>ordering=</code></register_keyword_display>
+    <register_entry register_file='xml/monitor.xml#attribute_ordering' register_title='&lt;monitor&gt; (Konfiguration)'  register_keyword='ordering' type='definition'/>
+    <register_entry register_file='xml/scheduler_script.xml#attribute_ordering' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='ordering' type='definition'/>
 </register_keyword>
 <register_keyword keyword='orders'>
     <register_keyword_display><code>orders=</code></register_keyword_display>
@@ -2957,6 +2964,7 @@
     <register_entry register_file='command_line.xml#use_option__scheduler' register_title='Kommandozeilenoptionen'  register_keyword='scheduler'/>
 </register_keyword>
 <register_keyword keyword='Scheduler-Skript'>
+    <register_entry register_file='xml/scheduler_script.xml' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='Scheduler-Skript'/>
     <register_entry register_file='xml/script.xml' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='Scheduler-Skript'/>
 </register_keyword>
 <register_keyword keyword='scheduler.log'>
@@ -2966,6 +2974,11 @@
     <register_keyword_display><code>scheduler_id=</code></register_keyword_display>
     <register_entry register_file='xml/answer/remote_scheduler.xml#attribute_scheduler_id' register_title='&lt;remote_scheduler&gt; (Antwort)'  register_keyword='scheduler_id' type='definition'/>
     <register_entry register_file='xml/select_events.xml#attribute_scheduler_id' register_title='&lt;select_events&gt; (Kommando)'  register_keyword='scheduler_id' type='definition'/>
+</register_keyword>
+<register_keyword keyword='scheduler_script'>
+    <register_keyword_display><code>&lt;scheduler_script&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__scheduler_script' register_title='Änderungsprotokoll'  register_keyword='scheduler_script'/>
+    <register_entry register_file='xml/scheduler_script.xml#' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='scheduler_script' type='definition'/>
 </register_keyword>
 <register_keyword keyword='SCHEDULER_TASK_TRIGGER_FILES'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_TRIGGER_FILES'/>
