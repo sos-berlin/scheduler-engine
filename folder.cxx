@@ -694,6 +694,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         ptr<Folder> new_subfolder = Z_NEW( Folder( subsystem(), folder() ) );
         new_subfolder->set_folder_path( folder()->path() );
         new_subfolder->set_name( base_file_info->_normalized_name );
+        new_subfolder->fix_name();
         new_subfolder->set_base_file_info( *base_file_info );
         add_file_based( new_subfolder );
         something_changed = true;
@@ -939,6 +940,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                     file_based->set_base_file_info( *base_file_info );
                     file_based->set_folder_path( folder()->path() );
                     file_based->set_name( Folder::object_name_of_filename( base_file_info->_filename ) );
+                    file_based->fix_name();
                     
                     if( old_file_based ) 
                     {
@@ -1106,9 +1108,7 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
         if( replace_no  ||  
             use_base_mechanism  &&  !replace_yes )
         {
-            file_based->set_file_based_state( File_based::s_undefined ); 
             file_based->set_dom( element );         // Objekt ergänzen (<base>) oder ändern. Evtl. Exception, wenn Objekt das nicht kann, z.B. <job>
-            file_based->set_file_based_state( File_based::s_not_initialized );
         }
         else
         {
@@ -1177,6 +1177,7 @@ void Typed_folder::add_file_based( File_based* file_based )
 
     if( file_based_or_null( normalized_name ) )  z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path().to_string() );
 
+    file_based->fix_name();
     file_based->set_typed_folder( this );
     file_based->log()->set_prefix( file_based->obj_name() );        // Jetzt mit Pfad
 
@@ -1933,7 +1934,7 @@ void File_based::set_name( const string& name )
 
     if( normalized_name != _file_based_subsystem->normalized_name( name ) )
     {
-        if( is_in_folder() )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
+        if( _name_is_fixed )  z::throw_xc( "SCHEDULER-429", obj_name(), name );       // Name darf nicht geändert werden, außer Großschreibung
         _name = name;
         log()->set_prefix( obj_name() );    // Noch ohne Pfad
 

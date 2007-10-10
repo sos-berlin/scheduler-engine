@@ -255,6 +255,41 @@
                         …
                     &lt;/ultimos>
 
+                    &lt;<scheduler_a href="xml/month.xml">month</scheduler_a> month="…">
+                        &lt;<scheduler_a href="xml/period.xml">period</scheduler_a> begin        = "00:00"
+                                end          = "24:00"
+                                let_run      = "…"
+                                repeat       = "…"     
+                                single_start = "…"     />
+                        &lt;<scheduler_a href="xml/weekdays.xml">weekdays</scheduler_a>>
+                            &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                               &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
+                                …
+                            &lt;/day>
+                            …
+                        &lt;/weekdays>
+                        &lt;<scheduler_a href="xml/monthdays.xml">monthdays</scheduler_a>>
+                            &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                                &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
+                                …
+                            &lt;/day>
+                            &lt;<scheduler_a href="xml/weekday.xml">weekday</scheduler_a> weekday="…" which="…">
+                                &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
+                                …
+                            &lt;/weekday>
+                            …
+                        &lt;/monthdays>
+
+                        &lt;<scheduler_a href="xml/ultimos.xml">ultimos</scheduler_a>>
+                            &lt;<scheduler_a href="xml/day.xml">day</scheduler_a> day="…">
+                                &lt;<scheduler_a href="xml/period.xml">period …/></scheduler_a>
+                                …
+                            &lt;/day>
+                            …
+                        &lt;/ultimos>
+                        …
+                    &lt;/month>
+
                     &lt;<scheduler_a href="xml/holidays.xml">holidays</scheduler_a>>
                         &lt;<scheduler_a href="xml/holiday.xml">holiday</scheduler_a> date="yyyy-mm-dd"/>
                         &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>

@@ -53,6 +53,28 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="absolute_repeat" type="hh:mm[:ss] | seconds">
+            <description>
+                <p>
+                    Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
+                    Danach wird er zu den Zeitpunkten gestartet, 
+                    die sich aus den Vielfachen von <code>absolute_repeat</code> nach <code>begin</code> errechnen.
+                    Die Wiederholung kann im Format <i>hh:mm</i> oder <i>hh:mm:ss</i> oder in Sekunden angegeben werden.
+                </p>
+
+                <p>
+                    Kann nicht mit dem Attribut <code>single_start=</code> kombiniert werden.
+                </p>
+
+                <scheduler_example>
+                    <pre>&lt;period begin="13:00" end="15:00" absolute_repeat="00:30"/></pre>
+                    <p>
+                        lässt den Job um 13:00, 13:30, 14:00 und 14:30 starten.
+                    </p>
+                </scheduler_example>
+            </description>
+        </xml_attribute>
+
         <xml_attribute name="single_start" type="hh:mm[:ss]">
             <description>
                 <p>

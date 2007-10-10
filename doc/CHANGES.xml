@@ -11,6 +11,55 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-10-05" version="2.0.187" subversion_revision="5290">
+        <revision jira="JS-134" type="new" title="Mehrere Scheduler-Skripte">
+            <description>
+                <p>
+                    Mit dem neuen XML-Element <scheduler_element name="scheduler_script"/>
+                    lassen sich mehrere Scheduler-Skripte angegeben.
+                </p>
+            </description>
+        </revision>
+
+        <revision jira="JS-68" type="new" title="Mehrere Job-Monitor &lt;monitor>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="monitor"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-121" type="new" title="Monate in &lt;run_time>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="month"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-123" type="new" title="absolute_repeat= in &lt;run_time>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="period"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-124" type="new" title="Mehrfache angaben in day=, monthday= usw.">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="day"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="modification" title="Neue Voreinstellung &lt;add_order replace='yes'>">
             <description>
                 <ul>

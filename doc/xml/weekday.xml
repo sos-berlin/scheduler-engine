@@ -30,6 +30,9 @@
                     <code>"saturday"</code> und
                     <code>"sunday"</code> oder
                 </p>
+                <p>
+                    Mehrere Tage können durch Leerzeichen getrennt angegeben werden.
+                </p>
             </description>
         </xml_attribute>
 

@@ -196,6 +196,7 @@
     <file path="xml/modify_order.xml"/>
     <file path="xml/modify_spooler.xml"/>
     <file path="xml/monitor.xml"/>
+    <file path="xml/month.xml"/>
     <file path="xml/monthdays.xml"/>
     <file path="xml/param.xml"/>
     <file path="xml/params.xml"/>
@@ -208,6 +209,7 @@
     <file path="xml/remove_order.xml"/>
     <file path="xml/run_time.xml"/>
     <file path="xml/script.xml"/>
+    <file path="xml/scheduler_script.xml"/>
     <file path="xml/security.xml"/>
     <file path="xml/select_events.xml"/>
     <file path="xml/service_request.xml"/>

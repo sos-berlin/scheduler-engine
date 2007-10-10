@@ -407,11 +407,10 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 {
     if( name != "" )  set_name( name );
 
-    _module = module? module : Z_NEW( Module( _spooler, _spooler->include_path() ) );
-
     _log = Z_NEW( Prefix_log( this ) );
     set_log();
 
+    _module = module? module : Z_NEW( Module( _spooler, _spooler->include_path() ) );
     _module->set_log( _log );
 
     _com_job  = new Com_job( this );
@@ -728,8 +727,6 @@ void Job::set_dom( const xml::Element_ptr& element )
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
             }
             else
-            //if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
-            //else
             if( e.nodeName_is( "lock.use" ) )  
             {
                 if( !_lock_requestor ) 
@@ -757,9 +754,6 @@ void Job::set_dom( const xml::Element_ptr& element )
             {
                 if( _module->set() )  z::throw_xc( "SCHEDULER-234", obj_name() );
 
-                //_module_xml_document  = NULL;
-                //_module_xml_element   = NULL;
-
                 _module->_process_filename     = subst_env( e.     getAttribute( "file"         , _module->_process_filename      ) );
                 _module->_process_param_raw    =            e.     getAttribute( "param"        , _module->_process_param_raw     );
                 _module->_process_log_filename = subst_env( e.     getAttribute( "log_file"     , _module->_process_log_filename  ) );
@@ -775,7 +769,7 @@ void Job::set_dom( const xml::Element_ptr& element )
                             if( eee.nodeName_is( "variable" ) ) 
                             {
                                 _module->_process_environment->set_var( eee.getAttribute( "name" ), 
-                                                                       subst_env( eee.getAttribute( "value" ), _module->_process_environment ) );
+                                                                        subst_env( eee.getAttribute( "value" ), _module->_process_environment ) );
                             }
                         }
                     }
@@ -786,15 +780,16 @@ void Job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "monitor" ) )
             {
-                if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _spooler->include_path(), _log ) );
+                _module->_monitors->set_dom( e );
+                //if( !_module->_monitor )  _module->_monitor = Z_NEW( Module( _spooler, _spooler->include_path(), _log ) );
 
-                DOM_FOR_EACH_ELEMENT( e, ee )
-                {
-                    if( ee.nodeName_is( "script" ) )  
-                    {
-                        _module->_monitor->set_dom( ee );
-                    }
-                }
+                //DOM_FOR_EACH_ELEMENT( e, ee )
+                //{
+                //    if( ee.nodeName_is( "script" ) )  
+                //    {
+                //        _module->_monitor->set_dom( ee );
+                //    }
+                //}
             }
             else
             if( e.nodeName_is( "commands" ) )
@@ -830,8 +825,6 @@ void Job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
-
-      //if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
 }
 

@@ -297,6 +297,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-444", "<day day=\"$1\"> has been defined already" },
     { "SCHEDULER-445", "Invalid weekday '$1'" },
     { "SCHEDULER-446", "<weekday day=\"$1\" which=\"$2\" has been defined already" },
+    { "SCHEDULER-447", "Error in $1: \n$2" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

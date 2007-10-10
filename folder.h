@@ -208,6 +208,7 @@ struct File_based : Scheduler_object,
 
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
+    void                        fix_name                    ()                                      { _name_is_fixed = true; }
     Absolute_path               path                        () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
@@ -279,6 +280,7 @@ struct File_based : Scheduler_object,
     State                      _state;
     //State                      _wished_state;
     Base_file_info             _base_file_info;
+    bool                       _name_is_fixed;
     bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
     bool                       _error_ignored;
     Md5                        _md5;

@@ -15,6 +15,29 @@
         <xml_parent_element name="job"/>
     </xml_parent_elements>
 
+    <xml_attributes>
+        <xml_attribute name="name" type="Name">
+            <description>
+                <p>
+                    Mehrere Monitor können angegeben werden, wenn sie unterschiedliche Namen erhalten.
+                </p>
+                <p>
+                    Die Monitor werden in der Reihenfolge des Attributes <code>ordering</code> aufgerufen.
+                    <code>spooler_process_after()</code> und <code>spooler_task_after()</code> 
+                    in der rückwärtigen Reihenfolge.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="ordering" type="Number" intial="1">
+            <description>
+                <p>
+                    Gibt die Rangfolge der Monitore an.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+    
 
     <xml_child_elements>
         <xml_child_element name="script"/>

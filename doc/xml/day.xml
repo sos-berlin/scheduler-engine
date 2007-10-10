@@ -25,7 +25,11 @@
         <xml_attribute name="day" type="zahl">
             <description>
                 <p>
-                    Gibt die Nummer des Tages an, abhängig vom Eltern-Element.
+                    Gibt die Nummer des Tages an, abhängig vom Eltern-Element,
+                    bei Wochentagen auch die englischen Namen.
+                </p>
+                <p>
+                    Mehrere Tage können durch Leerzeichen getrennt angegeben werden.
                 </p>
 
                 <dl>

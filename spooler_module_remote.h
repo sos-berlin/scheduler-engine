@@ -23,7 +23,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         c_construct,        
         c_call_begin,       //   spooler_open() 
 
-        c_release_begin,    // Wenn Monitor.spooler_task_before() false geliefert hat
+        c_release_begin,    // Wenn Module_monitor.spooler_task_before() false geliefert hat
         c_release,
 
         c_finished,

@@ -169,6 +169,13 @@
             </description>
         </xml_child_element>
 
+        <xml_child_element name="month">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
         <xml_child_element name="monthdays">
             <description>
                 <p>

@@ -251,6 +251,7 @@ void Standing_order::set_dom( const xml::Element_ptr& element )
 {
     assert( !_order );
 
+    assert_is_not_initialized();
     subsystem()->assert_xml_element_name( element );
 
     ptr<Order> order = new Order( spooler() );

@@ -20,6 +20,10 @@
     <register_keyword_display><code>abort_immediately_and_restart()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately_and_restart' register_title='Spooler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
 </register_keyword>
+<register_keyword keyword='absolute_repeat'>
+    <register_keyword_display><code>absolute_repeat=</code></register_keyword_display>
+    <register_entry register_file='xml/period.xml#attribute_absolute_repeat' register_title='&lt;period&gt; (Konfiguration)'  register_keyword='absolute_repeat' type='definition'/>
+</register_keyword>
 <register_keyword keyword='action'>
     <register_keyword_display><code>action=</code></register_keyword_display>
     <register_entry register_file='xml/job_chain_node.modify.xml#attribute_action' register_title='&lt;job_chain_node.modify&gt; (Kommando)'  register_keyword='action' type='definition'/>
@@ -512,6 +516,7 @@
 </register_keyword>
 <register_keyword keyword='day'>
     <register_keyword_display><code>&lt;day&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__day' register_title='Änderungsprotokoll'  register_keyword='day'/>
     <register_entry register_file='xml.xml#use_element__day' register_title='Alle XML-Elemente'  register_keyword='day'/>
     <register_entry register_file='xml/day.xml#' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='day' type='definition'/>
 </register_keyword>
@@ -2197,6 +2202,15 @@
 <register_keyword keyword='Monitor_impl (class)'>
     <register_keyword_display><code>Monitor_impl</code> (class)</register_keyword_display>
     <register_entry register_file='api/Monitor_impl.xml' register_keyword='Monitor_impl' type='definition'/>
+</register_keyword>
+<register_keyword keyword='month'>
+    <register_keyword_display><code>&lt;month&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__month' register_title='Änderungsprotokoll'  register_keyword='month'/>
+    <register_entry register_file='xml/month.xml#' register_title='&lt;month&gt; (Konfiguration)'  register_keyword='month' type='definition'/>
+</register_keyword>
+<register_keyword keyword='month'>
+    <register_keyword_display><code>month=</code></register_keyword_display>
+    <register_entry register_file='xml/month.xml#attribute_month' register_title='&lt;month&gt; (Konfiguration)'  register_keyword='month' type='definition'/>
 </register_keyword>
 <register_keyword keyword='monthdays'>
     <register_keyword_display><code>&lt;monthdays&gt;</code></register_keyword_display>

@@ -492,7 +492,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 18 );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 9 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -503,21 +503,24 @@ AGAIN:
                 params_array[ nr++ ] = "filename="        + _module->_filename;
                 params_array[ nr++ ] = "java_class="      + _module->_java_class_name;
                 params_array[ nr++ ] = "java_options="    + _module->_java_options;
-              //params_array[ nr++ ] = "java_options="    + _spooler->_config_java_options + " " + _module->_java_options;
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
 
-                if( _module->_monitor )
+                Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
                 {
-                    params_array[ nr++ ] = "monitor.language="        + _module->_monitor->_language;       // Muss der erste Paramter sein, legt den Monitor an
-                    params_array[ nr++ ] = "monitor.com_class="       + _module->_monitor->_com_class_name;
-                    params_array[ nr++ ] = "monitor.filename="        + _module->_monitor->_filename;
-                    params_array[ nr++ ] = "monitor.java_class="      + _module->_monitor->_java_class_name;
-                    params_array[ nr++ ] = "monitor.recompile="       + as_string( _module->_monitor->_recompile && !_module->_monitor->_compiled );
-                    params_array[ nr++ ] = "monitor.script="          + _module->_monitor->_text_with_includes.xml();
+                    Module_monitor* monitor = m->second;
+
+                    params_array[ nr++ ] = "monitor.language="        + monitor->_module->_language;       // Muss der erste Parameter sein, legt den Module_monitor an
+                    params_array[ nr++ ] = "monitor.name="            + monitor->_name;           
+                    params_array[ nr++ ] = "monitor.ordering="        + as_string( monitor->_ordering );
+                    params_array[ nr++ ] = "monitor.com_class="       + monitor->_module->_com_class_name;
+                    params_array[ nr++ ] = "monitor.filename="        + monitor->_module->_filename;
+                    params_array[ nr++ ] = "monitor.java_class="      + monitor->_module->_java_class_name;
+                    params_array[ nr++ ] = "monitor.recompile="       + as_string( monitor->_module->_recompile && !monitor->_module->_compiled );
+                    params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.xml();    // Muss der letzte Parameter sein!
                 }
             }
 
@@ -613,7 +616,7 @@ AGAIN:
         }
 
 */
-        case c_release_begin:     // Nur, wenn Construct() NULL geliefert hat (weil Monitor.spooler_task_before() false lieferte)
+        case c_release_begin:     // Nur, wenn Construct() NULL geliefert hat (weil Module_monitor.spooler_task_before() false lieferte)
         {
             operation->set_async_child( NULL );
             operation->set_async_child( _remote_instance->release__start() );

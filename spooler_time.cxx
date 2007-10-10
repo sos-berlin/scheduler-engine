@@ -1853,6 +1853,8 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         else
         if( e.nodeName_is( "month" ) )
         {
+            a_day_set = true;
+
             ptr<Month> month = Z_NEW( Month() );
             month->set_dom( e );
 
@@ -2021,7 +2023,8 @@ Time Run_time::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
     
-    return period.begin();
+    return !period.absolute_repeat().is_never()? period.next_repeated( time )
+                                               : period.begin();
 }
 
 //-------------------------------------------------------------------------Run_time::next_any_start

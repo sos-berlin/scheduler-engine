@@ -2816,7 +2816,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 void Spooler::cmd_job( const xml::Element_ptr& element )
 {
     //_job_subsystem->load_job_from_xml( element, Time::now(), _spooler->state() >= Spooler::s_starting );
-    root_folder()->job_folder()->add_file_based_xml( element );
+    root_folder()->job_folder()->add_or_replace_file_based_xml( element );
 
     signal( "add_job" );
 }

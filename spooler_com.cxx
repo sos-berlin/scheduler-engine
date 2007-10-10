@@ -2878,9 +2878,9 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
 {
     HRESULT hr = S_OK;
 
-    // Für Monitor: Wenn spooler_process() eine Exception liefert, fängt der Scheduler sie zunächst ab,
+    // Für <monitor>: Wenn spooler_process() eine Exception liefert, fängt der Scheduler sie zunächst ab,
     // meldet sie mit dieser Methode und ruft dann spooler_process_after().
-    // Ohne Monitor wird die Exception wie üblich geliefert.
+    // Ohne <monitor> wird die Exception wie üblich geliefert.
     
     try
     {

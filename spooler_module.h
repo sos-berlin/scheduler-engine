@@ -31,6 +31,8 @@ extern const string spooler_api_version_name;
 struct                                  Module_instance;
 typedef list< ptr<Module> >             Module_list;
 typedef list< ptr<Module_instance> >    Module_instance_list;
+struct                                  Module_monitors;
+struct                                  Module_monitor_instance;
 
 //-------------------------------------------------------------------------------Text_with_includes
 
@@ -81,7 +83,7 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler*, const string& include_path, Prefix_log* = NULL );
+                                Module                      ( Spooler*, const string& include_path, Has_log* = NULL );
     explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const string& include_path );
                                ~Module                      ()                                      {}
 
@@ -104,6 +106,7 @@ struct Module : Object
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
     string                      read_source_script          ()                                      { return _text_with_includes.read_text( _include_path ); }
+    bool                        needs_java                  ();
 
     Process_class*              process_class               () const;
     Process_class*              process_class_or_null       () const;
@@ -151,7 +154,7 @@ struct Module : Object
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
     bool                       _dont_remote;
-    ptr<Module>                _monitor;
+    ptr<Module_monitors>       _monitors;
 
     Fill_end                   _end_;
 };
@@ -288,26 +291,90 @@ struct Module_instance : Object
     bool                       _spooler_exit_called;
     bool                       _spooler_open_called;
     bool                       _spooler_close_called;
-  //bool                       _close_instance_at_end;
     In_call*                   _in_call;
     string                     _call_method;                // Für Module_instance::call__start()
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
 
-    ptr<Module_instance>       _monitor_instance;
-  //ptr<Com_variable_set>      _params;
+    typedef std::list< ptr<Module_monitor_instance> >  Module_monitor_instance_list;
+    Module_monitor_instance_list  _monitor_instance_list;
+  //ptr<Module_monitor_instances> _monitor_instances;
 
     Fill_end                   _end_;
 };
 
-//------------------------------------------------------------------------------Com_module_instance
-/*
-struct Com_job_instance_factory : IDispatch
-{
+//-----------------------------------------------------------------------------------Module_monitor
 
+struct Module_monitor : Object
+{
+    static bool                 less_ordering               ( const Module_monitor* a, const Module_monitor* b )  { return a->_ordering < b->_ordering; }
+
+
+                                Module_monitor              ()                                      : _zero_(this+1), _ordering(1) {}
+
+    string                      name                        () const                                { return _name; }
+    string                      obj_name                    () const                                { return S() << "Script_monitor " << name(); }
+
+    Fill_zero                  _zero_;
+    string                     _name;
+    int                        _ordering;
+    ptr<Module>                _module;
 };
-*/
+
+//----------------------------------------------------------------------------------Module_monitors
+
+struct Module_monitors : Object
+{
+                                Module_monitors             ( Module* module )                      : _zero_(this+1), _main_module(module) {}
+
+    void                        close                       ();
+    void                    set_dom                         ( const xml::Element_ptr& );
+    void                        initialize                  ();
+    void                        add_monitor                 ( Module_monitor* monitor )             { _monitor_map[ monitor->name() ] = monitor; }
+    Module_monitor*             monitor_or_null             ( const string& );
+    bool                        is_empty                    () const                                { return _monitor_map.empty(); }
+    bool                        needs_java                  ();
+    vector<Module_monitor*>     ordered_monitors            ();
+
+
+    Fill_zero                  _zero_;
+    typedef stdext::hash_map< string, ptr<Module_monitor> > Monitor_map;
+    Monitor_map                _monitor_map;
+
+  private:
+    Module*                    _main_module;
+};
+
+//--------------------------------------------------------------------------Module_monitor_instance
+
+struct Module_monitor_instance : Object
+{
+                                Module_monitor_instance     ( Module_monitor*, Module_instance* );
+
+    string                      obj_name                    () const                                { return _obj_name; }
+
+    ptr<Module_instance>       _module_instance;
+    string                     _obj_name;
+};
+
+////-------------------------------------------------------------------------Module_monitor_instances 
+//
+//struct Module_monitor_instances : Object
+//{
+//                                Module_monitor_instances    ( Module_monitors* monitors )           : _zero_(this+1), _monitors(monitors) {}
+//    void                        close                       ();
+//    void                        create_instances            ();
+//
+//    Fill_zero                  _zero_;
+//    //typedef stdext::hash_map< string, ptr<Module_monitor_instance> > Monitor_instance_map;
+//    //Monitor_instance_map       _monitor_instance_map;
+//    Module_instance_list       _module_instance_list;
+//
+//  private:
+//    Module_monitors*           _monitors;
+//};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

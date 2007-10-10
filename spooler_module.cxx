@@ -29,6 +29,7 @@ extern const string spooler_process_name        = "spooler_process()Z";
 extern const string spooler_on_error_name       = "spooler_on_error()V";
 extern const string spooler_on_success_name     = "spooler_on_success()V";
 extern const string spooler_api_version_name    = "spooler_api_version()Ljava.lang.String;";
+const string        default_monitor_name        = "scheduler";
 
 // Monitor-Methoden:
 const string spooler_task_before_name    = "spooler_task_before()Z";       
@@ -162,7 +163,7 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
             File_path path ( include_path, subst_env( element.getAttribute( "file" ) ) );
             result = string_from_file( path );
         }
-        catch( exception& x )  { z::throw_xc( message_string( "SCHEDULER-399", x ) ); }
+        catch( exception& x )  { z::throw_xc( "SCHEDULER-399", x ); }
     }
     else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
@@ -197,7 +198,7 @@ bool Text_with_includes::is_empty() const
 
 //-----------------------------------------------------------------------------------Module::Module
 
-Module::Module( Spooler* sp, const string& include_path, Prefix_log* log )
+Module::Module( Spooler* sp, const string& include_path, Has_log* log )
 : 
     _zero_(_end_), 
     _spooler(sp), 
@@ -228,6 +229,8 @@ void Module::init0()
 #   ifndef Z_WINDOWS
         _process_environment->_ignore_case = false;
 #   endif
+
+    _monitors = Z_NEW( Module_monitors( this ) );
 }
 
 //-----------------------------------------------------------------------------Module::set_priority
@@ -323,7 +326,7 @@ void Module::init()
 {
     if( _initialized )  return;
     
-    if( _monitor )  _monitor->init();
+    _monitors->initialize();
 
 
     if( _kind == kind_none )    // Wenn nicht, dann kind_internal
@@ -419,14 +422,22 @@ ptr<Module_instance> Module::create_instance()
 {
     ptr<Module_instance> result = create_instance_impl();
 
-    if( _monitor )
+
+    if( !_monitors->is_empty() )
     {
-        if( _kind == kind_process )  z::throw_xc( "SCHEDULER-315" );
+        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
         if( _kind != kind_remote )  
         {
-            result->_monitor_instance = _monitor->create_instance();
+            vector<Module_monitor*> ordered_monitors = _monitors->ordered_monitors();
+
+            Z_FOR_EACH( vector<Module_monitor*>, ordered_monitors, m )
+            {
+                Module_monitor* monitor = *m;
+
+                result->_monitor_instance_list.push_back( Z_NEW( Module_monitor_instance( monitor, monitor->_module->create_instance() ) ) );
+            }
         }
     }
 
@@ -520,6 +531,17 @@ Process_class* Module::process_class() const
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
 
+//-------------------------------------------------------------------------------Module::needs_java
+
+bool Module::needs_java() 
+{
+    bool result = _real_kind == Module::kind_java  &&  has_source_script();
+
+    if( !result )  result = _monitors->needs_java();
+
+    return result;
+}
+
 //----------------------------------------------------------------Module_instance::In_call::In_call
 
 Module_instance::In_call::In_call( Module_instance* module_instance, const string& name, const string& extra ) 
@@ -593,7 +615,14 @@ void Module_instance::init()
 
     if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
 
-    if( _monitor_instance  &&  !_monitor_instance->_initialized )  _monitor_instance->init();
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
+    {
+        try
+        {
+            (*m)->_module_instance->init();
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //---------------------------------------------------------------------------Module_instance::clear
@@ -602,7 +631,14 @@ void Module_instance::clear()
 { 
     _object_list.clear(); 
 
-    if( _monitor_instance )  _monitor_instance->clear();
+    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
+    {
+        try
+        {
+            (*m)->_module_instance->clear();
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //--------------------------------------------------------------------Module_instance::set_job_name
@@ -611,7 +647,14 @@ void Module_instance::set_job_name( const string& job_name )
 {
     _job_name = job_name; 
 
-    if( _monitor_instance )  _monitor_instance->set_job_name( job_name );
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
+    {
+        try
+        {
+            (*m)->_module_instance->set_job_name( job_name );
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //---------------------------------------------------------------------Module_instance::set_task_id
@@ -620,7 +663,14 @@ void Module_instance::set_task_id( int id )
 { 
     _task_id = id; 
 
-    if( _monitor_instance )  _monitor_instance->set_task_id( id );
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
+    {
+        try
+        {
+            (*m)->_module_instance->set_task_id( id );
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //-------------------------------------------------------------------------Module_instance::set_log
@@ -630,7 +680,14 @@ void Module_instance::set_log( Prefix_log* log )
     _log = log; 
     _com_log->set_log ( log );
 
-    if( _monitor_instance )  _monitor_instance->set_log( log );
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )
+    {
+        try
+        {
+            (*m)->_module_instance->set_log( log );
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //--------------------------------------------------------------------------------Task::set_in_call
@@ -657,7 +714,14 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     _task_id = task->id();
     //_title = task->obj_name();          // Titel für Prozess
 
-    if( _monitor_instance )  _monitor_instance->attach_task( task, log );
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )
+    {
+        try
+        {
+            (*m)->_module_instance->attach_task( task, log );
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //---------------------------------------------------------------------Module_instance::detach_task
@@ -673,14 +737,28 @@ void Module_instance::detach_task()
     _task_id = 0;
     //_title = "";
 
-    if( _monitor_instance )  _monitor_instance->detach_task();
+    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )
+    {
+        try
+        {
+            (*m)->_module_instance->detach_task();
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj
 
 void Module_instance::add_obj( IDispatch* object, const string& name )
 {
-    if( _monitor_instance )  _monitor_instance->add_obj( object, name );
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
+    {
+        try
+        {
+            (*m)->_module_instance->add_obj( object, name );
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
+    }
 }
 
 //--------------------------------------------------------------------------Module_instance::object
@@ -710,13 +788,24 @@ bool Module_instance::load()
 {
     bool ok = true;
 
-    if( _monitor_instance  &&  !_monitor_instance->_load_called )  
+    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
     {
-        bool ok = _monitor_instance->implicit_load_and_start();
-        if( !ok )  return false;
+        try
+        {
+            Module_monitor_instance* monitor_instance = *m;
 
-        Variant result = _monitor_instance->call_if_exists( spooler_task_before_name );
-        if( !result.is_missing() )  ok = check_result( result );
+            if( !monitor_instance->_module_instance->_load_called )  
+            {
+                ok = monitor_instance->_module_instance->implicit_load_and_start();
+                if( !ok )  return false;
+
+                Variant result = monitor_instance->_module_instance->call_if_exists( spooler_task_before_name );
+                if( !result.is_missing() )  ok = check_result( result );
+
+                if( !ok )  break;
+            }
+        }
+        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
     }
 
     _load_called = true;
@@ -774,28 +863,30 @@ void Module_instance::close__end()
 
 void Module_instance::close_monitor()
 {
-    if( _monitor_instance )  
+    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
     {
+        Module_monitor_instance* monitor_instance = *m;
+
         try
         {
-            _monitor_instance->call_if_exists( spooler_task_after_name );
+            monitor_instance->_module_instance->call_if_exists( spooler_task_after_name );
         }
         catch( exception& x )
         {
-            _log.error( spooler_task_after_name + ": " + x.what() );
+            _log.error( monitor_instance->obj_name() + " " + spooler_task_after_name + ": " + x.what() );
         }
 
         try
         {
-            _monitor_instance->close();
+            monitor_instance->_module_instance->close();
         }
         catch( exception& x )
         {
-            _log.error( string("Monitor: ") + x.what() );
+            _log.error( monitor_instance->obj_name() + " " + x.what() );
         }
-
-        _monitor_instance = NULL;
     }
+
+    _monitor_instance_list.clear();
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
@@ -872,43 +963,55 @@ Async_operation* Module_instance::step__start()
 
 Variant Module_instance::step__end()
 {
-    Variant ok;
+    Variant result;
 
-    if( !_monitor_instance )
+    if( _monitor_instance_list.empty() )
     {
-        ok = call_if_exists( spooler_process_name );
+        result = call_if_exists( spooler_process_name );
     }
     else
     {
-        ok = _monitor_instance->call_if_exists( spooler_process_before_name );
-        if( check_result( ok ) )
+        Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
+        {
+            Module_monitor_instance* monitor_instance = *m;
+
+            result = monitor_instance->_module_instance->call_if_exists( spooler_process_before_name );
+            if( !check_result( result ) )  break;
+        }
+
+        if( check_result( result ) )
         {
             try
             {
-                ok = call_if_exists( spooler_process_name );
+                result = call_if_exists( spooler_process_name );
             }
             catch( Xc& x )
             {
                 com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", x.code(), x.what() );
-                ok = false;
+                result = false;
             }
             catch( zschimmer::Xc& x )
             {
                 com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", x.code(), x.what() );
-                ok = false;
+                result = false;
             }
             catch( exception& x )
             {
                 com_call( object( "spooler_task", _com_task ), "Set_error_code_and_text", "", x.what() );
-                ok = false;
+                result = false;
             }
 
-            Variant result = _monitor_instance->call_if_exists( spooler_process_after_name, check_result( ok ) );
-            if( result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  ok = result;
+            Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
+            {
+                Module_monitor_instance* monitor_instance = *m;
+
+                Variant call_result = monitor_instance->_module_instance->call_if_exists( spooler_process_after_name, check_result( result ) );
+                if( result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  result = call_result;
+            }
         }
     }
 
-    return ok;
+    return result;
 }
 
 //---------------------------------------------------------------------Module_instance::call__start
@@ -965,6 +1068,98 @@ void Module_instance::end_task()
 {
     assert( _task );
     if( _task )  _task->cmd_end();
+}
+
+//-------------------------------------------------------------------------Module_monitors::set_dom
+
+void Module_monitors::set_dom( const xml::Element_ptr& element )
+{
+    if( !element.nodeName_is( "monitor" ) )  assert(0), z::throw_xc( "SCHEDULER-409", "monitor", element.nodeName() );
+    
+    string name = element.getAttribute( "name", default_monitor_name );
+
+    ptr<Module_monitor> monitor = monitor_or_null( name );
+
+    if( !monitor )
+    {
+        monitor = Z_NEW( Module_monitor() );
+        monitor->_name   = name;
+        monitor->_module = Z_NEW( Module( _main_module->_spooler, _main_module->_spooler->include_path(), &_main_module->_log ) );
+        add_monitor( monitor );
+    }
+
+    monitor->_ordering = element.int_getAttribute( "ordering", monitor->_ordering );
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "script" ) )  
+        {
+            monitor->_module->set_dom( e );
+        }
+    }
+}
+
+//----------------------------------------------------------------------Module_monitors::needs_java
+
+bool Module_monitors::needs_java() 
+{
+    bool result = false;
+
+    Z_FOR_EACH( Module_monitors::Monitor_map, _monitor_map, m )
+    {
+        Module_monitor* monitor = m->second;
+        result = monitor->_module->needs_java();
+        if( result )  break;
+    }
+
+    return result;
+}
+//-----------------------------------------------------------------Module_monitors::monitor_or_null
+
+Module_monitor* Module_monitors::monitor_or_null( const string& name )
+{
+    Module_monitor* result = NULL;
+
+    Monitor_map::iterator m = _monitor_map.find( name );
+    if( m != _monitor_map.end() )  result = m->second;
+
+    return result;
+}
+
+//----------------------------------------------------------------------Module_monitors::initialize
+
+void Module_monitors::initialize()
+{
+    vector<Module_monitor*> ordered_monitors = this->ordered_monitors();
+
+    Z_FOR_EACH( vector<Module_monitor*>, ordered_monitors, m )
+    {
+        Module_monitor* monitor = *m;
+
+        monitor->_module->init();
+    }
+}
+
+//-------------------------------------------------------------Module_monitors::ordered_module_list
+
+vector<Module_monitor*> Module_monitors::ordered_monitors()
+{
+    vector<Module_monitor*> result;
+
+    result.reserve( _monitor_map.size() );
+    Z_FOR_EACH( Monitor_map, _monitor_map, m )  result.push_back( m->second );
+    sort( result.begin(), result.end(), Module_monitor::less_ordering );
+
+    return result;
+}
+
+//-------------------------------------------------Module_monitor_instance::Module_monitor_instance
+
+Module_monitor_instance::Module_monitor_instance( Module_monitor* monitor, Module_instance* module_instance )
+:
+    _module_instance(module_instance),
+    _obj_name( "Script_monitor " + monitor->name() )
+{
 }
 
 //-------------------------------------------------------------------------------------------------

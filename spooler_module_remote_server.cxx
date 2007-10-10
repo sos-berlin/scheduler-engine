@@ -229,6 +229,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         int    task_id         = 0;
 
         Locked_safearray<Variant> params ( safearray );
+        ptr<Module_monitor>              monitor;
 
         _server = Z_NEW( Remote_module_instance_server( include_path ) );
 
@@ -244,38 +245,53 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 ole_value++;
                 string value = string_from_ole( ole_value );
 
-                if( key_word == "language"        )  _server->_module->_language        = value;
+                if( key_word == "language"         )  _server->_module->_language        = value;
                 else                                                                         
-                if( key_word == "com_class"       )  _server->_module->_com_class_name  = value;
+                if( key_word == "com_class"        )  _server->_module->_com_class_name  = value;
                 else                                                                         
-                if( key_word == "filename"        )  _server->_module->_filename        = value;
+                if( key_word == "filename"         )  _server->_module->_filename        = value;
                 else
-                if( key_word == "java_class"      )  _server->_module->_java_class_name = value;
+                if( key_word == "java_class"       )  _server->_module->_java_class_name = value;
                 else
-                if( key_word == "recompile"       )  _server->_module->_recompile       = value[0] == '1';
+                if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
-                if( key_word == "script"          )  _server->_module->set_xml_text_with_includes( value );
+                if( key_word == "script"           )  _server->_module->set_xml_text_with_includes( value );
                 else
-                if( key_word == "java_options"    )  java_options                     += " " + value;
+                if( key_word == "java_options"     )  java_options                     += " " + value;
                 else
-                if( key_word == "job"             )  job_name                          = value;
+                if( key_word == "job"              )  job_name                          = value;
                 else
-                if( key_word == "task_id"         )  task_id                           = as_int( value );
+                if( key_word == "task_id"          )  task_id                           = as_int( value );
                 else
-                if( key_word == "monitor.language"   )  _server->_module->_monitor = Z_NEW( Module( NULL, include_path, NULL ) ),  // Muss der erste Parameter für den Monitor sein
-                                                        _server->_module->_monitor->_language        = value;
+                if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
+                {
+                    monitor = Z_NEW( Module_monitor );
+                    monitor->_module = Z_NEW( Module( NULL, include_path, NULL ) );  
+                    monitor->_module->_language = value;
+                }
                 else                                                                         
-                if( key_word == "monitor.com_class"  )  _server->_module->_monitor->_com_class_name  = value;
-                else                                                                         
-                if( key_word == "monitor.filename"   )  _server->_module->_monitor->_filename        = value;
-                else
-                if( key_word == "monitor.java_class" )  _server->_module->_monitor->_java_class_name = value;
-                else
-                if( key_word == "monitor.recompile"  )  _server->_module->_monitor->_recompile       = value[0] == '1';
-                else
-                if( key_word == "monitor.script"     )  _server->_module->_monitor->set_xml_text_with_includes( value );
-                else
-                    assert(0), throw_xc( "server::construct", as_string(i), key_word );
+                if( monitor )
+                {
+                    if( key_word == "monitor.name"       )  monitor->_name                     = value;
+                    else                                                                         
+                    if( key_word == "monitor.ordering"   )  monitor->_ordering                 = as_int( value );
+                    else                                                                         
+                    if( key_word == "monitor.com_class"  )  monitor->_module->_com_class_name  = value;
+                    else                                                                         
+                    if( key_word == "monitor.filename"   )  monitor->_module->_filename        = value;
+                    else
+                    if( key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
+                    else
+                    if( key_word == "monitor.recompile"  )  monitor->_module->_recompile       = value[0] == '1';
+                    else
+                    if( key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
+                    {
+                        monitor->_module->set_xml_text_with_includes( value );
+                        _server->_module->_monitors->add_monitor( monitor );
+                    }
+                    else
+                        assert(0), throw_xc( "server::construct", as_string(i), key_word );
+                }
             }
         }
 
@@ -302,9 +318,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
             if( !java_work_dir.empty() )
             {
-                if( _server->_module->_real_kind           == Module::kind_java  &&  _server->_module->has_source_script()  ||
-                    _server->_module->_monitor && 
-                    _server->_module->_monitor->_real_kind == Module::kind_java  &&  _server->_module->_monitor->has_source_script() )
+                if( _server->_module->needs_java() )
                 {
                     java_vm->set_work_dir( java_work_dir );
                     java_vm->prepend_class_path( java_work_dir );
