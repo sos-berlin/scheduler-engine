@@ -516,9 +516,9 @@ struct file_based_subsystem : File_based_subsystem
 
     void close()
     {
-        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        Z_FOR_EACH_REVERSE( std::vector<FILE_BASED*>, ordered_file_baseds, it )
+        Z_FOR_EACH_REVERSE( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
             ptr<File_based> file_based = *it;
             
@@ -533,9 +533,9 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_initialize()
     {
-        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
+        Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
             File_based* file_based = +*it;
 
@@ -552,9 +552,9 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_load()
     {
-        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
+        Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
             File_based* file_based = +*it;
 
@@ -571,9 +571,9 @@ struct file_based_subsystem : File_based_subsystem
 
     bool subsystem_activate()
     {
-        std::vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
+        vector<FILE_BASED*> ordered_file_baseds = this->ordered_file_baseds();
 
-        Z_FOR_EACH( std::vector<FILE_BASED*>, ordered_file_baseds, it )
+        Z_FOR_EACH( typename vector<FILE_BASED*>, ordered_file_baseds, it )
         {
             File_based* file_based = +*it;
 
@@ -593,7 +593,7 @@ struct file_based_subsystem : File_based_subsystem
         vector<FILE_BASED*> result;
         
         result.reserve( _file_based_map.size() );
-        Z_FOR_EACH( File_based_map, _file_based_map, fb )  result.push_back( fb->second );
+        Z_FOR_EACH( typename File_based_map, _file_based_map, fb )  result.push_back( fb->second );
 
         //Wir müssen nicht ordnen und ordering_is_less() betrachtet nicht den Pfad: sort( result, result.begin(), result.end(), File_based::ordering_is_less );
 
