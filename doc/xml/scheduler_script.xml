@@ -4,14 +4,14 @@
 <!--$Id$-->
 
 <xml_element name     = "scheduler_script"
-             title    = "Scheduler-Skript"
+             title    = "Job Scheduler Skript"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author$"
              date     = "$Date$">
 
-    <scheduler_keyword keyword="Scheduler-Skript"/>
+    <scheduler_keyword keyword="Job Scheduler Skript"/>
 
     <xml_parent_elements>
         <xml_parent_element name="config"/>
@@ -22,7 +22,7 @@
         <xml_attribute name="name" type="Name" intial="scheduler">
             <description>
                 <p>
-                    Mehrere Scheduler-Skripte können angegeben werden,
+                    Mehrere Job Scheduler Skripte können angegeben werden,
                     wenn jedem ein eigener Name gegeben wird.
                 </p>
             </description>
@@ -31,7 +31,7 @@
         <xml_attribute name="ordering" type="number">
             <description>
                 <p>
-                    Scheduler-Skripte mit kleinerem <code>ordering</code> werden vorranging aufgerufen.
+                    Job Scheduler Skripte mit kleinerem <code>ordering</code> werden vorranging aufgerufen.
                     Umgekehrt beim Beenden des Schedulers:
                     <scheduler_method class="Job_impl" method="spooler_exit"/> werden nachrangig aufgerufen.
                 </p>
@@ -51,11 +51,11 @@
         </p>
         <p>
             <scheduler_method class="Job_impl" method="spooler_init"/> 
-            wird beim Start des Schedulers (vor dem Start der Jobs) aufgerufen.
+            wird beim Start des Job Schedulers (vor dem Start der Jobs) aufgerufen.
         </p>
         <p>
             <scheduler_method class="Job_impl" method="spooler_exit"/> 
-            wird bei Beendigung des Schedulers (nach Beendigung aller Jobs) aufgerufen.
+            wird bei Beendigung des Job Schedulers (nach Beendigung aller Jobs) aufgerufen.
         </p>
     </description>
 
