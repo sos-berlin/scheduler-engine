@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -50,10 +50,12 @@
             Dem Skript stehen die Variablen <code>spooler</code> und <code>spooler_log</code> zur Verfügung.
         </p>
         <p>
-            <scheduler_method class="Job_impl" method="spooler_init"/> wird beim Start des Schedulers (vor dem Start der Jobs) aufgerufen.
+            <scheduler_method class="Job_impl" method="spooler_init"/> 
+            wird beim Start des Schedulers (vor dem Start der Jobs) aufgerufen.
         </p>
         <p>
-            <scheduler_method class="Job_impl" method="spooler_exit"/> wird bei Beendigung des Schedulers (nach Beendigung aller Jobs) aufgerufen.
+            <scheduler_method class="Job_impl" method="spooler_exit"/> 
+            wird bei Beendigung des Schedulers (nach Beendigung aller Jobs) aufgerufen.
         </p>
     </description>
 
