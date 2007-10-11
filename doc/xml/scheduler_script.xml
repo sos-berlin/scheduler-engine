@@ -32,7 +32,7 @@
             <description>
                 <p>
                     Job Scheduler Skripte mit kleinerem <code>ordering</code> werden vorranging aufgerufen.
-                    Umgekehrt beim Beenden des Schedulers:
+                    Umgekehrt beim Beenden des Job Schedulers:
                     <scheduler_method class="Job_impl" method="spooler_exit"/> werden nachrangig aufgerufen.
                 </p>
             </description>

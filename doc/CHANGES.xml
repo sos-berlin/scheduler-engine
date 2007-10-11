@@ -11,10 +11,10 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-10-10" version="2.0.187" subversion_revision="5325">
-        <revision type="new" title="Linux-Scheduler mit entfernbaren Debug-Informationen">
+        <revision type="new" title="Linux Job Scheduler mit entfernbaren Debug-Informationen">
             <description>
                 <p>
-                    Den Linux-Scheduler gebe ich mit Debug-Informationen frei.
+                    Den Linux Job Scheduler gebe ich mit Debug-Informationen frei.
                     Das erleichtert die Fehlerdiagnose, macht ihn aber größer.
                     Das Kommando
                 </p>
@@ -22,18 +22,18 @@
                     <code>strip --preserve-dates bin/scheduler</code>
                 </p>
                 <p>
-                    entfernt die Debug-Information, und der Scheduler schrumpft auf seine frühere Größe. 
+                    entfernt die Debug-Information, und der Job Scheduler schrumpft auf seine frühere Größe. 
                     Das Kommando sollte auf jeder Suse-Installation vorhanden sein (Paket binutils).
                 </p>
             </description>
         </revision>
 
 
-        <revision jira="JS-134" type="new" title="Mehrere Scheduler-Skripte">
+        <revision jira="JS-134" type="new" title="Mehrere Job Scheduler Skripte">
             <description>
                 <p>
                     Mit dem neuen XML-Element <scheduler_element name="scheduler_script"/>
-                    lassen sich mehrere Scheduler-Skripte angegeben.
+                    lassen sich mehrere Job Scheduler Skripte angegeben.
                 </p>
             </description>
         </revision>
