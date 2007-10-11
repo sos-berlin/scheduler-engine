@@ -1697,18 +1697,17 @@ Period Run_time::call_function( const Time& requested_beginning )
     {
         try
         {
-            if( !_spooler->scheduler_script_subsystem()->default_scheduler_script_or_null() )  z::throw_xc( "SCHEDULER-395", Z_FUNCTION, _start_time_function );
 
             string date_string = requested_beginning.as_string( Time::without_ms );
-            string param2 = !_host_object? "" :
-                            _host_object->scheduler_type_code() == Scheduler_object::type_order? dynamic_cast<Order*>( +_host_object )->string_id() :
-                            _host_object->scheduler_type_code() == Scheduler_object::type_job  ? dynamic_cast<Job*  >( +_host_object )->name()
-                                                                                               : "";
+            string param2      = !_host_object? "" :
+                                 _host_object->scheduler_type_code() == Scheduler_object::type_order? dynamic_cast<Order*>( +_host_object )->string_id() :
+                                 _host_object->scheduler_type_code() == Scheduler_object::type_job  ? dynamic_cast<Job*  >( +_host_object )->name()
+                                                                                                    : "";
+            Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
+            string            function_name    = _start_time_function;
+            if( scheduler_script ->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
 
-            string function_name = _start_time_function;
-            if( _spooler->scheduler_script_subsystem()->default_scheduler_script()->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
-
-            Variant v = _spooler->scheduler_script_subsystem()->default_scheduler_script()->module_instance()->call( function_name, date_string, param2 );
+            Variant v = scheduler_script ->module_instance()->call( function_name, date_string, param2 );
             
             if( !v.is_null_or_empty_string() )
             {

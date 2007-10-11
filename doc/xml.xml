@@ -77,6 +77,7 @@
                 <scheduler_element name="lock"/><br/>
                 <scheduler_element name="lock.use"/><br/>
                 <scheduler_element name="monitor"/><br/>
+                <scheduler_element name="month"/><br/>
                 <scheduler_element name="monthdays"/><br/>
                 <scheduler_element name="param"/><br/>
                 <scheduler_element name="params"/><br/>
@@ -85,6 +86,7 @@
                 <scheduler_element name="process_class"/><br/>
                 <scheduler_element name="process_classes"/><br/>
                 <scheduler_element name="run_time"/><br/>
+                <scheduler_element name="scheduler_script"/><br/>
                 <scheduler_element name="script"/><br/>
                 <scheduler_element name="service_request"/><br/>
                 <scheduler_element name="security"/><br/>
@@ -127,6 +129,7 @@
                 <scheduler_element directory="xml/answer/" name="at"/><br/>
                 <scheduler_element directory="xml/answer/" name="description"/><br/>
                 <scheduler_element directory="xml/answer/" name="ERROR"/><br/>
+                <scheduler_element directory="xml/answer/" name="file_based"/><br/>
                 <scheduler_element directory="xml/answer/" name="history.entry"/><br/>
                 <scheduler_element directory="xml/answer/" name="history"/><br/>
                 <scheduler_element directory="xml/answer/" name="job"/><br/>
@@ -152,8 +155,10 @@
                 <scheduler_element directory="xml/answer/" name="processes"/><br/>
                 <scheduler_element directory="xml/answer/" name="queued_task"/><br/>
                 <scheduler_element directory="xml/answer/" name="queued_tasks"/><br/>
+                <scheduler_element directory="xml/answer/" name="replacement"/><br/>
                 <scheduler_element directory="xml/answer/" name="remote_scheduler"/><br/>
                 <scheduler_element directory="xml/answer/" name="remote_schedulers"/><br/>
+                <scheduler_element directory="xml/answer/" name="removed"/><br/>
                 <scheduler_element directory="xml/answer/" name="run_time"/><br/>
                 <scheduler_element directory="xml/answer/" name="spooler"/><br/>
                 <scheduler_element directory="xml/answer/" name="state"/><br/>
