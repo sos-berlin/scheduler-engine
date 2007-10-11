@@ -140,6 +140,7 @@ endif
 $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o  $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)  $(PROD_DIR)/3rd_party/libxslt/libxslt/$(O_DIR)/libxslt.a  $(PROD_DIR)/3rd_party/libxml2/$(O_DIR)/libxml2.a
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 	chmod a+rx $@
+	$(PROD_DIR)/make/separate-debug-info "$@"
 
 $(BIN_DIR)/setuid: setuid.o 
 	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s
