@@ -85,7 +85,7 @@ spooler_log.info( "hallo" );
 
                 <run_time start_time_function="my_start_time_function">
                     <monthdays>
-                        <weekday day="monday" which="2">
+                        <weekday day="monday" which="3">
                             <period single_start="02:00"/>
                         </weekday>
                         <weekday day="friday" which="-1">

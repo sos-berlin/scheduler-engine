@@ -1198,16 +1198,24 @@ Period Monthday_set::next_period( const Time& tim, With_single_start single_star
 
             if( _month_weekdays._is_filled )
             {
-                int    which   =  1 + ( date.day() - 1 ) / 7;
-                Period period2 = _month_weekdays.day( which, weekday ) -> next_period( time_of_day, single_start );
-                if( period > period2 )  period = period2;
+                int which =  1 + ( date.day() - 1 ) / 7;
+
+                if( Day* day = _month_weekdays.day( which, weekday ) )
+                {
+                    Period period2 = day->next_period( time_of_day, single_start );
+                    if( period > period2 )  period = period2;
+                }
             }
 
             if( _reverse_month_weekdays._is_filled )
             {
-                int    reverse_which = 1 + ( last_day_of_month( date ) - date.day() ) / 7;
-                Period period3       = _reverse_month_weekdays.day( reverse_which, weekday ) -> next_period( time_of_day, single_start );
-                if( period > period3 )  period = period3;
+                int reverse_which = 1 + ( last_day_of_month( date ) - date.day() ) / 7;
+
+                if( Day* day = _reverse_month_weekdays.day( reverse_which, weekday ) )
+                {
+                    Period period3 = day->next_period( time_of_day, single_start );
+                    if( period > period3 )  period = period3;
+                }
             }
 
             if( !period.empty() )
