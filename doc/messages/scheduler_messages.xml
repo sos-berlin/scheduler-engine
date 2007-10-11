@@ -2420,11 +2420,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-395">
+        <!--message code="SCHEDULER-395">
             <text xml:lang="en">
                 <title>No Scheduler script</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-396">
             <text xml:lang="en">

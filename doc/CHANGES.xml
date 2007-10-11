@@ -11,6 +11,24 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-10-10" version="2.0.187" subversion_revision="5325">
+        <revision type="new" title="Linux-Scheduler mit entfernbaren Debug-Informationen">
+            <description>
+                <p>
+                    Den Linux-Scheduler gebe ich mit Debug-Informationen frei.
+                    Das erleichtert die Fehlerdiagnose, macht ihn aber größer.
+                    Das Kommando
+                </p>
+                <p>
+                    <code>strip --preserve-dates bin/scheduler</code>
+                </p>
+                <p>
+                    entfernt die Debug-Information, und der Scheduler schrumpft auf seine frühere Größe. 
+                    Das Kommando sollte auf jeder Suse-Installation vorhanden sein (Paket binutils).
+                </p>
+            </description>
+        </revision>
+
+
         <revision jira="JS-134" type="new" title="Mehrere Scheduler-Skripte">
             <description>
                 <p>
@@ -71,7 +89,7 @@
             </description>
         </revision>
 
-        <revision type="new" title="Dynamische Konfiguration">
+        <revision jira="JS-155" type="new" title="Dynamische Konfiguration">
             <description>
                 <ul>
                     <li>

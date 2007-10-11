@@ -45,7 +45,7 @@
 
             <messages>
                 <message level="error" code="SCHEDULER-393"/>
-                <message level="error" code="SCHEDULER-395"/>
+             <!--message level="error" code="SCHEDULER-395"/-->
                 <message level="warn"  code="SCHEDULER-394"/>
             </messages>
         </xml_attribute>
