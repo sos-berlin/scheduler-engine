@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -400,7 +400,8 @@
             </description>
 
             <messages>
-                <message level="info" code="SCHEDULER-988"/>
+            <!--<message level="error" code="SCHEDULER-229"/>-->
+            <!--<message level="info" code="SCHEDULER-988"/>-->
             </messages>
         </xml_attribute>
 

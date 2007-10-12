@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <!--$Id: monthdays.xml 4004 2005-11-03 14:01:08Z jz $-->
@@ -28,7 +28,7 @@
                     <code>"thursday"</code>,
                     <code>"friday"</code>,
                     <code>"saturday"</code> und
-                    <code>"sunday"</code> oder
+                    <code>"sunday"</code>.
                 </p>
                 <p>
                     Mehrere Tage können durch Leerzeichen getrennt angegeben werden.
