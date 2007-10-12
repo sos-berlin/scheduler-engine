@@ -120,8 +120,143 @@
     <p>
     
     </p>
-    
-    
-    
-    
+		
+		
+		
+		<h2>Built-In Graphical User Interface</h2>
+		
+		<p>
+			The Job Scheduler can be operated using its own, built-in, web-based graphical user interface (GUI).
+			Instructions for accessing this interface were provided in the "Operation with a Browser" 
+			section of this chapter (above)??Link fehlt?.
+		</p>
+		
+		<p>
+			This interface is automatically installed and updated with the Job Scheduler installation package.??Stimts?
+		</p>
+		
+		<p>
+			<i>When can this interface be used in comparison with the Admin Web Interface?</i>
+		</p>
+		
+		<p>
+			When first opened, the Job Scheduler GUI appears as shown in the screenshot below and
+			comprises three areas:
+		</p>
+		
+		<ul>
+			<li>
+				An upper menu bar, where the general configuration of the interface (language &amp; update) is carried out; 
+				any monitoring functions the Job Scheduler is to carry out is shown ??Ist korrekt? and
+				the configuration of the Job Scheduler itself is carried out using the XML configuration file??Link fehlt?.
+				<br/><br/>
+				??Ist der Job Scheduler Editor hier?
+			</li>
+			<li>
+				A central menu and status bar, providing access to the most important Job Scheduler menus and 
+				status information about the operation of the Job Scheduler.
+				<br/><br/>
+				The "Update periodically" checkbox and the "Update" button are used to update the information shown 
+				in the web interface either at regular intervals (when the checkbox is selected) or manually, 
+				as required (using the button).
+				The interval with which the regular updates of the interface are carried out is set using ??Wo? ...
+			</li>
+			<li>
+				A working area initially showing a list of the jobs configured for the Job Scheduler,
+				which can be used to provide information about other aspects of the Job Scheduler operation 
+				such as the job chains, process classes and locks by selecting the appropriately named menu tabs.
+				Note that, should, for example, no locks be configured then the "Locks" menu tab will not be shown.
+			</li>
+		</ul>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_gui_reduced.jpg"/>
+		
+		<p>
+			The main menu for the operation of the Job Scheduler is shown in the next screenshot:
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_menu_reduced.jpg"/>
+		
+		<p>
+			Detailed information about the state of one of the jobs listed in the main working area of the interface 
+			can be obtained by clicking on the name of the job.
+			This causes the right hand part of the interface to divide ??Ist korrekt? and 
+			an area showing status information about the job to be displayed as can be seen in the screen shot below.
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_joblist_details_reduced.jpg"/>
+		
+		<p>
+			The job status area also contains a menu providing the main commands necessary for controlling the job
+			as shown in the next screen shot.
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_job_menu_reduced.jpg"/>
+		
+		<p>
+			The "Show description" item in the menu opens a new browser window containing the Job Editor.
+			This editor combines documentation of the job, its configuration and a generation function, 
+			where the job can be newly generated after changes to its configuration have been made.
+			This editor is so integrated in the Job Scheduler installation that the Job Scheduler automatically 
+			takes account of changes in a job configuration without having to be restarted.??Stimmt dies?
+		</p>
+		
+		<p>
+			The documentation for the Job Editor can be read .... ??Wo? - Link hinzufügen?
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_job_description_reduced.jpg"/>
+		
+		<p>
+			Information about tasks carrying out a job is shown in the task area of the interface as 
+			shown in the next screen shot:
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_task_reduced.jpg"/>
+		
+		<p>
+			A task menu is provided as shown in the following screen shot:
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_task_menu_reduced.jpg"/>
+		
+		<p>
+			Information about any errors occuring in the execution of a job is shown in the interface job area:
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_task_error_reduced.jpg"/>
+		
+		<p>
+			If the Job Scheduler is part of a Job Scheduler cluster, providing backup, monitoriung and fail-over features, 
+			a corresponding "Cluster" menu tab will be shown in the main working area of the interface.
+			As can be seen in the next screen shot, a button is provided to a menu for configuring cluster related aspects of the 
+			Job Scheduler operation:
+		</p>
+		
+		<img class="screen_shot" src="images/job_scheduler_http_backup_reduced.jpg"/>
+		
+		<p>
+			The principles for using the Job Scheduler GUI and 
+			which have been described in conjunction with the features shown in the preceeding screen shots
+			are followed for the aspects of the interface which have not been shown in the screen shots.
+			This means, for example, that use of the job chain part of the interface should follow intuitively.
+		</p>
+		
+		<p>
+			Detailed information about the configuration and operation of the Job Scheduler can be found 
+			in the following sections of this documentation:
+		</p>
+		
+		<ul>
+			<li>
+				XML Configuration??Link fehlt?.
+			</li>
+			<li>
+				Jobs &amp; Job Chains??Link?.
+			</li>
+			<li>
+				Orders??Link?.
+			</li>
+		</ul>
+		
 </description>

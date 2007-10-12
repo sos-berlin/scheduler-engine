@@ -142,3 +142,6 @@ div.box                         { margin-top: 1.5em;
 span.work_in_progress           { margin-top: 0em; margin-bottom: 2em; 
                                   color: red; font-family: 'Courier New' monospace;  
                                   white-space: nowrap; }
+
+
+img.screen_shot                 { margin: 20px 0px ; border:1px solid gray; }
