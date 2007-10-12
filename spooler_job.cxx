@@ -547,6 +547,8 @@ bool Job::on_initialize()
 
 bool Job::on_load() // Transaction* ta )
 {
+    // Nach Fehler nicht wiederholbar.
+
     bool result = false;
 
     if( _state < s_loaded )
@@ -555,25 +557,23 @@ bool Job::on_load() // Transaction* ta )
 
         set_log();  // Wir haben einen eigenen Präfix mit extra Blank "Job  xxx", damit's in einer Spalte mit "Task xxx" ist.
 
+        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+        {
+            _log->set_append( _log_append );
+            _log->set_filename( _spooler->log_directory() + "/job." + path().to_filename() + ".log" );      // Jobprotokoll
+        }
+
+        _log->open();
+
+        if( _lock_requestor )  _lock_requestor->load();       // Verbindet mit bekannten Sperren
+
+
         try
         {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
                 _history.open( &ta );
-
-                if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-                {
-                    _log->set_append( _log_append );
-                    _log->set_filename( _spooler->log_directory() + "/job." + path().to_filename() + ".log" );      // Jobprotokoll
-                }
-
-                _log->open();
-
-                if( _lock_requestor )  _lock_requestor->load();       // Verbindet mit bekannten Sperren
-
                 if( _spooler->_db->opened() )  load_tasks_from_db( &ta );
-
-                set_state( s_loaded );
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
         }
@@ -583,6 +583,7 @@ bool Job::on_load() // Transaction* ta )
             throw;
         }
 
+        set_state( s_loaded );
         result = true;
     }
 

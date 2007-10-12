@@ -1460,6 +1460,9 @@
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Task.xml#method__job' register_title='Task.job' register_keyword='job' type='definition'/>
 </register_keyword>
+<register_keyword keyword='Job Scheduler Skript'>
+    <register_entry register_file='xml/scheduler_script.xml' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='Job Scheduler Skript'/>
+</register_keyword>
 <register_keyword keyword='job-chain'>
     <register_keyword_display><code>-job-chain=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_job-chain' register_title='Kommandozeilenoptionen'  register_keyword='job-chain' type='definition'/>
@@ -2968,7 +2971,6 @@
     <register_entry register_file='command_line.xml#use_option__scheduler' register_title='Kommandozeilenoptionen'  register_keyword='scheduler'/>
 </register_keyword>
 <register_keyword keyword='Scheduler-Skript'>
-    <register_entry register_file='xml/scheduler_script.xml' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='Scheduler-Skript'/>
     <register_entry register_file='xml/script.xml' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='Scheduler-Skript'/>
 </register_keyword>
 <register_keyword keyword='scheduler.log'>
