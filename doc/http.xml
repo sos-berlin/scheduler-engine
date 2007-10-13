@@ -39,6 +39,11 @@
         Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
         Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="html_dir"/>.<br/>
     </p>
+		<p>
+			The user interface is described in the 
+			"<a href="user_interface">Built-In User Interface</a>" 
+			section of this chapter (below).
+		</p>
     
     
     <h2>Zugriffsschutz</h2>
@@ -123,12 +128,17 @@
 		
 		
 		
+		<scheduler_keyword keyword="Web Interface"/>
+		<scheduler_keyword keyword="User Interface"/>
+		<scheduler_keyword keyword="GUI"/>
+		<a href="user_interface"/>
 		<h2>Built-In Graphical User Interface</h2>
 		
 		<p>
 			The Job Scheduler can be operated using its own, built-in, web-based graphical user interface (GUI).
-			Instructions for accessing this interface were provided in the "Operation with a Browser" 
-			section of this chapter (above)??Link fehlt?.
+			Instructions for accessing this interface were provided in the 
+			"<a href="http.xml">Operation with a Browser</a>" 
+			section of this chapter (above).
 		</p>
 		
 		<p>
@@ -136,7 +146,19 @@
 		</p>
 		
 		<p>
-			<i>When can this interface be used in comparison with the Admin Web Interface?</i>
+			This interface is intended for the <em>operation</em> of the Job Scheduler
+			- i.e. starting, monitoring and stopping the Job Scheduler itself, jobs &amp; job chains, orders, and 
+			  any locks and Job Schedulers operating in a cluster.
+			<br/>
+			This interface should not be confused with the <a href="scheduler_editor.xml">Job Scheduler Editor</a>,
+			which is a GUI used to <em>configure</em> the Job Scheduler itself, jobs &amp; job chains, orders using XML.
+			(Note that the Job Scheduler Editor can be called up from the Job Scheduler GUI.??Stimmts? This is described below.)
+			<br/>
+			The Job Scheduler GUI should also not be confused with the Managed Jobs Administration interface, 
+			which is a part of the Job Scheduler <em>Managed Jobs</em> package.
+			The Managed Jobs Administration interface is a GUI for the creation and monitoring jobs, job chains &amp; orders and 
+			comes with a user administration. 
+			Further information about the Managed Jobs Administration interface can be found in the »Managed Jobs Documentation«.
 		</p>
 		
 		<p>
@@ -148,18 +170,22 @@
 			<li>
 				An upper menu bar, where the general configuration of the interface (language &amp; update) is carried out; 
 				any monitoring functions the Job Scheduler is to carry out is shown ??Ist korrekt? and
-				the configuration of the Job Scheduler itself is carried out using the XML configuration file??Link fehlt?.
-				<br/><br/>
-				??Ist der Job Scheduler Editor hier?
+				the configuration of the Job Scheduler itself is carried out using the 
+				<a href="konfiguration.xml">XML configuration file</a>.
+				<br/>
+				Note that the <a href="scheduler_editor.xml">Job Scheduler Editor</a> can be used to modify the XML configuration file.
+				??Bei der "http://demo.sos:4455/" Job Scheduler Installation (der ich zum Testzwecke benutzt habe), 
+				der "Configuration" Button öffnet der XML Datei und nicht der Scheduler Editor. Ist dies immer so?
 			</li>
 			<li>
 				A central menu and status bar, providing access to the most important Job Scheduler menus and 
 				status information about the operation of the Job Scheduler.
-				<br/><br/>
+				<br/>
 				The "Update periodically" checkbox and the "Update" button are used to update the information shown 
 				in the web interface either at regular intervals (when the checkbox is selected) or manually, 
 				as required (using the button).
-				The interval with which the regular updates of the interface are carried out is set using ??Wo? ...
+				The interval with which the regular updates of the interface are carried out is set using ... 
+				??Ja, was/wo?
 			</li>
 			<li>
 				A working area initially showing a list of the jobs configured for the Job Scheduler,
@@ -180,15 +206,16 @@
 		<p>
 			Detailed information about the state of one of the jobs listed in the main working area of the interface 
 			can be obtained by clicking on the name of the job.
-			This causes the right hand part of the interface to divide ??Ist korrekt? and 
-			an area showing status information about the job to be displayed as can be seen in the screen shot below.
+			This causes the right hand part of this area to divide and 
+			additional areas  showing status information about the job, about the task and about the taks queue to be displayed 
+			as can be seen in the screen shot below:
 		</p>
 		
 		<img class="screen_shot" src="images/job_scheduler_http_joblist_details_reduced.jpg"/>
 		
 		<p>
 			The job status area also contains a menu providing the main commands necessary for controlling the job
-			as shown in the next screen shot.
+			as shown in the next screen shot:
 		</p>
 		
 		<img class="screen_shot" src="images/job_scheduler_http_job_menu_reduced.jpg"/>
@@ -249,13 +276,19 @@
 		
 		<ul>
 			<li>
-				XML Configuration??Link fehlt?.
+				The <a href="konfiguration.xml">XML Configuration</a> of the Job Scheduler.
 			</li>
 			<li>
-				Jobs &amp; Job Chains??Link?.
+				<a href="job.xml">Jobs and Job Chains</a>.
 			</li>
 			<li>
-				Orders??Link?.
+				<a href="order.xml">Orders</a>.
+			</li>
+			<li>
+				<a href="protokolle.xml">Log files and errors</a>.
+			</li>
+			<li>
+				<a href="messages/index.xml">Error messages</a>.
 			</li>
 		</ul>
 		
