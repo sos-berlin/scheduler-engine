@@ -146,6 +146,11 @@
 		</p>
 		
 		<p>
+			The Job Scheduler GUI is configured in the <code>custom.js</code> datei, 
+			which is to be found in the <code>Job Scheduler installation directory\config\html</code> directory
+		</p>
+		
+		<p>
 			This interface is intended for the <em>operation</em> of the Job Scheduler
 			- i.e. starting, monitoring and stopping the Job Scheduler itself, jobs &amp; job chains, orders, and 
 			  any locks and Job Schedulers operating in a cluster.
@@ -170,12 +175,12 @@
 			<li>
 				An upper menu bar, where the general configuration of the interface (language &amp; update) is carried out; 
 				any monitoring functions the Job Scheduler is to carry out is shown ??Ist korrekt? and
-				the configuration of the Job Scheduler itself is carried out using the 
-				<a href="konfiguration.xml">XML configuration file</a>.
+				the configuration of the Job Scheduler itself in the
+				<a href="konfiguration.xml">XML configuration file</a> is shown.
 				<br/>
-				Note that the <a href="scheduler_editor.xml">Job Scheduler Editor</a> can be used to modify the XML configuration file.
-				??Bei der "http://demo.sos:4455/" Job Scheduler Installation (der ich zum Testzwecke benutzt habe), 
-				der "Configuration" Button öffnet der XML Datei und nicht der Scheduler Editor. Ist dies immer so?
+				Note that here the XML configuration file is shown "read-only" - 
+				to change the configuration, the <a href="scheduler_editor.xml">Job Scheduler Editor</a> or an alternative XML editor should 
+				be used which has access to the Job Scheduler installation directory.
 			</li>
 			<li>
 				A central menu and status bar, providing access to the most important Job Scheduler menus and 
