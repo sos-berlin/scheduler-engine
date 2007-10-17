@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Konfiguration der Job Scheduler Objekte in einzelnen XML-Dateien"
+    title               = "Konfiguration aus Hot Folders"
     base_dir            = ""
     parent_page         = "index.xml"
     author              = "$Author$"
@@ -13,6 +13,9 @@
     <p>
         Jobs, Job-Ketten, Daueraufträge, Prozessklassen und Sperren (im folgenden Objekte genannt)
         können in einzelnen Dateien gehalten werden, die der Job Scheduler automatisch nach Änderung übernimmt.
+        Der Job Scheduler überwacht Verzeichnisse (<em>Hot Folders</em>), für die hinzugefügte,
+        geänderte und gelöschte Dateien als entsprechende Operationen zum Hinzufügen, Ändern
+        und Entfernen von Jobs, Job-Ketten etc. ausgeführt werden. 
     </p>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
@@ -23,17 +26,17 @@
     <h2>Konfigurationsverzeichnis</h2>
     
     <p>
-        Die Dateien liest der Job Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnisse.
+        Die Dateien liest der Job Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnissen.
         Das Konfigurationsverzeichnis kann eingestellt werden mit
     </p>
     <ul>
         <li>
             <scheduler_element name="config" attribute="configuration_directory"/>,
-            voreingestellt ist das Verzeichnis <code>live</code> im Verzeichnis der Konfigurationsdatei.
+            voreingestellt ist das Verzeichnis <code>./config/live</code> im Verzeichnis der Konfigurationsdatei.
         </li>
         <li>
             <scheduler_option name="config"/>. 
-            Die Konfigurationsdatei erwartet der Scheduler dann im Konfigurationsverzeichnis 
+            Die Konfigurationsdatei erwartet der Scheduler dann im Konfigurationsverzeichnis (Voreinstellung <code>./config</code>)
             unter dem Namen <code>scheduler.xml</code>.
         </li>
     </ul>
@@ -41,7 +44,7 @@
     <p>
         Der Job Scheduler überwacht das Konfigurationsverzeichnis und seine Unterverzeichnisse
         und übernimmt hinzugefügte und geänderte Dateien.
-        Löschen einer Datei führt zum Löschen des entsprechenden Objekts im Scheduler.
+        Löschen einer Datei führt zum Löschen des entsprechenden Objekts im Job Scheduler.
     </p>
 
     <p>
@@ -60,7 +63,8 @@
     <h2>Dateien für Prozessklassen, Sperren, Jobs, Job-Ketten und Daueraufträge</h2>
 
     <p style="margin-bottom: 1em;">
-        Die Dateien enthalten die XML-Elemente für die Definition des Objekts:        
+        Die Dateien enthalten die XML-Elemente für die Definition des Objekts und werden
+        aufgrund folgender Namenskonventionen verarbeitet:       
     </p>
     <table cellspacing="0" cellpadding="0">
         <tr>
@@ -141,6 +145,29 @@
         Die Attribute <code>replace=</code> und <code>spooler_id=</code> sind nicht zulässsig.
     </p>
 
+    <br/><br/>
+
+    <br/><u>Beispiel eines Jobs (auftragsgesteuert): Datei <code>hello_world.job.xml</code>:</u><br/>
+    <pre>&lt;job order="yes"&gt;
+    &lt;script language="shell"&gt;&lt;![CDATA[
+      echo hello world
+    ]]&gt;&lt;/script&gt;
+&lt;/job&gt;</pre>
+
+    <br/><u>Beispiel einer Job-Kette: Datei <code>echo_hello.job_chain.xml</code>:</u><br/>
+    <pre>&lt;job_chain&gt;
+    &lt;job_chain_node  state="<i>start</i>" job="<i>hello_world</i>" next_state="<i>success</i>" error_state="<i>error</i>"/>
+    &lt;job_chain_node  state="<i>success</i>"/>
+    &lt;job_chain_node  state="<i>error</i>"/>
+&lt;/job_chain&gt;</pre>
+
+    <br/><u>Beispiel eines Auftrags: Datei <code>echo_hello,echo_trigger.order.xml</code>:</u><br/>
+    <pre>&lt;order&gt;
+    &lt;run_time&gt;
+      &lt;period repeat="3600"/&gt;
+    &lt;/run_time&gt;
+&lt;/order&gt;</pre>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
     
     <h2>Spiegelung des Verzeichnisses im Job Scheduler</h2>
@@ -181,6 +208,14 @@
             Der Job Scheduler vermerkt den Fehler im Objekt und verschickt eine eMail.
             <scheduler_element name="show_state"/> zeigt den Fehler.
         </li>
+        <li>
+            Objekte mit denselben (Datei)Namen können mehrfach in unterschiedlichen Verzeichnissen
+            vorhanden sein. Der Job Scheduler unterscheidet diese Objekte anhand ihres Pfads.
+            Wenn auf Objekte aus anderen Verzeichnissen verwiesen wird, z.B.
+            <pre>&lt;job  process_class="<i>/my_project/multi.process_class.xml</i>"/&gt;</pre>
+            <pre>&lt;job_chain_node  job="<i>/other_project/hello_world</i>"/&gt;</pre>
+            dann müssen absolute oder relative Pfade angegeben werden.
+        </li>
     </ul>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -191,7 +226,7 @@
         Kommandos zum Ändern von Objekten ändern nicht die Dateien.
     </p>
     <p>
-        Kommandos zum Löschen von Objekten dagegen löschen die zugrundliegende Datei
+        Kommandos zum Löschen von Objekten löschen die zugrundliegende Datei
         (die Debug-Version des Schedulers versieht den Dateinamen mit dem Anhängsel "<code>-REMOVED</code>").
     </p>
 
@@ -260,7 +295,7 @@
         als wäre der Job nicht zur Auftragsausführung bereit.
     </p>
 
-    <h4>Verschachtelte Job-Ketten</h4>
+    <h3>Verschachtelte Job-Ketten</h3>
     <p>
         Fehlt der Job-Kette eine verschachtelte Job-Kette <scheduler_element name="job_chain_node.job_chain"/>,
         dann ist die gesamte Job-Kette nicht bereit.
@@ -308,7 +343,7 @@
     </p>
     <p>
         Wenn eine Datei gelöscht ist, aber das dazugehörige Objekt noch nicht,
-        wird ein <scheduler_element directory="xml/answer/" name="removed"/> geliefert.
+        wird <scheduler_element directory="xml/answer/" name="removed"/> geliefert.
     </p>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
