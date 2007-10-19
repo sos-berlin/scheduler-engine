@@ -473,6 +473,8 @@ struct Node : Com_job_chain_node,
 
     virtual void                set_action                  ( const string& );
     string               string_action                      () const                                { return string_from_action( _action ); }
+    virtual void                handle_changed_processable_state()                                  {}
+
 
     xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
@@ -528,6 +530,7 @@ struct Order_queue_node : Node
 
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     void                    set_action                      ( const string& );
+    void                        handle_changed_processable_state();
 
   private:
     ptr<Order_queue>           _order_queue;
@@ -675,7 +678,7 @@ struct Job_chain : Com_job_chain,
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
-    void                    set_state                       ( const State& state )                  { _state = state; }
+    void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
     static string               state_name                  ( State );
 
@@ -814,10 +817,11 @@ struct Order_queue : Com_order_queue,
     void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* );
     bool                        empty                       ()                                      { return _queue.empty(); }
-    Order*                      first_order                 ( const Time& now = Time(0) ) const;
+    Order*                      first_processable_order     () const;
+    Order*                      first_immediately_processable_order( const Time& now = Time(0) ) const;
     Order*                      fetch_order                 ( const Time& now );
     Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
-    bool                        has_order                   ( const Time& now = Time(0) )           { return first_order( now ) != NULL; }
+    bool                        has_immediately_processable_order( const Time& now = Time(0) )      { return first_immediately_processable_order( now ) != NULL; }
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();

@@ -2599,7 +2599,7 @@ bool Job::do_something()
 //{
 //    bool result = false;
 //
-//    FOR_EACH( Task_list, _running_tasks, t )    // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_order() und s_running_waiting_for_order in diesem Modul
+//    FOR_EACH( Task_list, _running_tasks, t )    // 2006-12-16  Ist das nicht doppelt geprüft? Siehe first_immediately_processable_order() und s_running_waiting_for_order in diesem Modul
 //    {
 //        Task* task = *t;
 //        if( task->state() == Task::s_running_waiting_for_order  &&  !task->order() )    //|| (*t)->state() == Task::s_suspended  ) 

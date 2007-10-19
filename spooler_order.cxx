@@ -1137,10 +1137,9 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
     //    element.setAttribute( "orders", _order_queue->order_count( &ta ) );
     //}
 
-    if( show_what.is_set( show_job_chain_orders ) )
-    {
-        element.appendChild( order_queue()->dom_element( document, show_what | show_orders ) );
-    }
+    Show_what order_queue_show_what = show_what;
+    if( show_what.is_set( show_job_chain_orders ) )  order_queue_show_what |= show_orders;
+    element.appendChild( order_queue()->dom_element( document, show_what | show_orders ) );
 
     return element;
 }
@@ -1228,7 +1227,7 @@ void Job_node::connect_job( Job* job )
             _job = job;
 
             //In connect_job_node() schon erledigt
-            //if( Order* order = order_queue()->first_order() )
+            //if( Order* order = order_queue()->first_immediately_processable_order() )
             //{
             //    order->handle_changed_processable_state();
             //}
@@ -1277,19 +1276,23 @@ void Job_node::set_action( const string& action_string )
         {
             switch( _action )
             {
-                case act_process:
-                {
-                    if( Order* order = order_queue()->first_order() )
-                    {
-                        if( Job* job = job_or_null() )  job->signal_earlier_order( order );
-                    }
-
+                case act_process:  
+                    handle_changed_processable_state(); 
                     break;
-                }
 
                 default: ;
             }
         }
+    }
+}
+
+//-------------------------------------------------------Job_node::handle_changed_processable_state
+
+void Order_queue_node::handle_changed_processable_state()
+{
+    if( Order* order = _order_queue->first_processable_order() )
+    {
+        order->handle_changed_processable_state();
     }
 }
 
@@ -1670,7 +1673,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
     if( element.nodeName_is( "job_chain.modify" ) )
     {
-        if( _is_distributed )  z::throw_xc( "SCHEDULER-384", "job_chain.modify" );
+        if( _is_distributed )  z::throw_xc( "SCHEDULER-384", obj_name(), "job_chain.modify" );
 
         string new_state = element.getAttribute( "state" );
         
@@ -2700,6 +2703,22 @@ Order_subsystem* Job_chain::order_subsystem() const
     return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
 }
 
+//-----------------------------------------------------------------------------Job_chain::set_state
+
+void Job_chain::set_state( const State& state )                  
+{ 
+    if( _state != state )
+    {
+        _state = state; 
+
+        if( _state == s_active )
+        {
+            // Fällige Aufträge fortsetzen
+            Z_FOR_EACH( Node_list, _node_list, n )  (*n)->handle_changed_processable_state();
+        }
+    }
+}
+
 //-----------------------------------------------------------------Order_id_spaces::Order_id_spaces
 
 Order_id_spaces::Order_id_spaces( Order_subsystem* order_subsystem )
@@ -3447,7 +3466,7 @@ bool Order_queue::request_order( const Time& now, const string& cause )
 
     if( !result )  result = _has_tip_for_new_order  ||  _next_announced_distributed_order_time <= now;
 
-    if( !result )  result = has_order( now );
+    if( !result )  result = has_immediately_processable_order( now );
 
     if( !result )
     {
@@ -3575,15 +3594,37 @@ void Order_queue::tip_for_new_distributed_order()
     }
 }
 
-//-------------------------------------------------------------------------Order_queue::first_order
+//-------------------------------------------------------------Order_queue::first_processable_order
 
-Order* Order_queue::first_order( const Time& now ) const
+Order* Order_queue::first_processable_order() const
+{
+    // at kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
+
+    Order* result = NULL;
+
+    Z_FOR_EACH_CONST( Queue, _queue, o )
+    {
+        Order* order = *o;
+
+        if( order->is_processable() )
+        {
+            result = order;
+            break;
+        }
+    }
+
+    if( result )  assert( !result->_is_distributed );
+
+    return result;
+}
+
+//-------------------------------------------------Order_queue::first_immediately_processable_order
+
+Order* Order_queue::first_immediately_processable_order( const Time& now ) const
 {
     // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
     Order* result = NULL;
-
-    //remove_outdated_orders();
 
     Z_FOR_EACH_CONST( Queue, _queue, o )
     {
@@ -3613,7 +3654,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    Order* order = first_order( now );
+    Order* order = first_immediately_processable_order( now );
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
@@ -3979,12 +4020,12 @@ string Order::string_id( const Id& id )
 
 //----------------------------------------------------------------Order::is_immediately_processable
 
-bool Order::is_immediately_processable( const Time& now )
+bool Order::is_immediately_processable( const Time& at )
 {
     // select ... from scheduler_orders  where not suspended and replacement_for is null and setback is null 
     // scheduler_orders.processable := !_is_on_blacklist && !_suspende
 
-    return _setback <= now  &&  is_processable();
+    return _setback <= at  &&  is_processable();
 }
 
 //----------------------------------------------------------------------------Order::is_processable
@@ -4014,6 +4055,11 @@ bool Order::is_processable()
 
 void Order::handle_changed_processable_state()
 {
+    // Eine schönere Implementierung wäre vielleicht, nur für den ersten Auftrag der Warteschlange 
+    // Order_queue_node::handle_changed_processable_state() aufzurufen,
+    // denn die weiter hinten stehenden Aufträge laufen nie vor dem ersten an.
+    // Dann hätten wir weniger Aufruf an Job::signal_earlier_order().
+
     Time new_next_time = next_time();
 
     //if( new_next_time <= _signaled_next_time )
@@ -6041,7 +6087,7 @@ void Order::postprocessing2( Job* last_job )
 {
     Job* job = this->job();
 
-    if( _moved  &&  job  &&  !order_queue()->has_order() )
+    if( _moved  &&  job  &&  !order_queue()->has_immediately_processable_order() )
     {
         job->signal( "Order (delayed set_state)" );
     }

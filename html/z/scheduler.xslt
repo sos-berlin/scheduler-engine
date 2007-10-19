@@ -1042,7 +1042,7 @@
                     </b>
                 </td>
 
-                <td>
+                <td class="right_border">
                     <xsl:if test="not( /spooler/@show_job_chain_jobs_checkbox)">
                         <xsl:if test="job_chain_node.job_chain">
                             <xsl:value-of select="count( job_chain_node.job_chain )"/> job chains
@@ -1075,11 +1075,19 @@
                     </xsl:choose>
                 </td>
 
-                <td></td>
-                <td style="text-align: right">
+                <td class="right_border" style="text-align: right">
                     <xsl:call-template name="bold_counter">
                         <xsl:with-param name="counter" select="@orders" />
                         <xsl:with-param name="suffix"  select="'orders'" />
+                    </xsl:call-template>
+                </td>
+
+                <td>
+                    <xsl:call-template name="command_menu">
+                        <xsl:with-param name="onclick_call"       select="'job_chain_menu__onclick'"/>
+                        <xsl:with-param name="onclick_param1_str" select="@path"/>
+                        <xsl:with-param name="onclick_param2"     select="'mouse_x() - 25'"/>
+                        <xsl:with-param name="onclick_param3"     select="'mouse_y() - 1'"/>
                     </xsl:call-template>
                 </td>
             </xsl:element>
@@ -1380,17 +1388,24 @@
                                 </xsl:choose>
                             </td>
 
-                            <td></td>
-
-                            <td style="text-align: right">
-                                <xsl:if test="self::job_chain_node/@job">
+                            <td class="right_border" style="text-align: right">
+                                <xsl:if test="order_queue">
                                     <xsl:call-template name="bold_counter">
-                                        <xsl:with-param name="counter" select="@orders" />
+                                        <xsl:with-param name="counter" select="order_queue/@length" />
                                         <xsl:with-param name="suffix"  select="'orders'" />
                                     </xsl:call-template>
                                 </xsl:if>
                             </td>
 
+                            <td>
+                                <xsl:call-template name="command_menu">
+                                    <xsl:with-param name="onclick_call"       select="'job_chain_node_menu__onclick'"/>
+                                    <xsl:with-param name="onclick_param1_str" select="parent::job_chain/@path"/>
+                                    <xsl:with-param name="onclick_param2_str" select="@state"/>
+                                    <xsl:with-param name="onclick_param3"     select="'mouse_x() - 50'"/>
+                                    <xsl:with-param name="onclick_param4"     select="'mouse_y() - 1'"/>
+                                </xsl:call-template>
+                            </td>
                         </xsl:when>
                         
                         <xsl:when test="self::job_chain_node.job_chain">

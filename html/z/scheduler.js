@@ -917,6 +917,48 @@ function history_task_menu__onclick( task_id, x, y )
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
+//--------------------------------------------------------------------------job_chain_menu__onclick
+
+function job_chain_menu__onclick( job_chain_path, x, y )
+{
+    var job_chain_element = _response.selectSingleNode( "spooler/answer/state/job_chains/job_chain [ " + xml_attribute( "@path", job_chain_path ) + " ]" );  // Linker Rahmen
+    
+    if( job_chain_element )
+    {
+        var state         = job_chain_element.getAttribute( "state" );
+        var popup_builder = new Popup_menu_builder();
+
+        popup_builder.add_command ( "Start", "<job_chain.modify" + xml_attribute( "job_chain", job_chain_path ) + " state='running'/>", state == "stopped" );
+        popup_builder.add_command ( "Stop" , "<job_chain.modify" + xml_attribute( "job_chain", job_chain_path ) + " state='stopped'/>", state == "running" );
+
+        _popup_menu = popup_builder.show_popup_menu( x, y );
+    }
+}
+
+//---------------------------------------------------------------------job_chain_node_menu__onclick
+
+function job_chain_node_menu__onclick( job_chain_path, node_state, x, y )
+{
+    var xpath = "spooler/answer/state/job_chains/job_chain      [ " + xml_attribute( "@path" , job_chain_path ) + " ]" +
+                                               "/job_chain_node [ " + xml_attribute( "@state", node_state     ) + " ]";
+    var node_element = _response.selectSingleNode( xpath );  // Linker Rahmen
+    
+    if( node_element )
+    {
+        var action  = node_element.getAttribute( "action" );
+        if( !action )  action = "process";
+        
+        var popup_builder = new Popup_menu_builder();
+        var attributes    = xml_attribute( "job_chain", job_chain_path ) + xml_attribute( "state", node_state );
+
+        popup_builder.add_command ( "process"   , "<job_chain_node.modify " + attributes + " action='process'/>"   , action != "process"    );
+        popup_builder.add_command ( "stop"      , "<job_chain_node.modify " + attributes + " action='stop'/>"      , action != "stop"       );
+        popup_builder.add_command ( "next_state", "<job_chain_node.modify " + attributes + " action='next_state'/>", action != "next_state" );
+
+        _popup_menu = popup_builder.show_popup_menu( x, y );
+    }
+}
+
 //------------------------------------------------------------------------------order_menu__onclick
 
 function order_menu__onclick( job_chain_name, order_id, x, y )
@@ -1027,6 +1069,13 @@ function xml_encode_attribute( text )
 {
     if( text == null )  return "";
     return xml_encode( text ).replace( /"/g, "&quot;" );
+}
+
+//------------------------------------------------------------------------------------xml_attribute
+
+function xml_attribute( name, text )
+{
+    return " " + name + "='" + xml_encode_attribute( text ) + "'";
 }
 
 //-----------------------------------------------------------------------------------scheduler_init

@@ -117,9 +117,25 @@ public class My_job  extends sos.spooler.Job_impl
     }
 }
                 ]]>
-            </script>
-        </job>
-    </jobs>
+                </script>
+            </job>
+            
+            <job name="add_order">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler.execute_xml( '<add_order job_chain="job_chain_node.action.scheduler" id="1" at="now+15" replace="yes" title="Wir haben einen Auftrag!"/>' );
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
 
 
     <job_chains>
@@ -134,10 +150,9 @@ public class My_job  extends sos.spooler.Job_impl
 
         
         <commands>
-            <job_chain_node.modify job_chain="job_chain_node.action.scheduler" state="dwa" action="next_state"/>
-            <add_order job_chain="job_chain_node.action.scheduler" id="1" replace="yes" title="Wir haben einen Auftrag!"/>
-            <add_order job_chain="job_chain_node.action.scheduler" id="2" replace="yes"/>
-            <add_order job_chain="job_chain_node.action.scheduler" id="3" replace="yes"/>
+            <!--job_chain_node.modify job_chain="job_chain_node.action.scheduler" state="dwa" action="next_state"/-->
+            <!--add_order job_chain="job_chain_node.action.scheduler" id="2" replace="yes"/>
+            <add_order job_chain="job_chain_node.action.scheduler" id="3" replace="yes"/-->
             <start_job job="dirigent"/>
         </commands>
 
