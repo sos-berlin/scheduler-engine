@@ -604,16 +604,21 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );     // Entweder at= oder after=
 
-    ptr<Com_variable_set> pars = new Com_variable_set;
+
+    ptr<Com_variable_set> params      = new Com_variable_set;
+    ptr<Com_variable_set> environment = new Com_variable_set;
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "params" ) )  { pars->set_dom( e, &_variable_set_map );  break; }
+        if( e.nodeName_is( "params"      ) )   params->set_dom( e, &_variable_set_map );
+        else
+        if( e.nodeName_is( "environment" ) )   environment = new Com_variable_set,  environment->set_dom( e, NULL, "variable" );
     }
 
     Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) );
-    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at );
+    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(params), task_name, start_at );
     task->set_web_service( web_service_name );
+    if( environment )  task->merge_environment( environment );
     job->enqueue_task( task );
 
     xml::Element_ptr result = _answer.createElement( "ok" ); 

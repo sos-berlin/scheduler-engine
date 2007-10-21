@@ -80,6 +80,10 @@
                         <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
                         <xsd:attribute name="supervisor"            type="String"/>
                         <xsd:attribute name="configuration_directory" type="File"/>
+
+                        <xsd:attribute name="configuration_add_event"           type="Name"/>
+                        <xsd:attribute name="configuration_modify_event"        type="Name"/>
+                        <xsd:attribute name="config_configuration_delete_event" type="Name"/>
                     </xsd:complexType>
                 </xsd:element>
 
@@ -282,7 +286,8 @@
                         <xsd:attribute name="exclusive"             type="Yes_no"/>
                     </xsd:complexType>
                 </xsd:element>
-                
+
+                <xsd:element name="environment" type="environment" minOccurs="0"/>
                 <xsd:element ref="params" minOccurs="0"/>
 
                 <xsd:choice minOccurs="0">
@@ -291,18 +296,7 @@
                     <xsd:element name="process">
                         <xsd:complexType>
                             <xsd:sequence>
-                                <xsd:element name="environment" minOccurs="0">
-                                    <xsd:complexType>
-                                        <xsd:sequence>
-                                            <xsd:element name="variable" minOccurs="0" maxOccurs="unbounded">
-                                                <xsd:complexType>
-                                                    <xsd:attribute name="name"  type="String" use="required"/>
-                                                    <xsd:attribute name="value" type="String" use="required"/>
-                                                </xsd:complexType>
-                                            </xsd:element>
-                                        </xsd:sequence>
-                                    </xsd:complexType>
-                                </xsd:element>
+                                <xsd:element name="environment" type="environment" minOccurs="0"/>  <!-- Veraltet -->
                             </xsd:sequence>
                             
                             <xsd:attribute name="file"              type="File"        use="required"/>
@@ -1122,8 +1116,10 @@
     <xsd:element name="start_job">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="environment" type="environment" minOccurs="0"/>
                 <xsd:element ref="params" minOccurs="0"/>
             </xsd:sequence>
+            
             <xsd:attribute name="job"               type="Path"                     use="required"/>
             <xsd:attribute name="name"              type="Name"/>
             <xsd:attribute name="at"                type="Date_time_with_now_or_period"/>
@@ -1222,6 +1218,18 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
+    <xsd:complexType name="environment">
+        <xsd:sequence>
+            <xsd:element name="variable" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="name"  type="String" use="required"/>
+                    <xsd:attribute name="value" type="String" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    
     <xsd:complexType name="http.authentication">
         <xsd:sequence>
             <xsd:element name="http.users">

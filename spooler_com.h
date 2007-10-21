@@ -126,6 +126,7 @@ struct Com_variable: spooler_com::Ivariable,
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
     string                      string_value                () const;
+    string                      name                        () const                                { return string_from_bstr( _name ); }
 
 //private:
     Thread_semaphore           _lock;
@@ -163,6 +164,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();
+    string                      to_environment_string       () const;
     void                        to_xslt_parameters          ( xml::Xslt_parameters*, Has_log* warning_log = NULL );
 
     STDMETHODIMP                Set_var                     ( BSTR name, VARIANT* value )           { return put_Var( name, value ); }

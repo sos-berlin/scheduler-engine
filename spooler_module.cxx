@@ -588,11 +588,18 @@ Module_instance::Module_instance( Module* module )
 : 
     _zero_(_end_), 
     _module(module),
-    _log(module?module->_log:NULL) 
+    _log(module?module->_log:NULL),
+
+//#   ifdef Z_WINDOWS
+        _process_environment( variable_set_from_environment() )   
+//#    else
+//        _process_environment( new Com_variable_set() )            // Unix vererbt automatisch die Umgebungsvariablen
+//#   endif
+
 {
     _com_task    = new Com_task;
     _com_log     = new Com_log;
-
+    _process_environment->merge( _module->_process_environment );
     _spooler_exit_called = false;
 
   //_close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
@@ -722,6 +729,10 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
         }
         catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
     }
+
+    
+    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
+    if( task->environment_or_null() )  _process_environment->merge( task->environment_or_null() );
 }
 
 //---------------------------------------------------------------------Module_instance::detach_task

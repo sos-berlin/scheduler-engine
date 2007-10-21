@@ -13,17 +13,9 @@ Process_module_instance::Process_module_instance( Module* module )
 : 
     Module_instance(module),
     _zero_(this+1),
-    _process_handle( "process_handle" ),
-
-#   ifdef Z_WINDOWS
-        _process_environment( variable_set_from_environment() )   
-#    else
-        _process_environment( new Com_variable_set() )            // Unix vererbt automatisch die Umgebungsvariablen
-#   endif
-
+    _process_handle( "process_handle" )
 {
     assert( _module );
-    _process_environment->merge( _module->_process_environment );
 }
 
 //------------------------------------------------Process_module_instance::~Process_module_instance
@@ -75,7 +67,16 @@ void Process_module_instance::attach_task( Task* task, Prefix_log* log )
 {
     Module_instance::attach_task( task, log );
     
-    _process_environment->merge( task->params() );
+    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
+
+    Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
+        _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+
+    if( Order* order = task->order() )
+        if( Com_variable_set* order_params = order->params_or_null() )
+            Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
+                _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+
     _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
 }
 

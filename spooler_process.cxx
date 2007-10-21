@@ -434,6 +434,7 @@ void Process::start_local()
         //c->attach_stdout_file( _stdout_file );
         //c->attach_stderr_file( _stderr_file );
         c->set_priority      ( _priority );
+        if( _has_environment )  c->set_environment_string( _environment_string );
         if( _controller_address )  c->set_controller_address( _controller_address );
 
 #       ifdef Z_HPUX_PARISC

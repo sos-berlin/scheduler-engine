@@ -2988,7 +2988,9 @@
     <register_keyword_display><code>&lt;scheduler_script&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__scheduler_script' register_title='Änderungsprotokoll'  register_keyword='scheduler_script'/>
     <register_entry register_file='xml.xml#use_element__scheduler_script' register_title='Alle XML-Elemente'  register_keyword='scheduler_script'/>
+    <register_entry register_file='xml/config.xml#use_element__scheduler_script' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='scheduler_script'/>
     <register_entry register_file='xml/scheduler_script.xml#' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='scheduler_script' type='definition'/>
+    <register_entry register_file='xml/script.xml#use_element__scheduler_script' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='scheduler_script'/>
 </register_keyword>
 <register_keyword keyword='SCHEDULER_TASK_TRIGGER_FILES'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_TRIGGER_FILES'/>

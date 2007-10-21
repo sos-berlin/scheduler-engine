@@ -168,6 +168,14 @@
         <xml_child_element name="script" title="Scheduler-Skript">
             <description>
                 <p>
+                    Wie <scheduler_element name="scheduler_script"/><scheduler_element name="script"/>, siehe unten.
+                </p>
+            </description>            
+        </xml_child_element>
+        
+        <xml_child_element name="scheduler_script" title="Scheduler-Skript">
+            <description>
+                <p>
                     Das hierin enthaltene Skript führt der Scheduler beim Start, vor jedem Job aus.
                     Wenn die Methode <scheduler_method class="Job_impl" method="spooler_init"/> implementiert ist,
                     ruft der Scheduler sie auf.
@@ -181,11 +189,13 @@
                 </p>
             </description>
             <example>
-                <pre>&lt;script language="javascript">&lt;![CDATA[
+                <pre>&lt;scheduler_script>
+    &lt;script language="javascript">&lt;![CDATA[
 
-    spooler.variables( "database_name" ) = "db7";
+        spooler.variables( "database_name" ) = "db7";
 
-]]&gt;&lt;/script></pre>
+    ]]&gt;&lt;/script>
+&lt;/scheduler_script></pre>
             </example>
         </xml_child_element>
 

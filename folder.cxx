@@ -949,6 +949,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                                                                                       subsystem()->object_type_name() ) );
                         old_file_based->set_replacement( file_based );
                         current_file_based = NULL;
+
+                        old_file_based->handle_event( File_based::bfevt_modified );
                     }
                     else
                     {
@@ -956,6 +958,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                                                                                   Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                   subsystem()->object_type_name() ) );
                         add_file_based( file_based );
+
+                        file_based->handle_event( File_based::bfevt_added );
                     }
 
 
@@ -1008,6 +1012,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
 
             file_based = old_file_based;                // Für catch()
             assert( file_based->_file_is_removed );
+            
+            file_based->handle_event( File_based::bfevt_removed );
             file_based->remove();
             file_based = NULL;
         }
@@ -1674,12 +1680,15 @@ void File_based::remove_base_file()
 #        else
             file_path.unlink();
 #       endif    
+
+        handle_event( File_based::bfevt_removed );
     }
     catch( exception& )
     {
         if( file_path.exists() )  throw;
-        _file_is_removed = true;
     }
+
+    _file_is_removed = true;
 }
 
 //-------------------------------------------------------------------------File_based::replace_with
@@ -1952,6 +1961,47 @@ Folder* File_based::folder() const
 { 
     return _typed_folder? _typed_folder->folder()
                         : spooler()->folder_subsystem()->folder( folder_path() );   // _state < s_initialized, noch nicht im Typed_folder eingehängt, replacement()
+}
+
+//-------------------------------------------------------------------------File_based::handle_event
+
+void File_based::handle_event( Base_file_event base_file_event )
+{
+    Absolute_path job_path;
+    
+    switch( base_file_event )
+    {
+        case bfevt_added:       job_path = spooler()->_configuration_start_job_after_added;     break;
+        case bfevt_modified:    job_path = spooler()->_configuration_start_job_after_modified;  break;
+        case bfevt_removed :    job_path = spooler()->_configuration_start_job_after_deleted;   break;
+        default:                assert(0), throw_xc(__FUNCTION__ );
+    }
+
+    if( !job_path.empty() )
+    {
+        try
+        {
+            ptr<Com_variable_set> parameters  = new Com_variable_set;
+            ptr<Com_variable_set> environment = new Com_variable_set;
+
+            environment->set_var( "SCHEDULER_LIVE_FILEBASE", Folder::object_name_of_filename( _base_file_info._filename ) );  int WAS_BEDEUTED_FILEBASE;
+            environment->set_var( "SCHEDULER_LIVE_FILEPATH", File_path( folder()->directory(), _base_file_info._filename ) );
+            environment->set_var( "SCHEDULER_LIVE_EVENT"   , base_file_event == bfevt_added   ? "add"      :
+                                                             base_file_event == bfevt_modified? "modified" :
+                                                             base_file_event == bfevt_removed ? "deleted"  : "" );
+
+            Z_FOR_EACH( Com_variable_set::Map, environment->_map, v )  parameters->set_var( lcase( v->second->name() ), v->second->string_value() );
+            
+            Job*  job  = spooler()->job_subsystem()->job( job_path );
+            ptr<Task> task = job->create_task( +parameters , "", 0 );
+            task->merge_environment( environment );
+            job->enqueue_task( task );
+        }
+        catch( exception& x )
+        {
+            log()->error( x.what() );
+        }
+    }
 }
 
 //-------------------------------------------------------File_based_subsystem::File_based_subsystem

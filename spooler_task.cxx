@@ -221,6 +221,11 @@ Task::Task( Job* job )
     set_subprocess_timeout();
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
+
+    _params = new Com_variable_set();
+    _params->merge( job->_default_params );
+
+    _environment = new Com_variable_set(); 
 }
 
 //--------------------------------------------------------------------------------------Task::~Task

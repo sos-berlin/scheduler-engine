@@ -739,6 +739,11 @@ void Job::set_dom( const xml::Element_ptr& element )
                 _lock_requestor->set_dom( e );
             }
             else
+            if( e.nodeName_is( "environment" ) )
+            {
+                _module->_process_environment->set_dom( e, NULL, "variable" );
+            }
+            else
             if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
             else
             if( e.nodeName_is( "script"     ) )  
@@ -763,7 +768,7 @@ void Job::set_dom( const xml::Element_ptr& element )
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
-                    if( ee.nodeName_is( "environment" ) )
+                    if( ee.nodeName_is( "environment" ) )   // Veraltet
                     {
                         DOM_FOR_EACH_ELEMENT( ee, eee )
                         {
@@ -1148,12 +1153,10 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
     task->_id       = id;
     task->_obj_name = S() << "Task " << path().without_slash() << ":" << task->_id;
-
-    _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
-    if( params )  task->_params->Merge( params );
-
     task->_name     = task_name;
     task->_start_at = start_at; 
+
+    if( const Com_variable_set* p = dynamic_cast<const Com_variable_set*>( +params ) )  task->merge_params( p );
 
     return +task;
 }

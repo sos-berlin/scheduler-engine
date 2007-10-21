@@ -422,6 +422,7 @@ bool Remote_module_instance_proxy::try_to_get_process()
             _process->set_job_name( _job_name );
             _process->set_task_id ( _task_id  );
             if( _module->_priority != "" )  _process->set_priority( _module->_priority );
+            _process->set_environment_string( _process_environment->to_environment_string() );
 
             _process->start();
         }

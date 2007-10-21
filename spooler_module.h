@@ -284,6 +284,7 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
+    ptr<Com_variable_set>      _process_environment;
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;
@@ -299,7 +300,6 @@ struct Module_instance : Object
 
     typedef std::list< ptr<Module_monitor_instance> >  Module_monitor_instance_list;
     Module_monitor_instance_list  _monitor_instance_list;
-  //ptr<Module_monitor_instances> _monitor_instances;
 
     Fill_end                   _end_;
 };

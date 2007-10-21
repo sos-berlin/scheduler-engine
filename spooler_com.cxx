@@ -654,6 +654,30 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
     return varset;
 }
 
+//----------------------------------------------------------Com_variable_set::to_environment_string
+
+string Com_variable_set::to_environment_string() const
+{
+    size_t size = 0;
+
+    Z_FOR_EACH_CONST( Map, _map, m )
+        size += m->second->_name.length() + 1 + string_from_variant( m->second->_value ).length() + 1;      // Funktioniert nicht, wenn wir auf UTF-8 umstellen.
+
+    string result;
+    result.reserve( size );
+
+    Z_FOR_EACH_CONST( Map, _map, m )
+    {
+        result += string_from_bstr( m->second->_name );
+        result += '=';
+        result += string_from_variant( m->second->_value );
+        result += '\0';
+    }
+
+    assert( result.length() == size );
+    return result;
+}
+
 //-------------------------------------------------------------Com_variable_set::to_xslt_parameters
 
 void Com_variable_set::to_xslt_parameters( xml::Xslt_parameters* result, Has_log* warning_log )
@@ -869,9 +893,13 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
 
             Z_FOR_EACH( Map, _map, m )
             {
-                memcpy( p, m->first, m->first.length() * sizeof (OLECHAR) );
-                p += m->first.length();
-                *p++ = ';';
+                //memcpy( p, m->first, m->first.length() * sizeof (OLECHAR) );
+                if( m->second )
+                {
+                    memcpy( p, m->second->_name, m->second->_name.length() * sizeof (OLECHAR) );
+                    p += m->first.length();
+                    *p++ = ';';
+                }
             }
 
             p[ -1 ] = '\0';      // Letztes Semikolon überschreiben, ist schon außerhalb des Strings

@@ -163,13 +163,22 @@ struct File_based : Scheduler_object,
 {
     enum State
     {
-        s_undefined,     // Fehler in XML-Definition
+        s_undefined,            // Fehler in XML-Definition
         s_not_initialized,      // on_initialized() gscheitert
         s_initialized,          // on_initiailzed() ok, Objekt sieht gut aus
         s_loaded,               // Mit Daten gefüllt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
         s_active,
         s_closed
     };
+
+
+    enum Base_file_event
+    {
+        bfevt_added,
+        bfevt_modified,
+        bfevt_removed
+    };
+
 
 
                                 File_based                  ( File_based_subsystem*, IUnknown*, Type_code );
@@ -242,6 +251,8 @@ struct File_based : Scheduler_object,
 
     void                        remove_now                  ();
     File_based*                 replace_now                 ();
+
+    void                        handle_event                ( Base_file_event );
 
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual bool                on_initialize               ()                                      = 0;
@@ -745,6 +756,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
 
     void                        set_read_again_at           ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
+
 
   private:
     Fill_zero                  _zero_;

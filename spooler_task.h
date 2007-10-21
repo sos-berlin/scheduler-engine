@@ -137,7 +137,11 @@ struct Task : Object,
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
     Time                        ending_since                ()                                      { THREAD_LOCK_RETURN( _lock, Time, _ending_since ); }
 
+    void                        merge_params                ( const Com_variable_set* p )           { _params->merge( p ); }
     ptr<Com_variable_set>       params                      ()                                      { return _params; }
+
+    void                        merge_environment           ( const Com_variable_set* e )           { _environment->merge( e ); }
+    Com_variable_set*           environment_or_null         () const                                { return _environment; }
 
     void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
@@ -262,7 +266,7 @@ struct Task : Object,
     Thread_semaphore           _lock;
     Task_subsystem*            _thread;
     Task_history               _history;
- 
+
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
 
@@ -305,6 +309,7 @@ struct Task : Object,
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;
+    ptr<Com_variable_set>      _environment;
     Variant                    _result;
     string                     _name;
     ptr<Order>                 _order;
