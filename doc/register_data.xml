@@ -3407,6 +3407,7 @@
     <register_entry register_file='CHANGES.xml#use_element__state' register_title='Änderungsprotokoll'  register_keyword='state'/>
     <register_entry register_file='xml.xml#use_element__state' register_title='Alle XML-Elemente'  register_keyword='state'/>
     <register_entry register_file='xml/answer/state.xml#' register_title='&lt;state&gt; (Antwort)'  register_keyword='state' type='definition'/>
+    <register_entry register_file='xml/modify_spooler.xml#use_element__state' register_title='&lt;modify_spooler&gt; (Kommando)'  register_keyword='state'/>
 </register_keyword>
 <register_keyword keyword='state'>
     <register_keyword_display><code>state</code></register_keyword_display>

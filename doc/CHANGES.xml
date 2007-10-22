@@ -54,24 +54,6 @@
     </change>
     
     <change date="2007-10-10" version="2.0.187" subversion_revision="5325">
-        <revision type="new" title="Linux Job Scheduler mit entfernbaren Debug-Informationen">
-            <description>
-                <p>
-                    Den Linux Job Scheduler gebe ich mit Debug-Informationen frei.
-                    Das erleichtert die Fehlerdiagnose, macht ihn aber größer.
-                    Das Kommando
-                </p>
-                <p>
-                    <code>strip --preserve-dates bin/scheduler</code>
-                </p>
-                <p>
-                    entfernt die Debug-Information, und der Job Scheduler schrumpft auf seine frühere Größe. 
-                    Das Kommando sollte auf jeder Suse-Installation vorhanden sein (Paket binutils).
-                </p>
-            </description>
-        </revision>
-
-
         <revision jira="JS-134" type="new" title="Mehrere Job Scheduler Skripte">
             <description>
                 <p>
