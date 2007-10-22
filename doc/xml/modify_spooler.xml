@@ -16,7 +16,7 @@
     <description>
         <p>
             Wenn der Scheduler wegen Plattenplatzmangel für ein Protokoll angehalten hat
-            (<code><a href="answer/state.xml#attribute_waiting_errno">&lt;state waiting_errno="..."/></a></code>),
+            (<scheduler_element name="state" attribute="waiting_errno" directory="xml/answer/"/>),
             werden die Subkommandos
             <code>pause</code>,
             <code>reload</code>,
@@ -52,7 +52,7 @@
                     <dd>
                         Hebt <code>cmd="pause"</code> auf.<br/>
                         Oder setzt den Scheduler fort, wenn er wegen Platzmangels für die Protokolldateien angehalten hat
-                        (<a href="answer/state.xml#attribute_waiting_errno">siehe hier</a>).
+                        (<scheduler_element name="state" attribute="waiting_errno" directory="xml/answer/">siehe hier</scheduler_element>).                        
                     </dd>
 <!--
                     <dt><code>cmd="stop"</code></dt>

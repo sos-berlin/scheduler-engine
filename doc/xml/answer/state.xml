@@ -152,7 +152,7 @@
                 </p>
                 <p>
                     Der Scheduler kann mit
-                    <a href="../modify_spooler.xml"><code>&lt;modify_spooler cmd="continue"/></code></a>
+                    <scheduler_element name="modify_spooler" attribute="cmd" value="continue"/>
                     fortgesetzt werden.
                 </p>
             </description>
