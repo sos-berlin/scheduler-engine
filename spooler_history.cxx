@@ -649,9 +649,9 @@ void Database::create_tables_when_needed()
 
         bool created = create_table_when_needed( &ta, _spooler->_tasks_tablename, 
                                 "`task_id`"        " integer not null,"          // Primärschlüssel
-                                "`spooler_id`"     " varchar(100),"
+                                "`spooler_id`"     " varchar(100) not null,"
                                 "`cluster_member_id`"" varchar(100),"
-                                "`job_name`"       " varchar(100) not null,"
+                                "`job_name`"       " varchar(255) not null,"
                                 "`enqueue_time`"   " datetime,"
                                 "`start_at_time`"  " datetime,"
                                 "`parameters`"     " clob,"
@@ -684,9 +684,9 @@ void Database::create_tables_when_needed()
 
         bool created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
                                 "`id`"         " integer not null,"
-                                "`spooler_id`" " varchar(100),"
+                                "`spooler_id`" " varchar(100) not null,"
                                 "`cluster_member_id`"" varchar(100),"
-                                "`job_name`"   " varchar(100) not null,"
+                                "`job_name`"   " varchar(255) not null,"
                                 "`start_time`" " datetime not null,"
                                 "`end_time`"   " datetime,"
                                 "`cause`"      " varchar(50),"
@@ -725,7 +725,7 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                                "`job_chain`"    " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`job_chain`"    " varchar(255)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
                                 "`spooler_id`"   " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
@@ -774,9 +774,9 @@ void Database::create_tables_when_needed()
 
         bool created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
                                 "`history_id`"  " integer not null,"             // Primärschlüssel
-                                "`job_chain`"   " varchar(100) not null,"
+                                "`job_chain`"   " varchar(255) not null,"
                                 "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
-                                "`spooler_id`"  " varchar(100),"
+                                "`spooler_id`"  " varchar(100) not null,"
                                 "`title`"       " varchar(200),"
                                 "`state`"       " varchar(100),"
                                 "`state_text`"  " varchar(100),"
@@ -787,8 +787,9 @@ void Database::create_tables_when_needed()
 
         if( created )
         {
-            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`", Z_FUNCTION );
-            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`" , Z_FUNCTION );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`"            , Z_FUNCTION );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`, `order_id`" , Z_FUNCTION );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_START_TIME", "SCHED_O_HIST_3", "`start_time`"            , Z_FUNCTION );
         }
         else
         {
@@ -2246,7 +2247,7 @@ void Task_history::write( bool start )
                         if( _spooler->is_cluster() )
                         insert[ "cluster_member_id" ] = _spooler->cluster_member_id();
 
-                        insert[ "job_name"          ] = _task->job()->name();
+                        insert[ "job_name"          ] = _task->job()->path().without_slash();
                         insert[ "cause"             ] = start_cause_name( _task->_cause );
                         insert.set_datetime( "start_time", start_time );
 

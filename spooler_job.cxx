@@ -1183,7 +1183,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
                << "  from " << _spooler->_tasks_tablename
                << "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
                <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() )
-               <<    " and `job_name`=" << sql::quoted( name() ) 
+               <<    " and `job_name`=" << sql::quoted( path().without_slash() ) 
                << "  order by `task_id`";
 
     Any_file sel = ta.open_result_set( select_sql, Z_FUNCTION );
@@ -1250,7 +1250,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 insert.set_table_name( _spooler->_tasks_tablename );
 
                 insert             [ "TASK_ID"       ] = task->_id;
-                insert             [ "JOB_NAME"      ] = task->_job->name();
+                insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
                 insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
 
                 if( _spooler->is_cluster() )

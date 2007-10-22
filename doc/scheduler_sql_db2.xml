@@ -29,9 +29,9 @@
     <pre>CREATE TABLE <b>SCHEDULER_TASKS</b>
 (
     "TASK_ID"           integer not null,
-    "SPOOLER_ID"        varchar(100),
+    "SPOOLER_ID"        varchar(100) not null,
     "CLUSTER_MEMBER_ID" varchar(100),
-    "JOB_NAME"          varchar(100) not null,
+    "JOB_NAME"          varchar(255) not null,
     "ENQUEUE_TIME"      TIMESTAMP,
     "START_AT_TIME"     TIMESTAMP,
     "PARAMETERS"        CLOB,
@@ -42,9 +42,9 @@
     <pre>CREATE TABLE <b>SCHEDULER_HISTORY</b>
 (
     "ID"                integer not null,
-    "SPOOLER_ID"        varchar(100),
+    "SPOOLER_ID"        varchar(100) not null,
     "CLUSTER_MEMBER_ID" varchar(100),
-    "JOB_NAME"          varchar(100) not null,
+    "JOB_NAME"          varchar(255) not null,
     "START_TIME"        TIMESTAMP not null,
     "END_TIME"          TIMESTAMP,
     "CAUSE"             varchar(50),
@@ -65,7 +65,7 @@ CREATE INDEX SCHEDULER_HIST_4 on SCHEDULER_HISTORY ( "CLUSTER_MEMBER_ID" );</pre
 
     <pre>CREATE TABLE <b>SCHEDULER_ORDERS</b>
 (
-    "JOB_CHAIN"                   varchar(100) not null,
+    "JOB_CHAIN"                   varchar(255) not null,
     "ID"                          varchar(255) not null,
     "SPOOLER_ID"                  varchar(100) not null,
     "DISTRIBUTED_NEXT_TIME"       TIMESTAMP,
@@ -87,9 +87,9 @@ CREATE INDEX SCHEDULER_HIST_4 on SCHEDULER_HISTORY ( "CLUSTER_MEMBER_ID" );</pre
     <pre>CREATE TABLE <b>SCHEDULER_ORDER_HISTORY</b>
 (
     "HISTORY_ID" integer not null,
-    "JOB_CHAIN"  varchar(100) not null,
+    "JOB_CHAIN"  varchar(255) not null,
     "ORDER_ID"   varchar(255) not null,
-    "SPOOLER_ID" varchar(100),
+    "SPOOLER_ID" varchar(100) not null,
     "TITLE"      varchar(200),
     "STATE"      varchar(100),
     "STATE_TEXT" varchar(100),

@@ -34,7 +34,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="configuration_add_event" type="job_name">
+        <xml_attribute name="configuration_add_event" type="job_name" title="Job für neue Konfigurationsdatei">
             <description>
                 <p>
                     Der angegebene Job wird gestartet,
@@ -80,7 +80,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="configuration_modify_event" type="job_name">
+        <xml_attribute name="configuration_modify_event" type="job_name" title="Job für geänderte Konfigurationsdatei">
             <description>
                 <p>
                     Der angegebene Job wird gestartet,
@@ -99,7 +99,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="config_configuration_delete_event" type="job_name">
+        <xml_attribute name="config_configuration_delete_event" type="job_name" title="Job für gelöschte Konfigurationsdatei">
             <description>
                 <p>
                     Der angegebene Job wird gestartet,

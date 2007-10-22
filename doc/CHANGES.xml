@@ -10,6 +10,49 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-10-22" version="2.0.189" subversion_revision="5354">
+        <revision jira="JS-146" type="new" title="Jobstarts bei neuen, geänderten und gelöschen Konfigurationsdateien">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_add_event"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_modify_event"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="config_configuration_delete_event"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-147" type="new" title="Umgebungsvariablen für Tasks einstellbar">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" child="environment"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="start_job" child="environment"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+        
+        <revision jira="JS-148" type="new" title="Task- und Auftrags-Parameter für Nicht-API-Jobs">
+            <description>
+                <p>
+                    Nicht-API-Jobs erhalten die Task- und Auftrags-Parameter als Umgebungsvariablen.
+                    Die Namen sind großgeschrieben. 
+                    "<code>SCHEDULER_PARAM_</code>" ist den Namen vorangestellt.
+                    Auftragsparameter überschreiben gleichnamige Task-Parameter.
+                </p>
+            </description>
+        </revision>
+
+    </change>
+    
     <change date="2007-10-10" version="2.0.187" subversion_revision="5325">
         <revision type="new" title="Linux Job Scheduler mit entfernbaren Debug-Informationen">
             <description>
