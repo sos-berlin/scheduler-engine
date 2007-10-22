@@ -297,6 +297,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-445", "Invalid weekday '$1'" },
     { "SCHEDULER-446", "<weekday day=\"$1\" which=\"$2\" has been defined already" },
     { "SCHEDULER-447", "Error in $1: \n$2" },
+    { "SCHEDULER-448", "File '$1' cannot be read, because it is bigger than $2MB" },
+    { "SCHEDULER-449", "Syntax error in order parameters file $1: Missing '=' after variable name" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

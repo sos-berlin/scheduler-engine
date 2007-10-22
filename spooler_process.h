@@ -111,7 +111,8 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_task_id                     ( int id )                              { _task_id = id; }
   //void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
-    void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
+    void                    set_environment                 ( const Com_variable_set& env )         { _environment = new Com_variable_set( env ); }
+  //void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
     int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
     bool                     is_terminated                  ();
     void                        end_task                    ();
@@ -150,8 +151,7 @@ struct Process : zschimmer::Object, Scheduler_object
     Module_instance*           _module_instance;
     Process_class*             _process_class;
     string                     _priority;
-    string                     _environment_string;
-    bool                       _has_environment;
+    ptr<Com_variable_set>      _environment;
     Host_and_port              _remote_scheduler;
     pid_t                      _remote_pid;
     File                       _remote_stdout_file;

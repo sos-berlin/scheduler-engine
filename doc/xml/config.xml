@@ -33,7 +33,91 @@
             </description>
         </xml_attribute>
 
-        
+
+        <xml_attribute name="configuration_add_event" type="job_name">
+            <description>
+                <p>
+                    Der angegebene Job wird gestartet,
+                    wenn der Scheduler eine <i>neue</i> Datei aus dem Konfigurationsverzeichnis geladen hat.
+                </p>
+
+                <p>
+                    Der Job wird gestartet, so wie es seine <scheduler_element name="run_time"/> zulässt.
+                    Er sollte in der Scheduler-Konfigurationsdatei definiert sein, 
+                    damit er bekannt ist, wenn der Scheduler das Konfigurationsverzeichnis liest.
+                </p>
+
+                <p>
+                    Die gestartete Task hat drei Parameter 
+                    (erreichbar über <scheduler_method class="Task" object="spooler_task" property="params"/>):
+                </p>
+
+                <div class="indent">
+                    <table cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td style="padding-right: 2ex"><code>scheduler_live_event</code></td>
+                            <td>
+                                <code>"add"</code> (<code>"modify"</code> bzw. <code>"delete"</code> für die anderen Attribute)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 2ex"><code>scheduler_live_filepath</code></td>
+                            <td>Der Pfad der Datei</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 2ex"><code>scheduler_live_filebase</code></td>
+                            <td>Der Name der Datei</td>
+                        </tr>
+                    </table>
+                </div>
+                <p>
+                    Diese Task-Parameter stehen auch bereit als Umgebungsvariablen
+                    <code>SCHEDULER_LIVE_EVENT</code>,
+                    <code>SCHEDULER_LIVE_FILEPATH</code> und
+                    <code>SCHEDULER_LIVE_FILEBASE</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="configuration_modify_event" type="job_name">
+            <description>
+                <p>
+                    Der angegebene Job wird gestartet,
+                    wenn der Scheduler eine <i>geänderte</i> Datei aus dem Konfigurationsverzeichnis geladen hat.
+                </p>
+                <p>
+                    Der Job wird gestartet, so wie es seine <scheduler_element name="run_time"/> zulässt.
+                    Er sollte in der Scheduler-Konfigurationsdatei definiert sein,
+                    damit er bekannt ist, wenn der Scheduler das Konfigurationsverzeichnis liest.
+                </p>
+                <p>
+                    Parameter und Umgebungsvariablen sind gesetzt wie bei
+                    <scheduler_element name="config" attribute="configuration_add_event"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="config_configuration_delete_event" type="job_name">
+            <description>
+                <p>
+                    Der angegebene Job wird gestartet,
+                    wenn aus dem Konfigurationsverzeichnis eine im Scheduler geladene Datei entfernt worden ist.
+                </p>
+                <p>
+                    Der Job wird gestartet, so wie es seine <scheduler_element name="run_time"/> zulässt.
+                    Er sollte in der Scheduler-Konfigurationsdatei definiert sein,
+                    damit er bekannt ist, wenn der Scheduler das Konfigurationsverzeichnis liest.
+                </p>
+                <p>
+                    Parameter und Umgebungsvariablen sind gesetzt wie bei
+                    <scheduler_element name="config" attribute="configuration_add_event"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
         <xml_attribute name="main_scheduler" type="host:port">
             <description>
                 <p>

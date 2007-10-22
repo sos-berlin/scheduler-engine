@@ -424,7 +424,14 @@ void Process::start_local()
             xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
             xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
             xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
+
+            if( _environment )  
+            {
+                xml::Document_ptr dom_document = _environment->dom( "environment", "variable" );
+                xml_writer.write_element( dom_document.documentElement() );
+            }
         }
+
         xml_writer.end_element( "task_process" );
         xml_writer.flush();
 
@@ -434,7 +441,7 @@ void Process::start_local()
         //c->attach_stdout_file( _stdout_file );
         //c->attach_stderr_file( _stderr_file );
         c->set_priority      ( _priority );
-        if( _has_environment )  c->set_environment_string( _environment_string );
+        //if( _has_environment )  c->set_environment_string( _environment_string );
         if( _controller_address )  c->set_controller_address( _controller_address );
 
 #       ifdef Z_HPUX_PARISC

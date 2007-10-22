@@ -48,6 +48,7 @@ struct Process_module_instance : Module_instance
     bool                        process_has_signaled        ();
     int                         exit_code                   ()                                      { return _exit_code; }
     int                         termination_signal          ();
+    void                        fetch_parameters_from_process( Com_variable_set* );
     File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
     bool                        try_delete_files            ( Has_log* );
@@ -62,6 +63,8 @@ struct Process_module_instance : Module_instance
     File                       _stdout_file;
     File                       _stderr_file;
   //bool                       _stdout_logged;
+    Mapped_file                _order_params_file;
+
     bool                       _is_killed;
     File                       _shell_file;
     string                     _process_param;

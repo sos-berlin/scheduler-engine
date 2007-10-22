@@ -947,19 +947,20 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                         old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, 
                                                                                       Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                       subsystem()->object_type_name() ) );
+                        if( base_file_info->_timestamp_utc != current_file_based->base_file_info()._timestamp_utc ||   // Doppeltes Ereignis wegen _read_again vermeiden
+                            content_md5 != current_file_based->_md5 )  old_file_based->handle_event( File_based::bfevt_modified ); 
+
                         old_file_based->set_replacement( file_based );
                         current_file_based = NULL;
-
-                        old_file_based->handle_event( File_based::bfevt_modified );
                     }
                     else
                     {
                         file_based->log()->info( message_string( "SCHEDULER-891", rel_path, 
                                                                                   Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                   subsystem()->object_type_name() ) );
-                        add_file_based( file_based );
-
                         file_based->handle_event( File_based::bfevt_added );
+
+                        add_file_based( file_based );
                     }
 
 
@@ -1984,7 +1985,7 @@ void File_based::handle_event( Base_file_event base_file_event )
             ptr<Com_variable_set> parameters  = new Com_variable_set;
             ptr<Com_variable_set> environment = new Com_variable_set;
 
-            environment->set_var( "SCHEDULER_LIVE_FILEBASE", Folder::object_name_of_filename( _base_file_info._filename ) );  int WAS_BEDEUTED_FILEBASE;
+            environment->set_var( "SCHEDULER_LIVE_FILEBASE", _base_file_info._filename );
             environment->set_var( "SCHEDULER_LIVE_FILEPATH", File_path( folder()->directory(), _base_file_info._filename ) );
             environment->set_var( "SCHEDULER_LIVE_EVENT"   , base_file_event == bfevt_added   ? "add"      :
                                                              base_file_event == bfevt_modified? "modified" :
@@ -1999,7 +2000,7 @@ void File_based::handle_event( Base_file_event base_file_event )
         }
         catch( exception& x )
         {
-            log()->error( x.what() );
+            spooler()->folder_subsystem()->log()->error( x.what() );
         }
     }
 }

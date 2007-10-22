@@ -181,6 +181,11 @@
 
                 &lt;<scheduler_a href="xml/lock.use.xml">lock.use</scheduler_a> lock="…" …/>
     
+                &lt;<scheduler_a href="xml/environment.xml">environment</scheduler_a>>
+                    &lt;<scheduler_a href="xml/variable.xml">variable</scheduler_a> name="…" value="…"/>
+                    …
+                &lt;/environment>
+
                 &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
                     &lt;<scheduler_a href="xml/param.xml">param</scheduler_a> name="…" value="…"/>
                     …

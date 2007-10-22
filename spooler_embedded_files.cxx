@@ -296,8 +296,8 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
-    "<xsd:element name=\"environment\" type=\"environment\" minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"params\" minOccurs=\"0\"/>\n"
+    "<xsd:element name=\"environment\" type=\"environment\" minOccurs=\"0\"/>\n"
     "\n"
     "<xsd:choice minOccurs=\"0\">\n"
     "<xsd:element ref=\"script\"/>\n"
@@ -1125,8 +1125,8 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"start_job\">\n"
     "<xsd:complexType>\n"
     "<xsd:sequence>\n"
-    "<xsd:element name=\"environment\" type=\"environment\" minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"params\" minOccurs=\"0\"/>\n"
+    "<xsd:element name=\"environment\" type=\"environment\" minOccurs=\"0\"/>\n"
     "</xsd:sequence>\n"
     "\n"
     "<xsd:attribute name=\"job\"               type=\"Path\"                     use=\"required\"/>\n"
@@ -1787,7 +1787,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1192983364 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1193062247 },
     { NULL, NULL, 0 }
 };
 

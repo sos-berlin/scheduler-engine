@@ -226,6 +226,22 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         string java_class_path = _class_data->_task_process_element.getAttribute( "java_class_path" );
         string javac           = _class_data->_task_process_element.getAttribute( "javac"           );
         string java_work_dir   = _class_data->_task_process_element.getAttribute( "java_work_dir"   );
+
+        DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
+        {
+            if( e.nodeName_is( "environment" ) )
+            {
+                DOM_FOR_EACH_ELEMENT( e, ee )
+                {
+                    if( ee.nodeName_is( "variable" ) ) 
+                    {
+                        set_environment_variable( ee.getAttribute( "name" ), ee.getAttribute( "value" ) );
+                    }
+                }
+            }
+        }
+
+
         int    task_id         = 0;
 
         Locked_safearray<Variant> params ( safearray );

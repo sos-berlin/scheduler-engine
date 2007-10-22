@@ -113,6 +113,7 @@ struct Task : Object,
     void                        close                       ();
     void                        job_close                   ();                                     // Setzt _job = NULL
     void                        move_to_new_job             ( Job* new_job )                        { assert( _state == s_none );  _job = new_job; }
+    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     xml::Document_ptr           dom                         ( const Show_what& ) const;
 
@@ -177,6 +178,7 @@ struct Task : Object,
     void                        remove_order                ();
 
     void                        finish                      ();
+    void                        fetch_order_parameters_from_process();
     void                        set_state_texts_from_stdout ();
     void                        process_on_exit_commands    ();
     bool                        load                        ();

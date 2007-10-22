@@ -2739,6 +2739,18 @@
                 <title>Error in <p1>job_monitor</p1>: <br/><p2>error</p2></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-448">
+            <text xml:lang="en">
+                <title>File '<p1/>' cannot be read, because it is bigger than <p2/>MB</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-449">
+            <text xml:lang="en">
+                <title>Syntax error in order parameters file <p1>environment_variable_name</p1>: Missing '=' after variable name</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

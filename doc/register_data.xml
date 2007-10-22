@@ -381,13 +381,25 @@
     <register_keyword_display><code>config=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_config' register_title='file factory.ini, section [spooler]'  register_keyword='config' type='definition'/>
 </register_keyword>
+<register_keyword keyword='config_configuration_delete_event'>
+    <register_keyword_display><code>config_configuration_delete_event=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_config_configuration_delete_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config_configuration_delete_event' type='definition'/>
+</register_keyword>
 <register_keyword keyword='config_file'>
     <register_keyword_display><code>config_file=</code></register_keyword_display>
     <register_entry register_file='xml/answer/state.xml#attribute_config_file' register_title='&lt;state&gt; (Antwort)'  register_keyword='config_file' type='definition'/>
 </register_keyword>
+<register_keyword keyword='configuration_add_event'>
+    <register_keyword_display><code>configuration_add_event=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_configuration_add_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_add_event' type='definition'/>
+</register_keyword>
 <register_keyword keyword='configuration_directory'>
     <register_keyword_display><code>configuration_directory=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_directory' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_directory' type='definition'/>
+</register_keyword>
+<register_keyword keyword='configuration_modify_event'>
+    <register_keyword_display><code>configuration_modify_event=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_configuration_modify_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_modify_event' type='definition'/>
 </register_keyword>
 <register_keyword keyword='configuraton-directory'>
     <register_keyword_display><code>-configuraton-directory=</code></register_keyword_display>
@@ -2934,6 +2946,7 @@
     <register_entry register_file='xml/answer/run_time.xml#' register_title='&lt;run_time&gt; (Antwort)'  register_keyword='run_time' type='definition'/>
     <register_entry register_file='xml/answer/task.xml#use_element__run_time' register_title='&lt;task&gt; (Antwort)'  register_keyword='run_time'/>
     <register_entry register_file='xml/base.xml#use_element__run_time' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='run_time'/>
+    <register_entry register_file='xml/config.xml#use_element__run_time' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='run_time'/>
     <register_entry register_file='xml/job.xml#use_element__run_time' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='run_time'/>
     <register_entry register_file='xml/modify_job.xml#use_element__run_time' register_title='&lt;modify_job&gt; (Kommando)'  register_keyword='run_time'/>
     <register_entry register_file='xml/run_time.xml#' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='run_time' type='definition'/>

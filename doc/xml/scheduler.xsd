@@ -287,8 +287,8 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element name="environment" type="environment" minOccurs="0"/>
                 <xsd:element ref="params" minOccurs="0"/>
+                <xsd:element name="environment" type="environment" minOccurs="0"/>
 
                 <xsd:choice minOccurs="0">
                     <xsd:element ref="script"/>
@@ -1116,8 +1116,8 @@
     <xsd:element name="start_job">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="environment" type="environment" minOccurs="0"/>
                 <xsd:element ref="params" minOccurs="0"/>
+                <xsd:element name="environment" type="environment" minOccurs="0"/>
             </xsd:sequence>
             
             <xsd:attribute name="job"               type="Path"                     use="required"/>

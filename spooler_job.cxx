@@ -1198,21 +1198,19 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
             ptr<Com_variable_set>   parameters = new Com_variable_set;
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
+            _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
-            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
-                                                                            " where \"TASK_ID\"=" + as_string( task_id ) );
-            if( !xml.empty() )  set_dom( xml::Document_ptr( xml ).documentElement() );  // 2006-10-28 Das sieht ja merkwürdig aus. Sollte es heißen task->set_dom()?
-
-
-            _log->info( message_string( "SCHEDULER-917", task_id, start_at.as_string() ) );
-
 
             ptr<Task> task = create_task( +parameters, "", start_at, task_id );
             
+            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
+                                                                                 " where \"TASK_ID\"=" + as_string( task_id ) );
+            if( !xml.empty() )  task->set_dom( xml::Document_ptr( xml ).documentElement() );
+
             task->_is_in_database = true;
             task->_let_run        = true;
             task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
@@ -2089,11 +2087,16 @@ void Job::calculate_next_time( const Time& now )
                 {
                     // Minimum von _start_at für _next_time berücksichtigen
                     Task_queue::iterator it = _task_queue->begin();  
-                    while( it != _task_queue->end() )
+                    if( it != _task_queue->end() )
                     {
-                        if( (*it)->_start_at )  break;   // Startzeit angegeben?
-                        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-                        it++;
+                        if( !(*it)->_start_at  &&  next_time > _period.begin() )  next_time = _period.begin();  // Ohne Startzeit? In nächster Periode starten
+
+                        while( it != _task_queue->end() )
+                        {
+                            if( (*it)->_start_at )  break;   // Startzeit angegeben?
+                            if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+                            it++;
+                        }
                     }
 
                     if( it != _task_queue->end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;

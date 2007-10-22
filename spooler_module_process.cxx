@@ -7,6 +7,8 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
+const string order_params_environment_name = "SCHEDULER_RETURN_VALUES";
+
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
 Process_module_instance::Process_module_instance( Module* module )
@@ -65,8 +67,6 @@ void Process_module_instance::init()
 
 void Process_module_instance::attach_task( Task* task, Prefix_log* log )
 {
-    Module_instance::attach_task( task, log );
-    
     // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
 
     Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
@@ -77,7 +77,19 @@ void Process_module_instance::attach_task( Task* task, Prefix_log* log )
             Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
                 _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
 
+
+    // JS-147: <environment> kommt nach <params>, deshalb attach_task() erst jetzt rufen.
+    Module_instance::attach_task( task, log );
+    
+
     _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
+
+    if( task->order() )
+    {
+        _order_params_file.open_temporary( File::open_unlink_later );
+        _order_params_file.close();
+        _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
+    }
 }
 
 //--------------------------------------------------------------------Process_module_instance::load
@@ -279,7 +291,7 @@ bool Process_module_instance::begin__end()
     _spooler->register_process_handle( _process_handle );
 
 #   ifdef Z_WINDOWS
-        _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindet (ERRNO-13 Permission denied)
+        _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
         _stderr_file.close();
 #   endif
 
@@ -651,15 +663,52 @@ int Process_module_instance::termination_signal()
 #   endif
 }
 
+//-------------------------------------------Process_module_instance::fetch_parameters_from_process
+
+void Process_module_instance::fetch_parameters_from_process( Com_variable_set* params )
+{
+    if( _order_params_file.path() != "" )
+    {
+        _order_params_file.open( _order_params_file.path(), "rS" );
+
+        if( _order_params_file.length() > max_memory_file_size )  z::throw_xc( "SCHEDULER-448", _order_params_file.path(), max_memory_file_size / 1024 / 1024, order_params_environment_name );
+        
+        const char*       p     = (const char*)_order_params_file.map();
+        const char*       p_end = p + _order_params_file.map_length();
+
+        while( p < p_end )
+        {
+            const char* b = p;
+            while( p < p_end  &&  *p != '='  &&  *p != '\n' )  p++;
+            if( p >= p_end  ||  *p != '=' )  z::throw_xc( "SCHEDULER-449", order_params_environment_name );
+            string name ( b, p++ - b );
+
+            b = p;
+            while( p < p_end  &&  *p != '\n' )  p++;
+            string value ( b, p++ - b );
+
+            params->set_var( trim( name ), trim( value ) );
+
+            // Wenn letztes '\n' fehlt, ist p == p_end + 1
+        }
+
+        _order_params_file.close();
+    }
+}
+
 //--------------------------------------------------------Process_module_instance::try_delete_files
 
 bool Process_module_instance::try_delete_files( Has_log* log )
 {
     bool result = true;
 
-  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink( log );
-    if( _stdout_file.is_to_be_unlinked() )  result &= _stdout_file.try_unlink( log );
-    if( _stderr_file.is_to_be_unlinked() )  result &= _stderr_file.try_unlink( log );
+    _stdout_file.close();
+    _stderr_file.close();
+    _order_params_file.close();
+
+    if( _stdout_file      .is_to_be_unlinked() )  result &= _stdout_file      .try_unlink( log );
+    if( _stderr_file      .is_to_be_unlinked() )  result &= _stderr_file      .try_unlink( log );
+    if( _order_params_file.is_to_be_unlinked() )  result &= _order_params_file.try_unlink( log );
 
     return result;
 }
@@ -670,9 +719,9 @@ list<File_path> Process_module_instance::undeleted_files()
 {
     list<File_path> result;
 
-  //if( _stdin_file .is_to_be_unlinked() )  result &= _stdin_file .try_unlink( log );
-    if( _stdout_file.is_to_be_unlinked() )  result.push_back( _stdout_file.path() );
-    if( _stderr_file.is_to_be_unlinked() )  result.push_back( _stderr_file.path() );
+    if( _stdout_file      .is_to_be_unlinked() )  result.push_back( _stdout_file      .path() );
+    if( _stderr_file      .is_to_be_unlinked() )  result.push_back( _stderr_file      .path() );
+    if( _order_params_file.is_to_be_unlinked() )  result.push_back( _order_params_file.path() );
 
     return result;
 }

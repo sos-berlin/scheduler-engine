@@ -333,7 +333,23 @@ void Task::init()
     _spooler->_task_subsystem->add_task( this );       // Jetzt kann der Thread die Task schon starten!
 }
 
-//----------------------------------------------------------------------------------------Task::dom_element
+//------------------------------------------------------------------------------------Task::set_dom
+
+void Task::set_dom( const xml::Element_ptr& element )
+{
+    string web_service_name = element.getAttribute( "web_service" );
+    if( web_service_name != "" )  set_web_service( web_service_name );
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "environment" ) )
+        {
+            _environment->set_dom( e, NULL, "variable" );
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------Task::dom_element
 // s.a. Spooler_command::execute_show_task() zum Aufbau des XML-Elements <task>
 
 xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Show_what& show ) const
@@ -458,6 +474,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
     if( _web_service )
     task_element.setAttribute( "web_service"     , _web_service->name() );
+
+    if( _environment  &&  !_environment->is_empty() )
+        task_element.appendChild( _environment->dom_element( document, "environment", "variable" ) );
 
     return task_element;
 }
@@ -1442,8 +1461,17 @@ bool Task::do_something()
                                 if( _module_instance  && _module_instance->_module->_kind == Module::kind_process )
                                 {
                                     set_state_texts_from_stdout();
-                                    postprocess_order( _exit_code == 0  &&  !has_error() );     // Auftrag soll in den Fehlerzustand gehen, egal ob 
-                                }                                                               // bei einem Fehler auch der Job stoppt
+                                    
+                                    if( _order )
+                                    {
+                                        //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
+                                        Process_module_instance* process_module_instance = dynamic_cast<Process_module_instance*>( +_module_instance );
+                                        assert( process_module_instance );
+                                        process_module_instance->fetch_parameters_from_process( _order->params() );
+
+                                        postprocess_order( _exit_code == 0  &&  !has_error() );     // Auftrag soll in den Fehlerzustand gehen, egal ob 
+                                    }                                                               // bei einem Fehler auch der Job stoppt
+                                }                                                               
 
                                 // Gesammelte eMail senden, wenn collected_max erreicht:
                                 //Time log_time = _log->collect_end();
