@@ -1,4 +1,4 @@
-"job_scheduler_http_" FILES:
+"job_scheduler_http_" SCREEN-SHOT FILES:
 
 	Used in:
 		File http.xml
