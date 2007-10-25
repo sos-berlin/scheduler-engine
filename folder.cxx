@@ -317,20 +317,9 @@ bool Folder_subsystem::async_continue_( Continue_flags )
         if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 #   endif
 
+
+    handle_folders();
     
-    double now = double_from_gmtime();
-    if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
-
-    bool something_changed = _root_folder->adjust_with_directory( now );
-    
-    if( something_changed )  _last_change_at = now;
-
-    _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
-                                                                                    : directory_watch_interval_max;
-
-    if( _read_again_at )  set_async_next_gmtime( _read_again_at );
-                    else  set_async_delay( _directory_watch_interval );
-
     return true;
 }
 
@@ -343,6 +332,35 @@ string Folder_subsystem::async_state_text_() const
     result << obj_name();
 
     return result;
+}
+
+//-----------------------------------------------------------------Folder_subsystem::handle_folders
+
+bool Folder_subsystem::handle_folders( double minimum_age )
+{
+    bool something_changed = false;
+
+    if( subsystem_state() == subsys_active )
+    {
+        double now = double_from_gmtime();
+
+        if( _last_change_at + minimum_age <= now )
+        {
+            if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
+
+            something_changed = _root_folder->adjust_with_directory( now );
+            
+            if( something_changed )  _last_change_at = now;
+
+            _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
+                                                                                            : directory_watch_interval_max;
+
+            if( _read_again_at )  set_async_next_gmtime( _read_again_at );
+                            else  set_async_delay( _directory_watch_interval );
+        }
+    }
+
+    return something_changed;
 }
 
 //-----------------------------------------------------------------------------------Folder::Folder

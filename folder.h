@@ -757,6 +757,8 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
 
     void                        set_read_again_at           ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
 
+    bool                        handle_folders              ( double minimum_age = 0 );
+
 
   private:
     Fill_zero                  _zero_;

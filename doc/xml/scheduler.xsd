@@ -81,9 +81,9 @@
                         <xsd:attribute name="supervisor"            type="String"/>
                         <xsd:attribute name="configuration_directory" type="File"/>
 
-                        <xsd:attribute name="configuration_add_event"           type="Name"/>
-                        <xsd:attribute name="configuration_modify_event"        type="Name"/>
-                        <xsd:attribute name="config_configuration_delete_event" type="Name"/>
+                        <xsd:attribute name="configuration_add_event"           type="Path"/>
+                        <xsd:attribute name="configuration_modify_event"        type="Path"/>
+                        <xsd:attribute name="config_configuration_delete_event" type="Path"/>
                     </xsd:complexType>
                 </xsd:element>
 

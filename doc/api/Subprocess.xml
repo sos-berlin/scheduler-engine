@@ -262,6 +262,11 @@
             Nach dem Start des Subprozesses haben Änderungen an den Umgebungsvariablen keine Wirkung.
             Auch können vom Prozess geänderte Umgebungsvariablen nicht gelesen werden.
         </p>
+        <p>
+            Das Objekt lässt sich nicht anderen Objekten übergeben
+            (denn es befindet sich im Prozess der Task, 
+            während die meisten anderen Objekte sich im Prozess des Schedulers befinden).
+        </p>
     </description>
 
     <example programming_language="javascript">

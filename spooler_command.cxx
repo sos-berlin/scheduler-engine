@@ -1221,6 +1221,13 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
+        if( string_equals_prefix_then_skip( &p, "check_folders"    ) )  
+        {
+#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse prüfen
+                Z_UNIX_ONLY( spooler()->folder_subsystem()->handle_folders( 1 ) );  
+#           endif
+        }
+        else
             z::throw_xc( "SCHEDULER-164", what );
 
         if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  z::throw_xc( "SCHEDULER-164", what );

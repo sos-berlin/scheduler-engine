@@ -350,7 +350,7 @@
                 />
                 …
             &lt;/job_chain>
-            &lt;<scheduler_a href="xml/job_chain_node.job_chain.xml">job_chain</scheduler_a> name="…"/>
+            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> name="…"/>
                 &lt;<scheduler_a href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</scheduler_a>
                     job_chain   = "…"  
                     error_state = "…"

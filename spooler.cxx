@@ -1257,6 +1257,8 @@ void Spooler::load_arg()
         if( opt.param() ) {}
     }
 
+    sos::mail::Mail_static::instance()->set_factory_ini_path( _factory_ini );
+
 
     string log_level = as_string( _log_level );
 

@@ -685,7 +685,8 @@ void Process_module_instance::fetch_parameters_from_process( Com_variable_set* p
 
             b = p;
             while( p < p_end  &&  *p != '\n' )  p++;
-            string value ( b, p++ - b );
+            string value ( b, ( p[-1] == '\r'? p - 1 : p ) - b );
+            p++;
 
             params->set_var( trim( name ), trim( value ) );
 

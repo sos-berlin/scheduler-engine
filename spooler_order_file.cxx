@@ -464,7 +464,7 @@ void Directory_file_order_source::close_notification()
             remove_from_event_manager();
             set_async_manager( _spooler->_connection_manager );   // remove_from_event_manager() für set_async_next_gmtime() rückgängig machen
 
-            Z_LOG2( "scheduler.file_order", "FindCloseChangeNotification()\n" );
+            Z_LOG2( "scheduler.file_order", "FindCloseChangeNotification(\"" << _path << "\")\n" );
             FindCloseChangeNotification( _notification_event.handle() );
             _notification_event._handle = NULL;   // set_handle() ruft CloseHandle(), das wäre nicht gut
         }

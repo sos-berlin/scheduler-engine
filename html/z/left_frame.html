@@ -150,7 +150,7 @@ function update_jobs_frame()
     if( _show_card == "remote_schedulers"      )  what += " remote_schedulers";
     if( _show_card == "job_chains"             )  what += " job_chains";
 
-    var commands = "<show_state what='" + what + "' max_orders='" + max_orders + "'/>";
+    var commands = "<show_state what='" + what + " check_folders' max_orders='" + max_orders + "'/>";
     
     if( _show_card == "calendar" )
     {
