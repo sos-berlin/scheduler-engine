@@ -46,8 +46,9 @@
                 <file_order_source directory="$SOS_MOUNT/tmp/z/39" regex="^g.*\.ok$"/>
                 -->
     <job_chain_node state="edno" job="javascript"/>
-    <job_chain_node state="dwa"  job="javascript2"/>
-    <job_chain_node state="tri"  job="java"/>
-    <file_order_sink state="remove" remove="yes"/>
-    
+    <!--job_chain_node state="dwa"  job="javascript2"/>
+    <job_chain_node state="tri"  job="java"/-->
+    <file_order_sink state="move" move_to="$SOS_MOUNT/tmp/x/moved"/>
+    <!--file_order_sink state="remove" remove="yes"/-->
+
 </job_chain>
