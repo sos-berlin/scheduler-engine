@@ -573,7 +573,7 @@ struct Job_node : Order_queue_node,
     void                        disconnect_job              ();
 
   private:
-    friend struct               Job_chain;                  // add_job_node()
+    friend struct               order::Job_chain;           // add_job_node()
 
     Fill_zero                  _zero_;
     Absolute_path              _job_path;
