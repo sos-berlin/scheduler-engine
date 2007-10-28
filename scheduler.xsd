@@ -246,7 +246,10 @@
     
     <xsd:element name="add_order" type="order"/>
 
-    
+
+    <xsd:element name="check_folders" type="check_folders"/>
+
+
     <xsd:element name="holiday">
         <xsd:complexType>
             <xsd:attribute name="date" type="String" use="required"/>
@@ -551,7 +554,7 @@
         </xsd:key-->
     </xsd:element>
 
-    
+
     <xsd:element name="kill_task">
         <xsd:complexType>
             <xsd:attribute name="job"           type="Path"         use="required"/>

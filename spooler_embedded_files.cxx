@@ -161,7 +161,7 @@ const char file_scheduler_xsd[] =
     "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:element ref=\"add_jobs\"/>\n"
     "<xsd:element ref=\"add_order\"/>\n"
-    "<xsd:element name=\"check_folders\" type=\"check_folders\"/>\n"
+    "<xsd:element name=\"check_folders\"               type=\"check_folders\"/>\n"
     "<xsd:element ref=\"kill_task\"/>\n"
     "<xsd:element name=\"lock\"                        type=\"lock\"/>\n"
     "<xsd:element name=\"lock.remove\"                 type=\"lock.remove\"/>\n"
@@ -254,6 +254,9 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:element name=\"add_order\" type=\"order\"/>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"check_folders\" type=\"check_folders\"/>\n"
     "\n"
     "\n"
     "<xsd:element name=\"holiday\">\n"
@@ -1814,7 +1817,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1193593485 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1193597079 },
     { NULL, NULL, 0 }
 };
 
