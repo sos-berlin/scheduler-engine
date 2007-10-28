@@ -1414,6 +1414,8 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "ignore-process-classes" ) )  _ignore_process_classes = opt.set(),  _ignore_process_classes_set = true;
             else
+            //if( opt.flag      ( "no-database"            ) )  if( opt.set() )  _need_db = XXX;
+            //else
             if( opt.flag      ( "validate-xml"           ) )  _validate_xml = opt.set();
             else
             if( opt.flag      ( "exclusive"              ) )  _cluster_configuration._demand_exclusiveness   = opt.set();
@@ -2221,7 +2223,7 @@ void Spooler::run()
                     if( job->is_machine_resumable()  &&  resume_at > next_job_time )  resume_at = next_job_time,  resume_at_object = job;
 
                     if( wait_until > next_job_time  
-                     || wait_until == next_job_time && job->visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
+                     || wait_until == next_job_time && job->is_visible() )   // wait_until_object sollte nicht auf einen unsichtbaren Job zeigen
                     {
                         wait_until = next_job_time;
                         wait_until_object = job;

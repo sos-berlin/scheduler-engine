@@ -1149,6 +1149,7 @@ xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& documen
 Job_node::Job_node( Job_chain* job_chain, const Order::State& state, const Absolute_path& job_path ) 
 : 
     Order_queue_node( job_chain, state, n_job ),
+    _zero_(this+1),
     _job_path( job_path )
 {
     if( job_path == "" )  assert(0), z::throw_xc( Z_FUNCTION, "no job path" );
@@ -1473,7 +1474,7 @@ Job_chain::Job_chain( Scheduler* scheduler )
     file_based<Job_chain,Job_chain_folder_interface,Order_subsystem_interface>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
     _zero_(this+1),
     _orders_are_recoverable(true),
-    _visible(true)
+    _visible(visible_yes)
 {
 }
 
@@ -1580,8 +1581,13 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
     if( !element.nodeName_is( "job_chain" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", element.nodeName() );
 
-    set_name(                 element.     getAttribute( "name"              , name()                  )  );
-    _visible                = element.bool_getAttribute( "visible"           , _visible                );
+    set_name( element.getAttribute( "name", name() ) );
+
+    if( element.hasAttribute( "visible" ) )
+        _visible = element.getAttribute( "visible" ) == "never"? visible_never :
+                   element.bool_getAttribute( "visible" )      ? visible_yes 
+                                                               : visible_no;
+
     _orders_are_recoverable = element.bool_getAttribute( "orders_recoverable", _orders_are_recoverable );
 
     if( order_subsystem()->orders_are_distributed() )
@@ -1606,7 +1612,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
             if( e.nodeName_is( "file_order_sink" ) )
             {
                 Job* job = _spooler->job_subsystem()->job( file_order_sink_job_path );
-                job->set_visible( true );
+                job->set_visible();
 
                 ptr<Node> sink_node = new Sink_node( this, state, job->path(), 
                                                      subst_env( e.getAttribute( "move_to" ) ), 
@@ -1625,7 +1631,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
 
                 if( job_path != "" )
                 {
-                    node = add_job_node( job_path, state, next_state, error_state );
+                    node = add_job_node( job_path, state, next_state, error_state, e );
                 }
                 else
                 {
@@ -1701,7 +1707,7 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
 
 bool Job_chain::is_visible_in_xml_folder( const Show_what& show_what ) const
 {
-    return _visible  &&  show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders );
+    return is_visible()  &&  show_what.is_set( show_job_chains | show_job_chain_jobs | show_job_chain_orders );
 }
 
 //----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
@@ -1723,7 +1729,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     //result.setAttribute( "name"  , name() );
     result.setAttribute( "orders", order_count( &ta ) );
     result.setAttribute( "state" , state_name( state() ) );
-    if( !_visible ) result.setAttribute( "visible", _visible? "yes" : "no" );
+    if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
     if( _order_id_space )  result.setAttribute( "order_id_space", _order_id_space->path() );
 
@@ -1843,7 +1849,8 @@ Order::State normalized_state( const Order::State& state )
 
 //--------------------------------------------------------------------------Job_chain::add_job_node
 
-Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_, const Order::State& next_state, const Order::State& error_state )
+Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_, const Order::State& next_state, const Order::State& error_state,
+                               const xml::Element_ptr& element )
 {
     assert_is_not_initialized();
     //if( _state != s_under_construction )  z::throw_xc( "SCHEDULER-148" );
@@ -1856,11 +1863,19 @@ Node* Job_chain::add_job_node( const Path& job_path, const Order::State& state_,
 
     Absolute_path absolute_job_path ( folder_path(), Absolute_path( folder_path(), job_path ) );
 
-    ptr<Node> node = new Job_node( this, state, absolute_job_path );
+    ptr<Job_node> node = new Job_node( this, state, absolute_job_path );
     node->set_next_state ( next_state );
     node->set_error_state( error_state );
 
-    _node_list.push_back( node );
+    if( element )
+    {
+        string on_error = element.getAttribute( "on_error" );
+        if( on_error == "suspend" )  node->_on_error_suspend = true;
+        else
+        if( on_error == "setback" )  node->_on_error_setback = true;
+    }
+
+    _node_list.push_back( +node );
 
     return node;
 }
@@ -2035,7 +2050,7 @@ void Job_chain::complete_nested_job_chains()
 
 //-------------------------------------------------------------------------Job_chain::node_from_job
 
-Node* Job_chain::node_from_job( Job* job )
+Job_node* Job_chain::node_from_job( Job* job )
 {
     string job_path = job->path();
 
@@ -2120,7 +2135,7 @@ void Job_chain::add_order( Order* order )
     }
     
 
-    set_visible( true );
+    set_visible();
 
     Node* node = referenced_node_from_state( order->_state );
     if( node != node_from_state( order->_state ) )  
@@ -3372,7 +3387,7 @@ void Order_queue::add_order( Order* order, Do_log do_log )
 #   endif
 
     if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-        if( Job* job = job_node->job_or_null() )  job->set_visible( true );
+        if( Job* job = job_node->job_or_null() )  job->set_visible();
 
 
     Time next_time = order->next_time();
@@ -5842,9 +5857,11 @@ void Order::postprocessing( bool success )
 {
     _is_success_state = success;
 
-    Job* last_job = _task? _task->job() : NULL;
+    Job*      last_job = _task? _task->job() : NULL;
+    Job_node* job_node          = Job_node::cast( _job_chain_node );
+    bool      force_error_state = false;
 
-    bool force_error_state = false;
+    if( !success  &&  job_node->is_on_error_setback() )  setback();
 
     if( !_setback_called )  _setback_count = 0;
 
@@ -5857,22 +5874,22 @@ void Order::postprocessing( bool success )
         _setback_count = 0;
     }
 
-    if( _task  &&  _moved )
-        if( Job_node* job_node = Job_node::try_cast( _job_chain_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( "delayed set_state()" );
+    if( _task  &&  _moved  &&  job_node )
+        if( Job* job = job_node->job_or_null() )  job->signal( "delayed set_state()" );
 
     _task = NULL;
 
-
-
     if( !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  force_error_state )
     {
-        if( _job_chain_node )
+        if( job_node )
         {
             assert( _job_chain );
 
-            set_state1( success? _job_chain_node->next_state()
-                               : _job_chain_node->error_state() );
+            if( !success  &&  job_node->is_on_error_suspend() )  
+                set_suspended();
+            else
+                set_state1( success? job_node->next_state()
+                                   : job_node->error_state() );
         }
     }
     else

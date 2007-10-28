@@ -227,7 +227,7 @@ void init_file_order_sink( Scheduler* scheduler )
 {
     ptr<File_order_sink_job> file_order_sink_job = Z_NEW( File_order_sink_job( scheduler ) );
 
-    file_order_sink_job->set_visible( false );
+    file_order_sink_job->set_visible( visible_no );
     file_order_sink_job->set_order_controlled();
     file_order_sink_job->set_idle_timeout( file_order_sink_job_idle_timeout_default );
 

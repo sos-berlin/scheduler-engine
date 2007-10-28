@@ -1469,8 +1469,9 @@ bool Task::do_something()
                                         assert( process_module_instance );
                                         process_module_instance->fetch_parameters_from_process( _order->params() );
 
-                                        postprocess_order( _exit_code == 0  &&  !has_error() );     // Auftrag soll in den Fehlerzustand gehen, egal ob 
-                                    }                                                               // bei einem Fehler auch der Job stoppt
+                                        bool success = _exit_code == 0  &&  !has_error();   // Auftrag soll in den Fehlerzustand gehen, egal ob 
+                                        postprocess_order( success );                       // bei einem Fehler auch der Job stoppt
+                                    }                                                               
                                 }                                                               
 
                                 // Gesammelte eMail senden, wenn collected_max erreicht:

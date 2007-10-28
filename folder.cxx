@@ -1986,39 +1986,42 @@ Folder* File_based::folder() const
 
 void File_based::handle_event( Base_file_event base_file_event )
 {
-    Absolute_path job_path;
-    
-    switch( base_file_event )
+    if( spooler()->folder_subsystem()->subsystem_state() == subsys_active )
     {
-        case bfevt_added:       job_path = spooler()->_configuration_start_job_after_added;     break;
-        case bfevt_modified:    job_path = spooler()->_configuration_start_job_after_modified;  break;
-        case bfevt_removed :    job_path = spooler()->_configuration_start_job_after_deleted;   break;
-        default:                assert(0), throw_xc(__FUNCTION__ );
-    }
-
-    if( !job_path.empty() )
-    {
-        try
+        Absolute_path job_path;
+        
+        switch( base_file_event )
         {
-            ptr<Com_variable_set> parameters  = new Com_variable_set;
-            ptr<Com_variable_set> environment = new Com_variable_set;
-
-            environment->set_var( "SCHEDULER_LIVE_FILEBASE", _base_file_info._filename );
-            environment->set_var( "SCHEDULER_LIVE_FILEPATH", File_path( folder()->directory(), _base_file_info._filename ) );
-            environment->set_var( "SCHEDULER_LIVE_EVENT"   , base_file_event == bfevt_added   ? "add"      :
-                                                             base_file_event == bfevt_modified? "modified" :
-                                                             base_file_event == bfevt_removed ? "deleted"  : "" );
-
-            Z_FOR_EACH( Com_variable_set::Map, environment->_map, v )  parameters->set_var( lcase( v->second->name() ), v->second->string_value() );
-            
-            Job*  job  = spooler()->job_subsystem()->job( job_path );
-            ptr<Task> task = job->create_task( +parameters , "", 0 );
-            task->merge_environment( environment );
-            job->enqueue_task( task );
+            case bfevt_added:       job_path = spooler()->_configuration_start_job_after_added;     break;
+            case bfevt_modified:    job_path = spooler()->_configuration_start_job_after_modified;  break;
+            case bfevt_removed :    job_path = spooler()->_configuration_start_job_after_deleted;   break;
+            default:                assert(0), throw_xc(__FUNCTION__ );
         }
-        catch( exception& x )
+
+        if( !job_path.empty() )
         {
-            spooler()->folder_subsystem()->log()->error( x.what() );
+            try
+            {
+                ptr<Com_variable_set> parameters  = new Com_variable_set;
+                ptr<Com_variable_set> environment = new Com_variable_set;
+
+                environment->set_var( "SCHEDULER_LIVE_FILEBASE", _base_file_info._filename );
+                environment->set_var( "SCHEDULER_LIVE_FILEPATH", File_path( folder()->directory(), _base_file_info._filename ) );
+                environment->set_var( "SCHEDULER_LIVE_EVENT"   , base_file_event == bfevt_added   ? "add"      :
+                                                                 base_file_event == bfevt_modified? "modified" :
+                                                                 base_file_event == bfevt_removed ? "deleted"  : "" );
+
+                Z_FOR_EACH( Com_variable_set::Map, environment->_map, v )  parameters->set_var( lcase( v->second->name() ), v->second->string_value() );
+                
+                Job*  job  = spooler()->job_subsystem()->job( job_path );
+                ptr<Task> task = job->create_task( +parameters , "", 0 );
+                task->merge_environment( environment );
+                job->enqueue_task( task );
+            }
+            catch( exception& x )
+            {
+                spooler()->folder_subsystem()->log()->error( x.what() );
+            }
         }
     }
 }

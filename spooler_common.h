@@ -52,6 +52,15 @@ enum First_and_last
     fl_first_and_last_only
 };
 
+//---------------------------------------------------------------------------------------Visibility
+
+enum Visibility
+{
+    visible_never = 1,          // Wird nicht automatisch auf visible_yes gesetzt
+    visible_no,                 // Kann automatisch auf visible_yes gesetzt werden
+    visible_yes
+};
+
 //---------------------------------------------------------------------------Modified_event_handler
 
 struct Modified_event_handler

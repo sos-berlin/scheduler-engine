@@ -493,6 +493,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Period                      call_function               ( const Time& beginning_time );
 
     bool                        period_follows              ( const Time& time )                    { return next_period(time).begin() != Time::never; }
+  //bool                        period_follows              ( const Time& time )                    { return next_period( time, wss_next_period_or_single_start ).begin() != Time::never; }
 
     Time                        next_single_start           ( const Time& );
     Time                        next_any_start              ( const Time& );

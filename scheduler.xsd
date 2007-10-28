@@ -99,6 +99,7 @@
                 
                 <xsd:element ref="add_jobs"/>
                 <xsd:element ref="add_order"/>
+                <xsd:element name="check_folders" type="check_folders"/>
                 <xsd:element ref="kill_task"/>
                 <xsd:element ref="modify_job"/>
                 <xsd:element ref="modify_order"/>
@@ -151,6 +152,7 @@
         <xsd:choice minOccurs="0" maxOccurs="unbounded">
             <xsd:element ref="add_jobs"/>
             <xsd:element ref="add_order"/>
+            <xsd:element name="check_folders" type="check_folders"/>
             <xsd:element ref="kill_task"/>
             <xsd:element name="lock"                        type="lock"/>
             <xsd:element name="lock.remove"                 type="lock.remove"/>
@@ -365,7 +367,7 @@
             </xsd:sequence>
 
             <xsd:attribute name="name"                  type="Name"/>
-            <xsd:attribute name="visible"               type="Yes_no"/>
+            <xsd:attribute name="visible"               type="Yes_no_never"/>
             <xsd:attribute name="priority"              type="Process_priority"/>
             <xsd:attribute name="temporary"             type="Yes_no"/>
             <xsd:attribute name="spooler_id"            type="Name"/>
@@ -462,6 +464,14 @@
                                     <xsd:attribute name="job"           type="Path"/>
                                     <xsd:attribute name="next_state"    type="String"/>
                                     <xsd:attribute name="error_state"   type="String"/>
+                                    <xsd:attribute name="on_error">
+                                        <xsd:simpleType>
+                                            <xsd:restriction base="xsd:NMTOKEN">
+                                                <xsd:enumeration value="setback"/>
+                                                <xsd:enumeration value="suspend"/>
+                                            </xsd:restriction>
+                                        </xsd:simpleType>
+                                    </xsd:attribute>
                                     <xsd:attribute name="suspend"       type="Yes_no"/>
                                     <xsd:attribute name="delay"         type="xsd:nonNegativeInteger"/>
                                 </xsd:complexType>
@@ -483,7 +493,7 @@
             </xsd:sequence>
 
             <xsd:attribute name="name"               type="Name"/>
-            <xsd:attribute name="visible"            type="Yes_no"/>
+            <xsd:attribute name="visible"            type="Yes_no_never"/>
             <xsd:attribute name="orders_recoverable" type="Yes_no"/>
             <xsd:attribute name="distributed"        type="Yes_no"/>
         </xsd:complexType>
@@ -1218,6 +1228,9 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ELEMENT-TYPEN-->
 
+    <xsd:complexType name="check_folders"/>
+
+
     <xsd:complexType name="environment">
         <xsd:sequence>
             <xsd:element name="variable" minOccurs="0" maxOccurs="unbounded">
@@ -1470,6 +1483,20 @@
             <xsd:enumeration value="false"/>
             <xsd:enumeration value="0"/>
         </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Yes_no_never">
+        <xsd:union>
+            <xsd:simpleType>
+                <xsd:restriction base="Yes_no"/>
+            </xsd:simpleType>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:NMTOKEN">
+                    <xsd:enumeration value="never"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:union>
     </xsd:simpleType>
 
 

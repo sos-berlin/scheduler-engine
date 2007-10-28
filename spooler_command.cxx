@@ -566,6 +566,18 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
     }
 }
 
+//---------------------------------------------------------Command_processor::execute_check_folders
+
+xml::Element_ptr Command_processor::execute_check_folders( const xml::Element_ptr& )
+{
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+    _spooler->assert_is_activated( Z_FUNCTION );
+
+    _spooler->folder_subsystem()->handle_folders();
+    
+    return _answer.createElement( "ok" );
+}
+
 //-------------------------------------------------------------Command_processor::execute_kill_task
 
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
@@ -1290,6 +1302,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_cluster"     ) )  result = execute_show_cluster( element, show );
     else
     if( element.nodeName_is( "show_task"        ) )  result = execute_show_task( element, show );
+    else
+    if( element.nodeName_is( "check_folders"    ) )  result = execute_check_folders( element );
     else
     if( element.nodeName_is( "kill_task"        ) )  result = execute_kill_task( element );
     else

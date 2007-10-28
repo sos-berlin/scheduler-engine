@@ -438,8 +438,8 @@ void Web_service::set_dom( const xml::Element_ptr& element )
     {
         // Interne Jobkette und Job jetzt sichtbar machen
 
-        _spooler->root_folder()->job_chain_folder()->job_chain( forwarding_job_chain_name )->set_visible( true );
-        _spooler->root_folder()->job_folder()->job( forwarder_job_name )->set_visible( true );
+        _spooler->root_folder()->job_chain_folder()->job_chain( forwarding_job_chain_name )->set_visible();
+        _spooler->root_folder()->job_folder()->job( forwarder_job_name )->set_visible();
     }
 }
 

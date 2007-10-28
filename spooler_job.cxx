@@ -402,7 +402,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
-    _visible(true),
+    _visible(visible_yes),
     _stop_on_error(true)
 {
     if( name != "" )  set_name( name );
@@ -652,7 +652,12 @@ void Job::set_dom( const xml::Element_ptr& element )
         bool order;
 
         set_name    ( element.     getAttribute( "name"         , name()      ) );
-        _visible    = element.bool_getAttribute( "visible"      , _visible    );
+        
+        if( element.hasAttribute( "visible" ) )
+            _visible = element.getAttribute( "visible" ) == "never"? visible_never :
+                       element.bool_getAttribute( "visible" )      ? visible_yes 
+                                                                   : visible_no;
+    
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _module->set_priority( element.getAttribute( "priority"     , _module->_priority   ) );
         _title      = element.     getAttribute( "title"        , _title      );
@@ -1233,7 +1238,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
 
 void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
-    _job->set_visible( true );
+    _job->set_visible();
 
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
@@ -1926,6 +1931,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     if( _delay_until )
     {
         next_start_time = _period.next_try( _delay_until );
+        //if( next_start_time.is_never() )  next_start_time = _run_time->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
         if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
     }
     else
@@ -2727,7 +2733,7 @@ void Job::set_state( State new_state )
     if( old_state > s_initialized  ||  new_state != s_stopped )  // Übergang von none zu stopped interessiert uns nicht
     {
         if( new_state == s_stopping
-         || new_state == s_stopped  && _visible
+         || new_state == s_stopped  && is_visible()
          || new_state == s_error      )  _log->info  ( message_string( "SCHEDULER-931", state_name() ) ); 
                                    else  _log->debug9( message_string( "SCHEDULER-931", state_name() ) );
     }
@@ -2926,7 +2932,7 @@ Time Job::get_delay_order_after_setback( int setback_count )
 
 bool Job::is_visible_in_xml_folder( const Show_what& show_what ) const
 {
-    return visible()  &&  ( show_what._job_name == ""  ||  show_what._job_name == path().without_slash() );
+    return is_visible()  &&  ( show_what._job_name == ""  ||  show_what._job_name == path().without_slash() );
 }
 
 //---------------------------------------------------------------------------------Job::dom_element
@@ -2943,6 +2949,8 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
     if( !_title.empty() )
     result.setAttribute( "title"     , _title                  );
+
+    if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
 
     result.setAttribute_optional( "process_class", _module->_process_class_path );
 

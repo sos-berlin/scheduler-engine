@@ -566,13 +566,20 @@ struct Job_node : Order_queue_node,
     Job*                        job                         () const;
     Job*                        job_or_null                 () const;
     void                    set_action                      ( const string& );
+    bool                     is_on_error_setback            () const                                { return _on_error_setback; }
+    bool                     is_on_error_suspend            () const                                { return _on_error_suspend; }
 
     void                        connect_job                 ( Job* );
     void                        disconnect_job              ();
 
   private:
+    friend struct               Job_chain;                  // add_job_node()
+
+    Fill_zero                  _zero_;
     Absolute_path              _job_path;
     Job*                       _job;
+    bool                       _on_error_setback;
+    bool                       _on_error_suspend;
 };
 
 //-----------------------------------------------------------------job_chain::Nested_job_chain_node
@@ -682,8 +689,9 @@ struct Job_chain : Com_job_chain,
     State                       state                       () const                                { return _state; }
     static string               state_name                  ( State );
 
-    void                    set_visible                     ( bool b )                              { _visible = b; }
-    bool                        visible                     () const                                { return _visible; }
+    void                    set_visible                     ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
+    void                    set_visible                     ( Visibility v )                        { _visible = v; }
+    bool                     is_visible                     () const                                { return _visible == visible_yes; }
 
     bool                     is_distributed                 () const                                { return _is_distributed; }
 
@@ -701,7 +709,8 @@ struct Job_chain : Com_job_chain,
 
     job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 
                                                               const Order::State& next_state, 
-                                                              const Order::State& error_state );
+                                                              const Order::State& error_state,
+                                                              const xml::Element_ptr& = NULL );
     
     job_chain::Node*            add_end_node                ( const Order::State& input_state );
 
@@ -710,7 +719,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
     job_chain::Node*            node_from_state             ( const Order::State& );
     job_chain::Node*            node_from_state_or_null     ( const Order::State& );
-    job_chain::Node*            node_from_job               ( Job* );
+    job_chain::Job_node*        node_from_job               ( Job* );
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
@@ -764,7 +773,7 @@ struct Job_chain : Com_job_chain,
     Fill_zero                  _zero_;
     State                      _state;
     Order_id_space*            _order_id_space;
-    bool                       _visible;
+    Visibility                 _visible;
     bool                       _orders_are_recoverable;
     bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
 

@@ -214,10 +214,8 @@ bool Standing_order::order_is_removable_or_replaceable()
 
     if( !result )
     {
-        if( Job_chain* job_chain = spooler()->order_subsystem()->job_chain_or_null( _order->job_chain_path() ) )
-        {
-            result = job_chain->is_to_be_removed();
-        }
+        Job_chain* job_chain = spooler()->order_subsystem()->job_chain_or_null( _order->job_chain_path() );
+        result = !job_chain  ||  job_chain->is_to_be_removed();
     }
 
     return result;
