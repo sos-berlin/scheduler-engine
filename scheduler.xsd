@@ -152,7 +152,7 @@
         <xsd:choice minOccurs="0" maxOccurs="unbounded">
             <xsd:element ref="add_jobs"/>
             <xsd:element ref="add_order"/>
-            <xsd:element name="check_folders" type="check_folders"/>
+            <xsd:element name="check_folders"               type="check_folders"/>
             <xsd:element ref="kill_task"/>
             <xsd:element name="lock"                        type="lock"/>
             <xsd:element name="lock.remove"                 type="lock.remove"/>

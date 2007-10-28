@@ -67,6 +67,28 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="on_error" type="suspend|resume">
+            <description>
+                <p>
+                    Nach einem Auftragsschritt, der den Auftrag als fehlerhaft gekennzeichnet hat,
+                    versetzt der Scheduler den Auftrag in den Fehlerzustand <code>error_state</code>.
+                    Das kann mit diesem Attribut geändert werden.
+                </p>
+                <p>
+                    <code>on_error="suspend"</code> wirkt wie 
+                    <scheduler_method class="Order" property="suspended"/><code>=true</code>: 
+                    Der Scheduler belässt den Auftrag in seinem Zustand,
+                    er bleibt also vor dem Job stehen und wird suspendiert.
+                </p>
+                <p>
+                    <code>on_error="setback"</code> wirkt wie <scheduler_method class="Order" method="setback"/>:
+                    Der Scheduler belässt den Auftrag in seinem Zustand,
+                    er bleibt also vor dem Job stehen,
+                    so wie es im Job mit <scheduler_element name="delay_order_after_setback"/> eingestellt ist.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 

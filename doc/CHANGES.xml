@@ -10,6 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-10-28" version="2.0.190" subversion_revision="5364">
+        <revision jira="JS-153" type="new" title="Neues Kommando &lt;check_folders>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="check_folders"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-149" type="new" title="Neues Attribut &lt;job_chain_node on_error=&quot;setback|suspend&quot;">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain_node" attribute="on_error"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2007-10-22" version="2.0.189" subversion_revision="5354">
         <revision jira="JS-146" type="new" title="Jobstarts bei neuen, geänderten und gelöschen Konfigurationsdateien">
             <description>

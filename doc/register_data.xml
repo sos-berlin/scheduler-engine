@@ -259,6 +259,11 @@
     <register_entry register_file='api/Web_service_request.xml#method__charset_name' register_title='Web_service_request.charset_name' register_keyword='charset_name' type='definition'/>
     <register_entry register_file='api/Web_service_response.xml#method__charset_name' register_title='Web_service_response.charset_name' register_keyword='charset_name' type='definition'/>
 </register_keyword>
+<register_keyword keyword='check_folders'>
+    <register_keyword_display><code>&lt;check_folders&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__check_folders' register_title='Änderungsprotokoll'  register_keyword='check_folders'/>
+    <register_entry register_file='xml/check_folders.xml#' register_title='&lt;check_folders&gt; (Kommando)'  register_keyword='check_folders' type='definition'/>
+</register_keyword>
 <register_keyword keyword='class'>
     <register_keyword_display><code>class=</code></register_keyword_display>
     <register_entry register_file='xml/answer/ERROR.xml#attribute_class' register_title='&lt;ERROR&gt; (Antwort)'  register_keyword='class' type='definition'/>
@@ -692,6 +697,7 @@
     <register_entry register_file='api/Order.xml#use_element__delay_order_after_setback' register_title='Order'  register_keyword='delay_order_after_setback'/>
     <register_entry register_file='xml.xml#use_element__delay_order_after_setback' register_title='Alle XML-Elemente'  register_keyword='delay_order_after_setback'/>
     <register_entry register_file='xml/delay_order_after_setback.xml#' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='delay_order_after_setback' type='definition'/>
+    <register_entry register_file='xml/job_chain_node.xml#use_element__delay_order_after_setback' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='delay_order_after_setback'/>
     <register_entry register_file='xml/modify_order.xml#use_element__delay_order_after_setback' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='delay_order_after_setback'/>
 </register_keyword>
 <register_keyword keyword='delay_order_after_setback (property)'>
@@ -2350,6 +2356,10 @@
 </register_keyword>
 <register_keyword keyword='on_error'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='on_error'/>
+</register_keyword>
+<register_keyword keyword='on_error'>
+    <register_keyword_display><code>on_error=</code></register_keyword_display>
+    <register_entry register_file='xml/job_chain_node.xml#attribute_on_error' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='on_error' type='definition'/>
 </register_keyword>
 <register_keyword keyword='on_exit_code'>
     <register_keyword_display><code>on_exit_code=</code></register_keyword_display>

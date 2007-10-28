@@ -156,6 +156,7 @@
     <file path="xml/answer/waiting_jobs.xml"/>
     <file path="xml/at.xml"/>
     <file path="xml/base.xml"/>
+    <file path="xml/check_folders.xml"/>
     <file path="xml/cluster.xml"/>
     <file path="xml/commands.xml"/>
     <file path="xml/config.xml"/>
