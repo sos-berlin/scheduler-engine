@@ -1796,6 +1796,9 @@ void Spooler::activate()
 
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
 
+
+    _folder_subsystem        ->switch_subsystem_state( subsys_active );
+
     if( !_ignore_process_classes )
     _process_class_subsystem ->switch_subsystem_state( subsys_active );
 
@@ -1804,7 +1807,6 @@ void Spooler::activate()
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
     _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-    _folder_subsystem        ->switch_subsystem_state( subsys_active );
 
     if( !_xml_cmd.empty() )
     {

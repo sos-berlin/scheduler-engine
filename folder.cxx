@@ -14,6 +14,8 @@ using namespace zschimmer::file;
 const char                      folder_separator            = '/';
 const Absolute_path             root_path                   ( "/" );
 const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
+const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
+
 #ifdef Z_WINDOWS
     const int                   directory_watch_interval_min = 60;
     const int                   directory_watch_interval_max = 60;
@@ -252,6 +254,15 @@ bool Folder_subsystem::subsystem_initialize()
 bool Folder_subsystem::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
+
+    if( _directory.exists() )
+    {
+        _root_folder->load();
+        handle_folders();
+    }
+    else
+        log()->warn( message_string( "SCHEDULER-895", _directory ) );
+
     return true;
 }
 
@@ -283,14 +294,10 @@ bool Folder_subsystem::subsystem_activate()
         set_async_manager( _spooler->_connection_manager );
         _subsystem_state = subsys_active;
 
-        _root_folder->activate();
-        async_continue();  // IM FEHLERFALL trotzdem subsys_active setzen? Prüfen, ob Verzeichnis überhaupt vorhanden ist, sonst Abbruch. Oder warten, bis es da ist?
+        file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
 
         result = true;
     }
-    else
-        log()->warn( message_string( "SCHEDULER-895", _directory ) );
-
 
     return result;
 }
@@ -340,7 +347,8 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 {
     bool something_changed = false;
 
-    if( subsystem_state() == subsys_active )
+    if( subsystem_state() == subsys_loaded  ||
+        subsystem_state() == subsys_active )
     {
         double now = double_from_gmtime();
 
@@ -717,8 +725,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         add_file_based( new_subfolder );
         something_changed = true;
 
-        bool ok = new_subfolder->activate();
-        if( ok )  new_subfolder->adjust_with_directory( now );
+        new_subfolder->activate();
+        if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( now );
     }
     else
     {
@@ -904,6 +912,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     {
         if( base_file_info )
         {
+            if( old_file_based )  old_file_based->_base_file_check_removed_again_at = 0;  // _base_file_removed_at > 0 ==> Datei ist gelöscht und gleich wieder hinzugefügt worden
+
             file_path = File_path( folder()->directory(), base_file_info->_filename );
 
             bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
@@ -965,7 +975,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
                         old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, 
                                                                                       Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
                                                                                       subsystem()->object_type_name() ) );
-                        if( base_file_info->_timestamp_utc != current_file_based->base_file_info()._timestamp_utc ||   // Doppeltes Ereignis wegen _read_again vermeiden
+                        if( !read_again  ||  // Doppeltes Ereignis wegen _read_again vermeiden
+                            base_file_info->_timestamp_utc != current_file_based->base_file_info()._timestamp_utc ||   
                             content_md5 != current_file_based->_md5 )  old_file_based->handle_event( File_based::bfevt_modified ); 
 
                         old_file_based->set_replacement( file_based );
@@ -1026,15 +1037,24 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         {
             something_changed = true;
 
-            string p = folder()->make_path( old_file_based->base_file_info()._filename );
-            old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
+            if( !old_file_based->_base_file_check_removed_again_at )
+            {
+                old_file_based->_base_file_check_removed_again_at = now + remove_delay;
+                folder()->subsystem()->set_read_again_at_or_later( old_file_based->_base_file_check_removed_again_at );  
+            }
+            else
+            if( old_file_based->_base_file_check_removed_again_at <= now )
+            {
+                string p = folder()->make_path( old_file_based->base_file_info()._filename );
+                old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
-            file_based = old_file_based;                // Für catch()
-            assert( file_based->_file_is_removed );
-            
-            file_based->handle_event( File_based::bfevt_removed );
-            file_based->remove();
-            file_based = NULL;
+                file_based = old_file_based;                // Für catch()
+                assert( file_based->_file_is_removed );
+                
+                file_based->handle_event( File_based::bfevt_removed );
+                file_based->remove();
+                file_based = NULL;
+            }
         }
     }
     catch( exception& x )
@@ -1081,7 +1101,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     if( file_based  &&  file_based->_read_again )  
     {
         double at = now + file_timestamp_delay;
-        folder()->subsystem()->set_read_again_at( at );  
+        folder()->subsystem()->set_read_again_at_or_later( at );  
         file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay, Time().set_utc( at ).as_string() ) );
     }
 

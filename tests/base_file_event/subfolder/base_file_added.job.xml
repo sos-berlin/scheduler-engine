@@ -12,7 +12,6 @@ spooler_log.info( "scheduler_live_filebase=" + spooler_task.params.value( "sched
     </script>
 
     <run_time>
-        <period begin="20:47"/>
     </run_time>
     
 </job>

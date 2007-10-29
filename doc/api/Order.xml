@@ -394,7 +394,7 @@
             Wenn der Auftrag gerade von einer Task ausgeführt wird,
             liefert die Eigenschaft <scheduler_method class="Order" property="job_chain"/>
             weiterhin die Jobkette,
-            aus der der Auftrag gerade entfernt wird.
+            aus der der Auftrag mit diesem Aufruf entfernt worden ist.
             Erst wenn die Ausführung beendet ist, liefert die Eigenschaft <api.null/>
             (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
             Damit bleibt die Eigenschaft job_chain während der Ausführung durch die Task stabil.

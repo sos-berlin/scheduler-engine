@@ -298,6 +298,7 @@ struct File_based : Scheduler_object,
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
+    double                     _base_file_check_removed_again_at;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
     ptr<File_based>            _replacement;
@@ -752,10 +753,10 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     Folder*                     root_folder                 () const                                { return _root_folder; }
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
 
-    bool                        is_signaled                 ()                                      { return _directory_event.signaled(); }
-    void                        set_signaled                ( const string& text )                  { _directory_event.set_signaled( text ); }
+    bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
+    void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
 
-    void                        set_read_again_at           ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
+    void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
 
     bool                        handle_folders              ( double minimum_age = 0 );
 
