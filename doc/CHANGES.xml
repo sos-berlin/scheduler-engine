@@ -10,6 +10,27 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-10-29" version="2.0.191" subversion_revision="5370">
+        <revision jira="JS-155" type="modification" title="Lade- und Aktivierungsphase der dynamischen Konfiguration getrennt">
+            <description>
+                <p>
+                    Die Objekte der Konfigurationsverzeichnisse werden erst geladen, dann aktiviert.
+                    Damit können für <scheduler_element name="config" attribute="configuration_add_event"/> usw. Jobs
+                    aus den Konfigurationsverzeichnissen benutzt werden.
+                </p>
+            </description>
+        </revision>
+
+        <revision jira="JS-155" type="modification" title="Kurzfristiges Löschen und Wiedereinfügen einer Datei wird als Änderung angesehen">
+            <description>
+                <p>
+                    Wenn eine Datei in sehr kurzer Zeit gelöscht und wieder eingefügt wird,
+                    interpretiert der Scheduler das als Änderung, nicht als Löschen und Hinzufügen eines Objekts.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-10-28" version="2.0.190" subversion_revision="5365">
         <revision jira="JS-136" type="new" title="Authentifizierung für SMTP-Server (eMail-Versand)">
             <description>
