@@ -2017,6 +2017,14 @@
 <register_keyword keyword='Mail-Versand'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Mail-Versand'/>
 </register_keyword>
+<register_keyword keyword='mail.smtp.password'>
+    <register_keyword_display><code>mail.smtp.password=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#entry_mail.smtp.password' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='mail.smtp.password' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail.smtp.user'>
+    <register_keyword_display><code>mail.smtp.user=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#entry_mail.smtp.user' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='mail.smtp.user' type='definition'/>
+</register_keyword>
 <register_keyword keyword='mail_bcc'>
     <register_keyword_display><code>mail_bcc=</code></register_keyword_display>
     <register_entry register_file='xml/answer/log.xml#attribute_mail_bcc' register_title='&lt;log&gt; (Antwort)'  register_keyword='mail_bcc' type='definition'/>
@@ -3209,12 +3217,17 @@
     <register_entry register_file='xml/run_time.xml#attribute_single_start' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='single_start' type='definition'/>
 </register_keyword>
 <register_keyword keyword='smtp'>
+    <register_keyword_display><code>[smtp]</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='smtp' type='definition'/>
+</register_keyword>
+<register_keyword keyword='smtp'>
     <register_keyword_display><code>smtp=</code></register_keyword_display>
     <register_entry register_file='factory_ini_job.xml#entry_smtp' register_title='file factory.ini, section [job]'  register_keyword='smtp' type='definition'/>
     <register_entry register_file='factory_ini_spooler.xml#entry_smtp' register_title='file factory.ini, section [spooler]'  register_keyword='smtp' type='definition'/>
     <register_entry register_file='sos_ini_mail.xml#entry_smtp' register_title='file sos.ini, section [mail]'  register_keyword='smtp' type='definition'/>
     <register_entry register_file='xml/answer/log.xml#attribute_smtp' register_title='&lt;log&gt; (Antwort)'  register_keyword='smtp' type='definition'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='spooler' entry='smtp'/>
+    <register_ini_entry register_file='factory_ini_smtp.xml' register_title='Datei factory.ini, Abschnitt [smtp]' file='sos.ini' section='mail' entry='smtp'/>
     <register_ini_entry register_file='settings.xml' register_title='Einstellungen' file='sos.ini' section='mail' entry='smtp'/>
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='smtp'/>
 </register_keyword>

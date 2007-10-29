@@ -13,6 +13,7 @@
         <ini_section name="spooler"/>
         <ini_section name="job"/>
         <ini_section name="java"/>
+        <ini_section name="smtp"/>
     </ini_sections>
 
     <description>

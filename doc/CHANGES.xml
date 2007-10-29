@@ -11,6 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2007-10-28" version="2.0.190" subversion_revision="5365">
+        <revision jira="JS-136" type="new" title="Authentifizierung für SMTP-Server (eMail-Versand)">
+            <description>
+                <p>
+                    Der Scheduler läuft nur mit der neuen Datei <code>sos.mail.jar</code>!
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="smtp"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision jira="JS-153" type="new" title="Neues Kommando &lt;check_folders>">
             <description>
                 <ul>
