@@ -25,7 +25,7 @@
             <description>
                 <p>
                     Wenn eine Datei in sehr kurzer Zeit gelöscht und wieder eingefügt wird,
-                    interpretiert der Scheduler das als Änderung, nicht als Löschen und Hinzufügen eines Objekts.
+                    interpretiert der Job Scheduler das als Änderung, nicht als Löschen und Hinzufügen eines Objekts.
                 </p>
             </description>
         </revision>
@@ -35,7 +35,10 @@
         <revision jira="JS-136" type="new" title="Authentifizierung für SMTP-Server (eMail-Versand)">
             <description>
                 <p>
-                    Der Scheduler läuft nur mit der neuen Datei <code>sos.mail.jar</code>!
+                   Der Job Scheduler unterstützt Authentifizierung für den Versand von Mail via SMTP.
+                </p>
+                <p>
+                    Der Job Scheduler läuft nur mit der neuen Datei <code>sos.mail.jar</code>!
                 </p>
                 <ul>
                     <li>
@@ -45,8 +48,14 @@
             </description>
         </revision>
 
-        <revision jira="JS-153" type="new" title="Neues Kommando &lt;check_folders>">
+        <revision jira="JS-153" type="new" title="Neues Kommando &lt;check_folders&gt;">
             <description>
+                <p>
+                  Das Kommando veranlasst den Job Scheduler, den Inhalt von Konfigurationsverzeichnissen (Hot Folders) zu prüfen, 
+                  um geänderte, hinzugefügte oder entfernte Dateien sofort zu erkennen. Unter Windows wird dies sofort
+                  erkannt, unter Unix wird dies innerhalb von max. 60s erkannt. Das Kommando ist in der HTML-Oberfläche
+                  des Job Schedulers verfügbar.
+                </p>
                 <ul>
                     <li>
                         <scheduler_element name="check_folders"/>

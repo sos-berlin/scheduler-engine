@@ -15,11 +15,14 @@
 
     <description>
         <p>
-            Prüft die Konfigurationsverzeichnisse auf Änderung und aktualisiert die Objekte im Scheduler.
+            Prüft die Konfigurationsverzeichnisse auf Änderung und aktualisiert die Objekte im Job Scheduler.
+            Unter Windows werden Änderungen in Konfigurationsverzeichnissen sofort
+            erkannt, unter Unix wird dies innerhalb von max. 60s erkannt. 
         </p>
         <p>
-            Wer sofort den Zustand der Konfigurationsverzeichnisse im Scheduler gespiegelt sehen möchte,
-            kann dieses Kommando geben.
+            Das Kommando ist in der HTML-Oberfläche
+            des Job Schedulers verfügbar und wird bspw. eingesetzt, um während der Entwicklung von Jobs unter Unix
+            die Wartezeit zu verkürzen bis eine Änderung im Konfigurationsverzeichnis wirkt.
         </p>
     </description>
 
