@@ -6,10 +6,10 @@ DEP_PRODUCTS := kram file fs zschimmer
 
 #HPUX: Hostjava einbinden
 ifeq ($(shell uname),HP-UX)
-ifeq ($(shell uname -m),ia64)
-else
+#ifeq ($(shell uname -m),ia64)
+#else
 DEP_PRODUCTS += hostjava hostole
-endif
+#endif
 endif
 
 
