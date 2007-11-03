@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="single" max_processes="1"/>
+        </process_classes>
+    
+        <script language="javascript">
+        <![CDATA[
+
+var order = spooler.create_order();
+order.payload = spooler;
+spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
+
+order.payload = spooler.create_variable_set();
+spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
+spooler_log.info( order.payload_is_type( "hostware.record" ) );
+
+spooler_log.info( "****" );
+//
+
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="java" order="yes">
+                <script language="java" java_class="HelloWorld">
+                    <![CDATA[
+                
+import sos.spooler.Job_impl;
+
+public class HelloWorld extends Job_impl 
+{
+    public boolean spooler_process() 
+    {
+        spooler_log.info( "order.priority=" + spooler_task.order().priority() );
+        spooler_task.order().set_priority( -spooler_task.order().priority() );
+        return true;
+    }
+}
+
+                ]]></script> 
+            </job>
+
+
+            <job name="dwa" order="yes">
+                <script language="javascript">
+                    
+function spooler_process()
+{
+    return true;
+}
+                </script>
+            </job>
+
+
+            <job name="add_orders">
+                <script language="javascript">
+                    //
+                </script>
+
+                <commands on_exit_code="0">
+                    <add_order job_chain="order.priority" id="1" priority="111" replace="yes"/>
+                    <add_order job_chain="order.priority" id="2" priority="222" replace="yes"/>
+                    <add_order job_chain="order.priority" id="3" priority="333" replace="yes"/>
+                </commands>
+            </job>
+
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="order.priority">
+                <job_chain_node state="java" job="java" />
+                <job_chain_node state="dwa"  job="dwa"/>
+                <job_chain_node state="fertig"/>
+            </job_chain>
+        </job_chains>
+
+    </config>
+</spooler>

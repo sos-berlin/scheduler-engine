@@ -80,7 +80,7 @@ public class Order extends Idispatch
 
     
     /*+ Auftr�ge mit h�herer Priorit�t werden zuerst abgearbeitet. */
-    public String           priority            ()                                  { return (String)   com_call( "<priority"           ); }
+    public int              priority            ()                                  { return        int_com_call( "<priority"           ); }
     
     
     

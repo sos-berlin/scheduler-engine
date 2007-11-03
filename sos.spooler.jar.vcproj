@@ -29,7 +29,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description=""
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine=""
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
 			<Tool
@@ -52,7 +52,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine=""
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
@@ -95,7 +95,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description=""
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine=""
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
 			<Tool
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine=""
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
