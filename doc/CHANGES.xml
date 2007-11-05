@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
     
-    <change date="2007-11-03" version="2.0.191" subversion_revision="5375">
+    <change date="2007-11-03" version="2.0.190" subversion_revision="5375">
         <revision jira="JS-177" type="correction" title="Java-Methode Order.priority() korrigiert">
             <description>
                 <p>
@@ -22,7 +22,7 @@
     </change>
 
     
-    <change date="2007-10-29" version="2.0.191" subversion_revision="5370">
+    <change date="2007-10-29" version="2.0.190" subversion_revision="5370">
         <revision jira="JS-155" type="modification" title="Lade- und Aktivierungsphase der dynamischen Konfiguration getrennt">
             <description>
                 <p>

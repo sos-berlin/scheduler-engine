@@ -182,6 +182,7 @@ struct Order : Com_order,
     void                        start_now               ();
     bool                        setback                 ();
     void                    set_setback                 ( const Time&, bool keep_setback_count = false );
+    bool                        setback_called          () const                                    { return _setback_called; }
     void                        clear_setback           ( bool keep_setback_count = false );
     bool                     is_setback                 ()                                          { return _setback_count > 0; }
     void                    set_at                      ( const Time& );
