@@ -293,8 +293,8 @@ void Module::set_dom( const xml::Element_ptr& element )
 
     //if( _use_process_class )
     //{
-        set_checked_attribute( &_process_class_string, element, "process_class"    );
-        if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
+        //set_checked_attribute( &_process_class_string, element, "process_class"    );
+        //if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
     //}
 
     bool separate_process_default = false;

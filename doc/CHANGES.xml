@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-11-06" version="2.0.190" subversion_revision="5377">
+    <change date="2007-11-06" version="2.0.190" subversion_revision="5379">
         <revision jira="JS-177" type="modification" title="Veraltetes &lt;script process_class=&quot;...&quot;> wird nicht mehr unterstützt">
             <description>
                 <p>
