@@ -12,14 +12,21 @@
 
 
     <change date="2007-11-06" version="2.0.190" subversion_revision="5377">
-        <revision jira="JS-177" type="correction" title="Veraltetes &lt;script process_class=&quot;...&quot;> wirkt wieder">
+        <revision jira="JS-177" type="modification" title="Veraltetes &lt;script process_class=&quot;...&quot;> wird nicht mehr unterstützt">
+            <description>
+                <p>
+                    Verwenden Sie <scheduler_element name="job" attribute="process_class"/>.
+                </p>
+            </description>
+        </revision>
+        <!--<revision jira="JS-177" type="correction" title="Veraltetes &lt;script process_class=&quot;...&quot;> wirkt wieder">
             <description>
                 <p>
                     Zur Kompatibilität kann im Element <scheduler_element name="script"/> die Prozessklasse eines Jobs eingestellt werden.
                     Das funktionierte seit mindestens Version 2.0.186.5190 (2007-08-31) nicht und ist jetzt korrigiert.
                 </p>
             </description>
-        </revision>
+        </revision>-->
     </change>
 
 

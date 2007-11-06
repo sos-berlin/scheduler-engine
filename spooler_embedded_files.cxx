@@ -965,7 +965,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"filename\"              type=\"File\"/>\n"
     "<xsd:attribute name=\"java_class\"            type=\"String\"/>\n"
     "<xsd:attribute name=\"recompile\"             type=\"Yes_no\"/>\n"
-    "<xsd:attribute name=\"process_class\"         type=\"Path\"/>\n"
+    "<!--xsd:attribute name=\"process_class\"         type=\"Path\"    s. eMail von P\xc3" "\xbc" "schel 2007-11-06 12:55 /-->\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1817,7 +1817,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1193597341 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1194352499 },
     { NULL, NULL, 0 }
 };
 

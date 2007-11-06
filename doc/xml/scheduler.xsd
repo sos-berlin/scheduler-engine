@@ -956,7 +956,7 @@
             <xsd:attribute name="filename"              type="File"/>
             <xsd:attribute name="java_class"            type="String"/>
             <xsd:attribute name="recompile"             type="Yes_no"/>
-            <xsd:attribute name="process_class"         type="Path"/>
+         <!--xsd:attribute name="process_class"         type="Path"    s. eMail von Püschel 2007-11-06 12:55 /-->
         </xsd:complexType>
     </xsd:element>
 
