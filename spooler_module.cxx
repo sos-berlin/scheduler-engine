@@ -291,11 +291,11 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
 
-    if( _use_process_class )
-    {
+    //if( _use_process_class )
+    //{
         set_checked_attribute( &_process_class_string, element, "process_class"    );
         if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
-    }
+    //}
 
     bool separate_process_default = false;
 
