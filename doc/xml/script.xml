@@ -92,9 +92,9 @@
                     <dd>
                         Das Verhalten ist dasselbe wie von <scheduler_element name="process"/>.
                     </dd>
-                    <p>
+                    <dd>
                         Die Einstellung kann nicht verwendet werden bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>.
-                    </p>
+                    </dd>
                 </dl>
             </description>
         </xml_attribute>
