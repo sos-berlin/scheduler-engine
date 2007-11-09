@@ -1,0 +1,17 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+     
+    order = "yes"
+    tasks = "1"
+>
+
+    <script language="shell">
+        <![CDATA[
+
+echo %SCHEDULER_TASK_TRIGGER_FILES%
+echo $SCHEDULER_TASK_TRIGGER_FILES
+exit 0
+
+    ]]>
+    </script>
+
+</job>
