@@ -38,12 +38,12 @@ public class Scheduler_script  extends sos.spooler.Job_impl
         <jobs>
 
 
-            <job name="java" process_class="remote">
+            <job name="java">
 
-                <script java_class="spooler_job.My_job">
+                <script java_class="spooler_job.test.My_job">
                     <![CDATA[
 
-package spooler_job;
+package spooler_job.test;
 
 import sos.spooler.*;
 
@@ -58,7 +58,29 @@ public class My_job  extends sos.spooler.Job_impl
                 ]]>
                 </script>
 
-                <run_time once="yes" start_time_function="my_start_time_function"/>
+                <!--run_time once="yes" start_time_function="my_start_time_function"/-->
+                <run_time once="yes"/>
+            </job>
+
+
+
+            <job name="liebert">
+                <script language="java" java_class="sos.test.JavaCompileTest">
+                    <![CDATA[
+package sos.test;
+import sos.spooler.Job_impl;
+public class JavaCompileTest extends Job_impl {
+
+    public boolean spooler_process() {    	
+      spooler_log.info("Hello World!");          
+      return false;
+    }
+
+}]]>
+                </script>
+
+                <run_time once="yes"/>
+
             </job>
 
         </jobs>

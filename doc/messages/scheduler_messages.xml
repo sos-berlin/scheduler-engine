@@ -2751,6 +2751,12 @@
                 <title>Syntax error in order parameters file <p1>environment_variable_name</p1>: Missing '=' after variable name</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-450">
+            <text xml:lang="en">
+                <title>Java file '<p1/>' could not be deleted</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

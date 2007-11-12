@@ -121,17 +121,17 @@ bool Module::make_java_class( bool )
 {
     if( _java_vm->work_dir().empty() )  z::throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
 
-    string filename = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
-    string java_filename  = filename + ".java";
-    string class_filename = filename + ".class";
-    string source;
+    File_path filepath       = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
+    File_path java_filepath  = filepath + ".java";
+    File_path class_filepath = filepath + ".class";
+    string    source;
 //    bool   do_compile = force;
 //
 //
 //    if( !do_compile )
 //    {
 //        struct stat s;
-//        int err = ::stat( class_filename.c_str(), &s );
+//        int err = ::stat( class_filepath.c_str(), &s );
 //        if( err )
 //        {
 //            do_compile = true;
@@ -146,10 +146,10 @@ bool Module::make_java_class( bool )
 /////*
 ////            source = _source.text();
 ////
-////            Mapped_file m ( java_filename, "r" );
+////            Mapped_file m ( java_filepath, "r" );
 ////            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
 ////            {
-////                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
+////                _log.warn( "Datei " + java_filepath + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
 ////                do_compile = true;
 ////            }
 ////*/
@@ -160,17 +160,35 @@ bool Module::make_java_class( bool )
 //    {
         if( source.empty() )  source = read_source_script();
 
-        make_path( directory_of_path( java_filename ) );
+        make_path( java_filepath.directory() );
 
-        File source_file ( java_filename, "wb" );
+
+        // Windows: Falls die Großschreibung des Klassennamens geändert worden ist, müssen die alten Dateinamen gelöscht werden (Jira JS-181)
+        bool ok = java_filepath.try_unlink();
+        if( !ok  &&  java_filepath.exists() )  z::throw_xc( "SCHEDULER-450", java_filepath ); 
+
+        ok = class_filepath.try_unlink();
+        if( !ok  &&  class_filepath.exists() )  z::throw_xc( "SCHEDULER-450", class_filepath ); 
+
+
+        File source_file ( java_filepath, "wb" );
         source_file.print( source );
         source_file.close();
 
         //struct utimbuf utimbuf;
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
-        //utime( java_filename.c_str(), &utimbuf );
+        //utime( java_filepath.c_str(), &utimbuf );
 
-        string cmd = '"' + _java_vm->javac_filename() + "\" -g -classpath " + _java_vm->class_path() + ' ' + java_filename;     // + " -verbose"
+//#       ifdef Z_WINDOWS
+//            const char cmd_escape = '"';    // ?
+//#       else
+//            const char cmd_escape = '\\';
+//#       endif
+
+        S cmd;
+        cmd << '"' << _java_vm->javac_filename() << "\" -g "
+                                                    "-classpath " << _java_vm->class_path() << ' ' 
+                                                 << java_filepath;     // + " -verbose"
         _log.info( message_string( "SCHEDULER-934", cmd ) );
         
         System_command c;
@@ -182,7 +200,7 @@ bool Module::make_java_class( bool )
 
         if( c.xc() )  throw *c.xc();
 
-        //utime( class_filename.c_str(), &utimbuf );
+        //utime( class_filepath.c_str(), &utimbuf );
     //}
 
     //return do_compile;

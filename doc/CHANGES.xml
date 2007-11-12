@@ -11,6 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change jira="JS-181" date="2007-11-12" version="2.0.190" subversion_revision="5382">
+        <revision type="correction" title="Änderung der Großschreibung einer im Quellcode angegebenen Java-Klasse">
+            <description>
+                <p>
+                    Unter Windows führte die Änderung der Großschreibung des Namens einer Java-Klasse zu einem Fehler, 
+                    wenn deren Quell-Code direkt in <scheduler_element name="script" attribute="language" value="java"/> angegeben war.
+                    Der Scheduler löscht jetzt die generierte <code>.java</code>-Datei, um Windows zu der geänderten Großschreibungsweise zu zwingen.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-11-06" version="2.0.190" subversion_revision="5379">
         <revision type="modification" title="Veraltetes &lt;script process_class=&quot;...&quot;> wird nicht mehr unterstützt">
             <description>
