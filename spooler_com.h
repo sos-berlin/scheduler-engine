@@ -664,6 +664,7 @@ struct Com_spooler_proxy : object_server::proxy_with_local_methods< Com_spooler_
                                 Com_spooler_proxy           ();
 
 
+    STDMETHODIMP            get_Ini_path                    ( BSTR* );
     STDMETHODIMP                Create_xslt_stylesheet      ( spooler_com::Ixslt_stylesheet** );
 };
 

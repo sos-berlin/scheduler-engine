@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="localhost:4444" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="localhost:5555" max_processes="50"/>
         </process_classes>
 
         <script language="JavaScript">
@@ -52,6 +52,8 @@ function spooler_process()
 {               
     var hostware = new ActiveXObject( "hostware.global" );
     spooler_log.info( "DORT" );
+
+    spooler_log.info( "spooler.ini_path=" + spooler.ini_path );
 
     hostware.open( "-out *stdout" ).put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT " );
     hostware.open( "-out *stderr" ).put_line( "STDERR STDERR STDERR STDERR STDERR STDERR " );

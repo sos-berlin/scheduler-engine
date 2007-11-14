@@ -81,7 +81,7 @@ const Com_method Com_remote_module_instance_server::_methods[] =
 #endif
 //-----------------------------------------------Com_remote_module_instance_server::create_instance
 
-HRESULT Com_remote_module_instance_server::Create_instance( zschimmer::com::object_server::Session*, ptr<Object>* class_object_ptr, const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_remote_module_instance_server::Create_instance( zschimmer::com::object_server::Session* session, ptr<Object>* class_object_ptr, const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == IID_Iremote_module_instance_server )
     {
@@ -242,10 +242,9 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         }
 
 
-        int    task_id         = 0;
-
-        Locked_safearray<Variant> params ( safearray );
-        ptr<Module_monitor>              monitor;
+        int                       task_id = 0;
+        Locked_safearray<Variant> params  ( safearray );
+        ptr<Module_monitor>       monitor;
 
         _server = Z_NEW( Remote_module_instance_server( include_path ) );
 

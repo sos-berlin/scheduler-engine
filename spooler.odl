@@ -724,6 +724,9 @@ library Spooler
     ]
     interface Ispooler_proxy : IDispatch
     {
+        //[id(29),propget]
+        //HRESULT                 Ini_path                ( [out,retval] BSTR* );
+
         [id(33)]
         HRESULT                 Create_xslt_stylesheet  ( [out,retval] Ixslt_stylesheet** );
     }

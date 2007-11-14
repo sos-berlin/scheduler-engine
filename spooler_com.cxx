@@ -3155,7 +3155,7 @@ xml::Element_ptr Com_task_proxy::task_process_element()
 {
     xml::Element_ptr result;
 
-    Object* o = session()->server()->get_class_object( spooler_com::CLSID_Remote_module_instance_server );
+    Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
         result = c->_task_process_element;
@@ -3996,6 +3996,7 @@ STDMETHODIMP Com_spooler::get_Supervisor_client( Isupervisor_client** result )
 const Com_method Com_spooler_proxy::_methods[] =
 { 
 #ifdef Z_COM
+  //COM_PROPERTY_GET( Com_spooler_proxy, 29, Ini_path              , VT_BSTR     , 0 ),
     COM_METHOD      ( Com_spooler_proxy, 33, Create_xslt_stylesheet, VT_DISPATCH , 0 ),
 #endif
     {}
@@ -4021,6 +4022,21 @@ Com_spooler_proxy::Com_spooler_proxy()
 : 
     Proxy_with_local_methods( &class_descriptor )
 {
+}
+
+//------------------------------------------------------------------Com_spooler_proxy::get_Ini_path
+    
+STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )                    
+{ 
+    HRESULT hr = E_FAIL;
+
+    Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
+    if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+    {
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "factory_ini" ), result ); 
+    }
+
+    return hr;
 }
 
 //----------------------------------------------------------------Com_task_proxy::Create_subprocess
