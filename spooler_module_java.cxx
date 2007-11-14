@@ -179,21 +179,31 @@ bool Module::make_java_class( bool )
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
         //utime( java_filepath.c_str(), &utimbuf );
 
-#       ifdef Z_WINDOWS
-            const char cmd_escape = '"';    // ?
-#       else
-            const char cmd_escape = '\\';
-#       endif
+//#       ifdef Z_WINDOWS
+//            const char cmd_escape = '"';    // ?
+//#       else
+//            const char cmd_escape = '\\';
+//#       endif
 
+
+        //const char* e = getenv( "CLASSPATH" );
+        //string old_classpath = e? e : "";
+
+        set_environment_variable( "CLASSPATH", _java_vm->class_path() );  // Auf Wunsch von Püschel, Jira JS-180
+
+        
         S cmd;
         cmd << '"' << _java_vm->javac_filename() << "\" -g "
-                                                    "-classpath " << quoted_string( _java_vm->class_path(), '"', cmd_escape ) << ' ' 
-                                                 << quoted_string( java_filepath, '"', cmd_escape );     // + " -verbose"
+                                                  //"-classpath " << quoted_string( _java_vm->class_path(), '"', cmd_escape ) << ' ' 
+                                                 //<< quoted_string( java_filepath, '"', cmd_escape );     // + " -verbose"
+                                                 << java_filepath;     // + " -verbose"
         _log.info( message_string( "SCHEDULER-934", cmd ) );
         
         System_command c;
         c.set_throw( false );
         c.execute( cmd );
+
+        //Löscht nicht. set_environment_variable( "CLASSPATH", old_classpath );
 
         if( c.stderr_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stderr_text() ),  _log.info( "" );
         if( c.stdout_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stdout_text() ),  _log.info( "" );
