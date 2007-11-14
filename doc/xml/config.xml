@@ -99,7 +99,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="config_configuration_delete_event" type="job_path" title="Job für gelöschte Konfigurationsdatei">
+        <xml_attribute name="configuration_delete_event" type="job_path" title="Job für gelöschte Konfigurationsdatei">
             <description>
                 <p>
                     Der angegebene Job wird gestartet,

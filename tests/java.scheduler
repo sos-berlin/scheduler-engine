@@ -51,7 +51,7 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
-        spooler_log.info( "HALLO" );
+        spooler_log.info( "HALLO 2" );
         return false;
     }
 }
@@ -60,27 +60,6 @@ public class My_job  extends sos.spooler.Job_impl
 
                 <!--run_time once="yes" start_time_function="my_start_time_function"/-->
                 <run_time once="yes"/>
-            </job>
-
-
-
-            <job name="liebert">
-                <script language="java" java_class="sos.test.JavaCompileTest">
-                    <![CDATA[
-package sos.test;
-import sos.spooler.Job_impl;
-public class JavaCompileTest extends Job_impl {
-
-    public boolean spooler_process() {    	
-      spooler_log.info("Hello World!");          
-      return false;
-    }
-
-}]]>
-                </script>
-
-                <run_time once="yes"/>
-
             </job>
 
         </jobs>

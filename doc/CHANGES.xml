@@ -11,8 +11,38 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change jira="JS-181" date="2007-11-12" version="2.0.190" subversion_revision="5382">
-        <revision type="correction" title="Änderung der Großschreibung einer im Quellcode angegebenen Java-Klasse">
+    <change date="2007-11-15" version="2.0.190" subversion_revision="5383">
+        <revision type="modification" title="Löschen der Jobkette, auf die eine übergeordnete verweist, liefert keine Warnung mehr">
+            <description>
+                <p>
+                    Wenn eine Jobkette gelöscht wird, auf die einer übergeordneten Jobkette verweist,
+                    wird diese unbrauchbar, weshalb die Warnung
+                    <code>SCHEDULER-424  'Job_chain xxx' is being removed before 'yyy'</code> ausgegeben wurde.
+                    Die Meldung wird jetzt als Info ausgegeben.
+                </p>
+            </description>
+        </revision>
+        
+        <revision jira="JS-146" type="new" title="Jobstarts bei neuen, geänderten und gelöschen Konfigurationsdateien">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_add_event"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_modify_event"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_delete_event"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2007-11-12" version="2.0.190" subversion_revision="5382">
+        <revision jira="JS-181" type="correction" title="Änderung der Großschreibung einer im Quellcode angegebenen Java-Klasse">
             <description>
                 <p>
                     Unter Windows führte die Änderung der Großschreibung des Namens einer Java-Klasse zu einem Fehler, 
@@ -120,22 +150,6 @@
     </change>
     
     <change date="2007-10-22" version="2.0.189" subversion_revision="5354">
-        <revision jira="JS-146" type="new" title="Jobstarts bei neuen, geänderten und gelöschen Konfigurationsdateien">
-            <description>
-                <ul>
-                    <li>
-                        <scheduler_element name="config" attribute="configuration_add_event"/>
-                    </li>
-                    <li>
-                        <scheduler_element name="config" attribute="configuration_modify_event"/>
-                    </li>
-                    <li>
-                        <scheduler_element name="config" attribute="config_configuration_delete_event"/>
-                    </li>
-                </ul>
-            </description>
-        </revision>
-
         <revision jira="JS-147" type="new" title="Umgebungsvariablen für Tasks einstellbar">
             <description>
                 <ul>

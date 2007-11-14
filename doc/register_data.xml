@@ -386,10 +386,6 @@
     <register_keyword_display><code>config=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_config' register_title='file factory.ini, section [spooler]'  register_keyword='config' type='definition'/>
 </register_keyword>
-<register_keyword keyword='config_configuration_delete_event'>
-    <register_keyword_display><code>config_configuration_delete_event=</code></register_keyword_display>
-    <register_entry register_file='xml/config.xml#attribute_config_configuration_delete_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config_configuration_delete_event' type='definition'/>
-</register_keyword>
 <register_keyword keyword='config_file'>
     <register_keyword_display><code>config_file=</code></register_keyword_display>
     <register_entry register_file='xml/answer/state.xml#attribute_config_file' register_title='&lt;state&gt; (Antwort)'  register_keyword='config_file' type='definition'/>
@@ -397,6 +393,10 @@
 <register_keyword keyword='configuration_add_event'>
     <register_keyword_display><code>configuration_add_event=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_add_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_add_event' type='definition'/>
+</register_keyword>
+<register_keyword keyword='configuration_delete_event'>
+    <register_keyword_display><code>configuration_delete_event=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_configuration_delete_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_delete_event' type='definition'/>
 </register_keyword>
 <register_keyword keyword='configuration_directory'>
     <register_keyword_display><code>configuration_directory=</code></register_keyword_display>

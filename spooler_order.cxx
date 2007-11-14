@@ -1419,7 +1419,11 @@ bool Nested_job_chain_node::initialize()
 
 void Nested_job_chain_node::on_releasing_referenced_object( const reference< Nested_job_chain_node, Job_chain >& ref )
 {
-    if( _job_chain )  _job_chain->log()->warn( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );
+    if( _job_chain )
+    {
+        // Soll keine Warnung sein, s. eMail von Püschel 2007-11-13 15:33
+        _job_chain->log()->info( message_string( "SCHEDULER-424", ref->obj_name(), obj_name() ) );  
+    }
 }
 
 //---------------------------------------------------------------Nested_job_chain_node::dom_element

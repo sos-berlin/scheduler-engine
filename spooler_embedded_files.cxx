@@ -90,9 +90,9 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"supervisor\"            type=\"String\"/>\n"
     "<xsd:attribute name=\"configuration_directory\" type=\"File\"/>\n"
     "\n"
-    "<xsd:attribute name=\"configuration_add_event\"           type=\"Path\"/>\n"
-    "<xsd:attribute name=\"configuration_modify_event\"        type=\"Path\"/>\n"
-    "<xsd:attribute name=\"config_configuration_delete_event\" type=\"Path\"/>\n"
+    "<xsd:attribute name=\"configuration_add_event\"    type=\"Path\"/>\n"
+    "<xsd:attribute name=\"configuration_modify_event\" type=\"Path\"/>\n"
+    "<xsd:attribute name=\"configuration_delete_event\" type=\"Path\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1817,7 +1817,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1194353093 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1195031499 },
     { NULL, NULL, 0 }
 };
 
