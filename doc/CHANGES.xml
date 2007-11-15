@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-11-15" version="2.0.190" subversion_revision="5383">
+    <change date="2007-11-15" version="2.0.191" subversion_revision="5386">
         <revision type="modification" title="Löschen der Jobkette, auf die eine übergeordnete verweist, liefert keine Warnung mehr">
             <description>
                 <p>
@@ -22,7 +22,15 @@
                 </p>
             </description>
         </revision>
-        
+
+        <revision jira="JS-180" type="correction" title="Java-Quellcode kann jetzt mit Blank im Classpath übersetzt werden">
+            <description>
+                <p>
+                    Der Scheduler setzt dazu die Umgebungsvariable <code>CLASSPATH</code>.
+                </p>
+            </description>
+        </revision>
+
         <revision jira="JS-146" type="new" title="Jobstarts bei neuen, geänderten und gelöschen Konfigurationsdateien">
             <description>
                 <ul>
