@@ -15,8 +15,8 @@
         <revision type="modification" title="Löschen der Jobkette, auf die eine übergeordnete verweist, liefert keine Warnung mehr">
             <description>
                 <p>
-                    Wenn eine Jobkette gelöscht wird, auf die einer übergeordneten Jobkette verweist,
-                    wird diese unbrauchbar, weshalb die Warnung
+                    Wenn eine Jobkette gelöscht wird, auf die eine übergeordnete Jobkette verweist,
+                    wird letztere unbrauchbar, weshalb die Warnung
                     <code>SCHEDULER-424  'Job_chain xxx' is being removed before 'yyy'</code> ausgegeben wurde.
                     Die Meldung wird jetzt als Info ausgegeben.
                 </p>
