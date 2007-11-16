@@ -3996,7 +3996,10 @@ STDMETHODIMP Com_spooler::get_Supervisor_client( Isupervisor_client** result )
 const Com_method Com_spooler_proxy::_methods[] =
 { 
 #ifdef Z_COM
-  //COM_PROPERTY_GET( Com_spooler_proxy, 29, Ini_path              , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_spooler_proxy,  7, Include_path          , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_spooler_proxy,  8, Log_dirpath           , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_spooler_proxy, 19, Directory             , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_spooler_proxy, 29, Ini_path              , VT_BSTR     , 0 ),
     COM_METHOD      ( Com_spooler_proxy, 33, Create_xslt_stylesheet, VT_DISPATCH , 0 ),
 #endif
     {}
@@ -4024,6 +4027,51 @@ Com_spooler_proxy::Com_spooler_proxy()
 {
 }
 
+//--------------------------------------------------------------Com_spooler_proxy::get_Include_path
+    
+STDMETHODIMP Com_spooler_proxy::get_Include_path( BSTR* result )                    
+{ 
+    HRESULT hr = E_FAIL;
+
+    Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
+    if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+    {
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.include_path" ), result ); 
+    }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_spooler_proxy::get_Log_dir
+
+STDMETHODIMP Com_spooler_proxy::get_Log_dir( BSTR* result )                    
+{ 
+    HRESULT hr = E_FAIL;
+
+    Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
+    if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+    {
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.log_directory" ), result ); 
+    }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_spooler_proxy::get_Directory
+
+STDMETHODIMP Com_spooler_proxy::get_Directory( BSTR* result )                    
+{ 
+    HRESULT hr = E_FAIL;
+
+    Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
+    if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+    {
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.directory" ), result ); 
+    }
+
+    return hr;
+}
+
 //------------------------------------------------------------------Com_spooler_proxy::get_Ini_path
     
 STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )                    
@@ -4033,7 +4081,7 @@ STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "factory_ini" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.factory_ini" ), result ); 
     }
 
     return hr;

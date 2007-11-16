@@ -74,7 +74,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
     State                      _state;
 };
 
-//----------------------------emote_task_close_command_response::Remote_task_close_command_response
+//---------------------------Remote_task_close_command_response::Remote_task_close_command_response
 
 Remote_task_close_command_response::Remote_task_close_command_response( Process* p, Communication::Connection* c )
 : 

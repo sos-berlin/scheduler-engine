@@ -422,9 +422,12 @@ void Process::start_local()
             xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
             xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
             xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
-            xml_writer.set_attribute_optional( "factory_ini"    , _spooler->_factory_ini );
             xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
             xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
+            xml_writer.set_attribute_optional( "scheduler.directory"    , _spooler->directory() );
+            xml_writer.set_attribute_optional( "scheduler.log_directory", _spooler->_log_directory );
+            xml_writer.set_attribute_optional( "scheduler.include_path" , _spooler->_include_path );
+            xml_writer.set_attribute_optional( "scheduler.factory_ini"  , _spooler->_factory_ini );
 
             if( _environment )  
             {

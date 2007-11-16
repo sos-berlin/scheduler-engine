@@ -2638,7 +2638,7 @@ bool Job_chain::can_be_removed_now()
 {
     return is_to_be_removed()  && 
            !is_referenced()  &&
-           !has_order();
+           !has_order_in_task();
 }
 
 //--------------------------------------------------------------------------Job_chain::remove_error
@@ -5861,11 +5861,11 @@ void Order::postprocessing( bool success )
 {
     _is_success_state = success;
 
-    Job*      last_job = _task? _task->job() : NULL;
+    Job*      last_job          = _task? _task->job() : NULL;
     Job_node* job_node          = Job_node::cast( _job_chain_node );
     bool      force_error_state = false;
 
-    if( !success  &&  job_node->is_on_error_setback() )  setback();
+    if( !success  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
 
     if( !_setback_called )  _setback_count = 0;
 

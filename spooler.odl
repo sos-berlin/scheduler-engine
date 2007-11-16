@@ -724,8 +724,17 @@ library Spooler
     ]
     interface Ispooler_proxy : IDispatch
     {
-        //[id(29),propget]
-        //HRESULT                 Ini_path                ( [out,retval] BSTR* );
+        [id(7),propget]
+        HRESULT                 Include_path            ( [out,retval] BSTR* include_path );
+
+        [id(8),propget]
+        HRESULT                 Log_dir                 ( [out,retval] BSTR* Directory );
+
+        [id(19),propget]
+        HRESULT                 Directory               ( [out,retval] BSTR* work_directory_name );
+
+        [id(29),propget]
+        HRESULT                 Ini_path                ( [out,retval] BSTR* );
 
         [id(33)]
         HRESULT                 Create_xslt_stylesheet  ( [out,retval] Ixslt_stylesheet** );
