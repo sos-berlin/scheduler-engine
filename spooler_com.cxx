@@ -4051,7 +4051,7 @@ STDMETHODIMP Com_spooler_proxy::get_Log_dir( BSTR* result )
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.log_directory" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.log_dir" ), result ); 
     }
 
     return hr;
@@ -4081,7 +4081,7 @@ STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.factory_ini" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.ini_path" ), result ); 
     }
 
     return hr;

@@ -512,7 +512,11 @@ void Database::open( const string& db_name )
         try_reopen_after_error( x, Z_FUNCTION, true );
     }
 
-    if( opened() )  create_tables_when_needed();
+    if( opened() ) 
+    {
+        create_tables_when_needed();
+        check_database();
+    }
 }
 
 //----------------------------------------------------------------------------------Database::open2
@@ -613,6 +617,45 @@ void Database::open2( const string& db_name )
 //    else
 //        _log->info( message_string( "SCHEDULER-882", _db.dbms_name() ) );
 //}
+
+//-------------------------------------------------------------------------Database::check_database
+
+void Database::check_database()
+{
+    try
+    {
+        string temporary_name = "SCHEDULER.TEST.CHECK_DATABASE." + Time().as_string( Time::with_ms ) + "." + as_string( rand() );
+        string check_value;
+        
+        check_value.reserve( 300 );
+        check_value = "\t\r\n";                                  
+        for( int c = ' ' ; c <= 0x7E; c++ )  check_value += (char)c;     // Alle ASCII-Zeichen
+        for( int c = 0xA0; c <= 0xFF; c++ )  check_value += (char)c;     // Alle Latin1-Zeichen
+        check_value += '\\';    // Letztes Zeichen, um einen Syntaxfehler hervorzurufen, wenn die Datenbank \ im String interpretiert
+
+        {
+            Transaction ta ( this );
+
+            ta.set_variable( temporary_name, check_value );
+            string read_value = ta.get_variable_text( temporary_name );
+            if( read_value != check_value )  z::throw_xc( "SCHEDULER-452", check_value, read_value );
+
+            ta.rollback( __FUNCTION__ );
+        }
+
+        {
+            Transaction ta ( this );
+
+            bool record_exists = false;
+            ta.get_variable_text( temporary_name, &record_exists );
+            if( record_exists )  z::throw_xc( "SCHEDULER-453" );
+        }
+    }
+    catch( exception& x )
+    {
+        z::throw_xc( "SCHEDULER-451", x );
+    }
+}
 
 //--------------------------------------------------------------Database::create_tables_when_needed
 
@@ -1859,7 +1902,7 @@ void Job_history::open( Transaction* outer_transaction )
 {
     string section = _job->profile_section();
 
-    _job_name = _job->name();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
+    _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
     _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
     _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
@@ -1915,7 +1958,7 @@ void Job_history::open( Transaction* outer_transaction )
             {
                 _filename = "history";
                 if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
-                _filename += ".job." + _job_name + ".txt";
+                _filename += ".job." + _job_path.to_filename() + ".txt";
             }
             _filename = make_absolute_filename( _spooler->log_directory(), _filename );
             if( _filename[0] == '*' )  return;      // log_dir = *stderr
@@ -2005,7 +2048,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
         {
             try
             {
-                if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_name );
+                if( !_history_yes )  z::throw_xc( "SCHEDULER-141", _job_path );
 
                 if( _use_db  &&  !_spooler->_db->opened() )  z::throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
@@ -2021,32 +2064,35 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     else
                     if( _use_db )
                     {
-                    //string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
-                        string prefix = "-in -seq head -" + as_string(max(1,abs(next))) + " | ";
-                        string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
+                        S prefix;
+                        S clause;
 
-                        clause += " and \"SPOOLER_ID\"=" + sql_quoted( _spooler->id_for_db() );
-                        clause += " and `cluster_member_id` " + sql::null_string_equation( _spooler->cluster_member_id() );
+                        prefix << "-in -seq head -" << max( 1, abs(next) ) << " | ";
+
+                        clause << " where `job_name`="        << sql_quoted( _job_path.without_slash() );
+                        clause << " and `spooler_id`="        << sql_quoted( _spooler->id_for_db() );
+                        clause << " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() );
                         
                         if( id != -1 )
                         {
-                            clause += " and \"ID\"";
-                            clause += next < 0? "<" : 
-                                    next > 0? ">" 
-                                            : "=";
-                            clause += as_string(id);
+                            clause << " and `id`";
+                            clause << ( next < 0? "<" : 
+                                        next > 0? ">" 
+                                                : "=" );
+                            clause << id;
                         }
 
-                        clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
+                        clause << " order by `id` ";  
+                        if( next < 0 )  clause << " desc";
                         
                         if( _spooler->_db->_db_name == "" )  z::throw_xc( "SCHEDULER-361", Z_FUNCTION );
 
                         sel = ta.open_file( prefix + _spooler->_db->_db_name, 
-                                "select " + 
-                                ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
-                                " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                                join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) +
-                                " from " + _spooler->_job_history_tablename + 
+                                S() << "select " <<
+                                ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
+                                " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text` " <<
+                                join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
+                                " from " << _spooler->_job_history_tablename <<
                                 clause );
                     }
                     else

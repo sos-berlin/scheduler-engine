@@ -276,6 +276,14 @@
     <title>
         Das Arbeitsverzeichnis beim Start des Schedulers
     </title>
+
+    <description>
+        <p>
+            Eine auf einem entfernten Scheduler ausgeführte Task 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -356,6 +364,14 @@
     <title>
         Liefert die Kommandozeilenoption <code>-include-path=</code>.
     </title>
+
+    <description>
+        <p>
+            Eine auf einem entfernten Scheduler ausgeführte Task
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
@@ -372,6 +388,11 @@
     </title>
 
     <description>
+        <p>
+            Eine auf einem entfernten Scheduler ausgeführte Task
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.
+        </p>
         <p>
             Siehe <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>
         </p>
@@ -489,6 +510,14 @@
             <com.type type="BSTR"/>
         </com.result>
     </com>
+    
+    <description>
+        <p>
+            Eine auf einem entfernten Scheduler ausgeführte Task
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.
+        </p>
+    </description>
 </property>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

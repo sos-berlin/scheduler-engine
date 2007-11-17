@@ -82,7 +82,7 @@ echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zs
 #! /bin/bash -v
 echo Hallo
 echo Zweite Zeile
-sleep 10&amp;
+sleep 10
 exit 37
                 </script>
                 <run_time once="yes"/>

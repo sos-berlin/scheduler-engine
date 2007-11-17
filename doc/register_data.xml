@@ -2676,6 +2676,7 @@
     <register_entry register_file='CHANGES.xml#use_element__process_class' register_title='Änderungsprotokoll'  register_keyword='process_class'/>
     <register_entry register_file='api/Log.xml#use_element__process_class' register_title='Log'  register_keyword='process_class'/>
     <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='Process_class'  register_keyword='process_class'/>
+    <register_entry register_file='api/Spooler.xml#use_element__process_class' register_title='Spooler'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
     <register_entry register_file='dynamic_configuration.xml#use_element__process_class' register_title='Konfiguration aus Hot Folders'  register_keyword='process_class'/>

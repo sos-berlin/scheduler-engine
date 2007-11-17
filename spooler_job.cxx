@@ -1087,7 +1087,7 @@ zschimmer::Xc Job::remove_error()
 
 string Job::profile_section() 
 {
-    return "Job " + name();
+    return "Job " + path().without_slash();
 }
 
 //---------------------------------------------------------------------------Job::set_error_xc_only

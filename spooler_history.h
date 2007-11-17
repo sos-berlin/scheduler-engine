@@ -88,6 +88,7 @@ struct Database : Object, Scheduler_object //Subsystem
     Database_lock_syntax        lock_syntax             ();
     void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
   //void                        run_create_table_script ();
+    void                        check_database          ();
     void                        create_tables_when_needed();
     bool                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
     time_t                      reopen_time             () const                                    { return _reopen_time; }
@@ -313,7 +314,7 @@ struct Job_history
     Spooler*                   _spooler;
     Job*                       _job;
     Task*                      _last_task;              // Wem gehört der zuletzt geschriebene Satz?
-    string                     _job_name;
+    Absolute_path              _job_path;
     bool                       _history_yes;
     int                        _on_process;             // Beim soundsovieltem _on_process Historiensazt schreiben
     With_log_switch            _with_log;

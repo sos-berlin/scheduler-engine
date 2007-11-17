@@ -2757,6 +2757,30 @@
                 <title>Java file '<p1/>' could not be deleted</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-451">
+            <text xml:lang="en">
+                <title>Database check failed, database is not useable. <p1>error</p1></title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-452">
+            <text xml:lang="en">
+                <title>Database does not correctly store test values:<br/><p1/> (written value)<br/><p2/> (read value)</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-453">
+            <text xml:lang="en">
+                <title>Database does not respect rollback command</title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-454">
+            <text xml:lang="en">
+                <title>Database has possibly a problem with \ (backslash): <p1>error</p1></title>
+            </text>
+        </message-->
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

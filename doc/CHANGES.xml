@@ -11,6 +11,73 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-11-17" version="2.0.192" subversion_revision="5390">
+        <revision type="new" title="PostgresQL wird besser unterstützt, Scheduler prüft Datenbank">
+            <description>
+                <p>
+                    Beim Start führt der Scheduler einfache Tests des Datenbankmoduls durch:
+                </p>
+                <ul>
+                    <li>
+                        ob '<code>\</code>' (Backslash) korrekt behandelt wird,
+                    </li>
+                    <li>
+                        ob der Latin1-Zeichenvorrat und die ASCII-Codes TB (0x08), CR (0x0D) und NL (0x0A)
+                        geschrieben und gelesen werden können, und
+                    </li>
+                    <li>
+                        ob die SQL-Anweisung <code>rollback</code> auf die Tabelle <code>SCHEDULER_VARIABLES</code> wirkt.
+                    </li>
+                </ul>
+                <p>
+                    Bei einem Fehlschlag startet der Scheduler nicht.
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-451"/>
+                <scheduler_message level="error" code="SCHEDULER-452"/>
+                <scheduler_message level="error" code="SCHEDULER-453"/>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Entfernte Task-Ausführung: Spooler.directory, .log_dir, .ini_path und .include_path liefert Werte des entfernten Schedulers">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" property="directory"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Spooler" property="log_dir"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Spooler" property="ini_path"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Spooler" property="include_path"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-195" type="correction" title="Job-Historie für Jobs in Ordnern korrigiert">
+            <description>
+                <p>
+                    <scheduler_element name="show_job" attribute="what" value="task_history"/>
+                    berücksichtigt jetzt den ganzen Pfad des Jobs.
+                </p>
+            </description>
+        </revision>
+
+        <revision jira="JS-196" type="correction" title="Einträge in der factory.ini auch für Jobs in Ordnern möglich">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="job"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-11-15" version="2.0.191" subversion_revision="5386">
         <revision type="modification" title="Löschen der Jobkette, auf die eine übergeordnete verweist, liefert keine Warnung mehr">
             <description>

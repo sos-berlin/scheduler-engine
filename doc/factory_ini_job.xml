@@ -5,7 +5,7 @@
 
 <ini_section
     name     = "job"
-    variable_suffix = "jobname"
+    variable_suffix = "job_path"
     file     = "factory.ini"
     weight   = "30"
     title    = ""
@@ -40,6 +40,10 @@
         <p>
             Für jeden Job kann ein Abschnitt in der <code>factory.ini</code> eingerichtet werden.
             Die Einträge hier haben Vorrang vor den gleichnamigen Einträgen im Abschnitt <code>[spooler]</code>.
+        </p>
+        <p>
+            Der Pfad des Jobs muss ohne beginnenden Schrägstrich geschrieben werden,
+            z.B. <code>[job my_job]</code> oder <code>[job my_folder/my_job]</code>.
         </p>
     </description>
 </ini_section>
