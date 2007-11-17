@@ -68,6 +68,7 @@ struct Order_id_space : Object, Scheduler_object
 
     void                        add_job_chain               ( Job_chain*, bool check_ids = true );
     void                        remove_job_chain            ( Job_chain* );
+    bool                        job_chain_is_included       ( Job_chain* job_chain ) const          { return _job_chain_set.find( job_chain->normalized_path() ) != _job_chain_set.end(); }
 
 
     Fill_zero                  _zero_;
@@ -1322,7 +1323,7 @@ xml::Element_ptr Job_node::dom_element( const xml::Document_ptr& document, const
 
 string Job_node::normalized_job_path() const
 {
-    return spooler()->job_subsystem()->normalized_name( _job_path );
+    return spooler()->job_subsystem()->normalized_path( _job_path );
 }
 
 //------------------------------------------------------------------------------------Job_node::job
@@ -2954,7 +2955,9 @@ void Order_id_space::connect_job_chain( Job_chain* job_chain )
         Z_FOR_EACH( String_set, order_id_space->_job_chain_set, it )
         {
             Job_chain* jc = spooler()->order_subsystem()->job_chain( Absolute_path( *it ) );
+            
             add_job_chain( jc );
+
             // jc->set_job_chain_node( this )   wird von Order_id_space::complete_and_add() ausgeführt.
             // Dieser Aufruf soll noch nicht die Jobketten ändern, weil eine Exception (doppelte Auftragskennung) auftreten kann.
         }
@@ -3005,14 +3008,15 @@ void Order_id_space::complete_and_add( Job_chain* causing_job_chain )
 
 void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_ids )
 {
-    assert( _job_chain_set.find( job_chain->normalized_path() ) == _job_chain_set.end() );  //if( _job_chain_set.find( job_chain->normalized_path() ) == _job_chain_set.end() )
-
-    if( check_ids )
+    if( !job_chain_is_included( job_chain ) )
     {
-        check_for_unique_order_ids_of( job_chain );
-    }
+        if( check_ids )
+        {
+            check_for_unique_order_ids_of( job_chain );
+        }
 
-    _job_chain_set.insert( job_chain->normalized_path() );
+        _job_chain_set.insert( job_chain->normalized_path() );
+    }
 }
 
 //----------------------------------------------------Order_id_space::check_for_unique_order_ids_of

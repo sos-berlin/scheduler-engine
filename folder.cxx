@@ -57,6 +57,13 @@ bool Path::is_absolute_path() const
     return length() >= 0  &&  (*this)[0] == folder_separator;
 }
 
+//------------------------------------------------------------------------------------Path::is_root
+
+bool Path::is_root() const
+{ 
+    return to_string() == root_path.to_string(); 
+}
+
 //-----------------------------------------------------------------------------------Path::set_name
 
 void Path::set_name( const string& name )
@@ -2059,7 +2066,10 @@ File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown
     
 string File_based_subsystem::normalized_path( const Path& path ) const
 {
-    return Path( spooler()->folder_subsystem()->normalized_name( path.folder_path() ), 
+    Path folder_path = path.folder_path();
+
+    return Path( folder_path.is_root()  ||  folder_path.empty()? folder_path
+                                                               : spooler()->folder_subsystem()->normalized_path( folder_path ), 
                  normalized_name( path.name() ) );
 }
 

@@ -9,10 +9,6 @@ namespace sos {
 namespace scheduler {
 namespace folder {
 
-//--------------------------------------------------------------------------------------------const
-
-const extern char               folder_separator;
-
 //-------------------------------------------------------------------------------------------------
 
 struct Absolute_path;
@@ -22,6 +18,11 @@ struct Typed_folder;
 struct File_based;
 struct File_based_subsystem;
 struct Subfolder_folder;
+
+//--------------------------------------------------------------------------------------------const
+
+const extern char               folder_separator;
+extern const Absolute_path      root_path;
 
 //---------------------------------------------------------------------------------------------Path
 
@@ -47,6 +48,7 @@ struct Path : string
     void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
     bool                     is_absolute_path               () const;
     string                      absolute_path               () const;
+    bool                     is_root                        () const;
     string                      to_filename                 () const;
 
   private:
@@ -83,11 +85,6 @@ struct Absolute_path : Path
     Absolute_path&              operator =                  ( const string& path );                 // Nicht implementiert
   //Absolute_path&              operator =                  ( const char* path );
 };
-
-//-------------------------------------------------------------------------------------------------
-
-
-extern const Absolute_path      root_path;
 
 //------------------------------------------------------------------------------------------Pendant
 
@@ -510,6 +507,8 @@ struct File_based_subsystem : Subsystem
     virtual void                replace_file_based          ( File_based*, File_based* )            = 0;
 
   private:
+    void                        normalized_name             ( const Path& ) const;                  // Nicht implementiert! normalized_path() sollte aufgerufen werden?
+
     Dependencies               _dependencies;
 };
 

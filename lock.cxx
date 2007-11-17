@@ -1000,7 +1000,7 @@ bool Use::on_dependant_loaded( File_based* file_based )
     Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
 
     assert( file_based->subsystem() == lock_subsystem );
-    assert( file_based->normalized_path() == lock_subsystem->normalized_name( _lock_path ) );
+    assert( file_based->normalized_path() == lock_subsystem->normalized_path( _lock_path ) );
 
     Lock* lock = dynamic_cast<Lock*>( file_based );
     assert( lock );
