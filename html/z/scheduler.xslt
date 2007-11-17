@@ -60,7 +60,7 @@
             </tr>
         </table>
 
-        <p id="error_message" class="small" style="margin-top: 0px; color: #e00000"> </p>
+        <p id="error_message" class="small" style="margin-top: 0px; color: #e00000">&#160;</p>
         <span style="color: black"> </span>    <!-- Für Firefox -->
 
         &#160;<br/>

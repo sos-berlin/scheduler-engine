@@ -53,7 +53,10 @@ function spooler_process()
     var hostware = new ActiveXObject( "hostware.global" );
     spooler_log.info( "DORT" );
 
-    spooler_log.info( "spooler.ini_path=" + spooler.ini_path );
+    spooler_log.info( "spooler.directory    = " + spooler.directory );
+    spooler_log.info( "spooler.log_dir      = " + spooler.log_dir );
+    spooler_log.info( "spooler.include_path = " + spooler.include_path );
+    spooler_log.info( "spooler.ini_path     = " + spooler.ini_path );
 
     hostware.open( "-out *stdout" ).put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT " );
     hostware.open( "-out *stderr" ).put_line( "STDERR STDERR STDERR STDERR STDERR STDERR " );
