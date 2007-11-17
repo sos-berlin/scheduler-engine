@@ -3997,7 +3997,7 @@ const Com_method Com_spooler_proxy::_methods[] =
 { 
 #ifdef Z_COM
     COM_PROPERTY_GET( Com_spooler_proxy,  7, Include_path          , VT_BSTR     , 0 ),
-    COM_PROPERTY_GET( Com_spooler_proxy,  8, Log_dirpath           , VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Com_spooler_proxy,  8, Log_dir               , VT_BSTR     , 0 ),
     COM_PROPERTY_GET( Com_spooler_proxy, 19, Directory             , VT_BSTR     , 0 ),
     COM_PROPERTY_GET( Com_spooler_proxy, 29, Ini_path              , VT_BSTR     , 0 ),
     COM_METHOD      ( Com_spooler_proxy, 33, Create_xslt_stylesheet, VT_DISPATCH , 0 ),
