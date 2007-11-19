@@ -427,7 +427,7 @@ void Process::start_local()
             xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
             xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
             xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
-            xml_writer.set_attribute_optional( "scheduler.init_path"   , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
+            xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
 
             if( _environment )  
             {
