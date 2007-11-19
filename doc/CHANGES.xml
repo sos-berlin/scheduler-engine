@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-11-18" version="2.0.192" subversion_revision="5393">
+    <change date="2007-11-18" version="2.0.192" subversion_revision="5394">
         <revision type="new" title="PostgresQL wird besser unterstützt, Scheduler prüft Datenbank">
             <description>
                 <p>

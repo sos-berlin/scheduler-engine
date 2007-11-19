@@ -43,7 +43,7 @@ function spooler_process()
             </job>
 
             
-            <job name="remote" process_class="remote" tasks="50">
+            <job name="remote" tasks="50">
                 <script language="JavaScript">
 
                     <![CDATA[
