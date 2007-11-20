@@ -892,16 +892,17 @@ function job_menu__onclick( job_name, x, y )
 
 //-------------------------------------------------------------------------------task_menu__onclick
 
-function task_menu__onclick( task_id, x, y )
+function task_menu__onclick( job_path, task_id, x, y )
 {
+alert(job_path);
     var popup_builder = new Popup_menu_builder();
 
     popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
     popup_builder.add_bar();
-    popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command ( "End"             , "<kill_task" + xml_attribute( "job", job_path ) + " id='" + task_id + "'/>" );
   //popup_builder.add_command ( "Suspend"         , "<modify_task id='" + task_id + "'/> cmd='suspend'" );
   //popup_builder.add_command ( "Continue"        , "<modify_task id='" + task_id + "'/> cmd='continue'" );
-    popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+    popup_builder.add_command ( "Kill immediately", "<kill_task" + xml_attribute( "job", job_path ) + " id='" + task_id + "' immediately='yes'/>" );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

@@ -414,7 +414,11 @@ void Process::start_local()
 
        
         io::String_writer string_writer;
-        xml::Xml_writer xml_writer ( &string_writer );
+        xml::Xml_writer   xml_writer   ( &string_writer );
+
+        xml_writer.set_encoding( scheduler_character_encoding );
+        xml_writer.write_prolog();
+
         xml_writer.begin_element( "task_process" );
         {
             xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );

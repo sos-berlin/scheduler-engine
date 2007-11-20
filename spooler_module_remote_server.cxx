@@ -26,10 +26,6 @@ using namespace spooler_com;
 
 DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_instance_server, CLSID_Remote_module_instance_server, "Spooler.Remote_module_instance_server", "1.0" )
 
-//-------------------------------------------------------------------------------------------------
-
-
-
 //-------------------------------------Remote_module_instance_server::Remote_module_instance_server
 
 Remote_module_instance_server::Remote_module_instance_server( const string& include_path )
@@ -106,7 +102,7 @@ void Com_remote_module_instance_server::Class_data::initialize()
     string stdin_text = File( STDIN_FILENO ).read_all();
     if( stdin_text != "" )
     {
-        //Z_LOG2( "joacim", Z_FUNCTION << " STDIN: " << stdin_text << "\n" );
+        Z_LOG2( "joacim", Z_FUNCTION << " STDIN: " << stdin_text << "\n" );
         
         _stdin_dom_document.load_xml( stdin_text );
 
@@ -216,7 +212,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 {
     HRESULT hr = NOERROR;
 
-    *result = VARIANT_FALSE;;
+    *result = VARIANT_FALSE;
 
     try
     {
@@ -235,7 +231,12 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 {
                     if( ee.nodeName_is( "variable" ) ) 
                     {
-                        set_environment_variable( ee.getAttribute( "name" ), ee.getAttribute( "value" ) );
+                        string name;
+                        string value;
+
+                        get_variable_name_and_value( ee, &name, &value );
+
+                        set_environment_variable( name, value );
                     }
                 }
             }
@@ -410,9 +411,8 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name_bstr, VARIANT* r
 
         string name = string_from_bstr( name_bstr );
 
-        if( !_server->_module_instance )  
+        if( !_server  ||  !_server->_module_instance )  
         {
-
             if( name == spooler_close_name
              || name == spooler_on_error_name
              || name == spooler_exit_name     ) 
@@ -472,7 +472,7 @@ STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VAR
 
     try
     {
-        if( _server->_module_instance )
+        if( _server &&  _server->_module_instance )
         {
             _server->_module_instance->end__start( succeeded != 0 ) -> async_finish();
             _server->_module_instance->end__end();

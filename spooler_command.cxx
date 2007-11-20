@@ -1900,6 +1900,9 @@ void Command_processor::append_error_to_answer( const Xc& x )
 
 void Command_response::begin_standard_response()
 {
+    _xml_writer.set_encoding( scheduler_character_encoding );
+    _xml_writer.write_prolog();
+
     write( "<spooler><answer time=\"" );
     write( Time::now().as_string() );
     write( "\">" );

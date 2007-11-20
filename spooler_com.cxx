@@ -203,6 +203,17 @@ const Com_method Com_variable::_methods[] =
 };
 
 #endif
+
+//----------------------------------------------------------------------get_variable_name_and_value
+
+void get_variable_name_and_value( const xml::Element_ptr& element, string* name, string* value )
+{
+    *name  = element.getAttribute( "name" );
+    *value = element.getAttribute( "value" );
+
+    if( *value == "" )  *value = string_from_hex( element.getAttribute( "hex_value" ) );    // Jedes Hexbyte ein Unicode-Zeichen 00..FF
+}                
+
 //-----------------------------------------------------------------------Com_variable::Com_variable
 
 Com_variable::Com_variable( const BSTR name, const VARIANT& value )
@@ -350,8 +361,10 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
         {
             if( e.nodeName_is( variable_element_name ) ) 
             {
-                Bstr    name  = e.getAttribute( "name" );
-                string  value = e.getAttribute( "value" );
+                string name;
+                string value;
+
+                get_variable_name_and_value( e, &name, &value );
                 
                 if( variable_sets )
                 {
@@ -361,10 +374,11 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
                         value = subst_env( value, +it->second );
                     }
                 }
-                
+
+                Bstr    name_bstr = name;
                 Variant value_vt = value;
 
-                hr = put_Var( name, &value_vt );                       
+                hr = put_Var( name_bstr, &value_vt );                       
                 if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
             else
@@ -644,7 +658,10 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
                 if( vt != (VARTYPE)-1 )  var.setAttribute( "vt", vt );
                                    else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
 
-                var.setAttribute( "value", v->string_value() );
+                string string_value = v->string_value();
+                
+                if( io::is_valid_latin1( string_value ) )  var.setAttribute( "value"    , string_value );
+                                                     else  var.setAttribute( "hex_value", lcase_hex_from_string( string_value ) );   // Jedes Hexbyte ein Unicode-Zeichen 00..FF
 
                 varset.appendChild( var );
             }
@@ -808,12 +825,18 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
         {
             if( e.nodeName_is( "variable" ) || e.nodeName_is( "param" ) )
             {
-                Bstr    name  = e.getAttribute( "name" );
-                Variant value = e.getAttribute( "value" );
-                VARTYPE vt    = e.int_getAttribute( "vt", VT_BSTR );
-                value.change_type( vt );
+                string name;
+                string value;
 
-                hr = put_Var( name, &value );
+                get_variable_name_and_value( e, &name, &value );
+
+                VARTYPE vt        = e.int_getAttribute( "vt", VT_BSTR );
+                Bstr    name_bstr = name;
+                Variant value_v   = value;
+
+                value_v.change_type( vt );
+
+                hr = put_Var( name_bstr, &value_v );
                 if( FAILED( hr ) )  break;
             }
             else

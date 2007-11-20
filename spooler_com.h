@@ -103,6 +103,10 @@ struct Com_error: spooler_com::Ierror,
     Xc_copy                    _xc;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+void                            get_variable_name_and_value ( const xml::Element_ptr&, string* name, string* value );
+
 //-------------------------------------------------------------------------------------Com_variable
 
 struct Com_variable: spooler_com::Ivariable, 

@@ -2998,9 +2998,10 @@
                                 <td valign="top" style="padding-right: 0pt; text-align: right;">
                                     <xsl:call-template name="command_menu">
                                         <xsl:with-param name="onclick_call"       select="'task_menu__onclick'"/>
-                                        <xsl:with-param name="onclick_param1_str" select="@id"/>
-                                        <xsl:with-param name="onclick_param2"     select="'mouse_x() - 70'"/>
-                                        <xsl:with-param name="onclick_param3"     select="'mouse_y() - 1'"/>
+                                        <xsl:with-param name="onclick_param1_str" select="@job"/>
+                                        <xsl:with-param name="onclick_param2_str" select="@id"/>
+                                        <xsl:with-param name="onclick_param3"     select="'mouse_x() - 70'"/>
+                                        <xsl:with-param name="onclick_param4"     select="'mouse_y() - 1'"/>
                                     </xsl:call-template>
                                 </td>
                             </xsl:if>

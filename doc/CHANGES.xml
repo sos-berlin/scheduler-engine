@@ -38,7 +38,7 @@
             </description>
         </revision>
 
-        <revision type="modification" title="Entfernte Task-Ausführung: Spooler.directory, .log_dir, .ini_path und .include_path liefert Werte des entfernten Schedulers">
+        <revision type="modification" title="Entfernte Task-Ausführung: Spooler.directory, .log_dir, .ini_path und .include_path liefern Werte des entfernten Schedulers">
             <description>
                 <ul>
                     <li>
