@@ -8,7 +8,7 @@
 
         <jobs>
             <job name="generator">
-                <script>
+                <script language="javascript">
                     <![CDATA[
 
 var hostware = new ActiveXObject( "hostware.Global" );
@@ -28,8 +28,8 @@ function spooler_process()
             </job>
 
             <job name="javascript">
-                <script><![CDATA[
-                
+                <script language="javascript"><![CDATA[
+
 //
 
                 ]]></script>
