@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="generator">
+                <script>
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.Global" );
+var nr = 1
+
+
+function spooler_process()
+{
+    hostware.open( "-out /tmp/x/" + nr + ".txt" );    
+    return nr++ < 2;
+}
+
+                ]]>
+                </script>
+
+                <start_when_directory_changed directory="/tmp/x" regex="^[^.]+$"/>
+            </job>
+
+            <job name="javascript">
+                <script><![CDATA[
+                
+//
+
+                ]]></script>
+
+                <start_when_directory_changed directory="/tmp/x" regex="^[^.]+$"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>
