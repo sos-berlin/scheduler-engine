@@ -60,6 +60,7 @@
 
 
     <messages>
+        <message level="error" code="SCHEDULER-412"/>
         <message level="error" code="SCHEDULER-415"/>
         <message level="error" code="SCHEDULER-426"/>
         <message level="info"  code="SCHEDULER-862"/>
@@ -80,7 +81,10 @@
         <p>
             Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu, der eine verschachtelte Jobkette bezeichnet.
         </p>
-        <p>
+        <p> 
+            Jobketten, die verschachtelte Jobketten enthalten, können selbst nicht in anderen Jobketten als verschachtelte
+            Jobketten verwendet werden.
+        </p>
             Miteinander durch Verschachtelung verbundene Jobkettenn bilden einen gemeinsamen <i>Order_id_space</i>,
             um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.
         </p>
