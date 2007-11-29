@@ -1744,7 +1744,7 @@ void Spooler::start()
     }
 
 
-    // Datenbank
+    // Datenbank (startet Java, wenn JDBC verwendet wird)
 
     if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {

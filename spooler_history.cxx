@@ -624,13 +624,13 @@ void Database::check_database()
 {
     try
     {
-        string temporary_name = "SCHEDULER.TEST.CHECK_DATABASE." + Time().as_string( Time::with_ms ) + "." + as_string( rand() );
+        string temporary_name = "SCHEDULER.TEST.CHECK_DATABASE." + Time::now().as_string( Time::with_ms ) + "." + as_string( rand() );
         string check_value;
         
         check_value.reserve( 300 );
         check_value = "\t\r\n";                                  
         for( int c = ' ' ; c <= 0x7E; c++ )  check_value += (char)c;     // Alle ASCII-Zeichen
-        for( int c = 0xA0; c <= 0xFF; c++ )  check_value += (char)c;     // Alle Latin1-Zeichen
+        //2007-11-26 Andreas Püschel will das nicht:  for( int c = 0xA0; c <= 0xFF; c++ )  check_value += (char)c;     // Alle Latin1-Zeichen
         check_value += '\\';    // Letztes Zeichen, um einen Syntaxfehler hervorzurufen, wenn die Datenbank \ im String interpretiert
 
         {

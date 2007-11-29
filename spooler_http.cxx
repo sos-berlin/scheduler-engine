@@ -1150,6 +1150,8 @@ void Response::finish()
 
     // _headers_stream schreiben
 
+    //TODO: _operation->request()->_protocol == ""  ==> Simple request, simple respone, HTTP-Header nicht senden! (laut RFC 1945)
+
     _headers_stream << _operation->request()->_protocol << ' ' << _status_code << ' ' << http_status_messages[ _status_code ] << "\r\n";
     _headers.print( &_headers_stream );
 

@@ -11,6 +11,30 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-11-27" version="2.0.192" subversion_revision="5401">
+        <revision type="modification" title="Datenbanktest auf ASCII-Zeichen reduziert">
+            <description>
+                <p>
+                    Weil manche PostgresQL-Installationen Latin-1 nicht unterstützen, 
+                    prüft der Scheduler nur noch den ASCII-Zeichenvorrat (Basic Latin).
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-452"/>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2007-11-20" version="2.0.192" subversion_revision="5397">
+        <revision type="new" title="Variablenwerte mit Nicht-Latin1-Zeichen">
+            <description>
+                <p>
+                    Weil Umgebungsvariablen (z.B. <code>ERASE</code>) Zeichen enthalten können, 
+                    die in Latin-1 und UNICODE enthalten sind, wurden interne XML-Dokumente ungültig.
+                    Solche Variablenwerte codiert der Scheduler jetzt hexadezimal.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2007-11-18" version="2.0.192" subversion_revision="5394">
         <revision type="new" title="PostgresQL wird besser unterstützt, Scheduler prüft Datenbank">
             <description>
@@ -22,7 +46,7 @@
                         ob '<code>\</code>' (Backslash) korrekt behandelt wird,
                     </li>
                     <li>
-                        ob der Latin1-Zeichenvorrat und die ASCII-Codes TB (0x08), CR (0x0D) und NL (0x0A)
+                        ob der Latin1-Zeichenvorrat und die Steuerzeichen TB (0x08), CR (0x0D) und NL (0x0A)
                         geschrieben und gelesen werden können, und
                     </li>
                     <li>

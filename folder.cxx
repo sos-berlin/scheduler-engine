@@ -1,4 +1,4 @@
-// $Id: cluster.h 5126 2007-07-13 08:59:30Z jz $
+// $Id$
 
 #include "spooler.h"
 #include "../zschimmer/directory_lister.h"
@@ -2239,6 +2239,6 @@ bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace configuration
+} //namespace folder
 } //namespace scheduler
 } //namespace sos
