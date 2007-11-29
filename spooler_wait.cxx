@@ -26,9 +26,9 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-#ifndef Z_WINDOWS
-    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
-#endif
+//#ifndef Z_WINDOWS
+//    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
+//#endif
 
 //-----------------------------------------------------------------------------windows_message_step
 #ifdef Z_WINDOWS
