@@ -11,7 +11,18 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-11-27" version="2.0.192" subversion_revision="5401">
+    <change date="2007-11-30" version="2.0.192" subversion_revision="5402">
+        <revision type="modification" title="Job.name liefert den ganzen Pfand">
+            <description>
+                <p>
+                    <scheduler_method class="Job" property="name"/> liefert nicht mehr den Namen,
+                    sondern den Pfad des Jobs ohne beginnenden Schrägstrich.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2007-11-27" version="2.0.192" subversion_revision="5402">
         <revision type="modification" title="Datenbanktest auf ASCII-Zeichen reduziert">
             <description>
                 <p>

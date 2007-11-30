@@ -242,7 +242,7 @@ $spooler->job( 'job_a' )->start( $parameters );</pre>
         </com>
 
         <title>
-            Name des Jobs
+            Pfad des Jobs ohne beginnenden Schrägstrich
         </title>
         
         <description>

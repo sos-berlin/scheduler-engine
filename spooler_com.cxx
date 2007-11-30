@@ -2006,7 +2006,7 @@ STDMETHODIMP Com_job::get_Include_path( BSTR* result )
     return NOERROR;
 }
 
-//--------------------------------------------------------------------------------Com_job::get_name
+//--------------------------------------------------------------------------------Com_job::get_Name
 
 STDMETHODIMP Com_job::get_Name( BSTR* result )
 {
@@ -2015,7 +2015,7 @@ STDMETHODIMP Com_job::get_Name( BSTR* result )
         if( !_job )  return E_POINTER;
         //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        *result = SysAllocString_string( _job->name() );
+        *result = SysAllocString_string( _job->path().without_slash() );
     }
 
     return NOERROR;
