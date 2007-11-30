@@ -118,6 +118,13 @@ ifeq ($(OS),HP-UX)
 
 ifeq "$(shell uname -m)" "ia64"
 LIBS += -Wl,+b,/opt/java1.4/jre/lib/IA64N/server:/opt/java1.4/jre/lib/IA64N
+LINK_FLAGS += -Wl,+e,main
+LINK_FLAGS += -Wl,-B -Wl,immediate 
+#LINK_FLAGS += -Wl,-B -Wl,direct 
+#LINK_FLAGS += -Wl,-B -Wl,verbose 
+#LINK_FLAGS += -ldld
+#LINK_FLAGS += -luca
+#LINK_FLAGS += -l/usr/lib/hpux32/libuca.so.1
 else
 # Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
 LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
