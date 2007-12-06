@@ -110,8 +110,6 @@ struct Command_response : Xml_response
                               //Command_response            ();
 
     virtual string              complete_text               ()                                      { z::throw_xc( "SCHEDULER-353" ); }  // Nur für Synchronous_command_response
-
-  protected:
     void                        begin_standard_response     ();
     void                        end_standard_response       ();
 };
@@ -289,6 +287,7 @@ struct Command_processor
     xml::Element_ptr            execute_remove_order        ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remove_job_chain    ( const xml::Element_ptr& );
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
+    xml::Element_ptr            execute_supervisor_configuration_fetch_updated_files( const xml::Element_ptr& );
     xml::Element_ptr            execute_service_request     ( const xml::Element_ptr& );
     xml::Element_ptr            execute_get_events          ( const xml::Element_ptr& );
 

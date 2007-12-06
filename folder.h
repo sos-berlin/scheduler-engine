@@ -1,9 +1,10 @@
-// $Id$
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_FOLDER_H
 #define __SCHEDULER_FOLDER_H
 
 #include "../zschimmer/z_md5.h"
+#include "../zschimmer/directory_lister.h"
 
 namespace sos {
 namespace scheduler {
@@ -64,7 +65,7 @@ struct Path : string
 
 inline void insert_into_message( Message_string* m, int index, const Path& path ) throw()           { return m->insert( index, path.to_string() ); }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------Absolute_path
 
 struct Absolute_path : Path
 {
@@ -83,7 +84,22 @@ struct Absolute_path : Path
 
   private: 
     Absolute_path&              operator =                  ( const string& path );                 // Nicht implementiert
-  //Absolute_path&              operator =                  ( const char* path );
+};
+
+//---------------------------------------------------------------------------------Directory_lister
+
+struct Folder_directory_lister : file::Directory_lister
+{
+                                Folder_directory_lister     ( Prefix_log* log )                     : _zero_(this+1), _log(log) {}
+
+    bool                        open                        ( const File_path& root, const Absolute_path& folder_path );
+    ptr<file::File_info>        get                         ();
+    bool                        is_removed                  () const                                { return _is_removed; }
+
+  private:
+    Fill_zero                  _zero_;
+    ptr<Prefix_log> const      _log;
+    bool                       _is_removed;
 };
 
 //------------------------------------------------------------------------------------------Pendant
@@ -136,7 +152,7 @@ struct Dependencies
 
 struct Base_file_info
 {
-                                Base_file_info              ()                                      : _timestamp_utc(0) {}
+                                Base_file_info              ()                                      : _timestamp_utc(0), _info_timestamp(0) {}
 
                                 Base_file_info              ( const string& filename, double timestamp_utc, const string& normalized_name, double clock ) 
                                                                                                     : _filename(filename), _timestamp_utc(timestamp_utc),
@@ -426,8 +442,9 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
 
   //void                        remove_all_file_baseds      ();
-    file::File_path             directory                   () const                                { return _directory; }
+    file::File_path             directory                   () const;
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
+    bool                        is_valid_extension          ( const string& extension );
 
     bool                        adjust_with_directory       ( double now );
 
@@ -444,7 +461,6 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     void                        add_to_typed_folder_map     ( Typed_folder* );
 
     Fill_zero                  _zero_;
-    file::File_path            _directory;
 
     typedef stdext::hash_map< string, Typed_folder* >  Typed_folder_map;
     typedef stdext::hash_set< ptr<Folder> >            Folder_set;
@@ -751,6 +767,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     Folder*                     folder_or_null              ( const Absolute_path& path )           { return file_based_or_null( path ); }
     Folder*                     root_folder                 () const                                { return _root_folder; }
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
+    bool                        is_valid_extension          ( const string& );
 
     bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
     void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
@@ -758,6 +775,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
 
     bool                        handle_folders              ( double minimum_age = 0 );
+    xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
 
 
   private:

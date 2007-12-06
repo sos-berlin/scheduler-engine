@@ -11,6 +11,7 @@ struct Supervisor_interface : Subsystem, Object
 
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual void                execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* ) = 0;
+    virtual void                execute_configuration_fetch_updated_files( xml::Xml_writer*, const xml::Element_ptr&, Communication::Operation* ) = 0;
 };
 
 

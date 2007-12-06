@@ -1,6 +1,14 @@
 // $Id: spooler_remote.cxx 4705 2007-01-05 16:20:23Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
+#include "../zschimmer/base64.h"
+
+#include <sys/utime.h>          // utime()
+#include <sys/stat.h>           // mkdir()
+
+#ifdef Z_WINDOWS
+#   include <direct.h>          // mkdir()
+#endif
 
 namespace sos {
 namespace scheduler {
@@ -8,6 +16,8 @@ namespace scheduler {
 //-------------------------------------------------------------------------------------------------
 
 struct Supervisor_client_connection;
+
+using xml::Xml_writer;
 
 //---------------------------------------------------------------------------------Remote_scheduler
 
@@ -50,6 +60,22 @@ struct Remote_scheduler_register
     Map                                                  _map;
 };
 
+//------------------------------------------------------------------------------------Xml_file_info
+
+struct Xml_file_info : Base_file_info
+{
+    Xml_file_info( const xml::Element_ptr& element )
+    :
+        Base_file_info( element.getAttribute( "name" ), Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), element.getAttribute( "name" ), 0 ),
+        _element( element )
+    {
+        _md5.set_hex( element.getAttribute( "md5" ) );
+    }
+
+    xml::Element_ptr                   _element;
+    Md5                                _md5;            // Leer bei einem Verzeichnis
+};
+
 //---------------------------------------------------------------------------------------Supervisor
 
 struct Supervisor : Supervisor_interface
@@ -63,10 +89,15 @@ struct Supervisor : Supervisor_interface
     //bool                        subsystem_activate          ();
 
     // Supervisor_interface
-    void                        execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    void                        execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* );
+    void                        execute_configuration_fetch_updated_files( Xml_writer*, const xml::Element_ptr&, Communication::Operation* );
 
   private:
+    void                        write_updated_files_to_xml  ( Xml_writer*, const File_path&, const Absolute_path&, const xml::Element_ptr& );
+    void                        write_file_to_xml           ( Xml_writer*, const File_path&, const Absolute_path&, file::File_info*, const xml::Element_ptr& );
+
+
     Fill_zero                  _zero_;
     Remote_scheduler_register  _remote_scheduler_register;
 };
@@ -105,7 +136,9 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
         s_not_connected,
         s_connecting,
         s_registering,
-        s_registered
+        s_registered,
+        s_fetching_configuration,
+        s_configuration_fetched
     };
 
     static string               state_name                  ( State );
@@ -127,6 +160,9 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     bool                        async_finished_             () const                                { return _state == s_not_connected  
                                                                                                           || _state == s_registered; }
   //bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
+
+    void                        write_directory_structure   ( xml::Xml_writer*, const Absolute_path& );
+    void                        update_directory_structure  ( const Absolute_path&, const xml::Element_ptr& );
 
   private:
     Fill_zero                  _zero_;
@@ -227,6 +263,13 @@ const Com_method Supervisor_client::_methods[] =
     {}
 };
 
+//------------------------------------------------------------------------------file_info_is_lesser
+
+inline bool file_info_is_lesser( const file::File_info* a, const file::File_info* b )
+{
+    return a->path() < b->path();
+}
+
 //-----------------------------------------Supervisor_client_interface::Supervisor_client_interface
 
 Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, Type_code tc, Class_descriptor* class_descriptor )  
@@ -248,7 +291,7 @@ Supervisor_client_connection::Supervisor_client_connection( Supervisor_client* s
     _log = supervisor_client->log();
 }
 
-//----------------------------------------------Supervisor_client_connection::~Supervisor_client_connection
+//--------------------------------------Supervisor_client_connection::~Supervisor_client_connection
 
 Supervisor_client_connection::~Supervisor_client_connection()
 {
@@ -259,7 +302,7 @@ Supervisor_client_connection::~Supervisor_client_connection()
     }
 }
 
-//----------------------------------------------------------------Supervisor_client_connection::connect
+//------------------------------------------------------------Supervisor_client_connection::connect
 
 void Supervisor_client_connection::connect()
 {
@@ -270,8 +313,8 @@ void Supervisor_client_connection::connect()
     _state = s_connecting;
 }
 
-//--------------------------------------------------------Supervisor_client_connection::async_continue_
-    
+//----------------------------------------------------Supervisor_client_connection::async_continue_
+
 bool Supervisor_client_connection::async_continue_( Continue_flags )
 {
     Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
@@ -288,33 +331,88 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 connect();
                 break;
 
+
             case s_connecting:
             {
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
-                S xml;
-                xml << "<register_remote_scheduler";
-                xml << " scheduler_id='" << _spooler->_spooler_id  << "'";
-                xml << " tcp_port='"     << _spooler->_tcp_port    << "'";
-                xml << " version='"      << _spooler->_version     << "'";
-                xml << "/>";
+                ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
+                ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
 
-                _xml_client_connection->send( xml );
+                xml_writer->set_encoding( scheduler_character_encoding );
+                xml_writer->write_prolog();
+
+                xml_writer->begin_element( "register_remote_scheduler" );
+                xml_writer->set_attribute( "scheduler_id", _spooler->_spooler_id );
+                xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port   );
+                xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port   );
+                xml_writer->set_attribute( "version"     , _spooler->_version    );
+                xml_writer->end_element( "register_remote_scheduler" );
+                
+                xml_writer->close();
+
+                _xml_client_connection->send( string_writer->to_string() );
                 _state = s_registering;
             }
 
+
             case s_registering:
             {
-                if( xml::Document_ptr response_document = _xml_client_connection->received_dom_document() )
+                if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
                     log()->info( message_string( "SCHEDULER-950" ) );
                     _state = s_registered;
                 }
 
+                if( _state != s_registered )  break;
+            }
+
+
+            case s_registered:
+            {
+                if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
+
+                ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
+                ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
+
+                xml_writer->set_encoding( scheduler_character_encoding );
+                xml_writer->write_prolog();
+
+                xml_writer->begin_element( "supervisor.configuration.fetch_updated_files" );
+                xml_writer->set_attribute( "scheduler_id"                  , _spooler->id() );
+                xml_writer->set_attribute( "tcp_port"                      , _spooler->_tcp_port );
+                xml_writer->set_attribute( "signal_next_change_at_udp_port", _spooler->_udp_port );
+
+                write_directory_structure( xml_writer, root_path );
+
+                xml_writer->end_element( "supervisor.configuration.fetch_updated_files" );
+                xml_writer->close();
+
+                _xml_client_connection->send( string_writer->to_string() );
+                _state = s_fetching_configuration;
+            }
+
+
+            case s_fetching_configuration:
+            {
+                if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
+                {
+                    //log()->info( message_string( "SCHEDULER-950" ) );
+
+                    update_directory_structure( root_path, response_document.select_node_strict( "/spooler/answer/configuration.directory" ) );
+                    
+                    _state = s_configuration_fetched;
+                }
+
                 break;
             }
 
-            default: ;
+
+            case s_configuration_fetched:
+                break;
+
+            default: 
+                assert(0);
         }
     }
     catch( exception& x )
@@ -333,6 +431,116 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
     }
 
     return something_done;
+}
+
+//------------------------------------------Supervisor_client_connection::write_directory_structure
+
+void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* xml_writer, const Absolute_path& path )
+{
+    Folder_directory_lister dir ( _log );
+    
+    bool ok = dir.open( spooler()->folder_subsystem()->directory(), path );
+
+    if( ok )
+    {
+        while( ptr<file::File_info> file_info = dir.get() )
+        {
+            string filename = file_info->path().name();
+
+            if( file_info->is_directory() )
+            {
+                xml_writer->begin_element( "configuration.directory" );
+                xml_writer->set_attribute( "name", path.name() );
+
+                write_directory_structure( xml_writer, Absolute_path( path, filename ) );
+
+                xml_writer->end_element( "configuration.directory" );
+            }
+            else
+            {
+                string name      = Folder::object_name_of_filename( filename );
+                string extension = Folder::extension_of_filename( filename );
+                
+                if( name != "" )
+                {
+                    if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
+                    {
+                        File_path file_path       ( spooler()->folder_subsystem()->directory(), Absolute_path( path, filename ) );
+                        Time      last_write_time ( file_info->last_write_time(), Time::is_utc );
+
+                        xml_writer->begin_element( "configuration.file" );
+                        xml_writer->set_attribute( "name"           , filename );
+                        xml_writer->set_attribute( "last_write_time", last_write_time.xml_value() );
+                        xml_writer->set_attribute( "md5"            , md5( string_from_file( file_path ) ) );
+                        xml_writer->end_element( "configuration.file" );
+                    }
+                }
+            }
+        }
+    }
+}
+
+//-----------------------------------------Supervisor_client_connection::update_directory_structure
+
+void Supervisor_client_connection::update_directory_structure( const Absolute_path& directory_path, const xml::Element_ptr& element )
+{
+    assert( element );
+    assert( element.nodeName_is( "configuration.directory" ) );
+    assert( element.getAttribute( "name" ) == directory_path.name() );
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        Absolute_path path      ( directory_path, e.getAttribute( "name" ) );
+        File_path     file_path ( _spooler->folder_subsystem()->directory(), path );
+
+        if( e.nodeName_is( "configuration.directory" ) )
+        {
+            if( e.bool_getAttribute( "removed", false ) )
+            {
+                if( file_path.name() == "" )  z::throw_xc( Z_FUNCTION, file_path );     // Vorsichtshalber
+                file_path.remove_complete_directory();
+            }
+            else
+            {
+                int err = mkdir( file_path.c_str() );
+                if( err && errno != EEXIST )  zschimmer::throw_errno( errno, "mkdir" );
+
+                update_directory_structure( path, e );
+            }
+        }
+        else
+        if( e.nodeName_is( "configuration.file" ) )
+        {
+            if( e.bool_getAttribute( "removed", false ) )
+            {
+                file_path.unlink();
+            }
+            else
+            {
+                const xml::Element_ptr& content_element = e.select_node_strict( "content" );
+                if( content_element.getAttribute( "encoding" ) == "base64" )
+                {
+                    File file ( file_path + "~", "w" );
+                    file.print( base64_decoded( content_element.text() ) );
+                    file.close();
+
+                    time_t last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) ).as_utc_time_t();
+
+                    struct utimbuf utimbuf;
+                    utimbuf.actime  = ::time(NULL);
+                    utimbuf.modtime = last_write_time;
+                    int err = utime( file.path().c_str(), &utimbuf );
+                    if( err )  zschimmer::throw_errno( errno, "utime", Z_FUNCTION );
+
+                    file.path().move_to( file_path );
+                }
+                else
+                    z::throw_xc( Z_FUNCTION, "invalid <content>-encoding" );
+            }
+        }
+        else
+            assert(0);
+    }
 }
 
 //---------------------------------------------------------Supervisor_client_connection::async_state_text_
@@ -506,6 +714,186 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
     _remote_scheduler_register.add( remote_scheduler );
 }
 
+//--------------------------------------------Supervisor::execute_configuration_fetch_updated_files
+
+void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writer, const xml::Element_ptr& element, Communication::Operation* communication_operation )
+{
+    assert( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) );
+
+    int    tcp_port       = element.int_getAttribute( "tcp_port" );
+    string directory_name;
+
+    Directory_lister dir ( _spooler->_remote_configuration_directory );
+    while( ptr<file::File_info> file_info = dir.get() )
+    {
+        if( file_info->is_directory() )
+        {
+            string s   = file_info->path().name();
+            size_t pos = s.find( '#' );
+
+            if( pos != string::npos )
+            {
+                s[ pos ] = ':';
+
+                try
+                {
+                    Host_and_port host_and_port ( s );
+
+                    if( host_and_port.ip()   == communication_operation->connection()->peer().ip()  &&  
+                        host_and_port.port() == tcp_port )
+                    {
+                        if( directory_name != "" )  z::throw_xc( "SCHEDULER-454", directory_name, file_info->path().name() );
+                        directory_name = file_info->path().name();         
+                    }
+                }
+                catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
+            }
+        }
+    }
+    dir.close();
+
+    if( directory_name == "" )  z::throw_xc( "SCHEDULER-455", Host_and_port( communication_operation->connection()->peer().host(), tcp_port ).as_string() );
+
+
+    xml_writer->begin_element( "configuration.directory" );
+
+        write_updated_files_to_xml( xml_writer, File_path( _spooler->_remote_configuration_directory, directory_name ), root_path, element );
+
+    xml_writer->end_element( "configuration.directory" );
+}
+
+//-----------------------------------------------------------Supervisor::write_updated_files_to_xml
+
+void Supervisor::write_updated_files_to_xml( Xml_writer* xml_writer, const File_path& directory, const Absolute_path& path, const xml::Element_ptr& reference_element )
+{
+    Folder_directory_lister dir ( _log );
+    dir.open( directory, path );
+
+    if( dir.is_opened() )
+    {
+        list< ptr<file::File_info> >  file_info_list;
+        list< Xml_file_info >       xml_file_info_list;
+        
+        while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( file_info );
+        dir.close();
+
+        if( reference_element )
+        {
+            DOM_FOR_EACH_ELEMENT( reference_element, e )
+            {
+                if( e.nodeName_is( "configuration.directory" )  ||
+                    e.nodeName_is( "configuration.file"      )     )
+                {
+                    string filename = e.getAttribute( "name" );
+                    xml_file_info_list.push_back( Xml_file_info( e ) );
+                }
+            }
+        }
+
+        vector<file::File_info*>      ordered_file_infos;       // Geordnete Liste der vorgefundenen Dateien    
+        vector<const Xml_file_info*>  xml_ordered_file_infos;   // Geordnete Liste der bereits bekannten (replizierten) Dateien
+
+        ordered_file_infos.reserve( file_info_list.size() );
+        Z_FOR_EACH_CONST( list< ptr<file::File_info> >, file_info_list, it )  ordered_file_infos.push_back( *it );
+        sort( ordered_file_infos.begin(), ordered_file_infos.end(), file_info_is_lesser );
+
+        xml_ordered_file_infos.reserve( xml_file_info_list.size() );
+        Z_FOR_EACH( list<Xml_file_info>, xml_file_info_list, it )  xml_ordered_file_infos.push_back( &*it );
+        sort( xml_ordered_file_infos.begin(), xml_ordered_file_infos.end(), Base_file_info::less_dereferenced );
+
+
+        vector<file::File_info*>    ::iterator fi  = ordered_file_infos.begin();
+        vector<const Xml_file_info*>::iterator xfi = xml_ordered_file_infos.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
+
+        while( fi != ordered_file_infos.end()  ||
+               xfi != xml_ordered_file_infos.end() )
+        {
+            /// Dateinamen gleich?
+
+            while( xfi != xml_ordered_file_infos.end()  &&
+                   fi  != ordered_file_infos.end()  &&
+                   (*xfi)->_filename == (*fi)->path().name() )
+            {
+                if( (*fi)->last_write_time() != (*xfi)->_timestamp_utc  ||
+                    md5( string_from_file( File_path( directory, Absolute_path( path, (*fi)->path().name() ) ) ) ) != (*xfi)->_md5 )  // MD5 vom Verzeichnis ist ""
+                {
+                    write_file_to_xml( xml_writer, directory, path, *fi, (*xfi)->_element );
+                }
+
+                fi++, xfi++;
+            }
+
+
+
+            /// Dateien hinzugefügt?
+
+            while( fi != ordered_file_infos.end()  &&
+                   ( xfi == xml_ordered_file_infos.end()  ||  (*fi)->path().name() < (*xfi)->_filename ) )
+            {
+                write_file_to_xml( xml_writer, directory, path, *fi, NULL );
+                fi++;
+            }
+
+            assert( fi == ordered_file_infos.end()  || 
+                    xfi == xml_ordered_file_infos.end() ||
+                    (*fi)->path().name() >= (*xfi)->_normalized_name );
+            
+
+
+            /// Dateien gelöscht?
+
+            while( xfi != xml_ordered_file_infos.end()  &&
+                   ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > (*xfi)->_filename ) )  // Datei entfernt?
+            {
+                xml_writer->begin_element( (*fi)->is_directory()? "configuration.directory" : "configuration.file" );
+                xml_writer->set_attribute( "removed", "yes" );
+                xml_writer->end_element( (*fi)->is_directory()? "configuration.directory" : "configuration.file" );
+                xfi++;
+            }
+
+            assert( xfi == xml_ordered_file_infos.end()  ||
+                    fi == ordered_file_infos.end()  ||
+                    (*fi)->path().name() <= (*xfi)->_filename );
+        }
+    }
+}
+
+//--------------------------------------------------------------------Supervisor::write_file_to_xml
+
+void Supervisor::write_file_to_xml( Xml_writer* xml_writer, const File_path& directory, const Absolute_path& path, file::File_info* file_info, 
+                                    const xml::Element_ptr& reference_element )
+{
+    xml_writer->begin_element( file_info->is_directory()? "configuration.directory" : "configuration.file" );
+    xml_writer->set_attribute( "name"           , file_info->path().name() );
+    xml_writer->set_attribute( "last_write_time", Time( file_info->last_write_time(), Time::is_utc ).xml_value() );
+
+    if( file_info->is_directory() )
+    {
+        write_updated_files_to_xml( xml_writer, directory, path, reference_element );
+    }
+    else
+    {
+
+        try
+        {
+            string content = string_from_file( File_path( directory, Absolute_path( path, file_info->path().name() ) ) );
+
+            xml_writer->begin_element( "content" );
+            xml_writer->set_attribute( "encoding", "base64" );
+
+                xml_writer->write( base64_encoded( content ) );
+
+            xml_writer->end_element( "content" );
+        }
+        catch( exception& x )
+        {
+            _log->error( x.what() );
+        }
+    }
+
+    xml_writer->end_element( file_info->is_directory()? "configuration.directory" : "configuration.file" );
+}
+
 //--------------------------------------------------------------------------Supervisor::dom_element
 
 xml::Element_ptr Supervisor::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
@@ -570,7 +958,7 @@ bool Supervisor_client::subsystem_initialize()
 //    return true;
 //}
 
-//-----------------------------------------------------------------Supervisor_client::get_Hostname
+//------------------------------------------------------------------Supervisor_client::get_Hostname
 
 STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
 {
@@ -587,7 +975,7 @@ STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
     return hr;
 }
 
-//-----------------------------------------------------------------Supervisor_client::get_Tcp_port
+//------------------------------------------------------------------Supervisor_client::get_Tcp_port
 
 STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
 {

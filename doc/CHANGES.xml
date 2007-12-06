@@ -39,8 +39,8 @@
             <description>
                 <p>
                     Weil Umgebungsvariablen (z.B. <code>ERASE</code>) Zeichen enthalten können, 
-                    die in Latin-1 und UNICODE enthalten sind, wurden interne XML-Dokumente ungültig.
-                    Solche Variablenwerte codiert der Scheduler jetzt hexadezimal.
+                    die UNICODE nicht kennt, wurden interne XML-Dokumente ungültig.
+                    Solche Zeichen codiert der Scheduler jetzt hexadezimal.
                 </p>
             </description>
         </revision>

@@ -79,9 +79,9 @@ void Xml_client_connection::send( const string& s )
     }
 }
 
-//-----------------------------------------------------Xml_client_connection::received_dom_document
+//-----------------------------------------------Xml_client_connection::fetch_received_dom_document
 
-xml::Document_ptr Xml_client_connection::received_dom_document()
+xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
 {
     xml::Document_ptr result;
 

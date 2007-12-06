@@ -1,4 +1,4 @@
-// $Id: spooler_remote.h 4682 2006-12-22 12:02:12Z jz $
+// $Id: spooler_remote.h 4682 2006-12-22 12:02:12Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 namespace sos {
 namespace scheduler {
@@ -33,7 +33,7 @@ struct Xml_client_connection : Async_operation, Scheduler_object
     void                        connect                     ();
     bool                        is_send_possible            ();
     void                        send                        ( const string& );
-    xml::Document_ptr           received_dom_document       ();                                     // NULL, wenn noch nichts empfangen
+    xml::Document_ptr           fetch_received_dom_document ();                                     // NULL, wenn noch nichts empfangen
 
 
   protected:

@@ -250,6 +250,18 @@
     <xsd:element name="check_folders" type="check_folders"/>
 
 
+    <xsd:element name="supervisor.configuration.fetch_updated_files">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="configuration.file" type="configuration.file" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="scheduler_id"                      type="String"/>
+            <xsd:attribute name="tcp_port"                          type="xsd:nonNegativeInteger"/>
+            <xsd:attribute name="signal_next_change_at_udp_port"    type="xsd:nonNegativeInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="holiday">
         <xsd:complexType>
             <xsd:attribute name="date" type="String" use="required"/>
@@ -828,6 +840,7 @@
             <xsd:attribute name="version"       type="String"/>
             <xsd:attribute name="scheduler_id"  type="String"/>
             <xsd:attribute name="tcp_port"      type="xsd:nonNegativeInteger"/>
+            <xsd:attribute name="udp_port"      type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="logoff"        type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
@@ -1234,6 +1247,27 @@
     <xsd:complexType name="check_folders"/>
 
 
+    <xsd:complexType name="configuration.directory">
+        <xsd:sequence>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="configuration.directory" type="configuration.directory"/>
+                <xsd:element name="configuration.file"      type="configuration.file"/>
+            </xsd:choice>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="String"/>
+    </xsd:complexType>
+
+    
+    <xsd:complexType name="configuration.file">
+        <!--xsd:sequence>
+            <xsd:element name="content" type="content"/>
+        </xsd:sequence-->
+        <xsd:attribute name="name"              type="String"          use="required"/>
+        <xsd:attribute name="last_write_time"   type="xsd:dateTime"/>
+        <xsd:attribute name="md5"               type="Md5"/>
+    </xsd:complexType>
+
+    
     <xsd:complexType name="environment">
         <xsd:sequence>
             <xsd:element name="variable" minOccurs="0" maxOccurs="unbounded">
@@ -1655,7 +1689,14 @@
         </xsd:union>
     </xsd:simpleType>
 
+    
+    <xsd:simpleType name="Md5">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9a-fA-F]{32}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
 
+    
     <xsd:simpleType name="Month_name">
         <xsd:restriction base="xsd:NMTOKEN">
             <xsd:enumeration value="january"/>

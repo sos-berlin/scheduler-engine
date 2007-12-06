@@ -1496,6 +1496,9 @@ void Spooler::load_arg()
             _configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
     }
 
+    if( _remote_configuration_directory == "" )
+        _remote_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
+
     if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) )  
     {
         _configuration_is_job_script = true;

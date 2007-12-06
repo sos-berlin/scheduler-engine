@@ -1083,11 +1083,8 @@
         </message>
 
         <message code="SCHEDULER-223">
-            <text xml:lang="de">
-                <title>Anmelden beim Haupt-Scheduler gescheitert: <p1/></title>
-            </text>
             <text xml:lang="en">
-                <title>Logon at supervisor scheduler failed: <p1/></title>
+                <title>Supervisor has reported an error: <p1/></title>
             </text>
         </message>
 
@@ -2776,11 +2773,24 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-454">
+        <message code="SCHEDULER-454">
             <text xml:lang="en">
-                <title>Database has possibly a problem with \ (backslash): <p1>error</p1></title>
+                <title>Remote configuration directories '<p1/>' and '<p2/>' refer to the same IP number</title>
             </text>
-        </message-->
+        </message>
+
+        <message code="SCHEDULER-455">
+            <text xml:lang="en">
+                <title>No configuration directory for '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-456">
+            <text xml:lang="en">
+                <title>Invalid response from supervisor</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

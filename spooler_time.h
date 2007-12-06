@@ -37,13 +37,22 @@ struct Time
     };
 
 
+    enum Is_utc
+    {
+        is_utc
+    };
+
+
+
     static Time                 time_with_now               ( const string& );              // Datum mit Zeit oder "now+zeit"
     static void             set_current_difference_to_utc   ( time_t now );
     static int                  current_difference_to_utc   ()                              { return static_current_difference_to_utc; }
 
 
                                 Time                        ( double t = 0.0 )              { set(t); }
+                                Time                        ( double t, Is_utc )            { set_utc( t ); }
                                 Time                        ( time_t t )                    { set((double)t); }
+                                Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
                                 Time                        ( int t )                       { set((double)t); }
                                 Time                        ( uint t )                      { set((double)t); }
                                 Time                        ( const string& t )             { set(t); }
@@ -116,7 +125,7 @@ struct Time
     //FILETIME                    filetime                    () const;
 #endif
 
-    void                        set_datetime                ( const string& );
+    Time&                       set_datetime                ( const string& );
     void                        set_datetime_utc            ( const string& );
     Time                        time_of_day                 () const                        { return as_double() - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }

@@ -367,12 +367,21 @@ Time& Time::set_utc( double t )
 
 //-------------------------------------------------------------------------------Time::set_datetime
 
-void Time::set_datetime( const string& t )
+Time& Time::set_datetime( const string& t )
 {
-    string my_t = t;
+    bool   is_utc = false;
+    string my_t   = t;
+
+    if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  is_utc = true;
+    else
+    if( string_ends_with( my_t, "+0000" ) )  my_t.erase( my_t.length() - 5 ),  is_utc = true;
 
     double fraction = cut_fraction( &my_t );
-    set( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+
+    if( is_utc )  set_utc( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+            else  set    ( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+
+    return *this;
 }
 
 //---------------------------------------------------------------------------Time::set_datetime_utc

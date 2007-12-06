@@ -75,7 +75,7 @@ bool Remote_client_connection::async_continue_( Continue_flags flags )
 
             case s_registering:
             {
-                if( xml::Document_ptr response_document = _xml_client_connection->received_dom_document() )
+                if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
                     log()->info( message_string( "SCHEDULER-950" ) );
                     _state = s_registered;

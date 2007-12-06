@@ -37,6 +37,7 @@ namespace sos {
 namespace scheduler {
 
 using namespace std;
+using xml::Xml_writer;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -1083,6 +1084,30 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     return _answer.createElement( "ok" );
 }
 
+//--------------------------Command_processor::execute_supervisor_configuration_fetch_updated_files
+
+xml::Element_ptr Command_processor::execute_supervisor_configuration_fetch_updated_files( const xml::Element_ptr& element )
+{
+    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
+
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+
+
+    ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
+    _response = response;
+    _response->begin_standard_response();
+    {
+        Xml_writer xml_writer ( _response );
+
+        _spooler->_supervisor->execute_configuration_fetch_updated_files( &xml_writer, element, _communication_operation );
+
+        xml_writer.close();
+    }
+    _response->end_standard_response();
+
+    return NULL;
+}
+
 //-------------------------------------------------------Command_processor::execute_service_request
 
 xml::Element_ptr Command_processor::execute_service_request( const xml::Element_ptr& service_request_element )
@@ -1338,6 +1363,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "remove_job_chain" ) )  result = execute_remove_job_chain( element );
     else
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
+    else
+    if( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) )  result = execute_supervisor_configuration_fetch_updated_files( element );
     else
     if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
     else
@@ -1913,6 +1940,7 @@ void Command_response::begin_standard_response()
 void Command_response::end_standard_response()
 {
     write( "</answer></spooler>" );
+    write( io::Char_sequence( "\0", 1 ) );  // Null-Byte terminiert die XML-Antwort
 }
 
 //-----------------------------------File_buffered_command_response::File_buffered_command_response

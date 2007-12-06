@@ -237,7 +237,7 @@ string Read_transaction::file_as_string( const string& hostware_filename )
     //set_transaction_read();
     try
     {
-        return ::sos::file_as_string( "-binary " + _db->db_name() + hostware_filename );
+        return ::sos::file_as_string( "-binary " + _db->db_name() + hostware_filename, "" );
     }
     catch( exception& x )
     {
@@ -1863,7 +1863,7 @@ xml::Element_ptr Database::read_task( const xml::Document_ptr& doc, int task_id,
                     ta.set_transaction_read();
 
                     string log = file_as_string( "-binary " GZIP_AUTO + db_name() + " -table=" + _spooler->_job_history_tablename + " -blob=\"LOG\"" 
-                                                " where \"ID\"=" + as_string(task_id) );
+                                                " where \"ID\"=" + as_string(task_id), "" );
                     task_element.append_new_text_element( "log", log );
                 }
                 catch( exception& x ) { _log->warn( message_string( "SCHEDULER-268", task_id, x ) ); }  // "FEHLER BEIM LESEN DES LOGS FÜR TASK "

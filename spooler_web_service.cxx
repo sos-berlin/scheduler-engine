@@ -266,7 +266,7 @@ bool Web_services::is_request_authorized( http::Request* http_request )
         return false;
     }
 
-    string user_and_password = base64_decode( authorization.substr( 6 ) );
+    string user_and_password = base64_decoded( authorization.substr( 6 ) );
     size_t colon             = user_and_password.find( ':' );
 
     if( colon == string::npos )  
