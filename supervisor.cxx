@@ -3,11 +3,13 @@
 #include "spooler.h"
 #include "../zschimmer/base64.h"
 
-#include <sys/utime.h>          // utime()
 #include <sys/stat.h>           // mkdir()
 
 #ifdef Z_WINDOWS
 #   include <direct.h>          // mkdir()
+#   include <sys/utime.h>       // utime()
+#else
+#   include <utime.h>           // utime()
 #endif
 
 namespace sos {
@@ -502,7 +504,12 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
             }
             else
             {
-                int err = mkdir( file_path.c_str() );
+#               ifdef Z_WINDOWS
+                    int err = mkdir( file_path.c_str() );
+#                else
+                    int err = mkdir( file_path.c_str(), 0700 );
+#               endif
+
                 if( err && errno != EEXIST )  zschimmer::throw_errno( errno, "mkdir" );
 
                 update_directory_structure( path, e );
