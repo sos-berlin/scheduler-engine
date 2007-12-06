@@ -127,7 +127,7 @@ LINK_FLAGS += -Wl,-B -Wl,immediate
 #LINK_FLAGS += -l/usr/lib/hpux32/libuca.so.1
 else
 # Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
-LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
+#LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
 endif
 
 ifeq ($(NO_PERL),)

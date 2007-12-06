@@ -112,7 +112,7 @@ volatile int                    ctrl_c_pressed_handled              = 0;
     volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
 #endif
 
-#ifdef Z_HPUX_PARISC
+#ifdef Z_HPUX
     string                      static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
 
@@ -3513,7 +3513,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     value = value.substr( eq + 1 );
                     set_environment_variable( name, value );
 
-#                   ifdef Z_HPUX_PARISC
+#                   ifdef Z_HPUX
                         if( name == "LD_PRELOAD" )  scheduler::static_ld_preload = value;
 #                   endif
                 }
@@ -3678,7 +3678,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 int sos_main( int argc, char** argv )
 {
-#   ifdef Z_HPUX_PARISC
+#   ifdef Z_HPUX
         if( const char* value = getenv( "LD_PRELOAD" ) )  scheduler::static_ld_preload = value;
         putenv( "LD_PRELOAD=" );
 #   endif

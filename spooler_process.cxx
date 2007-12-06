@@ -452,7 +452,7 @@ void Process::start_local()
         //if( _has_environment )  c->set_environment_string( _environment_string );
         if( _controller_address )  c->set_controller_address( _controller_address );
 
-#       ifdef Z_HPUX_PARISC
+#       ifdef Z_HPUX
             c->set_ld_preload( static_ld_preload );
 #       endif
 

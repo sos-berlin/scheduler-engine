@@ -107,7 +107,7 @@ const int                       max_memory_file_size          = 10*1024*1024;   
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
 #endif
 
-#ifdef Z_HPUX_PARISC
+#ifdef Z_HPUX
     extern string               static_ld_preload;                        // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
 
