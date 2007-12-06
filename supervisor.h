@@ -30,6 +30,9 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
                                     Subsystem
 {
                                 Supervisor_client_interface ( Scheduler*, Type_code, Class_descriptor* );
+
+    virtual bool                is_ready                    () const                                = 0;
+    virtual bool                connection_failed           () const                                = 0;
 };
 
 

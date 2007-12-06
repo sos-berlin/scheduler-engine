@@ -17,9 +17,9 @@ namespace scheduler {
 
 //-------------------------------------------------------------------------------------------------
 
-struct Supervisor_client_connection;
-
 using xml::Xml_writer;
+
+struct Supervisor_client;
 
 //---------------------------------------------------------------------------------Remote_scheduler
 
@@ -104,31 +104,6 @@ struct Supervisor : Supervisor_interface
     Remote_scheduler_register  _remote_scheduler_register;
 };
 
-//--------------------------------------------------------------------------------Supervisor_client
-
-struct Supervisor_client : Supervisor_client_interface
-{
-                                Supervisor_client           ( Scheduler*, const Host_and_port& );
-
-    // Subsystem
-    void                        close                       ();
-    bool                        subsystem_initialize        ();
-                                Subsystem::obj_name;
-
-    // IDispatch_implementation
-    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
-    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Supervisor_client"; }
-    STDMETHODIMP            get_Hostname                    ( BSTR* );
-    STDMETHODIMP            get_Tcp_port                    ( int* );
-
-  private:
-    Fill_zero                  _zero_;
-    ptr<Supervisor_client_connection> _client_connection;
-
-    static Class_descriptor     class_descriptor;
-    static const Com_method     _methods[];
-};
-
 //---------------------------------------------------------------------Supervisor_client_connection
 
 struct Supervisor_client_connection : Async_operation, Scheduler_object
@@ -154,6 +129,8 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     State                       state                       () const                                { return _state; }
     void                        connect                     ();
     const Host_and_port&        host_and_port               () const                                { return _host_and_port; }
+    bool                        is_ready                    () const                                { return _is_ready; }
+    bool                        connection_failed           () const                                { return _connection_failed; }
 
 
   protected:
@@ -172,6 +149,37 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     Host_and_port              _host_and_port;
     Supervisor_client*         _supervisor_client;
     ptr<Xml_client_connection> _xml_client_connection;
+    bool                       _is_ready;
+    bool                       _connection_failed;
+};
+
+//--------------------------------------------------------------------------------Supervisor_client
+
+struct Supervisor_client : Supervisor_client_interface
+{
+                                Supervisor_client           ( Scheduler*, const Host_and_port& );
+
+    // Subsystem
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+                                Subsystem::obj_name;
+
+    // Supervisor_client_interface
+    bool                        is_ready                    () const                                { return _client_connection && _client_connection->is_ready(); }
+    bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
+
+    // IDispatch_implementation
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Supervisor_client"; }
+    STDMETHODIMP            get_Hostname                    ( BSTR* );
+    STDMETHODIMP            get_Tcp_port                    ( int* );
+
+  private:
+    Fill_zero                  _zero_;
+    ptr<Supervisor_client_connection> _client_connection;
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 };
 
 //------------------------------------------------------------------------Main_scheduler_connection
@@ -330,6 +338,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
         switch( _state )
         {
             case s_not_connected:
+                _connection_failed = false;
                 connect();
                 break;
 
@@ -346,8 +355,13 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 xml_writer->begin_element( "register_remote_scheduler" );
                 xml_writer->set_attribute( "scheduler_id", _spooler->_spooler_id );
+
+                if( _spooler->_tcp_port )
                 xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port   );
+                
+                if( _spooler->_udp_port )
                 xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port   );
+
                 xml_writer->set_attribute( "version"     , _spooler->_version    );
                 xml_writer->end_element( "register_remote_scheduler" );
                 
@@ -372,6 +386,8 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
             case s_registered:
             {
+                // Wird nach Verbindungsverlust nochmal durchlaufen
+
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
                 ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
@@ -406,11 +422,12 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                     _state = s_configuration_fetched;
                 }
 
-                break;
+                if( _state != s_configuration_fetched )  break;
             }
 
 
             case s_configuration_fetched:
+                _is_ready = true;   // Nach Verbindungsverlust bereits true
                 break;
 
             default: 
@@ -428,6 +445,8 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
         }
 
         _state = s_not_connected;
+        _connection_failed = true;
+
         set_async_delay( main_scheduler_retry_time );
         something_done = true;
     }
@@ -499,11 +518,14 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
         {
             if( e.bool_getAttribute( "removed", false ) )
             {
+                log()->info( message_string( "SCHEDULER-702", path + "/" ) );
                 if( file_path.name() == "" )  z::throw_xc( Z_FUNCTION, file_path );     // Vorsichtshalber
                 file_path.remove_complete_directory();
             }
             else
             {
+                log()->info( message_string( "SCHEDULER-702", path ) );
+
 #               ifdef Z_WINDOWS
                     int err = mkdir( file_path.c_str() );
 #                else
@@ -520,29 +542,36 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
         {
             if( e.bool_getAttribute( "removed", false ) )
             {
+                log()->info( message_string( "SCHEDULER-701", path + "/" ) );
                 file_path.unlink();
             }
             else
             {
                 const xml::Element_ptr& content_element = e.select_node_strict( "content" );
-                if( content_element.getAttribute( "encoding" ) == "base64" )
-                {
-                    File file ( file_path + "~", "w" );
-                    file.print( base64_decoded( content_element.text() ) );
-                    file.close();
+                string content;
 
-                    time_t last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) ).as_utc_time_t();
-
-                    struct utimbuf utimbuf;
-                    utimbuf.actime  = ::time(NULL);
-                    utimbuf.modtime = last_write_time;
-                    int err = utime( file.path().c_str(), &utimbuf );
-                    if( err )  zschimmer::throw_errno( errno, "utime", Z_FUNCTION );
-
-                    file.path().move_to( file_path );
-                }
+                if( content_element.getAttribute( "encoding" ) == "base64" )  content = base64_decoded( content_element.text() );
                 else
                     z::throw_xc( Z_FUNCTION, "invalid <content>-encoding" );
+
+                log()->info( message_string( "SCHEDULER-701", path ) );
+
+                File_path temporary_path = file_path + "~";
+                //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)
+
+                File file ( temporary_path, "wb" ); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei ändert
+                file.print( content );
+                file.close();
+
+                time_t last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) ).as_utc_time_t();
+
+                struct utimbuf utimbuf;
+                utimbuf.actime  = ::time(NULL);
+                utimbuf.modtime = last_write_time;
+                int err = utime( file.path().c_str(), &utimbuf );
+                if( err )  zschimmer::throw_errno( errno, "utime", Z_FUNCTION );
+
+                file.path().move_to( file_path );
             }
         }
         else

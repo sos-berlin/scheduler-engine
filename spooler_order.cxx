@@ -282,11 +282,10 @@ bool Database_order_detector::async_continue_( Continue_flags )
 
     S select_sql_begin;
     select_sql_begin << "select ";
-    if( database_orders_read_ahead_count < INT_MAX ) select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
+    if( database_orders_read_ahead_count < INT_MAX )  select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
     select_sql_begin << "`distributed_next_time`, `job_chain`, `state`"
                       "  from " << _spooler->_orders_tablename <<
-                      "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                         " and `distributed_next_time` is not null"
+                      "  where `distributed_next_time` is not null"
                          " and `occupying_cluster_member_id` is null";
 
     string select_sql_end = "  order by `distributed_next_time`";
@@ -3352,8 +3351,7 @@ int Order_queue::order_count( Read_transaction* ta )
             result += ta->open_result_set
                       (
                           S() << "select count(*)  from " << _spooler->_orders_tablename <<
-                                 "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-                                    " and `distributed_next_time` is not null"
+                                 "  where `distributed_next_time` is not null"
                                   //" and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
                                   //      " `occupying_cluster_member_id` is null )"
                                     " and " << db_where_expression(),
@@ -3733,8 +3731,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     select_sql << "select %limit(1)  `job_chain`, `distributed_next_time`, " << order_select_database_columns <<
                 "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
-                "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db()) <<
-                " and `distributed_next_time` <= {ts'" << now.as_string( Time::without_ms ) << "'}"
+                "  where `distributed_next_time` <= {ts'" << now.as_string( Time::without_ms ) << "'}"
                    " and `occupying_cluster_member_id` is null" << 
                    " and " << w <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";
@@ -3870,8 +3867,9 @@ Time Order_queue::next_time()
 string Order_queue::db_where_expression( )
 {
     S  result;
-    result << "`job_chain`="  << sql::quoted( _job_chain->path().without_slash() ) 
-           << " and `state`=" << sql::quoted( _order_queue_node->order_state().as_string() );
+    result <<      "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) 
+           << " and `job_chain`="  << sql::quoted( _job_chain->path().without_slash() ) 
+           << " and `state`="      << sql::quoted( _order_queue_node->order_state().as_string() );
     return result;
 
     //bool is_in_job_chain = false;

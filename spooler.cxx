@@ -1855,9 +1855,9 @@ void Spooler::execute_config_commands()
     _config_document_to_load = NULL;
 }
 
-//-------------------------------------------------------------------------------Spooler::is_active
+//-----------------------------------------------------------------------Spooler::cluster_is_active
 
-bool Spooler::is_active()
+bool Spooler::cluster_is_active()
 {
     return !_cluster || _cluster->is_active();
 }
@@ -2119,7 +2119,7 @@ void Spooler::end_waiting_tasks()
 
 void Spooler::run()
 {
-    set_state( is_active()? s_running : s_waiting_for_activation );
+    set_state( s_waiting_for_activation );
 
 
     int     nothing_done_count   = 0;
@@ -2142,7 +2142,9 @@ void Spooler::run()
 
         //-----------------------------------------------------------------------------------------
 
-        if( !_is_activated  &&  is_active() ) 
+        if( !_is_activated  &&  
+            cluster_is_active()  &&  
+            ( _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() ) )
         {
             if( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() )
             {

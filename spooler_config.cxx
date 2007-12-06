@@ -133,25 +133,21 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
         if( !_tcp_port_as_option_set )
         {
-            _tcp_port  = config_element.int_getAttribute( "port"         , _tcp_port     );
-            _tcp_port  = config_element.int_getAttribute( "tcp_port"     , _tcp_port     );
+            _tcp_port  = config_element.int_getAttribute( "port"         , _tcp_port );
+            _tcp_port  = config_element.int_getAttribute( "tcp_port"     , _tcp_port );
         }
 
         if( !_udp_port_as_option_set )
         {
-            _udp_port  = config_element.int_getAttribute( "port"         , _udp_port     );
-            _udp_port  = config_element.int_getAttribute( "udp_port"     , _udp_port     );
+            _udp_port  = config_element.int_getAttribute( "port"         , _udp_port );
+            _udp_port  = config_element.int_getAttribute( "udp_port"     , _udp_port );
         }
 
         if( !_ip_address_as_option_set )
             _ip_address = config_element.getAttribute( "ip_address" );
 
         _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
-
-#     ifdef _DEBUG
-      //_max_threads   = config_element.int_getAttribute( "threads"      , _max_threads  );
-#     endif
-          
+         
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
         _config_java_options    = subst_env( config_element.getAttribute( "java_options"    ) );
 
@@ -173,7 +169,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         {
             if( e.nodeName_is( "security" ) )
             {
-                //2007-07-11  _security.clear();
                 _security.set_dom( e );
             }
             else

@@ -408,7 +408,7 @@ struct Spooler : Object,
     void                        assert_is_activated         ( const string& function );
 
     bool                        is_cluster                  () const                            { return _cluster != NULL; }
-    bool                        is_active                   ();
+    bool                        cluster_is_active           ();
     bool                        has_exclusiveness           ();
     bool                        orders_are_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );

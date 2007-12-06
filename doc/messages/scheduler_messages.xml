@@ -4112,6 +4112,21 @@
                 <title>Folder is going to be removed because its configuration directory has been removed</title>
             </text>
         </message>
+        
+        
+        
+        
+        <message code="SCHEDULER-701">
+            <text xml:lang="en">
+                <title>Replicating '<p1/>'</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-702">
+            <text xml:lang="en">
+                <title>Removing '<p1/>'</title>
+            </text>
+        </message>
     </messages>
     
 </messages>
