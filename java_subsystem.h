@@ -1,4 +1,4 @@
-// $Id: scheduler_script.h 4773 2007-01-20 23:15:39Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_JAVA_SUBSYSTEM_H
 #define __SCHEDULER_JAVA_SUBSYSTEM_H

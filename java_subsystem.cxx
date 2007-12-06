@@ -1,4 +1,4 @@
-// $Id: scheduler_script.cxx 4793 2007-01-27 19:58:39Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 #include "../kram/sos_java.h"

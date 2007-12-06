@@ -1,4 +1,4 @@
-// $Id: spooler_remote.h 4682 2006-12-22 12:02:12Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 namespace sos {
 namespace scheduler {

@@ -1,4 +1,4 @@
-// $Id: spooler_remote.cxx 4705 2007-01-05 16:20:23Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 #include "../zschimmer/base64.h"

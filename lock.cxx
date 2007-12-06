@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx 4910 2007-03-23 23:15:25Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 

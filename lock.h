@@ -1,4 +1,4 @@
-// $Id: spooler_job.h 4888 2007-03-18 15:47:33Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
+// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
 
 #ifndef __SCHEDULER_LOCK_H
 #define __SCHEDULER_LOCK_H
