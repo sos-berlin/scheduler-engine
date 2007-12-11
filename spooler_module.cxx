@@ -75,24 +75,25 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
     int linenr_base = element.line_number();
 
-    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
+    for( xml::Node_ptr node = element.firstChild(); node; node = node.nextSibling() )
     {
-        if( n.line_number() )  linenr_base = n.line_number();
-
         string text;
 
-        switch( n.nodeType() )
+        if( int n = node.line_number() ) 
+            if( linenr_base < n )  linenr_base = n;     // libxml2 liefert bei Textknoten keine neue Zeilennummer, deshalb zählen wir selbst.
+
+        switch( node.nodeType() )
         {
             case xml::CDATA_SECTION_NODE:
             {
-                xml::CDATASection_ptr c = n;
+                xml::CDATASection_ptr c = node;
                 text = c.data();
                 goto TEXT;
             }
 
             case xml::TEXT_NODE:
             {
-                xml::Text_ptr t = n;
+                xml::Text_ptr t = node;
                 text = t.data();
                 goto TEXT;
             }
@@ -104,19 +105,26 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                 e.setAttribute( "linenr", linenr_base );
               //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
 
-                linenr_base += count( text.begin(), text.end(), '\n' );     // Für MSXML
+                linenr_base += count( text.begin(), text.end(), '\n' );
+                break;
+            }
+
+            case xml::COMMENT_NODE:
+            {
+                xml::Comment_ptr t = node;
+                text = t.data();
+                linenr_base += count( text.begin(), text.end(), '\n' );
                 break;
             }
 
             case xml::ELEMENT_NODE:     // <include file="..."/>
             {
-                xml::Element_ptr e = n;
+                xml::Element_ptr e = node;
 
                 if( e.nodeName_is( "include" ) )
                 {
                     xml::Element_ptr include_element = _dom_document.createElement( "include" );
                     include_element.setAttribute( "file", e.getAttribute( "file" ) );
-                    //include_element.setAttribute( "linenr", linenr_base );
 
                     _dom_document.documentElement().appendChild( include_element );
                 }

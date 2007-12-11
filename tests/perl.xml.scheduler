@@ -44,13 +44,20 @@ use strict;
 print ( "PERL PERL\n" );
 #fehler1();
 #die;
-                    <include file="${SCHEDULER_TEST}/expect.pl"/>
+                    <include file="${SCHEDULER_TEST}/expect.pl"
+
+ />
+
+<!-- 
+
+-->
+#FEHLER2();
 
                     <![CDATA[
 
 use strict;
 
-FEHLER();
+FEHLER3();
                     ]]></script>
                 <run_time once="yes"/>
             </job>
