@@ -42,8 +42,8 @@ use strict;
                 <script language="perl">
 
 print ( "PERL PERL\n" );
-#fehler1();
-die;
+fehler1();
+#die;
                     <include file="${SCHEDULER_TEST}/expect.pl"
 
  />

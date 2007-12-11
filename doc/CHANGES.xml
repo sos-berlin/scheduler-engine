@@ -11,8 +11,27 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-12-11" version="2.0.192" subversion_revision="5428">
+        <revision type="correction" title="&lt;script language=&quot;perl&quot;> meldet Fehler mit Zeilennummer und Pfad">
+            <description>
+                <p>
+                    Ein Fehler in einem (<scheduler_element name="script" attribute="language" value="perl"/>) wird jetzt
+                    in der Regel mit Zeilennummer und Pfad (bei <scheduler_element name="include"/>) gemeldet.
+                </p>
+                <p>
+                    Unter Unix erscheint die Position in der stderr-Ausgabe.
+                </p>
+                <p>
+                    Unter Windows wird bei machen Fehlern ("undefined value") die Zeilennummer der ersten Zeile 
+                    des Abschnitts, aber nicht der fehlerhaften Zeile gemeldet.
+                    Das scheint eine Besonderheit von ActivePerl zus ein.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-11-30" version="2.0.192" subversion_revision="5407">
-        <revision type="modification" title="Job.name liefert den ganzen Pfand">
+        <revision type="modification" title="Job.name liefert den ganzen Pfad">
             <description>
                 <p>
                     <scheduler_method class="Job" property="name"/> liefert nicht mehr den Namen,
