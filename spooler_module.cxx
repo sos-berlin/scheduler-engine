@@ -178,6 +178,15 @@ int Text_with_includes::text_element_linenr( const xml::Element_ptr& element )
     return element.int_getAttribute( "linenr", 1 );
 }
 
+//--------------------------------------------------------Text_with_includes::text_element_filepath
+
+string Text_with_includes::text_element_filepath( const xml::Element_ptr& element )
+{
+    string result = element.getAttribute( "file" );
+    if( result == "" )  result = "<script>";
+    return result;
+}
+
 //---------------------------------------------------------------------Text_with_includes::is_empty
 
 bool Text_with_includes::is_empty() const

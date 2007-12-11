@@ -35,8 +35,26 @@ use strict;
 
 
                     ]]></script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="fehler">
+                <script language="perl">
+
+print ( "PERL PERL\n" );
+#fehler1();
+#die;
+                    <include file="${SCHEDULER_TEST}/expect.pl"/>
+
+                    <![CDATA[
+
+use strict;
+
+FEHLER();
+                    ]]></script>
                 <run_time once="yes"/>
             </job>
+
         </jobs>
     </config>
 </spooler>

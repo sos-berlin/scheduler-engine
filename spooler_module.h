@@ -46,6 +46,7 @@ struct Text_with_includes : Non_cloneable
     string                      read_text                   ( const string& include_path );
     string                      read_text_element           ( const xml::Element_ptr&, const string& include_path );
     int                         text_element_linenr         ( const xml::Element_ptr& );
+    string                      text_element_filepath       ( const xml::Element_ptr& );
 
     string                      xml                         ()                                      { return _dom_document.xml(); }
     void                    set_xml                         ( const string& x )                     { _dom_document.load_xml( x ); }
