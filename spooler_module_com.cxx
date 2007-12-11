@@ -267,7 +267,8 @@ bool Scripting_engine_module_instance::load()
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 
-    bool is_perl = string_begins_with( lcase( _script_site->_engine_name ), "perl" );
+    bool is_perl     = string_begins_with( lcase( _script_site->_engine_name ), "perl" );
+    bool is_vbscript = lcase( _script_site->_engine_name ) == "vbscript";
 
     DOM_FOR_EACH_ELEMENT( _module->_text_with_includes.dom_element(), element )
     {
@@ -286,6 +287,9 @@ bool Scripting_engine_module_instance::load()
 
                 --line_number;
             }
+            else
+            if( is_vbscript )
+                --line_number;
 
             _script_site->parse( text, line_number );
         }
