@@ -381,7 +381,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
                     log()->info( message_string( "SCHEDULER-950" ) );
-                    _state = Z_NDEBUG_DEBUG( s_configuration_fetched, s_registered );
+                    _state = s_registered;
                 }
 
                 if( _state != s_registered )  break;
@@ -389,6 +389,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_registered:
+#ifdef Z_DEBUG
             {
                 // Wird nach Verbindungsverlust nochmal durchlaufen
 
@@ -435,6 +436,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_configuration_fetched:
+#endif
                 _is_ready = true;   // Nach Verbindungsverlust bereits true
                 break;
 
