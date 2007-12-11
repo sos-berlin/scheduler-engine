@@ -11,8 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-12-11" version="2.0.192" subversion_revision="5429">
+        <revision jira="JS-52" type="correction" title="XML-Fehler beim Lesen des Auftrags-XML-Dokument">
+            <description>
+                <p>
+                    Je nach Blockung der Datenbank konnte beim Lesen eines Auftrags ein XML-Fehler auftreten.
+                    Das sollte behoben sein.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-12-11" version="2.0.192" subversion_revision="5428">
-        <revision type="correction" title="&lt;script language=&quot;perl&quot;> meldet Fehler mit Zeilennummer und Pfad">
+        <revision jira="JS-206" type="correction" title="&lt;script language=&quot;perl&quot;> meldet Fehler mit Zeilennummer und Pfad">
             <description>
                 <p>
                     Ein Fehler in einem (<scheduler_element name="script" attribute="language" value="perl"/>) wird jetzt

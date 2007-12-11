@@ -1206,14 +1206,16 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
             _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
 
             string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
-                                                                                       " where \"TASK_ID\"=" + as_string( task_id ) );
+                                                                                       " where \"TASK_ID\"=" + as_string( task_id ), 
+                                                    "" );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
 
             ptr<Task> task = create_task( +parameters, "", start_at, task_id );
             
             string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
-                                                                                 " where \"TASK_ID\"=" + as_string( task_id ) );
+                                                                                 " where \"TASK_ID\"=" + as_string( task_id ),
+                                         "" );
             if( !xml.empty() )  task->set_dom( xml::Document_ptr( xml ).documentElement() );
 
             task->_is_in_database = true;
