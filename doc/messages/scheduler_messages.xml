@@ -4113,7 +4113,12 @@
             </text>
         </message>
         
-        
+        <message code="SCHEDULER-899">
+            <text xml:lang="en">
+                <title>Scheduler has no UDP port, so updated configuration files on supervisor will not be noticed</title>
+                <!--title>Scheduler has no UDP port, so supervisor is polled every <p1/> seconds for updated configuration files</title-->
+            </text>
+        </message>
         
         
         <message code="SCHEDULER-701">

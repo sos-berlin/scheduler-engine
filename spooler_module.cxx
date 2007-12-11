@@ -73,7 +73,7 @@ void Text_with_includes::initialize()
 
 void Text_with_includes::append_dom( const xml::Element_ptr& element )
 {
-    int linenr_base = element.line_number(); //? element.line_number() - 1 : 0;
+    int linenr_base = element.line_number();
 
     for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
     {
@@ -104,7 +104,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                 e.setAttribute( "linenr", linenr_base );
               //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
 
-                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
+                linenr_base += count( text.begin(), text.end(), '\n' );     // Für MSXML
                 break;
             }
 
@@ -116,7 +116,7 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                 {
                     xml::Element_ptr include_element = _dom_document.createElement( "include" );
                     include_element.setAttribute( "file", e.getAttribute( "file" ) );
-                    include_element.setAttribute( "linenr", linenr_base );
+                    //include_element.setAttribute( "linenr", linenr_base );
 
                     _dom_document.documentElement().appendChild( include_element );
                 }
@@ -175,7 +175,7 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
 
 int Text_with_includes::text_element_linenr( const xml::Element_ptr& element )
 {
-    return element.int_getAttribute( "linenr", 0 );
+    return element.int_getAttribute( "linenr", 1 );
 }
 
 //---------------------------------------------------------------------Text_with_includes::is_empty

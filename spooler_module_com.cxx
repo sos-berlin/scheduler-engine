@@ -267,13 +267,16 @@ bool Scripting_engine_module_instance::load()
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 
+    int line_number_correction = string_begins_with( lcase( _script_site->_engine_name ), "perl" )? -1 : 0;
+
     DOM_FOR_EACH_ELEMENT( _module->_text_with_includes.dom_element(), element )
     {
         string text = _module->_text_with_includes.read_text_element( element, _module->_include_path );
         if( text != "" )
         {
-            _script_site->parse( text, 
-                                 _module->_text_with_includes.text_element_linenr( element ) );
+            int line_number = _module->_text_with_includes.text_element_linenr( element ) + line_number_correction;
+            //Z_LOG2( "scheduler.script", "parse(" << text.length() << " bytes, line " << line_number << ")\n" );
+            _script_site->parse( text, line_number );
         }
     }
 

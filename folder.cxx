@@ -378,7 +378,7 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 bool Folder_subsystem::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler", "Prüfe Konfigurationsverzeichnis " << _directory << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory << "\n" );
 
     _directory_event.reset();
 

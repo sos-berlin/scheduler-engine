@@ -21,6 +21,10 @@ using xml::Xml_writer;
 
 struct Supervisor_client;
 
+//--------------------------------------------------------------------------------------------const
+
+//const int                       supervisor_configuration_poll_interval = 60;
+
 //---------------------------------------------------------------------------------Remote_scheduler
 
 struct Remote_scheduler : Remote_scheduler_interface
@@ -359,8 +363,8 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 if( _spooler->_tcp_port )
                 xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port   );
                 
-                if( _spooler->_udp_port )
-                xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port   );
+                //if( _spooler->_udp_port )
+                //xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port   );
 
                 xml_writer->set_attribute( "version"     , _spooler->_version    );
                 xml_writer->end_element( "register_remote_scheduler" );
@@ -377,7 +381,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
                 {
                     log()->info( message_string( "SCHEDULER-950" ) );
-                    _state = s_registered;
+                    _state = Z_NDEBUG_DEBUG( s_configuration_fetched, s_registered );
                 }
 
                 if( _state != s_registered )  break;
@@ -397,9 +401,13 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 xml_writer->write_prolog();
 
                 xml_writer->begin_element( "supervisor.configuration.fetch_updated_files" );
-                xml_writer->set_attribute( "scheduler_id"                  , _spooler->id() );
-                xml_writer->set_attribute( "tcp_port"                      , _spooler->_tcp_port );
-                xml_writer->set_attribute( "signal_next_change_at_udp_port", _spooler->_udp_port );
+                xml_writer->set_attribute( "scheduler_id", _spooler->id() );
+
+                if( _spooler->_tcp_port )
+                xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port );
+
+                if( _spooler->_udp_port )  xml_writer->set_attribute( "signal_next_change_at_udp_port", _spooler->_udp_port );
+                                     else  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
 
                 write_directory_structure( xml_writer, root_path );
 
@@ -729,6 +737,68 @@ void Supervisor::close()
 {
 }
 
+//----------------------------------------------------------------------Supervisor::async_continue_
+#if 0
+
+bool Supervisor::async_continue_( Continue_flags )
+{
+    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _remote_schedulers_directory << "\n" );
+
+    _remote_schedulers_directory_event.reset();
+
+#   ifdef Z_WINDOWS
+        //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _remote_schedulers_directory << "\")\n" );
+        BOOL ok = FindNextChangeNotification( _remote_schedulers_directory_event );
+        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+#   endif
+
+
+    check_folders();
+    
+    return true;
+}
+
+//------------------------------------------------------------------------Supervisor::check_folders
+
+bool Supervisor::check_folders( double minimum_age )
+{
+    bool something_changed = false;
+
+    if( subsystem_state() == subsys_active )
+    {
+        double now = double_from_gmtime();
+
+        if( _last_change_at + minimum_age <= now )
+        {
+            if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
+
+            something_changed = _root_folder->adjust_with_directory( now );
+            
+            if( something_changed )  _last_change_at = now;
+
+            _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
+                                                                                            : directory_watch_interval_max;
+
+            if( _read_again_at )  set_async_next_gmtime( _read_again_at );
+                            else  set_async_delay( _directory_watch_interval );
+        }
+    }
+
+    return something_changed;
+}
+
+//--------------------------------------------------------------------Supervisor::async_state_text_
+
+string Supervisor::async_state_text_() const
+{
+    S result;
+
+    result << obj_name();
+
+    return result;
+}
+
+#endif
 //----------------------------------------------------Supervisor::execute_register_remote_scheduler
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
@@ -756,8 +826,11 @@ void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writ
 {
     assert( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) );
 
-    int    tcp_port       = element.int_getAttribute( "tcp_port" );
     string directory_name;
+    int    tcp_port       = element.int_getAttribute( "tcp_port", 0 );
+
+    if( tcp_port == 0 )  z::throw_xc( Z_FUNCTION, "TCP port is missing" );
+
 
     Directory_lister dir ( _spooler->_remote_configuration_directory );
     while( ptr<file::File_info> file_info = dir.get() )
@@ -790,6 +863,13 @@ void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writ
 
     if( directory_name == "" )  z::throw_xc( "SCHEDULER-455", Host_and_port( communication_operation->connection()->peer().host(), tcp_port ).as_string() );
 
+
+    // Überwachung starten (auch wenn beim Lesen der Dateien ein Fehler auftritt)
+    // Async_operation - Verzeichnisbaum speichern und periodisch vergleichen
+    // Windows: Änderungssignal ist nur ein Hinweis, der Baum für den Scheduler wird trotzdem verglichen
+    // Baum des Schedulers im Register speichern? Verbindung zum Registereintrag herstellen
+    // Der Scheduler braucht seine Dateien nicht zu übergeben, wenn der Supervisor doch schon bescheid weiß? Auch im Fehlerfall?
+    //async_continue();
 
     xml_writer->begin_element( "configuration.directory" );
 

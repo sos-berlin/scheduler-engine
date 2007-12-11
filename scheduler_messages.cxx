@@ -476,6 +476,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-896", "File will be read again after $1 seconds" },
     { "SCHEDULER-897", "Error in replacement ignored::\n$2" },
     { "SCHEDULER-898", "Folder is going to be removed because its configuration directory has been removed" },
+    { "SCHEDULER-899", "Scheduler has no UDP port, so updated configuration files on supervisor will not be noticed" },
     { "SCHEDULER-701", "Replicating '$1'" },
     { "SCHEDULER-702", "Removing '$1'" },
     {}

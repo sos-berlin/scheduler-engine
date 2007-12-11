@@ -2144,7 +2144,7 @@ void Spooler::run()
 
         if( !_is_activated  &&  
             cluster_is_active()  &&  
-            ( _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() ) )
+            ( !_supervisor_client  ||  _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() ) )
         {
             if( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() )
             {
