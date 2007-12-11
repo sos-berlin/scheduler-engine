@@ -276,14 +276,16 @@ bool Scripting_engine_module_instance::load()
         {
             int line_number = _module->_text_with_includes.text_element_linenr( element );
 
-#           ifdef Z_WINDOWS
-                if( is_perl )  line_number--;
-#            else    
-                if( is_perl )  _script_site->parse( S() << "\n" "#line " << ( line_number - 1 ) << " " 
-                                                                         << quoted_string( _module->_text_with_includes.text_element_filepath( element ), '"', '\\' ) 
-                                                                         << "\n", 
-                                                    line_number );
-#           endif
+            if( is_perl )
+            {
+                text = S() << "\n" 
+                              "#line " << line_number << " " 
+                                       << quoted_string( _module->_text_with_includes.text_element_filepath( element ), '"', '\\' ) 
+                                       << "\n"
+                           << text;
+
+                --line_number;
+            }
 
             _script_site->parse( text, line_number );
         }
