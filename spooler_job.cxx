@@ -332,8 +332,8 @@ Order* Combined_job_nodes::fetch_and_occupy_order( const Time& now, const string
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
-        Order_queue* order_queue = (*it)->order_queue();
-        result = order_queue->fetch_and_occupy_order( now, cause, occupying_task );
+        Job_node* job_node = *it;
+        result = job_node->fetch_and_occupy_order( now, cause, occupying_task );
         if( result )  break;
     }
 

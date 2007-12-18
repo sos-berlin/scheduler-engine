@@ -1125,6 +1125,28 @@ void Order_queue_node::set_action( const string& action_string )
     }
 }
 
+//---------------------------------------------------------------------Order_queue_node::is_running
+
+bool Order_queue_node::is_running()
+{
+    return _action != act_stop  &&  
+           _job_chain->state() == Job_chain::s_active;
+}
+
+//---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
+
+Order* Order_queue_node::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
+{
+    Order* result = NULL;
+
+    if( is_running() )
+    {
+        result = order_queue()->fetch_and_occupy_order( now, cause, occupying_task );
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------Order_queue_node::dom_element
 
 xml::Element_ptr Order_queue_node::dom_element( const xml::Document_ptr& document, const Show_what& show_what )

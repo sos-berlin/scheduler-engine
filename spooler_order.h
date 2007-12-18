@@ -536,6 +536,8 @@ struct Order_queue_node : Node
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     void                    set_action                      ( const string& );
     void                        handle_changed_processable_state();
+    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
+    bool                        is_running                  ();
 
   private:
     ptr<Order_queue>           _order_queue;

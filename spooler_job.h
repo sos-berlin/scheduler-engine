@@ -271,7 +271,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
   //Order_queue*                order_queue                 () const                                { return _order_queue; }
     Order_queue*                any_order_queue             () const;
-    Combined_job_nodes*      combined_order_queues          () const                                { return _combined_job_nodes; }
+    Combined_job_nodes*         combined_job_nodes          () const                                { return _combined_job_nodes; }
     bool                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
     bool                        is_in_job_chain             () const                                { return _combined_job_nodes && !_combined_job_nodes->is_empty(); }
