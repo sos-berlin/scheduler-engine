@@ -223,6 +223,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_security.h"
 #include "spooler_wait.h"
 #include "folder.h"
+#include "directory_observer.h"
 #include "scheduler_script.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"

@@ -76,7 +76,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );
     void                        close_notification      ();
-    Order*                      read_directory          ( bool was_notified, const string& cause );
+    void                        read_directory          ( bool was_notified, const string& cause );
     void                        read_new_files_and_handle_deleted_files( const string& cause );
     bool                        read_new_files          ();
     bool                        clean_up_blacklisted_files();
@@ -537,16 +537,14 @@ void Directory_file_order_source::withdraw_order_request()
 {
     Z_LOGI2( "joacim", Z_FUNCTION << " " << _path << "\n" );
 
-    _expecting_request_order = false;
+    _expecting_request_order = true;
     set_async_next_gmtime( double_time_max );
 }
 
 //------------------------------------------------------Directory_file_order_source::read_directory
 
-Order* Directory_file_order_source::read_directory( bool was_notified, const string& )
+void Directory_file_order_source::read_directory( bool was_notified, const string& )
 {
-    Order* result = NULL;
-
     for( int try_index = 1;; try_index++ )           // Nach einem Fehler machen wir einen zweiten Versuch, bevor wir eine eMail schicken
     {
         try
@@ -608,9 +606,7 @@ Order* Directory_file_order_source::read_directory( bool was_notified, const str
         break;
     }
 
-    _expecting_request_order = result != NULL;  // Nächstes request_order() abwarten
-
-    return result;
+    _expecting_request_order = false;
 }
 
 //----------------------------------------------Directory_file_order_source::fetch_and_occupy_order

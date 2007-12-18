@@ -365,6 +365,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\directory_observer.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\folder.cxx"
 				>
 			</File>

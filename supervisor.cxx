@@ -277,13 +277,6 @@ const Com_method Supervisor_client::_methods[] =
     {}
 };
 
-//------------------------------------------------------------------------------file_info_is_lesser
-
-inline bool file_info_is_lesser( const file::File_info* a, const file::File_info* b )
-{
-    return a->path() < b->path();
-}
-
 //-----------------------------------------Supervisor_client_interface::Supervisor_client_interface
 
 Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, Type_code tc, Class_descriptor* class_descriptor )  

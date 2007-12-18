@@ -25,6 +25,10 @@ struct Subfolder_folder;
 const extern char               folder_separator;
 extern const Absolute_path      root_path;
 
+//-------------------------------------------------------------------------------------------------
+
+inline bool                     file_info_is_lesser         ( const file::File_info* a, const file::File_info* b )  { return a->path() < b->path(); }
+
 //---------------------------------------------------------------------------------------------Path
 
 struct Path : string
@@ -160,6 +164,10 @@ struct Base_file_info
                                                                                                       _info_timestamp(clock) {}
 
     bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
+    bool                        operator ==                 ( const Base_file_info& f ) const       { return _filename      == f._filename  &&
+                                                                                                             _timestamp_utc == f._timestamp_utc; }
+    bool                        operator !=                 ( const Base_file_info& f ) const       { return !( *this == f ); }
+
     static bool                 less_dereferenced           ( const Base_file_info* a, const Base_file_info* b )  { return *a < *b; }
 
     string                     _filename;                   // Ohne Verzeichnis
