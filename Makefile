@@ -15,6 +15,7 @@ endif
 
 objects = \
  cluster.o\
+ directory_observer.o\
  folder.o\
  java_subsystem.o\
  lock.o\
