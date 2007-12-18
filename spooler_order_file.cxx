@@ -606,7 +606,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
         break;
     }
 
-    _expecting_request_order = false;
+    //_expecting_request_order = false;
 }
 
 //----------------------------------------------Directory_file_order_source::fetch_and_occupy_order
