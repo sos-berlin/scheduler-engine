@@ -2798,6 +2798,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 signal( state_cmd_name(cmd) );
                                 break;
 
+            case sc_reread:     ok = true;  break;      // Jira JS-208
             //case sc_reread:     _reread = true, ok = true;  
             //                    signal( state_cmd_name(cmd) );
             //                    break;
@@ -2895,7 +2896,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_end:      return "end";
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";
-      //case Job::sc_reread:   return "reread";
+        case Job::sc_reread:   return "reread";
         case Job::sc_remove:   return "remove";
         default:               return as_string( (int)cmd );
     }

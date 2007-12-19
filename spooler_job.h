@@ -71,6 +71,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
         sc_end,                 // s_running                 -> s_pending
         sc_suspend,             // s_running                 -> s_suspended
         sc_continue,            // s_suspended               -> s_running
+        sc_reread,              // Null-Operation, Jira JS-208
         sc_remove,              // Spooler::remove_job
         sc__max
     };
