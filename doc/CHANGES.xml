@@ -11,6 +11,27 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2007-12-19" version="2.0.192" subversion_revision="5436">
+        <revision type="correction" title="Änderung einer Job-Konfiguration unter Unix hält Dateiaufträge nicht mehr an">
+            <description>
+                <p>
+                    Unter Unix hielt eine Änderung der Konfiguration des ersten Jobs der Jobkette 
+                    nach <scheduler_element name="file_order_source"/> die Dateiauftragsquelle an.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+        
+        <revision jira="JS-208" type="modification" title="modify_job cmd='reread' als NULL-Opertion wieder eingebaut">
+            <description>
+                <p>
+                    Das Kommando ist wirkungslos, weil die <scheduler_element name="include"/> 
+                    ohnehin bei jedem Job-Start erneut gelesen werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-12-11" version="2.0.192" subversion_revision="5429">
         <revision jira="JS-52" type="correction" title="XML-Fehler beim Lesen des Auftrags-XML-Dokument">
             <description>
