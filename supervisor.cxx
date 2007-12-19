@@ -382,7 +382,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_registered:
-#ifdef Z_DEBUG
+#ifdef Z_DEBUGxxx
             {
                 // Wird nach Verbindungsverlust nochmal durchlaufen
 
