@@ -809,7 +809,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         if( !order  &&  job_chain->is_distributed() ) 
             order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
 
-        result = order->dom_element( _answer, show );
+        if( order )  result = order->dom_element( _answer, show );
     }
 
     if( !result )

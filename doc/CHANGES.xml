@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-12-19" version="2.0.192" subversion_revision="5436">
+    <change date="2007-12-19" version="2.0.192" subversion_revision="5437">
         <revision type="correction" title="Änderung einer Job-Konfiguration unter Unix hält Dateiaufträge nicht mehr an">
             <description>
                 <p>
@@ -21,7 +21,16 @@
                 </p>
             </description>
         </revision>
-        
+
+        <revision type="correction" title="&lt;show_order>">
+            <description>
+                <p>
+                    Das Kommando <scheduler_element element="show_order"/> konnte den Scheduler abbrechen,
+                    wenn der Auftrag nicht mehr vorhanden war. Das ist behoben.
+                </p>
+            </description>
+        </revision>
+
         <revision jira="JS-208" type="modification" title="modify_job cmd='reread' als NULL-Opertion wieder eingebaut">
             <description>
                 <p>
