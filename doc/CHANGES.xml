@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-12-20" version="2.0.192" subversion_revision="5442">
+        <revision jira="JS-178"  type="correction" title="Große Antwort einer API-Methode ließ Task hängen">
+            <description>
+                <p>
+                    Ein Aufruf von z.B. <scheduler_method class="Spooler" object="spooler" method="execute_xml"/> 
+                    mit einer großen Rückgabe (etwa >100KB) konnte hängen bleiben.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
 
+    
     <change date="2007-12-19" version="2.0.192" subversion_revision="5438">
         <revision type="correction" title="Änderung einer Job-Konfiguration unter Unix hält Dateiaufträge nicht mehr an">
             <description>
@@ -25,13 +37,13 @@
         <revision type="correction" title="&lt;show_order>">
             <description>
                 <p>
-                    Das Kommando <scheduler_element element="show_order"/> konnte den Scheduler abbrechen,
+                    Das Kommando <scheduler_element name="show_order"/> konnte den Scheduler abbrechen,
                     wenn der Auftrag nicht mehr vorhanden war. Das ist behoben.
                 </p>
             </description>
         </revision>
 
-        <revision jira="JS-208" type="modification" title="modify_job cmd='reread' als NULL-Opertion wieder eingebaut">
+        <revision jira="JS-208" type="modification" title="modify_job cmd='reread' als Null-Operation wieder eingebaut">
             <description>
                 <p>
                     Das Kommando ist wirkungslos, weil die <scheduler_element name="include"/> 
