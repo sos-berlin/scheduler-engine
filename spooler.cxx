@@ -449,9 +449,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
                 ctrl_c_pressed++;
                 last_signal = sig;
 
-                if( ctrl_c_pressed >= 2  &&  spooler_ptr )  spooler_ptr->abort_now();  // Unter Linux ist ctrl_c_pressed meisten > 2, weil 
-                                                                                       // jeder Thread diese Routine durchlaufen lässt. Lösung: sigaction()
-
+                if( ctrl_c_pressed - ctrl_c_pressed_handled > 4 )  spooler_ptr->abort_now();
 
                 //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
                 //if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
@@ -469,7 +467,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
                 fprintf( stderr, "Unknown signal %d\n", sig );
         }
 
-        set_ctrl_c_handler( ctrl_c_pressed < 4 );
+        set_ctrl_c_handler( ctrl_c_pressed <= 5 );
     }
 
 #endif
