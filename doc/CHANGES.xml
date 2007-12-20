@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2007-12-19" version="2.0.192" subversion_revision="5437">
+    <change date="2007-12-19" version="2.0.192" subversion_revision="5438">
         <revision type="correction" title="Änderung einer Job-Konfiguration unter Unix hält Dateiaufträge nicht mehr an">
             <description>
                 <p>
