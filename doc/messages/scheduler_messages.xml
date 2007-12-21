@@ -2661,7 +2661,7 @@
 
         <message code="SCHEDULER-435">
             <text xml:lang="en">
-                <title>Standing order filename has not expected syntax <code><i>jobchain</i>,<i>orderid</i>.job.xml</code>: <p1>filename</p1></title>
+                <title>Standing order filename has not expected syntax <code><i>jobchain</i>,<i>orderid</i>.order.xml</code>: <p1>filename</p1></title>
             </text>
         </message>
 

@@ -7,10 +7,6 @@
     author="$Author$"
     date= "$Date$"
 >
-<register_keyword keyword=''>
-    <register_keyword_display><code>&lt;&gt;</code></register_keyword_display>
-    <register_entry register_file='CHANGES.xml#use_element__' register_title='Änderungsprotokoll'  register_keyword=''/>
-</register_keyword>
 <register_keyword keyword='?'>
     <register_keyword_display><code>-?=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__?' register_title='Änderungsprotokoll'  register_keyword='?'/>

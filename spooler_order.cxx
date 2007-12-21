@@ -2576,7 +2576,8 @@ bool file_path_matches( const File_path& path, const File_path& directory, const
 
     if( path.directory() == File_path( directory, "" ).directory() )
     {
-        if( regex.match( path.name() ) )  result = true;
+        if( !regex.is_compiled()  ||                        // Kein Regulärer Ausdruck angegeben
+            regex.match( path.name() ) )  result = true;    // oder der angegebene passt
     }
 
     return result;
@@ -4929,6 +4930,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
 xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what, const string* log ) const
 {
+    assert( this ); if( !this )  z::throw_xc( Z_FUNCTION );
+
+
     xml::Element_ptr result = dom_document.createElement( "order" );
 
     if( _standing_order )  _standing_order->fill_file_based_dom_element( result, show_what );

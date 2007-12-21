@@ -10,6 +10,24 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2007-12-21" version="2.0.192" subversion_revision="5444">
+        <revision type="correction" title="&lt;file_order_source> ohne regex= konnte Scheduler abbrechen">
+            <description>
+                <p>
+                    Bei <scheduler_element name="file_order_source"/> mit leerem Attribut <code>regex=</code>
+                    konnte der Scheduler abbrechen, 
+                    nachdem ein Dateiname auf die Schwarze Liste gesetzt worden ist
+                    (weil er nach Auftragsführung noch vorhanden ist).
+                    Das ist behoben.
+                </p>
+                <p>
+                    Zwischenlösung im bisherigen Scheduler: <code>regex="."</code>
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2007-12-20" version="2.0.192" subversion_revision="5442">
         <revision jira="JS-178"  type="correction" title="Große Antwort einer API-Methode ließ Task hängen">
             <description>
