@@ -42,7 +42,7 @@ use strict;
                 <script language="perl">
 
 print ( "PERL PERL\n" );
-fehler1();
+#fehler1();
 #die;
                     <include file="${SCHEDULER_TEST}/expect.pl"
 
@@ -58,7 +58,7 @@ fehler1();
 use strict;
 
 #die();
-FEHLER3();
+#FEHLER3();
                     ]]></script>
                 <run_time once="yes"/>
             </job>
