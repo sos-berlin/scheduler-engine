@@ -663,7 +663,7 @@ Spooler::Spooler()
     _db                         = Z_NEW( Database( this ) );
     _http_server                = http::new_http_server( this );
     _web_services               = new_web_services( this );
-    _supervisor                 = new_supervisor( this );
+    _supervisor                 = supervisor::new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -1089,7 +1089,7 @@ Task_subsystem* Spooler::task_subsystem()
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
 
-Supervisor_client_interface* Spooler::supervisor_client()
+supervisor::Supervisor_client_interface* Spooler::supervisor_client()
 { 
     if( !_supervisor_client )  z::throw_xc( "SCHEDULER-423" );
 
@@ -1943,7 +1943,7 @@ void Spooler::stop( const exception* )
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
     _java_subsystem            ->switch_subsystem_state( subsys_stopped );
-    //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
+    _supervisor                ->switch_subsystem_state( subsys_stopped );
 
 
     if( _cluster )

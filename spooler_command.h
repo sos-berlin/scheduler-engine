@@ -242,6 +242,9 @@ struct Command_processor
                                 Command_processor           ( Spooler*, Security::Level, Communication::Operation* cp = NULL );
                                ~Command_processor           ();
 
+    Security::Level             security_level              () const                                { return _security_level; }
+    Communication::Operation*   communication_operation     () const                                { return _communication_operation; }
+
     void                        execute_config_file         ( const string& xml_filename );
     void                        execute_http                ( http::Operation*, Http_file_directory* );
     ptr<Command_response>       response_execute            ( const string& xml_text, bool indent = false );
@@ -287,7 +290,6 @@ struct Command_processor
     xml::Element_ptr            execute_remove_order        ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remove_job_chain    ( const xml::Element_ptr& );
     xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
-    xml::Element_ptr            execute_supervisor_configuration_fetch_updated_files( const xml::Element_ptr& );
     xml::Element_ptr            execute_service_request     ( const xml::Element_ptr& );
     xml::Element_ptr            execute_get_events          ( const xml::Element_ptr& );
 

@@ -19,7 +19,6 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_database:                     return "Database";
         case type_database_order_detector:      return "Database_order_detector";
         case type_directory_file_order_source:  return "Directory_file_order_source";
-        case type_directory_observer:           return "Directory_observer";
         case type_directory_tree:               return "Directory_tree";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
         case type_folder:                       return "Folder";
@@ -55,6 +54,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_process_class:                return "Process_class";
         case type_process_class_folder:         return "Process_class_folder";
         case type_process_class_subsystem:      return "Process_class_subsystem";
+        case type_remote_configuration_observer:return "Remote_configuration_observer";
+        case type_remote_scheduler:             return "Remote_scheduler";
+        case type_remote_schedulers_configuration: return "Remote_schedulers_configuration";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler_script_folder:      return "Scheduler_script_folder";

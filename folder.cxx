@@ -119,6 +119,16 @@ Path Path::folder_path() const
     return substr( 0, p - c_str() );
 }
 
+//---------------------------------------------------------------------------Path::root_folder_name
+
+string Path::root_folder_name() const
+{
+    size_t s = find( folder_separator );
+
+    return s == string::npos? "" 
+                            : substr( 0, s );
+}
+
 //---------------------------------------------------------------------------------------Path::name
 
 string Path::name() const

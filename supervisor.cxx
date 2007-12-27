@@ -14,39 +14,57 @@
 
 namespace sos {
 namespace scheduler {
+namespace supervisor {
 
 //-------------------------------------------------------------------------------------------------
 
+using namespace directory_observer;
+
 using xml::Xml_writer;
 
+struct Supervisor;
 struct Supervisor_client;
 
 //--------------------------------------------------------------------------------------------const
 
 //const int                       supervisor_configuration_poll_interval = 60;
+const double                    udp_timeout                 = 60;
 
 //---------------------------------------------------------------------------------Remote_scheduler
 
-struct Remote_scheduler : Remote_scheduler_interface
+struct Remote_scheduler : Remote_scheduler_interface, 
+                          Scheduler_object
 {
-                                Remote_scheduler            ()                                      : _zero_(this+1){}
+                                Remote_scheduler            ( Supervisor* supervisor );
 
     void                        connection_lost_event       ( const exception* );
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show );
 
+    ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
+    ptr<Command_response>       execute_configuration_fetch_updated_files( const xml::Element_ptr&, Command_processor* );
+    void                        write_updated_files_to_xml  ( Xml_writer*, Directory*, const xml::Element_ptr& reference_element );
+    void                        write_file_to_xml           ( Xml_writer*, Directory*, const Directory_entry&, const xml::Element_ptr& reference_element );
+    bool                        check_remote_configuration  ();
+    void                        signal_remote_scheduler     ();
+    string                      obj_name                    () const;
+
+    string                      async_state_text_           () const                                { return obj_name(); }
+    bool                        async_continue_             ( Continue_flags );
+    bool                        async_finished_             () const                                { return false; }
 
     Fill_zero                  _zero_;
+    Supervisor*                _supervisor;
     Host_and_port              _host_and_port;
+    int                        _udp_port;
     string                     _scheduler_id;
-    string                     _version;
+    string                     _scheduler_version;
     Time                       _connected_at;
     Time                       _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
     Xc_copy                    _error;
-
-  //ptr<object_server::Proxy>  _scheduler_proxy;
+    int                        _configuration_version;
 };
 
 //------------------------------------------------------------------------Remote_scheduler_register
@@ -57,6 +75,7 @@ struct Remote_scheduler_register
 
 
     void                        add                         ( Remote_scheduler* );
+    Remote_scheduler*           get                         ( const Host_and_port& );
     Remote_scheduler*           get_or_null                 ( const Host_and_port& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -78,8 +97,52 @@ struct Xml_file_info : Base_file_info
         _md5.set_hex( element.getAttribute( "md5" ) );
     }
 
-    xml::Element_ptr                   _element;
-    Md5                                _md5;            // Leer bei einem Verzeichnis
+    xml::Element_ptr           _element;
+    Md5                        _md5;                        // Leer bei einem Verzeichnis
+};
+
+//----------------------------------------------------------------------------Remote_configurations
+
+struct Remote_configurations : Scheduler_object,
+                               Event_operation
+{
+                                Remote_configurations       ( Supervisor*, const File_path& directory );
+                               ~Remote_configurations       ();
+
+    void                        close                       ();
+
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+    Socket_event*               async_event                 ()                                      { return &_directory_event; }
+  //bool                        async_signaled_             ()                                      { return is_signaled(); }
+    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
+
+
+  //File_path                   directory_path              () const                                { return _directory_path; }
+    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
+
+  //bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
+  //void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
+
+    void                        activate                    ();
+    bool                     is_activated                   () const                                { return _is_activated; }
+
+    bool                        check                       ( double minimum_age = 0 );
+
+
+  private:
+    Fill_zero                  _zero_;
+    Supervisor*                _supervisor;
+    Event                      _directory_event;
+    ptr<Directory_tree>        _directory_tree;
+    int                        _directory_watch_interval;
+    double                     _last_change_at;
+    double                     _read_again_at;
+    bool                       _is_activated;
 };
 
 //---------------------------------------------------------------------------------------Supervisor
@@ -90,22 +153,29 @@ struct Supervisor : Supervisor_interface
 
     // Subsystem
     void                        close                       ();
-    //bool                        subsystem_initialize        ();
-    //bool                        subsystem_load              ();
-    //bool                        subsystem_activate          ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
 
     // Supervisor_interface
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* );
-    void                        execute_configuration_fetch_updated_files( Xml_writer*, const xml::Element_ptr&, Communication::Operation* );
+    ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
+
+
+    Remote_configurations*      remote_configurations       () const                                { return _remote_configurations; }
+    void                        read_configuration_directory_names();
+    Directory*                  configuration_directory_for_remote_scheduler( Remote_scheduler* );
+    bool                        check_remote_configurations ();
+    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
   private:
-    void                        write_updated_files_to_xml  ( Xml_writer*, const File_path&, const Absolute_path&, const xml::Element_ptr& );
-    void                        write_file_to_xml           ( Xml_writer*, const File_path&, const Absolute_path&, file::File_info*, const xml::Element_ptr& );
-
-
     Fill_zero                  _zero_;
     Remote_scheduler_register  _remote_scheduler_register;
+    ptr<Remote_configurations> _remote_configurations;
+    
+    typedef stdext::hash_map< Host_and_port, string >  Configuration_directory_map;
+    Configuration_directory_map _configuration_directory_map;
 };
 
 //---------------------------------------------------------------------Supervisor_client_connection
@@ -135,7 +205,7 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     const Host_and_port&        host_and_port               () const                                { return _host_and_port; }
     bool                        is_ready                    () const                                { return _is_ready; }
     bool                        connection_failed           () const                                { return _connection_failed; }
-
+    void                        start_update_configuration  ();
 
   protected:
     string                      async_state_text_           () const                                { return obj_name(); }
@@ -171,6 +241,7 @@ struct Supervisor_client : Supervisor_client_interface
     // Supervisor_client_interface
     bool                        is_ready                    () const                                { return _client_connection && _client_connection->is_ready(); }
     bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
+    void                        start_update_configuration  ()                                      { if( _client_connection )  _client_connection->start_update_configuration(); }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -320,6 +391,17 @@ void Supervisor_client_connection::connect()
     _state = s_connecting;
 }
 
+//-----------------------------------------Supervisor_client_connection::start_update_configuration
+
+void Supervisor_client_connection::start_update_configuration()
+{
+    if( _state == s_configuration_fetched )
+    {
+        _state = s_registered;
+        async_continue();
+    }
+}
+
 //----------------------------------------------------Supervisor_client_connection::async_continue_
 
 bool Supervisor_client_connection::async_continue_( Continue_flags )
@@ -355,11 +437,14 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 if( _spooler->_tcp_port )
                 xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port   );
+
+                if( _spooler->_udp_port )
+                xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port );
                 
                 //if( _spooler->_udp_port )
                 //xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port   );
 
-                xml_writer->set_attribute( "version"     , _spooler->_version    );
+                xml_writer->set_attribute( "version"     , _spooler->_version );
                 xml_writer->end_element( "register_remote_scheduler" );
                 
                 xml_writer->close();
@@ -382,7 +467,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_registered:
-#ifdef Z_DEBUGxxx
+#ifdef Z_DEBUG
             {
                 // Wird nach Verbindungsverlust nochmal durchlaufen
 
@@ -605,6 +690,15 @@ string Supervisor_client_connection::obj_name() const
 
 //-----------------------------------------------------------Remote_scheduler_register::get_or_null
 
+Remote_scheduler* Remote_scheduler_register::get( const Host_and_port& hp )
+{
+    Remote_scheduler* result = get_or_null( hp );
+    if( !result ) z::throw_xc( "SCHEDULER-457", hp.as_string() );
+    return result;
+}
+
+//-----------------------------------------------------------Remote_scheduler_register::get_or_null
+
 Remote_scheduler* Remote_scheduler_register::get_or_null( const Host_and_port& hp )
 {
     Map::iterator it = _map.find( hp );
@@ -643,6 +737,16 @@ xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr
     return result;
 }
 
+//---------------------------------------------------------------Remote_scheduler::Remote_scheduler
+
+Remote_scheduler::Remote_scheduler( Supervisor* supervisor )              
+: 
+    Scheduler_object( supervisor->spooler(), this, type_remote_scheduler ),
+    _zero_(this+1), 
+    _supervisor(supervisor) 
+{
+}
+
 //------------------------------------------------------------------------Remote_scheduler::set_dom
 
 void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_element )
@@ -655,11 +759,11 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
     }
     else
     {
-        _logged_on    = true;
-        _is_connected = true;
-        _scheduler_id = register_scheduler_element.getAttribute( "scheduler_id" );
-        _version      = register_scheduler_element.getAttribute( "version" );
-        _connected_at = Time::now();
+        _logged_on         = true;
+        _is_connected      = true;
+        _scheduler_id      = register_scheduler_element.getAttribute( "scheduler_id" );
+        _scheduler_version = register_scheduler_element.getAttribute( "version" );
+        _connected_at      = Time::now();
     }
 
 
@@ -669,6 +773,222 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
     {
         if( e.nodeName_is( "ERROR" ) )  _error = xc_from_dom_error( e );
     }
+}
+
+//--------------------------------------------------------------------Remote_scheduler::execute_xml
+
+ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
+{
+    if( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) )  
+        return execute_configuration_fetch_updated_files( element, command_processor );
+    else
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
+}
+
+//--------------------------------------Remote_scheduler::execute_configuration_fetch_updated_files
+
+ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files( const xml::Element_ptr& element, Command_processor* command_processor )
+{
+    assert( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) );
+    if( command_processor->security_level() < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+    if( !command_processor->communication_operation() )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
+
+    set_async_delay( double_time_max );   // UDP-Nachricht nicht mehr wiederholen
+
+
+    _supervisor->switch_subsystem_state( subsys_active );
+    _supervisor->remote_configurations()->activate();
+
+
+    int tcp_port = element.int_getAttribute( "tcp_port", 0 );
+
+    //if( _udp_port )
+    //{
+    //    _supervisor->remote_configurations()->request_directory_changed_event( this );
+    //}
+
+
+    ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
+    response->begin_standard_response();
+
+    Xml_writer xml_writer ( response );
+
+    xml_writer.begin_element( "configuration.directory" );
+    write_updated_files_to_xml( &xml_writer, _supervisor->configuration_directory_for_remote_scheduler( this ), element );
+    xml_writer.end_element( "configuration.directory" );
+
+    xml_writer.close();
+    response->end_standard_response();
+    return +response;
+}
+
+//-----------------------------------------------------Remote_scheduler::write_updated_files_to_xml
+
+void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Directory* directory, const xml::Element_ptr& reference_element )
+{
+    list<Xml_file_info>           xml_file_info_list;
+    vector<const Xml_file_info*>  xml_ordered_file_infos;   // Geordnete Liste der bereits bekannten (replizierten) Dateien
+    
+
+    if( reference_element )
+    {
+        DOM_FOR_EACH_ELEMENT( reference_element, e )
+        {
+            if( e.nodeName_is( "configuration.directory" )  ||
+                e.nodeName_is( "configuration.file"      )     )
+            {
+                string filename = e.getAttribute( "name" );
+                xml_file_info_list.push_back( Xml_file_info( e ) );
+            }
+        }
+    }
+
+    xml_ordered_file_infos.reserve( xml_file_info_list.size() );
+    Z_FOR_EACH( list<Xml_file_info>, xml_file_info_list, it )  xml_ordered_file_infos.push_back( &*it );
+    sort( xml_ordered_file_infos.begin(), xml_ordered_file_infos.end(), Base_file_info::less_dereferenced );
+
+
+    directory->read( Directory::read_no_subdirectories );
+
+    Directory::Entry_list       ::iterator e   = directory->_ordered_list.begin();
+    vector<const Xml_file_info*>::iterator xfi = xml_ordered_file_infos.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
+
+    while( e   != directory->_ordered_list.end()  ||
+           xfi != xml_ordered_file_infos.end() )
+    {
+        /// Dateinamen gleich?
+
+        while( xfi != xml_ordered_file_infos.end()  &&
+               e   != directory->_ordered_list.end()  &&
+               (*xfi)->_filename == e->_file_info->path().name() )
+        {
+            if( e->_file_info->last_write_time() != (*xfi)->_timestamp_utc  ||
+                md5( string_from_file( e->_file_info->path() ) ) != (*xfi)->_md5 )  // MD5 vom Verzeichnis ist ""
+            {
+                write_file_to_xml( xml_writer, directory, *e, (*xfi)->_element );
+            }
+
+            e++, xfi++;
+        }
+
+
+
+        /// Dateien hinzugefügt?
+
+        while( e != directory->_ordered_list.end()  &&
+               ( xfi == xml_ordered_file_infos.end()  ||  e->_file_info->path().name() < (*xfi)->_filename ) )
+        {
+            write_file_to_xml( xml_writer, directory, *e, NULL );
+            e++;
+        }
+
+        assert( e == directory->_ordered_list.end()  || 
+                xfi == xml_ordered_file_infos.end() ||
+                e->_file_info->path().name() >= (*xfi)->_normalized_name );
+        
+
+
+        /// Dateien gelöscht?
+
+        while( xfi != xml_ordered_file_infos.end()  &&
+               ( e == directory->_ordered_list.end()  ||  e->_file_info->path().name() > (*xfi)->_filename ) )  // Datei entfernt?
+        {
+            xml_writer->begin_element( e->_file_info->is_directory()? "configuration.directory" : "configuration.file" );
+            xml_writer->set_attribute( "removed", "yes" );
+            xml_writer->end_element( e->_file_info->is_directory()? "configuration.directory" : "configuration.file" );
+            xfi++;
+        }
+
+        assert( xfi == xml_ordered_file_infos.end()  ||
+                e == directory->_ordered_list.end()  ||
+                e->_file_info->path().name() <= (*xfi)->_filename );
+    }
+
+    _configuration_version = directory->version();
+}
+
+//--------------------------------------------------------------Remote_scheduler::write_file_to_xml
+
+void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, Directory* directory, const Directory_entry& directory_entry,
+                                          const xml::Element_ptr& reference_element )
+{
+    bool is_directory = directory_entry._file_info->is_directory();
+
+    xml_writer->begin_element( is_directory? "configuration.directory" : "configuration.file" );
+    xml_writer->set_attribute( "name", directory_entry._file_info->path().name() );
+
+    if( is_directory )
+    {
+        write_updated_files_to_xml( xml_writer, directory_entry._subdirectory, reference_element );
+    }
+    else
+    {
+        xml_writer->set_attribute( "last_write_time", Time( directory_entry._file_info->last_write_time(), Time::is_utc ).xml_value() );
+
+        try
+        {
+            string content = string_from_file( File_path( directory->file_path(), directory_entry._file_info->path().name() ) );
+
+            xml_writer->begin_element( "content" );
+            xml_writer->set_attribute( "encoding", "base64" );
+
+                xml_writer->write( base64_encoded( content ) );
+
+            xml_writer->end_element( "content" );
+        }
+        catch( exception& x )
+        {
+            log()->error( x.what() );
+        }
+    }
+
+    xml_writer->end_element( is_directory? "configuration.directory" : "configuration.file" );
+}
+
+//-----------------------------------------------------Remote_scheduler::check_remote_configuration
+
+bool Remote_scheduler::check_remote_configuration()
+{
+    bool result = false;
+
+    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
+
+    if( _udp_port )
+    {
+        if( Directory* directory = _supervisor->configuration_directory_for_remote_scheduler( this ) )
+        {
+            if( _configuration_version == directory->version() )  
+                directory->read( Directory::read_subdirectories );
+
+            if( _configuration_version != directory->version() )  
+            {
+                signal_remote_scheduler();
+                result = true;
+            }
+        }
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
+
+void Remote_scheduler::signal_remote_scheduler()
+{
+    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );  int EXCEPTION;
+    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
+}
+
+//----------------------------------------------------------------Remote_scheduler::async_continue_
+
+bool Remote_scheduler::async_continue_( Continue_flags )
+{
+    if( _is_connected )
+    {
+        signal_remote_scheduler();
+    }
+
+    return true;
 }
 
 //--------------------------------------------------------------------Remote_scheduler::dom_element
@@ -681,7 +1001,7 @@ xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& documen
     result.setAttribute_optional( "hostname"        , _host_and_port._host.name() );
     result.setAttribute         ( "tcp_port"        , _host_and_port._port );
     result.setAttribute_optional( "scheduler_id"    , _scheduler_id );
-    result.setAttribute         ( "version"         , _version );
+    result.setAttribute         ( "version"         , _scheduler_version );
 
   //result.setAttribute         ( "logged_on"       , _logged_on? "yes" : "no" );
 
@@ -699,6 +1019,17 @@ xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& documen
     return result;
 }
 
+//-----------------------------------------------------------------------Remote_scheduler::obj_name
+
+string Remote_scheduler::obj_name() const
+{ 
+    S result;
+    result << Scheduler_object::obj_name();
+    result << " ";
+    result << _host_and_port.as_string();
+    return result;
+}
+
 //----------------------------------------------------------Remote_scheduler::connection_lost_event
   
 void Remote_scheduler::connection_lost_event( const exception* x )
@@ -707,6 +1038,139 @@ void Remote_scheduler::connection_lost_event( const exception* x )
     _is_connected = false;
 
     if( _logged_on )  _error = x;
+}
+
+//-----------------------------------------------------Remote_configurations::Remote_configurations
+
+Remote_configurations::Remote_configurations( Supervisor* supervisor, const File_path& directory_path )
+:
+    Scheduler_object( supervisor->spooler(), this, type_remote_configuration_observer ),
+    _zero_(this+1),
+    _supervisor(supervisor),
+    _directory_watch_interval( folder::directory_watch_interval_max )
+{
+    _directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
+}
+
+//----------------------------------------------------Remote_configurations::~Remote_configurations
+    
+Remote_configurations::~Remote_configurations()
+{
+    try
+    {
+        close();
+    }
+    catch( exception& x )  { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
+}
+
+//---------------------------------------------------------------------Remote_configurations::close
+
+void Remote_configurations::close()
+{
+    remove_from_event_manager();
+
+#   ifdef Z_WINDOWS
+        Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
+        FindCloseChangeNotification( _directory_event._handle );
+        _directory_event._handle = NULL;
+#   endif
+
+    _directory_event.close();
+
+    _directory_tree = NULL;
+}
+
+//------------------------------------------------------------------Remote_configurations::activate
+
+void Remote_configurations::activate()
+{
+    if( !_is_activated )
+    {
+        _is_activated = true;
+
+#       ifdef Z_WINDOWS
+
+            assert( !_directory_event );
+
+            _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
+
+            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory_tree->directory_path() << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+            
+            HANDLE h = FindFirstChangeNotification( _directory_tree->directory_path().c_str(), 
+                                                    TRUE,                               // Mit Unterverzeichnissen
+                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
+                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
+                                                    FILE_NOTIFY_CHANGE_LAST_WRITE );
+
+            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
+
+            _directory_event._handle = h;
+
+
+#       endif
+
+        add_to_event_manager( _spooler->_connection_manager );
+        set_async_delay( folder::directory_watch_interval_min );
+    }
+}
+
+//-----------------------------------------------------------Remote_configurations::async_continue_
+
+bool Remote_configurations::async_continue_( Continue_flags )
+{
+    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
+
+    if( _directory_event.signaled() )
+    {
+        _directory_event.reset();
+
+#       ifdef Z_WINDOWS
+            //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory_path << "\")\n" );
+            BOOL ok = FindNextChangeNotification( _directory_event );
+            if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+#       endif
+
+    }
+
+    check();
+    
+    return true;
+}
+
+//---------------------------------------------------------Remote_configurations::async_state_text_
+
+string Remote_configurations::async_state_text_() const
+{
+    S result;
+
+    result << obj_name();
+
+    return result;
+}
+
+//---------------------------------------------------------------------Remote_configurations::check
+
+bool Remote_configurations::check( double minimum_age )
+{
+    bool something_changed = false;
+    double now = double_from_gmtime();
+
+    if( _last_change_at + minimum_age <= now )
+    {
+        if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
+
+        something_changed = _supervisor->check_remote_configurations();
+        
+        if( something_changed )  _last_change_at = now;
+
+        _directory_watch_interval = now - _last_change_at < folder::directory_watch_interval_max? folder::directory_watch_interval_min
+                                                                                                : folder::directory_watch_interval_max;
+
+        if( _read_again_at )  set_async_next_gmtime( _read_again_at );
+                        else  set_async_delay( _directory_watch_interval );
+    }
+
+    return something_changed;
 }
 
 //-----------------------------------------------------------------------------------new_supervisor
@@ -730,70 +1194,39 @@ Supervisor::Supervisor( Scheduler* scheduler )
 
 void Supervisor::close()
 {
+    if( _remote_configurations )
+    {
+        _remote_configurations->close();
+        _remote_configurations = NULL;
+    }
 }
 
-//----------------------------------------------------------------------Supervisor::async_continue_
-#if 0
+//-----------------------------------------------------------------Supervisor::subsystem_initialize
 
-bool Supervisor::async_continue_( Continue_flags )
+bool Supervisor::subsystem_initialize()
 {
-    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _remote_schedulers_directory << "\n" );
-
-    _remote_schedulers_directory_event.reset();
-
-#   ifdef Z_WINDOWS
-        //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _remote_schedulers_directory << "\")\n" );
-        BOOL ok = FindNextChangeNotification( _remote_schedulers_directory_event );
-        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-#   endif
-
-
-    check_folders();
-    
+    set_subsystem_state( subsys_initialized );
     return true;
 }
 
-//------------------------------------------------------------------------Supervisor::check_folders
+//-----------------------------------------------------------------------Supervisor::subsystem_load
 
-bool Supervisor::check_folders( double minimum_age )
+bool Supervisor::subsystem_load()
 {
-    bool something_changed = false;
+    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
 
-    if( subsystem_state() == subsys_active )
-    {
-        double now = double_from_gmtime();
-
-        if( _last_change_at + minimum_age <= now )
-        {
-            if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
-
-            something_changed = _root_folder->adjust_with_directory( now );
-            
-            if( something_changed )  _last_change_at = now;
-
-            _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
-                                                                                            : directory_watch_interval_max;
-
-            if( _read_again_at )  set_async_next_gmtime( _read_again_at );
-                            else  set_async_delay( _directory_watch_interval );
-        }
-    }
-
-    return something_changed;
+    set_subsystem_state( subsys_loaded );
+    return true;
 }
 
-//--------------------------------------------------------------------Supervisor::async_state_text_
+//-------------------------------------------------------------------Supervisor::subsystem_activate
 
-string Supervisor::async_state_text_() const
+bool Supervisor::subsystem_activate()
 {
-    S result;
-
-    result << obj_name();
-
-    return result;
+    set_subsystem_state( subsys_active );
+    return true;
 }
 
-#endif
 //----------------------------------------------------Supervisor::execute_register_remote_scheduler
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
@@ -805,35 +1238,45 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
 
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null( host_and_port );
 
-    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
+    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler( this ) );
 
     remote_scheduler->_host_and_port = host_and_port;
     remote_scheduler->_host_and_port._host.resolve_name();
     remote_scheduler->set_dom( register_remote_scheduler_element );
+    remote_scheduler->_udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
     
     xml_processor->_operation_connection->_remote_scheduler = +remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
     _remote_scheduler_register.add( remote_scheduler );
 }
 
-//--------------------------------------------Supervisor::execute_configuration_fetch_updated_files
+//--------------------------------------------------------------------------Supervisor::execute_xml
 
-void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writer, const xml::Element_ptr& element, Communication::Operation* communication_operation )
+ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    assert( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) );
-
-    string directory_name;
-    int    tcp_port       = element.int_getAttribute( "tcp_port", 0 );
-
+    int tcp_port = element.int_getAttribute( "tcp_port", 0 );
     if( tcp_port == 0 )  z::throw_xc( Z_FUNCTION, "TCP port is missing" );
 
+    Remote_scheduler* remote_scheduler = _remote_scheduler_register.get( Host_and_port( command_processor->communication_operation()->_connection->peer_host(), tcp_port ) );
 
-    Directory_lister dir ( _spooler->_remote_configuration_directory );
-    while( ptr<file::File_info> file_info = dir.get() )
+    return remote_scheduler->execute_xml( element, command_processor );
+}
+
+//---------------------------------------------------Supervisor::read_configuration_directory_names
+
+void Supervisor::read_configuration_directory_names()
+{
+    _configuration_directory_map.clear();
+
+    Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
+
+    root_directory->read( Directory::read_no_subdirectories );
+
+    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
     {
-        if( file_info->is_directory() )
+        if( e->_file_info->is_directory() )
         {
-            string s   = file_info->path().name();
-            size_t pos = s.find( '#' );
+            string s   = e->_file_info->path().name();
+            size_t pos = s.find( '#' );                     // Verzeichnisname "host#port"
 
             if( pos != string::npos )
             {
@@ -841,22 +1284,17 @@ void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writ
 
                 try
                 {
-                    Host_and_port host_and_port ( s );
+                    Host_and_port host_and_port ( s );      // Exception bei unbekannten Hostnamen
 
-                    if( host_and_port.ip()   == communication_operation->connection()->peer().ip()  &&  
-                        host_and_port.port() == tcp_port )
-                    {
-                        if( directory_name != "" )  z::throw_xc( "SCHEDULER-454", directory_name, file_info->path().name() );
-                        directory_name = file_info->path().name();         
-                    }
+                    Configuration_directory_map::iterator it = _configuration_directory_map.find( host_and_port );
+                    if( it != _configuration_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
+
+                    _configuration_directory_map[ host_and_port ] = e->_file_info->path().name();
                 }
                 catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
             }
         }
     }
-    dir.close();
-
-    if( directory_name == "" )  z::throw_xc( "SCHEDULER-455", Host_and_port( communication_operation->connection()->peer().host(), tcp_port ).as_string() );
 
 
     // Überwachung starten (auch wenn beim Lesen der Dateien ein Fehler auftritt)
@@ -865,144 +1303,39 @@ void Supervisor::execute_configuration_fetch_updated_files( Xml_writer* xml_writ
     // Baum des Schedulers im Register speichern? Verbindung zum Registereintrag herstellen
     // Der Scheduler braucht seine Dateien nicht zu übergeben, wenn der Supervisor doch schon bescheid weiß? Auch im Fehlerfall?
     //async_continue();
-
-    xml_writer->begin_element( "configuration.directory" );
-
-        write_updated_files_to_xml( xml_writer, File_path( _spooler->_remote_configuration_directory, directory_name ), root_path, element );
-
-    xml_writer->end_element( "configuration.directory" );
 }
 
-//-----------------------------------------------------------Supervisor::write_updated_files_to_xml
+//-----------------------------------------Supervisor::configuration_directory_for_remote_scheduler
 
-void Supervisor::write_updated_files_to_xml( Xml_writer* xml_writer, const File_path& directory, const Absolute_path& path, const xml::Element_ptr& reference_element )
+Directory* Supervisor::configuration_directory_for_remote_scheduler( Remote_scheduler* remote_scheduler )
 {
-    Folder_directory_lister dir ( _log );
-    dir.open( directory, path );
+    Directory* result = NULL;
 
-    if( dir.is_opened() )
+    read_configuration_directory_names();
+
+    Configuration_directory_map::iterator it = _configuration_directory_map.find( remote_scheduler->_host_and_port );
+    if( it != _configuration_directory_map.end() )  
     {
-        list< ptr<file::File_info> >  file_info_list;
-        list< Xml_file_info >       xml_file_info_list;
-        
-        while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( file_info );
-        dir.close();
-
-        if( reference_element )
-        {
-            DOM_FOR_EACH_ELEMENT( reference_element, e )
-            {
-                if( e.nodeName_is( "configuration.directory" )  ||
-                    e.nodeName_is( "configuration.file"      )     )
-                {
-                    string filename = e.getAttribute( "name" );
-                    xml_file_info_list.push_back( Xml_file_info( e ) );
-                }
-            }
-        }
-
-        vector<file::File_info*>      ordered_file_infos;       // Geordnete Liste der vorgefundenen Dateien    
-        vector<const Xml_file_info*>  xml_ordered_file_infos;   // Geordnete Liste der bereits bekannten (replizierten) Dateien
-
-        ordered_file_infos.reserve( file_info_list.size() );
-        Z_FOR_EACH_CONST( list< ptr<file::File_info> >, file_info_list, it )  ordered_file_infos.push_back( *it );
-        sort( ordered_file_infos.begin(), ordered_file_infos.end(), file_info_is_lesser );
-
-        xml_ordered_file_infos.reserve( xml_file_info_list.size() );
-        Z_FOR_EACH( list<Xml_file_info>, xml_file_info_list, it )  xml_ordered_file_infos.push_back( &*it );
-        sort( xml_ordered_file_infos.begin(), xml_ordered_file_infos.end(), Base_file_info::less_dereferenced );
-
-
-        vector<file::File_info*>    ::iterator fi  = ordered_file_infos.begin();
-        vector<const Xml_file_info*>::iterator xfi = xml_ordered_file_infos.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
-
-        while( fi != ordered_file_infos.end()  ||
-               xfi != xml_ordered_file_infos.end() )
-        {
-            /// Dateinamen gleich?
-
-            while( xfi != xml_ordered_file_infos.end()  &&
-                   fi  != ordered_file_infos.end()  &&
-                   (*xfi)->_filename == (*fi)->path().name() )
-            {
-                if( (*fi)->last_write_time() != (*xfi)->_timestamp_utc  ||
-                    md5( string_from_file( File_path( directory, Absolute_path( path, (*fi)->path().name() ) ) ) ) != (*xfi)->_md5 )  // MD5 vom Verzeichnis ist ""
-                {
-                    write_file_to_xml( xml_writer, directory, path, *fi, (*xfi)->_element );
-                }
-
-                fi++, xfi++;
-            }
-
-
-
-            /// Dateien hinzugefügt?
-
-            while( fi != ordered_file_infos.end()  &&
-                   ( xfi == xml_ordered_file_infos.end()  ||  (*fi)->path().name() < (*xfi)->_filename ) )
-            {
-                write_file_to_xml( xml_writer, directory, path, *fi, NULL );
-                fi++;
-            }
-
-            assert( fi == ordered_file_infos.end()  || 
-                    xfi == xml_ordered_file_infos.end() ||
-                    (*fi)->path().name() >= (*xfi)->_normalized_name );
-            
-
-
-            /// Dateien gelöscht?
-
-            while( xfi != xml_ordered_file_infos.end()  &&
-                   ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > (*xfi)->_filename ) )  // Datei entfernt?
-            {
-                xml_writer->begin_element( (*fi)->is_directory()? "configuration.directory" : "configuration.file" );
-                xml_writer->set_attribute( "removed", "yes" );
-                xml_writer->end_element( (*fi)->is_directory()? "configuration.directory" : "configuration.file" );
-                xfi++;
-            }
-
-            assert( xfi == xml_ordered_file_infos.end()  ||
-                    fi == ordered_file_infos.end()  ||
-                    (*fi)->path().name() <= (*xfi)->_filename );
-        }
+        Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
+        result = root_directory->entry( it->second )._subdirectory;
     }
+
+    return result;
 }
 
-//--------------------------------------------------------------------Supervisor::write_file_to_xml
+//----------------------------------------------------------Supervisor::check_remote_configurations
 
-void Supervisor::write_file_to_xml( Xml_writer* xml_writer, const File_path& directory, const Absolute_path& path, file::File_info* file_info, 
-                                    const xml::Element_ptr& reference_element )
+bool Supervisor::check_remote_configurations()
 {
-    xml_writer->begin_element( file_info->is_directory()? "configuration.directory" : "configuration.file" );
-    xml_writer->set_attribute( "name"           , file_info->path().name() );
-    xml_writer->set_attribute( "last_write_time", Time( file_info->last_write_time(), Time::is_utc ).xml_value() );
+    bool result = false;
 
-    if( file_info->is_directory() )
+    Z_FOR_EACH( Remote_scheduler_register::Map, _remote_scheduler_register._map, it )
     {
-        write_updated_files_to_xml( xml_writer, directory, path, reference_element );
-    }
-    else
-    {
-
-        try
-        {
-            string content = string_from_file( File_path( directory, Absolute_path( path, file_info->path().name() ) ) );
-
-            xml_writer->begin_element( "content" );
-            xml_writer->set_attribute( "encoding", "base64" );
-
-                xml_writer->write( base64_encoded( content ) );
-
-            xml_writer->end_element( "content" );
-        }
-        catch( exception& x )
-        {
-            _log->error( x.what() );
-        }
+        Remote_scheduler* remote_scheduler = it->second;
+        result |= remote_scheduler->check_remote_configuration();
     }
 
-    xml_writer->end_element( file_info->is_directory()? "configuration.directory" : "configuration.file" );
+    return result;
 }
 
 //--------------------------------------------------------------------------Supervisor::dom_element
@@ -1103,5 +1436,6 @@ STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace supervisor
 } //namespace scheduler
 } //namespace sos

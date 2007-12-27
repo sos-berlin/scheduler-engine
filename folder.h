@@ -22,8 +22,12 @@ struct Subfolder_folder;
 
 //--------------------------------------------------------------------------------------------const
 
-const extern char               folder_separator;
+extern const char               folder_separator;
 extern const Absolute_path      root_path;
+extern const int                file_timestamp_delay;                   // FAT-Zeitstempel sind 2 Sekunden genau
+extern const int                remove_delay;                           // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
+extern const int                directory_watch_interval_min;
+extern const int                directory_watch_interval_max;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -46,6 +50,7 @@ struct Path : string
     string                      name                        () const;
     void                    set_folder_path                 ( const string& );
     Path                        folder_path                 () const;
+    string                      root_folder_name            () const;
   //void                    set_absolute_if_relative        ( const Absolute_path& );
     void                    set_absolute                    ( const Absolute_path& absolute_base, const Path& relative );
   //void                        prepend_folder_path         ( const string& );

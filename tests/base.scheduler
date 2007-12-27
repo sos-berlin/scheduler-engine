@@ -4,7 +4,7 @@
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
     <config 
-        tcp_port="4444" 
+        port="4444" 
         supervisor=""
     >
 

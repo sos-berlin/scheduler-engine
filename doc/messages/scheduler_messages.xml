@@ -2791,6 +2791,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-457">
+            <text xml:lang="en">
+                <title>Remote scheduler '<p1/>' has not been registered</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

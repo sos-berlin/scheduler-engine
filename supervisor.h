@@ -2,6 +2,7 @@
 
 namespace sos {
 namespace scheduler {
+namespace supervisor {
 
 //-----------------------------------------------------------------------------Supervisor_interface
     
@@ -11,7 +12,7 @@ struct Supervisor_interface : Subsystem, Object
 
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual void                execute_register_remote_scheduler( const xml::Element_ptr&, Communication::Operation* ) = 0;
-    virtual void                execute_configuration_fetch_updated_files( xml::Xml_writer*, const xml::Element_ptr&, Communication::Operation* ) = 0;
+    virtual ptr<Command_response> execute_xml               ( const xml::Element_ptr&, Command_processor* ) = 0;
 };
 
 
@@ -19,7 +20,7 @@ ptr<Supervisor_interface>       new_supervisor              ( Scheduler* );
 
 //-----------------------------------------------------------------------Remote_scheduler_interface
 
-struct Remote_scheduler_interface : zschimmer::Object
+struct Remote_scheduler_interface : Async_operation
 {
     virtual void                connection_lost_event       ( const exception* )                    = 0;
 };
@@ -33,6 +34,7 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
 
     virtual bool                is_ready                    () const                                = 0;
     virtual bool                connection_failed           () const                                = 0;
+    virtual void                start_update_configuration  ()                                      = 0;
 };
 
 
@@ -40,5 +42,6 @@ ptr<Supervisor_client_interface> new_supervisor_client      ( Scheduler*, const 
 
 //-------------------------------------------------------------------------------------------------
 
+} //namespace supervisor
 } //namespace scheduler
 } //namespace sos

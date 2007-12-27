@@ -61,6 +61,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
 
                 case subsys_loaded:
                 {
+                    if( subsystem_state() < subsys_initialized )  switch_subsystem_state( subsys_initialized );
                     assert_subsystem_state( subsys_initialized, Z_FUNCTION );
 
                     result = subsystem_load();
@@ -69,6 +70,7 @@ bool Subsystem::switch_subsystem_state( Subsystem_state new_state )
 
                 case subsys_active:
                 {
+                    if( subsystem_state() < subsys_loaded )  switch_subsystem_state( subsys_loaded );
                     assert_subsystem_state( subsys_loaded, Z_FUNCTION );
 
                     result = subsystem_activate();

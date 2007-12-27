@@ -100,8 +100,9 @@ const int                       max_memory_file_size          = 10*1024*1024;   
 
 #ifdef Z_WINDOWS
     const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    27;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+    const int                   max_communication_connections =    26;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
                                                                           // 2007-09-11  Neues Handle für Folder_subsystem
+                                                                          // 2007-12-27  Neues Handle für supervisor::Configuration_observer
 #else
     const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
@@ -117,7 +118,6 @@ using namespace ::std;
 using namespace ::zschimmer::file;
 
 
-struct Show_calendar_options;
 struct Communication;
 struct Event;
 struct Get_events_command_response;
@@ -130,15 +130,13 @@ struct Order_folder_interface;
 struct Process;
 struct Process_class;
 struct Process_class_folder;
-struct Remote_scheduler_interface;
 struct Scheduler_script_folder;
 struct Scheduler_object;
 struct Scheduler_event;
+struct Show_calendar_options;
 struct Show_what;
 struct Spooler;
 typedef Spooler Scheduler;
-struct Supervisor_interface;
-struct Supervisor_client_interface;
 struct Task_subsystem;
 struct Subprocess;
 struct Subprocess_register;
@@ -149,6 +147,23 @@ struct Web_service_request;
 struct Web_service_response;
 struct Xml_client_connection;
 struct Xslt_stylesheet;
+
+
+namespace database
+{
+    struct Database;
+    struct Transaction;
+}
+using namespace database;
+
+
+namespace directory_observer
+{
+  //struct Directory_observer;
+    struct Directory_entry;
+    struct Directory_tree;
+    struct Directory;
+}
 
 
 namespace folder
@@ -191,12 +206,13 @@ namespace order
 using namespace order;
 
 
-namespace database
+namespace supervisor
 {
-    struct Database;
-    struct Transaction;
+    struct Remote_scheduler_interface;
+    struct Supervisor_interface;
+    struct Supervisor_client_interface;
 };
-using namespace database;
+
 
 
 typedef stdext::hash_set<string> String_set;
@@ -461,7 +477,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    subsystem                   ( Job* ) const                      { return _job_subsystem; }
     Order_subsystem_interface*  subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
 
-    Supervisor_client_interface*supervisor_client           ();
+    supervisor::Supervisor_client_interface*supervisor_client ();
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
@@ -622,8 +638,9 @@ struct Spooler : Object,
     Security                   _security;                   // <security>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
-    ptr<Supervisor_interface>  _supervisor;
-    ptr<Supervisor_client_interface> _supervisor_client;
+    ptr<supervisor::Supervisor_interface>        _supervisor;
+    ptr<supervisor::Supervisor_client_interface> _supervisor_client;
+
     ptr<Scheduler_event_manager> _scheduler_event_manager;
 
 

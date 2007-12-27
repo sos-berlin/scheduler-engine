@@ -571,9 +571,13 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_check_folders( const xml::Element_ptr& )
 {
+    // Für die HTML-Oberfläche und Wecksignal vom Supervisor
+
+
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
+    if( _spooler->_supervisor_client )  _spooler->_supervisor_client->start_update_configuration();
     _spooler->folder_subsystem()->handle_folders();
     
     return _answer.createElement( "ok" );
@@ -1084,30 +1088,6 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     return _answer.createElement( "ok" );
 }
 
-//--------------------------Command_processor::execute_supervisor_configuration_fetch_updated_files
-
-xml::Element_ptr Command_processor::execute_supervisor_configuration_fetch_updated_files( const xml::Element_ptr& element )
-{
-    if( !_communication_operation )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
-
-    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
-
-
-    ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
-    _response = response;
-    _response->begin_standard_response();
-    {
-        Xml_writer xml_writer ( _response );
-
-        _spooler->_supervisor->execute_configuration_fetch_updated_files( &xml_writer, element, _communication_operation );
-
-        xml_writer.close();
-    }
-    _response->end_standard_response();
-
-    return NULL;
-}
-
 //-------------------------------------------------------Command_processor::execute_service_request
 
 xml::Element_ptr Command_processor::execute_service_request( const xml::Element_ptr& service_request_element )
@@ -1364,7 +1344,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
-    if( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) )  result = execute_supervisor_configuration_fetch_updated_files( element );
+    if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else
     if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
     else

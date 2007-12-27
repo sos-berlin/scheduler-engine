@@ -161,7 +161,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
         string host_and_port = config_element.getAttribute( "supervisor" );
         if( host_and_port == "" )  host_and_port = config_element.getAttribute( "main_scheduler" );
-        if( host_and_port != "" )  _supervisor_client = new_supervisor_client( this, host_and_port );
+        if( host_and_port != "" )  _supervisor_client = supervisor::new_supervisor_client( this, host_and_port );
 
         set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );
 
@@ -179,7 +179,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             else
             if( e.nodeName_is( "holidays" ) )
             {
-                //2007-01-19  _holidays.clear();             int VIELLEICHT_BESSER_NICHT_LOESCHEN;
                 _holidays.set_dom( e );
             }
             else
