@@ -1284,6 +1284,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         result = _spooler->process_class_subsystem()->execute_xml( this, element, show );
     }
     else
+    if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
+    else
     if( element.nodeName_is( "show_state"       ) 
      || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else
@@ -1343,8 +1345,6 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "remove_job_chain" ) )  result = execute_remove_job_chain( element );
     else
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
-    else
-    if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else
     if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
     else

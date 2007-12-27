@@ -499,7 +499,6 @@ bool Communication::Connection::do_recv()
 
         if( len > 0 )
         {
-            if( z::Log_ptr log = "socket.data" )  *log << "recv: ", log->write( p, len ), *log << endl;
             _operation->put_request_part( p, len );
         }
     }
@@ -549,8 +548,6 @@ bool Communication::Connection::async_continue_( Continue_flags )
             {
                 string data = _operation->get_response_part();
                 if( data == "" )  break;
-
-                Z_LOG2( "socket.data", "send: " << data << '\n' );
 
                 something_done = true;
 

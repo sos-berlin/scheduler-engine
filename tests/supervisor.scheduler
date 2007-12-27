@@ -18,7 +18,7 @@ spooler_log.info( "spooler.supervisor_client.tcp_port=" + spooler.supervisor_cli
 
         <jobs>
 
-            <job name="java">
+            <!--job name="java">
 
                 <script java_class="spooler_job.My_job">
                     <![CDATA[
@@ -40,7 +40,7 @@ public class My_job  extends sos.spooler.Job_impl
                 </script>
 
                 <run_time once="yes"/>
-            </job>
+            </job-->
         </jobs>
     </config>
 </spooler>

@@ -819,6 +819,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
     xml_writer.close();
     response->end_standard_response();
+    response->close();
     return +response;
 }
 
