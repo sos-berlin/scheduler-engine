@@ -46,6 +46,7 @@ struct Directory_entry
                                 Directory_entry             ();
 
     bool                        is_aging                    () const                                { return _is_aging_until > 0; }
+    Directory_entry             clone                       ( Directory* new_parent ) const;
 
 
     Fill_zero                  _zero_;
@@ -72,9 +73,12 @@ struct Directory : Object
     File_path                   file_path                   () const;
     bool                        read                        ( Read_subdirectories );
   //bool                        refresh_aged_entries        ();
-    const Directory_entry&      entry                       ( const string& name ) const;
+    const Directory_entry*      entry_or_null               ( const string& name ) const;
   //Directory*                  subdirectory                ( const string& name ) const;
     int                         version                     () const                                { return _version; }
+    ptr<Directory>              clone                       () const                                { return clone2( NULL ); }
+    ptr<Directory>              clone2                      ( Directory* parent ) const;
+    void                        merge_new_entries           ( const Directory* );
 
 
   private:

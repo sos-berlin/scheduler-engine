@@ -60,7 +60,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
     ptr<Command_response>       execute_configuration_fetch_updated_files( const xml::Element_ptr&, Command_processor* );
     void                        write_updated_files_to_xml  ( Xml_writer*, Directory*, const xml::Element_ptr& reference_element );
-    void                        write_file_to_xml           ( Xml_writer*, Directory*, const Directory_entry&, const Xml_file_info* reference );
+    void                        write_file_to_xml           ( Xml_writer*, const Directory_entry&, const Xml_file_info* reference );
     bool                        check_remote_configuration  ();
     void                        signal_remote_scheduler     ();
     string                      obj_name                    () const;
@@ -81,6 +81,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     bool                       _is_connected;
     Xc_copy                    _error;
     int                        _configuration_version;
+    int                        _configuration_version_all;
 };
 
 //------------------------------------------------------------------------Remote_scheduler_register
@@ -118,15 +119,10 @@ struct Remote_configurations : Scheduler_object,
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
     Socket_event*               async_event                 ()                                      { return &_directory_event; }
-  //bool                        async_signaled_             ()                                      { return is_signaled(); }
     string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
 
-  //File_path                   directory_path              () const                                { return _directory_path; }
     Directory_tree*             directory_tree              () const                                { return _directory_tree; }
-
-  //bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
-  //void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
 
     void                        activate                    ();
     bool                     is_activated                   () const                                { return _is_activated; }
@@ -164,6 +160,7 @@ struct Supervisor : Supervisor_interface
     Remote_configurations*      remote_configurations       () const                                { return _remote_configurations; }
     void                        read_configuration_directory_names();
     Directory*                  configuration_directory_for_remote_scheduler( Remote_scheduler* );
+    Directory*                  configuration_directory_for_all_schedulers();
     bool                        check_remote_configurations ();
     string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
@@ -797,17 +794,40 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _supervisor->switch_subsystem_state( subsys_active );
     _supervisor->remote_configurations()->activate();
 
-
     ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
     response->begin_standard_response();
 
-    Xml_writer xml_writer ( response );
+    if( Directory* my_directory = _supervisor->configuration_directory_for_remote_scheduler( this ) )
+    {
+        ptr<Directory> merged_directory;
+        
+        my_directory->read( Directory::read_subdirectories );
 
-    xml_writer.begin_element( "configuration.directory" );
-    write_updated_files_to_xml( &xml_writer, _supervisor->configuration_directory_for_remote_scheduler( this ), element );
-    xml_writer.end_element( "configuration.directory" );
+        Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers();
+        if( all_directory )
+        {
+            merged_directory = my_directory->clone();
+            all_directory->read( Directory::read_subdirectories );
+            merged_directory->merge_new_entries( all_directory );
+        }
+        else
+        {
+            merged_directory = my_directory;
+        }
 
-    xml_writer.close();
+
+        Xml_writer xml_writer ( response );
+
+        xml_writer.begin_element( "configuration.directory" );
+        write_updated_files_to_xml( &xml_writer, merged_directory, element );
+        xml_writer.end_element( "configuration.directory" );
+        xml_writer.close();
+
+        
+        _configuration_version = my_directory->version();
+        if( all_directory )  _configuration_version_all = all_directory->version();
+    }
+
     response->end_standard_response();
     response->close();
     return +response;
@@ -839,8 +859,6 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
     sort( xml_ordered_file_infos.begin(), xml_ordered_file_infos.end(), Base_file_info::less_dereferenced );
 
 
-    directory->read( Directory::read_no_subdirectories );
-
     Directory::Entry_list       ::iterator e   = directory->_ordered_list.begin();
     vector<const Xml_file_info*>::iterator xfi = xml_ordered_file_infos.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
 
@@ -855,7 +873,7 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
         {
             if( e->_file_info->last_write_time() != (*xfi)->_timestamp_utc )
             {
-                if( !e->is_aging() )  write_file_to_xml( xml_writer, directory, *e, *xfi );
+                if( !e->is_aging() )  write_file_to_xml( xml_writer, *e, *xfi );
             }
 
             e++, xfi++;
@@ -868,7 +886,7 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
         while( e != directory->_ordered_list.end()  &&
                ( xfi == xml_ordered_file_infos.end()  ||  e->_file_info->path().name() < (*xfi)->_filename ) )
         {
-            if( !e->is_aging() )  write_file_to_xml( xml_writer, directory, *e, (Xml_file_info*)NULL );
+            if( !e->is_aging() )  write_file_to_xml( xml_writer, *e, (Xml_file_info*)NULL );
             e++;
         }
 
@@ -894,14 +912,11 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
                 e == directory->_ordered_list.end()  ||
                 e->_file_info->path().name() <= (*xfi)->_filename );
     }
-
-    _configuration_version = directory->version();
 }
 
 //--------------------------------------------------------------Remote_scheduler::write_file_to_xml
 
-void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, Directory* directory, const Directory_entry& directory_entry,
-                                          const Xml_file_info* reference )
+void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Directory_entry& directory_entry, const Xml_file_info* reference )
 {
     if( directory_entry._file_info->is_directory() )
     {
@@ -916,7 +931,7 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, Directory* dir
     {
         try
         {
-            string content = string_from_file( File_path( directory->file_path(), directory_entry._file_info->path().name() ) );
+            string content = string_from_file( directory_entry._file_info->path() );
 
             if( !reference  ||  reference->_md5 != md5( content ) )
             {
@@ -952,10 +967,22 @@ bool Remote_scheduler::check_remote_configuration()
     {
         if( Directory* directory = _supervisor->configuration_directory_for_remote_scheduler( this ) )
         {
-            if( _configuration_version == directory->version() )  
-                directory->read( Directory::read_subdirectories );
+            bool changed = false;
 
-            if( _configuration_version != directory->version() )  
+            if( _configuration_version == directory->version() )  directory->read( Directory::read_subdirectories );
+
+            changed = _configuration_version != directory->version();
+            
+            if( !changed )
+            {
+                if( Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers() )
+                {
+                    if( _configuration_version_all == all_directory->version() )  all_directory->read( Directory::read_subdirectories );
+                    changed = _configuration_version_all != all_directory->version();
+                }
+            }
+
+            if( changed )  
             {
                 signal_remote_scheduler();
                 result = true;
@@ -1119,10 +1146,9 @@ bool Remote_configurations::async_continue_( Continue_flags )
     {
         _directory_event.reset();
         
-
 #       ifdef Z_WINDOWS
             Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
-            ok = FindNextChangeNotification( _directory_event );
+            BOOL ok = FindNextChangeNotification( _directory_event );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 #       endif
     }
@@ -1313,10 +1339,18 @@ Directory* Supervisor::configuration_directory_for_remote_scheduler( Remote_sche
     if( it != _configuration_directory_map.end() )  
     {
         Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
-        result = root_directory->entry( it->second )._subdirectory;
+        if( const Directory_entry* entry = root_directory->entry_or_null( it->second ) )
+            result = entry->_subdirectory;
     }
 
     return result;
+}
+
+//-------------------------------------------Supervisor::configuration_directory_for_all_schedulers
+
+Directory* Supervisor::configuration_directory_for_all_schedulers()
+{
+    return remote_configurations()->directory_tree()->directory( Absolute_path( "/_all" ) );
 }
 
 //----------------------------------------------------------Supervisor::check_remote_configurations

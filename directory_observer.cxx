@@ -186,6 +186,18 @@ Directory_entry::Directory_entry()
 {
 }
 
+//---------------------------------------------------------------------------Directory::clone_entry
+
+Directory_entry Directory_entry::clone( Directory* new_parent ) const
+{
+    Directory_entry result;
+
+    result = Directory_entry( *this );
+    if( result._subdirectory )  result._subdirectory = _subdirectory->clone2( new_parent );
+
+    return result;
+}
+
 //------------------------------------------------------------------------------Directory::obj_name
 
 //string Directory::obj_name() const
@@ -273,7 +285,6 @@ Directory::Directory( Directory_tree* tree, Directory* parent, const string& nam
     _parent(parent),
     _name(name) 
 {
-    assert( _directory_tree );
 }
 
 //----------------------------------------------------------------------------------Directory::path
@@ -287,6 +298,8 @@ Absolute_path Directory::path() const
 
 File_path Directory::file_path() const
 {
+    if( !_directory_tree )  z::throw_xc( Z_FUNCTION );
+
     return File_path( _directory_tree->directory_path(), path() );
 }
 
@@ -299,20 +312,22 @@ File_path Directory::file_path() const
 
 //---------------------------------------------------------------------------------Directory::entry
 
-const Directory_entry& Directory::entry( const string& name ) const
+const Directory_entry* Directory::entry_or_null( const string& name ) const
 {
     Z_FOR_EACH_CONST( Entry_list, _ordered_list, it )  
     {
-        if( it->_file_info->path().name() == name )  return *it;
+        if( it->_file_info->path().name() == name )  return &*it;
     }
 
-    z::throw_xc( Z_FUNCTION, "unknown entry", name );
+    return NULL;
 }
 
 //----------------------------------------------------------------------------------Directory::read
 
 bool Directory::read( Read_subdirectories read_what )
 {
+    if( !_directory_tree )  z::throw_xc( Z_FUNCTION );
+
     bool directory_has_changed = false;
 
     Folder_directory_lister dir   ( _directory_tree->log() );
@@ -358,6 +373,7 @@ bool Directory::read( Read_subdirectories read_what )
                 _directory_tree->set_aging_until( e->_is_aging_until );
             }
             else
+            if( e->_is_aging_until )
             {
                 e->_is_aging_until = 0;
                 _directory_tree->set_last_change_at( now );
@@ -449,6 +465,54 @@ bool Directory::read( Read_subdirectories read_what )
 
     if( directory_has_changed )  _version++;
     return directory_has_changed;
+}
+
+//--------------------------------------------------------------------------------Directory::clone2
+
+ptr<Directory> Directory::clone2( Directory* new_parent ) const
+{
+    ptr<Directory> result = Z_NEW( Directory( (Directory_tree*)NULL, new_parent, _name ) );
+
+    Z_FOR_EACH_CONST( Entry_list, _ordered_list, it )  
+    {
+        result->_ordered_list.push_back( it->clone( new_parent ) );
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------Directory::merge_new_entries
+
+void Directory::merge_new_entries( const Directory* other )
+{
+    Entry_list::iterator my = _ordered_list.begin();
+    Z_FOR_EACH_CONST( Entry_list, other->_ordered_list, o )  
+    {
+        while( my != _ordered_list.end()  &&  my->_file_info->path().name() < o->_file_info->path().name() )  
+            my++;
+
+        if( my == _ordered_list.end()  ||  my->_file_info->path().name() > o->_file_info->path().name() )  
+            _ordered_list.insert( my, o->clone( this ) );
+    }
+
+
+#   ifndef NDEBUG
+    {
+        Entry_list::const_iterator a = _ordered_list.begin();
+        if( a != _ordered_list.end() )  
+        {
+            Entry_list::const_iterator b = a;
+            b++;
+
+            while( b != _ordered_list.end() )
+            {
+                assert( a->_file_info->path().name() < b->_file_info->path().name() );
+                a++;
+                b++;
+            }   
+        }
+    }
+#   endif
 }
 
 //------------------------------------------------------------------Directory::refresh_aged_entries
@@ -547,11 +611,15 @@ Directory* Directory_tree::directory( const Absolute_path& path )
 {
     assert( path.folder_path().is_root() );
 
-    const Directory_entry& entry = _root_directory->entry( path.name() );
-    
-    if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", path );
+    Directory* result = NULL;
 
-    return entry._subdirectory;
+    if( const Directory_entry* entry = _root_directory->entry_or_null( path.name() ) )
+    {
+        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", path );      Wenn's kein Verzeichnis ist, beachten wir's nicht
+        result = entry->_subdirectory;
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Directory_tree::read
