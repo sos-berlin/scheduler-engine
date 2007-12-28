@@ -127,7 +127,7 @@ struct Remote_configurations : Scheduler_object,
     void                        activate                    ();
     bool                     is_activated                   () const                                { return _is_activated; }
 
-    bool                        check                       ( double minimum_age = 0 );
+    bool                        check                       ();
 
 
   private:
@@ -1111,7 +1111,7 @@ void Remote_configurations::activate()
         _is_activated = true;
 
 #       ifdef Z_WINDOWS
-
+        {
             assert( !_directory_event );
 
             _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
@@ -1127,8 +1127,7 @@ void Remote_configurations::activate()
             if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
 
             _directory_event._handle = h;
-
-
+        }
 #       endif
 
         add_to_event_manager( _spooler->_connection_manager );
@@ -1171,7 +1170,7 @@ string Remote_configurations::async_state_text_() const
 
 //---------------------------------------------------------------------Remote_configurations::check
 
-bool Remote_configurations::check( double minimum_age )
+bool Remote_configurations::check()
 {
     log()->warn( Z_FUNCTION );
 
