@@ -252,80 +252,6 @@ struct Supervisor_client : Supervisor_client_interface
     static const Com_method     _methods[];
 };
 
-//------------------------------------------------------------------------Main_scheduler_connection
-// Verbindung zum Main Scheduler
-/*
-struct Main_scheduler_connection : Async_operation
-{
-    enum State
-    {
-        s_initial,
-        s_connecting,
-        s_stand_by,
-                                Main_scheduler_connection( Spooler*, const Host_and_port& );
-
-
-  protected:
-    string                      async_state_text_           ();
-    bool                        async_continue_             ( Continue_flags );
-    bool                        async_finished_             ()                                      { return _state == s_initial  
-
-  private:
-    Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Supervisor_client_connection      _xml_client_connection;
-};
-*/
-//-----------------------------------------------------------------------------Xml_client_operation
-/*
-struct Xml_client_operation : Operation
-{
-    Xml_client_operation( Supervisor_client_connection* conn ) : _connection( conn ) {}
-
-    ptr<Supervisor_client_connection> _connection;
-};
-*/
-//-------------------------------------------------------------------------------------------------
-
-
-
-//--------------------------------------------------------------------------Object_server_processor
-/*
-struct Object_server_processor : Communication::Operation
-{
-                                Object_server_processor     ( Object_server_processor_channel* );
-
-
-    void                        put_request_part            ( const char* data, int length );
-    bool                        request_is_complete         ();
-
-    void                        process                     ();
-
-    bool                        response_is_complete        ();
-    string                      get_response_part           ();
-    bool                        should_close_connection     ();
-
-
-    Fill_zero                          _zero_;
-    Object_server_processor_channel*      _operation_channel;
-    object_server::Input_message          _input_message;
-    object_server::Input_message::Builder _input_message_builder;
-    object_server::Output_message         _output_message;
-};
-
-//--------------------------------------------------------------------Object_server_processor_channel
-
-struct Object_server_processor_channel : Communication::Operation_channel
-{
-                                Object_server_processor_channel( Communication::Channel* );
-
-    ptr<Communication::Operation> processor                 ()                                      { ptr<Object_server_processor> result = Z_NEW( Object_server_processor( this ) ); 
-                                                                                                      return +result; }
-
-    ptr<object_server::Session> _session;
-};
-*/
-
 //--------------------------------------------------------------------------------------------const
     
 const int                               main_scheduler_retry_time           = 60;
@@ -1092,7 +1018,7 @@ void Remote_configurations::close()
     remove_from_event_manager();
 
 #   ifdef Z_WINDOWS
-        Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
+        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
         FindCloseChangeNotification( _directory_event._handle );
         _directory_event._handle = NULL;
 #   endif
@@ -1274,10 +1200,14 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
 
 ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    int tcp_port = element.int_getAttribute( "tcp_port", 0 );
-    if( tcp_port == 0 )  z::throw_xc( Z_FUNCTION, "TCP port is missing" );
+    //int tcp_port = element.int_getAttribute( "tcp_port", 0 );
+    //if( tcp_port == 0 )  z::throw_xc( Z_FUNCTION, "TCP port is missing" );
+    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
+    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
 
-    Remote_scheduler* remote_scheduler = _remote_scheduler_register.get( Host_and_port( command_processor->communication_operation()->_connection->peer_host(), tcp_port ) );
+    Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
+    //Remote_scheduler* remote_scheduler = _remote_scheduler_register.get( Host_and_port( command_processor->communication_operation()->_connection->peer_host(), tcp_port ) );
+    if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
 
     return remote_scheduler->execute_xml( element, command_processor );
 }

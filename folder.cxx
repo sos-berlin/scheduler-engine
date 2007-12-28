@@ -291,7 +291,7 @@ void Folder_subsystem::close()
 
 
 #   ifdef Z_WINDOWS
-        Z_LOG2( "scheduler", "FindCloseChangeNotification()\n" );
+        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
         FindCloseChangeNotification( _directory_event._handle );
         _directory_event._handle = NULL;
 #   endif

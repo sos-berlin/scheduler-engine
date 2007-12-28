@@ -23,6 +23,7 @@ ptr<Supervisor_interface>       new_supervisor              ( Scheduler* );
 struct Remote_scheduler_interface : Async_operation
 {
     virtual void                connection_lost_event       ( const exception* )                    = 0;
+    virtual ptr<Command_response> execute_xml               ( const xml::Element_ptr&, Command_processor* ) = 0;
 };
 
 //----------------------------------------------------------------------Supervisor_client_interface
