@@ -348,14 +348,20 @@ bool Directory::read( Read_subdirectories read_what )
 
             if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
             {
-                e->_file_info = *fi;
-                e->_timestamp = now;
-                directory_has_changed = true;
+                e->_file_info      = *fi;
+                e->_is_aging_until = now + file_timestamp_delay;
+                _directory_tree->set_aging_until( e->_is_aging_until );
             }
             else
-            if( e->_is_aging  &&  e->_timestamp + folder::file_timestamp_delay < now )
+            if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
             {
-                e->_is_aging = false;
+                _directory_tree->set_aging_until( e->_is_aging_until );
+            }
+            else
+            {
+                e->_is_aging_until = 0;
+                _directory_tree->set_last_change_at( now );
+                directory_has_changed = true;
             }
 
             if( (*fi)->is_directory() )
@@ -378,20 +384,20 @@ bool Directory::read( Read_subdirectories read_what )
         {
             list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
             new_entry->_file_info = *fi;
-            new_entry->_timestamp = now;
             
             if( (*fi)->is_directory() )  
             {
                 new_entry->_subdirectory = Z_NEW( Directory( _directory_tree, this, (*fi)->path().name() ) );
                 if( read_what == read_subdirectories )  new_entry->_subdirectory->read( read_what );
+                _directory_tree->set_last_change_at( now );
+                directory_has_changed = true;
             }
             else
             {
-                new_entry->_is_aging = true;
-                _directory_tree->set_aging_until( now + file_timestamp_delay );
+                new_entry->_is_aging_until = now + file_timestamp_delay;
+                _directory_tree->set_aging_until( new_entry->_is_aging_until );
             }
 
-            directory_has_changed = true;
             fi++;
         }
 
@@ -409,23 +415,30 @@ bool Directory::read( Read_subdirectories read_what )
             if( e->_subdirectory )
             {
                 e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
+                _directory_tree->set_last_change_at( now );
                 directory_has_changed = true;
+                e++;
             }
             else
-            if( e->_is_removed  &&  e->_timestamp + folder::remove_delay < now )  
+            if( !e->_is_removed )
+            {
+                e->_is_removed     = true;
+                e->_is_aging_until = now + remove_delay;
+                _directory_tree->set_aging_until( e->_is_aging_until );
+                e++;
+            }
+            else
+            if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
+            {
+                _directory_tree->set_aging_until( e->_is_aging_until );
+                e++;
+            }
+            else
             {
                 e = _ordered_list.erase( e );
+                _directory_tree->set_last_change_at( now );
                 directory_has_changed = true;
             }
-            else  
-            {
-                e->_timestamp  = now;
-                e->_is_removed = true;
-                e->_is_aging   = true;
-                _directory_tree->set_aging_until( now + remove_delay );
-            }
-
-            e++;
         }
 
         assert( e == _ordered_list.end()  ||
@@ -440,75 +453,75 @@ bool Directory::read( Read_subdirectories read_what )
 
 //------------------------------------------------------------------Directory::refresh_aged_entries
 
-bool Directory::refresh_aged_entries()
-{
-    bool   anything_is_refreshed = true;
-    double now                   = double_from_gmtime();
-
-    for( list<Directory_entry>::iterator it = _ordered_list.begin(); it != _ordered_list.end(); )
-    {
-        Directory_entry* entry = &*it++;
-
-        if( entry->_subdirectory )  anything_is_refreshed &= entry->_subdirectory->refresh_aged_entries();
-
-        if( entry->_is_aging )
-        {
-            if( entry->_is_removed )
-            {
-                if( now < entry->_timestamp + remove_delay )
-                {
-                    anything_is_refreshed = false;
-                }
-                else
-                {
-                    ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
-                    
-                    if( new_file_info->try_call_stat() )    // Gelöschte Datei ist wieder da?
-                    {
-                        entry->_file_info  = new_file_info;
-                        entry->_is_removed = false;
-                        entry->_timestamp  = now;
-                    }
-                    else   
-                    if( entry->_is_removed )
-                    {
-                        --it;                               // it war schon weitergeschaltet
-                        it = _ordered_list.erase( it );
-                    }
-                }
-            }
-            else
-            if( now < entry->_timestamp + file_timestamp_delay )
-            {
-                anything_is_refreshed = false;
-            }
-            else
-            {
-                ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
-                
-                if( new_file_info->try_call_stat() )  
-                {
-                    if( new_file_info->last_write_time() != entry->_file_info->last_write_time() )
-                    {
-                        entry->_file_info = new_file_info;
-                        entry->_timestamp = now;
-                    }
-                    else
-                    {
-                        entry->_is_aging = false;
-                    }
-                }
-                else   
-                {
-                    entry->_is_removed = true;
-                    entry->_timestamp  = now;
-                }
-            }
-        }
-    }
-
-    return anything_is_refreshed;
-}
+//bool Directory::refresh_aged_entries()
+//{
+//    bool   anything_is_refreshed = true;
+//    double now                   = double_from_gmtime();
+//
+//    for( list<Directory_entry>::iterator it = _ordered_list.begin(); it != _ordered_list.end(); )
+//    {
+//        Directory_entry* entry = &*it++;
+//
+//        if( entry->_subdirectory )  anything_is_refreshed &= entry->_subdirectory->refresh_aged_entries();
+//
+//        if( entry->_is_aging )
+//        {
+//            if( entry->_is_removed )
+//            {
+//                if( now < entry->_timestamp + remove_delay )
+//                {
+//                    anything_is_refreshed = false;
+//                }
+//                else
+//                {
+//                    ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
+//                    
+//                    if( new_file_info->try_call_stat() )    // Gelöschte Datei ist wieder da?
+//                    {
+//                        entry->_file_info  = new_file_info;
+//                        entry->_is_removed = false;
+//                        entry->_timestamp  = now;
+//                    }
+//                    else   
+//                    if( entry->_is_removed )
+//                    {
+//                        --it;                               // it war schon weitergeschaltet
+//                        it = _ordered_list.erase( it );
+//                    }
+//                }
+//            }
+//            else
+//            if( now < entry->_timestamp + file_timestamp_delay )
+//            {
+//                anything_is_refreshed = false;
+//            }
+//            else
+//            {
+//                ptr<file::File_info> new_file_info = Z_NEW( file::File_info );
+//                
+//                if( new_file_info->try_call_stat() )  
+//                {
+//                    if( new_file_info->last_write_time() != entry->_file_info->last_write_time() )
+//                    {
+//                        entry->_file_info = new_file_info;
+//                        entry->_timestamp = now;
+//                    }
+//                    else
+//                    {
+//                        entry->_is_aging = false;
+//                    }
+//                }
+//                else   
+//                {
+//                    entry->_is_removed = true;
+//                    entry->_timestamp  = now;
+//                }
+//            }
+//        }
+//    }
+//
+//    return anything_is_refreshed;
+//}
 
 //-------------------------------------------------------------------Directory_tree::Directory_tree
 
@@ -516,7 +529,8 @@ Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& dir
 :
     Scheduler_object( scheduler, this, type_directory_tree ),
     _zero_(this+1),
-    _directory_path(directory_path)
+    _directory_path(directory_path),
+    _refresh_aged_entries_at(double_time_max)
 {
     _root_directory = Z_NEW( Directory( this, (Directory*)NULL, root_path ) );
 }
@@ -542,25 +556,25 @@ Directory* Directory_tree::directory( const Absolute_path& path )
 
 //-----------------------------------------------------------------------------Directory_tree::read
 
-bool Directory_tree::read()
-{
-    bool directory_has_changed = false;
-
-    directory_has_changed = _root_directory->read( Directory::read_subdirectories );        int NICHT_ALLE_LESEN;
-
-    return directory_has_changed;
-}
+//bool Directory_tree::read()
+//{
+//    bool directory_has_changed = false;
+//
+//    directory_has_changed = _root_directory->read( Directory::read_subdirectories );
+//
+//    return directory_has_changed;
+//}
 
 //-------------------------------------------------------------Directory_tree::refresh_aged_entries
 
-void Directory_tree::refresh_aged_entries()
-{
-    if( _refresh_aged_entries_at  &&  _refresh_aged_entries_at >= double_from_gmtime() )
-    {
-        bool anything_is_refreshed = _root_directory->refresh_aged_entries();
-        if( anything_is_refreshed )  _refresh_aged_entries_at = 0;
-    }
-}
+//void Directory_tree::refresh_aged_entries()
+//{
+//    if( _refresh_aged_entries_at < double_time_max &&  _refresh_aged_entries_at >= double_from_gmtime() )
+//    {
+//        bool anything_is_refreshed = _root_directory->refresh_aged_entries();
+//        if( anything_is_refreshed )  _refresh_aged_entries_at = double_time_max;
+//    }
+//}
 
 //-------------------------------------------------------------------------------------------------
 

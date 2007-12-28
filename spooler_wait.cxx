@@ -463,7 +463,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
     while(1)
     {
-        double wait_time         = until - now;
+        double wait_time         = max( 0.0, until - now );
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
         DWORD  ret               = WAIT_TIMEOUT;

@@ -30,6 +30,22 @@ struct Supervisor_client;
 //const int                       supervisor_configuration_poll_interval = 60;
 const double                    udp_timeout                 = 60;
 
+//------------------------------------------------------------------------------------Xml_file_info
+
+struct Xml_file_info : Base_file_info
+{
+    Xml_file_info( const xml::Element_ptr& element )
+    :
+        Base_file_info( element.getAttribute( "name" ), Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), element.getAttribute( "name" ), 0 ),
+        _element( element )
+    {
+        _md5.set_hex( element.getAttribute( "md5" ) );
+    }
+
+    xml::Element_ptr           _element;
+    Md5                        _md5;                        // Leer bei einem Verzeichnis
+};
+
 //---------------------------------------------------------------------------------Remote_scheduler
 
 struct Remote_scheduler : Remote_scheduler_interface, 
@@ -44,7 +60,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     ptr<Command_response>       execute_xml                 ( const xml::Element_ptr&, Command_processor* );
     ptr<Command_response>       execute_configuration_fetch_updated_files( const xml::Element_ptr&, Command_processor* );
     void                        write_updated_files_to_xml  ( Xml_writer*, Directory*, const xml::Element_ptr& reference_element );
-    void                        write_file_to_xml           ( Xml_writer*, Directory*, const Directory_entry&, const xml::Element_ptr& reference_element );
+    void                        write_file_to_xml           ( Xml_writer*, Directory*, const Directory_entry&, const Xml_file_info* reference );
     bool                        check_remote_configuration  ();
     void                        signal_remote_scheduler     ();
     string                      obj_name                    () const;
@@ -83,22 +99,6 @@ struct Remote_scheduler_register
     Fill_zero                  _zero_;
     typedef map< Host_and_port, ptr<Remote_scheduler> >   Map;
     Map                                                  _map;
-};
-
-//------------------------------------------------------------------------------------Xml_file_info
-
-struct Xml_file_info : Base_file_info
-{
-    Xml_file_info( const xml::Element_ptr& element )
-    :
-        Base_file_info( element.getAttribute( "name" ), Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), element.getAttribute( "name" ), 0 ),
-        _element( element )
-    {
-        _md5.set_hex( element.getAttribute( "md5" ) );
-    }
-
-    xml::Element_ptr           _element;
-    Md5                        _md5;                        // Leer bei einem Verzeichnis
 };
 
 //----------------------------------------------------------------------------Remote_configurations
@@ -140,8 +140,6 @@ struct Remote_configurations : Scheduler_object,
     Event                      _directory_event;
     ptr<Directory_tree>        _directory_tree;
     int                        _directory_watch_interval;
-    double                     _last_change_at;
-    double                     _read_again_at;
     bool                       _is_activated;
 };
 
@@ -630,7 +628,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
         {
             if( e.bool_getAttribute( "removed", false ) )
             {
-                log()->info( message_string( "SCHEDULER-701", path + "/" ) );
+                log()->info( message_string( "SCHEDULER-702", path ) );
                 file_path.unlink();
             }
             else
@@ -800,14 +798,6 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _supervisor->remote_configurations()->activate();
 
 
-    int tcp_port = element.int_getAttribute( "tcp_port", 0 );
-
-    //if( _udp_port )
-    //{
-    //    _supervisor->remote_configurations()->request_directory_changed_event( this );
-    //}
-
-
     ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
     response->begin_standard_response();
 
@@ -863,10 +853,9 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
                e   != directory->_ordered_list.end()  &&
                (*xfi)->_filename == e->_file_info->path().name() )
         {
-            if( e->_file_info->last_write_time() != (*xfi)->_timestamp_utc  ||
-                md5( string_from_file( e->_file_info->path() ) ) != (*xfi)->_md5 )  // MD5 vom Verzeichnis ist ""
+            if( e->_file_info->last_write_time() != (*xfi)->_timestamp_utc )
             {
-                write_file_to_xml( xml_writer, directory, *e, (*xfi)->_element );
+                if( !e->is_aging() )  write_file_to_xml( xml_writer, directory, *e, *xfi );
             }
 
             e++, xfi++;
@@ -879,12 +868,12 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
         while( e != directory->_ordered_list.end()  &&
                ( xfi == xml_ordered_file_infos.end()  ||  e->_file_info->path().name() < (*xfi)->_filename ) )
         {
-            write_file_to_xml( xml_writer, directory, *e, NULL );
+            if( !e->is_aging() )  write_file_to_xml( xml_writer, directory, *e, (Xml_file_info*)NULL );
             e++;
         }
 
         assert( e == directory->_ordered_list.end()  || 
-                xfi == xml_ordered_file_infos.end() ||
+                xfi == xml_ordered_file_infos.end()  ||
                 e->_file_info->path().name() >= (*xfi)->_normalized_name );
         
 
@@ -894,9 +883,10 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
         while( xfi != xml_ordered_file_infos.end()  &&
                ( e == directory->_ordered_list.end()  ||  e->_file_info->path().name() > (*xfi)->_filename ) )  // Datei entfernt?
         {
-            xml_writer->begin_element( e->_file_info->is_directory()? "configuration.directory" : "configuration.file" );
+            xml_writer->begin_element( (*xfi)->_element.nodeName() );    // "configuration.directory" oder "configuration.file"
+            xml_writer->set_attribute( "name"   , (*xfi)->_filename );
             xml_writer->set_attribute( "removed", "yes" );
-            xml_writer->end_element( e->_file_info->is_directory()? "configuration.directory" : "configuration.file" );
+            xml_writer->end_element( (*xfi)->_element.nodeName() );
             xfi++;
         }
 
@@ -911,39 +901,43 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
 //--------------------------------------------------------------Remote_scheduler::write_file_to_xml
 
 void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, Directory* directory, const Directory_entry& directory_entry,
-                                          const xml::Element_ptr& reference_element )
+                                          const Xml_file_info* reference )
 {
-    bool is_directory = directory_entry._file_info->is_directory();
-
-    xml_writer->begin_element( is_directory? "configuration.directory" : "configuration.file" );
-    xml_writer->set_attribute( "name", directory_entry._file_info->path().name() );
-
-    if( is_directory )
+    if( directory_entry._file_info->is_directory() )
     {
-        write_updated_files_to_xml( xml_writer, directory_entry._subdirectory, reference_element );
+        xml_writer->begin_element( "configuration.directory" );
+        xml_writer->set_attribute( "name", directory_entry._file_info->path().name() );
+
+        write_updated_files_to_xml( xml_writer, directory_entry._subdirectory, reference? reference->_element : NULL );
+
+        xml_writer->end_element( "configuration.directory" );
     }
     else
     {
-        xml_writer->set_attribute( "last_write_time", Time( directory_entry._file_info->last_write_time(), Time::is_utc ).xml_value() );
-
         try
         {
             string content = string_from_file( File_path( directory->file_path(), directory_entry._file_info->path().name() ) );
 
-            xml_writer->begin_element( "content" );
-            xml_writer->set_attribute( "encoding", "base64" );
+            if( !reference  ||  reference->_md5 != md5( content ) )
+            {
+                xml_writer->begin_element( "configuration.file" );
+                xml_writer->set_attribute( "name"           , directory_entry._file_info->path().name() );
+                xml_writer->set_attribute( "last_write_time", Time( directory_entry._file_info->last_write_time(), Time::is_utc ).xml_value() );
 
-                xml_writer->write( base64_encoded( content ) );
+                    xml_writer->begin_element( "content" );
+                    xml_writer->set_attribute( "encoding", "base64" );
 
-            xml_writer->end_element( "content" );
+                        xml_writer->write( base64_encoded( content ) );
+
+                    xml_writer->end_element( "content" );
+                xml_writer->end_element( "configuration.file" );
+            }
         }
         catch( exception& x )
         {
-            log()->error( x.what() );
+            if( !string_begins_with( x.what(), S() << "ERRNO-" << ENOENT ) )  log()->warn( x.what() );
         }
     }
-
-    xml_writer->end_element( is_directory? "configuration.directory" : "configuration.file" );
 }
 
 //-----------------------------------------------------Remote_scheduler::check_remote_configuration
@@ -1124,13 +1118,13 @@ bool Remote_configurations::async_continue_( Continue_flags )
     if( _directory_event.signaled() )
     {
         _directory_event.reset();
+        
 
 #       ifdef Z_WINDOWS
-            //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory_path << "\")\n" );
-            BOOL ok = FindNextChangeNotification( _directory_event );
+            Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
+            ok = FindNextChangeNotification( _directory_event );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 #       endif
-
     }
 
     check();
@@ -1153,22 +1147,23 @@ string Remote_configurations::async_state_text_() const
 
 bool Remote_configurations::check( double minimum_age )
 {
-    bool something_changed = false;
-    double now = double_from_gmtime();
+    log()->warn( Z_FUNCTION );
 
-    if( _last_change_at + minimum_age <= now )
+    bool   something_changed = false;
+    double now               = double_from_gmtime();
+
+    //if( _directory_tree->last_change_at() + minimum_age <= now )
     {
-        if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
+        //if( _directory_tree->refresh_aged_entries_at() < now )  _read_again_at = 0;     // Verstrichen?
+        _directory_tree->reset_aging();
 
         something_changed = _supervisor->check_remote_configurations();
         
-        if( something_changed )  _last_change_at = now;
+        _directory_watch_interval = now - _directory_tree->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
+                                                                                                                  : folder::directory_watch_interval_max;
 
-        _directory_watch_interval = now - _last_change_at < folder::directory_watch_interval_max? folder::directory_watch_interval_min
-                                                                                                : folder::directory_watch_interval_max;
-
-        if( _read_again_at )  set_async_next_gmtime( _read_again_at );
-                        else  set_async_delay( _directory_watch_interval );
+        now = double_from_gmtime();
+        set_async_next_gmtime( min( _directory_tree->refresh_aged_entries_at(), now + _directory_watch_interval ) );
     }
 
     return something_changed;

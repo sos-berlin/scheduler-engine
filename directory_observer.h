@@ -20,16 +20,22 @@ struct Directory_tree : Scheduler_object,
                                ~Directory_tree              ();
 
     file::File_path             directory_path              () const                                { return _directory_path; }
-    bool                        read                        ();
-    void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
+  //bool                        read                        ();
+    double                      last_change_at              () const                                { return _last_change_at; }
+    double                      refresh_aged_entries_at     () const                                { return _refresh_aged_entries_at; }
     Directory*                  directory                   ( const Absolute_path& );
     Directory*                  root_directory              () const                                { return _root_directory; }
-    void                        refresh_aged_entries        ();
+  //void                        refresh_aged_entries        ();
+
+    void                        set_last_change_at          ( double t )                            { _last_change_at = t; }
+    void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
+    void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
 
   private:
     Fill_zero                  _zero_;
     file::File_path            _directory_path;
     ptr<Directory>             _root_directory;
+    double                     _last_change_at;
     double                     _refresh_aged_entries_at;
 };
 
@@ -39,12 +45,14 @@ struct Directory_entry
 {
                                 Directory_entry             ();
 
+    bool                        is_aging                    () const                                { return _is_aging_until > 0; }
+
+
     Fill_zero                  _zero_;
     ptr<file::File_info>       _file_info;
-    double                     _timestamp;                  // Zeitstempel von _file_info
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
-    bool                       _is_aging;
-    bool                       _is_removed;                 // _is_removed -> _is_aging
+    double                     _is_aging_until;
+    bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
 };
 
 //----------------------------------------------------------------------------------------Directory
@@ -63,7 +71,7 @@ struct Directory : Object
     Absolute_path               path                        () const;
     File_path                   file_path                   () const;
     bool                        read                        ( Read_subdirectories );
-    bool                        refresh_aged_entries        ();
+  //bool                        refresh_aged_entries        ();
     const Directory_entry&      entry                       ( const string& name ) const;
   //Directory*                  subdirectory                ( const string& name ) const;
     int                         version                     () const                                { return _version; }
