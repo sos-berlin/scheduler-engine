@@ -203,7 +203,7 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     void                        start_update_configuration  ();
 
   protected:
-    string                      async_state_text_           () const                                { return obj_name(); }
+    string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return _state == s_not_connected  
                                                                                                           || _state == s_registered; }
@@ -220,6 +220,7 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     ptr<Xml_client_connection> _xml_client_connection;
     bool                       _is_ready;
     bool                       _connection_failed;
+    bool                       _start_update_configuration_delayed;
 };
 
 //--------------------------------------------------------------------------------Supervisor_client
@@ -468,6 +469,27 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
     return something_done;
 }
 
+//--------------------------------------------------Supervisor_client_connection::async_state_text_
+
+string Supervisor_client_connection::async_state_text_() const
+{ 
+    S result;
+
+    result << obj_name();
+    result << "(";
+  //result << " " << _host_and_port;
+    result << " " << state_name( state() );
+
+    //Supervisor_client*         _supervisor_client;
+    //ptr<Xml_client_connection> _xml_client_connection;
+    if( _is_ready )  result << ", ready";
+    if( _connection_failed )  result << ", connection failed";
+    if( _start_update_configuration_delayed )  result << ", start_update_configuration_delayed ";
+    result << ")";
+
+    return result;
+}
+
 //------------------------------------------Supervisor_client_connection::write_directory_structure
 
 void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* xml_writer, const Absolute_path& path )
@@ -593,7 +615,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
     }
 }
 
-//---------------------------------------------------------Supervisor_client_connection::async_state_text_
+//---------------------------------------------------------Supervisor_client_connection::state_name
 
 string Supervisor_client_connection::state_name( State state )
 {
@@ -1205,7 +1227,7 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
 {
     ptr<Command_response> result;
 
-    if( string_begins_with( element.nodeName( "supervisor.remote_scheduler." ) ) )
+    if( string_begins_with( element.nodeName(), "supervisor.remote_scheduler." ) )
     {
         Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
         if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
