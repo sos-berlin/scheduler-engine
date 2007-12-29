@@ -422,7 +422,10 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 {
                     //log()->info( message_string( "SCHEDULER-950" ) );
 
-                    update_directory_structure( root_path, response_document.select_node_strict( "/spooler/answer/configuration.directory" ) );
+                    if( xml::Element_ptr directory_element = response_document.select_node( "/spooler/answer/configuration.directory" ) )
+                    {
+                        update_directory_structure( root_path, directory_element );
+                    }
                     
                     _state = s_configuration_fetched;
                 }
@@ -473,11 +476,6 @@ string Supervisor_client_connection::async_state_text_() const
 
     result << obj_name();
     result << "(";
-  //result << " " << _host_and_port;
-    result << " " << state_name( state() );
-
-    //Supervisor_client*         _supervisor_client;
-    //ptr<Xml_client_connection> _xml_client_connection;
     if( _is_ready )  result << ", ready";
     if( _connection_failed )  result << ", connection failed";
     if( _start_update_configuration_delayed )  result << ", start_update_configuration_delayed ";
@@ -582,11 +580,13 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
                 const xml::Element_ptr& content_element = e.select_node_strict( "content" );
                 string content;
 
+                Time last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) );
+
                 if( content_element.getAttribute( "encoding" ) == "base64" )  content = base64_decoded( content_element.text() );
                 else
                     z::throw_xc( Z_FUNCTION, "invalid <content>-encoding" );
 
-                log()->info( message_string( "SCHEDULER-701", path ) );
+                log()->info( message_string( "SCHEDULER-701", path, last_write_time.as_string() ) );
 
                 File_path temporary_path = file_path + "~";
                 //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)
@@ -595,11 +595,9 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
                 file.print( content );
                 file.close();
 
-                time_t last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) ).as_utc_time_t();
-
                 struct utimbuf utimbuf;
                 utimbuf.actime  = ::time(NULL);
-                utimbuf.modtime = last_write_time;
+                utimbuf.modtime = last_write_time.as_utc_time_t();
                 int err = utime( file.path().c_str(), &utimbuf );
                 if( err )  zschimmer::throw_errno( errno, "utime", Z_FUNCTION );
 
@@ -617,11 +615,13 @@ string Supervisor_client_connection::state_name( State state )
 {
     switch( state )
     {
-        case s_not_connected:   return "not_connected";
-        case s_connecting:      return "connecting";
-        case s_registering:     return "registering";
-        case s_registered:      return "registered";
-        default:                return "state=" + as_int( state );
+        case s_not_connected:           return "not_connected";
+        case s_connecting:              return "connecting";
+        case s_registering:             return "registering";
+        case s_registered:              return "registered";
+        case s_fetching_configuration:  return "fetching_configuration";
+        case s_configuration_fetched:   return "configuration_fetched";
+        default:                        return "state=" + as_string( state );
     }
 }
 
