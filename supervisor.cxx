@@ -390,7 +390,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_registered:
-#ifdef Z_DEBUG
             {
                 // Wird nach Verbindungsverlust nochmal durchlaufen
 
@@ -436,7 +435,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
 
             case s_configuration_fetched:
-#endif
                 if( _start_update_configuration_delayed )  
                 {
                     start_update_configuration();
