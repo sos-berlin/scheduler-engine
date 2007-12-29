@@ -825,11 +825,12 @@
                 </xsd:element>
             </xsd:sequence>
             
-            <xsd:attribute name="version"       type="String"/>
-            <xsd:attribute name="scheduler_id"  type="String"/>
-            <xsd:attribute name="tcp_port"      type="xsd:nonNegativeInteger"/>
-            <xsd:attribute name="udp_port"      type="xsd:nonNegativeInteger"/>
-            <xsd:attribute name="logoff"        type="Yes_no"/>
+            <xsd:attribute name="version"           type="String"/>
+            <xsd:attribute name="scheduler_id"      type="String"/>
+            <xsd:attribute name="tcp_port"          type="xsd:nonNegativeInteger"/>
+            <xsd:attribute name="udp_port"          type="xsd:nonNegativeInteger"/>
+            <xsd:attribute name="is_cluster_member" type="String"/>
+            <xsd:attribute name="logoff"            type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
     

@@ -369,9 +369,9 @@ Directory_tree::~Directory_tree()
 {
 }
 
-//------------------------------------------------------------------------Directory_tree::directory
+//----------------------------------------------------------------Directory_tree::directory_or_null
 
-Directory* Directory_tree::directory( const Absolute_path& path )
+Directory* Directory_tree::directory_or_null( const Absolute_path& path )
 {
     assert( path.folder_path().is_root() );
 

@@ -834,11 +834,12 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"version\"       type=\"String\"/>\n"
-    "<xsd:attribute name=\"scheduler_id\"  type=\"String\"/>\n"
-    "<xsd:attribute name=\"tcp_port\"      type=\"xsd:nonNegativeInteger\"/>\n"
-    "<xsd:attribute name=\"udp_port\"      type=\"xsd:nonNegativeInteger\"/>\n"
-    "<xsd:attribute name=\"logoff\"        type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"version\"           type=\"String\"/>\n"
+    "<xsd:attribute name=\"scheduler_id\"      type=\"String\"/>\n"
+    "<xsd:attribute name=\"tcp_port\"          type=\"xsd:nonNegativeInteger\"/>\n"
+    "<xsd:attribute name=\"udp_port\"          type=\"xsd:nonNegativeInteger\"/>\n"
+    "<xsd:attribute name=\"is_cluster_member\" type=\"String\"/>\n"
+    "<xsd:attribute name=\"logoff\"            type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1858,7 +1859,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1198920783 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1198928672 },
     { NULL, NULL, 0 }
 };
 
