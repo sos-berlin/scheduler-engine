@@ -321,6 +321,8 @@ void Supervisor_client_connection::start_update_configuration()
         _state = s_registered;
         async_continue();
     }
+    else
+        _start_update_configuration_delayed = true;
 }
 
 //----------------------------------------------------Supervisor_client_connection::async_continue_
@@ -400,18 +402,17 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 xml_writer->set_encoding( scheduler_character_encoding );
                 xml_writer->write_prolog();
 
-                xml_writer->begin_element( "supervisor.configuration.fetch_updated_files" );
+                xml_writer->begin_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
                 xml_writer->set_attribute( "scheduler_id", _spooler->id() );
 
                 if( _spooler->_tcp_port )
                 xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port );
 
-                if( _spooler->_udp_port )  xml_writer->set_attribute( "signal_next_change_at_udp_port", _spooler->_udp_port );
-                                     else  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
+                if( !_spooler->_udp_port )  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
 
                 write_directory_structure( xml_writer, root_path );
 
-                xml_writer->end_element( "supervisor.configuration.fetch_updated_files" );
+                xml_writer->end_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
                 xml_writer->close();
 
                 _xml_client_connection->send( string_writer->to_string() );
@@ -436,6 +437,12 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
             case s_configuration_fetched:
 #endif
+                if( _start_update_configuration_delayed )  
+                {
+                    start_update_configuration();
+                    _start_update_configuration_delayed = false;
+                }
+
                 _is_ready = true;   // Nach Verbindungsverlust bereits true
                 break;
 
@@ -700,7 +707,7 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
 
 ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    if( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) )  
+    if( element.nodeName_is( "supervisor.remote_scheduler.configuration.fetch_updated_files" ) )  
         return execute_configuration_fetch_updated_files( element, command_processor );
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
@@ -710,7 +717,7 @@ ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& ele
 
 ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_files( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    assert( element.nodeName_is( "supervisor.configuration.fetch_updated_files" ) );
+    assert( element.nodeName_is( "supervisor.remote_scheduler.configuration.fetch_updated_files" ) );
     if( command_processor->security_level() < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     if( !command_processor->communication_operation() )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
 
@@ -1098,8 +1105,6 @@ string Remote_configurations::async_state_text_() const
 
 bool Remote_configurations::check()
 {
-    log()->warn( Z_FUNCTION );
-
     bool   something_changed = false;
     double now               = double_from_gmtime();
 
@@ -1200,16 +1205,22 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
 
 ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
 {
-    //int tcp_port = element.int_getAttribute( "tcp_port", 0 );
-    //if( tcp_port == 0 )  z::throw_xc( Z_FUNCTION, "TCP port is missing" );
-    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
-    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
+    ptr<Command_response> result;
 
-    Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
-    //Remote_scheduler* remote_scheduler = _remote_scheduler_register.get( Host_and_port( command_processor->communication_operation()->_connection->peer_host(), tcp_port ) );
-    if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
+    if( string_begins_with( element.nodeName( "supervisor.remote_scheduler." ) ) )
+    {
+        Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
+        if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
 
-    return remote_scheduler->execute_xml( element, command_processor );
+        Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
+        if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
+
+        result = remote_scheduler->execute_xml( element, command_processor );
+    }
+    else
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
+
+    return result;
 }
 
 //---------------------------------------------------Supervisor::read_configuration_directory_names

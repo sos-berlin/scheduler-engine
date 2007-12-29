@@ -198,7 +198,6 @@ bool Directory::read( Read_subdirectories read_what )
                 e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
                 _directory_tree->set_last_change_at( now );
                 directory_has_changed = true;
-                e++;
             }
             else
             if( !e->_is_removed )

@@ -250,18 +250,6 @@
     <xsd:element name="check_folders" type="check_folders"/>
 
 
-    <xsd:element name="supervisor.configuration.fetch_updated_files">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="configuration.file" type="configuration.file" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
-            <xsd:attribute name="scheduler_id"                      type="String"/>
-            <xsd:attribute name="tcp_port"                          type="xsd:nonNegativeInteger"/>
-            <xsd:attribute name="signal_next_change_at_udp_port"    type="xsd:nonNegativeInteger"/>
-        </xsd:complexType>
-    </xsd:element>
-
-
     <xsd:element name="holiday">
         <xsd:complexType>
             <xsd:attribute name="date" type="String" use="required"/>
@@ -997,6 +985,18 @@
             </xsd:sequence>
             
             <xsd:attribute name="ignore_unknown_hosts" type="Yes_no"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="supervisor.remote_scheduler.configuration.fetch_updated_files">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="configuration.file"      type="configuration.file"/>
+                    <xsd:element name="configuration.directory" type="configuration.directory"/>
+                </xsd:choice>
+            </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
 
