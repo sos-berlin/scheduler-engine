@@ -1354,8 +1354,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
-            if( _zschimmer_mode &&
-                opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim
+            if( opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim Zschimmer
             else
             if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
             else
@@ -1382,7 +1381,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
             else
-            if( opt.flag      ( 'e', "log-to-stderr" ) )  _log_to_stderr = opt.set();
+            if( opt.flag      ( 'e', "log-to-stderr" ) )  _log_to_stderr = opt.set();   // Nur für Joacim Zschimmer
             else
             if( opt.with_value( "stderr-level"     ) )  _log_to_stderr = true,  _log_to_stderr_level = make_log_level( opt.value() );
             else

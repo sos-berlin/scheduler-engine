@@ -65,7 +65,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     void                        signal_remote_scheduler     ();
     string                      obj_name                    () const;
 
-    string                      async_state_text_           () const                                { return obj_name(); }
+    string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return false; }
 
@@ -403,10 +403,6 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 xml_writer->write_prolog();
 
                 xml_writer->begin_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
-                xml_writer->set_attribute( "scheduler_id", _spooler->id() );
-
-                if( _spooler->_tcp_port )
-                xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port );
 
                 if( !_spooler->_udp_port )  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
 
@@ -964,6 +960,15 @@ bool Remote_scheduler::async_continue_( Continue_flags )
     }
 
     return true;
+}
+
+//--------------------------------------------------------------Remote_scheduler::async_state_text_
+
+string Remote_scheduler::async_state_text_() const
+{ 
+    S result;
+    result << obj_name(); 
+    return result;
 }
 
 //--------------------------------------------------------------------Remote_scheduler::dom_element

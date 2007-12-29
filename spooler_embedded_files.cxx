@@ -259,18 +259,6 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"check_folders\" type=\"check_folders\"/>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"supervisor.configuration.fetch_updated_files\">\n"
-    "<xsd:complexType>\n"
-    "<xsd:sequence>\n"
-    "<xsd:element name=\"configuration.file\" type=\"configuration.file\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
-    "</xsd:sequence>\n"
-    "<xsd:attribute name=\"scheduler_id\"                      type=\"String\"/>\n"
-    "<xsd:attribute name=\"tcp_port\"                          type=\"xsd:nonNegativeInteger\"/>\n"
-    "<xsd:attribute name=\"signal_next_change_at_udp_port\"    type=\"xsd:nonNegativeInteger\"/>\n"
-    "</xsd:complexType>\n"
-    "</xsd:element>\n"
-    "\n"
-    "\n"
     "<xsd:element name=\"holiday\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"date\" type=\"String\" use=\"required\"/>\n"
@@ -1006,6 +994,18 @@ const char file_scheduler_xsd[] =
     "</xsd:sequence>\n"
     "\n"
     "<xsd:attribute name=\"ignore_unknown_hosts\" type=\"Yes_no\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"supervisor.remote_scheduler.configuration.fetch_updated_files\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
+    "<xsd:element name=\"configuration.file\"      type=\"configuration.file\"/>\n"
+    "<xsd:element name=\"configuration.directory\" type=\"configuration.directory\"/>\n"
+    "</xsd:choice>\n"
+    "</xsd:sequence>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1858,7 +1858,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1196942764 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1198920783 },
     { NULL, NULL, 0 }
 };
 
