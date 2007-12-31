@@ -371,15 +371,13 @@ Directory_tree::~Directory_tree()
 
 //----------------------------------------------------------------Directory_tree::directory_or_null
 
-Directory* Directory_tree::directory_or_null( const Absolute_path& path )
+Directory* Directory_tree::directory_or_null( const string& name )
 {
-    assert( path.folder_path().is_root() );
-
     Directory* result = NULL;
 
-    if( const Directory_entry* entry = _root_directory->entry_or_null( path.name() ) )
+    if( const Directory_entry* entry = _root_directory->entry_or_null( name ) )
     {
-        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", path );      Wenn's kein Verzeichnis ist, beachten wir's nicht
+        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", name );      Wenn's kein Verzeichnis ist, beachten wir's nicht
         result = entry->_subdirectory;
     }
 

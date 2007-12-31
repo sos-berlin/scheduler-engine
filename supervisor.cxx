@@ -29,6 +29,7 @@ struct Supervisor_client;
 
 //const int                       supervisor_configuration_poll_interval = 60;
 const double                    udp_timeout                 = 60;
+const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 
 //------------------------------------------------------------------------------------Xml_file_info
 
@@ -82,6 +83,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     bool                       _logged_on;
     bool                       _is_connected;
     Xc_copy                    _error;
+    string                     _configuration_directory_name;
     int                        _configuration_version;
     int                        _configuration_version_all;
 };
@@ -141,6 +143,47 @@ struct Remote_configurations : Scheduler_object,
     bool                       _is_activated;
 };
 
+//-----------------------------------------------------------------------------------Hostname_cache
+
+struct Hostname_cache
+{
+    Ip_address                  try_resolve_name            ( const string& hostname );
+
+    struct Hostname_map_entry
+    {
+                                Hostname_map_entry          ()                                      : _timestamp(0) {}
+        Ip_address             _ip_address;
+        double                 _timestamp;
+    };
+
+    typedef stdext::hash_map<string,Hostname_map_entry> Hostname_map;
+    Hostname_map               _hostname_map;
+};
+
+//---------------------------------------------------------------------Hostname_cache::resolve_name
+
+Ip_address Hostname_cache::try_resolve_name( const string& hostname )
+{
+    Hostname_map_entry& e   = _hostname_map[ lcase( hostname ) ];
+
+    if( !e._timestamp  ||  e._timestamp + max_hostname_age < double_from_gmtime() )     // Neuer oder veralteter Eintrag?
+    {
+        e._timestamp  = double_from_gmtime();
+
+        try
+        {
+            e._ip_address = Host( hostname );           // gethostbyname(), kann Exception auslösen
+        }
+        catch( exception& x )
+        {
+            Z_LOG( "ERROR " << Z_FUNCTION << " gethostbyname() ==> " << x.what() << "\n" );
+            e._ip_address = Ip_address( 0, 0, 0, 0 );
+        }
+    }
+
+    return e._ip_address;
+}
+
 //---------------------------------------------------------------------------------------Supervisor
 
 struct Supervisor : Supervisor_interface
@@ -173,6 +216,8 @@ struct Supervisor : Supervisor_interface
     
     typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
     Hostport_directory_map     _hostport_directory_map;
+
+    Hostname_cache             _hostname_cache;
 };
 
 //---------------------------------------------------------------------Supervisor_client_connection
@@ -707,14 +752,22 @@ Directory* Remote_scheduler::configuration_directory()
 {
     Directory* result;
 
+    if( _configuration_directory_name != ""  &&  
+        File_path( _supervisor->remote_configurations()->directory_tree()->directory_path(), _configuration_directory_name ).exists() )
+    {
+        result = _supervisor->remote_configurations()->directory_tree()->directory_or_null( _configuration_directory_name );
+    }
+    else
     if( _is_cluster_member )
     {
-        result = _supervisor->remote_configurations()->directory_tree()->directory_or_null( Absolute_path( root_path, _scheduler_id ) );
+        result = _supervisor->remote_configurations()->directory_tree()->directory_or_null( _scheduler_id );
     }
     else
     {
         result = _supervisor->configuration_directory_for_host_and_port( _host_and_port );
     }
+
+    _configuration_directory_name = result? result->name() : "";
 
     return result;
 }
@@ -978,7 +1031,7 @@ bool Remote_scheduler::check_remote_configuration()
 
 void Remote_scheduler::signal_remote_scheduler()
 {
-    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );  int EXCEPTION;
+    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
     set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
 }
 
@@ -1284,13 +1337,12 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
 
 void Supervisor::read_configuration_directory_names()
 {
-    Hostport_directory_map    new_hostport_directory_map;
+    Hostport_directory_map                 new_hostport_directory_map;
     stdext::hash_map<string,Host_and_port> directory_map;
+    Directory*                             root_directory             = remote_configurations()->directory_tree()->root_directory();
 
-    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() zu vermeiden
+    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
    
-
-    Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
 
     root_directory->read( Directory::read_no_subdirectories );
 
@@ -1304,7 +1356,7 @@ void Supervisor::read_configuration_directory_names()
             if( pos != string::npos )
             {
                 stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
-                if( it != directory_map.end() )
+                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
                 {
                     new_hostport_directory_map[ it->second ] = it->first;
                 }
@@ -1312,13 +1364,18 @@ void Supervisor::read_configuration_directory_names()
                 {
                     try
                     {
-                        d[ pos ] = ':';
-                        Host_and_port host_and_port ( d );      // Ruft gethostbyname(), Exception bei unbekannten Hostnamen
+                        Host_and_port host_and_port;
+                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
+                        
+                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
+                        {
+                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
 
-                        Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
-                        if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
+                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
+                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
 
-                        new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
+                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
+                        }
                     }
                     catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
                 }
@@ -1350,7 +1407,7 @@ Directory* Supervisor::configuration_directory_for_host_and_port( const Host_and
 
 Directory* Supervisor::configuration_directory_for_all_schedulers_or_null()
 {
-    return remote_configurations()->directory_tree()->directory_or_null( Absolute_path( "/_all" ) );
+    return remote_configurations()->directory_tree()->directory_or_null( "_all" );
 }
 
 //----------------------------------------------------------Supervisor::check_remote_configurations

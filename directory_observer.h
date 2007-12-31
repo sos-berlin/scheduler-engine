@@ -23,7 +23,7 @@ struct Directory_tree : Scheduler_object,
   //bool                        read                        ();
     double                      last_change_at              () const                                { return _last_change_at; }
     double                      refresh_aged_entries_at     () const                                { return _refresh_aged_entries_at; }
-    Directory*                  directory_or_null           ( const Absolute_path& );
+    Directory*                  directory_or_null           ( const string& name );
     Directory*                  root_directory              () const                                { return _root_directory; }
   //void                        refresh_aged_entries        ();
 
@@ -69,6 +69,7 @@ struct Directory : Object
 
                                 Directory                   ( Directory_tree*, Directory* parent, const string& name );
 
+    string                      name                        () const                                { return _name; }
     Absolute_path               path                        () const;
     File_path                   file_path                   () const;
     bool                        read                        ( Read_subdirectories );
