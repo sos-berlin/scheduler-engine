@@ -59,6 +59,7 @@ objects = \
  standing_order.o\
  subsystem.o\
  supervisor.o\
+ supervisor_client.o\
  xml_client_connection.o
 
 
