@@ -30,6 +30,7 @@ struct Supervisor_client;
 //const int                       supervisor_configuration_poll_interval = 60;
 const double                    udp_timeout                 = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
+const string                    directory_name_for_all_schedulers = "_all";
 
 //------------------------------------------------------------------------------------Xml_file_info
 
@@ -160,30 +161,6 @@ struct Hostname_cache
     Hostname_map               _hostname_map;
 };
 
-//---------------------------------------------------------------------Hostname_cache::resolve_name
-
-Ip_address Hostname_cache::try_resolve_name( const string& hostname )
-{
-    Hostname_map_entry& e   = _hostname_map[ lcase( hostname ) ];
-
-    if( !e._timestamp  ||  e._timestamp + max_hostname_age < double_from_gmtime() )     // Neuer oder veralteter Eintrag?
-    {
-        e._timestamp  = double_from_gmtime();
-
-        try
-        {
-            e._ip_address = Host( hostname );           // gethostbyname(), kann Exception auslösen
-        }
-        catch( exception& x )
-        {
-            Z_LOG( "ERROR " << Z_FUNCTION << " gethostbyname() ==> " << x.what() << "\n" );
-            e._ip_address = Ip_address( 0, 0, 0, 0 );
-        }
-    }
-
-    return e._ip_address;
-}
-
 //---------------------------------------------------------------------------------------Supervisor
 
 struct Supervisor : Supervisor_interface
@@ -220,471 +197,203 @@ struct Supervisor : Supervisor_interface
     Hostname_cache             _hostname_cache;
 };
 
-//---------------------------------------------------------------------Supervisor_client_connection
+//-----------------------------------------------------------------------------------new_supervisor
 
-struct Supervisor_client_connection : Async_operation, Scheduler_object
+ptr<Supervisor_interface> new_supervisor( Scheduler* scheduler )
 {
-    enum State
-    {
-        s_not_connected,
-        s_connecting,
-        s_registering,
-        s_registered,
-        s_fetching_configuration,
-        s_configuration_fetched
-    };
+    ptr<Supervisor> supervisor = Z_NEW( Supervisor( scheduler ) );
+    return +supervisor;
+}
 
-    static string               state_name                  ( State );
+//---------------------------------------------------------------------------Supervisor::Supervisor
 
-
-                                Supervisor_client_connection( Supervisor_client*, const Host_and_port& );
-                               ~Supervisor_client_connection();
-
-    virtual string              obj_name                    () const;
-
-    State                       state                       () const                                { return _state; }
-    void                        connect                     ();
-    const Host_and_port&        host_and_port               () const                                { return _host_and_port; }
-    bool                        is_ready                    () const                                { return _is_ready; }
-    bool                        connection_failed           () const                                { return _connection_failed; }
-    void                        start_update_configuration  ();
-
-  protected:
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    bool                        async_finished_             () const                                { return _state == s_not_connected  
-                                                                                                          || _state == s_registered; }
-  //bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
-
-    void                        write_directory_structure   ( xml::Xml_writer*, const Absolute_path& );
-    void                        update_directory_structure  ( const Absolute_path&, const xml::Element_ptr& );
-
-  private:
-    Fill_zero                  _zero_;
-    State                      _state;
-    Host_and_port              _host_and_port;
-    Supervisor_client*         _supervisor_client;
-    ptr<Xml_client_connection> _xml_client_connection;
-    bool                       _is_ready;
-    bool                       _connection_failed;
-    bool                       _start_update_configuration_delayed;
-};
-
-//--------------------------------------------------------------------------------Supervisor_client
-
-struct Supervisor_client : Supervisor_client_interface
-{
-                                Supervisor_client           ( Scheduler*, const Host_and_port& );
-
-    // Subsystem
-    void                        close                       ();
-    bool                        subsystem_initialize        ();
-                                Subsystem::obj_name;
-
-    // Supervisor_client_interface
-    bool                        is_ready                    () const                                { return _client_connection && _client_connection->is_ready(); }
-    bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
-    void                        start_update_configuration  ()                                      { if( _client_connection )  _client_connection->start_update_configuration(); }
-
-    // IDispatch_implementation
-    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
-    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Supervisor_client"; }
-    STDMETHODIMP            get_Hostname                    ( BSTR* );
-    STDMETHODIMP            get_Tcp_port                    ( int* );
-
-  private:
-    Fill_zero                  _zero_;
-    ptr<Supervisor_client_connection> _client_connection;
-
-    static Class_descriptor     class_descriptor;
-    static const Com_method     _methods[];
-};
-
-//--------------------------------------------------------------------------------------------const
-    
-const int                               main_scheduler_retry_time           = 60;
-Supervisor_client::Class_descriptor     Supervisor_client::class_descriptor ( &typelib, "Spooler.Supervisor", Supervisor_client::_methods );
-
-//----------------------------------------------------------------------Supervisor_client::_methods
-
-const Com_method Supervisor_client::_methods[] =
-{ 
-#ifdef COM_METHOD
-    COM_PROPERTY_GET( Supervisor_client,  1, Java_class_name     , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Supervisor_client,  2, Hostname            , VT_BSTR    , 0 ),
-    COM_PROPERTY_GET( Supervisor_client,  3, Tcp_port            , VT_INT     , 0 ),
-#endif
-    {}
-};
-
-//-----------------------------------------Supervisor_client_interface::Supervisor_client_interface
-
-Supervisor_client_interface::Supervisor_client_interface( Scheduler* scheduler, Type_code tc, Class_descriptor* class_descriptor )  
+Supervisor::Supervisor( Scheduler* scheduler )            
 : 
-    Idispatch_implementation( class_descriptor ),
-    Subsystem( scheduler, static_cast<IDispatch*>( this ), tc ) 
+    Supervisor_interface( scheduler, type_supervisor ), 
+    _zero_(this+1) 
 {
 }
 
-//---------------------------------------Supervisor_client_connection::Supervisor_client_connection
-    
-Supervisor_client_connection::Supervisor_client_connection( Supervisor_client* supervisor_client, const Host_and_port& host_and_port )
-: 
-    Scheduler_object( supervisor_client->_spooler, this, type_supervisor_client_connection ),
-    _zero_(this+1), 
-    _host_and_port(host_and_port)
-{
-    _supervisor_client = supervisor_client;
-    _log = supervisor_client->log();
-}
+//--------------------------------------------------------------------------------Supervisor::close
 
-//--------------------------------------Supervisor_client_connection::~Supervisor_client_connection
-
-Supervisor_client_connection::~Supervisor_client_connection()
+void Supervisor::close()
 {
-    if( _xml_client_connection )  
+    if( _remote_configurations )
     {
-        _xml_client_connection->set_async_parent( NULL );
-        _xml_client_connection->set_async_manager( NULL );
+        _remote_configurations->close();
+        _remote_configurations = NULL;
     }
 }
 
-//------------------------------------------------------------Supervisor_client_connection::connect
+//-----------------------------------------------------------------Supervisor::subsystem_initialize
 
-void Supervisor_client_connection::connect()
+bool Supervisor::subsystem_initialize()
 {
-    _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _host_and_port ) );
-    _xml_client_connection->set_async_manager( _spooler->_connection_manager );
-    _xml_client_connection->set_async_parent( this );
-    _xml_client_connection->connect();
-    _state = s_connecting;
+    set_subsystem_state( subsys_initialized );
+    return true;
 }
 
-//-----------------------------------------Supervisor_client_connection::start_update_configuration
+//-----------------------------------------------------------------------Supervisor::subsystem_load
 
-void Supervisor_client_connection::start_update_configuration()
+bool Supervisor::subsystem_load()
 {
-    if( _state == s_configuration_fetched )
+    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
+
+    set_subsystem_state( subsys_loaded );
+    return true;
+}
+
+//-------------------------------------------------------------------Supervisor::subsystem_activate
+
+bool Supervisor::subsystem_activate()
+{
+    set_subsystem_state( subsys_active );
+    return true;
+}
+
+//--------------------------------------------------------------------------Supervisor::execute_xml
+
+ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
+{
+    ptr<Command_response> result;
+
+    if( string_begins_with( element.nodeName(), "supervisor.remote_scheduler." ) )
     {
-        _state = s_registered;
-        async_continue();
+        Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
+        if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
+
+        Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
+        if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
+
+        result = remote_scheduler->execute_xml( element, command_processor );
     }
     else
-        _start_update_configuration_delayed = true;
-}
-
-//----------------------------------------------------Supervisor_client_connection::async_continue_
-
-bool Supervisor_client_connection::async_continue_( Continue_flags )
-{
-    Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
-
-    bool something_done = false;
-
-    try
-    {
-        if( _xml_client_connection )  _xml_client_connection->async_check_exception();
-
-        switch( _state )
-        {
-            case s_not_connected:
-                _connection_failed = false;
-                connect();
-                break;
-
-
-            case s_connecting:
-            {
-                if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
-
-                ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
-                ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
-
-                xml_writer->set_encoding( scheduler_character_encoding );
-                xml_writer->write_prolog();
-
-                xml_writer->begin_element( "register_remote_scheduler" );
-                xml_writer->set_attribute( "scheduler_id", _spooler->_spooler_id );
-
-                if( _spooler->_tcp_port )
-                xml_writer->set_attribute( "tcp_port"    , _spooler->_tcp_port   );
-
-                if( _spooler->_udp_port )
-                xml_writer->set_attribute( "udp_port"    , _spooler->_udp_port );
-            
-                if( _spooler->is_cluster() )
-                xml_writer->set_attribute( "is_cluster_member", "yes" );
-
-                xml_writer->set_attribute( "version"     , _spooler->_version );
-                xml_writer->end_element( "register_remote_scheduler" );
-                
-                xml_writer->close();
-
-                _xml_client_connection->send( string_writer->to_string() );
-                _state = s_registering;
-            }
-
-
-            case s_registering:
-            {
-                if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
-                {
-                    log()->info( message_string( "SCHEDULER-950" ) );
-                    _state = s_registered;
-                }
-
-                if( _state != s_registered )  break;
-            }
-
-
-            case s_registered:
-            {
-                // Wird nach Verbindungsverlust nochmal durchlaufen
-
-                if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
-
-                ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
-                ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
-
-                xml_writer->set_encoding( scheduler_character_encoding );
-                xml_writer->write_prolog();
-
-                xml_writer->begin_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
-
-                if( !_spooler->_udp_port )  log()->warn( message_string( "SCHEDULER-899" ) );//, supervisor_configuration_poll_interval ) );
-
-                write_directory_structure( xml_writer, root_path );
-
-                xml_writer->end_element( "supervisor.remote_scheduler.configuration.fetch_updated_files" );
-                xml_writer->close();
-
-                _xml_client_connection->send( string_writer->to_string() );
-                _state = s_fetching_configuration;
-            }
-
-
-            case s_fetching_configuration:
-            {
-                if( xml::Document_ptr response_document = _xml_client_connection->fetch_received_dom_document() )
-                {
-                    //log()->info( message_string( "SCHEDULER-950" ) );
-
-                    if( xml::Element_ptr directory_element = response_document.select_node( "/spooler/answer/configuration.directory" ) )
-                    {
-                        update_directory_structure( root_path, directory_element );
-                    }
-                    
-                    _state = s_configuration_fetched;
-                }
-
-                if( _state != s_configuration_fetched )  break;
-            }
-
-
-            case s_configuration_fetched:
-                if( _start_update_configuration_delayed )  
-                {
-                    start_update_configuration();
-                    _start_update_configuration_delayed = false;
-                }
-
-                _is_ready = true;   // Nach Verbindungsverlust bereits true
-
-                try
-                {
-                    if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
-                        _spooler->folder_subsystem()->handle_folders( 0.0 );  
-                }
-                catch( exception& x ) { log()->warn( x.what() ); }
-
-                break;
-
-            default: 
-                assert(0);
-        }
-    }
-    catch( exception& x )
-    {
-        log()->warn( x.what() );
-
-        if( _xml_client_connection ) 
-        {
-            _xml_client_connection->set_async_manager( NULL );
-            _xml_client_connection = NULL;
-        }
-
-        _state = s_not_connected;
-        _connection_failed = true;
-
-        set_async_delay( main_scheduler_retry_time );
-        something_done = true;
-    }
-
-    return something_done;
-}
-
-//--------------------------------------------------Supervisor_client_connection::async_state_text_
-
-string Supervisor_client_connection::async_state_text_() const
-{ 
-    S result;
-
-    result << obj_name();
-    result << "(";
-    if( _is_ready )  result << ", ready";
-    if( _connection_failed )  result << ", connection failed";
-    if( _start_update_configuration_delayed )  result << ", start_update_configuration_delayed ";
-    result << ")";
+        z::throw_xc( "SCHEDULER-105", element.nodeName() );
 
     return result;
 }
 
-//------------------------------------------Supervisor_client_connection::write_directory_structure
+//----------------------------------------------------Supervisor::execute_register_remote_scheduler
 
-void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* xml_writer, const Absolute_path& path )
+void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
 {
-    Folder_directory_lister dir ( _log );
+    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
+    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
+ 
+    Host_and_port host_and_port ( communication_operation->_connection->peer_host(), register_remote_scheduler_element.int_getAttribute( "tcp_port" ) );
+
+    ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null( host_and_port );
+
+    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler( this ) );
+
+    remote_scheduler->_host_and_port = host_and_port;
+    remote_scheduler->_host_and_port._host.resolve_name();
+    remote_scheduler->set_dom( register_remote_scheduler_element );
+    remote_scheduler->_udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
     
-    bool ok = dir.open( spooler()->folder_subsystem()->directory(), path );
+    xml_processor->_operation_connection->_remote_scheduler = +remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    _remote_scheduler_register.add( remote_scheduler );
+}
 
-    if( ok )
+//---------------------------------------------------Supervisor::read_configuration_directory_names
+
+void Supervisor::read_configuration_directory_names()
+{
+    Hostport_directory_map                 new_hostport_directory_map;
+    stdext::hash_map<string,Host_and_port> directory_map;
+    Directory*                             root_directory             = remote_configurations()->directory_tree()->root_directory();
+
+    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
+   
+
+    root_directory->read( Directory::read_no_subdirectories );
+
+    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
     {
-        while( ptr<file::File_info> file_info = dir.get() )
+        if( e->_file_info->is_directory() )
         {
-            string filename = file_info->path().name();
+            string d   = e->_file_info->path().name();
+            size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
 
-            if( file_info->is_directory() )
+            if( pos != string::npos )
             {
-                xml_writer->begin_element( "configuration.directory" );
-                xml_writer->set_attribute( "name", path.name() );
-
-                write_directory_structure( xml_writer, Absolute_path( path, filename ) );
-
-                xml_writer->end_element( "configuration.directory" );
-            }
-            else
-            {
-                string name      = Folder::object_name_of_filename( filename );
-                string extension = Folder::extension_of_filename( filename );
-                
-                if( name != "" )
+                stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
+                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
                 {
-                    if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
+                    new_hostport_directory_map[ it->second ] = it->first;
+                }
+                else
+                {
+                    try
                     {
-                        File_path file_path       ( spooler()->folder_subsystem()->directory(), Absolute_path( path, filename ) );
-                        Time      last_write_time ( file_info->last_write_time(), Time::is_utc );
+                        Host_and_port host_and_port;
+                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
+                        
+                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
+                        {
+                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
 
-                        xml_writer->begin_element( "configuration.file" );
-                        xml_writer->set_attribute( "name"           , filename );
-                        xml_writer->set_attribute( "last_write_time", last_write_time.xml_value() );
-                        xml_writer->set_attribute( "md5"            , md5( string_from_file( file_path ) ) );
-                        xml_writer->end_element( "configuration.file" );
+                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
+                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
+
+                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
+                        }
                     }
+                    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
                 }
             }
         }
     }
+
+    _hostport_directory_map = new_hostport_directory_map;
 }
 
-//-----------------------------------------Supervisor_client_connection::update_directory_structure
+//-----------------------------------------Supervisor::configuration_directory_for_host_and_port
 
-void Supervisor_client_connection::update_directory_structure( const Absolute_path& directory_path, const xml::Element_ptr& element )
+Directory* Supervisor::configuration_directory_for_host_and_port( const Host_and_port& host_and_port )
 {
-    assert( element );
-    assert( element.nodeName_is( "configuration.directory" ) );
-    assert( element.getAttribute( "name" ) == directory_path.name() );
+    Directory* result = NULL;
 
-    DOM_FOR_EACH_ELEMENT( element, e )
+    Hostport_directory_map::iterator it = _hostport_directory_map.find( host_and_port );
+    if( it != _hostport_directory_map.end() )  
     {
-        Absolute_path path      ( directory_path, e.getAttribute( "name" ) );
-        File_path     file_path ( _spooler->folder_subsystem()->directory(), path );
-
-        if( e.nodeName_is( "configuration.directory" ) )
-        {
-            if( e.bool_getAttribute( "removed", false ) )
-            {
-                log()->info( message_string( "SCHEDULER-702", path + "/" ) );
-                if( file_path.name() == "" )  z::throw_xc( Z_FUNCTION, file_path );     // Vorsichtshalber
-                file_path.remove_complete_directory();
-            }
-            else
-            {
-                log()->info( message_string( "SCHEDULER-702", path ) );
-
-#               ifdef Z_WINDOWS
-                    int err = mkdir( file_path.c_str() );
-#                else
-                    int err = mkdir( file_path.c_str(), 0700 );
-#               endif
-
-                if( err && errno != EEXIST )  zschimmer::throw_errno( errno, "mkdir" );
-
-                update_directory_structure( path, e );
-            }
-        }
-        else
-        if( e.nodeName_is( "configuration.file" ) )
-        {
-            if( e.bool_getAttribute( "removed", false ) )
-            {
-                log()->info( message_string( "SCHEDULER-702", path ) );
-                file_path.unlink();
-            }
-            else
-            {
-                const xml::Element_ptr& content_element = e.select_node_strict( "content" );
-                string content;
-
-                Time last_write_time = Time().set_datetime( e.getAttribute( "last_write_time" ) );
-
-                if( content_element.getAttribute( "encoding" ) == "base64" )  content = base64_decoded( content_element.text() );
-                else
-                    z::throw_xc( Z_FUNCTION, "invalid <content>-encoding" );
-
-                log()->info( message_string( "SCHEDULER-701", path, last_write_time.as_string() ) );
-
-                File_path temporary_path = file_path + "~";
-                //if( temporary_path.exists() )  temporary_path.unlink();     // Löschen, damit Dateirechte gesetzt werden können (Datei sollte nicht vorhanden sein)
-
-                File file ( temporary_path, "wb" ); //, 0400 );                   // Nur lesbar, damit keiner versehentlich die Datei ändert
-                file.print( content );
-                file.close();
-
-                struct utimbuf utimbuf;
-                utimbuf.actime  = ::time(NULL);
-                utimbuf.modtime = last_write_time.as_utc_time_t();
-                int err = utime( file.path().c_str(), &utimbuf );
-                if( err )  zschimmer::throw_errno( errno, "utime", Z_FUNCTION );
-
-                file.path().move_to( file_path );
-            }
-        }
-        else
-            assert(0);
+        Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
+        if( const Directory_entry* entry = root_directory->entry_or_null( it->second ) )
+            result = entry->_subdirectory;
     }
+
+    return result;
 }
 
-//---------------------------------------------------------Supervisor_client_connection::state_name
+//-----------------------------------Supervisor::configuration_directory_for_all_schedulers_or_null
 
-string Supervisor_client_connection::state_name( State state )
+Directory* Supervisor::configuration_directory_for_all_schedulers_or_null()
 {
-    switch( state )
+    return remote_configurations()->directory_tree()->directory_or_null( directory_name_for_all_schedulers );
+}
+
+//----------------------------------------------------------Supervisor::check_remote_configurations
+
+bool Supervisor::check_remote_configurations()
+{
+    bool result = false;
+    
+    read_configuration_directory_names();
+
+    Z_FOR_EACH( Remote_scheduler_register::Map, _remote_scheduler_register._map, it )
     {
-        case s_not_connected:           return "not_connected";
-        case s_connecting:              return "connecting";
-        case s_registering:             return "registering";
-        case s_registered:              return "registered";
-        case s_fetching_configuration:  return "fetching_configuration";
-        case s_configuration_fetched:   return "configuration_fetched";
-        default:                        return "state=" + as_string( state );
+        Remote_scheduler* remote_scheduler = it->second;
+        result |= remote_scheduler->check_remote_configuration();
     }
+
+    return result;
 }
 
-//------------------------------------------------------------------Supervisor_client_connection::obj_name
+//--------------------------------------------------------------------------Supervisor::dom_element
 
-string Supervisor_client_connection::obj_name() const
+xml::Element_ptr Supervisor::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
-    return S() << "Supervisor_client_connection(" << _host_and_port << " " << state_name( _state ) << ")";
+    return _remote_scheduler_register.dom_element( dom_document, show_what );
 }
 
 //-----------------------------------------------------------Remote_scheduler_register::get_or_null
@@ -799,6 +508,52 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
     {
         if( e.nodeName_is( "ERROR" ) )  _error = xc_from_dom_error( e );
     }
+}
+
+//-----------------------------------------------------Remote_scheduler::check_remote_configuration
+
+bool Remote_scheduler::check_remote_configuration()
+{
+    bool result = false;
+
+    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
+
+    if( _udp_port )
+    {
+        if( Directory* configuration_directory = this->configuration_directory() )
+        {
+            bool changed = false;
+
+            if( _configuration_version == configuration_directory->version() )  configuration_directory->read( Directory::read_subdirectories );
+
+            changed = _configuration_version != configuration_directory->version();
+            
+            if( !changed )
+            {
+                if( Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers_or_null() )
+                {
+                    if( _configuration_version_all == all_directory->version() )  all_directory->read( Directory::read_subdirectories );
+                    changed = _configuration_version_all != all_directory->version();
+                }
+            }
+
+            if( changed )  
+            {
+                signal_remote_scheduler();
+                result = true;
+            }
+        }
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
+
+void Remote_scheduler::signal_remote_scheduler()
+{
+    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
+    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
 }
 
 //--------------------------------------------------------------------Remote_scheduler::execute_xml
@@ -987,52 +742,6 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
             if( !string_begins_with( x.what(), S() << "ERRNO-" << ENOENT ) )  log()->warn( x.what() );
         }
     }
-}
-
-//-----------------------------------------------------Remote_scheduler::check_remote_configuration
-
-bool Remote_scheduler::check_remote_configuration()
-{
-    bool result = false;
-
-    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
-
-    if( _udp_port )
-    {
-        if( Directory* configuration_directory = this->configuration_directory() )
-        {
-            bool changed = false;
-
-            if( _configuration_version == configuration_directory->version() )  configuration_directory->read( Directory::read_subdirectories );
-
-            changed = _configuration_version != configuration_directory->version();
-            
-            if( !changed )
-            {
-                if( Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers_or_null() )
-                {
-                    if( _configuration_version_all == all_directory->version() )  all_directory->read( Directory::read_subdirectories );
-                    changed = _configuration_version_all != all_directory->version();
-                }
-            }
-
-            if( changed )  
-            {
-                signal_remote_scheduler();
-                result = true;
-            }
-        }
-    }
-
-    return result;
-}
-
-//--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
-
-void Remote_scheduler::signal_remote_scheduler()
-{
-    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
-    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
 }
 
 //----------------------------------------------------------------Remote_scheduler::async_continue_
@@ -1235,292 +944,28 @@ bool Remote_configurations::check()
     return something_changed;
 }
 
-//-----------------------------------------------------------------------------------new_supervisor
+//---------------------------------------------------------------------Hostname_cache::resolve_name
 
-ptr<Supervisor_interface> new_supervisor( Scheduler* scheduler )
+Ip_address Hostname_cache::try_resolve_name( const string& hostname )
 {
-    ptr<Supervisor> supervisor = Z_NEW( Supervisor( scheduler ) );
-    return +supervisor;
-}
+    Hostname_map_entry& e   = _hostname_map[ lcase( hostname ) ];
 
-//---------------------------------------------------------------------------Supervisor::Supervisor
-
-Supervisor::Supervisor( Scheduler* scheduler )            
-: 
-    Supervisor_interface( scheduler, type_supervisor ), 
-    _zero_(this+1) 
-{
-}
-
-//--------------------------------------------------------------------------------Supervisor::close
-
-void Supervisor::close()
-{
-    if( _remote_configurations )
+    if( !e._timestamp  ||  e._timestamp + max_hostname_age < double_from_gmtime() )     // Neuer oder veralteter Eintrag?
     {
-        _remote_configurations->close();
-        _remote_configurations = NULL;
-    }
-}
+        e._timestamp  = double_from_gmtime();
 
-//-----------------------------------------------------------------Supervisor::subsystem_initialize
-
-bool Supervisor::subsystem_initialize()
-{
-    set_subsystem_state( subsys_initialized );
-    return true;
-}
-
-//-----------------------------------------------------------------------Supervisor::subsystem_load
-
-bool Supervisor::subsystem_load()
-{
-    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
-
-    set_subsystem_state( subsys_loaded );
-    return true;
-}
-
-//-------------------------------------------------------------------Supervisor::subsystem_activate
-
-bool Supervisor::subsystem_activate()
-{
-    set_subsystem_state( subsys_active );
-    return true;
-}
-
-//----------------------------------------------------Supervisor::execute_register_remote_scheduler
-
-void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
-{
-    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
-    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
- 
-    Host_and_port host_and_port ( communication_operation->_connection->peer_host(), register_remote_scheduler_element.int_getAttribute( "tcp_port" ) );
-
-    ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null( host_and_port );
-
-    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler( this ) );
-
-    remote_scheduler->_host_and_port = host_and_port;
-    remote_scheduler->_host_and_port._host.resolve_name();
-    remote_scheduler->set_dom( register_remote_scheduler_element );
-    remote_scheduler->_udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
-    
-    xml_processor->_operation_connection->_remote_scheduler = +remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
-    _remote_scheduler_register.add( remote_scheduler );
-}
-
-//--------------------------------------------------------------------------Supervisor::execute_xml
-
-ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
-{
-    ptr<Command_response> result;
-
-    if( string_begins_with( element.nodeName(), "supervisor.remote_scheduler." ) )
-    {
-        Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( command_processor->communication_operation() );
-        if( !xml_processor )  z::throw_xc( "SCHEDULER-222", element.nodeName() );
-
-        Remote_scheduler_interface* remote_scheduler = xml_processor->_operation_connection->_remote_scheduler; 
-        if( !remote_scheduler )  z::throw_xc( "SCHEDULER-457", command_processor->communication_operation()->_connection->peer_host() );
-
-        result = remote_scheduler->execute_xml( element, command_processor );
-    }
-    else
-        z::throw_xc( "SCHEDULER-105", element.nodeName() );
-
-    return result;
-}
-
-//---------------------------------------------------Supervisor::read_configuration_directory_names
-
-void Supervisor::read_configuration_directory_names()
-{
-    Hostport_directory_map                 new_hostport_directory_map;
-    stdext::hash_map<string,Host_and_port> directory_map;
-    Directory*                             root_directory             = remote_configurations()->directory_tree()->root_directory();
-
-    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
-   
-
-    root_directory->read( Directory::read_no_subdirectories );
-
-    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
-    {
-        if( e->_file_info->is_directory() )
+        try
         {
-            string d   = e->_file_info->path().name();
-            size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
-
-            if( pos != string::npos )
-            {
-                stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
-                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
-                {
-                    new_hostport_directory_map[ it->second ] = it->first;
-                }
-                else
-                {
-                    try
-                    {
-                        Host_and_port host_and_port;
-                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
-                        
-                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
-                        {
-                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
-
-                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
-                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
-
-                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
-                        }
-                    }
-                    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
-                }
-            }
+            e._ip_address = Host( hostname );           // gethostbyname(), kann Exception auslösen
+        }
+        catch( exception& x )
+        {
+            Z_LOG( "ERROR " << Z_FUNCTION << " gethostbyname() ==> " << x.what() << "\n" );
+            e._ip_address = Ip_address( 0, 0, 0, 0 );
         }
     }
 
-    _hostport_directory_map = new_hostport_directory_map;
-}
-
-//-----------------------------------------Supervisor::configuration_directory_for_host_and_port
-
-Directory* Supervisor::configuration_directory_for_host_and_port( const Host_and_port& host_and_port )
-{
-    Directory* result = NULL;
-
-    Hostport_directory_map::iterator it = _hostport_directory_map.find( host_and_port );
-    if( it != _hostport_directory_map.end() )  
-    {
-        Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
-        if( const Directory_entry* entry = root_directory->entry_or_null( it->second ) )
-            result = entry->_subdirectory;
-    }
-
-    return result;
-}
-
-//-----------------------------------Supervisor::configuration_directory_for_all_schedulers_or_null
-
-Directory* Supervisor::configuration_directory_for_all_schedulers_or_null()
-{
-    return remote_configurations()->directory_tree()->directory_or_null( "_all" );
-}
-
-//----------------------------------------------------------Supervisor::check_remote_configurations
-
-bool Supervisor::check_remote_configurations()
-{
-    bool result = false;
-    
-    read_configuration_directory_names();
-
-    Z_FOR_EACH( Remote_scheduler_register::Map, _remote_scheduler_register._map, it )
-    {
-        Remote_scheduler* remote_scheduler = it->second;
-        result |= remote_scheduler->check_remote_configuration();
-    }
-
-    return result;
-}
-
-//--------------------------------------------------------------------------Supervisor::dom_element
-
-xml::Element_ptr Supervisor::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
-{
-    return _remote_scheduler_register.dom_element( dom_document, show_what );
-}
-
-//----------------------------------------------------------------------------new_supervisor_client
-
-ptr<Supervisor_client_interface> new_supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
-{
-    ptr<Supervisor_client> supervisor_client = Z_NEW( Supervisor_client( scheduler, host_and_port ) );
-    return +supervisor_client;
-}
-
-//--------------------------------------------------------------upervisor_client::Supervisor_client
-
-Supervisor_client::Supervisor_client( Scheduler* scheduler, const Host_and_port& host_and_port )
-: 
-    Supervisor_client_interface( scheduler, type_supervisor_client, &class_descriptor ),
-    _zero_(this+1)
-{
-    _log->set_prefix( S() << obj_name() << ' ' << host_and_port.as_string() );
-    _client_connection = Z_NEW( Supervisor_client_connection( this, host_and_port ) );
-}
-
-//-------------------------------------------------------------------------Supervisor_client::close
-    
-void Supervisor_client::close()
-{
-    if( _client_connection )
-    {
-        _client_connection->set_async_manager( NULL );
-        _client_connection = NULL;
-    }
-}
-
-//----------------------------------------------------------Supervisor_client::subsystem_initialize
-    
-bool Supervisor_client::subsystem_initialize()
-{
-    _subsystem_state = subsys_initialized;
-    _client_connection->set_async_manager( _spooler->_connection_manager );
-    _client_connection->connect();
-
-    return true;
-}
-
-//----------------------------------------------------------------Supervisor_client::subsystem_load
-
-//bool Supervisor_client::subsystem_load()
-//{
-//    _subsystem_state = subsys_loaded;
-//    return true;
-//}
-
-//------------------------------------------------------------Supervisor_client::subsystem_activate
-
-//bool Supervisor_client::subsystem_activate()
-//{
-//    _subsystem_state = subsys_activated;
-//    return true;
-//}
-
-//------------------------------------------------------------------Supervisor_client::get_Hostname
-
-STDMETHODIMP Supervisor_client::get_Hostname( BSTR* result )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        string hostname = _client_connection->host_and_port().host().name();
-        if( hostname == "" )  hostname = _client_connection->host_and_port().host().ip_string();
-        hr = String_to_bstr( hostname, result );
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-
-    return hr;
-}
-
-//------------------------------------------------------------------Supervisor_client::get_Tcp_port
-
-STDMETHODIMP Supervisor_client::get_Tcp_port( int* result )
-{
-    HRESULT hr = S_OK;
-
-    try
-    {
-        *result = _client_connection->host_and_port().port();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-
-    return hr;
+    return e._ip_address;
 }
 
 //-------------------------------------------------------------------------------------------------

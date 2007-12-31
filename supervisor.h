@@ -26,21 +26,6 @@ struct Remote_scheduler_interface : Async_operation
     virtual ptr<Command_response> execute_xml               ( const xml::Element_ptr&, Command_processor* ) = 0;
 };
 
-//----------------------------------------------------------------------Supervisor_client_interface
-
-struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_interface, spooler_com::Isupervisor_client >,
-                                    Subsystem
-{
-                                Supervisor_client_interface ( Scheduler*, Type_code, Class_descriptor* );
-
-    virtual bool                is_ready                    () const                                = 0;
-    virtual bool                connection_failed           () const                                = 0;
-    virtual void                start_update_configuration  ()                                      = 0;
-};
-
-
-ptr<Supervisor_client_interface> new_supervisor_client      ( Scheduler*, const Host_and_port& );
-
 //-------------------------------------------------------------------------------------------------
 
 } //namespace supervisor

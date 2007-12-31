@@ -8,6 +8,61 @@ namespace directory_observer {
 
 using namespace zschimmer::file;
 
+//-------------------------------------------------------------------Directory_tree::Directory_tree
+
+Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path )
+:
+    Scheduler_object( scheduler, this, type_directory_tree ),
+    _zero_(this+1),
+    _directory_path(directory_path),
+    _refresh_aged_entries_at(double_time_max)
+{
+    _root_directory = Z_NEW( Directory( this, (Directory*)NULL, root_path ) );
+}
+
+//------------------------------------------------------------------Directory_tree::~Directory_tree
+    
+Directory_tree::~Directory_tree()
+{
+}
+
+//----------------------------------------------------------------Directory_tree::directory_or_null
+
+Directory* Directory_tree::directory_or_null( const string& name )
+{
+    Directory* result = NULL;
+
+    if( const Directory_entry* entry = _root_directory->entry_or_null( name ) )
+    {
+        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", name );      Wenn's kein Verzeichnis ist, beachten wir's nicht
+        result = entry->_subdirectory;
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------Directory_tree::read
+
+//bool Directory_tree::read()
+//{
+//    bool directory_has_changed = false;
+//
+//    directory_has_changed = _root_directory->read( Directory::read_subdirectories );
+//
+//    return directory_has_changed;
+//}
+
+//-------------------------------------------------------------Directory_tree::refresh_aged_entries
+
+//void Directory_tree::refresh_aged_entries()
+//{
+//    if( _refresh_aged_entries_at < double_time_max &&  _refresh_aged_entries_at >= double_from_gmtime() )
+//    {
+//        bool anything_is_refreshed = _root_directory->refresh_aged_entries();
+//        if( anything_is_refreshed )  _refresh_aged_entries_at = double_time_max;
+//    }
+//}
+
 //------------------------------------------------------------------irectory_entry::Directory_entry
 
 Directory_entry::Directory_entry()
@@ -349,61 +404,6 @@ void Directory::merge_new_entries( const Directory* other )
 //    }
 //
 //    return anything_is_refreshed;
-//}
-
-//-------------------------------------------------------------------Directory_tree::Directory_tree
-
-Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path )
-:
-    Scheduler_object( scheduler, this, type_directory_tree ),
-    _zero_(this+1),
-    _directory_path(directory_path),
-    _refresh_aged_entries_at(double_time_max)
-{
-    _root_directory = Z_NEW( Directory( this, (Directory*)NULL, root_path ) );
-}
-
-//------------------------------------------------------------------Directory_tree::~Directory_tree
-    
-Directory_tree::~Directory_tree()
-{
-}
-
-//----------------------------------------------------------------Directory_tree::directory_or_null
-
-Directory* Directory_tree::directory_or_null( const string& name )
-{
-    Directory* result = NULL;
-
-    if( const Directory_entry* entry = _root_directory->entry_or_null( name ) )
-    {
-        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", name );      Wenn's kein Verzeichnis ist, beachten wir's nicht
-        result = entry->_subdirectory;
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------Directory_tree::read
-
-//bool Directory_tree::read()
-//{
-//    bool directory_has_changed = false;
-//
-//    directory_has_changed = _root_directory->read( Directory::read_subdirectories );
-//
-//    return directory_has_changed;
-//}
-
-//-------------------------------------------------------------Directory_tree::refresh_aged_entries
-
-//void Directory_tree::refresh_aged_entries()
-//{
-//    if( _refresh_aged_entries_at < double_time_max &&  _refresh_aged_entries_at >= double_from_gmtime() )
-//    {
-//        bool anything_is_refreshed = _root_directory->refresh_aged_entries();
-//        if( anything_is_refreshed )  _refresh_aged_entries_at = double_time_max;
-//    }
 //}
 
 //-------------------------------------------------------------------------------------------------

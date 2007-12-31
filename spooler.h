@@ -265,6 +265,7 @@ typedef stdext::hash_set<string> String_set;
 #include "java_subsystem.h"
 #include "lock.h"
 #include "supervisor.h"
+#include "supervisor_client.h"
 #include "standing_order.h"
 #include "xml_client_connection.h"
 

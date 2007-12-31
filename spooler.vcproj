@@ -1085,6 +1085,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\supervisor_client.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\xml_client_connection.cxx"
 				>
 			</File>
@@ -1251,6 +1255,10 @@
 			</File>
 			<File
 				RelativePath=".\supervisor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\supervisor_client.h"
 				>
 			</File>
 			<File
