@@ -453,15 +453,18 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
             }
             else
             {
-                log()->info( message_string( "SCHEDULER-701", path ) );
-
 #               ifdef Z_WINDOWS
                     int err = mkdir( file_path.c_str() );
 #                else
                     int err = mkdir( file_path.c_str(), 0700 );
 #               endif
 
-                if( err && errno != EEXIST )  zschimmer::throw_errno( errno, "mkdir" );
+                if( err )
+                {
+                    if( errno != EEXIST )  zschimmer::throw_errno( errno, "mkdir" );
+                }
+                else
+                    log()->info( message_string( "SCHEDULER-701", path + "/" ) );
 
                 update_directory_structure( path, e );
             }
