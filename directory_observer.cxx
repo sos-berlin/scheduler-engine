@@ -326,6 +326,9 @@ void Directory::merge_new_entries( const Directory* other )
         while( my != _ordered_list.end()  &&  my->_file_info->path().name() < o->_file_info->path().name() )  
             my++;
 
+        if( my != _ordered_list.end()  &&  my->_file_info->path().name() == o->_file_info->path().name()  &&  o->_file_info->is_directory() )
+            *my = o->clone( this );
+
         if( my == _ordered_list.end()  ||  my->_file_info->path().name() > o->_file_info->path().name() )  
             _ordered_list.insert( my, o->clone( this ) );
     }
