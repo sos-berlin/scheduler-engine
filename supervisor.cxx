@@ -822,17 +822,17 @@ bool Remote_configurations::async_continue_( Continue_flags )
     {
         _directory_event.reset();
         
-        for( int i = 0; i < 2; i++ )
-        {
-#           ifdef Z_WINDOWS
+#       ifdef Z_WINDOWS
+            for( int i = 0; i < 2; i++ )
+            {
                 Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
                 BOOL ok = FindNextChangeNotification( _directory_event );
                 if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-#           endif
 
-            DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
-            if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
-        }
+                DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
+                if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
+            }
+#       endif    
     }
 
     check();
