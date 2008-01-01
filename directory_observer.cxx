@@ -34,7 +34,6 @@ Directory* Directory_tree::directory_or_null( const string& name )
 
     if( const Directory_entry* entry = _root_directory->entry_or_null( name ) )
     {
-        //if( !entry._subdirectory )  z::throw_xc( Z_FUNCTION, "no directory", name );      Wenn's kein Verzeichnis ist, beachten wir's nicht
         result = entry->_subdirectory;
     }
 
@@ -144,143 +143,149 @@ const Directory_entry* Directory::entry_or_null( const string& name ) const
 
 //----------------------------------------------------------------------------------Directory::read
 
-bool Directory::read( Read_subdirectories read_what )
+bool Directory::read( Read_subdirectories read_what, double minimum_age )
 {
     if( !_directory_tree )  z::throw_xc( Z_FUNCTION );
 
-    bool directory_has_changed = false;
+    bool   directory_has_changed = false;
+    double now                   = double_from_gmtime();
 
-    Folder_directory_lister dir   ( _directory_tree->log() );
-    list< ptr<file::File_info> >  file_info_list;
-    vector< file::File_info*>     ordered_file_infos;       // Geordnete Liste der vorgefundenen Dateien    
-
-    dir.open( _directory_tree->directory_path(), path() );
-
-    if( dir.is_opened() )
+    if( read_what != read_subdirectories  ||
+        _last_read_at + minimum_age <= now )
     {
-        while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( &*file_info );
-        dir.close();
-    }
+        if( read_what == read_subdirectories )  _last_read_at = now;
 
-    ordered_file_infos.reserve( file_info_list.size() );
-    Z_FOR_EACH_CONST( list< ptr<file::File_info> >, file_info_list, it )  ordered_file_infos.push_back( &**it );
-    sort( ordered_file_infos.begin(), ordered_file_infos.end(), file_info_is_lesser );
+        Folder_directory_lister dir   ( _directory_tree->log() );
+        list< ptr<file::File_info> >  file_info_list;
+        vector< file::File_info*>     ordered_file_infos;       // Geordnete Liste der vorgefundenen Dateien    
 
-    vector<file::File_info*>::iterator fi  = ordered_file_infos.begin();
-    list<Directory_entry>   ::iterator e   = _ordered_list.begin();
-    double                             now = double_from_gmtime();
+        dir.open( _directory_tree->directory_path(), path() );
 
-    while( fi != ordered_file_infos.end()  ||
-           e  != _ordered_list.end() )
-    {
-        /// Dateinamen gleich?
-
-        while( e  != _ordered_list.end()  &&
-               fi != ordered_file_infos.end()  &&
-               e->_file_info->path().name() == (*fi)->path().name() )
+        if( dir.is_opened() )
         {
-            e->_is_removed = false;
-
-            if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
-            {
-                e->_file_info      = *fi;
-                e->_is_aging_until = now + file_timestamp_delay;
-                _directory_tree->set_aging_until( e->_is_aging_until );
-            }
-            else
-            if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
-            {
-                _directory_tree->set_aging_until( e->_is_aging_until );
-            }
-            else
-            if( e->_is_aging_until )
-            {
-                e->_is_aging_until = 0;
-                _directory_tree->set_last_change_at( now );
-                directory_has_changed = true;
-            }
-
-            if( (*fi)->is_directory() )
-            {
-                if( !e->_subdirectory )  e->_subdirectory = Z_NEW( Directory( _directory_tree, this, e->_file_info->path().name() ) );
-                if( read_what == read_subdirectories )  directory_has_changed = e->_subdirectory->read( read_what );
-            }
-            else
-                e->_subdirectory = NULL;
-
-            fi++, e++;
+            while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( &*file_info );
+            dir.close();
         }
 
+        ordered_file_infos.reserve( file_info_list.size() );
+        Z_FOR_EACH_CONST( list< ptr<file::File_info> >, file_info_list, it )  ordered_file_infos.push_back( &**it );
+        sort( ordered_file_infos.begin(), ordered_file_infos.end(), file_info_is_lesser );
 
+        vector<file::File_info*>::iterator fi  = ordered_file_infos.begin();
+        list<Directory_entry>   ::iterator e   = _ordered_list.begin();
+        double                             now = double_from_gmtime();
 
-        /// Dateien hinzugefügt?
-
-        while( fi != ordered_file_infos.end()  &&
-               ( e == _ordered_list.end()  ||  (*fi)->path().name() < e->_file_info->path().name() ) )
+        while( fi != ordered_file_infos.end()  ||
+               e  != _ordered_list.end() )
         {
-            list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
-            new_entry->_file_info = *fi;
+            /// Dateinamen gleich?
+
+            while( e  != _ordered_list.end()  &&
+                   fi != ordered_file_infos.end()  &&
+                   e->_file_info->path().name() == (*fi)->path().name() )
+            {
+                e->_is_removed = false;
+
+                if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
+                {
+                    e->_file_info      = *fi;
+                    e->_is_aging_until = now + file_timestamp_delay;
+                    _directory_tree->set_aging_until( e->_is_aging_until );
+                }
+                else
+                if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
+                {
+                    _directory_tree->set_aging_until( e->_is_aging_until );
+                }
+                else
+                if( e->_is_aging_until )
+                {
+                    e->_is_aging_until = 0;
+                    _directory_tree->set_last_change_at( now );
+                    directory_has_changed = true;
+                }
+
+                if( (*fi)->is_directory() )
+                {
+                    if( !e->_subdirectory )  e->_subdirectory = Z_NEW( Directory( _directory_tree, this, e->_file_info->path().name() ) );
+                    if( read_what == read_subdirectories )  directory_has_changed = e->_subdirectory->read( read_what );
+                }
+                else
+                    e->_subdirectory = NULL;
+
+                fi++, e++;
+            }
+
+
+
+            /// Dateien hinzugefügt?
+
+            while( fi != ordered_file_infos.end()  &&
+                   ( e == _ordered_list.end()  ||  (*fi)->path().name() < e->_file_info->path().name() ) )
+            {
+                list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
+                new_entry->_file_info = *fi;
+                
+                if( (*fi)->is_directory() )  
+                {
+                    new_entry->_subdirectory = Z_NEW( Directory( _directory_tree, this, (*fi)->path().name() ) );
+                    if( read_what == read_subdirectories )  new_entry->_subdirectory->read( read_what );
+                    _directory_tree->set_last_change_at( now );
+                    directory_has_changed = true;
+                }
+                else
+                {
+                    new_entry->_is_aging_until = now + file_timestamp_delay;
+                    _directory_tree->set_aging_until( new_entry->_is_aging_until );
+                }
+
+                fi++;
+            }
+
+            assert( fi == ordered_file_infos.end()  || 
+                    e == _ordered_list.end() ||
+                    (*fi)->path().name() >= e->_file_info->path().name() );
             
-            if( (*fi)->is_directory() )  
+
+
+            /// Dateien gelöscht?
+
+            while( e != _ordered_list.end()  &&
+                   ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > e->_file_info->path().name() ) )  // Datei entfernt?
             {
-                new_entry->_subdirectory = Z_NEW( Directory( _directory_tree, this, (*fi)->path().name() ) );
-                if( read_what == read_subdirectories )  new_entry->_subdirectory->read( read_what );
-                _directory_tree->set_last_change_at( now );
-                directory_has_changed = true;
-            }
-            else
-            {
-                new_entry->_is_aging_until = now + file_timestamp_delay;
-                _directory_tree->set_aging_until( new_entry->_is_aging_until );
+                if( e->_subdirectory )
+                {
+                    e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
+                    _directory_tree->set_last_change_at( now );
+                    directory_has_changed = true;
+                }
+                else
+                if( !e->_is_removed )
+                {
+                    e->_is_removed     = true;
+                    e->_is_aging_until = now + remove_delay;
+                    _directory_tree->set_aging_until( e->_is_aging_until );
+                    e++;
+                }
+                else
+                if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
+                {
+                    _directory_tree->set_aging_until( e->_is_aging_until );
+                    e++;
+                }
+                else
+                {
+                    e = _ordered_list.erase( e );
+                    _directory_tree->set_last_change_at( now );
+                    directory_has_changed = true;
+                }
             }
 
-            fi++;
+            assert( e == _ordered_list.end()  ||
+                    fi == ordered_file_infos.end()  ||
+                    (*fi)->path().name() <= e->_file_info->path().name() );
         }
-
-        assert( fi == ordered_file_infos.end()  || 
-                e == _ordered_list.end() ||
-                (*fi)->path().name() >= e->_file_info->path().name() );
-        
-
-
-        /// Dateien gelöscht?
-
-        while( e != _ordered_list.end()  &&
-               ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > e->_file_info->path().name() ) )  // Datei entfernt?
-        {
-            if( e->_subdirectory )
-            {
-                e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
-                _directory_tree->set_last_change_at( now );
-                directory_has_changed = true;
-            }
-            else
-            if( !e->_is_removed )
-            {
-                e->_is_removed     = true;
-                e->_is_aging_until = now + remove_delay;
-                _directory_tree->set_aging_until( e->_is_aging_until );
-                e++;
-            }
-            else
-            if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
-            {
-                _directory_tree->set_aging_until( e->_is_aging_until );
-                e++;
-            }
-            else
-            {
-                e = _ordered_list.erase( e );
-                _directory_tree->set_last_change_at( now );
-                directory_has_changed = true;
-            }
-        }
-
-        assert( e == _ordered_list.end()  ||
-                fi == ordered_file_infos.end()  ||
-                (*fi)->path().name() <= e->_file_info->path().name() );
     }
-
 
     if( directory_has_changed )  _version++;
     return directory_has_changed;
@@ -315,7 +320,7 @@ void Directory::merge_new_entries( const Directory* other )
     }
 
 
-#   ifndef NDEBUG
+#   ifndef NDEBUG   // Ordnung prüfen
     {
         Entry_list::const_iterator a = _ordered_list.begin();
         if( a != _ordered_list.end() )  

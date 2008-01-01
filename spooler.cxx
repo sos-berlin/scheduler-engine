@@ -1553,6 +1553,7 @@ void Spooler::load()
         _cluster->switch_subsystem_state( subsys_initialized );
     }
 
+    _supervisor              ->switch_subsystem_state( subsys_initialized );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem          ->switch_subsystem_state( subsys_initialized );

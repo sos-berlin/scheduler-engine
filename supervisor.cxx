@@ -24,6 +24,7 @@ using xml::Xml_writer;
 
 struct Supervisor;
 struct Supervisor_client;
+struct Remote_configurations;
 
 //--------------------------------------------------------------------------------------------const
 
@@ -31,6 +32,7 @@ struct Supervisor_client;
 const double                    udp_timeout                 = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 const string                    directory_name_for_all_schedulers = "_all";
+const double                    allowed_directory_age       = 1.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
 
 //------------------------------------------------------------------------------------Xml_file_info
 
@@ -65,7 +67,8 @@ struct Remote_scheduler : Remote_scheduler_interface,
     void                        write_file_to_xml           ( Xml_writer*, const Directory_entry&, const Xml_file_info* reference );
     bool                        check_remote_configuration  ();
     void                        signal_remote_scheduler     ();
-    Directory*                  configuration_directory     ();
+  //Directory*                  configuration_directory     ();
+    Directory*                  configuration_directory_or_null();
     string                      obj_name                    () const;
 
     string                      async_state_text_           () const;
@@ -74,6 +77,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
 
     Fill_zero                  _zero_;
     Supervisor*                _supervisor;
+    Remote_configurations*     _remote_configurations;
     Host_and_port              _host_and_port;
     int                        _udp_port;
     bool                       _is_cluster_member;
@@ -87,6 +91,8 @@ struct Remote_scheduler : Remote_scheduler_interface,
     string                     _configuration_directory_name;
     int                        _configuration_version;
     int                        _configuration_version_all;
+    bool                       _configuration_changed;
+    Time                       _configuration_transfered_at;
 };
 
 //------------------------------------------------------------------------Remote_scheduler_register
@@ -104,44 +110,7 @@ struct Remote_scheduler_register
 
     Fill_zero                  _zero_;
     typedef stdext::hash_map< Host_and_port, ptr<Remote_scheduler> >   Map;
-    Map                                                  _map;
-};
-
-//----------------------------------------------------------------------------Remote_configurations
-
-struct Remote_configurations : Scheduler_object,
-                               Event_operation
-{
-                                Remote_configurations       ( Supervisor*, const File_path& directory );
-                               ~Remote_configurations       ();
-
-    void                        close                       ();
-
-
-
-    // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    Socket_event*               async_event                 ()                                      { return &_directory_event; }
-    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
-
-
-    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
-
-    void                        activate                    ();
-    bool                     is_activated                   () const                                { return _is_activated; }
-
-    bool                        check                       ();
-
-
-  private:
-    Fill_zero                  _zero_;
-    Supervisor*                _supervisor;
-    Event                      _directory_event;
-    ptr<Directory_tree>        _directory_tree;
-    int                        _directory_watch_interval;
-    bool                       _is_activated;
+    Map                        _map;
 };
 
 //-----------------------------------------------------------------------------------Hostname_cache
@@ -159,6 +128,50 @@ struct Hostname_cache
 
     typedef stdext::hash_map<string,Hostname_map_entry> Hostname_map;
     Hostname_map               _hostname_map;
+};
+
+//----------------------------------------------------------------------------Remote_configurations
+
+struct Remote_configurations : Scheduler_object,
+                               Event_operation
+{
+                                Remote_configurations       ( Supervisor*, const File_path& directory );
+                               ~Remote_configurations       ();
+
+    void                        close                       ();
+
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+    Socket_event*               async_event                 ()                                      { return &_directory_event; }
+    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
+
+
+    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
+
+    void                        activate                    ();
+    bool                     is_activated                   () const                                { return _is_activated; }
+
+    bool                        check                       ();
+    void                        resolve_configuration_directory_names();
+    Directory*                  configuration_directory_for_host_and_port( const Host_and_port& );
+    Directory*                  configuration_directory_for_all_schedulers_or_null();
+
+
+  private:
+    Fill_zero                  _zero_;
+    Supervisor*                _supervisor;
+    Event                      _directory_event;
+    ptr<Directory_tree>        _directory_tree;
+    int                        _directory_watch_interval;
+    bool                       _is_activated;
+
+    typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
+    Hostport_directory_map     _hostport_directory_map;
+
+    Hostname_cache             _hostname_cache;
 };
 
 //---------------------------------------------------------------------------------------Supervisor
@@ -180,21 +193,14 @@ struct Supervisor : Supervisor_interface
 
 
     Remote_configurations*      remote_configurations       () const                                { return _remote_configurations; }
-    void                        read_configuration_directory_names();
-    Directory*                  configuration_directory_for_host_and_port( const Host_and_port& );
-    Directory*                  configuration_directory_for_all_schedulers_or_null();
-    bool                        check_remote_configurations ();
     string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
 
   private:
     Fill_zero                  _zero_;
-    Remote_scheduler_register  _remote_scheduler_register;
     ptr<Remote_configurations> _remote_configurations;
-    
-    typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
-    Hostport_directory_map     _hostport_directory_map;
 
-    Hostname_cache             _hostname_cache;
+  public:
+    Remote_scheduler_register  _remote_scheduler_register;
 };
 
 //-----------------------------------------------------------------------------------new_supervisor
@@ -229,6 +235,7 @@ void Supervisor::close()
 
 bool Supervisor::subsystem_initialize()
 {
+    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
     set_subsystem_state( subsys_initialized );
     return true;
 }
@@ -237,8 +244,6 @@ bool Supervisor::subsystem_initialize()
 
 bool Supervisor::subsystem_load()
 {
-    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
-
     set_subsystem_state( subsys_loaded );
     return true;
 }
@@ -293,100 +298,6 @@ void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& regi
     
     xml_processor->_operation_connection->_remote_scheduler = +remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
     _remote_scheduler_register.add( remote_scheduler );
-}
-
-//---------------------------------------------------Supervisor::read_configuration_directory_names
-
-void Supervisor::read_configuration_directory_names()
-{
-    Hostport_directory_map                 new_hostport_directory_map;
-    stdext::hash_map<string,Host_and_port> directory_map;
-    Directory*                             root_directory             = remote_configurations()->directory_tree()->root_directory();
-
-    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
-   
-
-    root_directory->read( Directory::read_no_subdirectories );
-
-    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
-    {
-        if( e->_file_info->is_directory() )
-        {
-            string d   = e->_file_info->path().name();
-            size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
-
-            if( pos != string::npos )
-            {
-                stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
-                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
-                {
-                    new_hostport_directory_map[ it->second ] = it->first;
-                }
-                else
-                {
-                    try
-                    {
-                        Host_and_port host_and_port;
-                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
-                        
-                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
-                        {
-                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
-
-                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
-                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
-
-                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
-                        }
-                    }
-                    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
-                }
-            }
-        }
-    }
-
-    _hostport_directory_map = new_hostport_directory_map;
-}
-
-//-----------------------------------------Supervisor::configuration_directory_for_host_and_port
-
-Directory* Supervisor::configuration_directory_for_host_and_port( const Host_and_port& host_and_port )
-{
-    Directory* result = NULL;
-
-    Hostport_directory_map::iterator it = _hostport_directory_map.find( host_and_port );
-    if( it != _hostport_directory_map.end() )  
-    {
-        Directory* root_directory = remote_configurations()->directory_tree()->root_directory();
-        if( const Directory_entry* entry = root_directory->entry_or_null( it->second ) )
-            result = entry->_subdirectory;
-    }
-
-    return result;
-}
-
-//-----------------------------------Supervisor::configuration_directory_for_all_schedulers_or_null
-
-Directory* Supervisor::configuration_directory_for_all_schedulers_or_null()
-{
-    return remote_configurations()->directory_tree()->directory_or_null( directory_name_for_all_schedulers );
-}
-
-//----------------------------------------------------------Supervisor::check_remote_configurations
-
-bool Supervisor::check_remote_configurations()
-{
-    bool result = false;
-    
-    read_configuration_directory_names();
-
-    Z_FOR_EACH( Remote_scheduler_register::Map, _remote_scheduler_register._map, it )
-    {
-        Remote_scheduler* remote_scheduler = it->second;
-        result |= remote_scheduler->check_remote_configuration();
-    }
-
-    return result;
 }
 
 //--------------------------------------------------------------------------Supervisor::dom_element
@@ -451,29 +362,37 @@ Remote_scheduler::Remote_scheduler( Supervisor* supervisor )
 : 
     Scheduler_object( supervisor->spooler(), this, type_remote_scheduler ),
     _zero_(this+1), 
-    _supervisor(supervisor) 
+    _supervisor(supervisor),
+    _remote_configurations(supervisor->remote_configurations())
 {
+    assert( _remote_configurations );
 }
 
 //--------------------------------------------------------Remote_scheduler::configuration_directory
     
-Directory* Remote_scheduler::configuration_directory()
-{
-    Directory* result;
+//Directory* Remote_scheduler::configuration_directory()
+//{
+//    Directory* result = configuration_directory_or_null();
+//    if( !result)  throw_xc( "SCHEDULER-455", obj_name() );
+//    return result;
+//}
 
-    if( _configuration_directory_name != ""  &&  
-        File_path( _supervisor->remote_configurations()->directory_tree()->directory_path(), _configuration_directory_name ).exists() )
+//------------------------------------------------Remote_scheduler::configuration_directory_or_null
+
+Directory* Remote_scheduler::configuration_directory_or_null()
+{
+    Directory* result = NULL;
+
+    //if( _configuration_directory_name != ""  &&
+    //    File_path( _remote_configurations->directory_tree()->directory_path(), _configuration_directory_name ).exists() )
     {
-        result = _supervisor->remote_configurations()->directory_tree()->directory_or_null( _configuration_directory_name );
+        result = _remote_configurations->directory_tree()->directory_or_null( _configuration_directory_name );
     }
-    else
-    if( _is_cluster_member )
+    
+    if( !result )
     {
-        result = _supervisor->remote_configurations()->directory_tree()->directory_or_null( _scheduler_id );
-    }
-    else
-    {
-        result = _supervisor->configuration_directory_for_host_and_port( _host_and_port );
+        result = _is_cluster_member? _remote_configurations->directory_tree()->directory_or_null( _scheduler_id )
+                                   : _remote_configurations->configuration_directory_for_host_and_port( _host_and_port );
     }
 
     _configuration_directory_name = result? result->name() : "";
@@ -510,52 +429,6 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
     }
 }
 
-//-----------------------------------------------------Remote_scheduler::check_remote_configuration
-
-bool Remote_scheduler::check_remote_configuration()
-{
-    bool result = false;
-
-    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
-
-    if( _udp_port )
-    {
-        if( Directory* configuration_directory = this->configuration_directory() )
-        {
-            bool changed = false;
-
-            if( _configuration_version == configuration_directory->version() )  configuration_directory->read( Directory::read_subdirectories );
-
-            changed = _configuration_version != configuration_directory->version();
-            
-            if( !changed )
-            {
-                if( Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers_or_null() )
-                {
-                    if( _configuration_version_all == all_directory->version() )  all_directory->read( Directory::read_subdirectories );
-                    changed = _configuration_version_all != all_directory->version();
-                }
-            }
-
-            if( changed )  
-            {
-                signal_remote_scheduler();
-                result = true;
-            }
-        }
-    }
-
-    return result;
-}
-
-//--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
-
-void Remote_scheduler::signal_remote_scheduler()
-{
-    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
-    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
-}
-
 //--------------------------------------------------------------------Remote_scheduler::execute_xml
 
 ptr<Command_response> Remote_scheduler::execute_xml( const xml::Element_ptr& element, Command_processor* command_processor )
@@ -578,47 +451,46 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
 
     _supervisor->switch_subsystem_state( subsys_active );
-    _supervisor->remote_configurations()->activate();
+    _remote_configurations->activate();
 
-    _supervisor->read_configuration_directory_names();
+    _remote_configurations->directory_tree()->root_directory()->read_without_subdirectories();
+    _remote_configurations->resolve_configuration_directory_names();
+
+
+    Directory*     all_directory    = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
+    Directory*     my_directory     = configuration_directory_or_null();
+    ptr<Directory> merged_directory = all_directory;
+    
+    if( all_directory )  all_directory->read_deep( allowed_directory_age );
+    if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  merged_directory = my_directory;
+    if( !merged_directory )  throw_xc( "SCHEDULER-455", obj_name() );
+
+    if( all_directory && my_directory )
+    {
+        ptr<Directory> merged_directory = my_directory->clone();
+        merged_directory->merge_new_entries( all_directory );
+    }
 
 
     ptr<File_buffered_command_response> response = Z_NEW( File_buffered_command_response() );
     response->begin_standard_response();
 
-    if( Directory* my_directory = configuration_directory() )
-    {
-        ptr<Directory> merged_directory;
-        
-        my_directory->read( Directory::read_subdirectories );
+    Xml_writer xml_writer ( response );
 
-        Directory* all_directory = _supervisor->configuration_directory_for_all_schedulers_or_null();
-        if( all_directory )
-        {
-            merged_directory = my_directory->clone();
-            all_directory->read( Directory::read_subdirectories );
-            merged_directory->merge_new_entries( all_directory );
-        }
-        else
-        {
-            merged_directory = my_directory;
-        }
-
-
-        Xml_writer xml_writer ( response );
-
-        xml_writer.begin_element( "configuration.directory" );
-        write_updated_files_to_xml( &xml_writer, merged_directory, element );
-        xml_writer.end_element( "configuration.directory" );
-        xml_writer.close();
-
-        
-        _configuration_version = my_directory->version();
-        if( all_directory )  _configuration_version_all = all_directory->version();
-    }
+    xml_writer.begin_element( "configuration.directory" );
+    write_updated_files_to_xml( &xml_writer, merged_directory, element );
+    xml_writer.end_element( "configuration.directory" );
+    xml_writer.close();
 
     response->end_standard_response();
     response->close();
+
+
+    _configuration_version       = my_directory ? my_directory ->version() : 0;
+    _configuration_version_all   = all_directory? all_directory->version() : 0;
+    _configuration_changed       = false;
+    _configuration_transfered_at = Time::now();
+
     return +response;
 }
 
@@ -744,6 +616,43 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
     }
 }
 
+//-----------------------------------------------------Remote_scheduler::check_remote_configuration
+
+bool Remote_scheduler::check_remote_configuration()
+{
+    // Konfigurationsverzeichnis ist möglicherweise geändert worden.
+
+    if( _udp_port )
+    {
+        if( Directory* configuration_directory = this->configuration_directory_or_null() )
+        {
+            if( _configuration_version == configuration_directory->version() )  configuration_directory->read_deep( 0.0 );
+            _configuration_changed  = _configuration_version != configuration_directory->version();
+        }
+
+        if( !_configuration_changed  )
+        {
+            if( Directory* all_directory = _remote_configurations->configuration_directory_for_all_schedulers_or_null() )
+                _configuration_changed = _configuration_version_all != all_directory->version();
+        }
+
+        if( _configuration_changed  )  
+        {
+            signal_remote_scheduler();
+        }
+    }
+
+    return _configuration_changed ;
+}
+
+//--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
+
+void Remote_scheduler::signal_remote_scheduler()
+{
+    send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
+    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
+}
+
 //----------------------------------------------------------------Remote_scheduler::async_continue_
 
 bool Remote_scheduler::async_continue_( Continue_flags )
@@ -787,6 +696,14 @@ xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& documen
     if( _disconnected_at )
     result.setAttribute         ( "disconnected_at" , _disconnected_at.as_string() );
 
+    result.setAttribute_optional( "configuration_directory", _configuration_directory_name );
+
+    if( _configuration_changed )
+    result.setAttribute         ( "configuration_changed", "yes" );
+
+    if( _configuration_transfered_at )
+    result.setAttribute         ( "configuration_transfered_at", _configuration_transfered_at.xml_value() );
+    
     if( _error )
     append_error_element( result, _error );
 
@@ -798,9 +715,11 @@ xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& documen
 string Remote_scheduler::obj_name() const
 { 
     S result;
+
     result << Scheduler_object::obj_name();
-    result << " ";
-    result << _host_and_port.as_string();
+    if( _scheduler_id != "" )  result << " " << _scheduler_id;
+    result << " (" << _host_and_port.as_string() << ")";
+
     return result;
 }
 
@@ -931,9 +850,19 @@ bool Remote_configurations::check()
     {
         //if( _directory_tree->refresh_aged_entries_at() < now )  _read_again_at = 0;     // Verstrichen?
         _directory_tree->reset_aging();
-
-        something_changed = _supervisor->check_remote_configurations();
+        _directory_tree->root_directory()->read_without_subdirectories();
+        resolve_configuration_directory_names();
         
+        if( Directory* all_directory = configuration_directory_for_all_schedulers_or_null() )
+            all_directory->read_deep( 0.0 );
+
+        Z_FOR_EACH( Remote_scheduler_register::Map, _supervisor->_remote_scheduler_register._map, it )
+        {
+            Remote_scheduler* remote_scheduler = it->second;
+            something_changed |= remote_scheduler->check_remote_configuration();
+        }
+
+       
         _directory_watch_interval = now - _directory_tree->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
                                                                                                                   : folder::directory_watch_interval_max;
 
@@ -942,6 +871,81 @@ bool Remote_configurations::check()
     }
 
     return something_changed;
+}
+
+//-------------------------------------Remote_configurations::resolve_configuration_directory_names
+
+void Remote_configurations::resolve_configuration_directory_names()
+{
+    Hostport_directory_map                 new_hostport_directory_map;
+    stdext::hash_map<string,Host_and_port> directory_map;
+    Directory*                             root_directory             = directory_tree()->root_directory();
+
+    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
+   
+
+    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
+    {
+        if( e->_file_info->is_directory() )
+        {
+            string d   = e->_file_info->path().name();
+            size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
+
+            if( pos != string::npos )
+            {
+                stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
+                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
+                {
+                    new_hostport_directory_map[ it->second ] = it->first;
+                }
+                else
+                {
+                    try
+                    {
+                        Host_and_port host_and_port;
+                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
+                        
+                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
+                        {
+                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
+
+                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
+                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
+
+                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
+                        }
+                    }
+                    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
+                }
+            }
+        }
+    }
+
+    _hostport_directory_map = new_hostport_directory_map;
+}
+
+//---------------------------------Remote_configurations::configuration_directory_for_host_and_port
+
+Directory* Remote_configurations::configuration_directory_for_host_and_port( const Host_and_port& host_and_port )
+{
+    Directory* result = NULL;
+
+    Hostport_directory_map::iterator it = _hostport_directory_map.find( host_and_port );
+    if( it != _hostport_directory_map.end() )  
+    {
+        Directory* root_directory = directory_tree()->root_directory();
+        if( const Directory_entry* entry = root_directory->entry_or_null( it->second ) )
+            result = entry->_subdirectory;
+    }
+
+    return result;
+}
+
+//------------------------Remote_configurations::configuration_directory_for_all_schedulers_or_null
+
+Directory* Remote_configurations::configuration_directory_for_all_schedulers_or_null()
+{
+    return directory_tree()->directory_or_null( directory_name_for_all_schedulers );
 }
 
 //---------------------------------------------------------------------Hostname_cache::resolve_name

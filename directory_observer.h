@@ -72,7 +72,9 @@ struct Directory : Object
     string                      name                        () const                                { return _name; }
     Absolute_path               path                        () const;
     File_path                   file_path                   () const;
-    bool                        read                        ( Read_subdirectories );
+    bool                        read                        ( Read_subdirectories, double minimum_age = 0.0 );
+    bool                        read_deep                   ( double minimum_age )                  { return read( read_subdirectories, minimum_age ); }
+    bool                        read_without_subdirectories ()                                      { return read( read_no_subdirectories ); }
   //bool                        refresh_aged_entries        ();
     const Directory_entry*      entry_or_null               ( const string& name ) const;
   //Directory*                  subdirectory                ( const string& name ) const;
@@ -84,10 +86,11 @@ struct Directory : Object
 
   private:
     Fill_zero                  _zero_;
-    Directory_tree* const      _directory_tree;
-    Directory*                 _parent;
     string                     _name;
     int                        _version;
+    double                     _last_read_at;
+    Directory*                 _parent;
+    Directory_tree* const      _directory_tree;
 
   public:
     typedef list<Directory_entry>  Entry_list;
