@@ -186,32 +186,39 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
             {
                 e->_is_removed = false;
 
-                if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
-                {
-                    e->_file_info      = *fi;
-                    e->_is_aging_until = now + file_timestamp_delay;
-                    _directory_tree->set_aging_until( e->_is_aging_until );
-                }
-                else
-                if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
-                {
-                    _directory_tree->set_aging_until( e->_is_aging_until );
-                }
-                else
-                if( e->_is_aging_until )
-                {
-                    e->_is_aging_until = 0;
-                    _directory_tree->set_last_change_at( now );
-                    directory_has_changed = true;
-                }
-
                 if( (*fi)->is_directory() )
                 {
-                    if( !e->_subdirectory )  e->_subdirectory = Z_NEW( Directory( _directory_tree, this, e->_file_info->path().name() ) );
-                    if( read_what == read_subdirectories )  directory_has_changed = e->_subdirectory->read( read_what );
+                    if( !e->_subdirectory )  
+                    {
+                        e->_subdirectory = Z_NEW( Directory( _directory_tree, this, e->_file_info->path().name() ) );
+                        directory_has_changed = true;
+                    }
+
+                    if( read_what == read_subdirectories )  directory_has_changed |= e->_subdirectory->read( read_what );
                 }
                 else
+                {
                     e->_subdirectory = NULL;
+
+                    if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
+                    {
+                        e->_file_info      = *fi;
+                        e->_is_aging_until = now + file_timestamp_delay;
+                        _directory_tree->set_aging_until( e->_is_aging_until );
+                    }
+                    else
+                    if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
+                    {
+                        _directory_tree->set_aging_until( e->_is_aging_until );
+                    }
+                    else
+                    if( e->_is_aging_until )
+                    {
+                        e->_is_aging_until = 0;
+                        _directory_tree->set_last_change_at( now );
+                        directory_has_changed = true;
+                    }
+                }
 
                 fi++, e++;
             }
@@ -223,6 +230,8 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
             while( fi != ordered_file_infos.end()  &&
                    ( e == _ordered_list.end()  ||  (*fi)->path().name() < e->_file_info->path().name() ) )
             {
+                //_directory_tree->log()->warn( (*fi)->path() + " hinzugefügt" );
+
                 list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
                 new_entry->_file_info = *fi;
                 
@@ -253,6 +262,8 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
             while( e != _ordered_list.end()  &&
                    ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > e->_file_info->path().name() ) )  // Datei entfernt?
             {
+                //_directory_tree->log()->warn( e->_file_info->path() + " gelöscht" );
+
                 if( e->_subdirectory )
                 {
                     e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen

@@ -32,7 +32,7 @@ struct Remote_configurations;
 const double                    udp_timeout                 = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 const string                    directory_name_for_all_schedulers = "_all";
-const double                    allowed_directory_age       = 1.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
+const double                    allowed_directory_age       = 0.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
 
 //------------------------------------------------------------------------------------Xml_file_info
 
@@ -43,7 +43,8 @@ struct Xml_file_info : Base_file_info
         Base_file_info( element.getAttribute( "name" ), Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), element.getAttribute( "name" ), 0 ),
         _element( element )
     {
-        _md5.set_hex( element.getAttribute( "md5" ) );
+        string md5_hex = element.getAttribute( "md5" );
+        if( md5_hex != "" )  _md5.set_hex( md5_hex );
     }
 
     xml::Element_ptr           _element;
@@ -155,6 +156,7 @@ struct Remote_configurations : Scheduler_object,
     bool                     is_activated                   () const                                { return _is_activated; }
 
     bool                        check                       ();
+    void                        set_alarm                   ();
     void                        resolve_configuration_directory_names();
     Directory*                  configuration_directory_for_host_and_port( const Host_and_port& );
     Directory*                  configuration_directory_for_all_schedulers_or_null();
@@ -165,7 +167,7 @@ struct Remote_configurations : Scheduler_object,
     Supervisor*                _supervisor;
     Event                      _directory_event;
     ptr<Directory_tree>        _directory_tree;
-    int                        _directory_watch_interval;
+    double                     _next_check_at;
     bool                       _is_activated;
 
     typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
@@ -453,7 +455,6 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _supervisor->switch_subsystem_state( subsys_active );
     _remote_configurations->activate();
 
-    _remote_configurations->directory_tree()->root_directory()->read_without_subdirectories();
     _remote_configurations->resolve_configuration_directory_names();
 
 
@@ -467,7 +468,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
     if( all_directory && my_directory )
     {
-        ptr<Directory> merged_directory = my_directory->clone();
+        merged_directory = my_directory->clone();
         merged_directory->merge_new_entries( all_directory );
     }
 
@@ -491,6 +492,8 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _configuration_changed       = false;
     _configuration_transfered_at = Time::now();
 
+    _remote_configurations->set_alarm();    // Für alternde Dateieinträge: Nach kurzer Zeit Verzeichnis nochmal prüfen 
+
     return +response;
 }
 
@@ -509,7 +512,6 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
             if( e.nodeName_is( "configuration.directory" )  ||
                 e.nodeName_is( "configuration.file"      )     )
             {
-                string filename = e.getAttribute( "name" );
                 xml_file_info_list.push_back( Xml_file_info( e ) );
             }
         }
@@ -621,28 +623,32 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
 bool Remote_scheduler::check_remote_configuration()
 {
     // Konfigurationsverzeichnis ist möglicherweise geändert worden.
+    
+    bool changed = false;
 
     if( _udp_port )
     {
         if( Directory* configuration_directory = this->configuration_directory_or_null() )
         {
             if( _configuration_version == configuration_directory->version() )  configuration_directory->read_deep( 0.0 );
-            _configuration_changed  = _configuration_version != configuration_directory->version();
+            changed = _configuration_version != configuration_directory->version();
         }
 
-        if( !_configuration_changed  )
+        if( !changed )
         {
             if( Directory* all_directory = _remote_configurations->configuration_directory_for_all_schedulers_or_null() )
-                _configuration_changed = _configuration_version_all != all_directory->version();
+                changed = _configuration_version_all != all_directory->version();
         }
 
-        if( _configuration_changed  )  
+        if( changed )  
         {
             signal_remote_scheduler();
         }
     }
 
-    return _configuration_changed ;
+    _configuration_changed |= changed;
+
+    return changed;
 }
 
 //--------------------------------------------------------Remote_scheduler::signal_remote_scheduler
@@ -739,8 +745,7 @@ Remote_configurations::Remote_configurations( Supervisor* supervisor, const File
 :
     Scheduler_object( supervisor->spooler(), this, type_remote_configuration_observer ),
     _zero_(this+1),
-    _supervisor(supervisor),
-    _directory_watch_interval( folder::directory_watch_interval_max )
+    _supervisor(supervisor)
 {
     _directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
 }
@@ -793,7 +798,8 @@ void Remote_configurations::activate()
                                                     TRUE,                               // Mit Unterverzeichnissen
                                                     FILE_NOTIFY_CHANGE_FILE_NAME  |  
                                                     FILE_NOTIFY_CHANGE_DIR_NAME   |
-                                                    FILE_NOTIFY_CHANGE_LAST_WRITE );
+                                                    FILE_NOTIFY_CHANGE_LAST_WRITE |
+                                                    FILE_NOTIFY_CHANGE_SIZE       );
 
             if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
 
@@ -816,11 +822,17 @@ bool Remote_configurations::async_continue_( Continue_flags )
     {
         _directory_event.reset();
         
-#       ifdef Z_WINDOWS
-            Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
-            BOOL ok = FindNextChangeNotification( _directory_event );
-            if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-#       endif
+        for( int i = 0; i < 2; i++ )
+        {
+#           ifdef Z_WINDOWS
+                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
+                BOOL ok = FindNextChangeNotification( _directory_event );
+                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+#           endif
+
+            DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
+            if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
+        }
     }
 
     check();
@@ -850,7 +862,6 @@ bool Remote_configurations::check()
     {
         //if( _directory_tree->refresh_aged_entries_at() < now )  _read_again_at = 0;     // Verstrichen?
         _directory_tree->reset_aging();
-        _directory_tree->root_directory()->read_without_subdirectories();
         resolve_configuration_directory_names();
         
         if( Directory* all_directory = configuration_directory_for_all_schedulers_or_null() )
@@ -859,69 +870,83 @@ bool Remote_configurations::check()
         Z_FOR_EACH( Remote_scheduler_register::Map, _supervisor->_remote_scheduler_register._map, it )
         {
             Remote_scheduler* remote_scheduler = it->second;
-            something_changed |= remote_scheduler->check_remote_configuration();
+            
+            if( remote_scheduler->_is_connected )
+            {
+                something_changed |= remote_scheduler->check_remote_configuration();
+            }
         }
 
        
-        _directory_watch_interval = now - _directory_tree->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
-                                                                                                                  : folder::directory_watch_interval_max;
+        double interval = now - _directory_tree->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
+                                                                                                        : folder::directory_watch_interval_max;
+        _next_check_at = now + interval;
 
-        now = double_from_gmtime();
-        set_async_next_gmtime( min( _directory_tree->refresh_aged_entries_at(), now + _directory_watch_interval ) );
+        set_alarm();
     }
 
     return something_changed;
+}
+
+//------------------------------------------------------------------Remote_configuration::set_alarm
+
+void Remote_configurations::set_alarm()
+{
+    set_async_next_gmtime( min( _directory_tree->refresh_aged_entries_at(), _next_check_at ) );
 }
 
 //-------------------------------------Remote_configurations::resolve_configuration_directory_names
 
 void Remote_configurations::resolve_configuration_directory_names()
 {
-    Hostport_directory_map                 new_hostport_directory_map;
-    stdext::hash_map<string,Host_and_port> directory_map;
-    Directory*                             root_directory             = directory_tree()->root_directory();
+    bool has_changed = directory_tree()->root_directory()->read_without_subdirectories();
 
-    Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
-   
-
-    Z_FOR_EACH_CONST( Directory::Entry_list, root_directory->_ordered_list, e )
+    if( has_changed )
     {
-        if( e->_file_info->is_directory() )
+        Hostport_directory_map                 new_hostport_directory_map;
+        stdext::hash_map<string,Host_and_port> directory_map;
+
+        Z_FOR_EACH( Hostport_directory_map, _hostport_directory_map, it )  directory_map[ it->second ] = it->first;     // Um gethostbyname() bekannter Verzeichnisse zu vermeiden
+   
+        Z_FOR_EACH_CONST( Directory::Entry_list, directory_tree()->root_directory()->_ordered_list, e )
         {
-            string d   = e->_file_info->path().name();
-            size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
-
-            if( pos != string::npos )
+            if( e->_file_info->is_directory() )
             {
-                stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
-                if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
+                string d   = e->_file_info->path().name();
+                size_t pos = d.find( '#' );                     // Verzeichnisname "host#port"
+
+                if( pos != string::npos )
                 {
-                    new_hostport_directory_map[ it->second ] = it->first;
-                }
-                else
-                {
-                    try
+                    stdext::hash_map<string,Host_and_port>::iterator it = directory_map.find( d );
+                    if( it != directory_map.end() )     // Verzeichnis ist schon bekannt?
                     {
-                        Host_and_port host_and_port;
-                        host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
-                        
-                        if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
-                        {
-                            host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
-
-                            Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
-                            if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
-
-                            new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
-                        }
+                        new_hostport_directory_map[ it->second ] = it->first;
                     }
-                    catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
+                    else
+                    {
+                        try
+                        {
+                            Host_and_port host_and_port;
+                            host_and_port._host = _hostname_cache.try_resolve_name( d.substr( 0, pos ) );
+                            
+                            if( host_and_port._host != Ip_address( 0, 0, 0, 0 ) )
+                            {
+                                host_and_port._port = as_int( d.substr( pos + 1 ) );                            // Exception
+
+                                Hostport_directory_map::iterator it = new_hostport_directory_map.find( host_and_port );
+                                if( it != new_hostport_directory_map.end() )  z::throw_xc( "SCHEDULER-454", it->second, e->_file_info->path().name() );   // Nicht eindeutig
+
+                                new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
+                            }
+                        }
+                        catch( exception& x ) { Z_LOG( Z_FUNCTION << "  " << x.what() << "\n" ); }    // Ungültiger Verzeichnisname
+                    }
                 }
             }
         }
-    }
 
-    _hostport_directory_map = new_hostport_directory_map;
+        _hostport_directory_map = new_hostport_directory_map;
+    }
 }
 
 //---------------------------------Remote_configurations::configuration_directory_for_host_and_port

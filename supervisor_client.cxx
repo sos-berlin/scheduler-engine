@@ -453,7 +453,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
             }
             else
             {
-                log()->info( message_string( "SCHEDULER-702", path ) );
+                log()->info( message_string( "SCHEDULER-701", path ) );
 
 #               ifdef Z_WINDOWS
                     int err = mkdir( file_path.c_str() );
@@ -525,7 +525,7 @@ void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* x
             if( file_info->is_directory() )
             {
                 xml_writer->begin_element( "configuration.directory" );
-                xml_writer->set_attribute( "name", path.name() );
+                xml_writer->set_attribute( "name", filename );
 
                 write_directory_structure( xml_writer, Absolute_path( path, filename ) );
 
