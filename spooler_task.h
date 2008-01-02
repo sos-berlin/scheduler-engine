@@ -27,7 +27,7 @@ struct Task_stdout_reader : Async_operation
 
     bool                        log_lines                   ( const string& lines );
     void                        start                       ();
-    void                        finish                      ();
+    bool                        finish                      ();
 
     // Async_operation:
     string                      async_state_text_           () const;

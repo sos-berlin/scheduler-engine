@@ -2360,10 +2360,13 @@ void Module_task::do_close__end()
             _exit_code = -termination_signal;
         }
  
-        _stdout_reader.finish();
+        bool stdout_ok = _stdout_reader.finish();
 
-        _log->log_file( _module_instance->stdout_path(), "stdout:" );
-        _log->log_file( _module_instance->stderr_path(), "stderr:" );
+        if( !stdout_ok )
+        {
+            _log->log_file( _module_instance->stdout_path(), "stdout:" );
+            _log->log_file( _module_instance->stderr_path(), "stderr:" );
+        }
 
         //_module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }
@@ -2528,16 +2531,21 @@ void Job_module_task::do_release__end()
 
 void Task_stdout_reader::start()
 {
+#ifdef Z_DEBUG
     if( _task->_module_instance->stdout_path() != "" )  _stdout_line_reader._file.open( _task->_module_instance->stdout_path(), "rb" );
     if( _task->_module_instance->stdout_path() != "" )  _stderr_line_reader._file.open( _task->_module_instance->stderr_path(), "rb" );
     set_async_manager( _task->_spooler->_connection_manager );
     set_async_delay( stdout_read_interval_min );
+#else
+    int DEBUG_RAUSNEHMEN;
+#endif
 }
 
 //-----------------------------------------------------------------------Task_stdout_reader::finish
 
-void Task_stdout_reader::finish()
+bool Task_stdout_reader::finish()
 {
+    bool   result = _stdout_line_reader._file.opened()  &  _stderr_line_reader._file.opened();
     string s;
 
     while(1)
@@ -2556,23 +2564,20 @@ void Task_stdout_reader::finish()
 
     _stdout_line_reader._file.close();
     _stderr_line_reader._file.close();
+
+    return result;
 }
 
 //--------------------------------------------------------------Task_stdout_reader::async_continue_
 
 bool Task_stdout_reader::async_continue_( Async_operation::Continue_flags )
 {
-#ifdef Z_DEBUG
     bool something_done = false;
 
     something_done |= log_lines( _stdout_line_reader.read_lines() );
     something_done |= log_lines( _stderr_line_reader.read_lines() );
 
     set_async_delay( something_done? stdout_read_interval_min : stdout_read_interval_max );
-#else
-    int DEBUG_RAUSNEHMEN;
-#endif
-
     return true;
 }
 
