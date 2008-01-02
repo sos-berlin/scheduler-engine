@@ -1995,6 +1995,7 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
         {
             _congestion_file.open_temporary( File::open_unlink );
             _congestion_file.print( _buffer );
+            _congestion_file_write_position += _buffer.length();
             _buffer = "";
         }
         
