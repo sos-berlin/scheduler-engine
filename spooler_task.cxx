@@ -358,6 +358,7 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
     if( !show.is_set( show_for_database_only ) )
     {
+        task_element.setAttribute( "job"             , _job->path() );
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
@@ -1583,7 +1584,8 @@ bool Task::do_something()
                             if( _state < s_ending )  set_state( s_ending ), loop = true;
                         }
 
-                        if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
+                        if( _killed  &&  _state < s_ending )  set_state( s_ending ), loop = true;
+                        //if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;  Fängt den Exitcode nicht ein (JS-211)
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }

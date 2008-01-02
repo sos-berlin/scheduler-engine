@@ -946,7 +946,7 @@ void Remote_configurations::resolve_configuration_directory_names()
                                 new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
                             }
                         }
-                        catch( exception& x ) { log()->error( x.what() ); }    // Ungültiger Verzeichnisname
+                        catch( exception& x ) { log()->warn( x.what() ); }    // Ungültiger Verzeichnisname
                     }
                 }
             }

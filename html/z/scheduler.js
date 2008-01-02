@@ -894,7 +894,6 @@ function job_menu__onclick( job_name, x, y )
 
 function task_menu__onclick( job_path, task_id, x, y )
 {
-alert(job_path);
     var popup_builder = new Popup_menu_builder();
 
     popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
