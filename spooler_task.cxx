@@ -31,7 +31,7 @@ static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
-const int                       max_stdout_line_length          = 100;
+const int                       max_stdout_line_length          = 1000;
 const double                    stdout_read_interval_min        =  1.0;
 const double                    stdout_read_interval_max        = 10.0;
 const double                    delete_temporary_files_delay    = 2;                                
@@ -2531,7 +2531,7 @@ void Job_module_task::do_release__end()
 
 void Task_stdout_reader::start()
 {
-#ifdef Z_DEBUG
+#ifdef _DEBUG
     if( _task->_module_instance->stdout_path() != "" )  _stdout_line_reader._file.open( _task->_module_instance->stdout_path(), "rb" );
     if( _task->_module_instance->stdout_path() != "" )  _stderr_line_reader._file.open( _task->_module_instance->stderr_path(), "rb" );
     set_async_manager( _task->_spooler->_connection_manager );
@@ -2551,6 +2551,20 @@ bool Task_stdout_reader::finish()
     while(1)
     {
         s = _stdout_line_reader.read_lines();
+        if( s == "" )  break;
+        log_lines( s );
+    }
+
+    while(1)
+    {
+        s = _stderr_line_reader.read_lines();
+        if( s == "" )  break;
+        log_lines( s );
+    }
+
+    while(1)
+    {
+        s = _stdout_line_reader.read_remainder();
         if( s == "" )  break;
         log_lines( s );
     }
@@ -2626,6 +2640,7 @@ string Task_stdout_reader::File_line_reader::read_remainder()
     {
         _file.seek( _read_length );
         result = _file.read_string( max_stdout_line_length );
+        _read_length += result.length();
     }
 
     return result;
