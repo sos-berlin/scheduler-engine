@@ -2797,6 +2797,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-458">
+            <text xml:lang="en">
+                <title>Remote configuration directory '<p1/>' is missing</title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

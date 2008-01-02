@@ -784,7 +784,8 @@ void Remote_configurations::activate()
 {
     if( !_is_activated )
     {
-        _is_activated = true;
+        if( !_directory_tree->directory_path().exists()  ||
+            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
 
 #       ifdef Z_WINDOWS
         {
@@ -809,6 +810,8 @@ void Remote_configurations::activate()
 
         add_to_event_manager( _spooler->_connection_manager );
         set_async_delay( folder::directory_watch_interval_min );
+
+        _is_activated = true;
     }
 }
 

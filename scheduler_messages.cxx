@@ -307,6 +307,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-455", "No configuration directory for '$1'" },
     { "SCHEDULER-456", "Invalid response from supervisor" },
     { "SCHEDULER-457", "Remote scheduler '$1' has not been registered" },
+    { "SCHEDULER-455", "Remote configuration directory '$1' is missing" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },
