@@ -247,6 +247,10 @@
     <register_entry register_file='command_line.xml#option_cd' register_title='Kommandozeilenoptionen'  register_keyword='cd' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__cd' register_title='Kommandozeilenoptionen'  register_keyword='cd'/>
 </register_keyword>
+<register_keyword keyword='central_configuration_directory'>
+    <register_keyword_display><code>central_configuration_directory=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_central_configuration_directory' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='central_configuration_directory' type='definition'/>
+</register_keyword>
 <register_keyword keyword='Change log'>
     <register_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll'  register_keyword='Change log'/>
 </register_keyword>
@@ -924,6 +928,7 @@
     <register_entry register_file='distributed_orders.xml#use_option__exclusive' register_title='Verteilte Aufträge'  register_keyword='exclusive'/>
     <register_entry register_file='settings.xml#use_option__exclusive' register_title='Einstellungen'  register_keyword='exclusive'/>
     <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
+    <register_entry register_file='xml/config.xml#use_option__exclusive' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/terminate.xml#use_option__exclusive' register_title='&lt;terminate&gt; (Kommando)'  register_keyword='exclusive'/>
 </register_keyword>
 <register_keyword keyword='exclusive'>
@@ -1222,6 +1227,7 @@
     <register_entry register_file='datenbank.xml#use_option__id' register_title='Datenbank'  register_keyword='id'/>
     <register_entry register_file='settings.xml#use_option__id' register_title='Einstellungen'  register_keyword='id'/>
     <register_entry register_file='xml/answer/state.xml#use_option__id' register_title='&lt;state&gt; (Antwort)'  register_keyword='id'/>
+    <register_entry register_file='xml/config.xml#use_option__id' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='id'/>
 </register_keyword>
 <register_keyword keyword='id'>
     <register_keyword_display><code>id=</code></register_keyword_display>

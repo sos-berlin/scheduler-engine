@@ -52,6 +52,13 @@
                     Dann wird nur die Konfiguration aus dem Verzeichnis <code>_all</code>, falls vorhanden, übertragen.
                 </p>
             </description>
+
+            <messages>
+                <message level="info" code="SCHEDULER-455"/>
+                <message level="error" code="SCHEDULER-454"/>
+                <message level="error" code="SCHEDULER-457"/>
+                <message level="error" code="SCHEDULER-458"/>
+            </messages>
         </xml_attribute>
 
 
