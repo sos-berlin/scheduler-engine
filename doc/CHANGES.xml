@@ -10,6 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-01-02" version="2.0.193" subversion_revision="5468">
+        <revision type="new" title="Zentrale Konfiguration">
+            <description>
+                <p>
+                    <scheduler_element name="config" attribute="central_configuration_directory"/>
+                </p>
+                <p>
+                    Der Supervisor kann jetzt die Konfiguration überschreiben.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="main_scheduler"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="configuration_directory"/>
+                    </li>
+                </ul>
+                
+            </description>
+        </revision>
+    </change>
+
     <change date="2007-12-21" version="2.0.192" subversion_revision="5444">
         <revision type="correction" title="&lt;file_order_source> ohne regex= konnte Scheduler abbrechen">
             <description>

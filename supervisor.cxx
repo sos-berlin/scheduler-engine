@@ -237,7 +237,7 @@ void Supervisor::close()
 
 bool Supervisor::subsystem_initialize()
 {
-    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_remote_configuration_directory ) );
+    _remote_configurations = Z_NEW( Remote_configurations( this, spooler()->_central_configuration_directory ) );
     set_subsystem_state( subsys_initialized );
     return true;
 }
@@ -464,7 +464,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     
     if( all_directory )  all_directory->read_deep( allowed_directory_age );
     if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  merged_directory = my_directory;
-    if( !merged_directory )  throw_xc( "SCHEDULER-455", obj_name() );
+    if( !merged_directory )  log()->info( message_string( "SCHEDULER-455", obj_name() ) );
 
     if( all_directory && my_directory )
     {
@@ -478,9 +478,13 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
     Xml_writer xml_writer ( response );
 
-    xml_writer.begin_element( "configuration.directory" );
-    write_updated_files_to_xml( &xml_writer, merged_directory, element );
-    xml_writer.end_element( "configuration.directory" );
+    if( merged_directory )
+    {
+        xml_writer.begin_element( "configuration.directory" );
+        write_updated_files_to_xml( &xml_writer, merged_directory, element );
+        xml_writer.end_element( "configuration.directory" );
+    }
+
     xml_writer.close();
 
     response->end_standard_response();

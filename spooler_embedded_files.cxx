@@ -89,6 +89,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"mail_xslt_stylesheet\"  type=\"File\"/>\n"
     "<xsd:attribute name=\"supervisor\"            type=\"String\"/>\n"
     "<xsd:attribute name=\"configuration_directory\" type=\"File\"/>\n"
+    "<xsd:attribute name=\"central_configuration_directory\" type=\"File\"/>\n"
     "\n"
     "<xsd:attribute name=\"configuration_add_event\"    type=\"Path\"/>\n"
     "<xsd:attribute name=\"configuration_modify_event\" type=\"Path\"/>\n"
@@ -1859,7 +1860,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1198941545 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1199266699 },
     { NULL, NULL, 0 }
 };
 

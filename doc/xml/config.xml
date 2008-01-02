@@ -18,7 +18,44 @@
 
     <xml_attributes>
 
-        <xml_attribute name="configuration_directory" type="path">
+        <xml_attribute name="central_configuration_directory" type="path" initial="remote">
+            <description>
+                <p>
+                    Voreingestellt ist das Verzeichnis <code>remote</code>
+                    im Verzeichnis der Konfigurationsdatei,
+                    siehe <scheduler_option name="config"/>.
+                </p>
+                <p>
+                    Das Verzeichnis ist für den Supervisor-Betrieb,
+                    bei dem andere Scheduler sich anmelden mit
+                    <scheduler_element name="config" attribute="main_scheduler"/>.
+                    Das Verzeichnis kann für jeden Scheduler ein Unterverzeichnis mit Konfigurationsdateien enthalten,
+                    die der Supervisor zum Scheduler laufend repliziert.
+                </p>
+                <p>
+                    Scheduler in einem Cluster 
+                    (<scheduler_option name="exclusive"/> oder <scheduler_option name="distributed-orders"/>)
+                    erhalten ihre Konfiguration aus einem Verzeichnis mit dem Namen der Scheduler-ID
+                    (<scheduler_option name="id"/>).
+                </p>
+                <p>
+                    Scheduler, die nicht zu einem Cluster gehören, erhalten Ihre Konfiguration aus einem Verzeichnis,
+                    dessen Name aus Rechnername und TCP-Portnummer (<scheduler_element name="config" attribute="tcp_port"/>)
+                    gebildet wird: <code><i>hostname</i>#<i>tcpport</i></code>.
+                </p>
+                <p>
+                    Für beide Fälle gilt, dass zusätzlich Dateien aus dem Verzeichnis <code>_all</code> übertragen werden.
+                    Diese Dateien sind nachrangig.
+                </p>
+                <p>
+                    Es ist möglich, für einen Scheduler kein Verzeichnis anzugeben. 
+                    Dann wird nur die Konfiguration aus dem Verzeichnis <code>_all</code>, falls vorhanden, übertragen.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="configuration_directory" type="path" initial="live">
             <description>
                 <p>
                     Voreingestellt ist das Verzeichnis <code>live</code> 
@@ -27,7 +64,7 @@
                 </p>
                 <p>
                     Diesem Verzeichnis entnimmt der Scheduler die
-                    Defitionen der Jobs usw., 
+                    Definitionen der Jobs usw., 
                     siehe <scheduler_a href="../dynamic_configuration.xml" quote="yes"/>.
                 </p>
             </description>
@@ -121,12 +158,19 @@
         <xml_attribute name="main_scheduler" type="host:port">
             <description>
                 <p>
-                    Ein Haupt-Scheduler, bei dem sich dieser Scheduler an- und abmelden soll.
+                    Der Supervisor, bei dem sich dieser Scheduler an- und abmelden soll.
                     Das geschieht asynchron und Fehler beeinträchtigen nicht den Betrieb.
                 </p>
                 <p>
-                    Version 2.0.116: Wenn der Haupt-Scheduler unter Windows läuft,
+                    Wenn der Haupt-Scheduler unter Windows läuft,
                     sollten nicht mehr als vier Scheduler sich bei ihn anmelden.
+                </p>
+                <p>
+                    Der Supervisor kann für den Scheduler die Konfiguration bestimmen,
+                    s. <scheduler_element name="config" attribute="central_configuration_directory"/>.
+                    Die vorhandene Konfiguration
+                    (<scheduler_element name="config" attribute="configuration_directory"/>)
+                    wird dabei überschrieben.
                 </p>
             </description>
         </xml_attribute>

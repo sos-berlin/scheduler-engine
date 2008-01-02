@@ -80,6 +80,7 @@
                         <xsd:attribute name="mail_xslt_stylesheet"  type="File"/>
                         <xsd:attribute name="supervisor"            type="String"/>
                         <xsd:attribute name="configuration_directory" type="File"/>
+                        <xsd:attribute name="central_configuration_directory" type="File"/>
 
                         <xsd:attribute name="configuration_add_event"    type="Path"/>
                         <xsd:attribute name="configuration_modify_event" type="Path"/>

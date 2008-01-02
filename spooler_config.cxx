@@ -128,8 +128,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         _configuration_start_job_after_modified = Absolute_path( root_path, config_element.getAttribute( "configuration_modify_event", _configuration_start_job_after_modified ) );
         _configuration_start_job_after_deleted  = Absolute_path( root_path, config_element.getAttribute( "configuration_delete_event", _configuration_start_job_after_deleted  ) );
 
-        if( !_remote_configuration_directory_as_option_set )
-            _remote_configuration_directory = config_element.getAttribute( "remote_configuration_directory", _remote_configuration_directory );
+        if( !_central_configuration_directory_as_option_set )
+            _central_configuration_directory = config_element.getAttribute( "central_configuration_directory", _central_configuration_directory );
 
         if( !_tcp_port_as_option_set )
         {

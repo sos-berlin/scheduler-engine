@@ -610,8 +610,8 @@ struct Spooler : Object,
     Absolute_path              _configuration_start_job_after_added;
     Absolute_path              _configuration_start_job_after_modified;
     Absolute_path              _configuration_start_job_after_deleted;
-    file::File_path            _remote_configuration_directory;
-    bool                       _remote_configuration_directory_as_option_set;
+    file::File_path            _central_configuration_directory;
+    bool                       _central_configuration_directory_as_option_set;
 
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
