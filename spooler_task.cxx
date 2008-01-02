@@ -31,6 +31,9 @@ static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
+const int                       max_stdout_line_length          = 100;
+const double                    stdout_read_interval_min        =  1.0;
+const double                    stdout_read_interval_max        = 10.0;
 const double                    delete_temporary_files_delay    = 2;                                
 const double                    delete_temporary_files_retry    = 0.1;                              
 
@@ -202,7 +205,8 @@ Task::Task( Job* job )
     _job(job),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
-    _lock("Task")
+    _lock("Task"),
+    _stdout_reader(this)
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
@@ -239,6 +243,8 @@ Task::~Task()
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
 
+    _stdout_reader.set_async_manager( NULL );
+
     _log->close();
 }
 
@@ -257,6 +263,8 @@ void Task::close()
 {
     if( !_closed )
     {
+        _stdout_reader.set_async_manager( NULL );
+
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
 
         if( _operation )
@@ -1207,6 +1215,8 @@ bool Task::do_something()
                                 ok = operation__end();
 
                                 //task_subsystem()->count_started_tasks();
+
+                                _stdout_reader.start();
 
                                 set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
                                                                                                        : s_running 
@@ -2350,6 +2360,8 @@ void Module_task::do_close__end()
             _exit_code = -termination_signal;
         }
  
+        _stdout_reader.finish();
+
         _log->log_file( _module_instance->stdout_path(), "stdout:" );
         _log->log_file( _module_instance->stderr_path(), "stderr:" );
 
@@ -2510,6 +2522,123 @@ void Job_module_task::do_release__end()
     if( !_module_instance )  return;  //z::throw_xc( "SCHEDULER-199" );
 
     _module_instance->release__end();
+}
+
+//------------------------------------------------------------------------Task_stdout_reader::start
+
+void Task_stdout_reader::start()
+{
+    if( _task->_module_instance->stdout_path() != "" )  _stdout_line_reader._file.open( _task->_module_instance->stdout_path(), "rb" );
+    if( _task->_module_instance->stdout_path() != "" )  _stderr_line_reader._file.open( _task->_module_instance->stderr_path(), "rb" );
+    set_async_manager( _task->_spooler->_connection_manager );
+    set_async_delay( stdout_read_interval_min );
+}
+
+//-----------------------------------------------------------------------Task_stdout_reader::finish
+
+void Task_stdout_reader::finish()
+{
+    string s;
+
+    while(1)
+    {
+        s = _stdout_line_reader.read_lines();
+        if( s == "" )  break;
+        log_lines( s );
+    }
+
+    while(1)
+    {
+        s = _stderr_line_reader.read_remainder();
+        if( s == "" )  break;
+        log_lines( s );
+    }
+
+    _stdout_line_reader._file.close();
+    _stderr_line_reader._file.close();
+}
+
+//--------------------------------------------------------------Task_stdout_reader::async_continue_
+
+bool Task_stdout_reader::async_continue_( Async_operation::Continue_flags )
+{
+#ifdef Z_DEBUG
+    bool something_done = false;
+
+    something_done |= log_lines( _stdout_line_reader.read_lines() );
+    something_done |= log_lines( _stderr_line_reader.read_lines() );
+
+    set_async_delay( something_done? stdout_read_interval_min : stdout_read_interval_max );
+#else
+    int DEBUG_RAUSNEHMEN;
+#endif
+
+    return true;
+}
+
+//------------------------------------------------------------Task_stdout_reader::async_state_text_
+
+string Task_stdout_reader::async_state_text_() const
+{
+    S result;
+    result << "Task_stdout_reader(stdout " << _stdout_line_reader._read_length << " bytes,"
+                                 "stderr " << _stderr_line_reader._read_length << " bytes)"; 
+    return result;
+}
+
+//-------------------------------------------------Task_stdout_reader::File_line_reader::read_lines
+
+string Task_stdout_reader::File_line_reader::read_lines()
+{
+    string lines;
+
+    if( _file.opened()  &&  _file.length() > _read_length )
+    {
+        _file.seek( _read_length );
+        lines = _file.read_string( max_stdout_line_length );
+        size_t nl = lines.rfind( '\n' );
+
+        if( nl == string::npos )    // Kein \n
+        {
+            if( lines.length() < max_stdout_line_length )  lines = "";    // Mehr Text als max_stdout_line_length wird umgebrochen
+            nl = lines.length();
+        }
+
+        lines.erase( nl );
+        _read_length += lines.length();
+    }
+
+    return lines;
+}
+
+//-------------------------------------------------Task_stdout_reader::File_line_reader::read_lines
+
+string Task_stdout_reader::File_line_reader::read_remainder()
+{
+    string result;
+
+    if( _file.opened() )
+    {
+        _file.seek( _read_length );
+        result = _file.read_string( max_stdout_line_length );
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------------Task_stdout_reader::log_lines
+
+bool Task_stdout_reader::log_lines( const string& lines )
+{
+    bool something_done = false;
+
+    if( lines != "" )  
+    {
+        _task->log()->info( lines );
+        something_done = true;
+    }
+
+    return something_done;
 }
 
 //-------------------------------------------------------------------------------------------------

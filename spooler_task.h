@@ -7,6 +7,40 @@
 namespace sos {
 namespace scheduler {
 
+//-------------------------------------------------------------------------------Task_stdout_reader
+
+struct Task_stdout_reader : Async_operation
+{
+    struct File_line_reader
+    {
+                                File_line_reader            ()                                      : _zero_(this+1) {}
+
+        string                  read_lines                  ();
+        string                  read_remainder              ();
+
+        Fill_zero              _zero_;
+        File                   _file;
+        size_t                 _read_length;
+    };
+
+                                Task_stdout_reader          ( Task* task )                          : _zero_(this+1), _task(task) {}
+
+    bool                        log_lines                   ( const string& lines );
+    void                        start                       ();
+    void                        finish                      ();
+
+    // Async_operation:
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+    bool                        async_finished_             () const                                { return false; }
+
+    
+    Fill_zero                  _zero_;
+    Task*                      _task;
+    File_line_reader           _stdout_line_reader;
+    File_line_reader           _stderr_line_reader;
+};
+
 //--------------------------------------------------------------------------------------Start_cause
 
 enum Start_cause
@@ -174,6 +208,8 @@ struct Task : Object,
     
 
   protected:
+    friend struct               Task_stdout_reader;
+
     void                        remove_order_after_error    ();
     void                        remove_order                ();
 
@@ -329,6 +365,8 @@ struct Task : Object,
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
     ptr<Web_service>           _web_service;
     ptr<lock::Holder>          _lock_holder;
+
+    Task_stdout_reader         _stdout_reader;              // Liest auch stderr
 };
 
 //----------------------------------------------------------------------------------------Task_list

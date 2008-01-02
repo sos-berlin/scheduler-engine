@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="shell">
+                <script language="shell">@echo off
+echo STATE_TEXT                
+echo Zweite Zeile
+sleep 12
+echo Dritte Zeile
+                </script>
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>
