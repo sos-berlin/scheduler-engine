@@ -6,6 +6,7 @@ drop_table( "SCHEDULER_TASKS"         );
 drop_table( "SCHEDULER_HISTORY"       );
 drop_table( "SCHEDULER_ORDERS"        );
 drop_table( "SCHEDULER_ORDER_HISTORY" );
+drop_table( "SCHEDULER_ORDER_STEP_HISTORY" );
 drop_table( "SCHEDULER_CLUSTERS"      );
 
 

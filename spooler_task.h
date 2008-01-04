@@ -7,9 +7,9 @@
 namespace sos {
 namespace scheduler {
 
-//-------------------------------------------------------------------------------Task_stdout_reader
+//------------------------------------------------------------------------------------Stdout_reader
 
-struct Task_stdout_reader : Async_operation
+struct Stdout_reader : Async_operation
 {
     struct File_line_reader
     {
@@ -23,8 +23,11 @@ struct Task_stdout_reader : Async_operation
         size_t                 _read_length;
     };
 
-                                Task_stdout_reader          ( Task* task )                          : _zero_(this+1), _task(task) {}
+                                Stdout_reader               ( Scheduler* scheduler )                : _zero_(this+1), _spooler(scheduler) {}
 
+    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
+    void                        open_stdout                 ( const File_path& );
+    void                        open_stderr                 ( const File_path& );
     bool                        log_lines                   ( const string& lines );
     void                        start                       ();
     bool                        finish                      ();
@@ -36,7 +39,8 @@ struct Task_stdout_reader : Async_operation
 
     
     Fill_zero                  _zero_;
-    Task*                      _task;
+    Spooler*                   _spooler;
+    Prefix_log*                _log;
     File_line_reader           _stdout_line_reader;
     File_line_reader           _stderr_line_reader;
 };
@@ -205,10 +209,11 @@ struct Task : Object,
     bool                        shall_wait_for_registered_pid();
     string                      trigger_files               () const                                { return _trigger_files; }
     Order*                      order                       ()                                      { return _order; }
+    pid_t                       pid                         () const                                { return _module_instance? _module_instance->pid() : 0; }
     
 
   protected:
-    friend struct               Task_stdout_reader;
+    friend struct               Stdout_reader;
 
     void                        remove_order_after_error    ();
     void                        remove_order                ();
@@ -366,7 +371,7 @@ struct Task : Object,
     ptr<Web_service>           _web_service;
     ptr<lock::Holder>          _lock_holder;
 
-    Task_stdout_reader         _stdout_reader;              // Liest auch stderr
+    Stdout_reader              _stdout_reader;              // Liest auch stderr
 };
 
 //----------------------------------------------------------------------------------------Task_list

@@ -78,8 +78,6 @@ struct Database : Object, Scheduler_object //Subsystem
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
-    void                        write_order_history     ( Order*, Transaction* = NULL );
-
     Transaction*                transaction             ();
     bool                        is_in_transaction       ()                                          { return _transaction != NULL; }
     int                         record_count            ()                                          { return _db.record_count(); }

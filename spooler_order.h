@@ -224,6 +224,10 @@ struct Order : Com_order,
 
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
+    void                        db_insert_order_history_record( Transaction* );
+    void                        db_update_order_history_record( Transaction* );
+    void                        db_insert_order_step_history_record( Transaction* );
+    void                        db_update_order_step_history_record( Transaction* );
     bool                        db_occupy_for_processing();
     bool                        db_release_occupation   ();
     void                        db_fill_stmt            ( sql::Write_stmt* );
@@ -312,6 +316,8 @@ struct Order : Com_order,
     bool                       _initial_state_set;
     bool                       _is_in_order_queue;      // Auftrag ist in _job_chain_node->order_queue() eingehängt
 
+    int                        _history_id;
+    int                        _step_number;
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     bool                       _setback_called;

@@ -661,17 +661,6 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
     _communication_operation->_operation_connection->register_task_process( process );
     
-    /*
-        Prozess registrieren
-            TCP-Verbindung bekommt ein Task-Prozess-Register
-            Bei Verbindungsverlust werden alle Prozesse abgebrochen
-            Ebenso bei Scheduler-Ende (also im Scheduler registrieren)
-
-        stdout und stderr verbinden (über vorhandene TCP-Verbindung?)
-
-        Prozess-Event überwachen (Unix: waitpid), Prozessende bemerken und protokollieren
-    */
-
     if( _log )  _log->info( message_string( "SCHEDULER-848", process->pid() ) );
 
     xml::Element_ptr result = _answer.createElement( "process" ); 

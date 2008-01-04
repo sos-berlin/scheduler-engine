@@ -539,7 +539,7 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
             jstring jstr1 = env.jstring_from_variant( param );
             jstring jstr2 = env.jstring_from_variant( param2 );
             jstring jstr = static_cast<jstring>( env->CallObjectMethod( _jobject, method_id, jstr1, jstr2 ) );
-            bool exception_check = env->ExceptionCheck();
+            jboolean exception_check = env->ExceptionCheck();
 
             if( !exception_check )
             {

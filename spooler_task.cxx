@@ -206,10 +206,11 @@ Task::Task( Job* job )
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
     _lock("Task"),
-    _stdout_reader(this)
+    _stdout_reader(job->_spooler)
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
+    _stdout_reader.set_log( _log );
 
     _let_run = _job->_period.let_run();
 
@@ -1207,15 +1208,15 @@ bool Task::do_something()
 
                             if( !_operation )
                             {
-                                if( _job->_history.min_steps() == 0 )  _history.start();
                                 _operation = begin__start();
                             }
                             else
                             {
                                 ok = operation__end();
 
-                                //task_subsystem()->count_started_tasks();
-
+                                if( _job->_history.min_steps() == 0 )  _history.start();
+                                _stdout_reader.open_stdout( _module_instance->stdout_path() );
+                                _stdout_reader.open_stderr( _module_instance->stderr_path() );
                                 _stdout_reader.start();
 
                                 set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
@@ -2527,23 +2528,31 @@ void Job_module_task::do_release__end()
     _module_instance->release__end();
 }
 
-//------------------------------------------------------------------------Task_stdout_reader::start
+//-----------------------------------------------------------------------Stdout_reader::open_stdout
 
-void Task_stdout_reader::start()
+void Stdout_reader::open_stdout( const File_path& path )
 {
-#ifdef _DEBUG
-    if( _task->_module_instance->stdout_path() != "" )  _stdout_line_reader._file.open( _task->_module_instance->stdout_path(), "rb" );
-    if( _task->_module_instance->stdout_path() != "" )  _stderr_line_reader._file.open( _task->_module_instance->stderr_path(), "rb" );
-    set_async_manager( _task->_spooler->_connection_manager );
-    set_async_delay( stdout_read_interval_min );
-#else
-    int DEBUG_RAUSNEHMEN;
-#endif
+    if( path != "" )  _stdout_line_reader._file.open( path, "rb" );
 }
 
-//-----------------------------------------------------------------------Task_stdout_reader::finish
+//-----------------------------------------------------------------------Stdout_reader::open_stderr
 
-bool Task_stdout_reader::finish()
+void Stdout_reader::open_stderr( const File_path& path )
+{
+    if( path != "" )  _stderr_line_reader._file.open( path, "rb" );
+}
+
+//-----------------------------------------------------------------------------Stdout_reader::start
+
+void Stdout_reader::start()
+{
+    set_async_manager( _spooler->_connection_manager );
+    set_async_delay( stdout_read_interval_min );
+}
+
+//----------------------------------------------------------------------------Stdout_reader::finish
+
+bool Stdout_reader::finish()
 {
     bool   result = _stdout_line_reader._file.opened()  &  _stderr_line_reader._file.opened();
     string s;
@@ -2582,9 +2591,9 @@ bool Task_stdout_reader::finish()
     return result;
 }
 
-//--------------------------------------------------------------Task_stdout_reader::async_continue_
+//-------------------------------------------------------------------Stdout_reader::async_continue_
 
-bool Task_stdout_reader::async_continue_( Async_operation::Continue_flags )
+bool Stdout_reader::async_continue_( Async_operation::Continue_flags )
 {
     bool something_done = false;
 
@@ -2595,19 +2604,19 @@ bool Task_stdout_reader::async_continue_( Async_operation::Continue_flags )
     return true;
 }
 
-//------------------------------------------------------------Task_stdout_reader::async_state_text_
+//-----------------------------------------------------------------Stdout_reader::async_state_text_
 
-string Task_stdout_reader::async_state_text_() const
+string Stdout_reader::async_state_text_() const
 {
     S result;
-    result << "Task_stdout_reader(stdout " << _stdout_line_reader._read_length << " bytes,"
-                                 "stderr " << _stderr_line_reader._read_length << " bytes)"; 
+    result << "Stdout_reader(stdout " << _stdout_line_reader._read_length << " bytes,"
+                            "stderr " << _stderr_line_reader._read_length << " bytes)"; 
     return result;
 }
 
-//-------------------------------------------------Task_stdout_reader::File_line_reader::read_lines
+//------------------------------------------------------Stdout_reader::File_line_reader::read_lines
 
-string Task_stdout_reader::File_line_reader::read_lines()
+string Stdout_reader::File_line_reader::read_lines()
 {
     string lines;
 
@@ -2630,9 +2639,9 @@ string Task_stdout_reader::File_line_reader::read_lines()
     return lines;
 }
 
-//-------------------------------------------------Task_stdout_reader::File_line_reader::read_lines
+//--------------------------------------------------Stdout_reader::File_line_reader::read_remainder
 
-string Task_stdout_reader::File_line_reader::read_remainder()
+string Stdout_reader::File_line_reader::read_remainder()
 {
     string result;
 
@@ -2646,15 +2655,15 @@ string Task_stdout_reader::File_line_reader::read_remainder()
     return result;
 }
 
-//--------------------------------------------------------------------Task_stdout_reader::log_lines
+//-------------------------------------------------------------------------Stdout_reader::log_lines
 
-bool Task_stdout_reader::log_lines( const string& lines )
+bool Stdout_reader::log_lines( const string& lines )
 {
     bool something_done = false;
 
     if( lines != "" )  
     {
-        _task->log()->info( lines );
+        _log->info( lines );
         something_done = true;
     }
 

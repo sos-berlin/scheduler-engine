@@ -357,6 +357,14 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
           //_server->_module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
             *result = VARIANT_TRUE;
         }
+
+        /*
+            stdout einsammeln:
+            Thread starten
+            Stdout_reader verwenden
+            Invoke()
+            Am Ende den Rest übertragen
+        */
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::construct" ); }
 

@@ -1296,6 +1296,7 @@ void Spooler::load_arg()
 
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
     _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" ) );
+    _order_step_history_tablename=ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_step_history_table", "SCHEDULER_ORDER_STEP_HISTORY" ) );
     _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    ) );
     _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" ) );
     _clusters_tablename         = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_members_table"      , "SCHEDULER_CLUSTERS" ) );

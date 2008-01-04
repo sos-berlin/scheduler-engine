@@ -7,6 +7,9 @@
 #include "../kram/sos_java.h"
 #include "../file/sosdb.h"
 
+#ifdef Z_WINDOWS
+#   include <process.h>     // getpid()
+#endif
 
 using namespace zschimmer;
 
@@ -449,7 +452,7 @@ void Database_retry::reopen_database_after_error( const exception& x, const stri
 
     _db->try_reopen_after_error( x, function ); 
 
-    repeat_loop(); 
+    if( _db->opened() )  repeat_loop(); 
 }
 
 //-------------------------------------------------------------------------------Database::Database
@@ -740,6 +743,7 @@ void Database::create_tables_when_needed()
                                 "`error_text`" " varchar(250),"
                                 "`parameters`" " clob,"
                                 "`log`"        " blob," 
+                                "`pid`"        " integer,"
                                 + join( "", create_extra ) 
                                 + "primary key( `id` )" );
 
@@ -753,10 +757,16 @@ void Database::create_tables_when_needed()
         else
         {
             bool added;
-            added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+            added = add_column( &ta, _spooler->_job_history_tablename, "pid", "add `pid` integer" );
 
-            //Jira JS-???  Setup der SOS legt exit_code nicht an.   if( added )
-                    add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
+            if( !added )
+            {
+                added = add_column( &ta, _spooler->_job_history_tablename, "cluster_member_id", "add `cluster_member_id` varchar(100)" );
+
+                //Jira JS-???  Setup der SOS legt exit_code nicht an.   if( added )
+                add_column( &ta, _spooler->_job_history_tablename, "EXIT_CODE"        , "add `EXIT_CODE`     integer" );
+            }
+
         }
 
         ta.commit( Z_FUNCTION );
@@ -824,7 +834,7 @@ void Database::create_tables_when_needed()
                                 "`state`"       " varchar(100),"
                                 "`state_text`"  " varchar(100),"
                                 "`start_time`"  " datetime not null,"
-                                "`end_time`"    " datetime not null,"
+                                "`end_time`"    " datetime,"
                                 "`log`"         " blob," 
                                 "primary key( `history_id` )" );
 
@@ -836,8 +846,42 @@ void Database::create_tables_when_needed()
         }
         else
         {
-            // add_column()
+            ta.intermediate_commit( Z_FUNCTION ); 
+
+            if( Any_file( S() << "-in " << db_name() << "select `end_time` from " << _spooler->_order_history_tablename << " where 1=0" )
+                .record_type()->field_descr(0).nullable() )
+            {
+                int NUR_FUER_POSTGRESQL;
+                string cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " alter column `end_time` drop not null";    // JS-150
+                _log->info( cmd );
+                ta.execute( cmd, Z_FUNCTION );
+            }
         }
+
+        ta.commit( Z_FUNCTION );
+    }
+
+    ////////////////////////////
+
+    {
+        Transaction ta ( this );
+
+        bool created = create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
+                                "`history_id`"  " integer not null,"             // Primärschlüssel
+                                "`step`"        " integer not null,"             // Primärschlüssel
+                                "`task_id`"     " integer not null,"
+                                "`state`"       " varchar(100) not null,"
+                                "`start_time`"  " datetime not null,"
+                                "`end_time`"    " datetime,"
+                                "primary key( `history_id`, `step` )" );
+
+        //if( created )
+        //{
+        //    ta.intermediate_commit( Z_FUNCTION ); 
+        //    string cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " alter column `end_time` drop not null";    // War vorher "not null" (JS-150)
+        //    _log->info( cmd );
+        //    ta.execute( cmd, Z_FUNCTION );
+        //}
 
         ta.commit( Z_FUNCTION );
     }
@@ -1635,6 +1679,7 @@ void Database::spooler_start()
 
                     insert[ "job_name"          ] = "(Spooler)";
                     insert[ "start_time"        ].set_datetime( Time::now().as_string(Time::without_ms) );
+                    insert[ "pid"               ] = getpid();
 
                     ta.execute( insert, Z_FUNCTION );
 
@@ -1728,74 +1773,6 @@ void Transaction::update_clob( const string& table_name, const string& column_na
     {
         _log->log( _spooler->_db_log_level, S() << x.what() << ", when writing clob: " << hostware_filename );
         throw;
-    }
-}
-
-//--------------------------------------------------------------------Database::write_order_history
-
-void Database::write_order_history( Order* order, Transaction* outer_transaction )
-{
-    if( !order->start_time() )  return;
-
-
-    while(1)
-    {
-        if( !_db.opened() )  return;
-
-        try
-        {
-            Transaction ta ( this, outer_transaction );
-
-            int              history_id = get_order_history_id( &ta );
-            sql::Insert_stmt insert     ( ta.database_descriptor() );
-
-            insert.set_table_name( _spooler->_order_history_tablename );
-            
-            insert[ "history_id" ] = history_id;
-            insert[ "job_chain"  ] = order->job_chain_path().without_slash();
-            insert[ "order_id"   ] = order->id().as_string();
-            insert[ "title"      ] = order->title();
-            insert[ "state"      ] = order->state().as_string();
-            insert[ "state_text" ] = order->state_text();
-            insert[ "spooler_id" ] = _spooler->id_for_db();
-            insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
-            insert.set_datetime( "end_time"  , ( order->end_time()? order->end_time() : Time::now() ).as_string(Time::without_ms) );
-
-            ta.execute( insert, Z_FUNCTION );
-
-
-            // Auftragsprotokoll
-
-            if( _spooler->_order_history_with_log )
-            {
-                string log_text = order->log()->as_string();
-                if( log_text != "" )
-                {
-                    try 
-                    {
-                        ta.set_transaction_written();
-                        string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                        if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                        //copy_file( "file -b " + log_filename, blob_filename );
-                        Any_file blob_file( "-out -binary " + blob_filename );
-                        blob_file.put( log_text );
-                        blob_file.close();
-                    }
-                    catch( exception& x ) 
-                    { 
-                        _log->warn( message_string( "SCHEDULER-267", _spooler->_order_history_tablename, x.what() ) );      // "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE "
-                    }
-                }
-            }
-
-            ta.commit( Z_FUNCTION );
-            break;
-        }
-        catch( exception& x )  
-        { 
-            if( outer_transaction )  throw;
-            try_reopen_after_error( x, Z_FUNCTION );
-        }
     }
 }
 
@@ -2296,6 +2273,9 @@ void Task_history::write( bool start )
                         insert[ "job_name"          ] = _task->job()->path().without_slash();
                         insert[ "cause"             ] = start_cause_name( _task->_cause );
                         insert.set_datetime( "start_time", start_time );
+                        
+                        if( int pid = _task->pid() )
+                        insert[ "pid"               ] = pid;
 
                         ta.execute( insert, Z_FUNCTION );
 

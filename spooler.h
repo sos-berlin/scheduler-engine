@@ -545,6 +545,7 @@ struct Spooler : Object,
     string                     _order_history_tablename;
     bool                       _order_history_yes;
     With_log_switch            _order_history_with_log;
+    string                     _order_step_history_tablename;
     Log_level                  _db_log_level;
 
     string                     _factory_ini;                // -ini=factory.ini

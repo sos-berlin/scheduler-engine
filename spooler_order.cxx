@@ -3736,6 +3736,14 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
     if( order ) 
     {
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            if( !order->_history_id )  order->db_insert_order_history_record( &ta );
+            order->db_insert_order_step_history_record( &ta );
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_order_history_tablename + " or " + _spooler->_order_step_history_tablename, x ), Z_FUNCTION ); }
+
         order->assert_task( Z_FUNCTION );
         order->_is_success_state = true;
     }
@@ -4192,6 +4200,129 @@ void Order::occupy_for_task( Task* task, const Time& now )
     //_is_virgin_in_this_run_time = false;
 }
 
+//------------------------------------------------------------Order::db_insert_order_history_record
+
+void Order::db_insert_order_history_record( Transaction* ta )
+{
+    if( _spooler->_order_history_yes  &&  _spooler->db()->opened() )
+    {
+        _history_id = _spooler->db()->get_order_history_id( ta );
+
+        sql::Insert_stmt insert ( ta->database_descriptor() );
+
+        insert.set_table_name( _spooler->_order_history_tablename );
+        
+        insert[ "history_id" ] = _history_id;
+        insert[ "job_chain"  ] = job_chain_path().without_slash();
+        insert[ "order_id"   ] = id().as_string();
+        insert[ "title"      ] = title();
+        insert[ "state"      ] = state().as_string();
+        insert[ "state_text" ] = state_text();
+        insert[ "spooler_id" ] = _spooler->id_for_db();
+        insert.set_datetime( "start_time", start_time().as_string(Time::without_ms) );
+        //insert.set_datetime( "end_time"  , "0000-00-00 00:00:00" );
+
+        ta->execute( insert, Z_FUNCTION );
+    }
+}
+
+//------------------------------------------------------------Order::db_update_order_history_record
+
+void Order::db_update_order_history_record( Transaction* outer_transaction )
+{
+    if( _spooler->_order_history_yes  &&  _spooler->db()->opened() )
+    {
+        if( !start_time() )  return;
+        assert( _history_id );
+
+        for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+        {
+            sql::Update_stmt update ( ta.database_descriptor() );
+
+            update.set_table_name( _spooler->_order_history_tablename );
+            update.and_where_condition( "history_id", _history_id );
+            update.set_datetime( "end_time"  , ( end_time()? end_time() : Time::now() ).as_string(Time::without_ms) );
+
+            ta.execute( update, Z_FUNCTION );
+
+            // Auftragsprotokoll
+
+            if( _spooler->_order_history_with_log )
+            {
+                string log_text = log()->as_string();
+                if( log_text != "" )
+                {
+                    try 
+                    {
+                        ta.set_transaction_written();
+                        string blob_filename = _spooler->db()->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where `history_id`=" + as_string( _history_id );
+                        if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                        Any_file blob_file( "-out -binary " + blob_filename );
+                        blob_file.put( log_text );
+                        blob_file.close();
+                    }
+                    catch( exception& x ) 
+                    { 
+                        _log->warn( message_string( "SCHEDULER-267", _spooler->_order_history_tablename, x.what() ) );      // "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE "
+                    }
+                }
+            }
+
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_order_history_tablename, x ), Z_FUNCTION ); }
+    }
+}
+
+//-------------------------------------------------------Order::db_insert_order_step_history_record
+
+void Order::db_insert_order_step_history_record( Transaction* ta )
+{
+    if( _spooler->_order_history_yes  &&  _spooler->db()->opened() )
+    {
+        assert( _history_id );
+        assert( _task );
+
+
+        Record record = ta->read_single_record( S() << "select max(`step`)  from " << _spooler->_order_step_history_tablename 
+                                                    << "  where `history_id`=" << _history_id,
+                                               Z_FUNCTION );
+        _step_number = record.null( 0 )? 1 : record.as_int( 0 ) + 1;
+
+        sql::Insert_stmt insert ( ta->database_descriptor(), _spooler->_order_step_history_tablename );
+        
+        insert[ "history_id" ] = _history_id;
+        insert[ "step"       ] = _step_number;
+        insert[ "state"      ] = state().as_string();
+        insert[ "task_id"    ] = _task->id();
+        insert[ "start_time" ].set_datetime( Time::now().as_string( Time::without_ms ) );
+
+        ta->execute( insert, Z_FUNCTION );
+    }
+}
+
+//-------------------------------------------------------Order::db_update_order_step_history_record
+
+void Order::db_update_order_step_history_record( Transaction* ta )
+{
+    if( _spooler->_order_history_yes  &&  _spooler->db()->opened() )
+    {
+        assert( _history_id );
+        assert( _step_number );
+
+
+        sql::Update_stmt update ( _spooler->database_descriptor(), _spooler->_order_step_history_tablename );
+
+        update.and_where_condition( "history_id", _history_id  );
+        update.and_where_condition( "step"      , _step_number );
+        
+        update[ "end_time"   ].set_datetime( Time::now().as_string( Time::without_ms ) );
+      //update[ "state_text" ] = state_text();
+
+        ta->execute_single( update, Z_FUNCTION );
+    }
+}
+
 //------------------------------------------------------------------Order::db_occupy_for_processing
 
 bool Order::db_occupy_for_processing()
@@ -4205,9 +4336,6 @@ bool Order::db_occupy_for_processing()
 
     update[ "occupying_cluster_member_id" ] = _spooler->cluster_member_id();
 
-    //update.and_where_condition( "spooler_id", _spooler->id_for_db() );
-    //update.and_where_condition( "job_chain" , job_chain->name() );
-    //update.and_where_condition( "id"        , id().as_string()    );
     update.and_where_condition( "state"                      , state().as_string() );
     update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
     update.and_where_condition( "distributed_next_time"      , calculate_db_distributed_next_time() );
@@ -4492,8 +4620,11 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 update_ok = ta.try_execute_single( delete_sql, Z_FUNCTION );
                 if( !update_ok )  update_ok = db_handle_modified_order( &ta );  //int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
 
-                db()->write_order_history( this, &ta );
+                if( update_option == update_and_release_occupation  &&  _history_id  &&  _step_number )
+                    db_update_order_step_history_record( &ta );
 
+                db_update_order_history_record( &ta );
+        
                 ta.commit( Z_FUNCTION );
             }
             catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-306", _spooler->_orders_tablename, x  ), Z_FUNCTION ); }
@@ -4522,6 +4653,9 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
             {
                 if( !_spooler->_db->opened() )  break;
+
+                if( update_option == update_and_release_occupation  &&  _history_id  &&  _step_number )
+                    db_update_order_step_history_record( &ta );
 
                 update_ok = ta.try_execute_single( update, Z_FUNCTION );
 
@@ -4584,7 +4718,9 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
     }
     else
     if( finished() )  
-        _spooler->_db->write_order_history( this, outer_transaction );
+    {
+        db_update_order_history_record( outer_transaction );
+    }
 
     return update_ok;
 }
@@ -4650,7 +4786,7 @@ void Order::close_log_and_write_history()
     
     if( _job_chain  &&  _spooler->_db  &&  _spooler->_db->opened() ) 
     {
-        _spooler->_db->write_order_history( this );  // Historie schreiben, aber Auftrag beibehalten
+         db_update_order_history_record( (Transaction*)NULL );    // Historie schreiben, aber Auftrag beibehalten
     }
 
     //2007-09-25 HTTP-Protokoll weiterlaufen lassen   _log->close();
@@ -6163,10 +6299,7 @@ void Order::postprocessing2( Job* last_job )
         {
             db_update( update_and_release_occupation );
         }
-        catch( exception& x )
-        {
-            _log->error( message_string( "SCHEDULER-313", x ) );
-        }
+        catch( exception& x ) { _log->error( message_string( "SCHEDULER-313", x ) ); }
     }
 
     if( _is_distributed  &&  _job_chain )
