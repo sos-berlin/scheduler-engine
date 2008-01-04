@@ -496,7 +496,9 @@ Variant Java_module_instance::call( const string& name_par )
     if( *name.rbegin() == ';' )     // Für spooler_api_version()
     {
         In_call in_call ( this, name ); 
-        result = env.string_from_jstring( Local_jstring( (jstring)env->CallObjectMethod( _jobject, method_id ) ) );
+        Local_jstring jstr = (jstring)env->CallObjectMethod( _jobject, method_id );
+        if( env->ExceptionCheck() )  env.throw_java( name );
+        result = env.string_from_jstring( jstr );
     }
     else
     {
@@ -532,18 +534,24 @@ Variant Java_module_instance::call( const string& name, const Variant& param, co
         else
         if( string_ends_with( name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;" ) )  // Für <run_time start_time_function="">, s. Run_time::call_function
         {
+            Bstr result;
+
             jstring jstr1 = env.jstring_from_variant( param );
             jstring jstr2 = env.jstring_from_variant( param2 );
             jstring jstr = static_cast<jstring>( env->CallObjectMethod( _jobject, method_id, jstr1, jstr2 ) );
+            bool exception_check = env->ExceptionCheck();
 
-            Bstr bstr;
-            env.jstring_to_bstr( jstr, &bstr._bstr );
+            if( !exception_check )
+            {
+                env.jstring_to_bstr( jstr, &result._bstr );
+            }
 
             env->DeleteLocalRef( jstr );
             env->DeleteLocalRef( jstr1 );
             env->DeleteLocalRef( jstr2 );
 
-            return bstr;
+            if( exception_check )  env.throw_java( name );
+            return result;
         }
         else
         //if( string_ends_with( name, "(Lsos/spooler/Spooler_object;)Z" ) )

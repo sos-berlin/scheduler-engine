@@ -7,7 +7,7 @@
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="lund:4444"/>
+            <process_class name="remote" />
         </process_classes>
 
         <script java_class="spooler_job.Scheduler_script">

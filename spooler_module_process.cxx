@@ -500,8 +500,8 @@ bool Process_module_instance::begin__end()
 
             ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
 
-            dup2( _stdout_file.fileno(), STDOUT_FILENO );
-            dup2( _stderr_file.fileno(), STDERR_FILENO );
+            dup2( _stdout_file.file_no(), STDOUT_FILENO );
+            dup2( _stderr_file.file_no(), STDERR_FILENO );
 
             int n = sysconf( _SC_OPEN_MAX );
             for( int i = 3; i < n; i++ )  ::close(i);

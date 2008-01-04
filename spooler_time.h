@@ -51,7 +51,9 @@ struct Time
 
                                 Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( double t, Is_utc )            { set_utc( t ); }
+#if !defined Z_AIX
                                 Time                        ( time_t t )                    { set((double)t); }
+#endif
                                 Time                        ( time_t t, Is_utc )            { set_utc((double)t); }
                                 Time                        ( int t )                       { set((double)t); }
                                 Time                        ( uint t )                      { set((double)t); }
@@ -63,7 +65,9 @@ struct Time
 
     void                        operator =                  ( double t )                    { set(t); }
     void                        operator =                  ( time_t t )                    { set((double)t); }
+#if !defined Z_AIX
     void                        operator =                  ( int t )                       { set((double)t); }
+#endif
     void                        operator =                  ( const string& t )             { set(t); }
     void                        operator =                  ( const char* t )               { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
@@ -111,7 +115,9 @@ struct Time
 
     static double               round                       ( double t );
     static double               normalize                   ( double t );
+#if !defined Z_AIX
     void                        set                         ( int t )                       { set( (double)t ); }
+#endif
     void                        set                         ( time_t t )                    { set( (double)t ); }
     void                        set                         ( double );
     void                        set                         ( const string& );

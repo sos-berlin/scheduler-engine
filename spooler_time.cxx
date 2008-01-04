@@ -491,7 +491,7 @@ Time Time::now()
         localtime_r( &tv.tv_sec, &local_tm );
         return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
 
-#   elif defined SYSTEM_HPUX || defined SYSTEM_SOLARIS
+#   elif defined SYSTEM_HPUX || defined SYSTEM_SOLARIS || defined Z_AIX
 
         timeval  tv;
         tm       local_tm;
