@@ -823,9 +823,12 @@ void Database::create_tables_when_needed()
     ////////////////////////////
 
     {
-        Transaction ta ( this );
+        bool created;
 
-        bool created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
+        {
+            Transaction ta ( this );
+
+            created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
                                 "`history_id`"  " integer not null,"             // Primärschlüssel
                                 "`job_chain`"   " varchar(255) not null,"
                                 "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
@@ -838,27 +841,44 @@ void Database::create_tables_when_needed()
                                 "`log`"         " blob," 
                                 "primary key( `history_id` )" );
 
-        if( created )
-        {
-            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`"            , Z_FUNCTION );
-            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`, `order_id`" , Z_FUNCTION );
-            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_START_TIME", "SCHED_O_HIST_3", "`start_time`"            , Z_FUNCTION );
-        }
-        else
-        {
-            ta.intermediate_commit( Z_FUNCTION ); 
-
-            if( Any_file( S() << "-in " << db_name() << "select `end_time` from " << _spooler->_order_history_tablename << " where 1=0" )
-                .record_type()->field_descr(0).nullable() )
+            if( created )
             {
-                int NUR_FUER_POSTGRESQL;
-                string cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " alter column `end_time` drop not null";    // JS-150
-                _log->info( cmd );
-                ta.execute( cmd, Z_FUNCTION );
+                Transaction ta ( this );
+                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`"            , Z_FUNCTION );
+                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`, `order_id`" , Z_FUNCTION );
+                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_START_TIME", "SCHED_O_HIST_3", "`start_time`"            , Z_FUNCTION );
+            }
+
+            ta.commit( Z_FUNCTION );
+        }
+
+        if( !created )
+        {
+            try
+            {
+                Transaction ta ( this );                                                    // JS-150
+
+                sql::Insert_stmt insert ( ta.database_descriptor() );
+
+                insert.set_table_name( _spooler->_order_history_tablename );
+                
+                insert[ "history_id" ] = -1;
+                insert[ "job_chain"  ] = "TEST";
+                insert[ "order_id"   ] = "TEST";
+                insert[ "state"      ] = "TEST";
+                insert[ "spooler_id" ] = _spooler->id_for_db();
+                insert.set_datetime( "start_time", Time::now().as_string(Time::without_ms) );
+
+                ta.execute( insert, Z_FUNCTION );
+                ta.rollback( Z_FUNCTION );
+            }
+            catch( exception& )
+            {
+                Transaction ta ( this );
+                alter_column_allow_null( &ta, _spooler->_order_history_tablename, "end_time", "datetime" );
+                ta.commit( Z_FUNCTION );
             }
         }
-
-        ta.commit( Z_FUNCTION );
     }
 
     ////////////////////////////
@@ -970,6 +990,58 @@ bool Database::add_column( Transaction* ta, const string& table_name, const stri
 
     return result;
 }
+
+//----------------------------------------------------------------Database::alter_column_allow_null
+
+bool Database::alter_column_allow_null( Transaction* ta, const string& table_name, const string& column_name, const string& type )
+{
+    bool result = false;
+    S    cmd;
+
+    switch( _db.dbms_kind() )
+    {
+        case dbms_access:
+        case dbms_db2:
+        case dbms_sql_server:
+            cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
+            break;
+
+        case dbms_firebird:
+            cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` type " << type << " null";
+            break;
+
+        case dbms_mysql:    // "datetime not null" wirkt wie "datetime null"
+        case dbms_oracle:
+        case dbms_oracle_thin:
+            cmd << "ALTER TABLE " << table_name << " modify column `" << column_name << "` " << type << " null";
+            break;
+
+        case dbms_postgresql:
+            cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` drop not null";
+            break;
+    }
+
+
+    if( cmd != "" )
+    {
+        _log->info( cmd );
+        ta->execute( cmd, Z_FUNCTION );
+
+        result = true;
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------Database::column_is_nullable
+
+//bool Database::column_is_nullable( const string& table_name, const string& column_name )
+//{
+//    // true ist nicht zuverlässig
+//
+//    return Any_file( S() << "-in " << db_name() << "select `" << column_name <<"` from " << table_name << " where 1=0" )
+//           .record_type()->field_descr(0).nullable();
+//}
 
 //----------------------------------------------------------------Database::handle_order_id_columns
 

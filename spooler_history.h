@@ -106,7 +106,9 @@ struct Database : Object, Scheduler_object //Subsystem
     void                        open_history_table      ( Read_transaction* );
   //void                        get_history_table_table ();
     bool                        add_column              ( Transaction*, const string& table_name, const string& column_name, const string add_clause );
+    bool                        alter_column_allow_null ( Transaction*, const string& table_name, const string& column_name, const string& type );
     void                        handle_order_id_columns ( Transaction* );
+  //bool                        column_is_nullable      ( const string& table_name, const string& column_name );
     int                         expand_varchar_column   ( Transaction*, const string& table_name, const string& column_name, int minimum_width, int new_width );
     int                         column_width            ( Transaction*, const string& table_name, const string& column_name );
     int                         get_id_                 ( const string& variable_name, Transaction* );

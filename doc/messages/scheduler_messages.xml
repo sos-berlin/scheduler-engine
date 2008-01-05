@@ -4144,6 +4144,13 @@
                 <title>Removing '<p1/>'</title>
             </text>
         </message>
+        
+        <!--message code="SCHEDULER-703">
+            <text xml:lang="en">
+                <title>Column '<p2/>' is being changed to accept null in database table '<p1/>': cmd</title>
+            </text>
+        </message-->
+
     </messages>
     
 </messages>
