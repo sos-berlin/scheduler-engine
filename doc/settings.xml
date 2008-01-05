@@ -297,6 +297,13 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
     </setting>
 
 
+    <setting setting = "db_order_step_history_table"
+             type    = "name"
+             initial = "SCHEDULER_ORDER_STEP_HISTORY"
+             title   = "Name der Datenbanktabelle für die Schritte der Auftragshistorie">
+    </setting>
+
+
     <setting setting = "db_orders_table"
              type    = "name"
              initial = "SCHEDULER_ORDERS"

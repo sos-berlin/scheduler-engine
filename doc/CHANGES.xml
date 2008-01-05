@@ -10,7 +10,57 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-01-02" version="2.0.193" subversion_revision="5476">
+    <change date="2008-01-05" version="2.0.194" subversion_revision="5482">
+        <revision jira="JS-150" type="new" title="Neue Datenbanktabelle scheduler_order_step_history">
+            <description>
+                <p>
+                    Die Tabelle nimmt für jeden Auftragsschritt einen Satz auf.
+                    Der Satz wird zu Beginn des Schritts geschrieben und am Ende vervollständigt.
+                </p>
+                <p>
+                    Die Tabelle <code>scheduler_order_history</code> wird jetzt schon mit dem ersten Auftragsschritt beschrieben
+                    und nach der Ausführung des Auftrags vervollständigt.
+                </p>
+                <p>
+                    Die Spalte <code>scheduler_order_history.end_time</code> nimmt jetzt <code>NULL</code> auf.
+                </p>
+                <p>
+                    Die Tabelle <code>scheduler_order_step_history</code> hat folgenden Aufbau (Syntax für PostgresQL):
+                </p>
+                <pre>CREATE TABLE SCHEDULER_ORDER_STEP_HISTORY 
+(
+    "HISTORY_ID" integer not null,          // <i>Verweis zu SCHEDULER_ORDER_HISTORY.HISTORY_ID</i>
+    "STEP"       integer not null,          // <i>1, 2, 3, ...</i>
+    "TASK_ID"    integer not null,          // <i>Verweis zu SCHEDULER_TASKS.TASK_ID</i>
+    "STATE"      varchar(100) not null,     // <i>Auftragszustand</i>
+    "START_TIME" timestamp not null,
+    "END_TIME"   timestamp,
+    primary key( "HISTORY_ID", "STEP" )
+)</pre>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_order_step_history_table"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <change jira="JS-150" date="2008-01-05" version="2.0.194" subversion_revision="5476">
+        <revision type="new" title="Neue Datenbankspalte scheduler_history.pid">
+            <description>
+                <p>
+                    Die neue Datenbankspalte <code>scheduler_history.pid</code> nimmt die Prozesskennung des Betriebssystems auf.
+                </p>
+                <p>
+                    Datenbank-Deklaration:
+                </p>
+                <pre>"PID" integer</pre>
+            </description>
+        </revision>
+    </change>
+
+    <change jira="JS-204" date="2008-01-02" version="2.0.193" subversion_revision="5476">
         <revision type="new" title="Zentrale Konfiguration">
             <description>
                 <p>
