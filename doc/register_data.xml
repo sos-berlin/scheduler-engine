@@ -589,6 +589,11 @@
     <register_keyword_display><code>db_order_history_table_name</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__db_order_history_table_name' register_title='Spooler.db_order_history_table_name' register_keyword='db_order_history_table_name' type='definition'/>
 </register_keyword>
+<register_keyword keyword='db_order_step_history_table'>
+    <register_keyword_display><code>db_order_step_history_table=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_spooler.xml#entry_db_order_step_history_table' register_title='file factory.ini, section [spooler]'  register_keyword='db_order_step_history_table' type='definition'/>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='db_order_step_history_table'/>
+</register_keyword>
 <register_keyword keyword='db_orders_table'>
     <register_keyword_display><code>db_orders_table=</code></register_keyword_display>
     <register_entry register_file='factory_ini_spooler.xml#entry_db_orders_table' register_title='file factory.ini, section [spooler]'  register_keyword='db_orders_table' type='definition'/>

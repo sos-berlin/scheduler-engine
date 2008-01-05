@@ -359,7 +359,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         }
 
         /*
-            stdout einsammeln:
+            stdout einsammeln, nur auf anderem Rechner (remote_scheduler):
             Thread starten
             Stdout_reader verwenden
             Invoke()

@@ -2532,14 +2532,14 @@ void Job_module_task::do_release__end()
 
 void Stdout_reader::open_stdout( const File_path& path )
 {
-    if( path != "" )  _stdout_line_reader._file.open( path, "rb" );
+    //if( path != "" )  _stdout_line_reader._file.open( path, "rb" );
 }
 
 //-----------------------------------------------------------------------Stdout_reader::open_stderr
 
 void Stdout_reader::open_stderr( const File_path& path )
 {
-    if( path != "" )  _stderr_line_reader._file.open( path, "rb" );
+    //if( path != "" )  _stderr_line_reader._file.open( path, "rb" );
 }
 
 //-----------------------------------------------------------------------------Stdout_reader::start
