@@ -885,7 +885,7 @@ void Database::create_tables_when_needed()
     {
         Transaction ta ( this );
 
-        bool created = create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
+        create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
                                 "`history_id`"  " integer not null,"             // Primärschlüssel
                                 "`step`"        " integer not null,"             // Primärschlüssel
                                 "`task_id`"     " integer not null,"
@@ -1009,19 +1009,19 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` type " << type << " null";
             break;
 
+        case dbms_postgresql:
+            cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` drop not null";
+            break;
+
+        default:
         case dbms_mysql:    // "datetime not null" wirkt wie "datetime null"
         case dbms_oracle:
         case dbms_oracle_thin:
             cmd << "ALTER TABLE " << table_name << " modify column `" << column_name << "` " << type << " null";
-            break;
-
-        case dbms_postgresql:
-            cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` drop not null";
-            break;
     }
 
 
-    if( cmd != "" )
+    if( !cmd.empty() )
     {
         _log->info( cmd );
         ta->execute( cmd, Z_FUNCTION );

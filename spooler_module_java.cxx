@@ -380,7 +380,7 @@ void Java_module_instance::init()
     
     assert( _jobject == NULL );
     _jobject = env->NewObject( _java_class, method_id );
-    if( !_jobject || env->CheckException() )  env.throw_java( _module->_java_class_name + " Konstruktor" );
+    if( !_jobject || env->ExceptionCheck() )  env.throw_java( _module->_java_class_name + " Konstruktor" );
 
     try
     {
