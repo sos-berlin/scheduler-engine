@@ -380,7 +380,7 @@ void Java_module_instance::init()
     
     assert( _jobject == NULL );
     _jobject = env->NewObject( _java_class, method_id );
-    if( !_jobject )  env.throw_java( _module->_java_class_name + " Konstruktor" );
+    if( !_jobject || env->CheckException() )  env.throw_java( _module->_java_class_name + " Konstruktor" );
 
     try
     {
@@ -496,7 +496,7 @@ Variant Java_module_instance::call( const string& name_par )
     if( *name.rbegin() == ';' )     // Für spooler_api_version()
     {
         In_call in_call ( this, name ); 
-        Local_jstring jstr = (jstring)env->CallObjectMethod( _jobject, method_id );
+        Local_jstring jstr ( (jstring)env->CallObjectMethod( _jobject, method_id ) );
         if( env->ExceptionCheck() )  env.throw_java( name );
         result = env.string_from_jstring( jstr );
     }

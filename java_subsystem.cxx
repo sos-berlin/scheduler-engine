@@ -49,12 +49,19 @@ Java_subsystem::Java_subsystem( Scheduler* scheduler )
     
 Java_subsystem::~Java_subsystem()
 {
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG( Z_FUNCTION << " " << x.what() ); }
 }
 
 //--------------------------------------------------------------------------Java_subsystem::close
     
 void Java_subsystem::close()
 {
+    if( _java_vm )  _java_vm->set_log( NULL );
+
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
     _subsystem_state = subsys_stopped;
 }
