@@ -34,7 +34,7 @@ const char history_column_names[] =    "id"           ":numeric,"
                                        "exit_code,"
                                        "pid";
 
-const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Datenbank
+const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Daten..bank
 
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
