@@ -29,7 +29,10 @@ const char history_column_names[] =    "id"           ":numeric,"
                                        "error,"
                                        "error_code,"
                                        "error_text,"
-                                       "parameters";
+                                       "parameters"
+                                       "cluster_member_id,"
+                                       "exit_code,"
+                                       "pid";
 
 const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Datenbank
 
@@ -746,6 +749,9 @@ void Database::create_tables_when_needed()
                                 "`pid`"        " integer,"
                                 + join( "", create_extra ) 
                                 + "primary key( `id` )" );
+
+        // Nicht vergessen: Konstante history_column_names um neue Spaltennamen erweitern!
+
 
         if( created )
         {
@@ -2138,7 +2144,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         sel = ta.open_file( prefix + _spooler->_db->_db_name, 
                                 S() << "select " <<
                                 ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
-                                " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text` " <<
+                                " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
+                                " `cluster_member_id`, `exit_code`, `pid`" <<
                                 join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
                                 " from " << _spooler->_job_history_tablename <<
                                 clause );

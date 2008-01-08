@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-01-05" version="2.0.194" subversion_revision="5482">
+    <change date="2008-01-05" version="2.0.194" subversion_revision="5488">
         <revision jira="JS-150" type="new" title="Neue Datenbanktabelle scheduler_order_step_history">
             <description>
                 <p>
