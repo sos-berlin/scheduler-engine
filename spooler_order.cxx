@@ -4284,10 +4284,17 @@ void Order::db_insert_order_step_history_record( Transaction* ta )
         assert( _task );
 
 
-        Record record = ta->read_single_record( S() << "select max(`step`)  from " << _spooler->_order_step_history_tablename 
-                                                    << "  where `history_id`=" << _history_id,
-                                               Z_FUNCTION );
-        _step_number = record.null( 0 )? 1 : record.as_int( 0 ) + 1;
+        try
+        {
+            Record record = ta->read_single_record( S() << "select max(`step`)  from " << _spooler->_order_step_history_tablename 
+                                                        << "  where `history_id`=" << _history_id,
+                                                   Z_FUNCTION );
+            _step_number = record.null( 0 )? 1 : record.as_int( 0 ) + 1;
+        }
+        catch( sos::Null_error& )     // Die Hostware macht das Feld im Record nicht nullable
+        {
+            _step_number = 1;
+        }
 
         sql::Insert_stmt insert ( ta->database_descriptor(), _spooler->_order_step_history_tablename );
         

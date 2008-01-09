@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+
+            <job name="javascript">
+                <script language="javascript"><![CDATA[
+
+function spooler_process()
+{
+    spooler_log.info( "JAVASCRIPT" );
+    
+    var date = new java.util.Date();
+    spooler_log.info( "date=" + date.toString() );
+    
+    return false;
+}
+                
+                ]]></script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>
