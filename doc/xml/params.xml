@@ -13,6 +13,7 @@
     <xml_parent_elements>
         <xml_parent_element name="job" />
         <xml_parent_element name="add_order" />
+        <xml_parent_element name="config" />
         <xml_parent_element name="modify_order" />
         <xml_parent_element name="payload"/>
         <xml_parent_element name="queued_task" directory="xml/answer/"/>

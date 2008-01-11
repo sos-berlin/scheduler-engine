@@ -167,6 +167,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {
+            if( e.nodeName_is( "params" ) )
+            {
+                _variables->set_dom( e, &_spooler->_variable_set_map );
+            }
+            else
             if( e.nodeName_is( "security" ) )
             {
                 _security.set_dom( e );

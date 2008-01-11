@@ -28,6 +28,7 @@
                                 </xsd:complexType>
                             </xsd:element>
 
+                            <xsd:element ref="params"           minOccurs="0"/>
                             <xsd:element ref="security"         minOccurs="0"/>
                             <xsd:element ref="cluster"          minOccurs="0"/>
                             <xsd:element ref="process_classes"  minOccurs="0"/>

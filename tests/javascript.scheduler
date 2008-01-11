@@ -9,14 +9,45 @@
         <jobs>
 
             <job name="javascript">
-                <script language="javascript"><![CDATA[
+                <script language="javascript">
+    <![CDATA[
+
+function fehler()
+{
+    FEHLER();
+}
+
+function fib() 
+{
+    var i = 0, j = 1;
+    
+    while(1)
+    {
+        yield i;
+        var t = i;
+        i = j;
+        j += t;
+    }
+}
 
 function spooler_process()
 {
     spooler_log.info( "JAVASCRIPT" );
     
+
+    var state = new XML( spooler.execute_xml( "<show_state/>" ) );
+    spooler_log.info( "Scheduler version " + state.spooler.answer.state.@version );
+    
+
+    // Java Liveconnect
     var date = new java.util.Date();
     spooler_log.info( "date=" + date.toString() );
+    
+    var g = fib();
+    for( var i = 0; i < 5; i++ )  spooler_log.info( "fib " + i + " = " + g.next() );
+
+
+    fehler();
     
     return false;
 }

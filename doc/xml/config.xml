@@ -280,6 +280,12 @@
             </description>
         </xml_child_element>
 
+        <xml_child_element name="params" title="Scheduler-weite Parameter">
+            <description>
+                Die eingestellten Parameter können mit <scheduler_method class="Spooler" property="variables"/> abgerufen werden.
+            </description>
+        </xml_child_element>
+
         <xml_child_element name="security" title="Stellt den Zugriffsschutz ein">
         </xml_child_element>
 

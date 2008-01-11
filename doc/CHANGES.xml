@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-01-11" version="2.0.195" subversion_revision="5495">
+        <revision jira="JS-212" type="new" title="Element &lt;params> unter &lt;config>">
+            <description>
+                <p>
+                    Mit <scheduler_element name="params"/> unter <scheduler_element name="config"/>
+                    lassen sich Scheduler-weite Parameter setzen, die mit
+                    <scheduler_method class="Spooler" property="variables"/> abgerufen werden können.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
     <change date="2008-01-05" version="2.0.194" subversion_revision="5488">
         <revision jira="JS-150" type="new" title="Neue Datenbanktabelle scheduler_order_step_history">
             <description>

@@ -37,6 +37,7 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
+    "<xsd:element ref=\"params\"           minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"security\"         minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"cluster\"          minOccurs=\"0\"/>\n"
     "<xsd:element ref=\"process_classes\"  minOccurs=\"0\"/>\n"
@@ -1860,7 +1861,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1199273340 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1199980364 },
     { NULL, NULL, 0 }
 };
 

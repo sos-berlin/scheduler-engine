@@ -744,6 +744,11 @@
         Die Scheduler-weiten Variablen als <code>Variable_set</code>
     </title>
 
+    <description>
+        <p>
+            Die Variablen können in der Konfigurationsdatei eingestellt werden mit <scheduler_element name="config" child="params"/>.
+        </p>
+    </description>
     <!-- var ist nicht für Javsascript implementiert! description>
         Siehe <scheduler_method class="Spooler" method="var"/>
     </description-->
