@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-01-11" version="2.0.195" subversion_revision="5495">
+    <change date="2008-01-11" version="2.0.195" subversion_revision="5499">
         <revision jira="JS-212" type="new" title="Element &lt;params> unter &lt;config>">
             <description>
                 <p>

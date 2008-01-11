@@ -31,7 +31,6 @@
 <pre>&lt;?xml version="1.0"?>
 &lt;spooler>
     &lt;config>
-        &lt;process_classes/>
         &lt;jobs>
             &lt;job name="test_job">
                 &lt;script language="JavaScript">&lt;![CDATA[
@@ -102,6 +101,10 @@
             
         &lt;<scheduler_a href="xml/base.xml">base</scheduler_a> file="…"/>
 
+        &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+            &lt;<scheduler_a href="xml/param.xml">param</scheduler_a> name="…" value="…"/>
+        &lt;/params>
+        
         &lt;<scheduler_a href="xml/security.xml">security</scheduler_a>>
             &lt;<scheduler_a href="xml/allowed_host.xml">allowed_host</scheduler_a> name="…" level="…"/>
             …
