@@ -10,6 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
+        <revision type="new" title="Scheduler für AIX bereitgestellt">
+        </revision>
+    </change>
+
+    <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
+        <revision jira="JS-219" type="new" title="HTML-Seiten über virtuelles Verzeichnis eines HTTP-Proxys möglich">
+        </revision>
+    </change>
+
+    <change date="2008-01-13" version="2.0.196" subversion_revision="5515">
+        <revision jira="JS-220" type="new" title="Spidermonkey 1.7">
+            <description>
+                <p>
+                    Das Modul <code>libspidermonkey.so</code> bzw. <code>spidermonkey.dll</code>
+                    ist auf die Version 1.7.0 umgestellt.
+                    <a href="http://www.mozilla.org/js/spidermonkey/release-notes/JS_170.html">SpiderMonkey 1.7.0 Change Log</a>
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-01-11" version="2.0.195" subversion_revision="5499">
         <revision jira="JS-212" type="new" title="Element &lt;params> unter &lt;config>">
             <description>

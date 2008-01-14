@@ -739,7 +739,12 @@ void Operation::on_first_order_processing( Task* )
 
 void Operation::begin()
 {
-    Z_LOG2( "scheduler.http", "HTTP: " << _parser->text() );    // Wird auch mit "socket.data" protokolliert (default aus)
+    if( zschimmer::Log_ptr log = "scheduler.http" )    // Wird auch mit "socket.data" protokolliert (default aus)
+    {
+        string text = _parser->text();
+        log << "HTTP: " << text;    
+        if( !string_ends_with( text, "\n" ) )  log << '\n';
+    }
 
     _response = Z_NEW( Response( this ) );
 

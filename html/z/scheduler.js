@@ -138,7 +138,7 @@ Time_log.prototype.get_line = function Time_log__get_line()
 
 function Scheduler()
 {
-    this._url               = "http://" + document.location.host + "/";
+    this._url               = ( document.location.href + "" ).replace( /[/][^/]*$/, "/" );  // Dateiname abschneiden, nur das Verzeichnis nehmen
     this._xml_http          = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
     this._dependend_windows = new Object();
     this._time_log          = new Time_log;

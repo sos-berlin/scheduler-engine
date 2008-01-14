@@ -493,7 +493,7 @@ spooler_task.exit_code = 0;   // Reset the exit code</pre>
                     In der Konfigurationsdatei im Element <scheduler_element name="job"/> mit <scheduler_element name="params"/>,
                 </li>
                 <li>
-                    <scheduler_method class="Job" method="start"/> oder
+                    <scheduler_method class="Job" method="start"/> und
                 </li>
                 <li>
                     <scheduler_element name="start_job"/>.
