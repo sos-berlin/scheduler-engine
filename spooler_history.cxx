@@ -29,7 +29,7 @@ const char history_column_names[] =    "id"           ":numeric,"
                                        "error,"
                                        "error_code,"
                                        "error_text,"
-                                       "parameters"
+                                       "parameters,"
                                        "cluster_member_id,"
                                        "exit_code,"
                                        "pid";
