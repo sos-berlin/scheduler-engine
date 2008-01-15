@@ -168,7 +168,9 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
     {
         try
         {
-            File_path path ( include_path, subst_env( element.getAttribute( "file" ) ) );
+            File_path path = subst_env( element.getAttribute( "file" ) );
+            if( path.is_relative_path() )  path.prepend_directory( include_path );
+
             result = string_from_file( path );
         }
         catch( exception& x )  { z::throw_xc( "SCHEDULER-399", x ); }
