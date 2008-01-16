@@ -226,6 +226,8 @@ Supervisor::Supervisor( Scheduler* scheduler )
 
 void Supervisor::close()
 {
+    set_subsystem_state( subsys_stopped );
+
     if( _remote_configurations )
     {
         _remote_configurations->close();

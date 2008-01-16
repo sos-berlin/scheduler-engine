@@ -541,7 +541,7 @@ void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* x
                 
                 if( name != "" )
                 {
-                    if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
+                    //if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
                     {
                         File_path file_path       ( spooler()->folder_subsystem()->directory(), Absolute_path( path, filename ) );
                         Time      last_write_time ( file_info->last_write_time(), Time::is_utc );

@@ -11,8 +11,6 @@
             <job name="javascript">
                 <script language="javascript">
 
-                    <include file="tmp/1.js"/>                    
-                    
     <![CDATA[
 
 function fehler()
