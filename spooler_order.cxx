@@ -4242,7 +4242,9 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
             update.set_table_name( _spooler->_order_history_tablename );
             update.and_where_condition( "history_id", _history_id );
             
-            update[ "state" ] = state().as_string();
+            update[ "state"      ] = state().as_string();
+            update[ "state_text" ] = state_text();
+            update[ "title"      ] = title();
             update.set_datetime( "end_time"  , ( end_time()? end_time() : Time::now() ).as_string(Time::without_ms) );
 
             ta.execute( update, Z_FUNCTION );
