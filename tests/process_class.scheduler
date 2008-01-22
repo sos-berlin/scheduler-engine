@@ -9,7 +9,7 @@
         <process_classes>
             <process_class name="Istanbul"/>
             <process_class name="Tiflis"  max_processes="1"/>
-            <process_class name="Caracas" remote_scheduler="sos:4444"/>
+            <process_class name="Caracas" remote_scheduler="sos:6360"/>
         </process_classes>
         
         <script language="JavaScript">

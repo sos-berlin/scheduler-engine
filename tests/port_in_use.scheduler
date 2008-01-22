@@ -5,7 +5,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config port="4444">
+    <config port="6360">
         <base file="base.scheduler"/>
 
         <jobs>

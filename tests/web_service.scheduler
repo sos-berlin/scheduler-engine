@@ -4,7 +4,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config tcp_port="4444" mail_xslt_stylesheet="$SCHEDULER_TEST/mail.xsl">
+    <config tcp_port="6360" mail_xslt_stylesheet="$SCHEDULER_TEST/mail.xsl">
 
         <security ignore_unknown_hosts="yes">
             <allowed_host host="0.0.0.0" level="all"/>

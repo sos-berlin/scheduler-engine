@@ -6,7 +6,7 @@
 >
     <config 
         main_scheduler="lillerud.zschimmer:6310"
-        tcp_port="4444"
+        tcp_port="6360"
     >
 
         <security>

@@ -3,7 +3,7 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
-    <config tcp_port="4444" supervisor="sos:4444">
+    <config tcp_port="6360">
 
         <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
         <security>
@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos-linux" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="sos" max_processes="50"/>
         </process_classes>
 
         <script language="JavaScript">
@@ -43,7 +43,7 @@ function spooler_process()
             </job>
 
             
-            <job name="remote" tasks="50">
+            <job name="remote" tasks="50" process_class="remote">
                 <script language="JavaScript">
 
                     <![CDATA[
@@ -102,6 +102,15 @@ function spooler_process()
 
             </job>
 
+
+            <job name="remote_shell" process_class="remote">
+                <script language="shell">
+                    <![CDATA[
+echo Hallo!                
+                ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
             
         </jobs>
 

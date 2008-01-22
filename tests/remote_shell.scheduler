@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://zschimmer.com/sos/scheduler/xml/scheduler.xsd"
+>
+    <config tcp_port="6360">
+
+        <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes>
+            <process_class name="remote" remote_scheduler="sos" max_processes="50"/>
+        </process_classes>
+
+
+        <jobs>
+
+            <job name="remote_shell" process_class="remote">
+                <script language="shell">
+                    <![CDATA[
+echo Hallo!                
+sleep 15
+echo Fertig.
+                ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+            
+        </jobs>
+
+    </config>
+</spooler>
