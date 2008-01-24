@@ -36,12 +36,13 @@
  <!--file path="api/all_classes.xml"/-->
     <file path="api/api.xml"/>
     <file path="backupscheduler.xml"/>
+    <file path="central_configuration.xml"/>
     <file path="command_line.xml"/>
     <file path="configuration.xml"/>
-    <file path="dynamic_configuration.xml"/>
     <file path="datenbank.xml"/>
     <file path="directory_watch.xml"/>
     <file path="distributed_orders.xml"/>
+    <file path="dynamic_configuration.xml"/>
     <file path="email.xml"/>
     <file path="factory_ini.xml"/>
     <file path="factory_ini_java.xml"/>
