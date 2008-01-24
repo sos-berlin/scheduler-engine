@@ -47,6 +47,7 @@
     <file path="factory_ini.xml"/>
     <file path="factory_ini_java.xml"/>
     <file path="factory_ini_job.xml"/>
+    <file path="factory_ini_smtp.xml"/>
     <file path="factory_ini_spooler.xml"/>
     <file path="file_orders.xml"/>
     <file path="files.xml"/>
