@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 <!--$Id: central_configuration.xml 5348 2007-10-17 07:28:03Z ap $-->
@@ -12,7 +12,7 @@
 >
     <p>
       Bei der zentralen Administration von Konfigurationen für Objekte (Jobs, Jobketten, Aufträgen und Sperren)
-      melden sich sogenannte „Workload Scheduler“  an einem zentralen Scheduler, dem „Supervisor“ an und werden von 
+      melden sich sogenannte "Workload Scheduler" an einem zentralen Scheduler, dem "Supervisor" an und werden von 
       ihm mit den Konfigurationsdateien für Objekte versorgt. Zusätzlich 
       zu der vom Supervisor bereitgestellten Konfiguration werden die lokalen Konfigurationen aus 
       dem aktuellen Hot Folder der Workload Scheduler (config/live) sowie der Konfigurationsdatei scheduler.xml eingelesen.
