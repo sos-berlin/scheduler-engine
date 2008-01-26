@@ -123,14 +123,14 @@
    
     <h2>Verhalten des Schedulers beim Start</h2>
     
-    <b>Workload Scheduler</b>
+    <h3>Workload Scheduler</h3>
     <p>
        Der Scheduler baut die Verbindung zum Supervisor auf und bestellt die Konfiguration. Erst nach der Replikation beginnt er den Betrieb. 
        Wenn der Supervisor nicht erreichbar ist, verwendet der Scheduler die vorhandene.  Falls  die Replikation später möglich wird, 
        wird sie durchgeführt. Änderungen an der zentralen Konfiguration werden dann sofort wirksam.
      </p>
      
-     <b>Supervisor Scheduler</b>
+     <h3>Supervisor Scheduler</h3>
       <p>Wenn der Supervisor startet, repliziert er die Konfigurationen für die Workload Scheduler. </p>
 
 
