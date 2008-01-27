@@ -101,7 +101,6 @@ struct Module : Object
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
-    Kind                        real_kind                   () const                                { return _real_kind; }
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );
@@ -126,8 +125,7 @@ struct Module : Object
     string                     _process_class_string;
     Absolute_path              _process_class_path;
     bool                       _use_process_class;
-    Kind                       _kind;                       // == kind_remote || == _real_kind
-    Kind                       _real_kind;                  // Falls _kind == kind_remote
+    Kind                       _kind;
     bool                       _initialized;
 
 
@@ -254,9 +252,9 @@ struct Module_instance : Object
     virtual void                release__end                ();
 
     virtual void                check_connection_error      ()                                      {}
-    virtual int                 exit_code                   ()                                      { return _exit_code; }
+    int                         exit_code                   ()                                      { return _exit_code; }
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
-    virtual int                 termination_signal          ()                                      { return 0; }
+    int                         termination_signal          ()                                      { return _termination_signal; }
     virtual File_path           stdout_path                 ()                                      { return File_path(); }
     virtual File_path           stderr_path                 ()                                      { return File_path(); }
     virtual bool                try_delete_files            ( Has_log* )                            { return true; }
@@ -277,6 +275,7 @@ struct Module_instance : Object
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
     int                        _exit_code;
+    int                        _termination_signal;
     bool                       _initialized;
     bool                       _load_called;
 

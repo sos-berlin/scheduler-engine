@@ -363,6 +363,7 @@
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
     <register_entry register_file='api/Spooler.xml#use_element__config' register_title='Spooler'  register_keyword='config'/>
     <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
+    <register_entry register_file='central_configuration.xml#use_element__config' register_title='Zentrale Konfiguration durch einen Supervisor Scheduler'  register_keyword='config'/>
     <register_entry register_file='command_line.xml#use_element__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
     <register_entry register_file='directory_watch.xml#use_element__config' register_title='Verzeichnisüberwachung'  register_keyword='config'/>
     <register_entry register_file='dynamic_configuration.xml#use_element__config' register_title='Konfiguration aus Hot Folders'  register_keyword='config'/>

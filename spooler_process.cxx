@@ -370,6 +370,8 @@ void Process::remove_module_instance( Module_instance* )
 
 void Process::start()
 {
+    if( started() )  assert(0), throw_xc( Z_FUNCTION );
+
     if( _process_class )  _remote_scheduler = _process_class->remote_scheduler();
 
     if( is_remote_host() )
@@ -403,95 +405,45 @@ void Process::start()
 
 void Process::start_local_process()
 {
-    if( started() )  assert(0), throw_xc( Z_FUNCTION );
+    ptr<object_server::Connection_to_own_server_process> c = _spooler->_connection_manager->new_connection_to_own_server_process();
+    c->open_stdout_stderr_files();
 
 
-    //if( !_server_hostname.empty() )
-    //{
-    //    assert(0); // War ein experiment
-    //    //_connection = Z_NEW( object_server::Connection( _spooler->_connection_manager ) );
-    //    //_connection->connect( _server_hostname, _server_port );
-    //    //_connection->set_async();
-    //}
-    //else
-    {
-        ptr<object_server::Connection_to_own_server_process> c = _spooler->_connection_manager->new_connection_to_own_server_process();
-        c->open_stdout_stderr_files();
+    object_server::Parameters parameters;
+
+    if( !_spooler->_sos_ini.empty() )
+    parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
+
+    if( !_spooler->_factory_ini.empty() )
+    parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
+
+    parameters.push_back( object_server::Parameter( "param", "-O" ) );
+
+    if( !_job_name.empty() )
+    parameters.push_back( object_server::Parameter( "param", "-job=" + _job_name ) );
+
+    if( _task_id )
+    parameters.push_back( object_server::Parameter( "param", "-task-id=" + as_string(_task_id) ) );
+
+    if( !log_filename().empty() )
+    parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
+
+    parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
 
-        object_server::Parameters parameters;
+    fill_connection( c );
 
-        if( !_spooler->_sos_ini.empty() )
-        parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
+    #ifdef Z_HPUX
+        c->set_ld_preload( static_ld_preload );
+    #endif
 
-        if( !_spooler->_factory_ini.empty() )
-        parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
+    c->set_priority( _priority );
+    c->start_process( parameters );
 
-        parameters.push_back( object_server::Parameter( "param", "-O" ) );
+    _connection = +c;
 
-        if( !_job_name.empty() )
-        parameters.push_back( object_server::Parameter( "param", "-job=" + _job_name ) );
-
-        if( _task_id )
-        parameters.push_back( object_server::Parameter( "param", "-task-id=" + as_string(_task_id) ) );
-
-        if( !log_filename().empty() )
-        parameters.push_back( object_server::Parameter( "param", "-log=" + log_categories_as_string() + " >+" + log_filename() ) );
-
-        parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
-
-       
-        io::String_writer string_writer;
-        xml::Xml_writer   xml_writer   ( &string_writer );
-
-        xml_writer.set_encoding( scheduler_character_encoding );
-        xml_writer.write_prolog();
-
-        xml_writer.begin_element( "task_process" );
-        {
-            xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
-            xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
-            xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
-            xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
-            xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
-            xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
-            xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
-            xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
-            xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
-            xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
-            xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
-
-            if( _environment )  
-            {
-                xml::Document_ptr dom_document = _environment->dom( "environment", "variable" );
-                xml_writer.write_element( dom_document.documentElement() );
-            }
-        }
-
-        xml_writer.end_element( "task_process" );
-        xml_writer.flush();
-
-
-
-        c->set_stdin_data    ( string_writer.to_string() );
-        //c->attach_stdout_file( _stdout_file );
-        //c->attach_stderr_file( _stderr_file );
-        c->set_priority      ( _priority );
-        //if( _has_environment )  c->set_environment_string( _environment_string );
-        if( _controller_address )  c->set_controller_address( _controller_address );
-
-#       ifdef Z_HPUX
-            c->set_ld_preload( static_ld_preload );
-#       endif
-
-        c->start_process( parameters );
-
-
-        _connection = +c;
-
-        _process_handle_copy = _connection->process_handle();
-        _spooler->register_process_handle( _process_handle_copy );
-    }
+    _process_handle_copy = _connection->process_handle();
+    _spooler->register_process_handle( _process_handle_copy );
 
     _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
@@ -500,22 +452,23 @@ void Process::start_local_process()
 
 void Process::start_local_thread()
 {
-    if( started() )  assert(0), throw_xc( Z_FUNCTION );
-
-
     ptr<object_server::Connection_to_own_server_thread> c = _spooler->_connection_manager->new_connection_to_own_server_thread();
-    //c->open_stdout_stderr_files();
-
-
-    //object_server::Parameters parameters;
-
-    //if( !_spooler->_sos_ini.empty() )
-    //parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
-
-    //if( !_spooler->_factory_ini.empty() )
-    //parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
-
    
+    fill_connection( c );
+
+    ptr<Server_thread> thread = Z_NEW( Server_thread( c ) );
+    c->start_thread( thread );
+
+
+    _connection = +c;
+
+    _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+}
+
+//-------------------------------------------------------------------------Process::fill_connection
+
+void Process::fill_connection( object_server::Connection* connection )
+{
     xml::Xml_string_writer stdin_xml_writer;
 
     stdin_xml_writer.set_encoding( scheduler_character_encoding );
@@ -523,18 +476,21 @@ void Process::start_local_thread()
 
     stdin_xml_writer.begin_element( "task_process" );
     {
-        int DOPPELT;
-        stdin_xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
-        stdin_xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
-        stdin_xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
-        stdin_xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
-        stdin_xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
-        //stdin_xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
-        //stdin_xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
+        stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
+        stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->_config_java_options );
+        stdin_xml_writer.set_attribute_optional( "java_class_path"       , _spooler->java_subsystem()->java_vm()->class_path() );
+        stdin_xml_writer.set_attribute_optional( "javac"                 , _spooler->java_subsystem()->java_vm()->javac_filename() );
+        stdin_xml_writer.set_attribute_optional( "java_work_dir"         , _spooler->java_work_dir() );
         stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
         stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
         stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
         stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
+
+        if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( connection ) )
+        {
+            stdin_xml_writer.set_attribute     ( "stdout_path"    , c->stdout_path() );
+            stdin_xml_writer.set_attribute     ( "stderr_path"    , c->stderr_path() );
+        }
 
         if( _environment )  
         {
@@ -545,26 +501,10 @@ void Process::start_local_thread()
 
     stdin_xml_writer.end_element( "task_process" );
     stdin_xml_writer.flush();
-    c->set_stdin_data( stdin_xml_writer.to_string() );
 
+    connection->set_stdin_data( stdin_xml_writer.to_string() );
 
-    //c->set_priority      ( _priority );
-    if( _controller_address )  c->set_controller_address( _controller_address );
-
-    #ifdef Z_HPUX
-        c->set_ld_preload( static_ld_preload );
-    #endif
-
-
-    ptr<Server_thread> thread = Z_NEW( Server_thread( c ) );
-    c->start_thread( thread );
-
-
-    _connection = +c;
-
-    _process_handle_copy = _connection->process_handle();
-
-    _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+    if( _controller_address )  connection->set_controller_address( _controller_address );
 }
 
 //----------------------------------------------------------------------Process::async_remote_start
@@ -644,7 +584,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
             xml_writer.write_prolog();
             xml_writer.begin_element( "remote_scheduler.start_remote_task" );
             xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
-            if( _module_instance->_module->real_kind() == Module::kind_process )  xml_writer.set_attribute( "kind", "process" );
+            if( _module_instance->_module->kind() == Module::kind_process )  xml_writer.set_attribute( "kind", "process" );
             xml_writer.end_element( "remote_scheduler.start_remote_task" );
             xml_writer.close();
             _xml_client_connection->send( xml_writer.to_string() );
@@ -683,7 +623,6 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
                 Z_LOG2( "joacim", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 
-                int KEIN_STDOUT;
                 //_remote_stdout_file.open_temporary( File::open_unlink_later );
                 //_remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
                 //_remote_stdout_file.close();

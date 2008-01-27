@@ -99,7 +99,7 @@ const int                       tcp_restart_close_delay             = 3;        
                                                                                         // Client (Internet Explorer) bekommt so Gelegenheit, selbst die Verbindung zu schlieﬂen.
                                                                                         // Siehe auch Spooler_communication::close(): set_linger( true, 1 );
 
-const int                       const_order_id_length_max           = 255;              // Die Datenbankspalte _muss_ so groﬂ sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
+const int                       const_order_id_length_max           = 250;              // Die Datenbankspalte _muss_ so groﬂ sein, sonst bricht Scheduler mit SCHEDULER-303, SCHEDULER-265 ab!
 
 const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;

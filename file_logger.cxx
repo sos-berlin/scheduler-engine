@@ -61,7 +61,10 @@ void File_logger::close()
 
 void File_logger::start()
 {
-    set_async_delay( read_interval_min );
+    if( !_file_line_reader_list.empty() )
+    {
+        set_async_delay( read_interval_min );
+    }
 }
 
 //------------------------------------------------------------------------File_logger::start_thread

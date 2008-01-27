@@ -70,6 +70,12 @@
                         </td>
                     </tr>
                     <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_remote_process"/><code>state="running_remote_process"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft in auf einem entfernten Scheduler.
+                        </td>
+                    </tr>
+                    <tr>
                         <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running"/><code>state="running"</code></td>
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Die Task läuft.

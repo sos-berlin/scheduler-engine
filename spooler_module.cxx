@@ -379,8 +379,6 @@ void Module::init()
         }
     }
 
-    _real_kind = _kind;     int REAL_KIND_UND_KIND_IDENTIFIZIEREN;  // _real_kind kann weg
-
 
     if( _kind != kind_internal )
     {
@@ -396,7 +394,7 @@ void Module::init()
     }
 
 
-    switch( _real_kind )
+    switch( _kind )
     {
         case kind_internal:             if( _process_class_path != ""  )
                                             if( Process_class* process_class = process_class_or_null() )
@@ -439,8 +437,8 @@ ptr<Module_instance> Module::create_instance()
 
     if( !_monitors->is_empty() )
     {
-        if( _real_kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
-        if( _real_kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
+        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
+        if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
         if( !_use_process_class )  
         {
@@ -468,7 +466,7 @@ ptr<Module_instance> Module::create_instance_impl()
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( _real_kind != kind_process  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( _kind != kind_process  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }
@@ -565,7 +563,7 @@ Process_class* Module::process_class() const
 
 bool Module::needs_java() 
 {
-    bool result = _real_kind == Module::kind_java  &&  has_source_script();
+    bool result = _kind == Module::kind_java  &&  has_source_script();
 
     if( !result )  result = _monitors->needs_java();
 

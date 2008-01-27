@@ -784,7 +784,7 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                                "`job_chain`"                   " varchar(255)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`job_chain`"                   " varchar(250)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`id`"                          " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
                                 "`spooler_id`"                  " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`distributed_next_time`"       " datetime"         " null,"     // Auftrag ist verteilt ausführbar
@@ -836,7 +836,7 @@ void Database::create_tables_when_needed()
 
             created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
                                 "`history_id`"  " integer"      " not null,"             // Primärschlüssel
-                                "`job_chain`"   " varchar(255)" " not null,"
+                                "`job_chain`"   " varchar(250)" " not null,"
                                 "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
                                 "`spooler_id`"  " varchar(100)" " not null,"
                                 "`title`"       " varchar(200)"     " null,"

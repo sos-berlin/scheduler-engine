@@ -344,60 +344,52 @@ Variant Process_module_instance::step__end()
 
     Variant result;
 
-    //if( !process_has_signaled() )  _process_handle.wait( 0.0 );
-    //
-    //if( !process_has_signaled() )
-    //{
-    //    result = false;
-    //}
-    //else
+    _process_handle.wait();
+    assert( process_has_signaled() );
+    end__end();
+    close__end();
+
+
+    io::String_writer string_writer;
+    xml::Xml_writer   xml_writer   ( &string_writer );
+
+    xml_writer.set_encoding( scheduler_character_encoding );
+    xml_writer.write_prolog();
+
+    xml_writer.begin_element( "process.result" );
     {
-        _process_handle.wait();
-        assert( process_has_signaled() );
-        end__end();
-        close__end();
+        xml_writer.set_attribute( "exit_code", exit_code() );
+        if( int s = termination_signal() )  xml_writer.set_attribute( "signal", s );
 
+        //Wird über log()->log_file() ausgegeben;
+        //xml_writer.begin_element( "log_file" );
+        //    xml_writer->begin_element( "content" );
+        //    xml_writer->set_attribute( "encoding", "base64" );
 
-        io::String_writer string_writer;
-        xml::Xml_writer   xml_writer   ( &string_writer );
+        //        string content;
 
-        xml_writer.set_encoding( scheduler_character_encoding );
-        xml_writer.write_prolog();
+        //        try
+        //        {
+        //            content = string_from_file( _process_log_filename );
+        //        }
+        //        catch( exception &x ) { content = x.what(); }
 
-        xml_writer.begin_element( "process.result" );
-        {
-            xml_writer.set_attribute( "exit_code", exit_code() );
-            if( int s = termination_signal() )  xml_writer.set_attribute( "signal", s );
+        //        xml_writer->write( base64_encoded( content ) );
 
-            //xml_writer.begin_element( "log_file" );
-            //    xml_writer->begin_element( "content" );
-            //    xml_writer->set_attribute( "encoding", "base64" );
+        //    xml_writer->end_element( "content" );
+        //xml_writer.end_element( "log_file" );
 
-            //        string content;
+        ptr<Com_variable_set> order_parameters = new Com_variable_set();
+        fetch_parameters_from_process( order_parameters );
 
-            //        try
-            //        {
-            //            content = string_from_file( LOG_FILE );
-            //        }
-            //        catch( exception &x ) { content = x.what(); }
-
-            //        xml_writer->write( base64_encoded( content ) );
-
-            //    xml_writer->end_element( "content" );
-            //xml_writer.end_element( "log_file" );
-
-            ptr<Com_variable_set> order_parameters = new Com_variable_set();
-            fetch_parameters_from_process( order_parameters );
-
-            if( !order_parameters->is_empty() )
-                xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
-        }
-
-        xml_writer.end_element( "process.result" );
-        xml_writer.flush();
-
-        result = string_writer.to_string();
+        if( !order_parameters->is_empty() )
+            xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
     }
+
+    xml_writer.end_element( "process.result" );
+    xml_writer.flush();
+
+    result = string_writer.to_string();
 
     return result;
 }
@@ -695,6 +687,8 @@ void Process_module_instance::end__end()
         /* Siehe Module_task::do_close__end(), Meldung SCHEDULER-279
         if( _process_handle._process_signaled )
         {
+            _termination_signal = _process_handle._process_signaled; 
+
             try
             {
                 z::throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
@@ -733,14 +727,14 @@ void Process_module_instance::end__end()
 
 //------------------------------------------------------Process_module_instance::termination_signal
 
-int Process_module_instance::termination_signal()
-{ 
-#   ifdef Z_WINDOWS
-        return 0;
-#    else
-        return _process_handle._process_signaled; 
-#   endif
-}
+//int Process_module_instance::termination_signal()
+//{ 
+//#   ifdef Z_WINDOWS
+//        return 0;
+//#    else
+//        return _process_handle._process_signaled; 
+//#   endif
+//}
 
 //-------------------------------------------Process_module_instance::fetch_parameters_from_process
 

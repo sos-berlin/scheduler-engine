@@ -46,8 +46,6 @@ struct Process_module_instance : Module_instance
     bool                        callable                    ()                                      { return _idispatch != NULL; }
     bool                        kill                        ();
     bool                        process_has_signaled        ();
-    int                         exit_code                   ()                                      { return _exit_code; }
-    int                         termination_signal          ();
     void                        fetch_parameters_from_process( Com_variable_set* );
     File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }

@@ -1221,7 +1221,7 @@ bool Task::do_something()
 
                                 State next_state;
                                 if( !ok )  next_state = s_ending;
-                                else if( _module_instance->_module->real_kind() == Module::kind_process )
+                                else if( _module_instance->_module->kind() == Module::kind_process )
                                         next_state = _module_instance->kind() == Module::kind_remote? s_running_remote_process 
                                                                                                     : s_running_process;
                                      else 
@@ -1238,7 +1238,7 @@ bool Task::do_something()
 
 
                         case s_running_process:
-                            assert( _module_instance->_module->real_kind() == Module::kind_process );
+                            assert( _module_instance->_module->kind() == Module::kind_process );
                             
                             if( _module_instance->process_has_signaled() )
                             {
@@ -1258,7 +1258,7 @@ bool Task::do_something()
 
 
                         case s_running_remote_process:
-                            assert( _module_instance->_module->real_kind() == Module::kind_process &&
+                            assert( _module_instance->_module->kind() == Module::kind_process &&
                                     _module_instance->kind()      == Module::kind_remote     );
 
                             if( !_operation )
@@ -1497,7 +1497,7 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                if( _module_instance  && _module_instance->_module->real_kind() == Module::kind_process )
+                                if( _module_instance  && _module_instance->_module->kind() == Module::kind_process )
                                 {
                                     set_state_texts_from_stdout();
                                     
@@ -2373,16 +2373,15 @@ void Module_task::do_close__end()
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
-        //if( !_exit_code_set )  _exit_code = exit_code;
         if( exit_code )
         {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
-            if( _module_instance->_module->real_kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
+            if( _module_instance->_module->kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
                 set_error( x );
             else  
                 _log->warn( x.what() );
 
-            if( _module_instance->_module->real_kind() == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
+            if( _module_instance->_module->kind() == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
         if( int termination_signal = _module_instance->termination_signal() )
@@ -2391,7 +2390,7 @@ void Module_task::do_close__end()
 
             if( !_job->_ignore_every_signal 
              && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
-             && ( _module_instance->_module->real_kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
+             && ( _module_instance->_module->kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
             {
                 set_error( x );
             }
@@ -2408,7 +2407,7 @@ void Module_task::do_close__end()
                 }
             }
 
-            //if( _module_instance->_module->real_kind() == Module::kind_process )  
+            //if( _module_instance->_module->kind() == Module::kind_process )  
             _exit_code = -termination_signal;
         }
  

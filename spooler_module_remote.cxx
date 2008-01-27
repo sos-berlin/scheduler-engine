@@ -89,6 +89,12 @@ Async_operation* Remote_module_instance_proxy::close__start()
         _remote_instance = NULL;
     }
 
+    if( _process  &&  _module->kind() != Module::kind_process )
+    {
+        _exit_code          = _process->exit_code();
+        _termination_signal = _process->termination_signal();
+    }
+
     _idispatch = NULL;
 
     if( _process )  result = _process->close__start();
@@ -288,6 +294,8 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 Variant Remote_module_instance_proxy::step__end()
 {
+    Variant result;
+
     if( !_remote_instance )  z::throw_xc( "SCHEDULER-200", "step__end" );
 
   //if( _call_state != c_finished )  z::throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
@@ -295,7 +303,18 @@ Variant Remote_module_instance_proxy::step__end()
     if( !_operation->async_finished() )  z::throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
 
     _operation = NULL;
-    return _remote_instance->call__end();
+    result = _remote_instance->call__end();
+
+    if( _module->kind() == Module::kind_process )
+    {
+        xml::Document_ptr dom_document           ( string_from_variant( result ) );
+        xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
+
+        _exit_code          = process_result_element.int_getAttribute( "exit_code", 0 );
+        _termination_signal = process_result_element.int_getAttribute( "signal", 0 );
+    }
+
+    return result;
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::call__start

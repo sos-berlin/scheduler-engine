@@ -107,6 +107,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                        start                       ();
     void                        start_local_process         ();
     void                        start_local_thread          ();
+    void                        fill_connection             ( object_server::Connection* );
     void                        async_remote_start          ();
     bool                        is_started                  ();
     bool                        async_remote_start_continue ( Async_operation::Continue_flags );
