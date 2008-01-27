@@ -9,6 +9,7 @@
 
 #include "spooler.h"
 #include "spooler_module_remote_server.h"
+#include "file_logger.h"
 #include "../kram/sos_java.h"
 
 #ifdef Z_WINDOWS
@@ -25,6 +26,29 @@ using namespace spooler_com;
 //extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_instance_server, CLSID_Remote_module_instance_server, "Spooler.Remote_module_instance_server", "1.0" )
+
+
+//----------------------------------------------------------------------Stdout_stderr_reader_thread
+
+//struct Stdout_stderr_reader_thread : Thread
+//{
+//                                Stdout_stderr_reader        ( Com_remote_module_instance_server* s ) : _zero_(this+1), _com_server(s) {}
+//                               ~Stdout_stderr_reader        ()                                      {}
+//
+//    int                         thread_main                 ();
+//  private:
+//    File
+//    Com_remote_module_instance_server* _com_server;
+//    File                               _stdout_file;
+//    File                               _stderr_file;
+//};
+//
+////---------------------------------------------------------Stdout_stderr_reader_thread::thread_main
+//
+//int Stdout_stderr_reader_thread::thread_main()
+//{
+//
+//}
 
 //-------------------------------------Remote_module_instance_server::Remote_module_instance_server
 
@@ -81,7 +105,7 @@ HRESULT Com_remote_module_instance_server::Create_instance( zschimmer::com::obje
 {
     if( iid == IID_Iremote_module_instance_server )
     {
-        ptr<Iremote_module_instance_server> instance = new Com_remote_module_instance_server( class_object_ptr );
+        ptr<Iremote_module_instance_server> instance = new Com_remote_module_instance_server( session, class_object_ptr );
         *result = +instance;
         return S_OK;
     }
@@ -97,14 +121,13 @@ Com_remote_module_instance_server::Class_data::Class_data()
 
 //----------------------------------------Com_remote_module_instance_server::Class_data::initialize
 
-void Com_remote_module_instance_server::Class_data::initialize()
+void Com_remote_module_instance_server::Class_data::read_xml( const string& xml_text )
 {
-    string stdin_text = File( STDIN_FILENO ).read_all();
-    if( stdin_text != "" )
+    if( xml_text != "" )
     {
-        Z_LOG2( "joacim", Z_FUNCTION << " STDIN: " << stdin_text << "\n" );
+        Z_LOG2( "joacim", Z_FUNCTION << xml_text << "\n" );
         
-        _stdin_dom_document.load_xml( stdin_text );
+        _stdin_dom_document.load_xml( xml_text );
 
         _task_process_element = _stdin_dom_document.documentElement();
         if( !_task_process_element  ||  !_task_process_element.nodeName_is( "task_process" ) )  z::throw_xc( Z_FUNCTION, "<task_process> expected" );
@@ -135,9 +158,10 @@ void Com_remote_module_instance_server::Class_data::initialize()
 
 //-----------------------------Com_remote_module_instance_server::Com_remote_module_instance_server
 
-Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object>* class_object_ptr )
+Com_remote_module_instance_server::Com_remote_module_instance_server( com::object_server::Session* session, ptr<Object>* class_object_ptr )
 :
-    Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this )
+    Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this ),
+    _session(session)
 {
     if( *class_object_ptr )
     {
@@ -147,7 +171,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
     else
     {
         _class_data = Z_NEW( Class_data );
-        _class_data->initialize();
+        _class_data->read_xml( _session->connection()->server()->stdin_data() );
 
         *class_object_ptr = _class_data;
 
@@ -175,6 +199,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( ptr<Object
 
 Com_remote_module_instance_server::~Com_remote_module_instance_server()
 {
+    if( _file_logger )  _file_logger->close();
 }
 
 //------------------------------------------------Com_remote_module_instance_server::QueryInterface
@@ -279,6 +304,16 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "task_id"          )  task_id                           = as_int( value );
                 else
+                if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
+                else
+                if( key_word == "process.param_raw"     )  _server->_module->_process_param_raw     = value;
+                else
+                if( key_word == "process.log_filename"  )  _server->_module->_process_log_filename  = value;
+                else
+                if( key_word == "process.ignore_error"  )  _server->_module->_process_ignore_error  = as_bool( value );
+                else
+                if( key_word == "process.ignore_signal" )  _server->_module->_process_ignore_signal = as_bool( value );
+                else
                 if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
                 {
                     monitor = Z_NEW( Module_monitor );
@@ -358,6 +393,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             *result = VARIANT_TRUE;
         }
 
+
         /*
             stdout einsammeln, nur auf anderem Rechner (remote_scheduler):
             Thread starten
@@ -373,14 +409,16 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
 //-------------------------------------------------------Com_remote_module_instance_server::Add_obj
 
-STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR name )
+STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR name_bstr )
 {
     HRESULT hr = NOERROR;
 
     try
     {
-        if( !_server->_module_instance )  z::throw_xc( "SCHEDULER-203", "add_obj", string_from_bstr(name) );
-        _server->_module_instance->add_obj( object, string_from_bstr(name) );
+        string name = string_from_bstr( name_bstr );
+        
+        if( !_server->_module_instance )  z::throw_xc( "SCHEDULER-203", "add_obj", name );
+        _server->_module_instance->add_obj( object, name );
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::add_obj" ); }
 
@@ -457,13 +495,30 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         {
             VARIANT* o = &objects[i];
             if( o->vt != VT_DISPATCH )  return DISP_E_BADVARTYPE;
-            _server->_module_instance->_object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
+            IDispatch* object = V_DISPATCH( o );
+            
+            string name = string_from_variant( names[i] );
+            _server->_module_instance->_object_list.push_back( Module_instance::Object_list_entry( object, name ) );
+
+            if( name == "spooler_log" )  _log = dynamic_cast<Com_log_proxy*>( object ),  assert( _log );
         }
+
 
         _server->_module_instance->begin__start() -> async_finish();
 
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server->_module_instance->begin__end();
+
+
+        if( _log )
+        {
+            assert( !_file_logger );
+
+            _file_logger = Z_NEW( File_logger( _log ) );
+            _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );
+            _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
+            _file_logger->start_thread();
+        }
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 

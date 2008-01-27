@@ -18,7 +18,7 @@ namespace scheduler {
 
 
 typedef zschimmer::Thread::Id   Thread_id;                  // _beginthreadex()
-typedef DWORD                   Process_id;
+//typedef DWORD                   Process_id;
 
 namespace time
 {
@@ -68,6 +68,10 @@ struct Modified_event_handler
     virtual void                on_before_modify_run_time()                                      {}
     virtual void                run_time_modified_event     () = 0;
 };
+
+//-------------------------------------------------------------------------------------------------
+
+typedef int64                   Process_id;   // Für Process
 
 //-------------------------------------------------------------------------------------------------
 

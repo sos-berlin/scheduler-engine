@@ -7,44 +7,6 @@
 namespace sos {
 namespace scheduler {
 
-//------------------------------------------------------------------------------------Stdout_reader
-
-struct Stdout_reader : Async_operation
-{
-    struct File_line_reader
-    {
-                                File_line_reader            ()                                      : _zero_(this+1) {}
-
-        string                  read_lines                  ();
-        string                  read_remainder              ();
-
-        Fill_zero              _zero_;
-        File                   _file;
-        size_t                 _read_length;
-    };
-
-                                Stdout_reader               ( Scheduler* scheduler )                : _zero_(this+1), _spooler(scheduler) {}
-
-    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
-    void                        open_stdout                 ( const File_path& );
-    void                        open_stderr                 ( const File_path& );
-    bool                        log_lines                   ( const string& lines );
-    void                        start                       ();
-    bool                        finish                      ();
-
-    // Async_operation:
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    bool                        async_finished_             () const                                { return false; }
-
-    
-    Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Prefix_log*                _log;
-    File_line_reader           _stdout_line_reader;
-    File_line_reader           _stderr_line_reader;
-};
-
 //--------------------------------------------------------------------------------------Start_cause
 
 enum Start_cause
@@ -83,6 +45,7 @@ struct Task : Object,
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
+        s_running_remote_process,   // Prozess, der über remote Scheduler läuft (über Remote_module_instance_proxy)
 
         s_suspended,            // Angehalten
                                 // Ab hier gilt Task::ending() == true
@@ -229,6 +192,7 @@ struct Task : Object,
   //void                        end__end                    ();
   //void                        step__start                 ();
     bool                        step__end                   ();
+    string                      remote_process_step__end    ();
     bool                        operation__end              ();
 
     void                        set_mail_defaults           ();
@@ -371,7 +335,7 @@ struct Task : Object,
     ptr<Web_service>           _web_service;
     ptr<lock::Holder>          _lock_holder;
 
-    Stdout_reader              _stdout_reader;              // Liest auch stderr
+    ptr<File_logger>          _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
 };
 
 //----------------------------------------------------------------------------------------Task_list

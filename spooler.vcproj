@@ -369,6 +369,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\file_logger.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\folder.cxx"
 				>
 			</File>
@@ -1099,6 +1103,10 @@
 			>
 			<File
 				RelativePath=".\cluster.h"
+				>
+			</File>
+			<File
+				RelativePath=".\file_logger.h"
 				>
 			</File>
 			<File

@@ -255,7 +255,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-397", "A distributed order does not support $1" },
     { "SCHEDULER-398", "After last error, next_start_function='$1' will no longer be executed for this <run_time>" },
     { "SCHEDULER-399", "Error in <include>: $1" },
-    { "SCHEDULER-400", "Only API jobs are allowed with <process_class remote_scheduler=\"...\"/>" },
     { "SCHEDULER-401", "Unknown '$1'" },
     { "SCHEDULER-403", "There is no valid state for job chain node state='$1', action='next_state' (circular next_state)" },
     { "SCHEDULER-404", "action='$1' is not possible on a distributed job chain" },

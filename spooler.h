@@ -120,6 +120,7 @@ using namespace ::zschimmer::file;
 
 struct Communication;
 struct Event;
+struct File_logger;
 struct Get_events_command_response;
 struct Job;
 struct Job_folder;
@@ -432,6 +433,7 @@ struct Spooler : Object,
     void                        assert_are_orders_distributed( const string& message_text );
     string                      cluster_member_id           ();
 
+    Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }
 
     void                        wait                        ();
     void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
@@ -688,6 +690,14 @@ struct Spooler : Object,
     int                        _is_in_check_is_active;
     bool                       _has_windows_console;
     bool                       _check_memory_leak;
+    Process_id                 _next_process_id;
+};
+
+//------------------------------------------------------------------------------------Object_server 
+
+struct Object_server : com::object_server::Server
+{
+                                Object_server               ();
 };
 
 //-------------------------------------------------------------------------------------------------

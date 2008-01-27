@@ -53,30 +53,30 @@ void Communication::Operation_connection::close()
 
 void Communication::Operation_connection::register_task_process( Process* process )
 {
-    assert( process->pid() );
-    _task_process_register[ process->pid() ] = process;
+    assert( process->process_id() );
+    _task_process_register[ process->process_id() ] = process;
 }
 
 //-------------------------------------Communication::Operation_connection::unregister_task_process
 
-void Communication::Operation_connection::unregister_task_process( pid_t pid )
+void Communication::Operation_connection::unregister_task_process( Process_id process_id )
 {
-    assert( pid );
+    assert( process_id );
 
-    Process* process = get_task_process( pid );
+    Process* process = get_task_process( process_id );
     process->close_async();
 
-    _task_process_register.erase( pid );
+    _task_process_register.erase( process_id );
 }
 
 //--------------------------------------------Communication::Operation_connection::get_task_process
 
-Process* Communication::Operation_connection::get_task_process( pid_t pid )
+Process* Communication::Operation_connection::get_task_process( Process_id process_id )
 {
-    assert( pid );
+    assert( process_id );
 
-    Task_process_register::iterator it = _task_process_register.find( pid );
-    if( it == _task_process_register.end() )  z::throw_xc( Z_FUNCTION, "unknown pid", pid );
+    Task_process_register::iterator it = _task_process_register.find( process_id );
+    if( it == _task_process_register.end() )  z::throw_xc( Z_FUNCTION, "unknown process id", process_id );
 
     return it->second;
 }

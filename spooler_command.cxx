@@ -68,7 +68,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
     enum State { s_initial, s_waiting, s_finished };
 
     Fill_zero                  _zero_;
-    pid_t                      _pid;    
+    Process_id                 _process_id;
     ptr<Process>               _process;
     ptr<Communication::Connection>  _connection;
     ptr<Async_operation>       _operation;
@@ -104,7 +104,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
     {
         case s_initial:
         {
-            _pid = _process->pid();
+            _process_id = _process->process_id();
             _operation = _process->close__start();
             _operation->set_async_parent( this );       // Weckt uns, wenn _operation fertig ist
             _state = s_waiting;
@@ -123,8 +123,9 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                 begin_standard_response();
 
                 _xml_writer.begin_element( "ok" );
-                write_file( "stdout", _process->stdout_path() );
-                write_file( "stderr", _process->stderr_path() );
+                int KEIN_STDOUT;
+                //write_file( "stdout", _process->stdout_path() );
+                //write_file( "stderr", _process->stderr_path() );
                 _xml_writer.end_element( "ok" );
 
                 _xml_writer.flush();
@@ -135,7 +136,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                 _state = s_finished;
 
 
-                if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _pid );
+                if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _process_id );
 
                 _process    = NULL;
                 _connection = NULL;
@@ -650,12 +651,14 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    int tcp_port = start_task_element.int_getAttribute( "tcp_port" );
+    int  tcp_port = start_task_element. int_getAttribute( "tcp_port" );
+    string kind   = start_task_element.     getAttribute( "kind" );
 
 
     ptr<Process> process = Z_NEW( Process( _spooler ) );
 
     process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
+    process->set_run_in_thread( kind == "process" );
     process->start();
 
 
@@ -664,7 +667,8 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     if( _log )  _log->info( message_string( "SCHEDULER-848", process->pid() ) );
 
     xml::Element_ptr result = _answer.createElement( "process" ); 
-    result.setAttribute( "pid", process->pid() );
+    result.setAttribute( "process_id", process->process_id() );
+    if( process->pid() )  result.setAttribute( "pid", process->pid() );
     return result;
 }
 
@@ -675,7 +679,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    int  pid  = close_element. int_getAttribute( "pid" );
+    int  pid  = close_element. int_getAttribute( "process_id" );
     bool kill = close_element.bool_getAttribute( "kill", false );
 
     Process* process = _communication_operation->_operation_connection->get_task_process( pid );

@@ -238,12 +238,35 @@ string Process::Async_remote_operation::async_state_text_() const
     return result;
 }
 
+//---------------------------------------------------------------------Server_thread::Server_thread
+
+Process::Server_thread::Server_thread( object_server::Connection_to_own_server_thread* c ) 
+: 
+    Base_class(c) 
+{
+    set_thread_name( "Process::Server_thread" );
+}
+
+//--------------------------------------------------------------Process::Server_thread::thread_main
+
+int Process::Server_thread::thread_main()
+{
+    Com_initialize com_initialize;
+
+    ptr<Object_server> server = Z_NEW( Object_server() );
+    server->set_stdin_data( _connection->stdin_data() );
+    _server = +server;
+
+    return run_server();
+}
+
 //---------------------------------------------------------------------------------Process::Process
 
 Process::Process( Spooler* sp )
 : 
     Scheduler_object( sp, this, type_process ), 
-    _zero_(this+1)
+    _zero_(this+1),
+    _process_id( _spooler->get_next_process_id() )
 {
 }
 
@@ -355,12 +378,17 @@ void Process::start()
         async_remote_start();
     }
     else
+    if( _run_in_thread )
     {
-        start_local();
+        start_local_thread();
+    }
+    else
+    {
+        start_local_process();
     }
 
 #   ifdef Z_WINDOWS
-        _connection->set_event( &_spooler->_event );
+        if( _spooler )  _connection->set_event( &_spooler->_event );
 #   endif
 
     _log->set_prefix( obj_name() );
@@ -371,9 +399,9 @@ void Process::start()
     _running_since = Time::now();
 }
 
-//-----------------------------------------------------------------------------Process::start_local
-    
-void Process::start_local()
+//---------------------------------------------------------------------Process::start_local_process
+
+void Process::start_local_process()
 {
     if( started() )  assert(0), throw_xc( Z_FUNCTION );
 
@@ -468,13 +496,83 @@ void Process::start_local()
     _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
 
+//----------------------------------------------------------------------Process::start_local_thread
+
+void Process::start_local_thread()
+{
+    if( started() )  assert(0), throw_xc( Z_FUNCTION );
+
+
+    ptr<object_server::Connection_to_own_server_thread> c = _spooler->_connection_manager->new_connection_to_own_server_thread();
+    //c->open_stdout_stderr_files();
+
+
+    //object_server::Parameters parameters;
+
+    //if( !_spooler->_sos_ini.empty() )
+    //parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
+
+    //if( !_spooler->_factory_ini.empty() )
+    //parameters.push_back( object_server::Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
+
+   
+    xml::Xml_string_writer stdin_xml_writer;
+
+    stdin_xml_writer.set_encoding( scheduler_character_encoding );
+    stdin_xml_writer.write_prolog();
+
+    stdin_xml_writer.begin_element( "task_process" );
+    {
+        int DOPPELT;
+        stdin_xml_writer.set_attribute_optional( "include_path"   , _spooler->include_path() );
+        stdin_xml_writer.set_attribute_optional( "java_options"   , _spooler->_config_java_options );
+        stdin_xml_writer.set_attribute_optional( "java_class_path", _spooler->java_subsystem()->java_vm()->class_path() );
+        stdin_xml_writer.set_attribute_optional( "javac"          , _spooler->java_subsystem()->java_vm()->javac_filename() );
+        stdin_xml_writer.set_attribute_optional( "java_work_dir"  , _spooler->java_work_dir() );
+        //stdin_xml_writer.set_attribute         ( "stdout_path"    , c->stdout_path() );
+        //stdin_xml_writer.set_attribute         ( "stderr_path"    , c->stderr_path() );
+        stdin_xml_writer.set_attribute_optional( "scheduler.directory"   , _spooler->directory() );      // Für Com_spooler_proxy::get_Directory
+        stdin_xml_writer.set_attribute_optional( "scheduler.log_dir"     , _spooler->_log_directory );   // Für Com_spooler_proxy::get_Log_dir
+        stdin_xml_writer.set_attribute_optional( "scheduler.include_path", _spooler->_include_path );    // Für Com_spooler_proxy::get_Include_path
+        stdin_xml_writer.set_attribute_optional( "scheduler.ini_path"    , _spooler->_factory_ini );     // Für Com_spooler_proxy::get_Ini_path
+
+        if( _environment )  
+        {
+            xml::Document_ptr dom_document = _environment->dom( "environment", "variable" );
+            stdin_xml_writer.write_element( dom_document.documentElement() );
+        }
+    }
+
+    stdin_xml_writer.end_element( "task_process" );
+    stdin_xml_writer.flush();
+    c->set_stdin_data( stdin_xml_writer.to_string() );
+
+
+    //c->set_priority      ( _priority );
+    if( _controller_address )  c->set_controller_address( _controller_address );
+
+    #ifdef Z_HPUX
+        c->set_ld_preload( static_ld_preload );
+    #endif
+
+
+    ptr<Server_thread> thread = Z_NEW( Server_thread( c ) );
+    c->start_thread( thread );
+
+
+    _connection = +c;
+
+    _process_handle_copy = _connection->process_handle();
+
+    _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+}
+
 //----------------------------------------------------------------------Process::async_remote_start
 
 void Process::async_remote_start()
 {
     ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
 
-  //c->set_stdin_data( _task_process_xml );
     assert( _process_class );
     c->set_remote_host( _remote_scheduler._host );
     c->listen_on_tcp_port( INADDR_ANY );
@@ -541,10 +639,15 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
-            // Xml_writer benutzen
-            // password übergeben?
-            string xml_text = S() << "<remote_scheduler.start_remote_task tcp_port='" << _connection->tcp_port() << "'/>";
-            _xml_client_connection->send( xml_text );
+            xml::Xml_string_writer xml_writer;
+            xml_writer.set_encoding( scheduler_character_encoding );
+            xml_writer.write_prolog();
+            xml_writer.begin_element( "remote_scheduler.start_remote_task" );
+            xml_writer.set_attribute( "tcp_port", _connection->tcp_port() );
+            if( _module_instance->_module->real_kind() == Module::kind_process )  xml_writer.set_attribute( "kind", "process" );
+            xml_writer.end_element( "remote_scheduler.start_remote_task" );
+            xml_writer.close();
+            _xml_client_connection->send( xml_writer.to_string() );
 
             something_done = true;
             _async_remote_operation->_state = Async_remote_operation::s_starting;
@@ -559,7 +662,8 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
 
-            _remote_pid = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "pid" );
+            _remote_process_id = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "process_id", 0 );
+            _remote_pid        = dom_document.select_element_strict( "spooler/answer/process" ).int_getAttribute( "pid", 0 );
 
             _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
             something_done = true;
@@ -579,13 +683,14 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
                 Z_LOG2( "joacim", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 
-                _remote_stdout_file.open_temporary( File::open_unlink_later );
-                _remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
-                _remote_stdout_file.close();
+                int KEIN_STDOUT;
+                //_remote_stdout_file.open_temporary( File::open_unlink_later );
+                //_remote_stdout_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stdout' and @encoding='hex' ]" ).text() ) );
+                //_remote_stdout_file.close();
 
-                _remote_stderr_file.open_temporary( File::open_unlink_later );
-                _remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
-                _remote_stderr_file.close();
+                //_remote_stderr_file.open_temporary( File::open_unlink_later );
+                //_remote_stderr_file.print( string_from_hex( dom_document.select_element_strict( "//ok/file [ @name='stderr' and @encoding='hex' ]" ).text() ) );
+                //_remote_stderr_file.close();
 
                 something_done = true;
                 _async_remote_operation->_state = Async_remote_operation::s_closed;
@@ -631,7 +736,7 @@ void Process::Async_remote_operation::close_remote_task( bool kill )
             try
             {
                 S xml;
-                xml << "<remote_scheduler.remote_task.close pid='" << _process->_remote_pid << "'";
+                xml << "<remote_scheduler.remote_task.close process_id='" << _process->_remote_process_id << "'";
                 if( kill )  xml << " kill='yes'";
                 xml << "/>";
 
@@ -690,6 +795,27 @@ bool Process::kill()
     return result;
 }
 
+//-------------------------------------------------------------------------------------Process::pid
+
+int Process::pid() const
+{ 
+    int result = 0;
+
+    if( _module_instance  &&  _module_instance->kind() == Module::kind_process )
+    {
+        if( _connection )  assert( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) );
+        result = _module_instance->pid();
+    }
+    else
+    if( _connection )
+    {
+        //assert( _module_instance  &&  _module_instance->kind() == Module::kind_remote );
+        result = _connection->pid();
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------------------Process::is_terminated
 
 bool Process::is_terminated()
@@ -726,16 +852,36 @@ bool Process::is_remote_host() const
 
 File_path Process::stdout_path()
 {
-    object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection );
-    return c? c->stdout_path() : _remote_stdout_file.path();
+    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
+    {
+        return c->stdout_path();
+    }
+    else
+    if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
+    {
+        assert(!"Connection_to_own_server_thread");
+        return "";
+    }
+    else
+        return _remote_stdout_file.path();
 }
 
 //-----------------------------------------------------------------------------Process::stderr_path
 
 File_path Process::stderr_path()
 {
-    object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection );
-    return c? c->stderr_path() : _remote_stderr_file.path();
+    if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
+    {
+        return c->stderr_path();
+    }
+    else
+    if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
+    {
+        assert(!"Connection_to_own_server_thread");
+        return "";
+    }
+    else
+        return _remote_stderr_file.path();
 }
 
 //---------------------------------------------------------------------Process::delete_files__start

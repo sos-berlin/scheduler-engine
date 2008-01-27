@@ -41,7 +41,7 @@ void Process_module_instance::close_handle()
         if( _pid_to_unregister )
         {
             _spooler->unregister_process_handle( _pid_to_unregister );
-            _pid_to_unregister = 0;
+            if( _spooler )  _pid_to_unregister = 0;
         }
 #   endif
 
@@ -49,7 +49,7 @@ void Process_module_instance::close_handle()
     if( _process_handle )
     {
 #       ifdef Z_WINDOWS
-            _spooler->unregister_process_handle( _process_handle );
+            if( _spooler )  _spooler->unregister_process_handle( _process_handle );
 #       endif
 
         _process_handle.close();
@@ -96,7 +96,7 @@ void Process_module_instance::attach_task( Task* task, Prefix_log* log )
 
 bool Process_module_instance::load()
 {
-    if( _module->_process_class_path != ""  &&  _module->process_class()->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
+    //if( _module->_process_class_path != ""  &&  _module->process_class()->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
 
     bool ok = Module_instance::load();
     if( !ok )  return ok;
@@ -204,7 +204,14 @@ void Process_module_instance::close__end()
 
 bool Process_module_instance::begin__end()
 {
-    if( _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler  &&  _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+
+    if( !_load_called )
+    {
+        bool ok = implicit_load_and_start();
+        if( !ok )  return false;
+    }
+
 
     PROCESS_INFORMATION process_info;
     STARTUPINFO         startup_info;
@@ -285,10 +292,12 @@ bool Process_module_instance::begin__end()
     _pid = process_info.dwProcessId;
     _process_handle.set_handle( process_info.hProcess );
     _process_handle.set_name( "Process " + program_path() );
-  //_process_handle.add_to( &_thread->_wait_handles );
-    _process_handle.add_to( &_spooler->_wait_handles );
-
-    _spooler->register_process_handle( _process_handle );
+    
+    if( _spooler )  
+    {
+        _process_handle.add_to( &_spooler->_wait_handles );
+        _spooler->register_process_handle( _process_handle );
+    }
 
 #   ifdef Z_WINDOWS
         _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
@@ -330,7 +339,67 @@ bool Process_module_instance::process_has_signaled()
 
 Variant Process_module_instance::step__end()
 {
-    return !process_has_signaled();
+    Z_LOG2( "scheduler", Z_FUNCTION << "\n" );
+    assert( !_spooler );    // Soll nur über Com_remote_module_instance_server gerufen werden
+
+    Variant result;
+
+    //if( !process_has_signaled() )  _process_handle.wait( 0.0 );
+    //
+    //if( !process_has_signaled() )
+    //{
+    //    result = false;
+    //}
+    //else
+    {
+        _process_handle.wait();
+        assert( process_has_signaled() );
+        end__end();
+        close__end();
+
+
+        io::String_writer string_writer;
+        xml::Xml_writer   xml_writer   ( &string_writer );
+
+        xml_writer.set_encoding( scheduler_character_encoding );
+        xml_writer.write_prolog();
+
+        xml_writer.begin_element( "process.result" );
+        {
+            xml_writer.set_attribute( "exit_code", exit_code() );
+            if( int s = termination_signal() )  xml_writer.set_attribute( "signal", s );
+
+            //xml_writer.begin_element( "log_file" );
+            //    xml_writer->begin_element( "content" );
+            //    xml_writer->set_attribute( "encoding", "base64" );
+
+            //        string content;
+
+            //        try
+            //        {
+            //            content = string_from_file( LOG_FILE );
+            //        }
+            //        catch( exception &x ) { content = x.what(); }
+
+            //        xml_writer->write( base64_encoded( content ) );
+
+            //    xml_writer->end_element( "content" );
+            //xml_writer.end_element( "log_file" );
+
+            ptr<Com_variable_set> order_parameters = new Com_variable_set();
+            fetch_parameters_from_process( order_parameters );
+
+            if( !order_parameters->is_empty() )
+                xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
+        }
+
+        xml_writer.end_element( "process.result" );
+        xml_writer.flush();
+
+        result = string_writer.to_string();
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Process_event::close
@@ -436,7 +505,14 @@ bool Process_module_instance::Process_event::wait( double seconds )
 
 bool Process_module_instance::begin__end()
 {
-    if( _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+    if( _spooler  &&  _spooler->_process_count >= max_processes )  z::throw_xc( "SCHEDULER-210", max_processes );
+
+    if( !_load_called )
+    {
+        bool ok = implicit_load_and_start();
+        if( !ok )  return false;
+    }
+
 
     vector<string> string_args;
 
@@ -554,10 +630,13 @@ bool Process_module_instance::begin__end()
     //set_state( s_running_process );
 
     _process_handle.set_name( "Process " + program_path() );
-    _process_handle.add_to( &_spooler->_wait_handles );
 
-    _spooler->register_process_handle( _process_handle._pid );
-    _pid_to_unregister = _process_handle._pid;
+    if( _spooler )
+    {
+        _process_handle.add_to( &_spooler->_wait_handles );
+        _spooler->register_process_handle( _process_handle._pid );
+        _pid_to_unregister = _process_handle._pid;
+    }
 
     //_operation = &dummy_sync_operation;
 

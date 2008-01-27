@@ -1238,7 +1238,7 @@ library Spooler
         [id(13)]
         HRESULT                 Error                   ( [in] BSTR line );
 
-        [id(14)]
+        [id(14)]    // Siehe auch Konstante dispid_log_log
         HRESULT                 Log                     ( [in] enum Log_level, [in] BSTR line );
 
         [id(15),propget]

@@ -161,7 +161,7 @@ spooler.job( "process" ).start( params );
 
     <messages>
         <message level="info" code="SCHEDULER-987"/>
-        <message level="error" code="SCHEDULER-400"/>
+        <!--message level="error" code="SCHEDULER-400"/-->
     </messages>
 
     <behavior_with_xml_element element="base" allowed="no"/>

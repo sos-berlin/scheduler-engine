@@ -646,7 +646,8 @@ Spooler::Spooler()
     _waitable_timer( "waitable_timer" ),
     _validate_xml(true),
     _environment( variable_set_from_environment() ),
-    _holidays(this)
+    _holidays(this),
+    _next_process_id(1)
 {
     Z_DEBUG_ONLY( self_test() );
 
@@ -3355,6 +3356,17 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     return ret;
 }
 
+//---------------------------------------------------------------------Object_server::Object_server
+
+Object_server::Object_server()
+{
+    register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::Create_instance );
+    register_class(              CLSID_Com_log_proxy                , Com_log_proxy                    ::Create_instance );
+    register_class( spooler_com::CLSID_Task_proxy                   , Com_task_proxy                   ::Create_instance );
+    register_class( spooler_com::CLSID_Spooler_proxy                , Com_spooler_proxy                ::Create_instance );
+  //register_class( spooler_com::CLSID_Xslt_stylesheet              , Xslt_stylesheet                  ::Create_instance );
+}
+
 //------------------------------------------------------------------------------------object_server
 
 int object_server( int argc, char** argv )
@@ -3366,14 +3378,7 @@ int object_server( int argc, char** argv )
 #   endif
 
 //show_msg("object_server");
-    zschimmer::com::object_server::Server server;
-
-    server.register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::Create_instance );
-    server.register_class(              CLSID_Com_log_proxy                , Com_log_proxy                    ::Create_instance );
-    server.register_class( spooler_com::CLSID_Task_proxy                   , Com_task_proxy                   ::Create_instance );
-    server.register_class( spooler_com::CLSID_Spooler_proxy                , Com_spooler_proxy                ::Create_instance );
-  //server.register_class( spooler_com::CLSID_Xslt_stylesheet              , Xslt_stylesheet                  ::Create_instance );
-
+    Object_server server;
     return server.main( argc, argv );
 }
                    

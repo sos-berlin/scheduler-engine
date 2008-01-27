@@ -17,6 +17,7 @@ struct Process_class_subsystem;
 
 //------------------------------------------------------------------------------------------Process
 // Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
+// Kann auch ein Thread sein.
 
 struct Process : zschimmer::Object, Scheduler_object
 {
@@ -77,6 +78,16 @@ struct Process : zschimmer::Object, Scheduler_object
     };
 
 
+    struct Server_thread : object_server::Connection_to_own_server_thread::Server_thread
+    {
+        typedef object_server::Connection_to_own_server_thread::Server_thread Base_class;
+
+                                Server_thread               ( object_server::Connection_to_own_server_thread* );
+
+        int                     thread_main                 ();
+    };
+
+
 
                                 Process                     ( Spooler* );
     Z_GNU_ONLY(                 Process                     (); )
@@ -93,9 +104,9 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                        started                     ()                                      { return _connection != NULL; }
 
     void                    set_controller_address          ( const Host_and_port& h )              { _controller_address = h; }
-  //void                    set_stdin_data                  ( const string& data )                  { _stdin_data = data; }
     void                        start                       ();
-    void                        start_local                 ();
+    void                        start_local_process         ();
+    void                        start_local_thread          ();
     void                        async_remote_start          ();
     bool                        is_started                  ();
     bool                        async_remote_start_continue ( Async_operation::Continue_flags );
@@ -113,7 +124,10 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_priority                    ( const string& priority )              { _priority = priority; }
     void                    set_environment                 ( const Com_variable_set& env )         { _environment = new Com_variable_set( env ); }
   //void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
-    int                         pid                         () const                                { return _connection? _connection->pid() : 0; }
+    void                    set_run_in_thread               ( bool b )                              { _run_in_thread = b; }
+    Process_id                  process_id                  () const                                { return _process_id; }
+    int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
+    Process_id                  remote_process_id           () const                                { return _remote_process_id; }
     bool                     is_terminated                  ();
     void                        end_task                    ();
     bool                        kill                        ();
@@ -152,13 +166,16 @@ struct Process : zschimmer::Object, Scheduler_object
     Process_class*             _process_class;
     string                     _priority;
     ptr<Com_variable_set>      _environment;
+    bool                       _run_in_thread;
     Host_and_port              _remote_scheduler;
+    Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
     File                       _remote_stdout_file;
     File                       _remote_stderr_file;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
+    Process_id                 _process_id;
 };
 
 //----------------------------------------------------------------------Process_class_configuration

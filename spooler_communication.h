@@ -152,8 +152,8 @@ struct Communication
 
         void                    close                       ();
         void                    register_task_process       ( Process* );
-        void                    unregister_task_process     ( pid_t );
-        Process*                get_task_process            ( pid_t );
+        void                    unregister_task_process     ( Process_id process_id );
+        Process*                get_task_process            ( Process_id process_id );
 
 
 
@@ -161,7 +161,7 @@ struct Communication
         Spooler*               _spooler;
         Connection*            _connection;
 
-        typedef map< pid_t, ptr<Process> >  Task_process_register;
+        typedef map< Process_id, ptr<Process> >  Task_process_register;
         Task_process_register      _task_process_register;
     };
 

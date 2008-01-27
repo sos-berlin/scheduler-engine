@@ -22,8 +22,6 @@ struct Remote_module_instance_server : Com_module_instance_base
 
     Fill_zero                  _zero_;
     ptr<Module_instance>       _module_instance;
-    bool                       _loaded_and_started;
-    bool                       _load_error;
     Fill_end                   _end_;
 };
 
@@ -34,11 +32,11 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
 {
     struct Class_data : Object
     {
-                                        Class_data          ();
-        void                            initialize          ();
+                                Class_data                  ();
+        void                    read_xml                    ( const string& );
 
-        xml::Document_ptr              _stdin_dom_document;
-        xml::Element_ptr               _task_process_element;
+        xml::Document_ptr      _stdin_dom_document;
+        xml::Element_ptr       _task_process_element;
     };
 
 
@@ -56,7 +54,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     //};
 
 
-                                Com_remote_module_instance_server( ptr<Object>* );
+                                Com_remote_module_instance_server( com::object_server::Session*, ptr<Object>* );
                                ~Com_remote_module_instance_server();
 
     static HRESULT              Create_instance             ( zschimmer::com::object_server::Session*, ptr<Object>*, const IID&, ptr<IUnknown>* );
@@ -76,7 +74,10 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
 
 
     ptr<Remote_module_instance_server> _server;
+    com::object_server::Session*  _session;
     ptr<Class_data>               _class_data;
+    ptr<Com_log_proxy>            _log;
+    ptr<File_logger>              _file_logger;
     //ptr<Stdout_stderr_collector>  _stdout_stderr_collector;
     //ptr<Stdout_stderr_handler>    _stdout_handler;
     //ptr<Stdout_stderr_handler>    _stderr_handler;

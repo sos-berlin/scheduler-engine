@@ -318,8 +318,6 @@ void Module::set_dom( const xml::Element_ptr& element )
 
     bool separate_process_default = false;
 
-    _separate_process = element.bool_getAttribute( "separate_process", separate_process_default );
-
     string use_engine = element.getAttribute     ( "use_engine" );
     
     if( use_engine == ""
@@ -381,42 +379,39 @@ void Module::init()
         }
     }
 
-    _real_kind = _kind;
-
-    if( _real_kind == kind_java  &&  has_source_script()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+    _real_kind = _kind;     int REAL_KIND_UND_KIND_IDENTIFIZIEREN;  // _real_kind kann weg
 
 
-    if( _kind != kind_process  &&  _kind != kind_internal )
+    if( _kind != kind_internal )
     {
         if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
 
-        if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_path.clear();
-
-        if( _separate_process )
-        {
-            if( _process_class_path != "" )  z::throw_xc( "SCHEDULER-194" );
-        }
+        if( _dont_remote )  _use_process_class = false, _process_class_path.clear();
 
         //if( _use_process_class )  
         //{
         //    //if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
         //}
+        //if( _use_process_class )   _kind = kind_remote;     // Bei _kind==kind_process: Nur wirksam, wenn Prozessklasse auch remote_scheduler hat!
     }
-    else
-    if( _process_class_path != ""  )
-        if( Process_class* process_class = process_class_or_null() )
-            if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-400" );
-
-    if( _kind != kind_internal )  if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
-
-    if( _kind == kind_java  &&  _spooler )  _spooler->_has_java = true;
 
 
-    switch( _kind )
+    switch( _real_kind )
     {
-        case kind_internal:             break;
+        case kind_internal:             if( _process_class_path != ""  )
+                                            if( Process_class* process_class = process_class_or_null() )
+                                                if( process_class->remote_scheduler() )  z::throw_xc( "SCHEDULER-REMOTE-INTERNAL?" );
+                                        break;
+
         case kind_remote:               break;
-        case kind_java:                 break;
+
+        case kind_java:                 if( _spooler )
+                                        {
+                                            if( has_source_script() )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+                                            if( !_use_process_class )  _spooler->_has_java = true;              // Java laden    
+                                        }
+
+                                        break;
         
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
@@ -444,10 +439,10 @@ ptr<Module_instance> Module::create_instance()
 
     if( !_monitors->is_empty() )
     {
-        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
-        if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
+        if( _real_kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
+        if( _real_kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
-        if( _kind != kind_remote )  
+        if( !_use_process_class )  
         {
             vector<Module_monitor*> ordered_monitors = _monitors->ordered_monitors();
 
@@ -470,7 +465,15 @@ ptr<Module_instance> Module::create_instance_impl()
     ptr<Module_instance> result;
 
 
-    switch( _kind )
+    Kind kind = _kind;
+    
+    if( _use_process_class  &&
+        ( _real_kind != kind_process  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+    {
+        kind = kind_remote;                 
+    }
+
+    switch( kind )
     {
         case kind_java:              
         {
@@ -530,6 +533,8 @@ ptr<Module_instance> Module::create_instance_impl()
             z::throw_xc( "SCHEDULER-173" );
     }
 
+    result->_kind = kind;
+
     return result;
 }
 
@@ -537,15 +542,21 @@ ptr<Module_instance> Module::create_instance_impl()
 
 Process_class* Module::process_class_or_null() const
 { 
-    return _use_process_class? _spooler->process_class_subsystem()->process_class_or_null( _process_class_path ) 
-                             : NULL;
+    Process_class* result = NULL;
+
+    if( _use_process_class )
+    {
+        result = _spooler->process_class_subsystem()->process_class_or_null( _process_class_path );
+    }
+
+    return result;
 }
 
 //----------------------------------------------------------------------------Module::process_class
 
 Process_class* Module::process_class() const
 { 
-    if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
+    //kind_process darf das (für remote_scheduler)  if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
 
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }

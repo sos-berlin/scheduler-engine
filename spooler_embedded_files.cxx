@@ -388,7 +388,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"title\"                 type=\"String\"/>\n"
     "<xsd:attribute name=\"log_append\"            type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"order\"                 type=\"Yes_no\"/>\n"
-    "<xsd:attribute name=\"separate_process\"      type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"separate_process\"      type=\"Yes_no\"/>                     <!-- Veraltet, wird ignoriert -->\n"
     "<xsd:attribute name=\"tasks\"                 type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"min_tasks\"             type=\"xsd:positiveInteger\"/>\n"
     "<xsd:attribute name=\"timeout\"               type=\"Duration\"/>                   <!-- F\xc3" "\xbc" "r ap, 1.4.06 timeout=\"0\" soll erlaubt sein (kein Aprilscherz) -->\n"
@@ -1170,14 +1170,21 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"remote_scheduler.start_remote_task\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"tcp_port\"          type=\"xsd:nonNegativeInteger\"   use=\"required\"/>\n"
+    "<xsd:attribute name=\"kind\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\n"
+    "<xsd:enumeration value=\"process\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
     "\n"
     "<xsd:element name=\"remote_scheduler.remote_task.close\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"pid\"               type=\"xsd:integer\"   use=\"required\"/>\n"
-    "<xsd:attribute name=\"kill\"              type=\"Yes_no\"                      />\n"
+    "<xsd:attribute name=\"process_id\"        type=\"xsd:long\"   use=\"required\"/>\n"
+    "<xsd:attribute name=\"kill\"              type=\"Yes_no\"                   />\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1861,7 +1868,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1200041531 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1201172660 },
     { NULL, NULL, 0 }
 };
 

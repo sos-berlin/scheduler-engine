@@ -391,8 +391,7 @@ bool Remote_module_instance_proxy::try_to_get_process()
 {
     if( !_process )
     {
-        if( _module->_separate_process 
-         || _module->_process_class_path.empty()  
+        if( _module->_process_class_path.empty()  
             &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
         {
             // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
@@ -493,7 +492,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 9 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 14 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -509,6 +508,14 @@ AGAIN:
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
+
+                params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
+                params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;
+                params_array[ nr++ ] = "process.log_filename="  + _module->_process_log_filename;
+                params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
+                params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
+
+                int PROCESS_ENVIRONMENT_FEHLT; //_module->_process_environment
 
                 Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
                 {
@@ -655,7 +662,6 @@ string Remote_module_instance_proxy::process_name() const
 
 bool Remote_module_instance_proxy::Operation::async_finished_() const
 { 
-
     if( _call_state == c_begin  &&  !_proxy->_process ) 
     {
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,

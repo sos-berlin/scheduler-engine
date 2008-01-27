@@ -11,6 +11,7 @@
 
 
 #include "spooler.h"
+#include "file_logger.h"
 #include "../kram/sleep.h"
 #include "../zschimmer/z_signals.h"
 
@@ -31,9 +32,6 @@ static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
-const int                       max_stdout_line_length          = 1000;
-const double                    stdout_read_interval_min        =  1.0;
-const double                    stdout_read_interval_max        = 10.0;
 const double                    delete_temporary_files_delay    = 2;                                
 const double                    delete_temporary_files_retry    = 0.1;                              
 
@@ -205,12 +203,11 @@ Task::Task( Job* job )
     _job(job),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
-    _lock("Task"),
-    _stdout_reader(job->_spooler)
+    _lock("Task")
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
-    _stdout_reader.set_log( _log );
+    _file_logger = Z_NEW( File_logger( _log ) );
 
     _let_run = _job->_period.let_run();
 
@@ -238,13 +235,13 @@ Task::Task( Job* job )
 
 Task::~Task()
 {
+    if( _file_logger )  _file_logger->set_async_manager( NULL );
+
     try
     {
         close();
     }
     catch( const exception& x ) { _log->warn( x.what() ); }
-
-    _stdout_reader.set_async_manager( NULL );
 
     _log->close();
 }
@@ -264,7 +261,8 @@ void Task::close()
 {
     if( !_closed )
     {
-        _stdout_reader.set_async_manager( NULL );
+        _file_logger->set_async_manager( NULL );
+        _file_logger->close();
 
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
 
@@ -776,6 +774,7 @@ string Task::state_name( State state )
         case s_running_delayed:             return "running_delayed";
         case s_running_waiting_for_order:   return "running_waiting_for_order";
         case s_running_process:             return "running_process";
+        case s_running_remote_process:      return "running_remote_process";
         case s_suspended:                   return "suspended";
       //case s_end:                         return "end";
         case s_ending:                      return "ending";
@@ -1215,13 +1214,20 @@ bool Task::do_something()
                                 ok = operation__end();
 
                                 if( _job->_history.min_steps() == 0 )  _history.start();
-                                _stdout_reader.open_stdout( _module_instance->stdout_path() );
-                                _stdout_reader.open_stderr( _module_instance->stderr_path() );
-                                _stdout_reader.start();
+                                _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
+                                _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
+                                _file_logger->set_async_manager( _spooler->_connection_manager );
+                                _file_logger->start();
 
-                                set_state( ok? _module_instance->_module->_kind == Module::kind_process? s_running_process 
-                                                                                                       : s_running 
-                                             : s_ending );
+                                State next_state;
+                                if( !ok )  next_state = s_ending;
+                                else if( _module_instance->_module->real_kind() == Module::kind_process )
+                                        next_state = _module_instance->kind() == Module::kind_remote? s_running_remote_process 
+                                                                                                    : s_running_process;
+                                     else 
+                                        next_state = s_running;
+ 
+                                set_state( next_state );
 
                                 loop = true;
                             }
@@ -1232,6 +1238,8 @@ bool Task::do_something()
 
 
                         case s_running_process:
+                            assert( _module_instance->_module->real_kind() == Module::kind_process );
+                            
                             if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
@@ -1244,6 +1252,25 @@ bool Task::do_something()
                             {
                                 _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
                                 _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
+                            }
+
+                            break;
+
+
+                        case s_running_remote_process:
+                            assert( _module_instance->_module->real_kind() == Module::kind_process &&
+                                    _module_instance->kind()      == Module::kind_remote     );
+
+                            if( !_operation )
+                            {
+                                _operation = do_step__start();
+                            }
+                            else
+                            {
+                                string result = remote_process_step__end();
+
+                                set_state( s_release );
+                                loop = true;
                             }
 
                             break;
@@ -1470,7 +1497,7 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                if( _module_instance  && _module_instance->_module->_kind == Module::kind_process )
+                                if( _module_instance  && _module_instance->_module->real_kind() == Module::kind_process )
                                 {
                                     set_state_texts_from_stdout();
                                     
@@ -1757,7 +1784,7 @@ bool Task::step__end()
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
         {
-            _spooler->_task_subsystem->count_step();
+            _spooler->_task_subsystem->count_step();        // Siehe auch remote_process_step__end()
             _job->count_step();
             _step_count++;
         }
@@ -1773,6 +1800,30 @@ bool Task::step__end()
     }
 
     return continue_task;
+}
+
+//-------------------------------------------------------------------Task::remote_process_step__end
+
+string Task::remote_process_step__end()
+{
+    string result;
+
+    try
+    {
+        result = do_step__end().as_string();
+
+        _spooler->_task_subsystem->count_step();
+        _job->count_step();
+        _step_count++;
+    }
+    catch( const exception& x ) 
+    { 
+        set_error(x); 
+    }
+
+    _operation = NULL;
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Task::operation__end
@@ -2326,12 +2377,12 @@ void Module_task::do_close__end()
         if( exit_code )
         {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
-            if( _module_instance->_module->_kind == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
+            if( _module_instance->_module->real_kind() == Module::kind_process  &&  !_module_instance->_module->_process_ignore_error )  
                 set_error( x );
             else  
                 _log->warn( x.what() );
 
-            if( _module_instance->_module->_kind == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
+            if( _module_instance->_module->real_kind() == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
         if( int termination_signal = _module_instance->termination_signal() )
@@ -2340,7 +2391,7 @@ void Module_task::do_close__end()
 
             if( !_job->_ignore_every_signal 
              && _job->_ignore_signals_set.find( termination_signal ) == _job->_ignore_signals_set.end()
-             && ( _module_instance->_module->_kind != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
+             && ( _module_instance->_module->real_kind() != Module::kind_process  ||  !_module_instance->_module->_process_ignore_signal ) )
             {
                 set_error( x );
             }
@@ -2357,17 +2408,18 @@ void Module_task::do_close__end()
                 }
             }
 
-            //if( _module_instance->_module->_kind == Module::kind_process )  
+            //if( _module_instance->_module->real_kind() == Module::kind_process )  
             _exit_code = -termination_signal;
         }
  
-        bool stdout_ok = _stdout_reader.finish();
+        _file_logger->finish();
+        _file_logger->close();
 
-        if( !stdout_ok )
-        {
-            _log->log_file( _module_instance->stdout_path(), "stdout:" );
-            _log->log_file( _module_instance->stderr_path(), "stderr:" );
-        }
+        //if( !stdout_ok )
+        //{
+        //    _log->log_file( _module_instance->stdout_path(), "stdout:" );
+        //    _log->log_file( _module_instance->stderr_path(), "stderr:" );
+        //}
 
         //_module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }
@@ -2526,148 +2578,6 @@ void Job_module_task::do_release__end()
     if( !_module_instance )  return;  //z::throw_xc( "SCHEDULER-199" );
 
     _module_instance->release__end();
-}
-
-//-----------------------------------------------------------------------Stdout_reader::open_stdout
-
-void Stdout_reader::open_stdout( const File_path& path )
-{
-    //if( path != "" )  _stdout_line_reader._file.open( path, "rb" );
-}
-
-//-----------------------------------------------------------------------Stdout_reader::open_stderr
-
-void Stdout_reader::open_stderr( const File_path& path )
-{
-    //if( path != "" )  _stderr_line_reader._file.open( path, "rb" );
-}
-
-//-----------------------------------------------------------------------------Stdout_reader::start
-
-void Stdout_reader::start()
-{
-    set_async_manager( _spooler->_connection_manager );
-    set_async_delay( stdout_read_interval_min );
-}
-
-//----------------------------------------------------------------------------Stdout_reader::finish
-
-bool Stdout_reader::finish()
-{
-    bool   result = _stdout_line_reader._file.opened()  &  _stderr_line_reader._file.opened();
-    string s;
-
-    while(1)
-    {
-        s = _stdout_line_reader.read_lines();
-        if( s == "" )  break;
-        log_lines( s );
-    }
-
-    while(1)
-    {
-        s = _stderr_line_reader.read_lines();
-        if( s == "" )  break;
-        log_lines( s );
-    }
-
-    while(1)
-    {
-        s = _stdout_line_reader.read_remainder();
-        if( s == "" )  break;
-        log_lines( s );
-    }
-
-    while(1)
-    {
-        s = _stderr_line_reader.read_remainder();
-        if( s == "" )  break;
-        log_lines( s );
-    }
-
-    _stdout_line_reader._file.close();
-    _stderr_line_reader._file.close();
-
-    return result;
-}
-
-//-------------------------------------------------------------------Stdout_reader::async_continue_
-
-bool Stdout_reader::async_continue_( Async_operation::Continue_flags )
-{
-    bool something_done = false;
-
-    something_done |= log_lines( _stdout_line_reader.read_lines() );
-    something_done |= log_lines( _stderr_line_reader.read_lines() );
-
-    set_async_delay( something_done? stdout_read_interval_min : stdout_read_interval_max );
-    return true;
-}
-
-//-----------------------------------------------------------------Stdout_reader::async_state_text_
-
-string Stdout_reader::async_state_text_() const
-{
-    S result;
-    result << "Stdout_reader(stdout " << _stdout_line_reader._read_length << " bytes,"
-                            "stderr " << _stderr_line_reader._read_length << " bytes)"; 
-    return result;
-}
-
-//------------------------------------------------------Stdout_reader::File_line_reader::read_lines
-
-string Stdout_reader::File_line_reader::read_lines()
-{
-    string lines;
-
-    if( _file.opened()  &&  _file.length() > _read_length )
-    {
-        _file.seek( _read_length );
-        lines = _file.read_string( max_stdout_line_length );
-        size_t nl = lines.rfind( '\n' );
-
-        if( nl == string::npos )    // Kein \n
-        {
-            if( lines.length() < max_stdout_line_length )  lines = "";    // Mehr Text als max_stdout_line_length wird umgebrochen
-            nl = lines.length();
-        }
-
-        lines.erase( nl );
-        _read_length += lines.length();
-    }
-
-    return lines;
-}
-
-//--------------------------------------------------Stdout_reader::File_line_reader::read_remainder
-
-string Stdout_reader::File_line_reader::read_remainder()
-{
-    string result;
-
-    if( _file.opened() )
-    {
-        _file.seek( _read_length );
-        result = _file.read_string( max_stdout_line_length );
-        _read_length += result.length();
-    }
-
-    return result;
-}
-
-//-------------------------------------------------------------------------Stdout_reader::log_lines
-
-bool Stdout_reader::log_lines( const string& lines )
-{
-    bool something_done = false;
-
-    if( lines != "" )  
-    {
-        _log->info( lines );
-        something_done = true;
-    }
-
-    return something_done;
 }
 
 //-------------------------------------------------------------------------------------------------

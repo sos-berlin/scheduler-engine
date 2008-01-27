@@ -49,6 +49,8 @@ DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node , job_chain_node , CLSID_Jo
 DESCRIBE_CLASS( &spooler_typelib, Com_order          , order          , CLSID_Order          , "Spooler.Order"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_order_queue    , order_queue    , CLSID_Order_queue    , "Spooler.Order_queue"   , "1.0" )
 
+const int                           dispid_log_log          = 14;           // Siehe spooler.odl
+
 //------------------------------------------------------------------------------------Typbibliothek
 
 Typelib_ref                         typelib;  
@@ -1773,6 +1775,32 @@ STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
     hr = _object->Invoke();
 }
 */
+//------------------------------------------------------------------------------Com_log_proxy::log2
+
+void Com_log_proxy::log2( zschimmer::Log_level log_level, const string& prefix, const string& line, Has_log* prefix_log )
+{
+    int THREAD_SICHER_MACHEN; // In com_remote.cxx
+
+    assert( !prefix_log );
+    assert( prefix == "" );
+
+    if( log_level >= _level )
+    {
+        UINT       arg_nr   = 0;
+        Dispparams parameters;
+        Excepinfo  excepinfo;
+        Variant    result;
+
+        parameters.set_arg_count( 2 );
+        parameters[ 0 ] = (int)log_level;
+        parameters[ 1 ] = line;
+
+        HRESULT hr = Proxy::Invoke_from_any_thread( dispid_log_log, IID_NULL, STANDARD_LCID, DISPATCH_METHOD, &parameters, &result, &excepinfo, &arg_nr );
+
+        if( FAILED( hr ) )  throw_com_excepinfo( hr, &excepinfo, Z_FUNCTION, "" );
+    }
+}
+
 //-------------------------------------------------------------------------Com_object_set::_methods
 #ifdef Z_COM
 

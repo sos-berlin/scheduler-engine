@@ -379,7 +379,7 @@
             <xsd:attribute name="title"                 type="String"/>
             <xsd:attribute name="log_append"            type="Yes_no"/>
             <xsd:attribute name="order"                 type="Yes_no"/>
-            <xsd:attribute name="separate_process"      type="Yes_no"/>
+            <xsd:attribute name="separate_process"      type="Yes_no"/>                     <!-- Veraltet, wird ignoriert -->
             <xsd:attribute name="tasks"                 type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="min_tasks"             type="xsd:positiveInteger"/>
             <xsd:attribute name="timeout"               type="Duration"/>                   <!-- Für ap, 1.4.06 timeout="0" soll erlaubt sein (kein Aprilscherz) -->
@@ -1161,14 +1161,21 @@
     <xsd:element name="remote_scheduler.start_remote_task">
         <xsd:complexType>
             <xsd:attribute name="tcp_port"          type="xsd:nonNegativeInteger"   use="required"/>
+            <xsd:attribute name="kind">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:NMTOKEN">
+                        <xsd:enumeration value="process"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 
 
     <xsd:element name="remote_scheduler.remote_task.close">
         <xsd:complexType>
-            <xsd:attribute name="pid"               type="xsd:integer"   use="required"/>
-            <xsd:attribute name="kill"              type="Yes_no"                      />
+            <xsd:attribute name="process_id"        type="xsd:long"   use="required"/>
+            <xsd:attribute name="kill"              type="Yes_no"                   />
         </xsd:complexType>
     </xsd:element>
 

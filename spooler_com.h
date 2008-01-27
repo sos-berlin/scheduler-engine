@@ -327,7 +327,8 @@ struct Com_log : spooler_com::Ilog,
 Z_DEFINE_GUID( CLSID_Com_log_proxy, 0xfeee47a6, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a6-6c1b-11d8-8103-000476ee8afb}
 
 
-struct Com_log_proxy: object_server::Proxy 
+struct Com_log_proxy: object_server::Proxy,
+                      Has_log
 {
                               //Com_log                     ();
 
@@ -363,6 +364,10 @@ struct Com_log_proxy: object_server::Proxy
     STDMETHODIMP            put_Level                       ( int );
     STDMETHODIMP            get_Level                       ( int* );
 */
+
+    // Has_log
+    void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* prefix_log = NULL );
+
 
   private:
   //static const z::com::Com_method    _methods[];

@@ -2447,11 +2447,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-400">
+        <!--message code="SCHEDULER-400">
             <text xml:lang="en">
                 <title>Only API jobs are allowed with &lt;process_class remote_scheduler="..."/></title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-401">
             <text xml:lang="en">

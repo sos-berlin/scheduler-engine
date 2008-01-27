@@ -78,7 +78,7 @@ struct Module : Object
         kind_java,
         kind_scripting_engine,
         kind_com,
-        kind_remote,
+        kind_remote,            // Nur für Module_instance
         kind_internal
     };
 
@@ -101,6 +101,7 @@ struct Module : Object
     virtual ptr<Module_instance> create_instance_impl       ();
     bool                        set                         ()                                      { return _set; }
     Kind                        kind                        () const                                { return _kind; }
+    Kind                        real_kind                   () const                                { return _real_kind; }
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     void                        set_checked_attribute       ( string*, const xml::Element_ptr&, const string&, bool modify_allowed = false );
     void                        set_priority                ( const string& );
@@ -121,12 +122,11 @@ struct Module : Object
     Text_with_includes         _text_with_includes;
     string                     _include_path;
     Reuse                      _reuse;
-    bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
     Absolute_path              _folder_path;
     string                     _process_class_string;
     Absolute_path              _process_class_path;
     bool                       _use_process_class;
-    Kind                       _kind;
+    Kind                       _kind;                       // == kind_remote || == _real_kind
     Kind                       _real_kind;                  // Falls _kind == kind_remote
     bool                       _initialized;
 
@@ -192,11 +192,6 @@ struct Module_instance : Object
 
     typedef list<Object_list_entry>  Object_list;
 
-    //typedef map< string, ptr<IDispatch> >  Object_register;
-    //Object_register            _object_register;
-
-
-
 
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* );
@@ -211,15 +206,14 @@ struct Module_instance : Object
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }
     virtual bool                is_remote_host              () const                                { return false; }
+    Module::Kind                kind                        () const                                { return _kind; }
     void                    set_log                         ( Prefix_log* );
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool )                                {} // veraltet: _close_instance_at_end = b; }   // Nach spooler_close() Instanz schließen
-  //void                    set_params                      ( Com_variable_set* params )            { _params = params; }
 
     virtual void                attach_task                 ( Task*, Prefix_log* );
     virtual void                detach_task                 ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
-  //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     IDispatch*                  object                      ( const string& name );
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );
 
@@ -278,6 +272,7 @@ struct Module_instance : Object
     Task*                      _task;
     int                        _task_id;                    // Wird lokalem Objectserver als -task-id=... übergeben, für die Prozessliste (ps)
     Spooler*                   _spooler;
+    Module::Kind               _kind;
     Delegated_log              _log;
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt

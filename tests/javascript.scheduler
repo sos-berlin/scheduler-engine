@@ -50,6 +50,8 @@ function spooler_process()
     for( var i = 0; i < 7; i++ )  spooler_log.info( "fib " + i + " = " + g.next() );
 
 
+    var order = spooler.create_order();
+    order.id = "XXX";
     fehler();
     
     return false;

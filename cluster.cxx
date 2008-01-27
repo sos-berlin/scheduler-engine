@@ -389,7 +389,7 @@ Heart_beat_watchdog_thread::Heart_beat_watchdog_thread( Cluster* d )
     _zero_(this+1),
     _cluster(d)
 {
-    set_thread_name( obj_name() );
+    set_thread_name( "Heart_beat_watchdog_thread" );
 }
 
 //----------------------------------------------------------Heart_beat_watchdog_thread::thread_main

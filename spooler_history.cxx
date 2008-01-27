@@ -675,9 +675,9 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_variables_tablename, 
-                                "`name` varchar(100) not null,"
-                                "`wert` integer,"  
-                                "`textwert` varchar(250),"  
+                                "`name`"     " varchar(100)"     " not null,"
+                                "`wert`"     " integer"              " null,"  
+                                "`textwert`" " varchar(250)"         " null,"  
                                 "primary key ( `name` )" );
         if( created )
         {
@@ -697,14 +697,14 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_tasks_tablename, 
-                                "`task_id`"        " integer not null,"          // Primärschlüssel
-                                "`spooler_id`"     " varchar(100) not null,"
-                                "`cluster_member_id`"" varchar(100),"
-                                "`job_name`"       " varchar(255) not null,"
-                                "`enqueue_time`"   " datetime,"
-                                "`start_at_time`"  " datetime,"
-                                "`parameters`"     " clob,"
-                                "`task_xml`"       " clob,"
+                                "`task_id`"          " integer"      " not null,"          // Primärschlüssel
+                                "`spooler_id`"       " varchar(100)" " not null,"
+                                "`cluster_member_id`"" varchar(100)"     " null,"
+                                "`job_name`"         " varchar(255)" " not null,"
+                                "`enqueue_time`"     " datetime"         " null,"
+                                "`start_at_time`"    " datetime"         " null,"
+                                "`parameters`"       " clob"             " null,"
+                                "`task_xml`"         " clob"             " null,"
                                 "primary key( `task_id` )" );
         if( created )
         {
@@ -732,21 +732,21 @@ void Database::create_tables_when_needed()
         for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " varchar(250),";
 
         bool created = create_table_when_needed( &ta, _spooler->_job_history_tablename, 
-                                "`id`"         " integer not null,"
-                                "`spooler_id`" " varchar(100) not null,"
-                                "`cluster_member_id`"" varchar(100),"
-                                "`job_name`"   " varchar(255) not null,"
-                                "`start_time`" " datetime not null,"
-                                "`end_time`"   " datetime,"
-                                "`cause`"      " varchar(50),"
-                                "`steps`"      " integer,"
-                                "`exit_code`"  " integer,"
-                                "`error`"      " boolean,"
-                                "`error_code`" " varchar(50),"
-                                "`error_text`" " varchar(250),"
-                                "`parameters`" " clob,"
-                                "`log`"        " blob," 
-                                "`pid`"        " integer,"
+                                "`id`"                " integer"       " not null,"
+                                "`spooler_id`"        " varchar(100)"  " not null,"
+                                "`cluster_member_id`" " varchar(100)"      " null,"
+                                "`job_name`"          " varchar(255)"  " not null,"
+                                "`start_time`"        " datetime"      " not null,"
+                                "`end_time`"          " datetime"          " null,"
+                                "`cause`"             " varchar(50)"       " null,"
+                                "`steps`"             " integer"           " null,"
+                                "`exit_code`"         " integer"           " null,"
+                                "`error`"             " boolean"           " null,"
+                                "`error_code`"        " varchar(50)"       " null,"
+                                "`error_text`"        " varchar(250)"      " null,"
+                                "`parameters`"        " clob"              " null,"
+                                "`log`"               " blob"              " null,"
+                                "`pid`"               " integer"           " null,"
                                 + join( "", create_extra ) 
                                 + "primary key( `id` )" );
 
@@ -784,22 +784,22 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                                "`job_chain`"    " varchar(255)" << chararacter_set << " not null,"                                    // Primärschlüssel
-                                "`id`"           " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
-                                "`spooler_id`"   " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
-                                "`distributed_next_time`" " datetime,"              // Auftrag ist verteilt ausführbar
-                                "`occupying_cluster_member_id`" "varchar(100),"     // Index
-                                "`priority`"     " integer not null,"
-                                "`state`"        " varchar(100),"
-                                "`state_text`"   " varchar(100),"
-                                "`title`"        " varchar(200),"
-                                "`created_time`" " datetime not null,"
-                                "`mod_time`"     " datetime,"
-                                "`ordering`"     " integer not null,"             // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
-                                "`payload`"      " clob,"
-                                "`initial_state`" "varchar(100),"               
-                                "`run_time`"     " clob,"
-                                "`order_xml`"    " clob,"
+                                "`job_chain`"                   " varchar(255)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`id`"                          " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
+                                "`spooler_id`"                  " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`distributed_next_time`"       " datetime"         " null,"     // Auftrag ist verteilt ausführbar
+                                "`occupying_cluster_member_id`" " varchar(100)"     " null,"     // Index
+                                "`priority`"                    " integer"      " not null,"
+                                "`state`"                       " varchar(100)"     " null,"
+                                "`state_text`"                  " varchar(100)"     " null,"
+                                "`title`"                       " varchar(200)"     " null,"
+                                "`created_time`"                " datetime"     " not null,"
+                                "`mod_time`"                    " datetime"         " null,"
+                                "`ordering`"                    " integer"      " not null,"     // Um die Reihenfolge zu erhalten, sollte geordneter Index sein
+                                "`payload`"                     " clob"             " null,"
+                                "`initial_state`"               " varchar(100)"     " null,"               
+                                "`run_time`"                    " clob"             " null,"
+                                "`order_xml`"                   " clob"             " null,"
                                 "primary key( `spooler_id`, `job_chain`, `id` )" );
         if( created )
         {
@@ -835,16 +835,16 @@ void Database::create_tables_when_needed()
             Transaction ta ( this );
 
             created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
-                                "`history_id`"  " integer not null,"             // Primärschlüssel
-                                "`job_chain`"   " varchar(255) not null,"
-                                "`order_id`"    " varchar(" << const_order_id_length_max << ") not null,"
-                                "`spooler_id`"  " varchar(100) not null,"
-                                "`title`"       " varchar(200),"
-                                "`state`"       " varchar(100),"
-                                "`state_text`"  " varchar(100),"
-                                "`start_time`"  " datetime not null,"
-                                "`end_time`"    " datetime,"
-                                "`log`"         " blob," 
+                                "`history_id`"  " integer"      " not null,"             // Primärschlüssel
+                                "`job_chain`"   " varchar(255)" " not null,"
+                                "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
+                                "`spooler_id`"  " varchar(100)" " not null,"
+                                "`title`"       " varchar(200)"     " null,"
+                                "`state`"       " varchar(100)"     " null,"
+                                "`state_text`"  " varchar(100)"     " null,"
+                                "`start_time`"  " datetime"     " not null,"
+                                "`end_time`"    " datetime"         " null,"
+                                "`log`"         " blob"             " null,"
                                 "primary key( `history_id` )" );
 
             if( created )
@@ -892,12 +892,12 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
-                                "`history_id`"  " integer not null,"             // Primärschlüssel
-                                "`step`"        " integer not null,"             // Primärschlüssel
-                                "`task_id`"     " integer not null,"
-                                "`state`"       " varchar(100) not null,"
-                                "`start_time`"  " datetime not null,"
-                                "`end_time`"    " datetime,"
+                                "`history_id`"  " integer"      " not null,"             // Primärschlüssel
+                                "`step`"        " integer"      " not null,"             // Primärschlüssel
+                                "`task_id`"     " integer"      " not null,"
+                                "`state`"       " varchar(100)" " not null,"
+                                "`start_time`"  " datetime"     " not null,"
+                                "`end_time`"    " datetime"         " null,"
                                 "primary key( `history_id`, `step` )" );
 
         //if( created )
@@ -1007,6 +1007,7 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
     {
         case dbms_access:
         case dbms_sql_server:
+        case dbms_sybase:
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
             break;
 
@@ -1100,6 +1101,7 @@ int Database::expand_varchar_column( Transaction* ta, const string& table_name, 
 
 
                 case dbms_sql_server:
+                case dbms_sybase:
                 {
                     if( table_name == _spooler->_orders_tablename  &&  lcase(column_name) == "id" )
                     {
@@ -1451,8 +1453,11 @@ Database_lock_syntax Database::lock_syntax()
 {
     switch( _db.dbms_kind() )
     {
+        case dbms_sybase: 
         case dbms_sql_server: return db_lock_with_updlock;      // from table  with(updlock)
+
         case dbms_access    : return db_lock_none;              
+
                      default: return db_lock_for_update;        // for update
     }
 }
