@@ -3006,6 +3006,9 @@
 <register_keyword keyword='running_process'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_process'/>
 </register_keyword>
+<register_keyword keyword='running_remote_process'>
+    <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_remote_process'/>
+</register_keyword>
 <register_keyword keyword='running_since'>
     <register_keyword_display><code>running_since=</code></register_keyword_display>
     <register_entry register_file='xml/answer/task.xml#attribute_running_since' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_since' type='definition'/>

@@ -17,7 +17,7 @@ struct Process_module_instance : Module_instance
 
             virtual void                close                       ();
             bool                        signaled                    ();
-            virtual bool                wait                        ( double seconds );
+            virtual bool                wait                        ( double seconds = INT_MAX );
                                         operator bool               ()                                      { return _pid != 0; }
 
             int                        _pid;

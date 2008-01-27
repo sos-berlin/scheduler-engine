@@ -255,6 +255,7 @@ struct Module_instance : Object
     int                         exit_code                   ()                                      { return _exit_code; }
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     int                         termination_signal          ()                                      { return _termination_signal; }
+    void                    set_termination_signal          ( int s )                               { _termination_signal = s; }
     virtual File_path           stdout_path                 ()                                      { return File_path(); }
     virtual File_path           stderr_path                 ()                                      { return File_path(); }
     virtual bool                try_delete_files            ( Has_log* )                            { return true; }

@@ -1779,8 +1779,6 @@ STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
 
 void Com_log_proxy::log2( zschimmer::Log_level log_level, const string& prefix, const string& line, Has_log* prefix_log )
 {
-    int THREAD_SICHER_MACHEN; // In com_remote.cxx
-
     assert( !prefix_log );
     assert( prefix == "" );
 

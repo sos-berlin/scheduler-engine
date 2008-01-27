@@ -1812,6 +1812,21 @@ string Task::remote_process_step__end()
     {
         result = do_step__end().as_string();
 
+        xml::Document_ptr dom_document           ( result );
+        xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
+
+        _module_instance->set_exit_code         ( process_result_element.int_getAttribute( "exit_code", 0 ) );
+        _module_instance->set_termination_signal( process_result_element.int_getAttribute( "signal"   , 0 ) );
+
+        if( _order )
+        {
+            if( xml::Element_ptr order_params_element = process_result_element.select_node( "order.params" ) )
+            {
+                ptr<Com_variable_set> p = new Com_variable_set( order_params_element );
+                _order->params()->merge( p );
+            }
+        }
+
         _spooler->_task_subsystem->count_step();
         _job->count_step();
         _step_count++;

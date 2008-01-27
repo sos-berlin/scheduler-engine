@@ -437,7 +437,10 @@ bool Process_module_instance::Process_event::wait( double seconds )
 
       //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
-        int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+        int flags = WUNTRACED;                          // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+        if( seconds != INT_MAX )  flags |= WNOHANG;
+
+        int ret = waitpid( _pid, &status, waitpid_flags );    
         if( ret == -1 )
         {
             Z_LOG2( "scheduler", "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << z_strerror(errno) << "\n" );

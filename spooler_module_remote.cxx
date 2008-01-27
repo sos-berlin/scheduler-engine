@@ -305,14 +305,15 @@ Variant Remote_module_instance_proxy::step__end()
     _operation = NULL;
     result = _remote_instance->call__end();
 
-    if( _module->kind() == Module::kind_process )
-    {
-        xml::Document_ptr dom_document           ( string_from_variant( result ) );
-        xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
+    // In spooler_task.cxx:
+    //if( _module->kind() == Module::kind_process )
+    //{
+    //    xml::Document_ptr dom_document           ( string_from_variant( result ) );
+    //    xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
 
-        _exit_code          = process_result_element.int_getAttribute( "exit_code", 0 );
-        _termination_signal = process_result_element.int_getAttribute( "signal", 0 );
-    }
+    //    _exit_code          = process_result_element.int_getAttribute( "exit_code", 0 );
+    //    _termination_signal = process_result_element.int_getAttribute( "signal", 0 );
+    //}
 
     return result;
 }

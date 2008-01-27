@@ -123,7 +123,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                 begin_standard_response();
 
                 _xml_writer.begin_element( "ok" );
-                int KEIN_STDOUT;
+                //int KEIN_STDOUT;
                 //write_file( "stdout", _process->stdout_path() );
                 //write_file( "stderr", _process->stderr_path() );
                 _xml_writer.end_element( "ok" );
