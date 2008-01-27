@@ -127,6 +127,7 @@ struct Job_folder;
 struct Job_subsystem_interface;
 struct Module;
 struct Module_instance;
+struct Object_server;
 struct Order_folder_interface;
 struct Process;
 struct Process_class;

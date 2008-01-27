@@ -78,13 +78,16 @@ struct Process : zschimmer::Object, Scheduler_object
     };
 
 
-    struct Server_thread : object_server::Connection_to_own_server_thread::Server_thread
+    struct Com_server_thread : object_server::Connection_to_own_server_thread::Server_thread
     {
         typedef object_server::Connection_to_own_server_thread::Server_thread Base_class;
 
-                                Server_thread               ( object_server::Connection_to_own_server_thread* );
+                                Com_server_thread           ( object_server::Connection_to_own_server_thread* );
 
         int                     thread_main                 ();
+
+        Fill_zero              _zero_;
+        ptr<Object_server>     _object_server;
     };
 
 
@@ -156,6 +159,7 @@ struct Process : zschimmer::Object, Scheduler_object
     Host_and_port              _controller_address;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
+    ptr<Com_server_thread>     _com_server_thread;
     Process_handle             _process_handle_copy;
     bool                       _is_killed;
     int                        _exit_code;

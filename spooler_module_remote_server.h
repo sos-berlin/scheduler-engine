@@ -35,8 +35,11 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
                                 Class_data                  ();
         void                    read_xml                    ( const string& );
 
+        Fill_zero              _zero_;
         xml::Document_ptr      _stdin_dom_document;
         xml::Element_ptr       _task_process_element;
+        pid_t                  _remote_instance_pid;
+      //Com_remote_module_instance_server* _com_remote_module_instance_server;      // Das einzige Objekt der Klasse
     };
 
 

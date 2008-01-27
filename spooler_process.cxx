@@ -238,24 +238,25 @@ string Process::Async_remote_operation::async_state_text_() const
     return result;
 }
 
-//---------------------------------------------------------------------Server_thread::Server_thread
+//----------------------------------------------------Process::Com_server_thread::Com_server_thread
 
-Process::Server_thread::Server_thread( object_server::Connection_to_own_server_thread* c ) 
+Process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_server_thread* c ) 
 : 
-    Base_class(c) 
+    Base_class(c),
+    _zero_(this+1)
 {
-    set_thread_name( "Process::Server_thread" );
+    set_thread_name( "Process::Com_server_thread" );
 }
 
-//--------------------------------------------------------------Process::Server_thread::thread_main
-
-int Process::Server_thread::thread_main()
+//----------------------------------------------------------Process::Com_server_thread::thread_main
+    
+int Process::Com_server_thread::thread_main()
 {
     Com_initialize com_initialize;
 
-    ptr<Object_server> server = Z_NEW( Object_server() );
-    server->set_stdin_data( _connection->stdin_data() );
-    _server = +server;
+    _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Process::pid()
+    _object_server->set_stdin_data( _connection->stdin_data() );
+    _server = +_object_server;
 
     return run_server();
 }
@@ -456,8 +457,8 @@ void Process::start_local_thread()
    
     fill_connection( c );
 
-    ptr<Server_thread> thread = Z_NEW( Server_thread( c ) );
-    c->start_thread( thread );
+    _com_server_thread = Z_NEW( Com_server_thread( c ) );
+    c->start_thread( _com_server_thread );
 
 
     _connection = +c;
@@ -727,6 +728,12 @@ bool Process::kill()
         {
             result = c->kill_process();
         }
+        else
+        if( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) )
+        {
+            if( pid_t pid = this->pid() )
+                try_kill_process_immediately( pid );   // Für kind_remote kind_process (Process_module_instance)
+        }
     }
 
     if( result )  _is_killed = true;
@@ -740,16 +747,33 @@ int Process::pid() const
 { 
     int result = 0;
 
-    if( _module_instance  &&  _module_instance->kind() == Module::kind_process )
-    {
-        if( _connection )  assert( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) );
-        result = _module_instance->pid();
-    }
-    else
+    //if( _module_instance  &&  _module_instance->kind() == Module::kind_process )
+    //{
+    //    if( _connection )  assert( dynamic_cast<object_server::Connection_to_own_server_thread*>( +_connection ) );
+    //    result = _module_instance->pid();
+    //}
+    //else
     if( _connection )
     {
-        //assert( _module_instance  &&  _module_instance->kind() == Module::kind_remote );
-        result = _connection->pid();
+        if( _com_server_thread )
+        {
+            if( ptr<Object_server> object_server = _com_server_thread->_object_server )
+            {
+                // Hmm, scheint der einzige Weg zu sein, an die Pid der Process_module_instance heranzukommen.
+
+                Object* o = object_server->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
+
+                if( Com_remote_module_instance_server::Class_data* class_data = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
+                {
+                    result = class_data->_remote_instance_pid;
+                }
+            }
+        }
+        else
+        {
+            //assert( _module_instance  &&  _module_instance->kind() == Module::kind_remote );
+            result = _connection->pid();
+        }
     }
 
     return result;

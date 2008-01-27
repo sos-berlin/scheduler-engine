@@ -116,6 +116,8 @@ HRESULT Com_remote_module_instance_server::Create_instance( zschimmer::com::obje
 //----------------------------------------Com_remote_module_instance_server::Class_data::Class_data
 
 Com_remote_module_instance_server::Class_data::Class_data()
+:
+    _zero_(this+1)
 {
 }
 
@@ -193,6 +195,9 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 //        }
 //#       endif
     }
+
+    //assert( !_class_data->_com_remote_module_instance_server );
+    //_class_data->_com_remote_module_instance_server = this;
 }
 
 //----------------------------Com_remote_module_instance_server::~Com_remote_module_instance_server
@@ -200,6 +205,8 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 Com_remote_module_instance_server::~Com_remote_module_instance_server()
 {
     if( _file_logger )  _file_logger->close();
+    
+  //if( _class_data )  _class_data->_com_remote_module_instance_server = NULL;
 }
 
 //------------------------------------------------Com_remote_module_instance_server::QueryInterface
@@ -509,6 +516,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server->_module_instance->begin__end();
 
+
+        assert( !_class_data->_remote_instance_pid );
+        _class_data->_remote_instance_pid = _server->_module_instance->pid();
 
         if( _log )
         {
