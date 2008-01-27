@@ -437,8 +437,8 @@ bool Process_module_instance::Process_event::wait( double seconds )
 
       //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
-        int flags = WUNTRACED;                          // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
-        if( seconds != INT_MAX )  flags |= WNOHANG;
+        int waitpid_flags = WUNTRACED;                          // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+        if( seconds != INT_MAX )  waitpid_flags |= WNOHANG;
 
         int ret = waitpid( _pid, &status, waitpid_flags );    
         if( ret == -1 )

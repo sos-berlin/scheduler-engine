@@ -791,36 +791,42 @@ bool Process::is_remote_host() const
 
 File_path Process::stdout_path()
 {
+    File_path result;
+
     if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
     {
-        return c->stdout_path();
+        result = c->stdout_path();
     }
     else
     if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
     {
         assert(!"Connection_to_own_server_thread");
-        return "";
     }
     else
-        return _remote_stdout_file.path();
+        result = _remote_stdout_file.path();
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Process::stderr_path
 
 File_path Process::stderr_path()
 {
+    File_path result;
+
     if( object_server::Connection_to_own_server_process* c = dynamic_cast< object_server::Connection_to_own_server_process* >( +_connection ) )
     {
-        return c->stderr_path();
+        result = c->stderr_path();
     }
     else
     if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
     {
         assert(!"Connection_to_own_server_thread");
-        return "";
     }
     else
-        return _remote_stderr_file.path();
+        result = _remote_stderr_file.path();
+
+    return result;
 }
 
 //---------------------------------------------------------------------Process::delete_files__start
