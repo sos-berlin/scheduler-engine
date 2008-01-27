@@ -46,12 +46,13 @@ struct File_logger : Async_operation
                                ~File_logger                 ();
 
     void                        close                       ();
+    void                        set_remove_files            ( bool b )                              { _remove_files = b; }
     void                        add_file                    ( const File_path&, const string& prefix );
-    bool                        log_lines                   ( const string& lines );
     void                        start                       ();
     void                        start_thread                ();
     void                        finish                      ();
 
+  protected:
     // Async_operation:
     string                      async_state_text_           () const;
     bool                        async_continue_             ( Continue_flags );
@@ -59,12 +60,16 @@ struct File_logger : Async_operation
 
 
   private:
+    bool                        log_lines                   ( const string& lines );
+
+
     typedef list< ptr<File_line_reader> >  File_line_reader_list;
 
     Fill_zero                  _zero_;
     Has_log*                   _log;
     File_line_reader_list      _file_line_reader_list;
     ptr<File_logger_thread>    _thread;
+    bool                       _remove_files;
 };
 
 //-------------------------------------------------------------------------------------------------

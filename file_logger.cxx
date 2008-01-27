@@ -55,6 +55,16 @@ void File_logger::close()
         _thread->thread_close();
         _thread = NULL;
     }
+
+    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+    {
+        File_line_reader* file_line_reader = *it;
+
+        if( _remove_files )  file_line_reader->_file.unlink_later();
+        file_line_reader->close();
+    }
+
+    _file_line_reader_list.clear();
 }
 
 //-------------------------------------------------------------------------------File_logger::start
@@ -171,7 +181,7 @@ File_logger::File_line_reader::File_line_reader( const File_path& path, const st
     _file.open( path, "rb" );
 }
 
-//--------------------------------------------------------------ile_logger::File_line_reader::close
+//-------------------------------------------------------------File_logger::File_line_reader::close
     
 void File_logger::File_line_reader::close()
 {
