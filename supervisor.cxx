@@ -634,11 +634,15 @@ bool Remote_scheduler::check_remote_configuration()
 
     if( _udp_port )
     {
+        bool had_configuration_directory = _configuration_directory_name != "";
+
         if( Directory* configuration_directory = this->configuration_directory_or_null() )
         {
             if( _configuration_version == configuration_directory->version() )  configuration_directory->read_deep( 0.0 );
             changed = _configuration_version != configuration_directory->version();
         }
+        else
+            changed = had_configuration_directory;
 
         if( !changed )
         {

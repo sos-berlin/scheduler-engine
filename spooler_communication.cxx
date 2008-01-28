@@ -468,7 +468,7 @@ bool Communication::Connection::do_recv()
             if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
 
             if( len == 1  &&  buffer[0] == '\n'   
-             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  
+             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )     // Leere Eingabe, zum Debuggen:
             { 
                 if( _spooler->_supervisor_client )  _spooler->_supervisor_client->try_connect();
                 if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders( 1 ); 
