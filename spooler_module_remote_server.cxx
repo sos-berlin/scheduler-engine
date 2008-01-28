@@ -76,9 +76,48 @@ void Remote_module_instance_server::close__end()   // synchron
 {
     close_monitor();
 
-    if( _module_instance )  _module_instance->close(), _module_instance = NULL;;
+    if( _module_instance )  
+    {
+        try_delete_files();     // Kann verzögern um 
+
+        _module_instance->close(), 
+        _module_instance = NULL;
+    }
 
     Com_module_instance_base::close__end();  // synchron
+}
+
+//--------------------------------------------------Remote_module_instance_server::try_delete_files
+
+void Remote_module_instance_server::try_delete_files()
+{
+    bool deleted = _module_instance->try_delete_files( NULL );
+
+    if( !deleted )
+    {
+        string paths = join( ", ", _module_instance->undeleted_files() );
+        _log.debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
+
+        double until = double_from_gmtime() + delete_temporary_files_delay;
+        while(1)
+        {
+            sleep( delete_temporary_files_retry );
+            deleted = _module_instance->try_delete_files( NULL );
+            if( deleted )  break;
+            if( double_from_gmtime() >= until )  break;
+        }
+
+        if( deleted )  
+        {
+            _log.debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
+        }
+        else 
+        {
+            string paths = join( ", ", _module_instance->undeleted_files() );
+            _log.info( message_string( "SCHEDULER-878", paths ) );
+            //_job.log()->warn( message_string( "SCHEDULER-878", paths ) );
+        }
+    }
 }
 
 //------------------------------------------------------Com_remote_module_instance_server::_methods
@@ -507,7 +546,12 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             string name = string_from_variant( names[i] );
             _server->_module_instance->_object_list.push_back( Module_instance::Object_list_entry( object, name ) );
 
-            if( name == "spooler_log" )  _log = dynamic_cast<Com_log_proxy*>( object ),  assert( _log );
+            if( name == "spooler_log" )  
+            {
+                _log = dynamic_cast<Com_log_proxy*>( object ),  assert( _log );
+                _server->set_log( _log );
+                _server->_module_instance->set_log( _log );
+            }
         }
 
 

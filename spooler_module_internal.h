@@ -35,7 +35,7 @@ struct Internal_module_instance : Module_instance
 
     Fill_zero                  _zero_;
     Task*                      _task;
-    Prefix_log*                _log;
+    Has_log*                   _log;
     bool                       _loaded;
 };
 

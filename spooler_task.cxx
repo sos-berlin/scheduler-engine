@@ -32,8 +32,6 @@ static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
-const double                    delete_temporary_files_delay    = 2;                                
-const double                    delete_temporary_files_retry    = 0.1;                              
 
 //----------------------------------------------------------------------------Spooler_object::level
 /*

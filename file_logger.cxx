@@ -9,8 +9,8 @@ namespace scheduler {
 //--------------------------------------------------------------------------------------------const
 
 const int                       max_line_length             = 1000;
-const double                    read_interval_min           =  1.0;
-const double                    read_interval_max           = 10.0;
+const double                    read_interval_min           = Z_NDEBUG_DEBUG(  1.0, 0.1 );
+const double                    read_interval_max           = Z_NDEBUG_DEBUG( 10.0, 1.0 );
 
 //-------------------------------------------------------------------------File_logger::File_logger
 

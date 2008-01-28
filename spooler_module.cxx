@@ -712,8 +712,16 @@ void Module_instance::set_task_id( int id )
 
 void Module_instance::set_log( Prefix_log* log )
 { 
+    _com_log->set_log( log );
+
+    set_log( (Has_log*)log );
+}
+
+//-------------------------------------------------------------------------Module_instance::set_log
+
+void Module_instance::set_log( Has_log* log )
+{ 
     _log = log; 
-    _com_log->set_log ( log );
 
     Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )
     {

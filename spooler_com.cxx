@@ -1777,10 +1777,10 @@ STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
 */
 //------------------------------------------------------------------------------Com_log_proxy::log2
 
-void Com_log_proxy::log2( zschimmer::Log_level log_level, const string& prefix, const string& line, Has_log* prefix_log )
+void Com_log_proxy::log2( zschimmer::Log_level log_level, const string&, const string& line, Has_log* )
 {
-    assert( !prefix_log );
-    assert( prefix == "" );
+    //assert( !prefix_log );
+    //assert( prefix == "" );
 
     if( log_level >= _level )
     {

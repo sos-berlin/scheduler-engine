@@ -18,6 +18,7 @@ struct Remote_module_instance_server : Com_module_instance_base
 
     void                        close__end                  ();
     void                        load_implicitly             ();
+    void                        try_delete_files            ();
 
 
     Fill_zero                  _zero_;

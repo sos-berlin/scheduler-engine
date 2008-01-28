@@ -26,11 +26,14 @@ Process_module_instance::~Process_module_instance()
 {
     close_handle();
 
-    if( _stdout_file.is_to_be_unlinked() )
-        _stdout_file.try_unlink( _module? &_module->_log : NULL );      // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. 
-                                                                        // Das soll kein Task-Problem sein! Siehe auch Task::do_something, s_deleting_files
-    if( _stderr_file.is_to_be_unlinked() )
-        _stderr_file.try_unlink( _module? &_module->_log : NULL );      
+    // Nicht ins _log, also Task-Log protokollieren, damit mail_on_warning nicht greift. 
+    // Das soll kein Task-Problem sein! Siehe auch Task::do_something, s_deleting_files
+    // Kein base_log? Dann nicht nach stderr protokollieren (bei Betrieb Remote_module_instance_server).
+    Delegated_log* unlink_log = _module &&  _module->_log.base_log()? &_module->_log : NULL;      
+
+    if( _stdout_file      .is_to_be_unlinked() )  _stdout_file      .try_unlink( unlink_log );
+    if( _stderr_file      .is_to_be_unlinked() )  _stderr_file      .try_unlink( unlink_log );
+    if( _order_params_file.is_to_be_unlinked() )  _order_params_file.try_unlink( unlink_log );
 }
 
 //------------------------------------------------------------Process_module_instance::close_handle

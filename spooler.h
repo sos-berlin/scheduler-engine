@@ -97,6 +97,8 @@ extern const string             scheduler_character_encoding;
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
 const int                       max_memory_file_size          = 10*1024*1024;   // Für Dateien, die komplett in den Speicher geladen werden
+extern const double             delete_temporary_files_delay;
+extern const double             delete_temporary_files_retry;
 
 #ifdef Z_WINDOWS
     const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
