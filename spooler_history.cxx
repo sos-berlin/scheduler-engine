@@ -1007,7 +1007,6 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
     {
         case dbms_access:
         case dbms_sql_server:
-        case dbms_sybase:       // Funktioniert nicht
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
             break;
 
@@ -1022,6 +1021,10 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
 
         case dbms_mysql:    // "datetime not null" wirkt wie "datetime null"
             cmd << "ALTER TABLE " << table_name << " modify column `" << column_name << "` " << type << " null";
+            break;
+
+        case dbms_sybase:
+            cmd << "ALTER TABLE " << table_name << " modify `" << column_name << "` " << type << " null";
             break;
 
         case dbms_oracle:
