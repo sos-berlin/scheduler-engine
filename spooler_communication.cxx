@@ -468,7 +468,13 @@ bool Communication::Connection::do_recv()
             if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
 
             if( len == 1  &&  buffer[0] == '\n'   
-             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
+             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  
+            { 
+                _spooler->signal( "do_something!" );  
+                _spooler->_last_time_enter_pressed = Time::now().as_time_t(); 
+                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders( 1 );  
+                return true; 
+            }
 
             //_receive_at_start = false;
             _connection_state = s_receiving;
