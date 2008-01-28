@@ -559,14 +559,14 @@ void Database::open2( const string& db_name )
             {
                 _db.open( "-in -out " + my_db_name );
 
-                //switch( _db.dbms_kind() )
-                //{
-                //    case dbms_sql_server: 
-                //        _db.put( S() << "set lock_timeout " << ( lock_timeout * 1000 ) );  
-                //        break;
+                switch( _db.dbms_kind() )
+                {
+                    case dbms_sybase: 
+                        _db_descr._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                        break;
 
-                //    default: ;
-                //}
+                    default: ;
+                }
 
                 _log->info( message_string( "SCHEDULER-807", _db.dbms_name() ) );     // Datenbank ist geöffnet
 
@@ -1007,7 +1007,7 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
     {
         case dbms_access:
         case dbms_sql_server:
-        case dbms_sybase:
+        case dbms_sybase:       // Funktioniert nicht
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
             break;
 
@@ -1789,9 +1789,12 @@ void Database::spooler_stop()
         {
             Transaction ta ( this );
             {
-                ta.execute( "UPDATE " + _spooler->_job_history_tablename + "  set \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'} "
-                            "where \"ID\"=" + as_string(_id), 
-                            Z_FUNCTION );
+                sql::Update_stmt update ( database_descriptor() );
+                update.set_table_name( _spooler->_job_history_tablename  );
+                update[ "end_time" ].set_datetime( Time::now().as_string(Time::without_ms) );
+                update.and_where_condition( "id", _id );
+                ta.execute( update, Z_FUNCTION );
+
                 ta.commit( Z_FUNCTION );
             }
         }
@@ -2374,14 +2377,17 @@ void Task_history::write( bool start )
                     }
                     else
                     {
-                        string stmt = "UPDATE " + _spooler->_job_history_tablename + "  set ";
-                        stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
-                        stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
-                        stmt += ", \"STEPS\"=" + as_string( _task->_step_count );
-                        stmt += ", \"EXIT_CODE\"=" + as_string( _task->_exit_code );
-                        stmt += ", \"ERROR\"=" + as_string( _task->has_error() );
-                        if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
-                        if( !_task->_error.what().empty() ) stmt += ", \"ERROR_TEXT\"=" + sql_quoted( _task->_error.what().substr( 0, 249 ) );    // Für MySQL 249 statt 250. jz 7.1.04
+                        sql::Update_stmt update ( _spooler->db()->database_descriptor(), _spooler->_job_history_tablename  );
+                        
+                        update.and_where_condition( "id", _task->_id );
+                        update[ "start_time" ].set_datetime( start_time );
+                        update[ "end_time"   ].set_datetime( Time::now().as_string(Time::without_ms) );
+                        update[ "steps"      ] = _task->_step_count;
+                        update[ "exit_code"  ] = _task->_exit_code;
+                        update[ "error"      ] = _task->has_error();
+
+                        if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
+                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, 249 );    // Für MySQL 249 statt 250. jz 7.1.04
 
                         if( _extra_record.type() )
                         {
@@ -2391,13 +2397,13 @@ void Task_history::write( bool start )
                                 {
                                     string s = _extra_record.as_string(i);
                                     if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
-                                    stmt += ", " + sql_quoted_name( _job_history->_extra_names[i] ) + "=" + s;
+                                    update [ _job_history->_extra_names[i] ] = s;
                                 }
                             }
                         }
 
-                        stmt += " where `id`=" + as_string( _task->_id );
-                        ta.execute( stmt, Z_FUNCTION );
+                        ta.execute( update, Z_FUNCTION );
+
 
 
                         // Task-Protokoll

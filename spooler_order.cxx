@@ -377,10 +377,9 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     Time t = order_queue->next_announced_distributed_order_time();
     assert( t );
 
-    result << " and `distributed_next_time` < {ts'" 
-           << ( t < Time::never? t.as_string( Time::without_ms ) 
-                               : never_database_distributed_next_time ) 
-           << "'}";
+    result << " and `distributed_next_time` < " 
+           << db()->database_descriptor()->timestamp_string( t < Time::never? t.as_string( Time::without_ms ) 
+                                                                            : never_database_distributed_next_time );
 
     return result;
 }
@@ -568,8 +567,8 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if(  options->_from              )  select_sql << " and `distributed_next_time` >= {ts'" << options->_from   << "'}";
-        if( !options->_before.is_never() )  select_sql << " and `distributed_next_time` < {ts'"  << options->_before << "'}";
+        if(  options->_from              )  select_sql << " and `distributed_next_time` >= " << db()->database_descriptor()->timestamp_string( options->_from  .as_string(Time::without_ms) );
+        if( !options->_before.is_never() )  select_sql << " and `distributed_next_time` < "  << db()->database_descriptor()->timestamp_string( options->_before.as_string(Time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
         
@@ -634,7 +633,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         if( flag & lo_lock )  select_sql << " %update_lock";
         select_sql << "  where " << order_db_where_condition( job_chain_path, order_id.as_string() );
 
-        if( flag & lo_blacklisted )  select_sql << " and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
+        if( flag & lo_blacklisted )  select_sql << " and `distributed_next_time`=" << db()->database_descriptor()->timestamp_string( blacklist_database_distributed_next_time );
                                else  select_sql << " and `distributed_next_time` is not null";
 
         Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION );
@@ -2598,7 +2597,7 @@ hash_set<string> Job_chain::db_get_blacklisted_order_id_set( const File_path& di
         S select_sql;
         select_sql << "select `id`  from " << _spooler->_orders_tablename <<
                       "  where " << db_where_condition() << 
-                      "  and `distributed_next_time`={ts'" << blacklist_database_distributed_next_time << "'}";
+                      "  and `distributed_next_time`=" << db()->database_descriptor()->timestamp_string( blacklist_database_distributed_next_time );
 
         for( Any_file result_set = ta.open_result_set( select_sql, Z_FUNCTION ); !result_set.eof(); )
         {
@@ -3762,7 +3761,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     select_sql << "select %limit(1)  `job_chain`, `distributed_next_time`, " << order_select_database_columns <<
                 "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
-                "  where `distributed_next_time` <= {ts'" << now.as_string( Time::without_ms ) << "'}"
+                "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( Time::without_ms ) ) <<
                    " and `occupying_cluster_member_id` is null" << 
                    " and " << w <<
                 "  order by `distributed_next_time`, `priority`, `ordering`";

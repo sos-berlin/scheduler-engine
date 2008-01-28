@@ -144,7 +144,6 @@ struct Time
     double                      cut_fraction                ( string* datetime_string );
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
-    string                      jdbc_value                  () const;
     string                      xml_value                   ( With_ms = with_ms ) const;                        
     void                        print                       ( ostream& s ) const            { s << as_string(); }
     friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }

@@ -1749,18 +1749,18 @@ void Cluster::create_table_when_needed()
     Transaction ta ( db() );
 
     db()->create_table_when_needed( &ta, _spooler->_clusters_tablename,
-            "`member_id`"                      " varchar(100) not null, "
-            "`scheduler_id`"                   " varchar(100) not null, "
-            "`precedence`"                     " integer, "
-            "`last_heart_beat`"                " integer, "                     // time_t
-            "`next_heart_beat`"                " integer, "                     // time_t
-            "`active`"                         " boolean, "                     // null oder 1 (not null)
-            "`exclusive`"                      " boolean, "                     // null oder 1 (not null)
-            "`dead`"                           " boolean, "                     // null oder 1 (not null)
-            "`command`"                        " varchar(250), "
-            "`http_url`"                       " varchar(100), "
-            "`deactivating_member_id`"         " varchar(100), "
-            "`xml`"                            " clob, "
+            "`member_id`"                      " varchar(100)" " not null, "
+            "`scheduler_id`"                   " varchar(100)" " not null, "
+            "`precedence`"                     " integer"          " null, "
+            "`last_heart_beat`"                " integer"          " null, "        // time_t
+            "`next_heart_beat`"                " integer"          " null, "        // time_t
+            "`active`"                         " boolean"          " null, "        // null oder 1 (not null)
+            "`exclusive`"                      " boolean"          " null, "        // null oder 1 (not null)
+            "`dead`"                           " boolean"          " null, "        // null oder 1 (not null)
+            "`command`"                        " varchar(250)"     " null, "
+            "`http_url`"                       " varchar(100)"     " null, "
+            "`deactivating_member_id`"         " varchar(100)"     " null, "
+            "`xml`"                            " clob"             " null, "
             "primary key( `member_id` )" );
 
     ta.commit( Z_FUNCTION );
