@@ -568,7 +568,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         {
             assert( !_file_logger );
 
-            _file_logger = Z_NEW( File_logger( _log ) );
+            _file_logger = Z_NEW( File_logger( _log, "Com_remote_module_instance_server" ) );
             _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );
             _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
             _file_logger->start_thread();

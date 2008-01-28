@@ -205,7 +205,7 @@ Task::Task( Job* job )
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
-    _file_logger = Z_NEW( File_logger( _log ) );
+    _file_logger = Z_NEW( File_logger( _log, obj_name() ) );
 
     _let_run = _job->_period.let_run();
 

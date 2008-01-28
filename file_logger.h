@@ -42,7 +42,7 @@ struct File_logger : Async_operation
         Event                  _terminate_event;
     };
 
-                                File_logger                 ( Has_log* );
+                                File_logger                 ( Has_log*, const string& for_object );
                                ~File_logger                 ();
 
     void                        close                       ();
@@ -70,6 +70,7 @@ struct File_logger : Async_operation
     File_line_reader_list      _file_line_reader_list;
     ptr<File_logger_thread>    _thread;
     bool                       _remove_files;
+    string                     _for_object;
 };
 
 //-------------------------------------------------------------------------------------------------

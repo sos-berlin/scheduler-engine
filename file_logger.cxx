@@ -14,10 +14,11 @@ const double                    read_interval_max           = Z_NDEBUG_DEBUG( 10
 
 //-------------------------------------------------------------------------File_logger::File_logger
 
-File_logger::File_logger( Has_log* log )
+File_logger::File_logger( Has_log* log, const string& for_object )
 :
     _zero_(this+1),
-    _log(log)
+    _log(log),
+    _for_object(for_object)
 {
 }
 
@@ -144,11 +145,14 @@ string File_logger::async_state_text_() const
 {
     S result;
     result << "File_logger(";
+
+    result << _for_object;
     
     Z_FOR_EACH_CONST( File_line_reader_list, _file_line_reader_list, it )
     {
         File_line_reader* file_line_reader = *it;
-        if( it != _file_line_reader_list.begin() )  result << ", ";
+        //if( it != _file_line_reader_list.begin() )  
+        result << ", ";
         result << file_line_reader->_prefix << ": " << file_line_reader->_read_length << " bytes";
     }
 
