@@ -4275,6 +4275,8 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_order_history_tablename, x ), Z_FUNCTION ); }
     }
+
+    _history_id = 0;        // Beim nächsten Start neue history_id ziehen
 }
 
 //-------------------------------------------------------Order::db_insert_order_step_history_record
@@ -4977,6 +4979,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string at_string        = element.getAttribute( "at" );
     string setback          = element.getAttribute( "setback" );
     _setback_count          = element.int_getAttribute( "setback_count", _setback_count );
+    _history_id             = element.int_getAttribute( "history_id"   , _history_id );
 
     if( element.bool_getAttribute( "replacement" ) )  set_replacement( true );
     _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
@@ -5094,6 +5097,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
+        if( _history_id )  result.setAttribute( "history_id", _history_id );
+
         if( _setback )
         result.setAttribute( "next_start_time", _setback.as_string() );
 
@@ -6230,7 +6235,7 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
     
     close_log_and_write_history();  // Historie schreiben, aber Auftrag beibehalten
     _start_time = 0;
-    _end_time = 0;
+    _end_time   = 0;
 
     try
     {
