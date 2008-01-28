@@ -4632,10 +4632,13 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 update_ok = ta.try_execute_single( delete_sql, Z_FUNCTION );
                 if( !update_ok )  update_ok = db_handle_modified_order( &ta );  //int DISTRIBUTED_FEHLER_KOENNTE_GEZEIGT_WERDEN; // Zeigen, wenn distributed_next_time falsch ist.
 
-                if( update_option == update_and_release_occupation  &&  _history_id  &&  _step_number )
-                    db_update_order_step_history_record( &ta );
+                if( _history_id )
+                {
+                    if( update_option == update_and_release_occupation  &&  _step_number )
+                        db_update_order_step_history_record( &ta );
 
-                db_update_order_history_record( &ta );
+                    db_update_order_history_record( &ta );
+                }
         
                 ta.commit( Z_FUNCTION );
             }
@@ -4798,7 +4801,13 @@ void Order::close_log_and_write_history()
     
     if( _job_chain  &&  _spooler->_db  &&  _spooler->_db->opened() ) 
     {
-         db_update_order_history_record( (Transaction*)NULL );    // Historie schreiben, aber Auftrag beibehalten
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            if( _step_number )  db_update_order_step_history_record( &ta );
+            db_update_order_history_record( &ta );    // Historie schreiben, aber Auftrag beibehalten
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", "order history", x ), Z_FUNCTION ); }
     }
 
     //2007-09-25 HTTP-Protokoll weiterlaufen lassen   _log->close();

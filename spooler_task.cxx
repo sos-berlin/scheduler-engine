@@ -205,7 +205,6 @@ Task::Task( Job* job )
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
-    _file_logger = Z_NEW( File_logger( _log, obj_name() ) );
 
     _let_run = _job->_period.let_run();
 
@@ -259,8 +258,11 @@ void Task::close()
 {
     if( !_closed )
     {
-        _file_logger->set_async_manager( NULL );
-        _file_logger->close();
+        if( _file_logger )
+        {
+            _file_logger->set_async_manager( NULL );
+            _file_logger->close();
+        }
 
         FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
 
@@ -335,6 +337,8 @@ void Task::init()
 {
     set_state( s_loading );
 
+    _file_logger = Z_NEW( File_logger( _log ) );
+    _file_logger->set_object_name( obj_name() );
     _spooler->_task_subsystem->add_task( this );       // Jetzt kann der Thread die Task schon starten!
 }
 

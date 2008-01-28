@@ -42,10 +42,11 @@ struct File_logger : Async_operation
         Event                  _terminate_event;
     };
 
-                                File_logger                 ( Has_log*, const string& for_object );
+                                File_logger                 ( Has_log* );
                                ~File_logger                 ();
 
     void                        close                       ();
+    void                        set_object_name             ( const string& text )                  { _for_object = text; }
     void                        set_remove_files            ( bool b )                              { _remove_files = b; }
     void                        add_file                    ( const File_path&, const string& prefix );
     void                        start                       ();
