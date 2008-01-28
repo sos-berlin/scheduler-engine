@@ -14,6 +14,7 @@ struct Supervisor_client_interface: idispatch_implementation< Supervisor_client_
     virtual bool                is_ready                    () const                                = 0;
     virtual bool                connection_failed           () const                                = 0;
     virtual void                start_update_configuration  ()                                      = 0;
+    virtual void                try_connect                 ()                                      = 0;
 };
 
 

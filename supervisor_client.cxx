@@ -50,6 +50,7 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     bool                        is_ready                    () const                                { return _is_ready; }
     bool                        connection_failed           () const                                { return _connection_failed; }
     void                        start_update_configuration  ();
+    void                        try_connect                 ();
 
   protected:
     string                      async_state_text_           () const;
@@ -87,6 +88,7 @@ struct Supervisor_client : Supervisor_client_interface
     bool                        is_ready                    () const                                { return _client_connection && _client_connection->is_ready(); }
     bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
     void                        start_update_configuration  ()                                      { if( _client_connection )  _client_connection->start_update_configuration(); }
+    void                        try_connect                 ()                                      { if( _client_connection )  _client_connection->try_connect(); }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -262,6 +264,16 @@ void Supervisor_client_connection::start_update_configuration()
     }
     else
         _start_update_configuration_delayed = true;
+}
+
+//--------------------------------------------------------Supervisor_client_connection::try_connect
+
+void Supervisor_client_connection::try_connect()
+{
+    if( _state == s_not_connected )
+    {
+        async_wake();
+    }
 }
 
 //----------------------------------------------------Supervisor_client_connection::async_continue_
