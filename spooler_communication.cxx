@@ -470,9 +470,10 @@ bool Communication::Connection::do_recv()
             if( len == 1  &&  buffer[0] == '\n'   
              || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  
             { 
+                if( _spooler->_supervisor_client )  _spooler->_supervisor_client->try_connect();
+                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders( 1 ); 
                 _spooler->signal( "do_something!" );  
                 _spooler->_last_time_enter_pressed = Time::now().as_time_t(); 
-                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders( 1 );  
                 return true; 
             }
 
