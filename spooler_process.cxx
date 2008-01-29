@@ -406,11 +406,8 @@ void Process::start()
 
 void Process::start_local_process()
 {
-    ptr<object_server::Connection_to_own_server_process> c = _spooler->_connection_manager->new_connection_to_own_server_process();
-    c->open_stdout_stderr_files();
-
-
-    object_server::Parameters parameters;
+    ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connection_manager->new_connection_to_own_server_process();
+    object_server::Parameters                            parameters;
 
     if( !_spooler->_sos_ini.empty() )
     parameters.push_back( object_server::Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
@@ -432,16 +429,18 @@ void Process::start_local_process()
     parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
 
-    fill_connection( c );
+    //if( _open_stdout_stderr_files ) 
+        connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
+    fill_connection( connection );
 
     #ifdef Z_HPUX
-        c->set_ld_preload( static_ld_preload );
+        connection->set_ld_preload( static_ld_preload );
     #endif
 
-    c->set_priority( _priority );
-    c->start_process( parameters );
+    connection->set_priority( _priority );
+    connection->start_process( parameters );
 
-    _connection = +c;
+    _connection = +connection;
 
     _process_handle_copy = _connection->process_handle();
     _spooler->register_process_handle( _process_handle_copy );
@@ -453,15 +452,15 @@ void Process::start_local_process()
 
 void Process::start_local_thread()
 {
-    ptr<object_server::Connection_to_own_server_thread> c = _spooler->_connection_manager->new_connection_to_own_server_thread();
+    ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
    
-    fill_connection( c );
+    fill_connection( connection );
 
-    _com_server_thread = Z_NEW( Com_server_thread( c ) );
-    c->start_thread( _com_server_thread );
+    _com_server_thread = Z_NEW( Com_server_thread( connection ) );
+    connection->start_thread( _com_server_thread );
 
 
-    _connection = +c;
+    _connection = +connection;
 
     _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
@@ -489,8 +488,8 @@ void Process::fill_connection( object_server::Connection* connection )
 
         if( object_server::Connection_to_own_server_process* c = dynamic_cast<object_server::Connection_to_own_server_process*>( connection ) )
         {
-            stdin_xml_writer.set_attribute     ( "stdout_path"    , c->stdout_path() );
-            stdin_xml_writer.set_attribute     ( "stderr_path"    , c->stderr_path() );
+            stdin_xml_writer.set_attribute( "stdout_path", c->stdout_path() );
+            stdin_xml_writer.set_attribute( "stderr_path", c->stderr_path() );
         }
 
         if( _environment )  
@@ -821,13 +820,13 @@ File_path Process::stdout_path()
     {
         result = c->stdout_path();
     }
-    else
-    if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
-    {
-        assert(!"Connection_to_own_server_thread");
-    }
-    else
-        result = _remote_stdout_file.path();
+    //else
+    //if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
+    //{
+    //    assert(!"Connection_to_own_server_thread");
+    //}
+    //else
+    //    result = _remote_stdout_file.path();
 
     return result;
 }
@@ -842,13 +841,13 @@ File_path Process::stderr_path()
     {
         result = c->stderr_path();
     }
-    else
-    if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
-    {
-        assert(!"Connection_to_own_server_thread");
-    }
-    else
-        result = _remote_stderr_file.path();
+    //else
+    //if( object_server::Connection_to_own_server_thread* c = dynamic_cast< object_server::Connection_to_own_server_thread* >( +_connection ) )
+    //{
+    //    assert(!"Connection_to_own_server_thread");
+    //}
+    //else
+    //    result = _remote_stderr_file.path();
 
     return result;
 }
@@ -863,11 +862,11 @@ bool Process::try_delete_files( Has_log* log )
     {
         result = c->try_delete_files( log );
     }
-    else
-    {
-        if( _remote_stdout_file.is_to_be_unlinked() )  result &= _remote_stdout_file.try_unlink();
-        if( _remote_stderr_file.is_to_be_unlinked() )  result &= _remote_stderr_file.try_unlink();
-    }
+    //else
+    //{
+    //    if( _remote_stdout_file.is_to_be_unlinked() )  result &= _remote_stdout_file.try_unlink();
+    //    if( _remote_stderr_file.is_to_be_unlinked() )  result &= _remote_stderr_file.try_unlink();
+    //}
 
     return result;
 }
@@ -882,11 +881,11 @@ list<File_path> Process::undeleted_files()
     {
         result = c->undeleted_files();
     }
-    else
-    {
-        if( _remote_stdout_file.is_to_be_unlinked() )  result.push_back( _remote_stdout_file.path() );
-        if( _remote_stderr_file.is_to_be_unlinked() )  result.push_back( _remote_stderr_file.path() );
-    }
+    //else
+    //{
+    //    if( _remote_stdout_file.is_to_be_unlinked() )  result.push_back( _remote_stdout_file.path() );
+    //    if( _remote_stderr_file.is_to_be_unlinked() )  result.push_back( _remote_stderr_file.path() );
+    //}
 
     return result;
 }

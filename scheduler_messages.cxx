@@ -143,7 +143,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-274", "Error when killing subprocess $1: $2" },
     { "SCHEDULER-275", "Deadline reached, killing subprocess $1" },
     { "SCHEDULER-276", "Could not kill task" },
-    { "SCHEDULER-277", "Killing task after request" },
+    { "SCHEDULER-277", "Trying to kill task after request" },
     { "SCHEDULER-278", "<period> ended, terminating task" },
     { "SCHEDULER-279", "Process terminated with signal $1 ($2)" },
     { "SCHEDULER-280", "Process terminated with exit code $1 (0x$2)" },

@@ -107,6 +107,7 @@ struct Process : zschimmer::Object, Scheduler_object
     bool                        started                     ()                                      { return _connection != NULL; }
 
     void                    set_controller_address          ( const Host_and_port& h )              { _controller_address = h; }
+    void                    set_open_stdout_stderr_files    ( bool b = true )                       { _open_stdout_stderr_files = b; }
     void                        start                       ();
     void                        start_local_process         ();
     void                        start_local_thread          ();
@@ -157,6 +158,7 @@ struct Process : zschimmer::Object, Scheduler_object
   //string                     _server_hostname;
   //int                        _server_port;
     Host_and_port              _controller_address;
+    bool                       _open_stdout_stderr_files;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     ptr<Com_server_thread>     _com_server_thread;
@@ -175,8 +177,8 @@ struct Process : zschimmer::Object, Scheduler_object
     Host_and_port              _remote_scheduler;
     Process_id                 _remote_process_id;
     pid_t                      _remote_pid;
-    File                       _remote_stdout_file;
-    File                       _remote_stderr_file;
+    //File                       _remote_stdout_file;
+    //File                       _remote_stderr_file;
     ptr<Async_remote_operation> _async_remote_operation;
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;

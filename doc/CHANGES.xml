@@ -10,6 +10,14 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-01-28" version="2.0.198" subversion_revision="5559">
+        <revision type="new" title="Scheduler für AIX bereitgestellt">
+            <description>
+                
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
         <revision type="new" title="Scheduler für AIX bereitgestellt">
         </revision>

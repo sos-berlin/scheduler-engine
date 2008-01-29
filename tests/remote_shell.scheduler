@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="sos-linux" max_processes="50"/>
         </process_classes>
 
 
@@ -21,7 +21,8 @@
                 <script language="shell">
                     <![CDATA[
 echo Hallo!                
-sleep 15
+env
+sleep 10
 echo Fertig.
 exit 27
                 ]]>

@@ -433,16 +433,11 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
         if( !_process->started() )
         {
-            //if( !_server_hostname.empty() )
-            //{
-            //    _process->set_server( _server_hostname, _server_port );
-            //}
-
             _process->set_job_name( _job_name );
             _process->set_task_id ( _task_id  );
             if( _module->_priority != "" )  _process->set_priority( _module->_priority );
             _process->set_environment( *_process_environment );
-
+            _process->set_open_stdout_stderr_files();
             _process->start();
         }
 
@@ -512,7 +507,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 15 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 14 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -529,8 +524,8 @@ AGAIN:
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
 
-                if( _module->kind() == Module::kind_process )
-                params_array[ nr++ ] = "log_stdout_stderr=1";
+                //if( _module->kind() == Module::kind_process )
+                //params_array[ nr++ ] = "log_stdout_stderr=1";
 
                 params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
                 params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;

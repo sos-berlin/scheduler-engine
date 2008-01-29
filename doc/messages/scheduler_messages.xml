@@ -1567,11 +1567,8 @@
         </message>
 
         <message code="SCHEDULER-277">
-            <text xml:lang="de">
-                <title>Task wird nach Anforderung abgebrochen</title>
-            </text>
             <text xml:lang="en">
-                <title>Killing task after request</title>
+                <title>Trying to kill task after request</title>
             </text>
         </message>
 

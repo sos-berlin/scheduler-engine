@@ -7,12 +7,17 @@
     <config>
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
+        <process_classes>
+            <process_class name="remote" remote_scheduler="sos:6360"/>
+        </process_classes>
+        
         <jobs>
+<!--            
             <job name="shell">
                 <script language="shell">@echo off
 echo STATE_TEXT                
 echo Zweite Zeile
-sleep 2
+sleep 5
 echo Dritte Zeile
 echo Vierte Zeile
 echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -22,6 +27,57 @@ echo
                 </script>
                 <run_time once="yes"/>
             </job>
+
+            <job name="api">
+                <script language="javascript">
+                    <![CDATA[
+             
+var hostware = new ActiveXObject( "hostware.global" );             
+var stdout = hostware.open( "-out *stdout" );
+var stderr = hostware.open( "-out *stderr" );
+stdout.put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT" );
+stderr.put_line( "STDERR STDERR STDERR STDERR STDERR STDERR STDERR" );
+hostware.sleep( 6 );
+stdout.put_line( "stdout fertig." );
+stderr.put_line( "stderr fertig." );
+                    ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+
+            <job name="remote_shell" process_class="remote">
+                <script language="shell">
+                    @echo off
+                    echo STATE_TEXT
+                    echo Zweite Zeile
+                    sleep 7
+                    echo Dritte Zeile
+                    echo Vierte Zeile
+                    echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    echo
+                </script>
+                <run_time once="yes"/>
+            </job>
+-->
+            <job name="remote_api" process_class="remote">
+                <script language="javascript">
+                    <![CDATA[
+             
+var hostware = new ActiveXObject( "hostware.global" );             
+var stdout = hostware.open( "-out *stdout" );
+var stderr = hostware.open( "-out *stderr" );
+stdout.put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT" );
+stderr.put_line( "STDERR STDERR STDERR STDERR STDERR STDERR STDERR" );
+hostware.sleep( 8 );
+stdout.put_line( "stdout fertig." );
+stderr.put_line( "stderr fertig." );
+                    ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+
         </jobs>
     </config>
 </spooler>

@@ -679,10 +679,10 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    int  pid  = close_element. int_getAttribute( "process_id" );
-    bool kill = close_element.bool_getAttribute( "kill", false );
+    int  process_id = close_element. int_getAttribute( "process_id" );
+    bool kill       = close_element.bool_getAttribute( "kill", false );
 
-    Process* process = _communication_operation->_operation_connection->get_task_process( pid );
+    Process* process = _communication_operation->_operation_connection->get_task_process( process_id );
 
     if( kill )  process->kill();
 
@@ -794,7 +794,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     if( show.is_set( show_all_ ) )  show = Show_what( show_standard );
 
     Absolute_path job_chain_path = Absolute_path( root_path, show_order_element.getAttribute( "job_chain" ) );
-    Order::Id     id             = show_order_element.getAttribute( "order"     );
+    Order::Id     id             = show_order_element.getAttribute( "order"      );
     string        history_id     = show_order_element.getAttribute( "history_id" );
     string        id_string      = string_from_variant( id );
 
@@ -821,7 +821,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                            " select max(\"HISTORY_ID\") as history_id_max "
                            "  from " + _spooler->_order_history_tablename +
                            "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
-                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_path ) +
+                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_path.without_slash() ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ),
                             Z_FUNCTION );
 

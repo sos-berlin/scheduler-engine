@@ -54,7 +54,7 @@ void Remote_module_instance_server::close__end()   // synchron
 
     if( _module_instance )  
     {
-        try_delete_files();     // Kann verzögern um 
+        try_delete_files();     // Kann verzögern um delete_temporary_files_delay Sekunden
 
         _module_instance->close(), 
         _module_instance = NULL;
@@ -247,6 +247,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         string java_class_path = _class_data->_task_process_element.getAttribute( "java_class_path" );
         string javac           = _class_data->_task_process_element.getAttribute( "javac"           );
         string java_work_dir   = _class_data->_task_process_element.getAttribute( "java_work_dir"   );
+        _log_stdout_stderr     = _class_data->_task_process_element.getAttribute( "stdout_path"     ) == "";
 
         DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
         {
@@ -303,8 +304,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "job"              )  job_name                          = value;
                 else
                 if( key_word == "task_id"          )  task_id                           = as_int( value );
-                else
-                if( key_word == "log_stdout_stderr"     )  _log_stdout_stderr                       = as_bool( value );
+                //else
+                //if( key_word == "log_stdout_stderr"     )  _log_stdout_stderr                       = as_bool( value );
                 else
                 if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
                 else
@@ -380,7 +381,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         }
         else
         {
-            Z_LOG2( "scheduler", "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
+            Z_LOG2( "java", "Com_remote_module_instance_server::Construct: Die Java Virtual Machine läuft bereits.\n" );
             // Parameter für Java können nicht übernommen werden.
         }
 
@@ -510,7 +511,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
 
         assert( !_class_data->_remote_instance_pid );
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
-
+assert(!"XXX");
         if( _log  &&  _log_stdout_stderr )
         {
             assert( !_file_logger );
@@ -519,7 +520,11 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             _file_logger->set_object_name( "Com_remote_module_instance_server" );   // Nur zur Info
             _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );
             _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
-            _file_logger->start_thread();
+            
+            if( _file_logger->has_files() )
+            {
+                _file_logger->start_thread();
+            }
         }
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }

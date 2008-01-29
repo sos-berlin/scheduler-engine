@@ -1216,10 +1216,15 @@ bool Task::do_something()
                                 ok = operation__end();
 
                                 if( _job->_history.min_steps() == 0 )  _history.start();
+
                                 _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
                                 _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
-                                _file_logger->set_async_manager( _spooler->_connection_manager );
-                                _file_logger->start();
+
+                                if( _file_logger->has_files() )
+                                {
+                                    _file_logger->set_async_manager( _spooler->_connection_manager );
+                                    _file_logger->start();
+                                }
 
                                 State next_state;
                                 if( !ok )  next_state = s_ending;
