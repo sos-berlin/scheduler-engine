@@ -67,7 +67,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     com::object_server::Session*  _session;
     ptr<Class_data>               _class_data;
     ptr<Com_log_proxy>            _log;
-    bool                          _log_stdout_stderr;
+  //bool                          _log_stdout_stderr;
     ptr<File_logger>              _file_logger;
 };
 

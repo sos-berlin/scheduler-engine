@@ -247,7 +247,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         string java_class_path = _class_data->_task_process_element.getAttribute( "java_class_path" );
         string javac           = _class_data->_task_process_element.getAttribute( "javac"           );
         string java_work_dir   = _class_data->_task_process_element.getAttribute( "java_work_dir"   );
-        _log_stdout_stderr     = _class_data->_task_process_element.getAttribute( "stdout_path"     ) == "";
+      //_log_stdout_stderr     = _class_data->_task_process_element.getAttribute( "stdout_path"     ) == "";
 
         DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
         {
@@ -503,21 +503,16 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         }
 
 
-        _server->_module_instance->begin__start() -> async_finish();
-
-        result->vt = VT_BOOL;
-        V_BOOL( result ) = _server->_module_instance->begin__end();
-
-
-        assert( !_class_data->_remote_instance_pid );
-        _class_data->_remote_instance_pid = _server->_module_instance->pid();
-assert(!"XXX");
-        if( _log  &&  _log_stdout_stderr )
+        if( _log ) // &&  _log_stdout_stderr )
         {
             assert( !_file_logger );
 
             _file_logger = Z_NEW( File_logger( _log ) );
             _file_logger->set_object_name( "Com_remote_module_instance_server" );   // Nur zur Info
+            
+            _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stdout_path" ), "stdout" );
+            _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stderr_path" ), "stderr" );
+            // Entweder die oberen beiden oder die unteren beiden sind gültig, also nicht "". Die unteren bei Process_module_instance
             _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );
             _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
             
@@ -526,6 +521,15 @@ assert(!"XXX");
                 _file_logger->start_thread();
             }
         }
+
+        _server->_module_instance->begin__start() -> async_finish();
+
+        result->vt = VT_BOOL;
+        V_BOOL( result ) = _server->_module_instance->begin__end();
+
+
+        assert( !_class_data->_remote_instance_pid );
+        _class_data->_remote_instance_pid = _server->_module_instance->pid();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 
