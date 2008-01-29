@@ -705,6 +705,20 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
+    try
+    {
+        close();
+    }
+    catch( exception& x )
+    {
+        cerr << Z_FUNCTION << " " << x.what() << "\n";
+    }
+}
+
+//-----------------------------------------------------------------------------------Spooler::close
+
+void Spooler::close()
+{
     if( _daylight_saving_time_transition_detector )  _daylight_saving_time_transition_detector->set_async_manager( NULL );
 
     spooler_ptr = NULL;
@@ -732,6 +746,8 @@ Spooler::~Spooler()
     if( _com_log     )  _com_log->set_log( NULL );
 
     //update_console_title( 0 );
+
+    // _log offenhalten
 }
 
 //------------------------------------------------------------------------------------Spooler::name
@@ -3066,8 +3082,8 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
+    close();
     _log->info( message_string( "SCHEDULER-999" ) );        // "Scheduler ordentlich beendet"
-                                                
     _log->close();
 
    

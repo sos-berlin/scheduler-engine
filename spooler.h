@@ -340,6 +340,8 @@ struct Spooler : Object,
                                 Spooler                     ();
                                ~Spooler                     ();
 
+    void                        close                       ();
+
     // Scheduler_object:
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
