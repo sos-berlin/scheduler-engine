@@ -23,6 +23,7 @@
 echo Hallo!                
 sleep 15
 echo Fertig.
+exit 27
                 ]]>
                 </script>
                 <run_time once="yes"/>

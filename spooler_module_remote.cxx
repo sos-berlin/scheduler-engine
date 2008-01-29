@@ -512,7 +512,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 14 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 15 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -528,6 +528,9 @@ AGAIN:
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
+
+                if( _module->kind() == Module::kind_process )
+                params_array[ nr++ ] = "log_stdout_stderr=1";
 
                 params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
                 params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;

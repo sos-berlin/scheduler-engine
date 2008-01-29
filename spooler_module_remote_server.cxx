@@ -202,6 +202,7 @@ void Com_remote_module_instance_server::Class_data::read_xml( const string& xml_
 Com_remote_module_instance_server::Com_remote_module_instance_server( com::object_server::Session* session, ptr<Object>* class_object_ptr )
 :
     Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this ),
+    _zero_(this+1),
     _session(session)
 {
     if( *class_object_ptr )
@@ -349,6 +350,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "job"              )  job_name                          = value;
                 else
                 if( key_word == "task_id"          )  task_id                           = as_int( value );
+                else
+                if( key_word == "log_stdout_stderr"     )  _log_stdout_stderr                       = as_bool( value );
                 else
                 if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
                 else
@@ -564,7 +567,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         assert( !_class_data->_remote_instance_pid );
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
 
-        if( _log )
+        if( _log  &&  _log_stdout_stderr )
         {
             assert( !_file_logger );
 

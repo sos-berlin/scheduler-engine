@@ -77,14 +77,13 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
 
 
 
+    Fill_zero                          _zero_;
     ptr<Remote_module_instance_server> _server;
     com::object_server::Session*  _session;
     ptr<Class_data>               _class_data;
     ptr<Com_log_proxy>            _log;
+    bool                          _log_stdout_stderr;
     ptr<File_logger>              _file_logger;
-    //ptr<Stdout_stderr_collector>  _stdout_stderr_collector;
-    //ptr<Stdout_stderr_handler>    _stdout_handler;
-    //ptr<Stdout_stderr_handler>    _stderr_handler;
 };
 
 //-------------------------------------------------------------------------------------------------
