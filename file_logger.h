@@ -52,6 +52,8 @@ struct File_logger : Async_operation
     void                        start                       ();
     void                        start_thread                ();
     void                        finish                      ();
+    bool                        flush                       ();
+    bool                        flush_lines                 ();
 
   protected:
     // Async_operation:
@@ -61,7 +63,7 @@ struct File_logger : Async_operation
 
 
   private:
-    bool                        log_lines                   ( const string& lines );
+    bool                        log_lines                   ( const string& );
 
 
     typedef list< ptr<File_line_reader> >  File_line_reader_list;

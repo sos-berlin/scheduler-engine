@@ -23,32 +23,8 @@ namespace scheduler {
 using namespace zschimmer::com::object_server;
 using namespace spooler_com;
 
-//extern Typelib_descr spooler_typelib;
-
 DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_instance_server, CLSID_Remote_module_instance_server, "Spooler.Remote_module_instance_server", "1.0" )
 
-
-//----------------------------------------------------------------------Stdout_stderr_reader_thread
-
-//struct Stdout_stderr_reader_thread : Thread
-//{
-//                                Stdout_stderr_reader        ( Com_remote_module_instance_server* s ) : _zero_(this+1), _com_server(s) {}
-//                               ~Stdout_stderr_reader        ()                                      {}
-//
-//    int                         thread_main                 ();
-//  private:
-//    File
-//    Com_remote_module_instance_server* _com_server;
-//    File                               _stdout_file;
-//    File                               _stderr_file;
-//};
-//
-////---------------------------------------------------------Stdout_stderr_reader_thread::thread_main
-//
-//int Stdout_stderr_reader_thread::thread_main()
-//{
-//
-//}
 
 //-------------------------------------Remote_module_instance_server::Remote_module_instance_server
 
@@ -216,28 +192,7 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
         _class_data->read_xml( _session->connection()->server()->stdin_data() );
 
         *class_object_ptr = _class_data;
-
-//#       ifndef Z_DEBUG
-//            int STDOUT_STDERR_COLLECTOR_NICHT_IMPLEMENTIERT;
-//#       elif 0
-//        if( _class_data->_task_process_element.bool_getAttribute( "collect_stdout_stderr" ) )
-//        {
-//Z_DEBUG_ONLY( assert( !"collect_stdout_stderr" ) );
-//            _stdout_stderr_collector = Z_NEW( Stdout_stderr_collector() );
-//
-//            _stdout_handler = Z_NEW( Stdout_stderr_handler( this, "stdout" ) );
-//            _stderr_handler = Z_NEW( Stdout_stderr_handler( this, "stderr" ) );
-//
-//            _stdout_stderr_collector->set_stdout_handler( _stdout_handler );
-//            _stdout_stderr_collector->set_stderr_handler( _stderr_handler );
-//
-//            _stdout_stderr_collector->start();
-//        }
-//#       endif
     }
-
-    //assert( !_class_data->_com_remote_module_instance_server );
-    //_class_data->_com_remote_module_instance_server = this;
 }
 
 //----------------------------Com_remote_module_instance_server::~Com_remote_module_instance_server
@@ -245,8 +200,6 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 Com_remote_module_instance_server::~Com_remote_module_instance_server()
 {
     if( _file_logger )  _file_logger->close();
-    
-  //if( _class_data )  _class_data->_com_remote_module_instance_server = NULL;
 }
 
 //------------------------------------------------Com_remote_module_instance_server::QueryInterface
@@ -441,15 +394,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
           //_server->_module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
             *result = VARIANT_TRUE;
         }
-
-
-        /*
-            stdout einsammeln, nur auf anderem Rechner (remote_scheduler):
-            Thread starten
-            Stdout_reader verwenden
-            Invoke()
-            Am Ende den Rest übertragen
-        */
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::construct" ); }
 
@@ -598,6 +542,8 @@ STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VAR
             _server->_module_instance->end__start( succeeded != 0 ) -> async_finish();
             _server->_module_instance->end__end();
         }
+
+        if( _file_logger )  _file_logger->finish();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::end" ); }
 

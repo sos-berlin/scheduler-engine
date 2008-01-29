@@ -36,6 +36,8 @@ File_logger::~File_logger()
 
 void File_logger::add_file( const File_path& path, const string& prefix )
 {
+    Z_LOG2( "joacim", Z_FUNCTION << " " << path << " (" << prefix << ")\n" );
+
     if( path != "" )  
     {
         _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, prefix ) ) );
@@ -87,10 +89,26 @@ void File_logger::start_thread()
     _thread->thread_start();
 }
 
+//-------------------------------------------------------------------------File_logger::flush_lines
+
+bool File_logger::flush_lines()
+{
+    bool something_done = false;
+
+    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+    {
+        File_line_reader* file_line_reader = *it;
+        something_done |= log_lines( file_line_reader->read_lines() );
+    }
+
+    return something_done;
+}
+
 //------------------------------------------------------------------------------File_logger::finish
 
-void File_logger::finish()
+bool File_logger::flush()
 {
+    bool   something_done;
     string s;
 
     Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
@@ -101,7 +119,7 @@ void File_logger::finish()
         {
             s = file_line_reader->read_lines();
             if( s == "" )  break;
-            log_lines( s );
+            something_done |= log_lines( s );
         }
     }
 
@@ -113,13 +131,27 @@ void File_logger::finish()
         {
             s = file_line_reader->read_remainder();
             if( s == "" )  break;
-            log_lines( s );
+            something_done |= log_lines( s );
         }
-
-        file_line_reader->close();
     }
 
     // Nicht rufen, wenn wir in eigenem Thread sind:  close();
+
+    return something_done;
+}
+
+//------------------------------------------------------------------------------File_logger::finish
+
+void File_logger::finish()
+{
+    flush();
+
+    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
+    {
+        File_line_reader* file_line_reader = *it;
+
+        file_line_reader->close();
+    }
 }
 
 //---------------------------------------------------------------------File_logger::async_continue_
@@ -128,11 +160,7 @@ bool File_logger::async_continue_( Async_operation::Continue_flags )
 {
     bool something_done = false;
 
-    Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
-    {
-        File_line_reader* file_line_reader = *it;
-        something_done |= log_lines( file_line_reader->read_lines() );
-    }
+    flush_lines();
 
     set_async_delay( something_done? read_interval_min : read_interval_max );
     return true;

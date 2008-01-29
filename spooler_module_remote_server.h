@@ -40,22 +40,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
         xml::Document_ptr      _stdin_dom_document;
         xml::Element_ptr       _task_process_element;
         pid_t                  _remote_instance_pid;
-      //Com_remote_module_instance_server* _com_remote_module_instance_server;      // Das einzige Objekt der Klasse
     };
-
-
-    //struct Stdout_stderr_handler : Object, Stdout_stderr_collector::Handler
-    //{
-    //                            Stdout_stderr_handler       ( Com_remote_module_instance_server* s, const string& prefix ) : _com_server(s), _prefix(prefix) {}
-    //                           ~Stdout_stderr_handler       ()                                      {}
-
-    //    // Stdout_stderr_collector::Handler
-    //    void                    on_thread_has_received_data ( const string& );
-
-    //  private:
-    //    string                             _prefix;
-    //    Com_remote_module_instance_server* _com_server;
-    //};
 
 
                                 Com_remote_module_instance_server( com::object_server::Session*, ptr<Object>* );
