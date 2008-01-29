@@ -39,7 +39,7 @@ struct File_logger : Async_operation
 
         File_logger*           _file_logger;
         Async_manager          _async_manager;
-        Event                  _terminate_event;
+        zschimmer::Event       _terminate_event;
     };
 
                                 File_logger                 ( Has_log* );
