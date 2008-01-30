@@ -202,6 +202,20 @@ void Process_module_instance::close__end()
     Module_instance::close__end();
 }
 
+//------------------------------------------------------------Process_module_instance::begin__start
+
+Async_operation* Process_module_instance::begin__start()
+{
+    // Für Com_remote_module_instance_server::Begin (File_logger) stdout- und stderr-Dateien schon hier anlegen
+    // Wegen open_inheritable sollte vor begin__end() kein anderer Prozess gestartet werden.
+    // (Sowieso wird begin__end() gleich danach gerufen)
+
+    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+
+    return Module_instance::begin__start();
+}
+
 //--------------------------------------------------------------Process_module_instance::begin__end
 #ifdef Z_WINDOWS
 
@@ -222,9 +236,6 @@ bool Process_module_instance::begin__end()
 
     memset( &process_info, 0, sizeof process_info );
 
-
-    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
-    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
     memset( &startup_info, 0, sizeof startup_info );
     startup_info.cb          = sizeof startup_info;
@@ -541,9 +552,6 @@ bool Process_module_instance::begin__end()
             }
         }
     }
-
-    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
-    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
     Message_string m ( "SCHEDULER-987" );
     m.set_max_insertion_length( INT_MAX );

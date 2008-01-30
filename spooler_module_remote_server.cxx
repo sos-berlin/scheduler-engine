@@ -142,7 +142,7 @@ void Com_remote_module_instance_server::Class_data::read_xml( const string& xml_
 {
     if( xml_text != "" )
     {
-        Z_LOG2( "joacim", Z_FUNCTION << xml_text << "\n" );
+        //Z_LOG2( "joacim", Z_FUNCTION << xml_text << "\n" );
         
         _stdin_dom_document.load_xml( xml_text );
 
@@ -503,7 +503,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         }
 
 
-        if( _log ) // &&  _log_stdout_stderr )
+        Async_operation* operation = _server->_module_instance->begin__start();
+
+        if( _log ) 
         {
             assert( !_file_logger );
 
@@ -513,19 +515,15 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stdout_path" ), "stdout" );
             _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stderr_path" ), "stderr" );
             // Entweder die oberen beiden oder die unteren beiden sind gültig, also nicht "". Die unteren bei Process_module_instance
-            _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );
+            _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );  // Process_module_instance::begin__start() hat die Dateien angelegt
             _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
             
-            if( _file_logger->has_files() )
-            {
-                _file_logger->start_thread();
-            }
+            if( _file_logger->has_files() )  _file_logger->start_thread();
         }
 
-        _server->_module_instance->begin__start() -> async_finish();
+        operation->async_finish();
 
-        result->vt = VT_BOOL;
-        V_BOOL( result ) = _server->_module_instance->begin__end();
+        result->vt = VT_BOOL, V_BOOL( result ) = _server->_module_instance->begin__end();
 
 
         assert( !_class_data->_remote_instance_pid );

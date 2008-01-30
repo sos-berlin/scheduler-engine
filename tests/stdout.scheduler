@@ -12,7 +12,7 @@
         </process_classes>
         
         <jobs>
-<!--
+
             <job name="shell">
                 <script language="shell">@echo off
 echo STATE_TEXT                
@@ -44,7 +44,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes"/>
             </job>
--->
+
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
@@ -60,7 +60,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes"/>
             </job>
-<!--
+
             <job name="remote_api" process_class="remote">
                 <script language="javascript">
                     <![CDATA[
@@ -77,7 +77,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes"/>
             </job>
--->
+
         </jobs>
     </config>
 </spooler>

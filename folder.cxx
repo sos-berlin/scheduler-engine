@@ -961,19 +961,19 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info, double now )
 {
-#   ifdef Z_DEBUG
-        if( zschimmer::Log_ptr log = "joacim" )
-        {
-            log << Z_FUNCTION << "( ";
-            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._timestamp_utc ).as_string()
-                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
-                            else  log << "new";
-            log << ", ";
-            if( base_file_info )  log << Time().set_utc( base_file_info->_timestamp_utc ).as_string();
-                            else  log << "removed file";
-            log << " )\n";
-        }
-#   endif
+//#   ifdef Z_DEBUG
+//        if( zschimmer::Log_ptr log = "joacim" )
+//        {
+//            log << Z_FUNCTION << "( ";
+//            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._timestamp_utc ).as_string()
+//                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
+//                            else  log << "new";
+//            log << ", ";
+//            if( base_file_info )  log << Time().set_utc( base_file_info->_timestamp_utc ).as_string();
+//                            else  log << "removed file";
+//            log << " )\n";
+//        }
+//#   endif
 
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;

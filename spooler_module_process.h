@@ -36,6 +36,7 @@ struct Process_module_instance : Module_instance
     bool                        load                        ();
     void                        start                       ();
     void                        close__end                  ();
+    Async_operation*            begin__start                ();
     bool                        begin__end                  ();
     void                        end__end                    ();
     Variant                     step__end                   ();

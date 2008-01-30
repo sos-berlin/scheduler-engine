@@ -108,7 +108,7 @@ bool File_logger::flush_lines()
 
 bool File_logger::flush()
 {
-    bool   something_done;
+    bool   something_done = false;
     string s;
 
     Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
