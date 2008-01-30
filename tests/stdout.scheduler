@@ -8,11 +8,11 @@
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos:6360"/>
+            <process_class name="remote" remote_scheduler="localhost:6360"/>
         </process_classes>
         
         <jobs>
-
+<!--
             <job name="shell">
                 <script language="shell">@echo off
 echo STATE_TEXT                
@@ -25,7 +25,7 @@ echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 echo
                 </script>
-                <run_time once="yes"/>
+                <run_time once="yes" repeat="1"/>
             </job>
 
             <job name="api">
@@ -42,9 +42,9 @@ stdout.put_line( "stdout fertig." );
 stderr.put_line( "stderr fertig." );
                     ]]>
                 </script>
-                <run_time once="yes"/>
+                <run_time once="yes" repeat="1"/>
             </job>
-
+-->
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
@@ -58,9 +58,9 @@ stderr.put_line( "stderr fertig." );
                     echo -n xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                     echo
                 </script>
-                <run_time once="yes"/>
+                <run_time once="yes" repeat="1"/>
             </job>
-
+<!--
             <job name="remote_api" process_class="remote">
                 <script language="javascript">
                     <![CDATA[
@@ -75,9 +75,9 @@ stdout.put_line( "stdout fertig." );
 stderr.put_line( "stderr fertig." );
                     ]]>
                 </script>
-                <run_time once="yes"/>
+                <run_time once="yes" repeat="1"/>
             </job>
-
+-->
         </jobs>
     </config>
 </spooler>
