@@ -886,6 +886,15 @@ Time Period::next_try( const Time& t )
 
 Time Period::next_repeated( const Time& t ) const
 {
+    Time result = next_repeated_allow_after_end( t );
+
+    return result < _end? result : Time::never;  
+}
+
+//----------------------------------------------------------------------------Period::next_repeated
+
+Time Period::next_repeated_allow_after_end( const Time& t ) const
+{
     Time result = Time::never;
     
     if( !_repeat.is_never() )
@@ -899,9 +908,8 @@ Time Period::next_repeated( const Time& t ) const
         result = next_absolute_repeated( t, 1 );
     }
 
-    return result < _end? result : Time::never;  
+    return result;  
 }
-
 //-------------------------------------------------------------------Period::next_absolute_repeated
 
 Time Period::next_absolute_repeated( const Time& t, int next ) const

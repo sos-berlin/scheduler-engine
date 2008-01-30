@@ -6485,7 +6485,7 @@ Time Order::next_start_time( bool first_call )
         }
         else
         {
-            result = _period.next_repeated( now );
+            result = _period.next_repeated_allow_after_end( now );
 
             if( result >= _period.end() )       // Periode abgelaufen?
             {
