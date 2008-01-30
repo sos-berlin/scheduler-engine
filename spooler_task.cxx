@@ -2073,7 +2073,7 @@ void Task::set_state_texts_from_stdout()
     {
         try
         {
-            file::File stdout_file ( _module_instance->stdout_path(), "r" );
+            file::File stdout_file ( _module_instance->stdout_path(), "rb" );
             string first_line = stdout_file.read_string( max_stdout_state_text_length );
             stdout_file.close();
 
