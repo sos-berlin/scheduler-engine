@@ -419,12 +419,12 @@ void Process_module_instance::Process_event::close()
     {
         int status = 0;
 
-        if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
+        if( z::Log_ptr log = "scheduler" )  log << "waitpid(" << _pid << ")  ";
 
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
 
-        if( log_ptr )  if( ret == -1 )  *log_ptr << "ERRNO-" << errno << "  " << strerror(errno) << endl;
-                                  else  *log_ptr << endl;
+        if( z::Log_ptr log = "scheduler" )  if( ret == -1 )  log << "ERRNO-" << errno << "  " << strerror(errno) << "\n";
+                                                       else  log << "\n";
 
         _pid = 0;
     }
@@ -561,7 +561,7 @@ bool Process_module_instance::begin__end()
     Z_LOG2( "scheduler", "signal(SIGCHLD,SIG_DFL)\n" );
     ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 
-    if( log_ptr )  *log_ptr << "fork()  ";
+    Z_LOG2( "scheduler", "fork(), execvp(\"" << program_path() << "\")\n" );
     int pid = fork();
 
     switch( pid )
@@ -571,6 +571,9 @@ bool Process_module_instance::begin__end()
 
         case 0:
         {
+            zschimmer::Log_ptr::disable_logging(); // fork() kann gesperrte Mutex übernehmen, was zum Deadlock führt (stimmt das?)
+            // Z_LOG() ist jetzt wirkunglos. Kann cerr auch gesperrt sein? Wenigstens ist es unwahrscheinlich, weil cerr kaum benutzt wird.
+
             if( _module->_priority != "" ) 
             {
                 try
@@ -578,7 +581,7 @@ bool Process_module_instance::begin__end()
                     int error = setpriority( PRIO_PROCESS, getpid(), posix::priority_from_string( _module->_priority ) );
                     if( error )  throw_errno( errno, "setpriority" );
                 }
-                catch( exception& x ) { Z_LOG2( "scheduler", "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n" ); }
+                catch( exception& x ) { cerr << "setpriority(" << _module->_priority << ") ==> ERROR " << x.what() << "\n"; }
             }
 
             ::signal( SIGINT, SIG_IGN );    // Ctrl-C ignorieren (Darum kümmert sich der Haupt-Prozess)
@@ -607,20 +610,20 @@ bool Process_module_instance::begin__end()
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr( m->second->_name ) + "=" + m->second->_value.as_string();
-                    Z_LOG2( "env", "putenv(\"" << e << "\")\n" );
+                    //Z_LOG2( "env", "putenv(\"" << e << "\")\n" );
                     putenv( strdup( e.c_str() ) );
 #                else
-                    Z_LOG2( "env", "setenv(\"" << m->second->_name << "\",\"" << m->second->_value.as_string() << "\")\n" );
+                    //Z_LOG2( "env", "setenv(\"" << m->second->_name << "\",\"" << m->second->_value.as_string() << "\")\n" );
                     setenv( string_from_bstr( m->second->_name ).c_str(), m->second->_value.as_string().c_str(), true );
 #               endif
             }
 
 
-            Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
+            //Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
             execvp( program_path().c_str(), args );
 
             int e = errno;
-            Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
+            //Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
             fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", e, strerror(e), program_path().c_str() );
             _exit( e? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }
