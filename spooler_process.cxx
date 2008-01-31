@@ -429,8 +429,7 @@ void Process::start_local_process()
     parameters.push_back( object_server::Parameter( "program", _spooler->_my_program_filename ) );
 
 
-    //if( _open_stdout_stderr_files ) 
-        connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
+    connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
     fill_connection( connection );
 
     #ifdef Z_HPUX

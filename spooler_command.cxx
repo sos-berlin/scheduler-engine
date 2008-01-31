@@ -786,8 +786,6 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, const Show_what& show_ )
 {
-    xml::Element_ptr result;
-
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
@@ -797,22 +795,21 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     Order::Id     id             = show_order_element.getAttribute( "order"      );
     string        history_id     = show_order_element.getAttribute( "history_id" );
     string        id_string      = string_from_variant( id );
+    ptr<Order>    order;
+    string        log;
 
     if( history_id == "" )
     {
         Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-        ptr<Order> order     = job_chain->order_or_null( id );
+        
+        order = job_chain->order_or_null( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
             order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, id );
-
-        if( order )  result = order->dom_element( _answer, show );
     }
 
-    if( !result )
+    if( !order  &&  _spooler->_db->opened() )
     {
-        if( !_spooler->_db->opened() )  goto NO_ORDER;
-
         Read_transaction ta ( _spooler->_db );
     
         if( history_id == "" )
@@ -825,55 +822,52 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ),
                             Z_FUNCTION );
 
-            if( sel.eof() )  goto NO_ORDER;
-
-            history_id = sel.get_record().as_string( "history_id_max" );
-            if( history_id == "" )  goto NO_ORDER;
+            if( !sel.eof() )  history_id = sel.get_record().as_string( "history_id_max" );
         }
 
-        S select_sql;
-        select_sql <<  "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                       "  from " << _spooler->_order_history_tablename <<
-                       "  where \"HISTORY_ID\"=" << history_id;
-        if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
-
-        Any_file sel = ta.open_result_set( S() << select_sql, Z_FUNCTION );
-
-        if( sel.eof() )  goto NO_ORDER;
-        Record record = sel.get_record();
-
-        //order = Z_NEW( Order( _spooler, sel.get_record() );
-        ptr<Order> order = new Order( _spooler );
-        order->set_id        ( record.as_string( "id"         ) );
-        order->set_state     ( record.as_string( "state"      ) );
-        order->set_state_text( record.as_string( "state_text" ) );
-        order->set_title     ( record.as_string( "title"      ) );
-      //order->set_priority  ( record.as_int   ( "priority"   ) );
-        sel.close();
-
-        string log;
-
-        if( show.is_set( show_log ) )
+        if( history_id != "" )  
         {
-            log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
-                                     " where \"HISTORY_ID\"=" << history_id );
-        }
+            S select_sql;
+            select_sql <<  "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                           "  from " << _spooler->_order_history_tablename <<
+                           "  where \"HISTORY_ID\"=" << history_id;
+            if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
 
-        /* Payload steht nicht in der Historie
-        if( show & show_payload )
-        {
-            string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -clob=\"PAYLOAD\"" 
-                                             " where \"HISTORY_ID\"=" + history_id );
-            if( payload != "" )  order->set_payload( payload );
+            Any_file sel = ta.open_result_set( S() << select_sql, Z_FUNCTION );
+
+            if( !sel.eof() ) 
+            {
+                Record record = sel.get_record();
+
+                //order = Z_NEW( Order( _spooler, sel.get_record() );
+                order = new Order( _spooler );
+                order->set_id        ( record.as_string( "id"         ) );
+                order->set_state     ( record.as_string( "state"      ) );
+                order->set_state_text( record.as_string( "state_text" ) );
+                order->set_title     ( record.as_string( "title"      ) );
+              //order->set_priority  ( record.as_int   ( "priority"   ) );
+                sel.close();
+
+                if( show.is_set( show_log ) )
+                {
+                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
+                                             " where \"HISTORY_ID\"=" << history_id );
+                }
+
+                /* Payload steht nicht in der Historie
+                if( show & show_payload )
+                {
+                    string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -clob=\"PAYLOAD\"" 
+                                                     " where \"HISTORY_ID\"=" + history_id );
+                    if( payload != "" )  order->set_payload( payload );
+                }
+                */
+            }
         }
-        */
     }
 
-    if( result )  return result;
-
-
-NO_ORDER:
-    z::throw_xc( "SCHEDULER-162", id_string, job_chain_path );
+    if( !order )  z::throw_xc( "SCHEDULER-162", id_string, job_chain_path );
+    return order->dom_element( _answer, show, log != ""? &log : NULL );
 }
 
 //-------------------------------------------------------------Command_processor::execute_add_order

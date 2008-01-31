@@ -437,7 +437,6 @@ bool Remote_module_instance_proxy::try_to_get_process()
             _process->set_task_id ( _task_id  );
             if( _module->_priority != "" )  _process->set_priority( _module->_priority );
             _process->set_environment( *_process_environment );
-            _process->set_open_stdout_stderr_files();
             _process->start();
         }
 
