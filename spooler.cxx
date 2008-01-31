@@ -2138,9 +2138,6 @@ void Spooler::end_waiting_tasks()
 
 void Spooler::run()
 {
-    set_state( s_waiting_for_activation );
-
-
     int     nothing_done_count   = 0;
     int     nichts_getan_zaehler = 0;
     int     log_wait_id          = 0;
@@ -2161,15 +2158,20 @@ void Spooler::run()
 
         //-----------------------------------------------------------------------------------------
 
-        if( !_is_activated  &&  
-            cluster_is_active()  &&  
-            ( !_supervisor_client  ||  _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() ) )
+        if( !_is_activated )
         {
-            if( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() )
+            if( cluster_is_active()  &&  
+                ( !_supervisor_client  ||  _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() )  &&
+                ( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() ) )
             {
                 _is_activated = true;
                 activate();
                 _assert_is_active = true;
+            }
+            else
+            if( _state == s_starting )
+            {
+                set_state( s_waiting_for_activation );
             }
         }
 
