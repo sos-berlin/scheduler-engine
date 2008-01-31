@@ -29,7 +29,12 @@ exit 27
                 </script>
                 <run_time once="yes"/>
             </job>
-            
+
+            <job name="remote_process" process_class="remote">
+                <process file="/tmp/test.cmd" log_file="/tmp/logfile"/>
+                <run_time once="yes"/>
+            </job>
+
         </jobs>
 
     </config>

@@ -252,13 +252,27 @@ Process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_
     
 int Process::Com_server_thread::thread_main()
 {
+    int result = 0;
+
     Com_initialize com_initialize;
 
-    _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Process::pid()
-    _object_server->set_stdin_data( _connection->stdin_data() );
-    _server = +_object_server;
+    try
+    {
+        _object_server = Z_NEW( Object_server() );  // Bis zum Ende des Threads stehenlassen, wird von anderem Thread benutzt: Process::pid()
+        _object_server->set_stdin_data( _connection->stdin_data() );
+        _server = +_object_server;
 
-    return run_server();
+        result = run_server();
+    }
+    catch( exception& x )
+    {
+        S s; 
+        s << "ERROR in Com_server_thread: " << x.what() << "\n";
+        Z_LOG2( "scheduler", s );
+        cerr << s;
+    }
+
+    return result;
 }
 
 //---------------------------------------------------------------------------------Process::Process

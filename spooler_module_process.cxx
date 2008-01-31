@@ -303,16 +303,18 @@ bool Process_module_instance::begin__end()
     m.insert( 1, command_line );
     _log.info( m );
 
+    Z_LOG2( "scheduler", "CreateProcess(" << command_line << ")\n" );
+    
     ok = CreateProcess( NULL, //executable_path.c_str(),    // application name
-                        (char*)command_line.c_str(),      // command line
-                        NULL,                       // process security attributes
-                        NULL,                       // primary thread security attributes
-                        TRUE,                       // handles are inherited?
+                        (char*)command_line.c_str(),    // command line
+                        NULL,                           // process security attributes
+                        NULL,                           // primary thread security attributes
+                        TRUE,                           // handles are inherited?
                         creation_flags,
-                        (char*)((string)env).c_str(),      // use parent's environment
-                        NULL,                       // use parent's current directory
-                        &startup_info,              // STARTUPINFO pointer
-                        &process_info );            // receives PROCESS_INFORMATION
+                        (char*)((string)env).c_str(),
+                        NULL,                           // use parent's current directory
+                        &startup_info,                  // STARTUPINFO pointer
+                        &process_info );                // receives PROCESS_INFORMATION
     if( !ok )  throw_mswin_error( "CreateProcess", executable_path );
 
     CloseHandle( process_info.hThread );
