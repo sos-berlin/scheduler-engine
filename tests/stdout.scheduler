@@ -12,7 +12,7 @@
         </process_classes>
         
         <jobs>
-
+<!--
             <job name="shell">
                 <script language="shell">@echo off
 type s:\01-ff.txt                
@@ -28,24 +28,31 @@ echo
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+-->
             <job name="api">
                 <script language="javascript">
                     <![CDATA[
-             
-var hostware = new ActiveXObject( "hostware.global" );             
+
+var hostware = new ActiveXObject( "hostware.global" );
 var stdout = hostware.open( "-out *stdout" );
 var stderr = hostware.open( "-out *stderr" );
 stdout.put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT" );
 stderr.put_line( "STDERR STDERR STDERR STDERR STDERR STDERR STDERR" );
-hostware.sleep( 6 );
-stdout.put_line( "stdout fertig." );
-stderr.put_line( "stderr fertig." );
+var index = 1;
+
+function spooler_process()
+{
+    stdout.put_line( "stdout" );
+    stderr.put_line( "stderr" );
+    spooler_task.delay_spooler_process = 3;
+    return true; //index++ < 3;
+}
+
                     ]]>
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+<!--
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
@@ -79,7 +86,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+-->
         </jobs>
     </config>
 </spooler>

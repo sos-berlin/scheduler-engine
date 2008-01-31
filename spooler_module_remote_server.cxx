@@ -235,6 +235,7 @@ STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, 
 
 STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray, VARIANT_BOOL* result )
 {
+    //assert( !"Com_remote_module_instance_server::Construct" );
     HRESULT hr = NOERROR;
 
     *result = VARIANT_FALSE;
