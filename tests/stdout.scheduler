@@ -15,6 +15,7 @@
 
             <job name="shell">
                 <script language="shell">@echo off
+type s:\01-ff.txt                
 echo STATE_TEXT                
 echo Zweite Zeile
 sleep 5
@@ -48,6 +49,7 @@ stderr.put_line( "stderr fertig." );
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
+                    type s:\01-ff.txt
                     echo STATE_TEXT
                     echo Zweite Zeile
                     sleep 7

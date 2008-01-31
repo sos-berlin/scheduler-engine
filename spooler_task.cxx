@@ -31,8 +31,6 @@ namespace scheduler {
 static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
-const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
-
 //----------------------------------------------------------------------------Spooler_object::level
 /*
 Level Spooler_object::level()
@@ -1250,8 +1248,6 @@ bool Task::do_something()
                             if( _module_instance->process_has_signaled() )
                             {
                                 _log->info( message_string( "SCHEDULER-915" ) );
-                                //set_state_texts_from_stdout();
-                                //postprocess_order( true );
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -1506,14 +1502,19 @@ bool Task::do_something()
 
                                 if( _module_instance  && _module_instance->_module->kind() == Module::kind_process )
                                 {
-                                    set_state_texts_from_stdout();
-                                    
+                                    if( Process_module_instance* process_module_instance = dynamic_cast<Process_module_instance*>( +_module_instance ) )
+                                    {
+                                        set_state_texts_from_stdout( process_module_instance->get_first_line_as_state_text() );
+
+                                        if( _order )
+                                        {
+                                            //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
+                                            process_module_instance->fetch_parameters_from_process( _order->params() );
+                                        }
+                                    }
+
                                     if( _order )
                                     {
-                                        //Process_module_instance::attach_task() hat temporäre Datei zur Rückgabe der Auftragsparameter geöffnet
-                                        Process_module_instance* process_module_instance = dynamic_cast<Process_module_instance*>( +_module_instance );
-                                        assert( process_module_instance );
-                                        process_module_instance->fetch_parameters_from_process( _order->params() );
 
                                         if( !has_error() )
                                         {
@@ -1813,6 +1814,9 @@ bool Task::step__end()
 
 string Task::remote_process_step__end()
 {
+    // Das könnte mit der Endebehandlung einer Process_module_instance, also ohne kind_remote, zusammengefasst werden.
+    // Dazu sollte für beide Verfahren eine gemeinsame Oberklasse gebildet werden, mit einem Proxy für kind_remote als Unterklasse.
+
     string result;
 
     try
@@ -1820,10 +1824,12 @@ string Task::remote_process_step__end()
         result = do_step__end().as_string();
 
         xml::Document_ptr dom_document           ( result );
-        xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/process.result" );
+        xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/" "process.result" );
 
         _module_instance->set_exit_code         ( process_result_element.int_getAttribute( "exit_code", 0 ) );
         _module_instance->set_termination_signal( process_result_element.int_getAttribute( "signal"   , 0 ) );
+
+        set_state_texts_from_stdout( process_result_element.getAttribute( "state_text" ) );
 
         if( _order )
         {
@@ -2067,30 +2073,10 @@ void Task::finish()
 
 //----------------------------------------------------------------Task::set_state_texts_from_stdout
 
-void Task::set_state_texts_from_stdout()
+void Task::set_state_texts_from_stdout( const string& state_text )
 {
-    if( _module_instance  &&  _module_instance->stdout_path() != "" )
-    {
-        try
-        {
-            file::File stdout_file ( _module_instance->stdout_path(), "rb" );
-            string first_line = stdout_file.read_string( max_stdout_state_text_length );
-            stdout_file.close();
-
-            size_t n = first_line.find( '\n' );
-            if( n == string::npos )  n = first_line.length();
-            if( n > 0  &&  first_line[ n - 1 ] == '\r' )  n--;
-            first_line.erase( n );
-
-            _job->set_state_text( first_line );
-
-            if( _order )  _order->set_state_text( first_line );
-        }
-        catch( exception& x )
-        {
-            _log->warn( message_string( "SCHEDULER-881", x ) );
-        }
-    }
+    _job->set_state_text( state_text );
+    if( _order )  _order->set_state_text( state_text );
 }
 
 //-------------------------------------------------------------------Task::process_on_exit_commands

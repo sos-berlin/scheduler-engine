@@ -183,7 +183,7 @@ struct Task : Object,
 
     void                        finish                      ();
     void                        fetch_order_parameters_from_process();
-    void                        set_state_texts_from_stdout ();
+    void                        set_state_texts_from_stdout ( const string& );
     void                        process_on_exit_commands    ();
     bool                        load                        ();
     Async_operation*            begin__start                ();

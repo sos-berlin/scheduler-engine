@@ -7,7 +7,10 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
-const string order_params_environment_name = "SCHEDULER_RETURN_VALUES";
+//--------------------------------------------------------------------------------------------const
+
+const string                    order_params_environment_name   = "SCHEDULER_RETURN_VALUES";
+const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
 
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
@@ -375,6 +378,8 @@ Variant Process_module_instance::step__end()
         xml_writer.set_attribute( "exit_code", exit_code() );
         if( int s = termination_signal() )  xml_writer.set_attribute( "signal", s );
 
+        xml_writer.set_attribute_optional( "state_text", xml::non_xml_latin1_characters_substituted( get_first_line_as_state_text() ) );
+
         //Wird über log()->log_file() ausgegeben;
         //xml_writer.begin_element( "log_file" );
         //    xml_writer->begin_element( "content" );
@@ -404,6 +409,33 @@ Variant Process_module_instance::step__end()
     xml_writer.flush();
 
     result = string_writer.to_string();
+
+    return result;
+}
+
+//--------------------------------------------Process_module_instance::get_first_line_as_state_text
+
+string Process_module_instance::get_first_line_as_state_text()
+{
+    string result;
+
+    try
+    {
+        file::File stdout_file ( stdout_path(), "rb" );
+        string first_line = stdout_file.read_string( max_stdout_state_text_length );
+        stdout_file.close();
+
+        size_t n = first_line.find( '\n' );
+        if( n == string::npos )  n = first_line.length();
+        if( n > 0  &&  first_line[ n - 1 ] == '\r' )  n--;
+        first_line.erase( n );
+
+        result = first_line;
+    }
+    catch( exception& x )
+    {
+        _log.warn( message_string( "SCHEDULER-881", x ) );
+    }
 
     return result;
 }
