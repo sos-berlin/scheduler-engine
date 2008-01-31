@@ -282,6 +282,7 @@ struct Module_instance : Object
     bool                       _load_called;
 
     ptr<Com_variable_set>      _process_environment;
+    bool                       _has_order;
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;

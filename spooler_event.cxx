@@ -68,7 +68,7 @@ xml::Document_ptr Scheduler_event::dom()
     xml::Document_ptr   event_dom;
 
     event_dom.create();
-    event_dom.appendChild( event_dom.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
+  //event_dom.appendChild( event_dom.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
 
     xml::Element_ptr scheduler_event_element = event_dom.createElement( "scheduler_event" );
     event_dom.appendChild( scheduler_event_element  );

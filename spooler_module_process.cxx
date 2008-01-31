@@ -67,36 +67,43 @@ void Process_module_instance::close_handle()
 void Process_module_instance::init()
 {
     Module_instance::init();
-}
 
-//-------------------------------------------------------------Process_module_instance::attach_task
-
-void Process_module_instance::attach_task( Task* task, Prefix_log* log )
-{
-    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
-
-    Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
-        _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-
-    if( Order* order = task->order() )
-        if( Com_variable_set* order_params = order->params_or_null() )
-            Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
-                _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-
-
-    // JS-147: <environment> kommt nach <params>, deshalb attach_task() erst jetzt rufen.
-    Module_instance::attach_task( task, log );
-    
-
-    _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
-
-    if( task->order() )
+    if( _has_order )
     {
         _order_params_file.open_temporary( File::open_unlink_later );
         _order_params_file.close();
         _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
     }
 }
+
+//-------------------------------------------------------------Process_module_instance::attach_task
+
+//void Process_module_instance::attach_task( Task* task, Prefix_log* log )
+//{
+//    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
+//
+//    Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
+//        _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+//
+//    if( Order* order = task->order() )
+//        if( Com_variable_set* order_params = order->params_or_null() )
+//            Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
+//                _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+//
+//
+//    // JS-147: <environment> kommt nach <params>, deshalb attach_task() erst jetzt rufen.
+//    Module_instance::attach_task( task, log );
+//    
+//
+//    _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
+//
+//    if( task->order() )
+//    {
+//        _order_params_file.open_temporary( File::open_unlink_later );
+//        _order_params_file.close();
+//        _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
+//    }
+//}
 
 //--------------------------------------------------------------------Process_module_instance::load
 
@@ -280,9 +287,13 @@ bool Process_module_instance::begin__end()
 
     // Environment
     S env;
-    Z_FOR_EACH( Com_variable_set::Map, _process_environment->_map, m )
-        env << string_from_bstr ( m->second->_name ) << "=" << string_from_variant( m->second->_value ) << '\0';
-    env << '\0';
+    {
+        ptr<Com_variable_set> environment = variable_set_from_environment();
+        environment->merge( _process_environment );
+        Z_FOR_EACH( Com_variable_set::Map, environment->_map, m )
+            env << string_from_bstr ( m->second->_name ) << "=" << string_from_variant( m->second->_value ) << '\0';
+        env << '\0';
+    }
 
     DWORD creation_flags = 0;
     if( _module->_priority != "" )  creation_flags |= windows::priority_class_from_string( _module->_priority );        // Liefert 0 bei Fehler
@@ -796,8 +807,8 @@ void Process_module_instance::fetch_parameters_from_process( Com_variable_set* p
 
         if( _order_params_file.length() > max_memory_file_size )  z::throw_xc( "SCHEDULER-448", _order_params_file.path(), max_memory_file_size / 1024 / 1024, order_params_environment_name );
         
-        const char*       p     = (const char*)_order_params_file.map();
-        const char*       p_end = p + _order_params_file.map_length();
+        const char* p     = (const char*)_order_params_file.map();
+        const char* p_end = p + _order_params_file.map_length();
 
         while( p < p_end )
         {

@@ -30,7 +30,7 @@ struct Process_module_instance : Module_instance
                                 Process_module_instance     ( Module* );
                                ~Process_module_instance     ();
 
-    virtual void                attach_task                 ( Task*, Prefix_log* );
+  //virtual void                attach_task                 ( Task*, Prefix_log* );
 
     void                        init                        ();
     bool                        load                        ();

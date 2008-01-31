@@ -589,7 +589,7 @@ xml::Document_ptr Com_variable_set::dom( const string& element_name, const strin
     xml::Document_ptr doc;
     
     doc.create();
-    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
+  //doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
   //doc.appendChild( dom_element( doc, xml_element_name(), "variable" ) );
     doc.appendChild( dom_element( doc, element_name, subelement_name ) );
 

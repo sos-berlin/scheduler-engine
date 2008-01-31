@@ -252,6 +252,8 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
         {
+            assert( dynamic_cast<object_server::Connection_to_own_server_process*>( _session->connection() ) );     // Environment nicht im Thread setzen!
+
             if( e.nodeName_is( "environment" ) )
             {
                 DOM_FOR_EACH_ELEMENT( e, ee )
@@ -270,8 +272,9 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         }
 
 
-        int                       task_id = 0;
-        Locked_safearray<Variant> params  ( safearray );
+        int                       task_id   = 0;
+        bool                      has_order = false;
+        Locked_safearray<Variant> params    ( safearray );
         ptr<Module_monitor>       monitor;
 
         _server = Z_NEW( Remote_module_instance_server( include_path ) );
@@ -305,8 +308,15 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "job"              )  job_name                          = value;
                 else
                 if( key_word == "task_id"          )  task_id                           = as_int( value );
-                //else
-                //if( key_word == "log_stdout_stderr"     )  _log_stdout_stderr                       = as_bool( value );
+                else
+                if( key_word == "environment"      )  
+                {
+                    xml::Document_ptr dom_document ( value, scheduler_character_encoding );
+                    _server->_module->_process_environment = new Com_variable_set();
+                    _server->_module->_process_environment->set_dom( dom_document.documentElement(), (Variable_set_map*)NULL, "variable" );
+                }
+                else
+                if( key_word == "has_order"             )  has_order                                = as_bool( value );
                 else
                 if( key_word == "process.filename"      )  _server->_module->_process_filename      = value;
                 else
@@ -325,28 +335,25 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                     monitor->_module->_language = value;
                 }
                 else                                                                         
-                if( monitor )
+                if( monitor  &&  key_word == "monitor.name"       )  monitor->_name                     = value;
+                else                                                                         
+                if( monitor  &&  key_word == "monitor.ordering"   )  monitor->_ordering                 = as_int( value );
+                else                                                                         
+                if( monitor  &&  key_word == "monitor.com_class"  )  monitor->_module->_com_class_name  = value;
+                else                                                                         
+                if( monitor  &&  key_word == "monitor.filename"   )  monitor->_module->_filename        = value;
+                else
+                if( monitor  &&  key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
+                else
+                if( monitor  &&  key_word == "monitor.recompile"  )  monitor->_module->_recompile       = value[0] == '1';
+                else
+                if( monitor  &&  key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
                 {
-                    if( key_word == "monitor.name"       )  monitor->_name                     = value;
-                    else                                                                         
-                    if( key_word == "monitor.ordering"   )  monitor->_ordering                 = as_int( value );
-                    else                                                                         
-                    if( key_word == "monitor.com_class"  )  monitor->_module->_com_class_name  = value;
-                    else                                                                         
-                    if( key_word == "monitor.filename"   )  monitor->_module->_filename        = value;
-                    else
-                    if( key_word == "monitor.java_class" )  monitor->_module->_java_class_name = value;
-                    else
-                    if( key_word == "monitor.recompile"  )  monitor->_module->_recompile       = value[0] == '1';
-                    else
-                    if( key_word == "monitor.script"     )  // Muss der letzte Paraemter sein!
-                    {
-                        monitor->_module->set_xml_text_with_includes( value );
-                        _server->_module->_monitors->add_monitor( monitor );
-                    }
-                    else
-                        assert(0), throw_xc( "server::construct", as_string(i), key_word );
+                    monitor->_module->set_xml_text_with_includes( value );
+                    _server->_module->_monitors->add_monitor( monitor );
                 }
+                else
+                    assert(0), throw_xc( "server::construct", as_string(i), key_word );
             }
         }
 
@@ -392,6 +399,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         {
             _server->_module_instance->set_job_name( job_name );             // Nur zur Diagnose
             _server->_module_instance->set_task_id( task_id );               // Nur zur Diagnose
+            _server->_module_instance->_has_order = has_order;
           //_server->_module_instance->init();
           //_server->_module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
             *result = VARIANT_TRUE;

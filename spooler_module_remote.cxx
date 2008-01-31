@@ -506,7 +506,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 14 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, 16 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -522,6 +522,10 @@ AGAIN:
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
+                params_array[ nr++ ] = "environment="     + _process_environment->dom( "environment", "variable" ).xml();  // Wird bisher nur von Process_module_instance benutzt 2008-10-31
+
+                if( _has_order )
+                params_array[ nr++ ] = "has_order=1";
 
                 //if( _module->kind() == Module::kind_process )
                 //params_array[ nr++ ] = "log_stdout_stderr=1";
