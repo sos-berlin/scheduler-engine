@@ -1516,7 +1516,7 @@ void Spooler::load_arg()
         }
     }
 
-    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );
+    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );        // "live" bis es richtig gemacht ist
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
