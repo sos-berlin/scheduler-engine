@@ -352,7 +352,11 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 if( !_spooler->_configuration_cache_directory.exists() )
                 {
-                    int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
+                    #ifdef Z_WINDOWS
+                        int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
+                    #else
+                        int err = mkdir( _spooler->_configuration_cache_directory.c_str(), 0777 );
+                    #endif
                     if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
                 }
 
