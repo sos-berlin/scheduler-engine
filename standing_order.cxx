@@ -155,6 +155,19 @@ void Standing_order::set_name( const string& name )
     _job_chain_path = Absolute_path( folder_path(), _job_chain_name );
 }
 
+//-------------------------------------------------------Standing_order::on_dependant_to_be_removed
+
+//bool Standing_order::on_dependant_to_be_removed( File_based* )
+//{
+//    if( !_order  ||  _order->job_chain_path() == "" )  
+//    {
+//        set_to_be_removed( true );
+//        check_for_replacing_or_removing();
+//    }
+//
+//    return true;
+//}
+
 //--------------------------------------------------------------------Standing_order::on_initialize
 
 bool Standing_order::on_initialize()
@@ -287,20 +300,20 @@ xml::Element_ptr Standing_order::dom_element( const xml::Document_ptr& dom_docum
 
 //-------------------------------------------------------------------------Standing_order::obj_name
 
-string Standing_order::obj_name() const
-{
-    if( _order )
-    {
-        S result;
-
-        result << "Standing_order";
-        if( _order ) result << " " << _order->obj_name();
-
-        return result;
-    }
-    else
-        return file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >::obj_name();
-}
+//string Standing_order::obj_name() const
+//{
+//    if( _order )
+//    {
+//        S result;
+//
+//        result << "Standing_order";
+//        if( _order ) result << " " << _order->obj_name();
+//
+//        return result;
+//    }
+//    else
+//        return file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >::obj_name();
+//}
 
 //-------------------------------------------------------------------------------------------------
 

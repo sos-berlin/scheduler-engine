@@ -126,6 +126,8 @@ struct Pendant
     virtual bool                on_dependant_loaded         ( File_based* )                         = 0;
     virtual bool                on_dependant_to_be_removed  ( File_based* );
     virtual void                on_dependant_removed        ( File_based* );
+    virtual Prefix_log*         log                         ()                                      = 0;
+
     
   private:
     typedef stdext::hash_set< string >                                Dependant_set;
@@ -220,6 +222,7 @@ struct File_based : Scheduler_object,
     bool                        on_dependant_loaded         ( File_based* );
     bool                        on_dependant_to_be_removed  ( File_based* );
     void                        on_dependant_removed        ( File_based* );
+    Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
 
     void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );

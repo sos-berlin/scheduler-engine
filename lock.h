@@ -158,6 +158,7 @@ struct Use : Object,
 
     // Pendant:
     bool                        on_dependant_loaded         ( File_based* );
+    Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
 
     Lock*                       lock                        () const;

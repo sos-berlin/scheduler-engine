@@ -2800,6 +2800,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-459">
+            <text xml:lang="en">
+                <title>Error in dependant after '<p1/>' has been loaded:<br/><p2/></title>
+            </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

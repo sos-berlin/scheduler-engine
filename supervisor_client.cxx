@@ -350,15 +350,15 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
-                if( !_spooler->_configuration_cache_directory.exists() )
-                {
-                    #ifdef Z_WINDOWS
-                        int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
-                    #else
-                        int err = mkdir( _spooler->_configuration_cache_directory.c_str(), 0777 );
-                    #endif
-                    if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
-                }
+                //if( !_spooler->_configuration_cache_directory.exists() )
+                //{
+                //    #ifdef Z_WINDOWS
+                //        int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
+                //    #else
+                //        int err = mkdir( _spooler->_configuration_cache_directory.c_str(), 0777 );
+                //    #endif
+                //    if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
+                //}
 
                 ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
                 ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );

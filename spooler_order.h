@@ -572,6 +572,7 @@ struct Job_node : Order_queue_node,
     // Pendant
     bool                        on_dependant_loaded         ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
+    Prefix_log*                 log                         ()                                      { return Order_queue_node::log(); }
 
 
     string                      job_path                    () const                                { return _job_path; }

@@ -19,7 +19,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     // Scheduler_object
 
     void                        close                       ();
-    string                      obj_name                    () const;
+  //string                      obj_name                    () const;
 
 
     // file_based<>
@@ -30,6 +30,8 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     void                        set_name                    ( const string& );
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+  //bool                        on_dependant_to_be_removed  ( File_based* );
 
     bool                        on_initialize               (); 
     bool                        on_load                     (); 

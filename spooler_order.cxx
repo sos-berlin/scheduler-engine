@@ -2711,14 +2711,14 @@ Job_chain* Job_chain::on_replace_now()
         {
             if( Order_queue_node* old_job_chain_node = Order_queue_node::try_cast( node_from_state_or_null( new_job_chain_node->order_state() ) ) )
             {
+                new_job_chain_node->order_queue()->_is_loaded = true;
+
                 Order_queue::Queue queue = old_job_chain_node->order_queue()->_queue;
                 Z_FOR_EACH( Order_queue::Queue, queue, it )
                 {
                     ptr<Order> order = *it;
                     remove_order( order );
                     replacement()->add_order( order );
-                    //order->remove_from_job_chain( jc_leave_in_job_chain_stack );
-                    //order->place_in_job_chain( this, jc_leave_in_job_chain_stack );
                 }
             }
         }

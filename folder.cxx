@@ -1641,16 +1641,22 @@ bool File_based::switch_file_based_state( State state )
 
 //------------------------------------------------------------------File_based::on_dependant_loaded
 
-bool File_based::on_dependant_loaded( File_based* )
+bool File_based::on_dependant_loaded( File_based* file_based )
 {
-    return activate();
-    //return try_switch_wished_file_based_state();
+    bool result = false;
+
+    if( is_in_folder() )  check_for_replacing_or_removing();    // Für Standing_order: Wenn Jobkette gelöscht, Auftragsdatei geändert und Jobkette wieder geladen wird, 2008-02-01
+    if( is_in_folder() )  result = activate();
+    
+    return result;
 }
 
 //-----------------------------------------------------------File_based::on_dependant_to_be_removed
 
-bool File_based::on_dependant_to_be_removed( File_based* )
+bool File_based::on_dependant_to_be_removed( File_based* file_based )
 {
+    assert( file_based->is_in_folder() );
+
     return true;
 }
 
@@ -1658,6 +1664,8 @@ bool File_based::on_dependant_to_be_removed( File_based* )
 
 void File_based::on_dependant_removed( File_based* file_based )
 {
+    assert( file_based->is_in_folder() );
+
     check_for_replacing_or_removing();
     Pendant::on_dependant_removed( file_based );
 }
@@ -2284,7 +2292,14 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
             Requestor_set::iterator next_it2 = it2;  next_it2++;
             Pendant*                pendant  = *it2;
         
-            pendant->on_dependant_loaded( found_missing );
+            try
+            {
+                pendant->on_dependant_loaded( found_missing );
+            }
+            catch( exception& x )
+            {
+                pendant->log()->error( message_string( "SCHEDULER-459", found_missing->obj_name(), x.what() ) );
+            }
         }
     }
 }
