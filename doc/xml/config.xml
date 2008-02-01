@@ -28,7 +28,7 @@
                 <p>
                     Das Verzeichnis ist für den Supervisor-Betrieb,
                     bei dem andere Scheduler sich anmelden mit
-                    <scheduler_element name="config" attribute="main_scheduler"/>.
+                    <scheduler_element name="config" attribute="supervisor"/>.
                     Das Verzeichnis kann für jeden Scheduler ein Unterverzeichnis mit Konfigurationsdateien enthalten,
                     die der Supervisor zum Scheduler laufend repliziert.
                 </p>
@@ -162,7 +162,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="main_scheduler" type="host:port">
+        <xml_attribute name="supervisor" type="host:port">
             <description>
                 <p>
                     Der Supervisor, bei dem sich dieser Scheduler an- und abmelden soll.

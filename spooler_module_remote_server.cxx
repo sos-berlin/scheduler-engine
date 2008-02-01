@@ -252,7 +252,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         DOM_FOR_EACH_ELEMENT( _class_data->_task_process_element, e )
         {
-            assert( dynamic_cast<object_server::Connection_to_own_server_process*>( _session->connection() ) );     // Environment nicht im Thread setzen!
+            assert( !dynamic_cast<object_server::Connection_to_own_server_thread*>( _session->connection() ) );     // Environment nicht im Thread setzen!
 
             if( e.nodeName_is( "environment" ) )
             {

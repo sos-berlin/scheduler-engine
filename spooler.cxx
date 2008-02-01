@@ -1511,8 +1511,12 @@ void Spooler::load_arg()
             _configuration_file_path = File_path( _configuration_file_path, "scheduler.xml" );
         }
         else
+        {
             _configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
+        }
     }
+
+    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
@@ -1802,6 +1806,7 @@ void Spooler::start()
 
 void Spooler::activate()
 {
+    _folder_subsystem->set_directory( _supervisor_client && _supervisor_client->is_using_central_configuration()? _configuration_cache_directory :_configuration_directory );
     _folder_subsystem->switch_subsystem_state( subsys_loaded );
 
     if( !_ignore_process_classes )
@@ -3022,7 +3027,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         // Nachdem argv und profile gelesen sind und config geladen ist:
 
-        _folder_subsystem->set_directory( _configuration_directory );
         _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
         _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 

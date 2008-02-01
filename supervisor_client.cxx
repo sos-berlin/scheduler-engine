@@ -89,6 +89,7 @@ struct Supervisor_client : Supervisor_client_interface
     bool                        connection_failed           () const                                { return _client_connection && _client_connection->connection_failed(); }
     void                        start_update_configuration  ()                                      { if( _client_connection )  _client_connection->start_update_configuration(); }
     void                        try_connect                 ()                                      { if( _client_connection )  _client_connection->try_connect(); }
+    bool                        is_using_central_configuration() const                              { return _is_using_central_configuration; }
 
     // IDispatch_implementation
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
@@ -97,8 +98,11 @@ struct Supervisor_client : Supervisor_client_interface
     STDMETHODIMP            get_Tcp_port                    ( int* );
 
   private:
+    friend struct               Supervisor_client_connection;
+
     Fill_zero                  _zero_;
     ptr<Supervisor_client_connection> _client_connection;
+    bool                       _is_using_central_configuration;
 
     static Class_descriptor     class_descriptor;
     static const Com_method     _methods[];
@@ -346,6 +350,12 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
+                if( !_spooler->_configuration_cache_directory.exists() )
+                {
+                    int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
+                    if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
+                }
+
                 ptr<io::String_writer> string_writer = Z_NEW( io::String_writer() );
                 ptr<xml::Xml_writer>   xml_writer    = Z_NEW( xml::Xml_writer( string_writer ) );
 
@@ -374,6 +384,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
 
                     if( xml::Element_ptr directory_element = response_document.select_node( "/spooler/answer/configuration.directory" ) )
                     {
+                        _supervisor_client->_is_using_central_configuration = true;
                         update_directory_structure( root_path, directory_element );
                     }
                     
@@ -453,7 +464,8 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
     DOM_FOR_EACH_ELEMENT( element, e )
     {
         Absolute_path path      ( directory_path, e.getAttribute( "name" ) );
-        File_path     file_path ( _spooler->folder_subsystem()->directory(), path );
+      //File_path     file_path ( _spooler->folder_subsystem()->directory(), path );
+        File_path     file_path ( _spooler->_configuration_cache_directory, path );
 
         if( e.nodeName_is( "configuration.directory" ) )
         {
@@ -529,7 +541,7 @@ void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* x
 {
     Folder_directory_lister dir ( _log );
     
-    bool ok = dir.open( spooler()->folder_subsystem()->directory(), path );
+    bool ok = dir.open( _spooler->_configuration_cache_directory, path );
 
     if( ok )
     {

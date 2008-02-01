@@ -309,8 +309,18 @@ void Folder_subsystem::close()
 void Folder_subsystem::set_directory( const File_path& directory )
 {
     assert_subsystem_state( subsys_initialized, Z_FUNCTION );
+    if( directory == "" )  z::throw_xc( Z_FUNCTION );
     _directory = directory;
 }
+
+//------------------------------------------------------------Folder_subsystem::set_cache_directory
+
+//void Folder_subsystem::set_cache_directory( const File_path& directory )
+//{
+//    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
+//    if( directory == "" )  z::throw_xc( Z_FUNCTION );
+//    _cache_directory = directory;
+//}
 
 //-----------------------------------------------------------Folder_subsystem::subsystem_initialize
 
@@ -561,11 +571,6 @@ bool Folder::on_initialize()
 
 bool Folder::on_load()
 {
-    //_path = _parent? Absolute_path( _parent->_path, name() )
-    //               : root_path;
-    //_directory = _parent? File_path( _parent->_directory, name() )
-    //                    : subsystem()->directory();
-
     return true;
 }
 

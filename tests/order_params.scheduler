@@ -1,14 +1,18 @@
 <?xml version="1.0"?>
 <spooler
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
     <config>
 
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
-        <process_classes/>
+        <params>
+            <include file="xxx"/>
+        </params>
 
+        <process_classes/>
+        
         <script language="javascript">
         <![CDATA[
 

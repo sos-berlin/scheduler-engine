@@ -2141,10 +2141,6 @@
     <register_keyword_display><code>main()</code></register_keyword_display>
     <register_entry register_file='api/Spooler_program.xml#method__main' register_title='Spooler_program.main()' register_keyword='main()' type='definition'/>
 </register_keyword>
-<register_keyword keyword='main_scheduler'>
-    <register_keyword_display><code>main_scheduler=</code></register_keyword_display>
-    <register_entry register_file='xml/config.xml#attribute_main_scheduler' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='main_scheduler' type='definition'/>
-</register_keyword>
 <register_keyword keyword='max'>
     <register_keyword_display><code>max=</code></register_keyword_display>
     <register_entry register_file='xml/file_order_source.xml#attribute_max' register_title='&lt;file_order_source&gt; (Konfiguration)'  register_keyword='max' type='definition'/>
@@ -3567,6 +3563,10 @@
 <register_keyword keyword='supervisor'>
     <register_keyword_display><code>&lt;supervisor&gt;</code></register_keyword_display>
     <register_entry register_file='xml/supervisor.xml#' register_title='&lt;supervisor&gt; (Konfiguration)'  register_keyword='supervisor' type='definition'/>
+</register_keyword>
+<register_keyword keyword='supervisor'>
+    <register_keyword_display><code>supervisor=</code></register_keyword_display>
+    <register_entry register_file='xml/config.xml#attribute_supervisor' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='supervisor' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Supervisor_client (class)'>
     <register_keyword_display><code>Supervisor_client</code> (class)</register_keyword_display>

@@ -64,7 +64,7 @@
    <h2>Einen Scheduler an den Supervisor anmelden</h2>
    <p>
       Ein Workload Scheduler meldet sich am Supervisor mit einem Eintrag in der Scheduler Konfigurationsdatei an. Das Attribut
-      <scheduler_element name="config" attribute="main_scheduler"/> im Element <code>config </code> bezeichnet den Host 
+      <scheduler_element name="config" attribute="supervisor"/> im Element <code>config </code> bezeichnet den Host 
       und den Port des Supervisors.
     </p>
     <p>
@@ -116,7 +116,7 @@
          		Inhalt von Ordner config/live des Workload Schedulers nach config/remote/host:port des Supervisors kopieren         		
         </li>    
         <li>
-         	 Anmeldung an an Supervisor konfigurieren. Dazu Eintrag <scheduler_element name="config" attribute="main_scheduler"/> 
+         	 Anmeldung an an Supervisor konfigurieren. Dazu Eintrag <scheduler_element name="config" attribute="supervisor"/> 
          	 in config/scheduler.xml  des Workload Schedulers anlegen
         </li>
      </ul>

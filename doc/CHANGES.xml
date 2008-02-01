@@ -113,7 +113,7 @@
                 </p>
                 <ul>
                     <li>
-                        <scheduler_element name="config" attribute="main_scheduler"/>
+                        <scheduler_element name="config" attribute="supervisor"/>
                     </li>
                     <li>
                         <scheduler_element name="config" attribute="configuration_directory"/>

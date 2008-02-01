@@ -775,6 +775,7 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
 
     void                    set_directory                   ( const file::File_path& );
     File_path                   directory                   () const                                { return _directory; }
+  //void                    set_cache_directory             ( const file::File_path& );
 
     Folder*                     folder                      ( const Absolute_path& path )           { return file_based( path ); }
     Folder*                     folder_or_null              ( const Absolute_path& path )           { return file_based_or_null( path ); }

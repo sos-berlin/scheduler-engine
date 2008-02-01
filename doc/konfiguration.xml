@@ -91,7 +91,7 @@
             java_options         = "…"    
             log_dir              = "…"
             mail_xslt_stylesheet = "…"
-            main_scheduler       = "hostname:4444"
+            supervisor           = "hostname:4444"
             param                = "…"
             port                 = "4444"
             priority_max         = "1000"
