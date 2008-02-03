@@ -414,6 +414,8 @@ void Process::start()
     _session->set_connection_has_only_this_session();
 
     _running_since = Time::now();
+
+    assert( is_started() );
 }
 
 //---------------------------------------------------------------------Process::start_local_process

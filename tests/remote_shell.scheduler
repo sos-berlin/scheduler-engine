@@ -27,6 +27,12 @@ echo Fertig.
 exit 27
                 ]]>
                 </script>
+
+                <monitor>
+                    <script language="javascript">
+                        XXX;
+                    </script>
+                </monitor>
                 <run_time once="yes"/>
             </job>
 

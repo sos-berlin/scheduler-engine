@@ -556,6 +556,9 @@ Process_class* Module::process_class() const
 { 
     //kind_process darf das (für remote_scheduler)  if( !_use_process_class )  assert(0), z::throw_xc( "NO_PROCESS_CLASS", Z_FUNCTION );
 
+    // Für kind_process (ohne kind_remote) wird die Prozessklasse nicht wirklich benutzt, d.h. das Prozesslimit wirkt nicht.
+    // Besser wäre das Limit zu berücksichtigen (über Dummy-Process?).
+
     return _spooler->process_class_subsystem()->process_class( _process_class_path );
 }
 
@@ -881,6 +884,40 @@ bool Module_instance::load()
     return ok;
 }
 
+//--------------------------------------------------------------Module_instance::try_to_get_process
+
+bool Module_instance::try_to_get_process()
+{
+    if( !_process )
+    {
+        if( _module->_process_class_path.empty()  
+            &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
+        {
+            // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+            _process = _spooler->process_class_subsystem()->new_temporary_process();
+        }
+        else
+        {
+            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available();
+        }
+
+        if( _process )
+        {
+            _process->add_module_instance( this );
+
+            assert( !_process->started() );
+
+            _process->set_job_name( _job_name );
+            _process->set_task_id ( _task_id  );
+        }
+
+        // _process wird nur von Remote_module_instance_procy benutzt. 
+        // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
+    }
+
+    return true;
+}
+
 //---------------------------------------------------------------------------Module_instance::start
 
 void Module_instance::start()
@@ -911,6 +948,12 @@ void Module_instance::close()
     Async_operation* op = close__start();
     if( !op->async_finished() )  _log.warn( message_string( "SCHEDULER-293" ) );        // "Warten auf Schließen der Modulinstanz ..."
     close__end();
+
+    if( _process )
+    {
+        _process->remove_module_instance( this );
+        _process = NULL;
+    }
 }
 
 //--------------------------------------------------------------------Module_instance::close__start

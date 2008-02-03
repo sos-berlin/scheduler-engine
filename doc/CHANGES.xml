@@ -10,17 +10,87 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-01-28" version="2.0.198" subversion_revision="5559">
-        <revision type="new" title="Scheduler für AIX bereitgestellt">
+    <change date="2008-02-01" version=" 2.0.197" subversion_revision="5590">
+        <revision jira="JS-213" type="new" title="Nicht-API-Tasks lassen sich unter entferntem Scheduler ausführen">
             <description>
-                
+                <p>
+                    Für Nicht-API-Jobs 
+                    lässt sich eine Prozessklasse mit entferntem Scheduler angeben.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="script" attribute="language" value="script"/>    
+                    </li>
+                    <li>
+                        <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-205" type="modification" title="Job.name liefert den Pfad des Jobs">
+            <description>
+                <p>
+                    <scheduler_method class="Job" property="name"/> liefert nicht mehr den Namen, sondern den Pfad des Jobs.
+                </p>
+            </description>
+        </revision>
+
+        <revision jira="JS-204" type="new" title="Zentrale Konfiguration">
+            <description>
+                <p>
+                    Ein als Supervisor laufender Scheduler kann Konfigurationsdateien (-verzeichnisse) für andere Scheduler bereitstellen.
+                    Änderungen werden laufen übernommen.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="supervisor"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="central_configuration_directory"/>
+                    </li>
+                    <li>
+                        <scheduler_a href="central_configuration.xml" quote="yes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-203" type="new" title="stdout und stderr werden laufend ins Protokoll übernommen">
+            <description>
+                <p>
+                    Ausgaben nach <code>stdout</code> und <code>stderr</code> werden nicht mehr erst am Ende der Task,
+                    sondern laufend übernommen.
+                    Das geschieht sekündlich. Wenn keine Ausgabe kommt, verlängert sich die Period auf zehn Sekunden.
+                </p>
+                <p>
+                    Bei API-Tasks werden Ausgaben nach Beendigung des Skripts (also kurz vor Beendigung des Prozesses) nicht übernommen.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Datenbank Adaptive Server Enterprise von Sybase wird unterstützt">
+            <description>
+                <p>
+                    Für alle Datenbanken sind die Spalten für Auftragskennungen und Jobkettenamen von 255 auf 250 Zeichen verkürzt worden.
+                </p>
+            </description>
+        </revision>
+        
+        <revision jira="JS-227" type="correction" title="Mit &lt;run_time> wiederholte Aufträge werden nach Mitternacht fortgesetzt">
+            <description>
+                <p>
+                    Bislang endeten die Aufträge um 24:00. (Eine Folge von JS-123 im Oktober 2007.)
+                </p>
             </description>
         </revision>
     </change>
 
     <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
-        <revision type="new" title="Scheduler für AIX bereitgestellt">
-        </revision>
+        <revision type="new" title="Scheduler für AIX bereitgestellt"/>
     </change>
 
     <change date="2008-01-14" version="2.0.196" subversion_revision="5515">

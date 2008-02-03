@@ -24,7 +24,6 @@ Remote_module_instance_proxy::~Remote_module_instance_proxy()
 
 void Remote_module_instance_proxy::close()
 {
-    detach_process();
     Com_module_instance_base::close();
 }
 
@@ -41,17 +40,6 @@ void Remote_module_instance_proxy::init()
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  z::throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
-}
-
-//-----------------------------------------------------Remote_module_instance_proxy::detach_process
-
-void Remote_module_instance_proxy::detach_process()
-{
-    if( _process )
-    {
-        _process->remove_module_instance( this );
-        _process = NULL;
-    }
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
@@ -409,42 +397,22 @@ bool Remote_module_instance_proxy::Operation::begin__end()
 
 bool Remote_module_instance_proxy::try_to_get_process()
 {
-    if( !_process )
+    bool ok = Module_instance::try_to_get_process();
+    if( ok )
     {
-        if( _module->_process_class_path.empty()  
-            &&  !_spooler->process_class_subsystem()->process_class_or_null( _module->_process_class_path ) )   
-        {
-            // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-            _process = _spooler->process_class_subsystem()->new_temporary_process();
-        }
-        else
-        {
-            _process = _spooler->process_class_subsystem()->process_class( _module->_process_class_path ) -> select_process_if_available();
-            if( !_process )  return false;
+        assert( _process );
 
-            // Erstmal immer nur eine Task pro Prozess. 
-            // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
-            // sodass nicht eine nicht beendete Operation den Prozess blockiert.
-
-            //_process = _spooler->process_class( _process_class_path ) -> select_process();
-        }
-
-        _process->add_module_instance( this );
-
-        if( !_process->started() )
-        {
-            _process->set_job_name( _job_name );
-            _process->set_task_id ( _task_id  );
-            if( _module->_priority != "" )  _process->set_priority( _module->_priority );
-            _process->set_environment( *_process_environment );
-            _process->start();
-        }
+        if( _module->_priority != "" )  _process->set_priority( _module->_priority );
+        _process->set_environment( *_process_environment );
+        _process->start();
 
         _session      = _process->session(); 
         _pid          = _session->connection()->pid();
+
+        ok = true;
     }
 
-    return _process->is_started();
+    return ok;
 }
 
 //-------------------------------------------Remote_module_instance_proxy::continue_async_operation

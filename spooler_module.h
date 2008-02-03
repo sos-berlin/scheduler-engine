@@ -232,7 +232,7 @@ struct Module_instance : Object
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
     virtual string              process_name                () const                                { return ""; }
 
-    virtual bool                try_to_get_process          ()                                      { return true; }
+    virtual bool                try_to_get_process          ();
 
     virtual Async_operation*    close__start                ();
     virtual void                close__end                  ();
@@ -281,6 +281,7 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
+    ptr<Process>               _process;                    // Wird nur von Remote_instance_module_procy benutzt, sonst Dummy
     ptr<Com_variable_set>      _process_environment;
     bool                       _has_order;
     Object_list                _object_list;

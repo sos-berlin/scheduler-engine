@@ -6,6 +6,10 @@
 >
     <config>
         <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="my_process_class"/>
+        </process_classes>
         
         <script language="javascript"><![CDATA[
         
@@ -24,7 +28,7 @@ job_chain.add_or_replace_order( order );
         ]]></script>
 
         <jobs>
-            <job name="test" order="yes" title="Aufruf von /tmp/test.cmd">
+            <job name="test" order="yes" title="Aufruf von /tmp/test.cmd" process_class="my_process_class">
                 <process file="/tmp/test.cmd" param="Mein Parameter">
                     <environment>
                         <variable name="var1" value="111"/>

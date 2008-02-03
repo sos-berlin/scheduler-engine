@@ -64,7 +64,6 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     void                        close                       ();
     bool                        kill                        ();
     bool                        is_remote_host              () const                                { return _process && _process->is_remote_host(); }
-    void                        detach_process              ();
   
     void                        add_obj                     ( IDispatch*, const string& name );
   //void                        add_log_obj                 ( Com_log*, const string& name );
@@ -103,15 +102,10 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     Fill_zero                  _zero_;
 
-  //string                         _process_class_name;
-    ptr<Process>                   _process;
-    ptr<object_server::Session>    _session;
-    ptr<object_server::Proxy>      _remote_instance;
-    ptr<Async_operation>           _operation;
-    bool                           _end_success;            // Für end__start()
-
-    //string                      _server_hostname;
-    //int                         _server_port;
+    ptr<object_server::Session> _session;
+    ptr<object_server::Proxy>   _remote_instance;
+    ptr<Async_operation>        _operation;
+    bool                        _end_success;               // Für end__start()
     int                         _exit_code;
     int                         _termination_signal;
 
