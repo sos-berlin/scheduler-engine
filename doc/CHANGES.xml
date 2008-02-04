@@ -11,6 +11,23 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2008-02-01" version=" 2.0.197" subversion_revision="5590">
+        <revision type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
+            <description>
+                <p>
+                    Nicht-API-Jobs können einer Prozessklasse zugeordnet werden (Default: die Prozessklasse mit dem leeren Namen <code>""</code>).
+                    D.h. die in der Prozessklasse eingestellte Begrenzung der Prozess wirkt auch auf Nicht-API-Jobs.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="process_class"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="process_class" attribute="max_processes"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision jira="JS-213" type="new" title="Nicht-API-Tasks lassen sich unter entferntem Scheduler ausführen">
             <description>
                 <p>
