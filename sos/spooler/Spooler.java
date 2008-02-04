@@ -153,4 +153,6 @@ public class Spooler extends Idispatch
     public Process_classes  process_classes()                                       { return (Process_classes)com_call( "<process_classes" ); }                                                                                      
     
     public Supervisor_client supervisor_client()                                    { return (Supervisor_client)com_call( "<supervisor_client" ); }
+    
+    public String           configuration_directory()                               { return (String)        com_call( "<configuration_directory" ); }
 }

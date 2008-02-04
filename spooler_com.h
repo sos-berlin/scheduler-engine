@@ -436,6 +436,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                Execute_command             ( BSTR );
     STDMETHODIMP            put_Machine_resumable           ( VARIANT_BOOL );
     STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
+    STDMETHODIMP            get_Folder_path                 ( BSTR* );
 
 
   private:
@@ -647,6 +648,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Locks                       ( spooler_com::Ilocks** );
     STDMETHODIMP            get_Process_classes             ( spooler_com::Iprocess_classes** );
     STDMETHODIMP            get_Supervisor_client           ( spooler_com::Isupervisor_client** );
+    STDMETHODIMP            get_Configuration_directory     ( BSTR* );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }

@@ -338,6 +338,9 @@ library Spooler
 
         [id(19),propget]                                                                               
         HRESULT                 Process_class               ( [out,retval] Iprocess_class** );
+
+        [id(20),propget]        
+        HRESULT                 Folder_path                 ( [out,retval] BSTR* );
     }
 
     [
@@ -704,6 +707,9 @@ library Spooler
 
         [id(39),propget]        
         HRESULT                 Supervisor_client       ( [out,retval] Isupervisor_client** );
+
+        [id(40),propget]        
+        HRESULT                 Configuration_directory ( [out,retval] BSTR* );
     }
 
     [

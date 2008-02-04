@@ -311,4 +311,6 @@ public class Job extends Idispatch
     public void             remove              ()                                  {                     com_call( "remove"                        ); }
 
     public Process_class    process_class       ()                                  { return (Process_class)com_call( "<process_class"              ); }
+
+    public String           folder_path         ()                                  { return (String)     com_call( "<folder_path"                  ); }
 }

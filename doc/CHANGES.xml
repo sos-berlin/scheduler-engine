@@ -10,19 +10,22 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-02-01" version=" 2.0.197" subversion_revision="5590">
-        <revision type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
+    <change date="2008-02-04" version=" 2.0.197" subversion_revision="5594">
+        <revision jira="JS-255" type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
             <description>
                 <p>
                     Nicht-API-Jobs können einer Prozessklasse zugeordnet werden (Default: die Prozessklasse mit dem leeren Namen <code>""</code>).
                     D.h. die in der Prozessklasse eingestellte Begrenzung der Prozess wirkt auch auf Nicht-API-Jobs.
+                </p>
+                <p>
+                    Die voreingestellte Begrenzung ist von 10 auf 30 erhöht worden.
                 </p>
                 <ul>
                     <li>
                         <scheduler_element name="job" attribute="process_class"/>
                     </li>
                     <li>
-                        <scheduler_element name="process_class" attribute="max_processes"/>
+                        <scheduler_element name="process_class" attribute="max_processes" value="30"/>
                     </li>
                 </ul>
             </description>

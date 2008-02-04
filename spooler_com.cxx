@@ -1873,6 +1873,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     { DISPATCH_METHOD     , 17, "Execute_command"               , (Com_method_ptr)&Com_job::Execute_command             , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
     {}
 };
 
@@ -2253,6 +2254,24 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
 
         *result = _job->module()->process_class();
         if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_job::get_Folder_path
+
+STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  z::throw_xc( "SCHEDULER-122" );
+
+        hr = String_to_bstr( _job->has_base_file()? _job->folder_path() : Absolute_path(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
@@ -3375,6 +3394,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 37, "Locks"                     , (Com_method_ptr)&Com_spooler::get_Locks            , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 38, "Process_classes"           , (Com_method_ptr)&Com_spooler::get_Process_classes  , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 39, "Supervisor_client"         , (Com_method_ptr)&Com_spooler::get_Supervisor_client, VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, 40, "Configuration_directory"   , (Com_method_ptr)&Com_spooler::get_Configuration_directory, VT_BSTR },
     {}
 };
 
@@ -4037,6 +4057,30 @@ STDMETHODIMP Com_spooler::get_Supervisor_client( Isupervisor_client** result )
 
     return hr;
 }
+
+//---------------------------------------------------------Com_spooler::get_Configuration_directory
+
+STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    if( !_spooler )  return E_POINTER;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        string dir = _spooler->_configuration_directory;
+        
+        if( string_ends_with( dir, "/" ) ||
+            string_ends_with( dir, Z_DIR_SEPARATOR ) )  dir.erase( dir.length() - 1 );
+
+        hr = String_to_bstr( dir, result );
+    }
+    catch( const exception& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
 
 //----------------------------------------------------------------------Com_spooler_proxy::_methods
 

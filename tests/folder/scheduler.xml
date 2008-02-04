@@ -5,5 +5,21 @@
 
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
+        <jobs>
+            <job name="no_folder">
+
+                <script language="JavaScript">
+                <![CDATA[
+
+spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
+
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+
+
     </config>
 </spooler>

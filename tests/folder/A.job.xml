@@ -1,0 +1,29 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+     
+>
+    
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{               
+    //spooler_log.info( spooler_task.order.title );
+    spooler_log.info( "spooler.configuration_directory='" + spooler.configuration_directory + "'" );
+    spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
+    
+    new ActiveXObject( "hostware.global" ).sleep( 5 );
+
+    //var order = spooler.create_order();
+    //order.id = 1;
+    //order.title = "ERSATZ";
+    //spooler.job_chain( "job_chain.nested.scheduler.C" ).add_or_replace_order( order );
+    
+    return false;
+}
+
+    ]]>
+    </script>
+
+    <run_time once="yes"/>
+    
+</job>

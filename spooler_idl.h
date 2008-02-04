@@ -220,6 +220,7 @@ struct Ijob : IDispatch
     virtual HRESULT         Remove                      ()                                      = 0;
     virtual HRESULT         Execute_command             ( BSTR )                                = 0;
     virtual HRESULT     get_Process_class               ( Iprocess_class** )                    = 0;
+    virtual HRESULT     get_Folder_path                 ( BSTR* )                               = 0;
 };
 
 //--------------------------------------------------------------------------------------------Itask
@@ -348,6 +349,7 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Locks                       ( spooler_com::Ilocks** )               = 0;
     virtual HRESULT     get_Process_classes             ( spooler_com::Iprocess_classes** )     = 0;
     virtual HRESULT     get_Supervisor_client           ( spooler_com::Isupervisor_client** )   = 0;
+    virtual HRESULT     get_Configuration_directory     ( BSTR* )                               = 0;
 };
 
 //-------------------------------------------------------------------------------Ispooler_proxy 

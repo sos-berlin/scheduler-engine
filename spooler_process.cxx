@@ -962,7 +962,7 @@ Process_class_configuration::Process_class_configuration( Scheduler* scheduler, 
     Idispatch_implementation( &class_descriptor ),
     file_based<Process_class_configuration,Process_class_folder,Process_class_subsystem>( scheduler->process_class_subsystem(), static_cast< spooler_com::Iprocess_class* >( this ), type_process_class ),
     _zero_(this+1),
-    _max_processes(10)
+    _max_processes(30)
 { 
     if( name != "" )  set_name( name );
 }
