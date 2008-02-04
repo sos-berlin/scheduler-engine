@@ -948,12 +948,6 @@ void Module_instance::close()
     Async_operation* op = close__start();
     if( !op->async_finished() )  _log.warn( message_string( "SCHEDULER-293" ) );        // "Warten auf Schließen der Modulinstanz ..."
     close__end();
-
-    if( _process )
-    {
-        _process->remove_module_instance( this );
-        _process = NULL;
-    }
 }
 
 //--------------------------------------------------------------------Module_instance::close__start
@@ -968,6 +962,18 @@ Async_operation* Module_instance::close__start()
 void Module_instance::close__end()
 {
     close_monitor();
+    detach_process();
+}
+
+//------------------------------------------------------------------Module_instance::detach_process
+
+void Module_instance::detach_process()
+{
+    if( _process )
+    {
+        _process->remove_module_instance( this );
+        _process = NULL;
+    }
 }
 
 //-------------------------------------------------------------------Module_instance::close_monitor

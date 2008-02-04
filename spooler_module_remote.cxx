@@ -17,7 +17,11 @@ namespace scheduler {
 
 Remote_module_instance_proxy::~Remote_module_instance_proxy()
 {
-    close();
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------------Remote_module_instance_proxy::close
@@ -31,12 +35,6 @@ void Remote_module_instance_proxy::close()
 
 void Remote_module_instance_proxy::init()
 {
-    //if( getenv( "SPOOLER_SERVER" ) )
-    //{
-    //    _server_hostname = getenv( "SPOOLER_SERVER" );
-    //    _server_port     = 9000;
-    //}
-
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  z::throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
@@ -101,7 +99,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
 void Remote_module_instance_proxy::close__end()
 {
-    close_monitor();
+    Com_module_instance_base::close__end();
     _session = NULL;
 }
 

@@ -74,11 +74,6 @@
                 </p>
                 <ul>
                     <li>
-                        Nur API-Jobs sind möglich. 
-                        <scheduler_element name="process"/> und <scheduler_element name="script" attribute="language" value="shell"/>
-                        sind nicht möglich.
-                    </li>
-                    <li>
                         <scheduler_element name="include"/> innerhalb von <scheduler_element name="script"/> wird vom Task-Prozess ausgeführt.
                         Die einzuschließende Datei wird also vom Rechner, der die Task ausführt, gelesen.
                     </li>

@@ -8,7 +8,7 @@
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <process_classes>
-            <process_class name="my_process_class"/>
+            <process_class name="my_process_class" max_processes="3"/>
         </process_classes>
         
         <script language="javascript"><![CDATA[
@@ -28,7 +28,7 @@ job_chain.add_or_replace_order( order );
         ]]></script>
 
         <jobs>
-            <job name="test" order="yes" title="Aufruf von /tmp/test.cmd" process_class="my_process_class">
+            <job name="test" order="yes" title="Aufruf von /tmp/test.cmd">
                 <process file="/tmp/test.cmd" param="Mein Parameter">
                     <environment>
                         <variable name="var1" value="111"/>
@@ -79,7 +79,7 @@ function spooler_process_after( return_value ) {
                 <run_time/>
             </job>
 
-            <job name="shell">
+            <job name="shell" process_class="my_process_class" tasks="5">
                 <script language="shell">@echo off
 echo STATE_TEXT                
 echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zschimmer.com/sos.
@@ -87,10 +87,17 @@ echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zs
 echo Hallo
 echo Zweite Zeile
 sleep 10
-exit 37
                 </script>
                 <run_time once="yes"/>
             </job>
         </jobs>
+
+        <commands>
+            <start_job job="shell"/>
+            <start_job job="shell"/>
+            <start_job job="shell"/>
+            <start_job job="shell"/>
+            <start_job job="shell"/>
+        </commands>
     </config>
 </spooler>

@@ -188,8 +188,6 @@ string Process_module_instance::program_path()
 
 void Process_module_instance::close__end()
 {
-    close_monitor();
-
 #ifdef Z_WINDOWS
     if( _process_handle )
 #endif

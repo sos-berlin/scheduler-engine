@@ -230,9 +230,10 @@ struct Module_instance : Object
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
-    virtual string              process_name                () const                                { return ""; }
+    string                      process_name                () const                                { return ""; }
 
     virtual bool                try_to_get_process          ();
+    void                        detach_process              ();
 
     virtual Async_operation*    close__start                ();
     virtual void                close__end                  ();

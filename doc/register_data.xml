@@ -2673,7 +2673,6 @@
     <register_entry register_file='xml/copy_params.xml#use_element__process' register_title='&lt;copy_params&gt;'  register_keyword='process'/>
     <register_entry register_file='xml/job.xml#use_element__process' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process'/>
     <register_entry register_file='xml/process.xml#' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process' type='definition'/>
-    <register_entry register_file='xml/process_class.xml#use_element__process' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process'/>
     <register_entry register_file='xml/script.xml#use_element__process' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process'/>
 </register_keyword>
 <register_keyword keyword='process-class'>

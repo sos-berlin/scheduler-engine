@@ -414,8 +414,6 @@ void Process::start()
     _session->set_connection_has_only_this_session();
 
     _running_since = Time::now();
-
-    assert( is_started() );
 }
 
 //---------------------------------------------------------------------Process::start_local_process
@@ -542,29 +540,29 @@ void Process::async_remote_start()
 
 //------------------------------------------------------------------------------Process::is_started
 
-bool Process::is_started()
-{
-    bool result = false;
-
-    if( _async_remote_operation )
-    {
-        _async_remote_operation->async_check_exception( Z_FUNCTION );
-
-        result = _async_remote_operation->async_finished();
-     
-        //if( result )
-        //{
-        //    _async_remote_operation->set_async_manager( NULL );
-        //    _async_remote_operation = NULL;
-        //}
-    }
-    else
-    {
-        result = true;
-    }
-
-    return result;
-}
+//bool Process::is_started()
+//{
+//    bool result = false;
+//
+//    if( _async_remote_operation )
+//    {
+//        _async_remote_operation->async_check_exception( Z_FUNCTION );
+//
+//        result = _async_remote_operation->async_finished();
+//     
+//        //if( result )
+//        //{
+//        //    _async_remote_operation->set_async_manager( NULL );
+//        //    _async_remote_operation = NULL;
+//        //}
+//    }
+//    else
+//    {
+//        result = true;
+//    }
+//
+//    return result;
+//}
 
 //-------------------------------------------------------------Process::async_remote_start_continue
 
@@ -1101,6 +1099,14 @@ Process_class::Process_class( Scheduler* scheduler, const string& name )
     
 Process_class::~Process_class()
 {
+    Z_DEBUG_ONLY( assert( _process_set.empty() ) );
+    Z_DEBUG_ONLY( assert( _waiting_jobs.empty() ) );
+
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
 }
 
 //-----------------------------------------------------------------Process_class::set_configuration

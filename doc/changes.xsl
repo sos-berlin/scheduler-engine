@@ -105,9 +105,15 @@
         <xsl:if test="description">
             <p style="margin-top: 0ex">&#160;</p>
             <xsl:apply-templates select="description"/>
-            <p style="margin-top: 0ex">&#160;</p>
         </xsl:if>
 
+        <xsl:if test="messages">
+            <xsl:apply-templates select="messages" mode="without_title">
+                <xsl:with-param name="show_level" select="true()"/>
+            </xsl:apply-templates>
+        </xsl:if>
+
+        <p style="margin-top: 0ex">&#160;</p>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

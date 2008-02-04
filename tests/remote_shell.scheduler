@@ -30,7 +30,12 @@ exit 27
 
                 <monitor>
                     <script language="javascript">
-                        XXX;
+                        <![CDATA[ 
+                        
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                       
+
+]]>
                     </script>
                 </monitor>
                 <run_time once="yes"/>

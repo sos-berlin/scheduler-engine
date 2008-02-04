@@ -46,7 +46,7 @@ void Com_module_instance_base::init()
 
 void Com_module_instance_base::close__end()
 {
-    close_monitor();
+    Module_instance::close__end();
 
     _idispatch = NULL;
 }

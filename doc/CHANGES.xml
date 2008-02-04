@@ -57,6 +57,17 @@
                     </li>
                 </ul>
             </description>
+
+            <messages>
+                <message level="warn"  code="SCHEDULER-454"/>
+                <message level="info"  code="SCHEDULER-455"/>
+                <message level="error" code="SCHEDULER-456"/>
+                <message level="error" code="SCHEDULER-457"/>
+                <message level="error" code="SCHEDULER-458"/>
+                <message level="info"  code="SCHEDULER-701"/>
+                <message level="info"  code="SCHEDULER-702"/>
+                <message level="warn"  code="SCHEDULER-899"/>
+            </messages>
         </revision>
 
         <revision jira="JS-203" type="new" title="stdout und stderr werden laufend ins Protokoll übernommen">
@@ -67,7 +78,8 @@
                     Das geschieht sekündlich. Wenn keine Ausgabe kommt, verlängert sich die Period auf zehn Sekunden.
                 </p>
                 <p>
-                    Bei API-Tasks werden Ausgaben nach Beendigung des Skripts (also kurz vor Beendigung des Prozesses) nicht übernommen.
+                    Bei API-Tasks, die auf einem entfernten Scheduler laufen (<scheduler_element name="process_class" attribute="remote_scheduler"/>),
+                    werden Ausgaben nach Beendigung des Skripts (also kurz vor Beendigung des Prozesses) nicht übernommen.
                 </p>
             </description>
         </revision>
