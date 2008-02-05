@@ -83,6 +83,20 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+<property name="configuration_directory" access="read" setting="configuration_directory">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         Pfad des Konfigurationsverzeichnisses
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <method name="create_job_chain">
     <com>
         <com.result>

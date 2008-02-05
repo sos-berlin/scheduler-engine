@@ -408,6 +408,11 @@
     <register_keyword_display><code>configuration_directory=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_directory' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_directory' type='definition'/>
 </register_keyword>
+<register_keyword keyword='configuration_directory (property)'>
+    <register_keyword_display><code>configuration_directory</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Job.xml#method__configuration_directory' register_title='Job.configuration_directory' register_keyword='configuration_directory' type='definition'/>
+    <register_entry register_file='api/Spooler.xml#method__configuration_directory' register_title='Spooler.configuration_directory' register_keyword='configuration_directory' type='definition'/>
+</register_keyword>
 <register_keyword keyword='configuration_modify_event'>
     <register_keyword_display><code>configuration_modify_event=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_modify_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_modify_event' type='definition'/>

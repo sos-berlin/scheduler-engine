@@ -654,6 +654,26 @@ spooler_job.max_order_setbacks = 5;                      // Die 5. Rückstellung
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="configuration_directory" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Verzeichnis der Konfigurationsdatei des Jobs
+        </title>
+
+        <description>
+            <p>
+                <code>""</code>, wenn der Job nicht aus einem Konfigurationsverzeichnis stammt.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <description>
         <p>
             Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.

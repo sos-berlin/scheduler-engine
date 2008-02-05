@@ -62,7 +62,7 @@
         </xml_attribute>
 
 
-        <xml_attribute name="configuration_directory" type="path" initial="live">
+        <xml_attribute name="configuration_directory" type="path" initial="live" setting="configuration_directory">
             <description>
                 <p>
                     Voreingestellt ist das Verzeichnis <code>live</code> 

@@ -312,5 +312,7 @@ public class Job extends Idispatch
 
     public Process_class    process_class       ()                                  { return (Process_class)com_call( "<process_class"              ); }
 
-    public String           folder_path         ()                                  { return (String)     com_call( "<folder_path"                  ); }
+  //public String           folder_path         ()                                  { return (String)     com_call( "<folder_path"                  ); }
+
+    public String           configuration_directory()                               { return (String)     com_call( "<configuration_directory"      ); }
 }

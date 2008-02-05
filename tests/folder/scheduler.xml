@@ -11,7 +11,9 @@
                 <script language="JavaScript">
                 <![CDATA[
 
-spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
+spooler_log.info( "spooler.configuration_directory='"         + spooler.configuration_directory + "'" );
+//spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
+spooler_log.info( "spooler_job.configuration_directory='"         + spooler_job.configuration_directory + "'" );
 
                 ]]>
                 </script>

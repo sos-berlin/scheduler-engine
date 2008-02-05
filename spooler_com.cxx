@@ -1873,7 +1873,8 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     { DISPATCH_METHOD     , 17, "Execute_command"               , (Com_method_ptr)&Com_job::Execute_command             , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
+  //{ DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 21, "Configuration_directory"       , (Com_method_ptr)&Com_job::get_Configuration_directory , VT_BSTR       },
     {}
 };
 
@@ -2272,6 +2273,25 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
         hr = String_to_bstr( _job->has_base_file()? _job->folder_path() : Absolute_path(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------Com_job::get_Configuration_directory
+
+STDMETHODIMP Com_job::get_Configuration_directory( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  z::throw_xc( "SCHEDULER-122" );
+
+        int VERSCHIEDENE_VERZEICHNISSE;
+        hr = String_to_bstr( _job->has_base_file()? File_path( _job->spooler()->_configuration_directory, _job->folder_path() ) : File_path(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

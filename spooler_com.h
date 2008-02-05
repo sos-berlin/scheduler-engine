@@ -437,6 +437,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            put_Machine_resumable           ( VARIANT_BOOL );
     STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
     STDMETHODIMP            get_Folder_path                 ( BSTR* );
+    STDMETHODIMP            get_Configuration_directory     ( BSTR* );
 
 
   private:

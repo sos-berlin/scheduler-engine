@@ -931,6 +931,10 @@ db = scheduler.mdb
         </description>
     </setting>
 
+    <setting setting = "configuration_directory"
+             type    = "path"
+             title   = "Pfad des Konfigurationsverzeichnisses">
+    </setting>
 
     <!--
     <setting setting = "run_time_begin"

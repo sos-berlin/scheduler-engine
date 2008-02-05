@@ -10,6 +10,21 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-02-04" version=" 2.0.198" subversion_revision="5596">
+        <revision jira="JS-222" type="new" title="Neue Aufrufe Spooler.configuration_directory und Job.folder_path">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Spooler" property="configuration_directory"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job" property="configuration_directory"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-02-04" version=" 2.0.197" subversion_revision="5594">
         <revision jira="JS-255" type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
             <description>
