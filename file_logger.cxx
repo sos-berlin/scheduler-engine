@@ -160,7 +160,10 @@ bool File_logger::async_continue_( Async_operation::Continue_flags )
 {
     bool something_done = false;
 
-    flush_lines();
+    Z_MUTEX( _mutex )
+    {
+        flush_lines();
+    }
 
     set_async_delay( something_done? read_interval_min : read_interval_max );
     return true;
@@ -170,9 +173,10 @@ bool File_logger::async_continue_( Async_operation::Continue_flags )
 
 string File_logger::async_state_text_() const
 {
+    // Kann von anderem Thread gerufen werden!
+
     S result;
     result << "File_logger(";
-
     result << _for_object;
     
     Z_FOR_EACH_CONST( File_line_reader_list, _file_line_reader_list, it )
@@ -184,6 +188,7 @@ string File_logger::async_state_text_() const
     }
 
     result << ")";
+
     return result;
 }
 
@@ -295,8 +300,12 @@ int File_logger::File_logger_thread::thread_main()
     Z_LOG2( "joacim", Z_FUNCTION << "\n" );
 
     ptr<File_logger> file_logger = _file_logger;    // Halten
-    file_logger->set_async_manager( &_async_manager );
-    file_logger->start();
+
+    Z_MUTEX( file_logger->_mutex )
+    {
+        file_logger->set_async_manager( &_async_manager );
+        file_logger->start();
+    }
 
     while( !_terminate_event.signaled() )
     {
@@ -304,9 +313,13 @@ int File_logger::File_logger_thread::thread_main()
         _terminate_event.wait( _async_manager.async_next_gmtime() - now );
         _async_manager.async_continue();
     }
-    
-    file_logger->finish();
-    file_logger->set_async_manager( NULL );
+
+    Z_MUTEX( file_logger->_mutex )
+    {
+        file_logger->finish();
+        file_logger->set_async_manager( NULL );
+    }
+
     _file_logger = NULL;
     file_logger = NULL;
 
