@@ -220,8 +220,8 @@ bool Folder_subsystem::handle_folders( double minimum_age )
             {
                 Directory* cache_dir = _cache_directory_observer->directory_tree()->root_directory();
                 cache_dir->read_deep( 0.0 );
-                directory = _live_directory_observer? merged_cache_and_live_directories()
-                                                    : cache_dir;
+                if( _live_directory_observer ) directory = merged_cache_and_live_directories();
+                                          else directory = cache_dir;
             }
 
             if( directory )

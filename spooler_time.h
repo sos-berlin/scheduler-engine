@@ -122,7 +122,7 @@ struct Time
     void                        set                         ( double );
     void                        set                         ( const string& );
     Time&                       set_utc                     ( double );
-    Time&                       set_utc                     ( time_t t )                    { set( (double)t ); }
+    Time&                       set_utc                     ( time_t t )                    { set( (double)t );  return *this; }
     double                      as_double                   () const;
     double                      as_utc_double               () const;
 
