@@ -61,6 +61,7 @@ objects = \
  subsystem.o\
  supervisor.o\
  supervisor_client.o\
+ path.o\
  xml_client_connection.o
 
 
