@@ -19,6 +19,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_database:                     return "Database";
         case type_database_order_detector:      return "Database_order_detector";
         case type_directory_file_order_source:  return "Directory_file_order_source";
+        case type_directory_observer:           return "Directory_observer";
         case type_directory_tree:               return "Directory_tree";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
         case type_folder:                       return "Folder";

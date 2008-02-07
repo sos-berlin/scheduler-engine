@@ -7,11 +7,11 @@ namespace scheduler {
 namespace folder {
 
 using namespace zschimmer::file;
+using namespace directory_observer;
 
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
-const Absolute_path             root_path                   ( "/" );
 const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
 const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
 
@@ -23,251 +23,13 @@ const int                       remove_delay                = 2;        // Nur D
     const int                   directory_watch_interval_max = 60;
 #endif
 
-//---------------------------------------------------------------------------------------Path::Path
-
-Path::Path( const string& folder_path, const string& tail_path ) 
-{ 
-    if( int len = folder_path.length() + tail_path.length() )
-    {
-        if( folder_path != ""  &&  *folder_path.rbegin() != folder_separator )
-        {
-            reserve( len + 1 );
-            *this = folder_path;
-            *this += folder_separator;
-        }
-        else
-        {
-            reserve( len );
-            *this = folder_path;
-        }
-
-        if( tail_path != "" )
-        {
-            if( folder_path != ""  &&  *tail_path.begin() == folder_separator )  *this += tail_path.c_str() + 1;
-                                                                           else  *this += tail_path;
-        }
-    }
-}
-
-//---------------------------------------------------------------------------Path::is_absolute_path
-
-bool Path::is_absolute_path() const
-{
-    return length() >= 0  &&  (*this)[0] == folder_separator;
-}
-
-//------------------------------------------------------------------------------------Path::is_root
-
-bool Path::is_root() const
-{ 
-    return to_string() == root_path.to_string(); 
-}
-
-//-----------------------------------------------------------------------------------Path::set_name
-
-void Path::set_name( const string& name )
-{
-    string f = folder_path();
-    if( f != "" )  f += folder_separator;
-    set_path( f + name );
-}
-
-//----------------------------------------------------------------------------Path::set_folder_path
-
-void Path::set_folder_path( const string& folder_path )
-{
-    set_path( Path( folder_path, name() ) );
-}
-
-//-------------------------------------------------------------------------------Path::set_absolute
-
-void Path::set_absolute( const Absolute_path& absolute_base, const Path& relative )
-{
-    assert( !absolute_base.empty() );
-    if( absolute_base.empty() )  assert(0), z::throw_xc( Z_FUNCTION, relative );
-
-    if( relative.empty() )
-    {
-        set_path( "" );
-    }
-    else
-    {
-        if( relative.is_absolute_path() )
-        {
-            set_path( relative );
-        }
-        else
-        {
-            set_path( Path( absolute_base, relative ) );
-        }
-    }
-}
-
-//--------------------------------------------------------------------------------Path::folder_path
-
-Path Path::folder_path() const
-{
-    const char* p0 = c_str();
-    const char* p  = p0 + length();
-
-    if( p > p0 )
-    {
-        while( p > p0  &&  p[-1] != folder_separator )  p--;
-        if( p > p0+1  &&  p[-1] == folder_separator )  p--;
-    }
-
-    return substr( 0, p - c_str() );
-}
-
-//---------------------------------------------------------------------------Path::root_folder_name
-
-string Path::root_folder_name() const
-{
-    size_t s = find( folder_separator );
-
-    return s == string::npos? "" 
-                            : substr( 0, s );
-}
-
-//---------------------------------------------------------------------------------------Path::name
-
-string Path::name() const
-{
-    const char* p0 = c_str();
-    const char* p  = p0 + length();
-
-    while( p > p0  &&  p[-1] != folder_separator )  p--;
-
-    return p;
-}
-
-//--------------------------------------------------------------------------------Path::to_filename
-
-string Path::to_filename() const
-{
-    string result = to_string();
-
-    if( string_begins_with( result, "/" ) )  result.erase( 0, 1 );
-
-    for( int i = 0; i < result.length(); i++ ) 
-    {
-        if( result[i] == '/' )  result[i] = ',';
-
-        if( strchr(     "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
-                    "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
-                    "<>:\"/\\|",
-                    result[i] ) )  result[i] = '_';
-    }
-
-    return result;
-}
-
-//---------------------------------------------------------------------Absolute_path::Absolute_path
-
-Absolute_path::Absolute_path( const Path& path )
-{
-    assert( path.empty()  ||  path.is_absolute_path() );
-    if( !path.empty()  &&  !path.is_absolute_path() )  assert(0), z::throw_xc( Z_FUNCTION, path );
-
-    set_path( path );
-}
-
-//------------------------------------------------------------------------Absolute_path::with_slash
-
-string Absolute_path::with_slash() const
-{
-    assert( empty() || is_absolute_path() );
-    return to_string();
-}
-
-//---------------------------------------------------------------------Absolute_path::without_slash
-
-string Absolute_path::without_slash() const
-{
-    if( empty() )
-    {
-        return "";
-    }
-    else
-    {
-        assert( string_begins_with( to_string(), "/" ) );
-        return to_string().substr( 1 );
-    }
-}
-
-//--------------------------------------------------------------------------Absolute_path::set_path
-
-void Absolute_path::set_path( const string& path )
-{ 
-    Path::set_path( path ); 
-    assert( empty() || is_absolute_path() );
-}
-
-//--------------------------------------------------------------------Folder_directory_lister::open
-
-bool Folder_directory_lister::open( const File_path& root, const Absolute_path& path )
-{
-    assert( _log );
-
-    bool      result        = false;
-    File_path complete_path ( root, path.without_slash() );
-
-    try
-    {
-        Directory_lister::open( complete_path );
-        result = true;
-    }
-    catch( zschimmer::Xc& x )
-    {
-        if( path.is_root()  &&  !complete_path.exists() )  z::throw_xc( "SCHEDULER-882", complete_path, x );    // Jemand hat das Konfigurationsverzeichnis entfernt
-
-        if( x.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )  // ERRNO-2  Verzeichnis gelöscht
-        {
-            _is_removed = true; 
-            _log->debug3( x.what() );
-        }
-        else
-        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt.
-        {
-            _log->info( x.what() ); 
-        }
-        else  
-            throw;
-    }
-
-    return result;
-}
-
-//---------------------------------------------------------------------Folder_directory_lister::get
-
-ptr<file::File_info> Folder_directory_lister::get()
-{
-    ptr<file::File_info> result;
-
-    while(1)
-    {
-        result = Directory_lister::get();
-        if( !result )  break;
-
-#       ifdef Z_UNIX
-            bool file_exists = result->try_call_stat();
-#        else
-            bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
-#       endif
-
-        if( file_exists )  break;
-    }
-
-    return result;
-}
-
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
 :
     file_based_subsystem<Folder>( scheduler, this, type_folder_subsystem ),
-    _zero_(this+1),
-    _directory_watch_interval( directory_watch_interval_max )
+    _zero_(this+1)
+  //_directory_watch_interval( directory_watch_interval_max )
 {
 }
 
@@ -286,15 +48,9 @@ Folder_subsystem::~Folder_subsystem()
 
 void Folder_subsystem::close()
 {
+    if( _live_directory_observer  )  _live_directory_observer ->close();
+    if( _cache_directory_observer )  _cache_directory_observer->close();
     _subsystem_state = subsys_stopped;
-    set_async_manager( NULL );
-
-
-#   ifdef Z_WINDOWS
-        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
-        FindCloseChangeNotification( _directory_event._handle );
-        _directory_event._handle = NULL;
-#   endif
 
     if( _root_folder )  
     {
@@ -309,18 +65,24 @@ void Folder_subsystem::close()
 void Folder_subsystem::set_directory( const File_path& directory )
 {
     assert_subsystem_state( subsys_initialized, Z_FUNCTION );
-    if( directory == "" )  z::throw_xc( Z_FUNCTION );
-    _directory = directory;
+    assert( !_live_directory_observer );
+
+    _live_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
+    _live_directory_observer->register_directory_handler( this );
+    handle_folders();
 }
 
 //------------------------------------------------------------Folder_subsystem::set_cache_directory
 
-//void Folder_subsystem::set_cache_directory( const File_path& directory )
-//{
-//    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
-//    if( directory == "" )  z::throw_xc( Z_FUNCTION );
-//    _cache_directory = directory;
-//}
+void Folder_subsystem::set_cache_directory( const File_path& directory )
+{
+    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
+    assert( !_cache_directory_observer );
+
+    _cache_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
+    _cache_directory_observer->register_directory_handler( this );
+    handle_folders();
+}
 
 //-----------------------------------------------------------Folder_subsystem::subsystem_initialize
 
@@ -339,13 +101,14 @@ bool Folder_subsystem::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
 
-    if( _directory.exists() )
+    if( _live_directory_observer   &&  _live_directory_observer ->directory_tree()->directory_path().exists()  ||
+        _cache_directory_observer  &&  _cache_directory_observer->directory_tree()->directory_path().exists() )
     {
         _root_folder->load();
         handle_folders();
     }
     else
-        log()->warn( message_string( "SCHEDULER-895", _directory ) );
+        log()->warn( message_string( "SCHEDULER-895", _live_directory_observer->directory_tree()->directory_path() ) );
 
     return true;
 }
@@ -356,32 +119,33 @@ bool Folder_subsystem::subsystem_activate()
 {
     bool result = false;
 
-    if( _directory.exists() )
+    if( _live_directory_observer->directory_tree()->directory_path().exists() )
     {
-#       ifdef Z_WINDOWS
+        _live_directory_observer->activate();
 
-            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-            
-            HANDLE h = FindFirstChangeNotification( _directory.c_str(), 
-                                                    TRUE,                               // Mit Unterverzeichnissen
-                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
-                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
-                                                    FILE_NOTIFY_CHANGE_LAST_WRITE );
-
-            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory );
-
-            _directory_event._handle = h;
-            _directory_event.add_to( &_spooler->_wait_handles );
-
-#       endif
-
-        set_async_manager( _spooler->_connection_manager );
         _subsystem_state = subsys_active;
 
         file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
 
         result = true;
     }
+
+    if( _cache_directory_observer )
+    {
+        _cache_directory_observer->activate();
+    }
+
+    return result;
+}
+
+//----------------------------------------------Folder_subsystem::merged_cache_and_live_directories
+
+ptr<Directory> Folder_subsystem::merged_cache_and_live_directories()
+{
+    int RICHTIG_IMPLEMENTIERUNG_FEHLT;
+
+    ptr<Directory> result = _cache_directory_observer->directory_tree()->root_directory()->clone();
+    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory() );
 
     return result;
 }
@@ -396,33 +160,13 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 //----------------------------------------------------------------Folder_subsystem::async_continue_
 
-bool Folder_subsystem::async_continue_( Continue_flags )
+bool Folder_subsystem::on_handle_directory( directory_observer::Directory_observer* )
 {
-    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory << "\n" );
-
-    _directory_event.reset();
-
-#   ifdef Z_WINDOWS
-        //Z_LOG2( "scheduler", "FindNextChangeNotification(\"" << _directory << "\")\n" );
-        BOOL ok = FindNextChangeNotification( _directory_event );
-        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-#   endif
-
+    Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _live_directory_observer->directory_tree()->directory_path() << "\n" );
 
     handle_folders();
     
     return true;
-}
-
-//--------------------------------------------------------------Folder_subsystem::async_state_text_
-
-string Folder_subsystem::async_state_text_() const
-{
-    S result;
-
-    result << obj_name();
-
-    return result;
 }
 
 //-------------------------------------------------------------Folder_subsystem::is_valid_extension
@@ -462,21 +206,51 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
         if( _last_change_at + minimum_age <= now )
         {
-            if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
+          //if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
 
-            something_changed = _root_folder->adjust_with_directory( now );
+            ptr<Directory> directory;
+            
+            if( _live_directory_observer )
+            {
+                directory = _live_directory_observer->directory_tree()->root_directory();
+                directory->read_deep( 0.0 );
+            }
+
+            if( _cache_directory_observer )
+            {
+                Directory* cache_dir = _cache_directory_observer->directory_tree()->root_directory();
+                cache_dir->read_deep( 0.0 );
+                directory = _live_directory_observer? merged_cache_and_live_directories()
+                                                    : cache_dir;
+            }
+
+            if( directory )
+            {
+                something_changed = _root_folder->adjust_with_directory( directory, now );
+            }
             
             if( something_changed )  _last_change_at = now;
 
-            _directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
-                                                                                            : directory_watch_interval_max;
+            //_directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
+            //                                                                                : directory_watch_interval_max;
 
-            if( _read_again_at )  set_async_next_gmtime( _read_again_at );
-                            else  set_async_delay( _directory_watch_interval );
+            //if( _read_again_at )  set_async_next_gmtime( _read_again_at );
+            //                else  set_async_delay( _directory_watch_interval );
         }
     }
 
     return something_changed;
+}
+
+//-------------------------------------------------------------------Folder_subsystem::set_signaled
+
+void Folder_subsystem::set_signaled( const string& text )                  
+{ 
+    // Besser: nur den Verzeichnisbaum signalisieren, der auch betroffen ist
+    int NUR_EINEN_SIGNALISIEREN;
+
+    if( _live_directory_observer  )  _live_directory_observer ->set_signaled( text );
+    if( _cache_directory_observer )  _cache_directory_observer->set_signaled( text );
 }
 
 //-----------------------------------------------------------------------------------Folder::Folder
@@ -560,6 +334,13 @@ void Folder::set_name( const string& name )
     }
 }
 
+//----------------------------------------------------------------------------------Folder::is_root
+
+bool Folder::is_root() const
+{
+    return this == _spooler->folder_subsystem()->root_folder();
+}
+
 //----------------------------------------------------------------------------Folder::on_initialize
 
 bool Folder::on_initialize()
@@ -615,7 +396,8 @@ string Folder::extension_of_filename( const string& filename )
 
 file::File_path Folder::directory() const
 { 
-    return File_path( spooler()->folder_subsystem()->directory(), path().without_slash() ); 
+    //return File_path( spooler()->folder_subsystem()->directory(), path().without_slash() ); 
+    return base_file_info()._path;
 }
 
 //--------------------------------------------------------------------------------Folder::make_path
@@ -627,96 +409,96 @@ Absolute_path Folder::make_path( const string& name )
 
 //--------------------------------------------------------------------Folder::adjust_with_directory
 
-bool Folder::adjust_with_directory( double now )
+bool Folder::adjust_with_directory( Directory* directory, double now )
 {
+    assert( directory );
+
+
     bool something_changed = false;
 
-    typedef stdext::hash_map< Typed_folder*, list<Base_file_info> >   File_list_map;
+    typedef stdext::hash_map< Typed_folder*, list< const Directory_entry* > >   File_list_map;
     
     File_list_map file_list_map;
 
-    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  file_list_map[ it->second ] = list<Base_file_info>();
+    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  file_list_map[ it->second ] = list< const Directory_entry* >();
 
     try
     {
         // DATEINAMEN EINSAMMELN
 
-        Folder_directory_lister dir             ( _log );
-        bool                    directory_is_ok = false;
+        //Folder_directory_lister dir             ( _log );
+        //bool                    directory_is_ok = false;
 
-        if( !base_file_is_removed() )
+        //if( !base_file_is_removed() )
+        int BASE_FILE_IS_REMOVED;  // Was ist das?
         {
+            string last_normalized_name;
+            string last_extension;
+            string last_filename;
 
-            directory_is_ok = dir.open( spooler()->folder_subsystem()->directory(), path() );
-
-            if( directory_is_ok )
+            Z_FOR_EACH( Directory::Entry_list, directory->_ordered_list, directory_iterator )
             {
-                string last_normalized_name;
-                string last_extension;
-                string last_filename;
+                Directory_entry* directory_entry      = &*directory_iterator;
+                string           filename             = directory_entry->_file_info->path().name();
+                string           name;
+                string           extension            = extension_of_filename( filename );
+                string           normalized_extension = lcase( extension );
+                Typed_folder*    typed_folder         = NULL;
 
-                while( ptr<file::File_info> file_info = dir.get() )
+                if( directory_entry->_file_info->is_directory() )
                 {
-                    string        filename             = file_info->path().name();
-                    string        name;
-                    string        extension            = extension_of_filename( filename );
-                    string        normalized_extension = lcase( extension );
-                    Typed_folder* typed_folder         = NULL;
-
-                    if( file_info->is_directory() )
+                    name         = filename;
+                    typed_folder = _subfolder_folder;
+                }
+                else
+                {
+                    name = object_name_of_filename( filename );
+                    
+                    if( name != "" )
                     {
-                        name         = filename;
-                        typed_folder = _subfolder_folder;
+                        Typed_folder_map::iterator it = _typed_folder_map.find( extension );
+                        if( it != _typed_folder_map.end() )  typed_folder = it->second;
+                    }
+                }
+
+                if( typed_folder )
+                {
+                    directory_entry->_normalized_name = typed_folder->subsystem()->normalized_name( name );
+
+                    if( directory_entry->_normalized_name == last_normalized_name  &&
+                        extension                        == last_extension           )
+                    {
+                        zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
+
+                        log()->warn( x.what() );
+
+                        // Liefert minütlich eine eMail:
+                        //if( _spooler->_mail_on_error )
+                        //{
+                        //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                        //    scheduler_event.set_error( x );
+
+                        //    Mail_defaults mail_defaults( spooler() );
+                        //    mail_defaults.set( "subject", x.what() );
+                        //    mail_defaults.set( "body"   , x.what() );
+
+                        //    scheduler_event.send_mail( mail_defaults );
+                        //}
                     }
                     else
                     {
-                        name = object_name_of_filename( filename );
-                        
-                        if( name != "" )
-                        {
-                            Typed_folder_map::iterator it = _typed_folder_map.find( extension );
-                            if( it != _typed_folder_map.end() )  typed_folder = it->second;
-                        }
+                        file_list_map[ typed_folder ].push_back( directory_entry );
+                      //file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
                     }
 
-                    if( typed_folder )
-                    {
-                        string normalized_name = typed_folder->subsystem()->normalized_name( name );
-
-                        if( normalized_name == last_normalized_name  &&
-                            extension       == last_extension           )
-                        {
-                            zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
-
-                            log()->warn( x.what() );
-
-                            // Liefert minütlich eine eMail:
-                            //if( _spooler->_mail_on_error )
-                            //{
-                            //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
-                            //    scheduler_event.set_error( x );
-
-                            //    Mail_defaults mail_defaults( spooler() );
-                            //    mail_defaults.set( "subject", x.what() );
-                            //    mail_defaults.set( "body"   , x.what() );
-
-                            //    scheduler_event.send_mail( mail_defaults );
-                            //}
-                        }
-                        else
-                        {
-                            file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
-                        }
-
-                        last_normalized_name = normalized_name;
-                        last_extension       = normalized_extension;
-                        last_filename        = filename;
-                    }
+                    last_normalized_name = directory_entry->_normalized_name;
+                    last_extension       = normalized_extension;
+                    last_filename        = filename;
                 }
             }
         }
 
-        if( directory_is_ok  ||  dir.is_removed()  ||  base_file_is_removed() )
+        //if( directory_is_ok  ||  dir.is_removed()  ||  base_file_is_removed() )
         {
             Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
             {
@@ -797,7 +579,7 @@ Subfolder_folder::~Subfolder_folder()
 
 //-----------------------------------------------------------Subfolder_folder::on_base_file_changed
 
-bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_file_info* base_file_info, double now )
+bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Directory_entry* directory_entry, double now )
 {
     bool    something_changed = false;
     Folder* subfolder         = static_cast<Folder*>( file_based );
@@ -806,25 +588,27 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
     {
         ptr<Folder> new_subfolder = Z_NEW( Folder( subsystem(), folder() ) );
         new_subfolder->set_folder_path( folder()->path() );
-        new_subfolder->set_name( base_file_info->_normalized_name );
+        new_subfolder->set_name( directory_entry->_normalized_name );
         new_subfolder->fix_name();
-        new_subfolder->set_base_file_info( *base_file_info );
-        add_file_based( new_subfolder );
+        new_subfolder->set_base_file_info( Base_file_info( *directory_entry ) ); 
+        add_file_based( new_subfolder );                    
         something_changed = true;
 
         new_subfolder->activate();
-        if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( now );
+        int SUBFOLDER_NULL;
+        if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( directory_entry->_subdirectory, now );
     }
     else
     {
-        subfolder->_file_is_removed = base_file_info == NULL;
+        subfolder->_file_is_removed = directory_entry == NULL;
         subfolder->_remove_xc       = zschimmer::Xc();
 
-        if( base_file_info )
+        if( directory_entry )
         {
-            subfolder->set_base_file_info( *base_file_info );
+            subfolder->set_base_file_info( Base_file_info( *directory_entry ) );
             subfolder->set_to_be_removed( false ); 
-            something_changed = subfolder->adjust_with_directory( now );    
+            int SUBFOLDER_NULL;
+            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory, now );    
         }
         else
         if( !subfolder->is_to_be_removed() ) 
@@ -832,7 +616,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
             string p = folder()->make_path( subfolder->base_file_info()._filename );
             subfolder->log()->info( message_string( "SCHEDULER-898" ) );
 
-            subfolder->adjust_with_directory( now );
+            int SUBFOLDER_NULL;
+            subfolder->adjust_with_directory( directory_entry->_subdirectory, now );
             subfolder->remove();
 
             something_changed = true;
@@ -841,7 +626,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Base_
         {
             // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
             // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
-            something_changed = subfolder->adjust_with_directory( now );    
+        int SUBFOLDER_NULL;
+            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory, now );    
         }
     }
 
@@ -897,66 +683,61 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
     
-bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_list, double now )
+bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& ordered_directory_entries, double now )
 {
-    bool                          something_changed  = false;
-    vector<const Base_file_info*> ordered_file_infos;     // Geordnete Liste der vorgefundenen Dateien    
-    vector<File_based*>           ordered_file_baseds;    // Geordnete Liste der bereits bekannten (geladenen) Dateien
-
-    ordered_file_infos.reserve( file_info_list.size() );
-    Z_FOR_EACH_CONST( list<Base_file_info>, file_info_list, it )  ordered_file_infos.push_back( &*it );
-    sort( ordered_file_infos.begin(), ordered_file_infos.end(), Base_file_info::less_dereferenced );
+    bool                something_changed  = false;
+    vector<File_based*> ordered_file_baseds;    // Geordnete Liste der bereits bekannten (geladenen) Dateien
 
     ordered_file_baseds.reserve( _file_based_map.size() );
     Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
     sort( ordered_file_baseds.begin(), ordered_file_baseds.end(), File_based::less_dereferenced );
 
 
-    vector<const Base_file_info*>::iterator fi = ordered_file_infos.begin();
-    vector<File_based*          >::iterator fb = ordered_file_baseds.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
+    list<const Directory_entry*>::const_iterator de = ordered_directory_entries.begin();
+    vector<File_based*         >::const_iterator fb = ordered_file_baseds.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
 
-    while( fi != ordered_file_infos.end()  ||
+    while( de != ordered_directory_entries.end()  ||
            fb != ordered_file_baseds.end() )
     {
         /// Dateinamen gleich Objektnamen?
 
         while( fb != ordered_file_baseds.end()  &&
-               fi != ordered_file_infos.end()  &&
-               (*fb)->_base_file_info._normalized_name == (*fi)->_normalized_name )
+               de != ordered_directory_entries.end()  &&
+               (*fb)->_base_file_info._normalized_name == (*de)->_normalized_name )
         {
-            something_changed |= on_base_file_changed( *fb, *fi, now );
-            fi++, fb++;
+            something_changed |= on_base_file_changed( *fb, *de, now );
+            de++, fb++;
         }
 
 
 
         /// Dateien hinzugefügt?
 
-        while( fi != ordered_file_infos.end()  &&
-               ( fb == ordered_file_baseds.end()  ||  (*fi)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
+        while( de != ordered_directory_entries.end()  &&
+               ( fb == ordered_file_baseds.end()  ||  (*de)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
         {
-            something_changed |= on_base_file_changed( (File_based*)NULL, (*fi), now );
-            fi++;
+            something_changed |= on_base_file_changed( (File_based*)NULL, *de, now );
+            de++;
         }
 
-        assert( fi == ordered_file_infos.end()  || 
+        assert( de == ordered_directory_entries.end()  || 
                 fb == ordered_file_baseds.end() ||
-                (*fi)->_normalized_name >= (*fb)->_base_file_info._normalized_name );
+                (*de)->_normalized_name >= (*fb)->_base_file_info._normalized_name );
         
 
 
         /// Dateien gelöscht?
 
         while( fb != ordered_file_baseds.end()  &&
-               ( fi == ordered_file_infos.end()  ||  (*fi)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
+               ( de == ordered_directory_entries.end()  ||  (*de)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
         {
             something_changed |= on_base_file_changed( *fb, NULL, now );
             fb++;
         }
 
         assert( fb == ordered_file_baseds.end()  ||
-                fi == ordered_file_infos.end()  ||
-                (*fi)->_normalized_name <= (*fb)->_base_file_info._normalized_name );
+                de == ordered_directory_entries.end()  ||
+                (*de)->_normalized_name <= (*fb)->_base_file_info._normalized_name );
     }
 
     return something_changed;
@@ -964,22 +745,23 @@ bool Typed_folder::adjust_with_directory( const list<Base_file_info>& file_info_
 
 //---------------------------------------------------------------Typed_folder::on_base_file_changed
 
-bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_file_info* base_file_info, double now )
+bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry, double now )
 {
 //#   ifdef Z_DEBUG
 //        if( zschimmer::Log_ptr log = "joacim" )
 //        {
 //            log << Z_FUNCTION << "( ";
-//            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._timestamp_utc ).as_string()
+//            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._last_write_time ).as_string()
 //                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
 //                            else  log << "new";
 //            log << ", ";
-//            if( base_file_info )  log << Time().set_utc( base_file_info->_timestamp_utc ).as_string();
+//            if( base_file_info )  log << Time().set_utc( base_file_info->_last_write_time ).as_string();
 //                            else  log << "removed file";
 //            log << " )\n";
 //        }
 //#   endif
 
+    //const Base_file_info* base_file_info = directory_entry->_file_info;
     bool            something_changed  = false;
     ptr<File_based> file_based         = NULL;
     File_based*     current_file_based = old_file_based;        // File_based der zuletzt gelesenen Datei
@@ -990,128 +772,134 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     if( old_file_based )  
     {
         if( !old_file_based->_file_is_removed )  old_file_based->_remove_xc = zschimmer::Xc();      // Datei ist wieder da
-        old_file_based->_file_is_removed = base_file_info == NULL;
+        old_file_based->_file_is_removed = directory_entry == NULL;
         if( old_file_based->replacement() )  current_file_based = old_file_based->replacement();    // File_based der zuletzt geladenen Datei
     }
 
 
     try
     {
-        if( base_file_info )
+        if( directory_entry )
         {
-            if( old_file_based )  old_file_based->_base_file_check_removed_again_at = 0;  // _base_file_removed_at > 0 ==> Datei ist gelöscht und gleich wieder hinzugefügt worden
-
-            file_path = File_path( folder()->directory(), base_file_info->_filename );
-
-            bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
-                                     current_file_based  &&
-                                     current_file_based->_base_file_info._timestamp_utc != base_file_info->_timestamp_utc;
-
-            bool read_again = !timestamp_changed  &&  
-                              current_file_based  &&
-                              current_file_based->_read_again  &&
-                              current_file_based->_base_file_info._info_timestamp + file_timestamp_delay <= now;    // Falls Datei geändert, aber Zeitstempel nicht
-
-            if( is_new  ||  timestamp_changed  ||  read_again )
+            if( !directory_entry->is_aging() )
             {
-                string content;
-                Md5    content_md5;
-                z::Xc  content_xc;
-                
-                try
+                string name = directory_entry->_file_info->path().name();
+
+                //if( old_file_based )  old_file_based->_base_file_check_removed_again_at = 0;  // _base_file_removed_at > 0 ==> Datei ist gelöscht und gleich wieder hinzugefügt worden
+
+                //file_path = File_path( folder()->directory(), directory_entry->_file_info->file_path().name() );
+
+                bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
+                                         current_file_based  &&
+                                         current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
+
+                //bool read_again = !timestamp_changed  &&  
+                //                  current_file_based  &&
+                //                  current_file_based->_read_again  &&
+                //                  current_file_based->_base_file_info._info_timestamp + file_timestamp_delay <= now;    // Falls Datei geändert, aber Zeitstempel nicht
+
+                if( is_new  ||  timestamp_changed ) // ||  read_again )
                 {
-                    content = string_from_file( file_path );
-                    content_md5 = md5( content );
-                }
-                catch( exception& x ) { content_xc = x; }
-
-                if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )    // ERRNO-2 (Datei gelöscht)?
-                {
-                    if( old_file_based )  
-                    {
-                        old_file_based->_file_is_removed = true;
-                        old_file_based->remove();
-                        old_file_based = NULL;
-                    }
-                }
-                else
-                if( read_again  &&                                              // Inhalt nach file_timestamp_delay nochmal prüfen?
-                    content_md5 == current_file_based->_md5  &&                 // Inhalt hat sich nicht geändert?
-                    !current_file_based->_error_ignored )   
-                {
-                    current_file_based->_read_again = false;
-                }
-                else
-                {   
-                    string rel_path = folder()->make_path( base_file_info->_filename );
-
-                    something_changed = true;
-
-
-                    file_based = subsystem()->call_new_file_based();
-                    file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
-                    file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._timestamp_utc != base_file_info->_timestamp_utc;
-                    file_based->_md5        = content_md5;
-                    file_based->set_base_file_info( *base_file_info );
-                    file_based->set_folder_path( folder()->path() );
-                    file_based->set_name( Folder::object_name_of_filename( base_file_info->_filename ) );
-                    file_based->fix_name();
+                    string content;
+                  //Md5    content_md5;
+                    z::Xc  content_xc;
                     
-                    if( old_file_based ) 
+                    try
                     {
-                        old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, 
-                                                                                      Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
-                                                                                      subsystem()->object_type_name() ) );
-                        if( !read_again  ||  // Doppeltes Ereignis wegen _read_again vermeiden
-                            base_file_info->_timestamp_utc != current_file_based->base_file_info()._timestamp_utc ||   
-                            content_md5 != current_file_based->_md5 )  old_file_based->handle_event( File_based::bfevt_modified ); 
+                        content = string_from_file( directory_entry->_file_info->path() );
+                        //content_md5 = md5( content );
+                    }
+                    catch( exception& x ) { content_xc = x; }
 
-                        old_file_based->set_replacement( file_based );
-                        current_file_based = NULL;
+                    if( content_xc.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )    // ERRNO-2 (Datei gelöscht)?
+                    {
+                        if( old_file_based )  
+                        {
+                            old_file_based->_file_is_removed = true;
+                            old_file_based->remove();
+                            old_file_based = NULL;
+                        }
                     }
                     else
-                    {
-                        file_based->log()->info( message_string( "SCHEDULER-891", rel_path, 
-                                                                                  Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
-                                                                                  subsystem()->object_type_name() ) );
-                        file_based->handle_event( File_based::bfevt_added );
-
-                        add_file_based( file_based );
-                    }
-
-
-                    if( !content_xc.is_empty() )  throw content_xc;
+                    //if( read_again  &&                                              // Inhalt nach file_timestamp_delay nochmal prüfen?
+                    //    content_md5 == current_file_based->_md5  &&                 // Inhalt hat sich nicht geändert?
+                    //    !current_file_based->_error_ignored )   
+                    //{
+                    //    current_file_based->_read_again = false;
+                    //}
+                    //else
+                    {   
+                        something_changed = true;
 
 
-                    xml::Document_ptr dom_document ( content );
-                    xml::Element_ptr  element      = dom_document.documentElement();
-                    subsystem()->assert_xml_element_name( element );
-                    if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+                        file_based = subsystem()->call_new_file_based();
+                        file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
+                      //file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._last_write_time != directory_entry->_file_info->last_write_time();
+                      //file_based->_md5        = content_md5;
+                        file_based->set_base_file_info( Base_file_info( *directory_entry ) );
+                        file_based->set_folder_path( folder()->path() );
+                        file_based->set_name( name );
+                        file_based->fix_name();
+                        
+                        string rel_path = folder()->make_path( name );
+                        Time   t; 
+                        t.set_utc( directory_entry->_file_info->last_write_time() );
 
-                    assert_empty_attribute( element, "spooler_id" );
-                    if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
-
-                    Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
-
-                    file_based->set_dom( element );
-                    file_based->set_file_based_state( File_based::s_not_initialized );
-
-                    file_based->initialize();
-
-
-                    if( file_based->file_based_state() == File_based::s_initialized )
-                    {
-                        if( !old_file_based )           // Neues Objekt?
+                        if( old_file_based ) 
                         {
-                            file_based->activate();     
+                            old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, t.as_string(), subsystem()->object_type_name() ) );
+                            //if( !read_again  ||  // Doppeltes Ereignis wegen _read_again vermeiden
+                            //    directory_entry->_file_info->last_write_time() != current_file_based->base_file_info()._last_write_time ||   
+                            //    content_md5 != current_file_based->_md5 )  
+                            {
+                                old_file_based->handle_event( File_based::bfevt_modified ); 
+                            }
+
+                            old_file_based->set_replacement( file_based );
+                            current_file_based = NULL;
                         }
                         else
                         {
-                            old_file_based->prepare_to_replace();
+                            file_based->log()->info( message_string( "SCHEDULER-891", rel_path, t.as_string(), subsystem()->object_type_name() ) );
+                            file_based->handle_event( File_based::bfevt_added );
 
-                            if( old_file_based->can_be_replaced_now() ) 
+                            add_file_based( file_based );
+                        }
+
+
+                        if( !content_xc.is_empty() )  throw content_xc;
+
+
+                        xml::Document_ptr dom_document ( content );
+                        xml::Element_ptr  element      = dom_document.documentElement();
+                        subsystem()->assert_xml_element_name( element );
+                        if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
+
+                        assert_empty_attribute( element, "spooler_id" );
+                        if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
+
+                        Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
+
+                        file_based->set_dom( element );
+                        file_based->set_file_based_state( File_based::s_not_initialized );
+
+                        file_based->initialize();
+
+
+                        if( file_based->file_based_state() == File_based::s_initialized )
+                        {
+                            if( !old_file_based )           // Neues Objekt?
                             {
-                                file_based = old_file_based->replace_now();     assert( !file_based->replacement() );
+                                file_based->activate();     
+                            }
+                            else
+                            {
+                                old_file_based->prepare_to_replace();
+
+                                if( old_file_based->can_be_replaced_now() ) 
+                                {
+                                    file_based = old_file_based->replace_now();     assert( !file_based->replacement() );
+                                }
                             }
                         }
                     }
@@ -1124,13 +912,13 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
         {
             something_changed = true;
 
-            if( !old_file_based->_base_file_check_removed_again_at )
-            {
-                old_file_based->_base_file_check_removed_again_at = now + remove_delay;
-                folder()->subsystem()->set_read_again_at_or_later( old_file_based->_base_file_check_removed_again_at );  
-            }
-            else
-            if( old_file_based->_base_file_check_removed_again_at <= now )
+            //if( !old_file_based->_base_file_check_removed_again_at )
+            //{
+            //    old_file_based->_base_file_check_removed_again_at = now + remove_delay;
+            //    folder()->subsystem()->set_read_again_at_or_later( old_file_based->_base_file_check_removed_again_at );  
+            //}
+            //else
+            //if( old_file_based->_base_file_check_removed_again_at <= now )
             {
                 string p = folder()->make_path( old_file_based->base_file_info()._filename );
                 old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
@@ -1148,24 +936,26 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     {
         if( !file_based )  throw;   // Sollte nicht passieren
 
-        file_based->_error_ignored = file_based->_read_again  &&  file_based->_state < File_based::s_initialized;   // Wegen langsam schreibender Editoren
+      //file_based->_error_ignored = file_based->_read_again  &&  file_based->_state < File_based::s_initialized;   // Wegen langsam schreibender Editoren
 
-        Log_level log_level = file_based->_error_ignored? log_info : log_error;
+        Log_level log_level = //file_based->_error_ignored? log_info : 
+                              log_error;
         string    msg;
 
 
-        if( base_file_info )        // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
+        if( directory_entry )        // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
         {
             file_based->_base_file_xc      = x;
             file_based->_base_file_xc_time = double_from_gmtime();
 
-            msg = message_string( "SCHEDULER-428", File_path( folder()->directory(), base_file_info->_filename ), 
-                                                   Time().set_utc( base_file_info->_timestamp_utc ).as_string(), 
-                                                   x );
+            Time t;
+            t.set_utc( directory_entry->_file_info->last_write_time() );
+
+            msg = message_string( "SCHEDULER-428", directory_entry->_file_info->path(), t.as_string(), x );
         }
         else
         {
-            msg = message_string( "SCHEDULER-439", File_path( folder()->directory(), file_based->base_file_info()._filename ), 
+            msg = message_string( "SCHEDULER-439", file_based->base_file_info()._path, 
                                                    file_based->subsystem()->object_type_name(), x );
         }
 
@@ -1185,12 +975,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Base_
     }
 
 
-    if( file_based  &&  file_based->_read_again )  
-    {
-        double at = now + file_timestamp_delay;
-        folder()->subsystem()->set_read_again_at_or_later( at );  
-        file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay, Time().set_utc( at ).as_string() ) );
-    }
+    //if( file_based  &&  file_based->_read_again )  
+    //{
+    //    double at = now + file_timestamp_delay;
+    //    folder()->subsystem()->set_read_again_at_or_later( at );  
+    //    file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay, Time().set_utc( at ).as_string() ) );
+    //}
 
 
     return something_changed;
@@ -1262,9 +1052,9 @@ void Typed_folder::add_or_replace_file_based_xml( const xml::Element_ptr& elemen
 
 //------------------------------------------------Typed_folder::add_to_replace_or_remove_candidates
 
-void Typed_folder::add_to_replace_or_remove_candidates( const string& name )             
+void Typed_folder::add_to_replace_or_remove_candidates( const File_based& file_based )             
 { 
-    _replace_or_remove_candidates_set.insert( name ); 
+    _replace_or_remove_candidates_set.insert( file_based.name() ); 
     spooler()->folder_subsystem()->set_signaled( Z_FUNCTION );      // Könnte ein getrenntes Ereignis sein, denn das Verzeichnis muss nicht erneut gelesen werden.
 }
 
@@ -1462,9 +1252,7 @@ string Typed_folder::obj_name() const
 
     if( _folder )
     {
-        //if( _folder->path_without_slash() != "" )  
-            result << " " << _folder->path();
-        //                                     else  result << " /";
+        result << " " << _folder->path();
     }
 
     return result;
@@ -1805,21 +1593,19 @@ void File_based::remove_base_file()
 {
     if( !has_base_file() )  assert(0), z::throw_xc( Z_FUNCTION );
 
-    File_path file_path ( folder()->directory(), base_file_info()._filename );
-
     try
     {
 #       ifdef Z_DEBUG
-            file_path.move_to( file_path + "-REMOVED" );
+            _base_file_info._path.move_to( base_file_info()._path + "-REMOVED" );
 #        else
-            file_path.unlink();
+            _base_file_info._path.unlink();
 #       endif    
 
         handle_event( File_based::bfevt_removed );
     }
     catch( exception& )
     {
-        if( file_path.exists() )  throw;
+        if( _base_file_info._path.exists() )  throw;
     }
 
     _file_is_removed = true;
@@ -1867,14 +1653,14 @@ void File_based::check_for_replacing_or_removing( When_to_act when_to_act )
                 if( ok  &&  can_be_replaced_now() )
                 {
                     if( when_to_act == act_now )  replace_now();
-                                            else  typed_folder()->add_to_replace_or_remove_candidates( name() );
+                                            else  typed_folder()->add_to_replace_or_remove_candidates( *this );
                 }
             }
             else
             if( is_to_be_removed()  &&  can_be_removed_now() )
             {
                 if( when_to_act == act_now )  remove_now();
-                                        else  typed_folder()->add_to_replace_or_remove_candidates( name() );
+                                        else  typed_folder()->add_to_replace_or_remove_candidates( *this );
             }
         }
     }
@@ -2013,11 +1799,11 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
     if( has_base_file() )
     {
-        element.setAttribute_optional( "filename", _base_file_info._filename );
+        element.setAttribute_optional( "file", _base_file_info._path );
         if( _file_is_removed )  element.setAttribute( "removed", "yes" );
 
         Time t;
-        t.set_utc( _base_file_info._timestamp_utc );
+        t.set_utc( _base_file_info._last_write_time );
         element.setAttribute( "last_write_time", t.xml_value() );
 
         element.setAttribute( "state", file_based_state_name() );
@@ -2121,7 +1907,7 @@ void File_based::handle_event( Base_file_event base_file_event )
                 ptr<Com_variable_set> environment = new Com_variable_set;
 
                 environment->set_var( "SCHEDULER_LIVE_FILEBASE", _base_file_info._filename );
-                environment->set_var( "SCHEDULER_LIVE_FILEPATH", File_path( folder()->directory(), _base_file_info._filename ) );
+                environment->set_var( "SCHEDULER_LIVE_FILEPATH", _base_file_info._path );
                 environment->set_var( "SCHEDULER_LIVE_EVENT"   , base_file_event == bfevt_added   ? "add"      :
                                                                  base_file_event == bfevt_modified? "modified" :
                                                                  base_file_event == bfevt_removed ? "deleted"  : "" );
@@ -2330,6 +2116,17 @@ bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
     }
 
     return result;
+}
+
+//-------------------------------------------------------------------Base_file_info::Base_file_info
+
+Base_file_info::Base_file_info( const directory_observer::Directory_entry& de ) 
+: 
+    _path           ( de._file_info->path()            ), 
+    _filename       ( de._file_info->path().name()     ), 
+    _last_write_time( de._file_info->last_write_time() ),
+    _normalized_name( de._normalized_name              ) 
+{
 }
 
 //-------------------------------------------------------------------------------------------------

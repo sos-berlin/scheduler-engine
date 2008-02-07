@@ -1516,7 +1516,7 @@ void Spooler::load_arg()
         }
     }
 
-    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );        // "live" bis es richtig gemacht ist
+    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
@@ -1806,8 +1806,16 @@ void Spooler::start()
 
 void Spooler::activate()
 {
-    _folder_subsystem->set_directory( _supervisor_client && _supervisor_client->is_using_central_configuration()? _configuration_cache_directory :_configuration_directory );
+    if( _supervisor_client && _supervisor_client->is_using_central_configuration() )
+    {
+        _folder_subsystem->set_cache_directory( _configuration_cache_directory );
+        if( _configuration_directory.exists() )  _folder_subsystem->set_directory( _configuration_directory );
+    }
+    else
+        _folder_subsystem->set_directory( _configuration_directory );
+
     _folder_subsystem->switch_subsystem_state( subsys_loaded );
+
 
     if( !_ignore_process_classes )
     _process_class_subsystem->switch_subsystem_state( subsys_loaded );
@@ -2475,7 +2483,7 @@ bool Spooler::run_continue( const Time& now )
 
     if( _state != Spooler::s_paused )
     {
-        if( _folder_subsystem->is_signaled() )  something_done |= _folder_subsystem->async_continue();
+        //if( _folder_subsystem->is_signaled() )  something_done |= _folder_subsystem->async_continue();
 
         // PROZESSE FORTSETZEN
         something_done |= _process_class_subsystem->async_continue();

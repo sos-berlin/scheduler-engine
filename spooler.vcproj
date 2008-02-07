@@ -385,6 +385,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\path.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\register.cxx"
 				>
 			</File>
@@ -1119,6 +1123,10 @@
 			</File>
 			<File
 				RelativePath=".\lock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\path.h"
 				>
 			</File>
 			<File

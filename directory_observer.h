@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_DIRECTORY_OBSERVER_H
 #define __SCHEDULER_DIRECTORY_OBSERVER_H
 
+#include "../zschimmer/directory_lister.h"
+
 namespace sos {
 namespace scheduler {
 namespace directory_observer {
@@ -10,6 +12,22 @@ namespace directory_observer {
 //-------------------------------------------------------------------------------------------------
     
 struct Directory;
+
+//---------------------------------------------------------------------------------Directory_lister
+
+struct Folder_directory_lister : file::Directory_lister
+{
+                                Folder_directory_lister     ( Prefix_log* log )                     : _zero_(this+1), _log(log) {}
+
+    bool                        open                        ( const File_path& root, const Absolute_path& folder_path );
+    ptr<file::File_info>        get                         ();
+    bool                        is_removed                  () const                                { return _is_removed; }
+
+  private:
+    Fill_zero                  _zero_;
+    ptr<Prefix_log> const      _log;
+    bool                       _is_removed;
+};
 
 //-----------------------------------------------------------------------------------Directory_tree
 
@@ -54,6 +72,7 @@ struct Directory_entry
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
     double                     _is_aging_until;
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
+    string                     _normalized_name;
 };
 
 //----------------------------------------------------------------------------------------Directory
@@ -98,6 +117,45 @@ struct Directory : Object
 };
 
 //-------------------------------------------------------------------------------Directory_observer
+
+struct Directory_observer : Scheduler_object,
+                            Event_operation
+{
+    struct Directory_handler
+    {
+        virtual bool            on_handle_directory          ( Directory_observer* )                 = 0;
+    };
+
+
+                                Directory_observer          ( Scheduler*, const File_path& directory );
+                               ~Directory_observer          ();
+
+    // Async_operation
+    bool                        async_finished_             () const                                { return false; }
+    string                      async_state_text_           () const;
+    bool                        async_continue_             ( Continue_flags );
+    Socket_event*               async_event                 ()                                      { return &_directory_event; }
+    string                      obj_name                    () const;
+
+    void                        close                       ();
+    void                        activate                    ();
+    bool                        run_handler                 ();
+    void                        set_alarm                   ();
+    void                        set_signaled                ( const string& text );
+    void                        register_directory_handler  ( Directory_handler* );
+
+    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
+
+
+  private:
+    Fill_zero                  _zero_;
+    Event                      _directory_event;
+    ptr<Directory_tree>        _directory_tree;
+  //int                        _directory_watch_interval;
+    double                     _next_check_at;
+    bool                       _is_activated;
+    Directory_handler*           _directory_handler;
+};
 
 //struct Directory_observer : Scheduler_object,
 //                            Async_operation

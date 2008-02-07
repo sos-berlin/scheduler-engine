@@ -4,7 +4,6 @@
 #define __SCHEDULER_FOLDER_H
 
 #include "../zschimmer/z_md5.h"
-#include "../zschimmer/directory_lister.h"
 
 namespace sos {
 namespace scheduler {
@@ -12,7 +11,6 @@ namespace folder {
 
 //-------------------------------------------------------------------------------------------------
 
-struct Absolute_path;
 struct Folder;
 struct Folder_subsystem;
 struct Typed_folder;
@@ -23,7 +21,6 @@ struct Subfolder_folder;
 //--------------------------------------------------------------------------------------------const
 
 extern const char               folder_separator;
-extern const Absolute_path      root_path;
 extern const int                file_timestamp_delay;                   // FAT-Zeitstempel sind 2 Sekunden genau
 extern const int                remove_delay;                           // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
 extern const int                directory_watch_interval_min;
@@ -32,84 +29,6 @@ extern const int                directory_watch_interval_max;
 //-------------------------------------------------------------------------------------------------
 
 inline bool                     file_info_is_lesser         ( const file::File_info* a, const file::File_info* b )  { return a->path() < b->path(); }
-
-//---------------------------------------------------------------------------------------------Path
-
-struct Path : string
-{
-                                Path                        ()                                      {}
-                                Path                        ( const string& path )                  { set_path( path ); }
-                                Path                        ( const char* path )                    { set_path( path ); }
-                                Path                        ( const string& directory, const string& tail_path );
-
-    Path&                       operator =                  ( const string& path )                  { set_path( path );  return *this; }
-    Path&                       operator =                  ( const char* path )                    { set_path( path );  return *this; }
-
-
-    void                    set_name                        ( const string& );                                
-    string                      name                        () const;
-    void                    set_folder_path                 ( const string& );
-    Path                        folder_path                 () const;
-    string                      root_folder_name            () const;
-  //void                    set_absolute_if_relative        ( const Absolute_path& );
-    void                    set_absolute                    ( const Absolute_path& absolute_base, const Path& relative );
-  //void                        prepend_folder_path         ( const string& );
-    const string&               to_string                   () const                                { return *static_cast<const string*>( this ); }
-    void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
-    bool                     is_absolute_path               () const;
-    string                      absolute_path               () const;
-    bool                     is_root                        () const;
-    string                      to_filename                 () const;
-
-  private:
-    bool                        operator <                  ( const File_path& path ) const         { return compare( path ) <  0; }
-    bool                        operator <=                 ( const File_path& path ) const         { return compare( path ) <= 0; }
-    bool                        operator ==                 ( const File_path& path ) const         { return compare( path ) == 0; }
-    bool                        operator !=                 ( const File_path& path ) const         { return compare( path ) != 0; }
-    bool                        operator >=                 ( const File_path& path ) const         { return compare( path ) >= 0; }
-    bool                        operator >                  ( const File_path& path ) const         { return compare( path ) >  0; }
-    int                         compare                     ( const File_path& ) const;             // Nicht implementiert, weil Großkleinschreibung manchmal beachtet werden muss
-};
-
-
-inline void insert_into_message( Message_string* m, int index, const Path& path ) throw()           { return m->insert( index, path.to_string() ); }
-
-//------------------------------------------------------------------------------------Absolute_path
-
-struct Absolute_path : Path
-{
-                                Absolute_path               ()                                      {}
-                              //Absolute_path               ( const string& path )                  { set_path( path ); }
-                              //Absolute_path               ( const char* path )                    { set_path( path ); }
-                                Absolute_path               ( const Absolute_path& absolute_directory, const string& path )  { set_absolute( absolute_directory, path ); }
-                                Absolute_path               ( const Absolute_path& absolute_directory, const Bstr&   path )  { set_absolute( absolute_directory, string_from_bstr( path ) ); }
-                                Absolute_path               ( const Absolute_path& absolute_directory, const char*   path )  { set_absolute( absolute_directory, path ); }
-    explicit                    Absolute_path               ( const Path& );
-
-    void                    set_path                        ( const string& path );
-
-    string                      with_slash                  () const;
-    string                      without_slash               () const;
-
-  private: 
-    Absolute_path&              operator =                  ( const string& path );                 // Nicht implementiert
-};
-
-//---------------------------------------------------------------------------------Directory_lister
-
-struct Folder_directory_lister : file::Directory_lister
-{
-                                Folder_directory_lister     ( Prefix_log* log )                     : _zero_(this+1), _log(log) {}
-
-    bool                        open                        ( const File_path& root, const Absolute_path& folder_path );
-    ptr<file::File_info>        get                         ();
-    bool                        is_removed                  () const                                { return _is_removed; }
-
-  private:
-    Fill_zero                  _zero_;
-    ptr<Prefix_log> const      _log;
-    bool                       _is_removed;
-};
 
 //------------------------------------------------------------------------------------------Pendant
 
@@ -163,24 +82,25 @@ struct Dependencies
 
 struct Base_file_info
 {
-                                Base_file_info              ()                                      : _timestamp_utc(0), _info_timestamp(0) {}
-
-                                Base_file_info              ( const string& filename, double timestamp_utc, const string& normalized_name, double clock ) 
-                                                                                                    : _filename(filename), _timestamp_utc(timestamp_utc),
-                                                                                                      _normalized_name(normalized_name), 
-                                                                                                      _info_timestamp(clock) {}
+                                Base_file_info              ()                                      : _last_write_time(0) {}//, _info_timestamp(0) {}
+                                Base_file_info              ( const directory_observer::Directory_entry& );
+                                Base_file_info              ( const string& filename, time_t timestamp_utc, const string& normalized_name ) 
+                                                                                                    : _filename(filename), _last_write_time(timestamp_utc),
+                                                                                                      _normalized_name(normalized_name) {}
+                                                                                                      //_info_timestamp(clock) {}
 
     bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
     bool                        operator ==                 ( const Base_file_info& f ) const       { return _filename      == f._filename  &&
-                                                                                                             _timestamp_utc == f._timestamp_utc; }
+                                                                                                             _last_write_time == f._last_write_time; }
     bool                        operator !=                 ( const Base_file_info& f ) const       { return !( *this == f ); }
 
     static bool                 less_dereferenced           ( const Base_file_info* a, const Base_file_info* b )  { return *a < *b; }
 
-    string                     _filename;                   // Ohne Verzeichnis
-    double                     _timestamp_utc;
+    string                     _filename;                   // == _path.name()
+    File_path                  _path;
+    time_t                     _last_write_time;            // Derselbe Typ wie zschimmer::file::File_info::last_write_time()
     string                     _normalized_name;            // Ohne Dateinamenserweiterung
-    double                     _info_timestamp;             // Wann dieses Base_file_info erstellt worden ist
+  //double                     _info_timestamp;             // Wann dieses Base_file_info erstellt worden ist
 };
 
 //---------------------------------------------------------------------------------------File_based
@@ -318,16 +238,15 @@ struct File_based : Scheduler_object,
 
     string                     _name;
     State                      _state;
-    //State                      _wished_state;
     Base_file_info             _base_file_info;
     bool                       _name_is_fixed;
-    bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
-    bool                       _error_ignored;
-    Md5                        _md5;
+  //bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
+  //bool                       _error_ignored;
+  //Md5                        _md5;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
-    double                     _base_file_check_removed_again_at;
+    //double                     _base_file_check_removed_again_at;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
     ptr<File_based>            _replacement;
@@ -363,7 +282,7 @@ struct Typed_folder : Scheduler_object,
     Folder*                     folder                      () const                                { return _folder; }
     File_based_subsystem*       subsystem                   () const                                { return file_based_subsystem(); }
 
-    bool                        adjust_with_directory       ( const list<Base_file_info>&, double now );
+    bool                        adjust_with_directory       ( const list< const directory_observer::Directory_entry* >&, double now );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
   //void                        remove_all_file_baseds      ();
@@ -378,12 +297,12 @@ struct Typed_folder : Scheduler_object,
     ptr<File_based>             new_initialized_file_based_xml( const xml::Element_ptr&, const string& default_name = "" );
     void                        add_file_based_xml            ( const xml::Element_ptr&, const string& default_name = "" );
     void                        add_or_replace_file_based_xml ( const xml::Element_ptr&, const string& default_name = "" );
-    void                        add_to_replace_or_remove_candidates( const string& name );
+    void                        add_to_replace_or_remove_candidates( const File_based& file_based );
     void                        handle_replace_or_remove_candidates();
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
-    virtual bool                on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info, double now );
+    virtual bool                on_base_file_changed        ( File_based*, const directory_observer::Directory_entry* changed_base_file_info, double now );
     virtual void                set_dom                     ( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -458,11 +377,12 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
 
   //void                        remove_all_file_baseds      ();
+    bool                        is_root                     () const;
     file::File_path             directory                   () const;
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
     bool                        is_valid_extension          ( const string& extension );
 
-    bool                        adjust_with_directory       ( double now );
+    bool                        adjust_with_directory       ( directory_observer::Directory*, double now );
 
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
@@ -503,7 +423,7 @@ struct Subfolder_folder : typed_folder< Folder >
 
 
     // Typed_folder
-    bool                        on_base_file_changed        ( File_based*, const Base_file_info* changed_base_file_info, double now );
+    bool                        on_base_file_changed        ( File_based*, const directory_observer::Directory_entry*, double now );
 
 
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "folders" ); }
@@ -746,8 +666,10 @@ struct file_based_subsystem : File_based_subsystem
 
 //---------------------------------------------------------------------------------Folder_subsystem
 
-struct Folder_subsystem : file_based_subsystem<Folder>,
-                          Async_operation
+struct Folder_subsystem : Object,
+                          file_based_subsystem<Folder>,
+                          directory_observer::Directory_observer::Directory_handler
+
 {
                                 Folder_subsystem            ( Scheduler* );
                                ~Folder_subsystem            ();
@@ -769,16 +691,20 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     ptr<Folder>                 new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "folders" ); }
 
+
+    // directory_observer::Directory_observer::Directory_handler
+    bool                        on_handle_directory          ( directory_observer::Directory_observer* );
+
+
     // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    bool                        async_signaled_             ()                                      { return is_signaled(); }
+    //bool                        async_finished_             () const                                { return false; }
+    //string                      async_state_text_           () const;
+    //bool                        async_continue_             ( Continue_flags );
+    //bool                        async_signaled_             ()                                      { return is_signaled(); }
 
 
     void                    set_directory                   ( const file::File_path& );
-    File_path                   directory                   () const                                { return _directory; }
-  //void                    set_cache_directory             ( const file::File_path& );
+    void                    set_cache_directory             ( const file::File_path& );
 
     Folder*                     folder                      ( const Absolute_path& path )           { return file_based( path ); }
     Folder*                     folder_or_null              ( const Absolute_path& path )           { return file_based_or_null( path ); }
@@ -786,10 +712,11 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
     bool                        is_valid_extension          ( const string& );
 
-    bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
-    void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
+  //bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
+    void                    set_signaled                    ( const string& text );
 
-    void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
+  //void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
+    ptr<directory_observer::Directory> merged_cache_and_live_directories();
 
     bool                        handle_folders              ( double minimum_age = 0 );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
@@ -797,12 +724,14 @@ struct Folder_subsystem : file_based_subsystem<Folder>,
 
   private:
     Fill_zero                  _zero_;
-    file::File_path            _directory;
+  //file::File_path            _directory;
     ptr<Folder>                _root_folder;
-    Event                      _directory_event;
-    int                        _directory_watch_interval;
+  //Event                      _directory_event;
+  //int                        _directory_watch_interval;
     double                     _last_change_at;
-    double                     _read_again_at;
+  //double                     _read_again_at;
+    ptr<directory_observer::Directory_observer>  _live_directory_observer;                          // Konfigurationsverzeichnis
+    ptr<directory_observer::Directory_observer>  _cache_directory_observer;                         // Cache mit Konfiguration vom Supervisor, s. Supervisor_client
 };
 
 

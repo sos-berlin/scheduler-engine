@@ -46,7 +46,7 @@ Directory* Directory_tree::directory_or_null( const string& name )
 //{
 //    bool directory_has_changed = false;
 //
-//    directory_has_changed = _root_directory->read( Directory::read_subdirectories );
+//    directory_has_changed = _root_directory->read_deep( 0.0 );
 //
 //    return directory_has_changed;
 //}
@@ -430,6 +430,241 @@ void Directory::merge_new_entries( const Directory* other )
 //
 //    return anything_is_refreshed;
 //}
+
+//-----------------------------------------------------------Directory_observer::Directory_observer
+
+Directory_observer::Directory_observer( Scheduler* scheduler, const File_path& directory_path )
+:
+    Scheduler_object( scheduler, this, type_directory_observer ),
+    _zero_(this+1)
+{
+    if( directory_path == "" )  z::throw_xc( Z_FUNCTION );
+
+    _directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
+}
+
+//----------------------------------------------------------Directory_observer::~Directory_observer
+    
+Directory_observer::~Directory_observer()
+{
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+}
+
+//------------------------------------------------------------------------Directory_observer::close
+
+void Directory_observer::close()
+{
+    remove_from_event_manager();
+
+    #ifdef Z_WINDOWS
+        if( _directory_event._handle )
+        {
+            Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
+            FindCloseChangeNotification( _directory_event._handle );
+            _directory_event._handle = NULL;
+        }
+    #endif
+
+    _directory_event.close();
+    _directory_tree = NULL;
+}
+
+//---------------------------------------------------Directory_observer::register_directory_handler
+
+void Directory_observer::register_directory_handler( Directory_handler* directory_handler )
+{
+    if( _directory_handler )  z::throw_xc( Z_FUNCTION );
+    _directory_handler = directory_handler;
+}
+
+//---------------------------------------------------------------------Directory_observer::activate
+
+void Directory_observer::activate()
+{
+    if( !_is_activated )
+    {
+        if( !_directory_tree->directory_path().exists()  ||
+            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
+
+#       ifdef Z_WINDOWS
+        {
+            assert( !_directory_event );
+
+            _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
+
+            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory_tree->directory_path() << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+            
+            HANDLE h = FindFirstChangeNotification( _directory_tree->directory_path().c_str(), 
+                                                    TRUE,                               // Mit Unterverzeichnissen
+                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
+                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
+                                                    FILE_NOTIFY_CHANGE_LAST_WRITE |
+                                                    FILE_NOTIFY_CHANGE_SIZE       );
+
+            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
+
+            _directory_event._handle = h;
+        }
+#       endif
+
+        add_to_event_manager( _spooler->_connection_manager );
+        
+        //set_async_delay( folder::directory_watch_interval_min );
+        //async_wake();
+        async_continue();
+
+        _is_activated = true;
+    }
+}
+
+//--------------------------------------------------------------Directory_observer::async_continue_
+
+bool Directory_observer::async_continue_( Continue_flags )
+{
+    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
+
+    bool something_done;
+
+    if( _directory_event.signaled() )
+    {
+        _directory_event.reset();
+        
+#       ifdef Z_WINDOWS
+            for( int i = 0; i < 2; i++ )
+            {
+                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
+                BOOL ok = FindNextChangeNotification( _directory_event );
+                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+
+                DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
+                if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
+            }
+#       endif    
+    }
+    
+    something_done = run_handler();
+
+    return something_done;
+}
+
+//------------------------------------------------------------------Directory_observer::run_handler
+
+bool Directory_observer::run_handler()
+{
+    bool something_done;
+
+    directory_tree()->reset_aging();
+
+    if( !_directory_handler )  z::throw_xc( Z_FUNCTION, "_directory_handler==NULL" );
+    something_done = _directory_handler->on_handle_directory( this );
+
+    double now      = double_from_gmtime();
+    double interval = now - directory_tree()->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
+                                                                                                     : folder::directory_watch_interval_max;
+    _next_check_at = now + interval;
+    set_alarm();
+
+    return something_done;
+}
+
+//-----------------------------------------------------------------Directory_observer::set_signaled
+
+void Directory_observer::set_signaled( const string& text )
+{
+    _directory_event.set_signaled( text );
+}
+
+//------------------------------------------------------------Directory_observer::async_state_text_
+
+string Directory_observer::async_state_text_() const
+{
+    S result;
+
+    result << obj_name();
+
+    return result;
+}
+
+//---------------------------------------------------------------------Directory_observer::obj_name
+
+string Directory_observer::obj_name() const
+{
+    S result;
+
+    result << Scheduler_object::obj_name();
+    if( _directory_tree )  result << "(" << _directory_tree->directory_path() << ")";
+
+    return result;
+}
+
+//--------------------------------------------------------------------Directory_observer::set_alarm
+
+void Directory_observer::set_alarm()
+{
+    set_async_next_gmtime( min( _directory_tree->refresh_aged_entries_at(), _next_check_at ) );
+}
+
+//--------------------------------------------------------------------Folder_directory_lister::open
+
+bool Folder_directory_lister::open( const File_path& root, const Absolute_path& path )
+{
+    assert( _log );
+
+    bool      result        = false;
+    File_path complete_path ( root, path.without_slash() );
+
+    try
+    {
+        Directory_lister::open( complete_path );
+        result = true;
+    }
+    catch( zschimmer::Xc& x )
+    {
+        if( path.is_root()  &&  !complete_path.exists() )  z::throw_xc( "SCHEDULER-882", complete_path, x );    // Jemand hat das Konfigurationsverzeichnis entfernt
+
+        if( x.code() == ( S() << "ERRNO-" << ENOENT ).to_string() )  // ERRNO-2  Verzeichnis gelöscht
+        {
+            _is_removed = true; 
+            _log->debug3( x.what() );
+        }
+        else
+        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt.
+        {
+            _log->info( x.what() ); 
+        }
+        else  
+            throw;
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------Folder_directory_lister::get
+
+ptr<file::File_info> Folder_directory_lister::get()
+{
+    ptr<file::File_info> result;
+
+    while(1)
+    {
+        result = Directory_lister::get();
+        if( !result )  break;
+
+#       ifdef Z_UNIX
+            bool file_exists = result->try_call_stat();
+#        else
+            bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
+#       endif
+
+        if( file_exists )  break;
+    }
+
+    return result;
+}
 
 //-------------------------------------------------------------------------------------------------
 

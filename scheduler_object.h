@@ -19,6 +19,7 @@ struct Scheduler_object
         type_database,
         type_database_order_detector,
         type_directory_file_order_source,
+        type_directory_observer,
         type_directory_tree,
         type_exclusive_scheduler_watchdog,
         type_folder_subsystem,

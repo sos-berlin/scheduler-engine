@@ -102,9 +102,10 @@ extern const double             delete_temporary_files_retry;
 
 #ifdef Z_WINDOWS
     const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    26;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+    const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
                                                                           // 2007-09-11  Neues Handle für Folder_subsystem
                                                                           // 2007-12-27  Neues Handle für supervisor::Configuration_observer
+                                                                          // 2008-02-06  Neues Handle für _configuration_cache_directory
 #else
     const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()
@@ -242,8 +243,9 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
-#include "folder.h"
+#include "path.h"
 #include "directory_observer.h"
+#include "folder.h"
 #include "scheduler_script.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"
@@ -469,7 +471,7 @@ struct Spooler : Object,
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
     Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
-    Folder_subsystem*           folder_subsystem            ()                                  { return _folder_subsystem; }
+    Folder_subsystem*           folder_subsystem            () const                            { return _folder_subsystem; }
     Process_class_subsystem*    process_class_subsystem     ();
     Task_subsystem*             task_subsystem              ();
     Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }

@@ -40,7 +40,9 @@ struct Xml_file_info : Base_file_info
 {
     Xml_file_info( const xml::Element_ptr& element )
     :
-        Base_file_info( element.getAttribute( "name" ), Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), element.getAttribute( "name" ), 0 ),
+        Base_file_info( element.getAttribute( "name" ), 
+                        (time_t)Time().set_datetime( element.getAttribute( "last_write_time" ) ).as_utc_double(), 
+                        element.getAttribute( "name" ) ),
         _element( element )
     {
         string md5_hex = element.getAttribute( "md5" );
@@ -133,29 +135,21 @@ struct Hostname_cache
 
 //----------------------------------------------------------------------------Remote_configurations
 
-struct Remote_configurations : Scheduler_object,
-                               Event_operation
+struct Remote_configurations : Object,
+                               Scheduler_object,
+                               Directory_observer::Directory_handler
 {
                                 Remote_configurations       ( Supervisor*, const File_path& directory );
                                ~Remote_configurations       ();
 
+
+    // Directory_observer::Directory_handler:
+    bool                        on_handle_directory          ( Directory_observer* );
+
+
     void                        close                       ();
-
-
-    // Async_operation
-    bool                        async_finished_             () const                                { return false; }
-    string                      async_state_text_           () const;
-    bool                        async_continue_             ( Continue_flags );
-    Socket_event*               async_event                 ()                                      { return &_directory_event; }
-    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
-
-
-    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
-
+    Directory_tree*             directory_tree              () const                                { return _directory_observer? _directory_observer->directory_tree() : NULL; }
     void                        activate                    ();
-    bool                     is_activated                   () const                                { return _is_activated; }
-
-    bool                        check                       ();
     void                        set_alarm                   ();
     void                        resolve_configuration_directory_names();
     Directory*                  configuration_directory_for_host_and_port( const Host_and_port& );
@@ -165,10 +159,9 @@ struct Remote_configurations : Scheduler_object,
   private:
     Fill_zero                  _zero_;
     Supervisor*                _supervisor;
-    Event                      _directory_event;
-    ptr<Directory_tree>        _directory_tree;
-    double                     _next_check_at;
-    bool                       _is_activated;
+    ptr<Directory_observer>    _directory_observer;
+  //double                     _next_check_at;
+  //bool                       _is_activated;
 
     typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
     Hostport_directory_map     _hostport_directory_map;
@@ -387,7 +380,7 @@ Directory* Remote_scheduler::configuration_directory_or_null()
 {
     Directory* result = NULL;
 
-    //if( _configuration_directory_name != ""  &&
+    if( _configuration_directory_name != "" ) // &&
     //    File_path( _remote_configurations->directory_tree()->directory_path(), _configuration_directory_name ).exists() )
     {
         result = _remote_configurations->directory_tree()->directory_or_null( _configuration_directory_name );
@@ -540,7 +533,7 @@ void Remote_scheduler::write_updated_files_to_xml( Xml_writer* xml_writer, Direc
                e   != directory->_ordered_list.end()  &&
                (*xfi)->_filename == e->_file_info->path().name() )
         {
-            if( e->_file_info->last_write_time() != (*xfi)->_timestamp_utc )
+            if( e->_file_info->last_write_time() != (*xfi)->_last_write_time )
             {
                 if( !e->is_aging() )  write_file_to_xml( xml_writer, *e, *xfi );
             }
@@ -757,7 +750,9 @@ Remote_configurations::Remote_configurations( Supervisor* supervisor, const File
     _zero_(this+1),
     _supervisor(supervisor)
 {
-    _directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
+    //_directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
+    _directory_observer = Z_NEW( Directory_observer( spooler(), directory_path ) );
+    _directory_observer->register_directory_handler( this );
 }
 
 //----------------------------------------------------Remote_configurations::~Remote_configurations
@@ -775,128 +770,122 @@ Remote_configurations::~Remote_configurations()
 
 void Remote_configurations::close()
 {
-    remove_from_event_manager();
-
-#   ifdef Z_WINDOWS
-        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
-        FindCloseChangeNotification( _directory_event._handle );
-        _directory_event._handle = NULL;
-#   endif
-
-    _directory_event.close();
-
-    _directory_tree = NULL;
+    if( _directory_observer )    _directory_observer->close();
+//    remove_from_event_manager();
+//
+//#   ifdef Z_WINDOWS
+//        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
+//        FindCloseChangeNotification( _directory_event._handle );
+//        _directory_event._handle = NULL;
+//#   endif
+//
+//    _directory_event.close();
+//
+//    _directory_tree = NULL;
 }
 
 //------------------------------------------------------------------Remote_configurations::activate
 
 void Remote_configurations::activate()
 {
-    if( !_is_activated )
-    {
-        if( !_directory_tree->directory_path().exists()  ||
-            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
-
-#       ifdef Z_WINDOWS
-        {
-            assert( !_directory_event );
-
-            _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
-
-            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory_tree->directory_path() << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-            
-            HANDLE h = FindFirstChangeNotification( _directory_tree->directory_path().c_str(), 
-                                                    TRUE,                               // Mit Unterverzeichnissen
-                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
-                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
-                                                    FILE_NOTIFY_CHANGE_LAST_WRITE |
-                                                    FILE_NOTIFY_CHANGE_SIZE       );
-
-            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
-
-            _directory_event._handle = h;
-        }
-#       endif
-
-        add_to_event_manager( _spooler->_connection_manager );
-        set_async_delay( folder::directory_watch_interval_min );
-
-        _is_activated = true;
-    }
+    _directory_observer->activate();
+//    if( !_is_activated )
+//    {
+//        if( !_directory_tree->directory_path().exists()  ||
+//            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
+//
+//#       ifdef Z_WINDOWS
+//        {
+//            assert( !_directory_event );
+//
+//            _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
+//
+//            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory_tree->directory_path() << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
+//            
+//            HANDLE h = FindFirstChangeNotification( _directory_tree->directory_path().c_str(), 
+//                                                    TRUE,                               // Mit Unterverzeichnissen
+//                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
+//                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
+//                                                    FILE_NOTIFY_CHANGE_LAST_WRITE |
+//                                                    FILE_NOTIFY_CHANGE_SIZE       );
+//
+//            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
+//
+//            _directory_event._handle = h;
+//        }
+//#       endif
+//
+//        add_to_event_manager( _spooler->_connection_manager );
+//        set_async_delay( folder::directory_watch_interval_min );
+//
+//        _is_activated = true;
+//    }
 }
 
 //-----------------------------------------------------------Remote_configurations::async_continue_
 
-bool Remote_configurations::async_continue_( Continue_flags )
-{
-    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
-
-    if( _directory_event.signaled() )
-    {
-        _directory_event.reset();
-        
-#       ifdef Z_WINDOWS
-            for( int i = 0; i < 2; i++ )
-            {
-                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
-                BOOL ok = FindNextChangeNotification( _directory_event );
-                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-
-                DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
-                if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
-            }
-#       endif    
-    }
-
-    check();
-    
-    return true;
-}
+//bool Remote_configurations::async_continue_( Continue_flags )
+//{
+//    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
+//
+//    if( _directory_event.signaled() )
+//    {
+//        _directory_event.reset();
+//        
+//#       ifdef Z_WINDOWS
+//            for( int i = 0; i < 2; i++ )
+//            {
+//                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
+//                BOOL ok = FindNextChangeNotification( _directory_event );
+//                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+//
+//                DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
+//                if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
+//            }
+//#       endif    
+//    }
+//
+//    check();
+//    
+//    return true;
+//}
 
 //---------------------------------------------------------Remote_configurations::async_state_text_
 
-string Remote_configurations::async_state_text_() const
+//string Remote_configurations::async_state_text_() const
+//{
+//    S result;
+//
+//    result << obj_name();
+//
+//    return result;
+//}
+//
+//-------------------------------------------------------Remote_configurations::on_handle_directory
+
+bool Remote_configurations::on_handle_directory( Directory_observer* )
 {
-    S result;
+    bool something_changed = false;
 
-    result << obj_name();
-
-    return result;
-}
-
-//---------------------------------------------------------------------Remote_configurations::check
-
-bool Remote_configurations::check()
-{
-    bool   something_changed = false;
-    double now               = double_from_gmtime();
-
-    //if( _directory_tree->last_change_at() + minimum_age <= now )
+    resolve_configuration_directory_names();
+    
+    if( Directory* all_directory = configuration_directory_for_all_schedulers_or_null() )
     {
-        //if( _directory_tree->refresh_aged_entries_at() < now )  _read_again_at = 0;     // Verstrichen?
-        _directory_tree->reset_aging();
-        resolve_configuration_directory_names();
-        
-        if( Directory* all_directory = configuration_directory_for_all_schedulers_or_null() )
-            all_directory->read_deep( 0.0 );
-
-        Z_FOR_EACH( Remote_scheduler_register::Map, _supervisor->_remote_scheduler_register._map, it )
-        {
-            Remote_scheduler* remote_scheduler = it->second;
-            
-            if( remote_scheduler->_is_connected )
-            {
-                something_changed |= remote_scheduler->check_remote_configuration();
-            }
-        }
-
-       
-        double interval = now - _directory_tree->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
-                                                                                                        : folder::directory_watch_interval_max;
-        _next_check_at = now + interval;
-
-        set_alarm();
+        all_directory->read_deep( 0.0 );
     }
+
+    Z_FOR_EACH( Remote_scheduler_register::Map, _supervisor->_remote_scheduler_register._map, it )
+    {
+        Remote_scheduler* remote_scheduler = it->second;
+        
+        if( remote_scheduler->_is_connected )
+        {
+            something_changed |= remote_scheduler->check_remote_configuration();
+        }
+    }
+
+   
+    //set_alarm();
 
     return something_changed;
 }
@@ -905,7 +894,7 @@ bool Remote_configurations::check()
 
 void Remote_configurations::set_alarm()
 {
-    set_async_next_gmtime( min( _directory_tree->refresh_aged_entries_at(), _next_check_at ) );
+    if( _directory_observer )  _directory_observer->set_alarm();
 }
 
 //-------------------------------------Remote_configurations::resolve_configuration_directory_names
