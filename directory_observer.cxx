@@ -318,10 +318,10 @@ ptr<Directory> Directory::clone2( Directory* new_parent ) const
 
 //---------------------------------------------------------------------Directory::merge_new_entries
 
-void Directory::merge_new_entries( const Directory* other )
+void Directory::merge_new_entries( Directory* other, Has_log* log )
 {
     Entry_list::iterator my = _ordered_list.begin();
-    Z_FOR_EACH_CONST( Entry_list, other->_ordered_list, o )  
+    Z_FOR_EACH( Entry_list, other->_ordered_list, o )  
     {
         while( my != _ordered_list.end()  &&  my->_file_info->path().name() < o->_file_info->path().name() )  
             my++;
@@ -333,6 +333,12 @@ void Directory::merge_new_entries( const Directory* other )
                 if( my->_subdirectory )  my->_subdirectory->merge_new_entries( o->_subdirectory );
                                   else  *my = o->clone( this );
             }
+            else
+            if( log  &&  !o->_duplicate_logged )
+            {
+                o->_duplicate_logged = true;
+                log->error( message_string( "SCHEDULER-703", File_path( path(), o->_file_info->path().name() ) ) );
+            }
         }
 
         if( my == _ordered_list.end()  ||  my->_file_info->path().name() > o->_file_info->path().name() )  
@@ -340,6 +346,13 @@ void Directory::merge_new_entries( const Directory* other )
     }
 
 
+    assert_ordered_list();
+}
+
+//-------------------------------------------------------------------Directory::assert_ordered_list
+
+void Directory::assert_ordered_list()
+{
 #   ifndef NDEBUG   // Ordnung prüfen
     {
         Entry_list::const_iterator a = _ordered_list.begin();

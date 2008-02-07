@@ -2290,8 +2290,7 @@ STDMETHODIMP Com_job::get_Configuration_directory( BSTR* result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        int VERSCHIEDENE_VERZEICHNISSE;
-        hr = String_to_bstr( _job->has_base_file()? File_path( _job->spooler()->_configuration_directory, _job->folder_path() ) : File_path(), result );
+        hr = String_to_bstr( _job->has_base_file()? _job->base_file_info()._path.directory() : File_path(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

@@ -142,10 +142,8 @@ bool Folder_subsystem::subsystem_activate()
 
 ptr<Directory> Folder_subsystem::merged_cache_and_live_directories()
 {
-    int RICHTIG_IMPLEMENTIERUNG_FEHLT;
-
     ptr<Directory> result = _cache_directory_observer->directory_tree()->root_directory()->clone();
-    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory() );
+    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory(), log() );
 
     return result;
 }
