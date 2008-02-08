@@ -148,7 +148,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 {
                     _socket_operation->set_keepalive( true );
                 }
-                catch( exception& x ) { log()->warn( x.what() ); }
+                catch( exception& x ) { log()->info( x.what() ); }
 
                 _state = s_connecting;
                 something_done = true;

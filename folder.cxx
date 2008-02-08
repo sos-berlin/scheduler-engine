@@ -447,7 +447,7 @@ bool Folder::adjust_with_directory( Directory* directory )
                     directory_entry->_normalized_name = typed_folder->subsystem()->normalized_name( name );
 
                     if( directory_entry->_normalized_name == last_normalized_name  &&
-                        extension                        == last_extension           )
+                        extension                         == last_extension           )
                     {
                         zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
 
@@ -759,7 +759,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             if( !directory_entry->is_aging() )
             {
-                string name              = directory_entry->_file_info->path().name();
+                string name              = object_name_of_filename( directory_entry->_file_info->path().name() );
                 bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                            current_file_based  &&
                                            current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
@@ -1064,7 +1064,8 @@ void Typed_folder::add_file_based( File_based* file_based )
     string normalized_name = file_based->normalized_name();
     if( normalized_name == ""  &&  !is_empty_name_allowed() )  z::throw_xc( "SCHEDULER-432", subsystem()->object_type_name() );
 
-    if( file_based_or_null( normalized_name ) )  z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path().to_string() );
+    if( file_based_or_null( normalized_name ) )  
+        z::throw_xc( "SCHEDULER-160", subsystem()->object_type_name(), file_based->path().to_string() );
 
     file_based->fix_name();
     file_based->set_typed_folder( this );

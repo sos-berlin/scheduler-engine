@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-02-08" version=" 2.0.199" subversion_revision="5608">
+    <change date="2008-02-08" version="2.0.199" subversion_revision="5608">
         <revision jira="JS-221" type="new" title="Cache für zentrale Konfiguration und parallele lokale Konfiguration">
             <description>
                 <p>
@@ -34,7 +34,7 @@
         </revision>
     </change>
 
-    <change date="2008-02-04" version=" 2.0.198" subversion_revision="5596">
+    <change date="2008-02-04" version="2.0.198" subversion_revision="5596">
         <revision jira="JS-222" type="new" title="Neue Aufrufe Spooler.configuration_directory und Job.folder_path">
             <description>
                 <ul>
@@ -49,7 +49,7 @@
         </revision>
     </change>
 
-    <change date="2008-02-04" version=" 2.0.197" subversion_revision="5594">
+    <change date="2008-02-04" version="2.0.197" subversion_revision="5594">
         <revision jira="JS-255" type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
             <description>
                 <p>
