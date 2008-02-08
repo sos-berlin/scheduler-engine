@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-02-08" version=" 2.0.199" subversion_revision="5605">
+    <change date="2008-02-08" version=" 2.0.199" subversion_revision="5606">
         <revision jira="JS-221" type="new" title="Cache für zentrale Konfiguration und parallele lokale Konfiguration">
             <description>
                 <p>
@@ -19,8 +19,7 @@
                 </p>
                 <p>
                     Der Scheduler mischt die zentrale mit der lokalen Konfiguration.
-                    Bei einer Namenskollision hat die zentrale Konfiguration Vorrang.
-                    Eine Fehlermeldung wird ausgegeben.
+                    Ein zentral konfiguriertes Objekt kann nicht lokal überschrieben werden.
                 </p>
                 <ul>
                     <li>
@@ -30,7 +29,7 @@
             </description>
             <messages>
                 <message level="error" code="SCHEDULER-460"/>
-                <message level="error" code="SCHEDULER-703"/>
+                <message level="warn" code="SCHEDULER-703"/>
             </messages>
         </revision>
     </change>
