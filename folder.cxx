@@ -469,7 +469,6 @@ bool Folder::adjust_with_directory( Directory* directory )
                     else
                     {
                         file_list_map[ typed_folder ].push_back( directory_entry );
-                      //file_list_map[ typed_folder ].push_back( Base_file_info( filename, (double)file_info->last_write_time(), normalized_name, now ) );
                     }
 
                     last_normalized_name = directory_entry->_normalized_name;
@@ -479,14 +478,11 @@ bool Folder::adjust_with_directory( Directory* directory )
             }
         }
 
-        //if( directory_is_ok  ||  dir.is_removed()  ||  base_file_is_removed() )
+        Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
         {
-            Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-            {
-                Typed_folder* typed_folder = it->second;
+            Typed_folder* typed_folder = it->second;
 
-                something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
-            }
+            something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
         }
     }
     catch( exception& x ) 
@@ -659,10 +655,15 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
     
-bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& ordered_directory_entries )
+bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& directory_entries )
 {
-    bool                something_changed  = false;
-    vector<File_based*> ordered_file_baseds;    // Geordnete Liste der bereits bekannten (geladenen) Dateien
+    bool                     something_changed  = false;
+    vector<const Directory*> ordered_directory_entries;     // Geordnete Liste der Dateinamen
+    vector<File_based*>      ordered_file_baseds;           // Geordnete Liste der bereits bekannten (geladenen) Dateien
+
+    ordered_diretory_entries.reserve( _file_based_map.size() );
+    Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_diretory_entries.push_back( &*fb->second );
+    sort( ordered_diretory_entries.begin(), ordered_diretory_entries.end(), File_based::less_dereferenced );
 
     ordered_file_baseds.reserve( _file_based_map.size() );
     Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
@@ -723,19 +724,19 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& or
 
 bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry )
 {
-//#   ifdef Z_DEBUG
-//        if( zschimmer::Log_ptr log = "joacim" )
-//        {
-//            log << Z_FUNCTION << "( ";
-//            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._last_write_time ).as_string()
-//                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
-//                            else  log << "new";
-//            log << ", ";
-//            if( base_file_info )  log << Time().set_utc( base_file_info->_last_write_time ).as_string();
-//                            else  log << "removed file";
-//            log << " )\n";
-//        }
-//#   endif
+#   if 1//def Z_DEBUG
+        if( zschimmer::Log_ptr log = "joacim" )
+        {
+            log << Z_FUNCTION << "( ";
+            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._last_write_time ).as_string()
+                                      << ( old_file_based->_file_is_removed? " file_is_removed" : "" );
+                            else  log << "new";
+            log << ", ";
+            if( directory_entry )  log << Time().set_utc( directory_entry->_file_info->last_write_time() ).as_string() << " " << directory_entry->_file_info->path();
+                             else  log << "removed file";
+            log << " )\n";
+        }
+#   endif
 
     //const Base_file_info* base_file_info = directory_entry->_file_info;
     bool            something_changed  = false;
@@ -759,7 +760,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             if( !directory_entry->is_aging() )
             {
-                string name              = object_name_of_filename( directory_entry->_file_info->path().name() );
+                string name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
                 bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                            current_file_based  &&
                                            current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();

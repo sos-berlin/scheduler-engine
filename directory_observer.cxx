@@ -311,6 +311,8 @@ bool Directory::read( Read_flags read_what, double minimum_age )
         }
     }
 
+    assert_ordered_list();
+
     _repeated_read = true;
     if( directory_has_changed )  _version++;
     return directory_has_changed;
