@@ -90,6 +90,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     Time                       _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
+    bool                       _repeated_reading;
     Xc_copy                    _error;
     string                     _configuration_directory_name;
     int                        _configuration_version;
@@ -457,9 +458,14 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     Directory*     my_directory     = configuration_directory_or_null();
     ptr<Directory> merged_directory = all_directory;
     
-    if( all_directory )  all_directory->read_deep( allowed_directory_age );
-    if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  merged_directory = my_directory;
+
+    Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories_suppress_aging :     // Beim ersten Aufruf sofort antworten, Dateien nicht altern lassen
+                                                          Directory::read_subdirectories;
+
+    if( all_directory )  all_directory->read( read_flags, allowed_directory_age );
+    if( my_directory  )  my_directory ->read( read_flags, allowed_directory_age ),  merged_directory = my_directory;
     if( !merged_directory )  log()->info( message_string( "SCHEDULER-455", obj_name() ) );
+    _repeated_reading = true;
 
     if( all_directory && my_directory )
     {
@@ -771,17 +777,6 @@ Remote_configurations::~Remote_configurations()
 void Remote_configurations::close()
 {
     if( _directory_observer )    _directory_observer->close();
-//    remove_from_event_manager();
-//
-//#   ifdef Z_WINDOWS
-//        Z_LOG2( "scheduler", "FindCloseChangeNotification(" << _directory_event << ")\n" );
-//        FindCloseChangeNotification( _directory_event._handle );
-//        _directory_event._handle = NULL;
-//#   endif
-//
-//    _directory_event.close();
-//
-//    _directory_tree = NULL;
 }
 
 //------------------------------------------------------------------Remote_configurations::activate
@@ -789,78 +784,8 @@ void Remote_configurations::close()
 void Remote_configurations::activate()
 {
     _directory_observer->activate();
-//    if( !_is_activated )
-//    {
-//        if( !_directory_tree->directory_path().exists()  ||
-//            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
-//
-//#       ifdef Z_WINDOWS
-//        {
-//            assert( !_directory_event );
-//
-//            _directory_event.set_name( "Remote_configurations " + _directory_tree->directory_path() );
-//
-//            Z_LOG2( "scheduler", "FindFirstChangeNotification( \"" << _directory_tree->directory_path() << "\", TRUE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );\n" );
-//            
-//            HANDLE h = FindFirstChangeNotification( _directory_tree->directory_path().c_str(), 
-//                                                    TRUE,                               // Mit Unterverzeichnissen
-//                                                    FILE_NOTIFY_CHANGE_FILE_NAME  |  
-//                                                    FILE_NOTIFY_CHANGE_DIR_NAME   |
-//                                                    FILE_NOTIFY_CHANGE_LAST_WRITE |
-//                                                    FILE_NOTIFY_CHANGE_SIZE       );
-//
-//            if( !h  ||  h == INVALID_HANDLE_VALUE )  throw_mswin( "FindFirstChangeNotification", _directory_tree->directory_path() );
-//
-//            _directory_event._handle = h;
-//        }
-//#       endif
-//
-//        add_to_event_manager( _spooler->_connection_manager );
-//        set_async_delay( folder::directory_watch_interval_min );
-//
-//        _is_activated = true;
-//    }
 }
 
-//-----------------------------------------------------------Remote_configurations::async_continue_
-
-//bool Remote_configurations::async_continue_( Continue_flags )
-//{
-//    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
-//
-//    if( _directory_event.signaled() )
-//    {
-//        _directory_event.reset();
-//        
-//#       ifdef Z_WINDOWS
-//            for( int i = 0; i < 2; i++ )
-//            {
-//                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
-//                BOOL ok = FindNextChangeNotification( _directory_event );
-//                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-//
-//                DWORD ret = WaitForSingleObject( _directory_event, 0 );     // Warum wird es doppelt signalisiert?
-//                if( ret != WAIT_OBJECT_0 )  break;                          // Mit dieser Schleife wird async_continue_ bei einem Ereignis nicht doppelt gerufen
-//            }
-//#       endif    
-//    }
-//
-//    check();
-//    
-//    return true;
-//}
-
-//---------------------------------------------------------Remote_configurations::async_state_text_
-
-//string Remote_configurations::async_state_text_() const
-//{
-//    S result;
-//
-//    result << obj_name();
-//
-//    return result;
-//}
-//
 //-------------------------------------------------------Remote_configurations::on_handle_directory
 
 bool Remote_configurations::on_handle_directory( Directory_observer* )
@@ -883,10 +808,7 @@ bool Remote_configurations::on_handle_directory( Directory_observer* )
             something_changed |= remote_scheduler->check_remote_configuration();
         }
     }
-
    
-    //set_alarm();
-
     return something_changed;
 }
 

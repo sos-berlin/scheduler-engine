@@ -114,6 +114,7 @@ bool Folder_subsystem::subsystem_activate()
     if( _live_directory_observer->directory_tree()->directory_path().exists() )
     {
         _live_directory_observer->activate();
+        _live_directory_observer->run_handler();
 
         _subsystem_state = subsys_active;
 
@@ -125,6 +126,7 @@ bool Folder_subsystem::subsystem_activate()
     if( _cache_directory_observer )
     {
         _cache_directory_observer->activate();
+        _cache_directory_observer->run_handler();
     }
 
     return result;
@@ -207,7 +209,12 @@ bool Folder_subsystem::handle_folders( double minimum_age )
             if( _cache_directory_observer )
             {
                 Directory* cache_dir = _cache_directory_observer->directory_tree()->root_directory();
-                cache_dir->read_deep( 0.0 );
+
+                // Die Dateien aus dem Cache lassen wir nicht altern.
+                // a) überflüssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
+                // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst würde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
+
+                cache_dir->read( Directory::read_subdirectories_suppress_aging, 0.0 );     
                 if( _live_directory_observer ) directory = merged_cache_and_live_directories();
                                           else directory = cache_dir;
             }
@@ -229,8 +236,6 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 void Folder_subsystem::set_signaled( const string& text )                  
 { 
     // Besser: nur den Verzeichnisbaum signalisieren, der auch betroffen ist
-    int NUR_EINEN_SIGNALISIEREN;
-
     if( _live_directory_observer  )  _live_directory_observer ->set_signaled( text );
     if( _cache_directory_observer )  _cache_directory_observer->set_signaled( text );
 }
@@ -393,7 +398,7 @@ Absolute_path Folder::make_path( const string& name )
 
 bool Folder::adjust_with_directory( Directory* directory )
 {
-    assert( directory );
+    assert( directory );  if( !directory )  z::throw_xc( Z_FUNCTION, "directory==NULL" );
 
     typedef stdext::hash_map< Typed_folder*, list< const Directory_entry* > >   File_list_map;
     
@@ -571,7 +576,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         something_changed = true;
 
         new_subfolder->activate();
-        int SUBFOLDER_NULL;
         if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( directory_entry->_subdirectory );
     }
     else
@@ -583,7 +587,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         {
             subfolder->set_base_file_info( Base_file_info( *directory_entry ) );
             subfolder->set_to_be_removed( false ); 
-            int SUBFOLDER_NULL;
             something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
         }
         else
@@ -591,8 +594,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         {
             string p = folder()->make_path( subfolder->base_file_info()._filename );
             subfolder->log()->info( message_string( "SCHEDULER-898" ) );
-
-            int SUBFOLDER_NULL;
             subfolder->adjust_with_directory( directory_entry->_subdirectory );
             subfolder->remove();
 
@@ -602,7 +603,6 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         {
             // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
             // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
-        int SUBFOLDER_NULL;
             something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
         }
     }

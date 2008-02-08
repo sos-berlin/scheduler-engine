@@ -157,17 +157,17 @@ const Directory_entry* Directory::entry_or_null( const string& name ) const
 
 //----------------------------------------------------------------------------------Directory::read
 
-bool Directory::read( Read_subdirectories read_what, double minimum_age )
+bool Directory::read( Read_flags read_what, double minimum_age )
 {
     if( !_directory_tree )  z::throw_xc( Z_FUNCTION );
 
     bool   directory_has_changed = false;
     double now                   = double_from_gmtime();
 
-    if( read_what != read_subdirectories  ||
+    if( !( read_what & read_subdirectories )  ||
         _last_read_at + minimum_age <= now )
     {
-        if( read_what == read_subdirectories )  _last_read_at = now;
+        if( read_what & read_subdirectories )  _last_read_at = now;
 
         Folder_directory_lister dir   ( _directory_tree->log() );
         list< ptr<file::File_info> >  file_info_list;
@@ -208,7 +208,7 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
                         directory_has_changed = true;
                     }
 
-                    if( read_what == read_subdirectories )  directory_has_changed |= e->_subdirectory->read( read_what );
+                    if( read_what & read_subdirectories )  directory_has_changed |= e->_subdirectory->read( read_what );
                 }
                 else
                 {
@@ -252,11 +252,12 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
                 if( (*fi)->is_directory() )  
                 {
                     new_entry->_subdirectory = Z_NEW( Directory( _directory_tree, this, (*fi)->path().name() ) );
-                    if( read_what == read_subdirectories )  new_entry->_subdirectory->read( read_what );
+                    if( read_what & read_subdirectories )  new_entry->_subdirectory->read( read_what );
                     _directory_tree->set_last_change_at( now );
                     directory_has_changed = true;
                 }
                 else
+                if( !( read_what & read_suppress_aging )  ||  _repeated_read )
                 {
                     new_entry->_is_aging_until = now + file_timestamp_delay;
                     _directory_tree->set_aging_until( new_entry->_is_aging_until );
@@ -310,6 +311,7 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
         }
     }
 
+    _repeated_read = true;
     if( directory_has_changed )  _version++;
     return directory_has_changed;
 }
@@ -536,7 +538,7 @@ void Directory_observer::activate()
         
         //set_async_delay( folder::directory_watch_interval_min );
         //async_wake();
-        async_continue();
+        //async_continue();
 
         _is_activated = true;
     }

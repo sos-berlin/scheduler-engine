@@ -85,10 +85,12 @@ struct Directory_entry
 
 struct Directory : Object
 {
-    enum Read_subdirectories
+    enum Read_flags
     {
         read_no_subdirectories,
-        read_subdirectories
+        read_subdirectories                 = 0x01,
+        read_suppress_aging                 = 0x02,
+        read_subdirectories_suppress_aging  = 0x03
     };
 
 
@@ -97,7 +99,7 @@ struct Directory : Object
     string                      name                        () const                                { return _name; }
     Absolute_path               path                        () const;
     File_path                   file_path                   () const;
-    bool                        read                        ( Read_subdirectories, double minimum_age = 0.0 );
+    bool                        read                        ( Read_flags, double minimum_age = 0.0 );
     bool                        read_deep                   ( double minimum_age )                  { return read( read_subdirectories, minimum_age ); }
     bool                        read_without_subdirectories ()                                      { return read( read_no_subdirectories ); }
     const Directory_entry*      entry_or_null               ( const string& name ) const;
@@ -116,6 +118,7 @@ struct Directory : Object
     double                     _last_read_at;
     Directory*                 _parent;
     Directory_tree* const      _directory_tree;
+    bool                       _repeated_read;
 
   public:
     typedef list<Directory_entry>  Entry_list;
