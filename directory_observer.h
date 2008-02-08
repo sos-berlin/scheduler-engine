@@ -49,7 +49,7 @@ struct Directory_tree : Scheduler_object,
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
     bool                        is_cache                    () const                                { return _is_cache; }
-    bool                    set_is_cache                    ( bool b )                              { _is_cache = b; }
+    void                    set_is_cache                    ( bool b )                              { _is_cache = b; }
 
   private:
     Fill_zero                  _zero_;
