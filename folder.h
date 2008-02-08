@@ -234,16 +234,14 @@ struct File_based : Scheduler_object,
     State                      _state;
     Base_file_info             _base_file_info;
     bool                       _name_is_fixed;
-  //bool                       _read_again;                 // Wegen ungenauer Zeitstempel und langsam schreibender Editoren jede Datei zweimal Lesen
-  //bool                       _error_ignored;
   //Md5                        _md5;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
     int                        _duplicate_version;
-    //double                     _base_file_check_removed_again_at;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
+    bool                       _is_from_cache;              // Aus dem Cache, also zentral konfiguriert (File_based darf nicht lokal überschrieben werden)
     ptr<File_based>            _replacement;
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
@@ -277,7 +275,7 @@ struct Typed_folder : Scheduler_object,
     Folder*                     folder                      () const                                { return _folder; }
     File_based_subsystem*       subsystem                   () const                                { return file_based_subsystem(); }
 
-    bool                        adjust_with_directory       ( const list< const directory_observer::Directory_entry* >&, double now );
+    bool                        adjust_with_directory       ( const list< const directory_observer::Directory_entry* >& );
     File_based*                 file_based                  ( const string& name ) const;
     File_based*                 file_based_or_null          ( const string& name ) const;
   //void                        remove_all_file_baseds      ();
@@ -294,11 +292,11 @@ struct Typed_folder : Scheduler_object,
     void                        add_or_replace_file_based_xml ( const xml::Element_ptr&, const string& default_name = "" );
     void                        add_to_replace_or_remove_candidates( const File_based& file_based );
     void                        handle_replace_or_remove_candidates();
-    void                        check_for_duplicate_configuration_file( File_based*, const directory_observer::Directory_entry* );
+    void                        ignore_duplicate_configuration_file( File_based*, File_based*, const directory_observer::Directory_entry& );
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
-    virtual bool                on_base_file_changed        ( File_based*, const directory_observer::Directory_entry* changed_base_file_info, double now );
+    virtual bool                on_base_file_changed        ( File_based*, const directory_observer::Directory_entry* changed_base_file_info );
     virtual void                set_dom                     ( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual xml::Element_ptr    new_dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -378,7 +376,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
     bool                        is_valid_extension          ( const string& extension );
 
-    bool                        adjust_with_directory       ( directory_observer::Directory*, double now );
+    bool                        adjust_with_directory       ( directory_observer::Directory* );
 
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
@@ -419,7 +417,7 @@ struct Subfolder_folder : typed_folder< Folder >
 
 
     // Typed_folder
-    bool                        on_base_file_changed        ( File_based*, const directory_observer::Directory_entry*, double now );
+    bool                        on_base_file_changed        ( File_based*, const directory_observer::Directory_entry* );
 
 
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "folders" ); }

@@ -75,7 +75,7 @@ Directory* Directory_tree::directory_or_null( const string& name )
 //    }
 //}
 
-//------------------------------------------------------------------irectory_entry::Directory_entry
+//-----------------------------------------------------------------Directory_entry::Directory_entry
 
 Directory_entry::Directory_entry()
 :
@@ -245,10 +245,9 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
             while( fi != ordered_file_infos.end()  &&
                    ( e == _ordered_list.end()  ||  (*fi)->path().name() < e->_file_info->path().name() ) )
             {
-                //_directory_tree->log()->warn( (*fi)->path() + " hinzugefügt" );
-
                 list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
-                new_entry->_file_info = *fi;
+                new_entry->_file_info     = *fi;
+                new_entry->_is_from_cache = _directory_tree->is_cache();
                 
                 if( (*fi)->is_directory() )  
                 {
@@ -277,8 +276,6 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
             while( e != _ordered_list.end()  &&
                    ( fi == ordered_file_infos.end()  ||  (*fi)->path().name() > e->_file_info->path().name() ) )  // Datei entfernt?
             {
-                //_directory_tree->log()->warn( e->_file_info->path() + " gelöscht" );
-
                 if( e->_subdirectory )
                 {
                     e = _ordered_list.erase( e );       // Verzeichniseinträge nicht altern lassen, sofort löschen
@@ -587,8 +584,8 @@ bool Directory_observer::run_handler()
     something_done = _directory_handler->on_handle_directory( this );
 
     double now      = double_from_gmtime();
-    double interval = now - directory_tree()->last_change_at() < folder::directory_watch_interval_max? folder::directory_watch_interval_min
-                                                                                                     : folder::directory_watch_interval_max;
+    double interval = now - directory_tree()->last_change_at() < directory_watch_interval_max? directory_watch_interval_min
+                                                                                             : directory_watch_interval_max;
     _next_check_at = now + interval;
     set_alarm();
 

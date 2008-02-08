@@ -2806,6 +2806,11 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-460">
+            <text xml:lang="en">
+                <title><p1>object</p1> is centrally defined and cannot be locally overwritten</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -4150,7 +4155,7 @@
         
         <message code="SCHEDULER-703">
             <text xml:lang="en">
-                <title>Local configuration file is ignored, central configuration file is used</title>
+                <title>Local configuration file is ignored, the central configuration file is used instead</title>
             </text>
         </message>
         

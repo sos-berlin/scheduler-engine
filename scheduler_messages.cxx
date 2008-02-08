@@ -308,6 +308,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-457", "Remote scheduler '$1' has not been registered" },
     { "SCHEDULER-458", "Remote configuration directory '$1' is missing" },
     { "SCHEDULER-459", "Error in dependant after '$1' has been loaded:\n$2" },
+    { "SCHEDULER-460", "$1 is centrally defined and cannot be locally overwritten" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },
@@ -475,13 +476,12 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-893", "$1 is '$2' now" },
     { "SCHEDULER-894", "'$1' will be removed later, it is used by $2" },
     { "SCHEDULER-895", "Configuration directory '$1' does not exist, it will be ignored" },
-    { "SCHEDULER-896", "File will be read again after $1 seconds" },
     { "SCHEDULER-897", "Error in replacement ignored::\n$2" },
     { "SCHEDULER-898", "Folder is going to be removed because its configuration directory has been removed" },
     { "SCHEDULER-899", "Scheduler has no UDP port, so updated configuration files on supervisor will not be noticed" },
     { "SCHEDULER-701", "Replicating '$1'" },
     { "SCHEDULER-702", "Removing '$1'" },
-    { "SCHEDULER-703", "Local configuration file is ignored, central configuration file is used" },
+    { "SCHEDULER-703", "Local configuration file is ignored, the central configuration file is used instead" },
     {}
 };
 } //namespace sos

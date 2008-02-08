@@ -29,6 +29,7 @@
                 </ul>
             </description>
             <messages>
+                <message level="error" code="SCHEDULER-460"/>
                 <message level="error" code="SCHEDULER-703"/>
             </messages>
         </revision>

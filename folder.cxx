@@ -58,7 +58,8 @@ void Folder_subsystem::set_directory( const File_path& directory )
 
     _live_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
     _live_directory_observer->register_directory_handler( this );
-    handle_folders();
+
+    //handle_folders();
 }
 
 //------------------------------------------------------------Folder_subsystem::set_cache_directory
@@ -69,8 +70,10 @@ void Folder_subsystem::set_cache_directory( const File_path& directory )
     assert( !_cache_directory_observer );
 
     _cache_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
+    _cache_directory_observer->directory_tree()->set_is_cache( true );
     _cache_directory_observer->register_directory_handler( this );
-    handle_folders();
+
+    //handle_folders();
 }
 
 //-----------------------------------------------------------Folder_subsystem::subsystem_initialize
@@ -211,7 +214,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
             if( directory )
             {
-                something_changed = _root_folder->adjust_with_directory( directory, now );
+                something_changed = _root_folder->adjust_with_directory( directory );
             }
             
             if( something_changed )  _last_change_at = now;
@@ -388,16 +391,14 @@ Absolute_path Folder::make_path( const string& name )
 
 //--------------------------------------------------------------------Folder::adjust_with_directory
 
-bool Folder::adjust_with_directory( Directory* directory, double now )
+bool Folder::adjust_with_directory( Directory* directory )
 {
     assert( directory );
-
-
-    bool something_changed = false;
 
     typedef stdext::hash_map< Typed_folder*, list< const Directory_entry* > >   File_list_map;
     
     File_list_map file_list_map;
+    bool          something_changed = false;
 
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  file_list_map[ it->second ] = list< const Directory_entry* >();
 
@@ -405,11 +406,7 @@ bool Folder::adjust_with_directory( Directory* directory, double now )
     {
         // DATEINAMEN EINSAMMELN
 
-        //Folder_directory_lister dir             ( _log );
-        //bool                    directory_is_ok = false;
-
-        //if( !base_file_is_removed() )
-        int BASE_FILE_IS_REMOVED;  // Was ist das?
+        if( !base_file_is_removed() )
         {
             string last_normalized_name;
             string last_extension;
@@ -483,7 +480,7 @@ bool Folder::adjust_with_directory( Directory* directory, double now )
             {
                 Typed_folder* typed_folder = it->second;
 
-                something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ], now );
+                something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
             }
         }
     }
@@ -558,7 +555,7 @@ Subfolder_folder::~Subfolder_folder()
 
 //-----------------------------------------------------------Subfolder_folder::on_base_file_changed
 
-bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Directory_entry* directory_entry, double now )
+bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Directory_entry* directory_entry )
 {
     bool    something_changed = false;
     Folder* subfolder         = static_cast<Folder*>( file_based );
@@ -575,7 +572,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
 
         new_subfolder->activate();
         int SUBFOLDER_NULL;
-        if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( directory_entry->_subdirectory, now );
+        if( new_subfolder->file_based_state() >= File_based::s_loaded )  new_subfolder->adjust_with_directory( directory_entry->_subdirectory );
     }
     else
     {
@@ -587,7 +584,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
             subfolder->set_base_file_info( Base_file_info( *directory_entry ) );
             subfolder->set_to_be_removed( false ); 
             int SUBFOLDER_NULL;
-            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory, now );    
+            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
         }
         else
         if( !subfolder->is_to_be_removed() ) 
@@ -596,7 +593,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
             subfolder->log()->info( message_string( "SCHEDULER-898" ) );
 
             int SUBFOLDER_NULL;
-            subfolder->adjust_with_directory( directory_entry->_subdirectory, now );
+            subfolder->adjust_with_directory( directory_entry->_subdirectory );
             subfolder->remove();
 
             something_changed = true;
@@ -606,7 +603,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
             // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
             // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
         int SUBFOLDER_NULL;
-            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory, now );    
+            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
         }
     }
 
@@ -662,7 +659,7 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
     
-bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& ordered_directory_entries, double now )
+bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& ordered_directory_entries )
 {
     bool                something_changed  = false;
     vector<File_based*> ordered_file_baseds;    // Geordnete Liste der bereits bekannten (geladenen) Dateien
@@ -684,7 +681,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& or
                de != ordered_directory_entries.end()  &&
                (*fb)->_base_file_info._normalized_name == (*de)->_normalized_name )
         {
-            something_changed |= on_base_file_changed( *fb, *de, now );
+            something_changed |= on_base_file_changed( *fb, *de );
             de++, fb++;
         }
 
@@ -695,7 +692,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& or
         while( de != ordered_directory_entries.end()  &&
                ( fb == ordered_file_baseds.end()  ||  (*de)->_normalized_name < (*fb)->_base_file_info._normalized_name ) )
         {
-            something_changed |= on_base_file_changed( (File_based*)NULL, *de, now );
+            something_changed |= on_base_file_changed( (File_based*)NULL, *de );
             de++;
         }
 
@@ -710,7 +707,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& or
         while( fb != ordered_file_baseds.end()  &&
                ( de == ordered_directory_entries.end()  ||  (*de)->_normalized_name > (*fb)->_base_file_info._normalized_name ) )  // Datei entfernt?
         {
-            something_changed |= on_base_file_changed( *fb, NULL, now );
+            something_changed |= on_base_file_changed( *fb, NULL );
             fb++;
         }
 
@@ -724,7 +721,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& or
 
 //---------------------------------------------------------------Typed_folder::on_base_file_changed
 
-bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry, double now )
+bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry )
 {
 //#   ifdef Z_DEBUG
 //        if( zschimmer::Log_ptr log = "joacim" )
@@ -767,7 +764,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                                            current_file_based  &&
                                            current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
 
-                if( is_new  ||  timestamp_changed )
+                if( !is_new  &&  !timestamp_changed )
+                {
+                    ignore_duplicate_configuration_file( current_file_based, (File_based*)NULL, *directory_entry );
+                }
+                else
                 {
                     string content;
                   //Md5    content_md5;
@@ -800,8 +801,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         file_based->set_folder_path( folder()->path() );
                         file_based->set_name( name );
                         file_based->fix_name();
+                        file_based->_is_from_cache = directory_entry->_is_from_cache;
 
-                        check_for_duplicate_configuration_file( file_based, directory_entry );
+                        ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
                         string rel_path = folder()->make_path( name );
                         Time   t; 
@@ -860,8 +862,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                     }
                 }
-                else
-                    check_for_duplicate_configuration_file( old_file_based, directory_entry );
             }
         }
         else                                        // Datei ist gelöscht
@@ -921,16 +921,36 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
     return something_changed;
 }
 
-//---------------------------------------------Typed_folder::check_for_duplicate_configuration_file
+//------------------------------------------------Typed_folder::ignore_duplicate_configuration_file
 
-void Typed_folder::check_for_duplicate_configuration_file( File_based* file_based, const Directory_entry* directory_entry )
+void Typed_folder::ignore_duplicate_configuration_file( File_based* current_file_based, File_based* new_file_based, const Directory_entry& directory_entry )
 {
-    if( file_based  &&  directory_entry  &&  
-        file_based->_duplicate_version != directory_entry->_duplicate_version )  
+    //if( new_file_based  &&  current_file_based )  new_file_based->_duplicate_version = current_file_based->_duplicate_version;
+
+    File_based* file_based = new_file_based? new_file_based : current_file_based;
+
+    if( directory_entry._duplicate_version  &&  
+        directory_entry._duplicate_version != file_based->_duplicate_version  &&
+        !directory_entry.is_aging() )
     {
-        if( directory_entry->_duplicate_version )  file_based->log()->error( message_string( "SCHEDULER-703" ) );
-        file_based->_duplicate_version = directory_entry->_duplicate_version;
+        if( !new_file_based )
+        {
+            // Lokale Datei geändert, Objekt ist aber zentral definiert: 
+            file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Geänderte lokale Datei wird ignoriert
+        }
+        else
+        //if( current_file_based  &&  !current_file_based->_is_from_cache )
+        //{
+        //    file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Bereits gelesene lokale Datei wird durch zentrale ersetzt
+        //}
+        //else
+        {
+            file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Lokale Datei wird ignoriert und zentrale Version wird genommen
+        }
     }
+
+    if( current_file_based )  current_file_based->_duplicate_version = directory_entry._duplicate_version;
+    if( new_file_based     )  new_file_based    ->_duplicate_version = directory_entry._duplicate_version;
 }
 
 //-----------------------------------------------------Typed_folder::new_initialized_file_based_xml
@@ -1376,7 +1396,7 @@ bool File_based::switch_file_based_state( State state )
 
 //------------------------------------------------------------------File_based::on_dependant_loaded
 
-bool File_based::on_dependant_loaded( File_based* file_based )
+bool File_based::on_dependant_loaded( File_based* )
 {
     bool result = false;
 
@@ -1464,6 +1484,14 @@ void File_based::set_to_be_removed( bool b )
 void File_based::set_replacement( File_based* replacement )             
 { 
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
+    
+    if( replacement  &&  
+        _is_from_cache  &&  
+        !replacement->_is_from_cache &&
+        _base_file_info._path.exists() )    // Außer, die zentrale Datei ist gelöscht
+    {
+        z::throw_xc( "SCHEDULER-460", subsystem()->object_type_name() );  // Original ist zentral konfiguriert, aber Ersatz nicht
+    }
 
     _replacement = replacement; 
     if( _replacement )  set_to_be_removed( false ); 

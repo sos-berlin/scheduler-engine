@@ -48,6 +48,8 @@ struct Directory_tree : Scheduler_object,
     void                        set_last_change_at          ( double t )                            { _last_change_at = t; }
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
+    bool                        is_cache                    () const                                { return _is_cache; }
+    bool                    set_is_cache                    ( bool b )                              { _is_cache = b; }
 
   private:
     Fill_zero                  _zero_;
@@ -55,6 +57,7 @@ struct Directory_tree : Scheduler_object,
     ptr<Directory>             _root_directory;
     double                     _last_change_at;
     double                     _refresh_aged_entries_at;
+    bool                       _is_cache;                   // Verzeichnis des Caches mit der zentralen Konfiguration
 };
 
 //----------------------------------------------------------------------------------Directory_entry
@@ -72,6 +75,7 @@ struct Directory_entry
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
     double                     _is_aging_until;
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
+    bool                       _is_from_cache;
     int                        _version;
     int                        _duplicate_version;          // Für merged_new_entries() und Meldung SCHEDULER-703
     string                     _normalized_name;
