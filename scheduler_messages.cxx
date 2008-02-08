@@ -481,7 +481,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-899", "Scheduler has no UDP port, so updated configuration files on supervisor will not be noticed" },
     { "SCHEDULER-701", "Replicating '$1'" },
     { "SCHEDULER-702", "Removing '$1'" },
-    { "SCHEDULER-703", "Local file with same path will be ignored: $1" },
+    { "SCHEDULER-703", "Local configuration file is ignored, central configuration file is used" },
     {}
 };
 } //namespace sos

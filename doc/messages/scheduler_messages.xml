@@ -4150,7 +4150,7 @@
         
         <message code="SCHEDULER-703">
             <text xml:lang="en">
-                <title>Local file with same path will be ignored: <p1/></title>
+                <title>Local configuration file is ignored, central configuration file is used</title>
             </text>
         </message>
         

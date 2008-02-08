@@ -72,7 +72,8 @@ struct Directory_entry
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
     double                     _is_aging_until;
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
-    bool                       _duplicate_logged;           // Für merged_new_entries(): Bereits gemeldet, dass derselbe Dateiname in cache und live
+    int                        _version;
+    int                        _duplicate_version;          // Für merged_new_entries() und Meldung SCHEDULER-703
     string                     _normalized_name;
 };
 
@@ -95,13 +96,12 @@ struct Directory : Object
     bool                        read                        ( Read_subdirectories, double minimum_age = 0.0 );
     bool                        read_deep                   ( double minimum_age )                  { return read( read_subdirectories, minimum_age ); }
     bool                        read_without_subdirectories ()                                      { return read( read_no_subdirectories ); }
-  //bool                        refresh_aged_entries        ();
     const Directory_entry*      entry_or_null               ( const string& name ) const;
   //Directory*                  subdirectory                ( const string& name ) const;
     int                         version                     () const                                { return _version; }
     ptr<Directory>              clone                       () const                                { return clone2( NULL ); }
     ptr<Directory>              clone2                      ( Directory* parent ) const;
-    void                        merge_new_entries           ( Directory*, Has_log* = NULL );
+    void                        merge_new_entries           ( const Directory* );
     void                        assert_ordered_list         ();
 
 

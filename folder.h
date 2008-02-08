@@ -246,6 +246,7 @@ struct File_based : Scheduler_object,
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
+    int                        _duplicate_version;
     //double                     _base_file_check_removed_again_at;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
@@ -299,6 +300,7 @@ struct Typed_folder : Scheduler_object,
     void                        add_or_replace_file_based_xml ( const xml::Element_ptr&, const string& default_name = "" );
     void                        add_to_replace_or_remove_candidates( const File_based& file_based );
     void                        handle_replace_or_remove_candidates();
+    void                        check_for_duplicate_configuration_file( File_based*, const directory_observer::Directory_entry* );
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }

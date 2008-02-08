@@ -66,7 +66,8 @@ Directory* Directory_tree::directory_or_null( const string& name )
 
 Directory_entry::Directory_entry()
 :
-    _zero_(this+1)
+    _zero_(this+1),
+    _version(1)
 {
 }
 
@@ -215,6 +216,7 @@ bool Directory::read( Read_subdirectories read_what, double minimum_age )
                     if( e->_is_aging_until )
                     {
                         e->_is_aging_until = 0;
+                        e->_version++;
                         _directory_tree->set_last_change_at( now );
                         directory_has_changed = true;
                     }
@@ -318,10 +320,10 @@ ptr<Directory> Directory::clone2( Directory* new_parent ) const
 
 //---------------------------------------------------------------------Directory::merge_new_entries
 
-void Directory::merge_new_entries( Directory* other, Has_log* log )
+void Directory::merge_new_entries( const Directory* other )
 {
     Entry_list::iterator my = _ordered_list.begin();
-    Z_FOR_EACH( Entry_list, other->_ordered_list, o )  
+    Z_FOR_EACH_CONST( Entry_list, other->_ordered_list, o )  
     {
         while( my != _ordered_list.end()  &&  my->_file_info->path().name() < o->_file_info->path().name() )  
             my++;
@@ -334,11 +336,7 @@ void Directory::merge_new_entries( Directory* other, Has_log* log )
                                   else  *my = o->clone( this );
             }
             else
-            if( log  &&  !o->_duplicate_logged )
-            {
-                o->_duplicate_logged = true;
-                log->error( message_string( "SCHEDULER-703", File_path( path(), o->_file_info->path().name() ) ) );
-            }
+            if( !o->is_aging() )  my->_duplicate_version = o->_version;     // Meldung SCHEDULER-703 wird auf das Duplikat hinweisen
         }
 
         if( my == _ordered_list.end()  ||  my->_file_info->path().name() > o->_file_info->path().name() )  

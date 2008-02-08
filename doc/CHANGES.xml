@@ -10,6 +10,30 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-02-08" version=" 2.0.199" subversion_revision="5599">
+        <revision jira="JS-221" type="new" title="Cache für zentrale Konfiguration und parallele lokale Konfiguration">
+            <description>
+                <p>
+                    Eine vom Supervisor geladene Konfiguration wird im neuen Verzeichnis <code>cache</code>
+                    (das ist im Verzeichnis der Konfigurationsdatei) gehalten.
+                </p>
+                <p>
+                    Der Scheduler mischt die zentrale mit der lokalen Konfiguration.
+                    Bei einer Namenskollision hat die zentrale Konfiguration Vorrang.
+                    Eine Fehlermeldung wird ausgegeben.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="supervisor"/>
+                    </li>
+                </ul>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-703"/>
+            </messages>
+        </revision>
+    </change>
+
     <change date="2008-02-04" version=" 2.0.198" subversion_revision="5596">
         <revision jira="JS-222" type="new" title="Neue Aufrufe Spooler.configuration_directory und Job.folder_path">
             <description>

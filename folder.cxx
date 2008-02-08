@@ -143,7 +143,7 @@ bool Folder_subsystem::subsystem_activate()
 ptr<Directory> Folder_subsystem::merged_cache_and_live_directories()
 {
     ptr<Directory> result = _cache_directory_observer->directory_tree()->root_directory()->clone();
-    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory(), log() );
+    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory() );
 
     return result;
 }
@@ -829,7 +829,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                     {   
                         something_changed = true;
 
-
                         file_based = subsystem()->call_new_file_based();
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
                       //file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._last_write_time != directory_entry->_file_info->last_write_time();
@@ -838,6 +837,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         file_based->set_folder_path( folder()->path() );
                         file_based->set_name( name );
                         file_based->fix_name();
+
+                        check_for_duplicate_configuration_file( file_based, directory_entry );
                         
                         string rel_path = folder()->make_path( name );
                         Time   t; 
@@ -902,6 +903,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                     }
                 }
+                else
+                    check_for_duplicate_configuration_file( old_file_based, directory_entry );
             }
         }
         else                                        // Datei ist gelöscht
@@ -982,6 +985,20 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 
 
     return something_changed;
+}
+
+//---------------------------------------------Typed_folder::check_for_duplicate_configuration_file
+
+void Typed_folder::check_for_duplicate_configuration_file( File_based* file_based, const Directory_entry* directory_entry )
+{
+    if( file_based  &&  
+        directory_entry  &&  
+        //!directory_entry->is_aging()  &&
+        file_based->_duplicate_version != directory_entry->_duplicate_version )  
+    {
+        if( directory_entry->_duplicate_version )  file_based->log()->error( message_string( "SCHEDULER-703" ) );
+        file_based->_duplicate_version = directory_entry->_duplicate_version;
+    }
 }
 
 //-----------------------------------------------------Typed_folder::new_initialized_file_based_xml
