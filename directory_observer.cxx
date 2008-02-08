@@ -8,6 +8,19 @@ namespace directory_observer {
 
 using namespace zschimmer::file;
 
+//-------------------------------------------------------------------------------------------------
+
+const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
+const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
+
+#ifdef Z_WINDOWS
+    const int                   directory_watch_interval_min = 60;
+    const int                   directory_watch_interval_max = 60;
+#else
+    const int                   directory_watch_interval_min =  5;
+    const int                   directory_watch_interval_max = 60;
+#endif
+
 //-------------------------------------------------------------------Directory_tree::Directory_tree
 
 Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path )

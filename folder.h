@@ -21,10 +21,6 @@ struct Subfolder_folder;
 //--------------------------------------------------------------------------------------------const
 
 extern const char               folder_separator;
-extern const int                file_timestamp_delay;                   // FAT-Zeitstempel sind 2 Sekunden genau
-extern const int                remove_delay;                           // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
-extern const int                directory_watch_interval_min;
-extern const int                directory_watch_interval_max;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -82,15 +78,14 @@ struct Dependencies
 
 struct Base_file_info
 {
-                                Base_file_info              ()                                      : _last_write_time(0) {}//, _info_timestamp(0) {}
+                                Base_file_info              ()                                      : _last_write_time(0) {}
                                 Base_file_info              ( const directory_observer::Directory_entry& );
                                 Base_file_info              ( const string& filename, time_t timestamp_utc, const string& normalized_name ) 
                                                                                                     : _filename(filename), _last_write_time(timestamp_utc),
                                                                                                       _normalized_name(normalized_name) {}
-                                                                                                      //_info_timestamp(clock) {}
 
     bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
-    bool                        operator ==                 ( const Base_file_info& f ) const       { return _filename      == f._filename  &&
+    bool                        operator ==                 ( const Base_file_info& f ) const       { return _filename == f._filename  &&
                                                                                                              _last_write_time == f._last_write_time; }
     bool                        operator !=                 ( const Base_file_info& f ) const       { return !( *this == f ); }
 
@@ -100,7 +95,6 @@ struct Base_file_info
     File_path                  _path;
     time_t                     _last_write_time;            // Derselbe Typ wie zschimmer::file::File_info::last_write_time()
     string                     _normalized_name;            // Ohne Dateinamenserweiterung
-  //double                     _info_timestamp;             // Wann dieses Base_file_info erstellt worden ist
 };
 
 //---------------------------------------------------------------------------------------File_based
@@ -698,13 +692,6 @@ struct Folder_subsystem : Object,
     bool                        on_handle_directory          ( directory_observer::Directory_observer* );
 
 
-    // Async_operation
-    //bool                        async_finished_             () const                                { return false; }
-    //string                      async_state_text_           () const;
-    //bool                        async_continue_             ( Continue_flags );
-    //bool                        async_signaled_             ()                                      { return is_signaled(); }
-
-
     void                    set_directory                   ( const file::File_path& );
     void                    set_cache_directory             ( const file::File_path& );
 
@@ -714,7 +701,6 @@ struct Folder_subsystem : Object,
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
     bool                        is_valid_extension          ( const string& );
 
-  //bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
     void                    set_signaled                    ( const string& text );
 
   //void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
@@ -726,12 +712,8 @@ struct Folder_subsystem : Object,
 
   private:
     Fill_zero                  _zero_;
-  //file::File_path            _directory;
     ptr<Folder>                _root_folder;
-  //Event                      _directory_event;
-  //int                        _directory_watch_interval;
     double                     _last_change_at;
-  //double                     _read_again_at;
     ptr<directory_observer::Directory_observer>  _live_directory_observer;                          // Konfigurationsverzeichnis
     ptr<directory_observer::Directory_observer>  _cache_directory_observer;                         // Cache mit Konfiguration vom Supervisor, s. Supervisor_client
 };

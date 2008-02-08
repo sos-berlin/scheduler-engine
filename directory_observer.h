@@ -159,46 +159,6 @@ struct Directory_observer : Scheduler_object,
     Directory_handler*           _directory_handler;
 };
 
-//struct Directory_observer : Scheduler_object,
-//                            Async_operation
-//{
-//                                Directory_observer          ( Scheduler*, const File_path& directory );
-//                               ~Directory_observer          ();
-//
-//    void                        close                       ();
-//
-//
-//
-//    // Async_operation
-//    bool                        async_finished_             () const                                { return false; }
-//    string                      async_state_text_           () const;
-//    bool                        async_continue_             ( Continue_flags );
-//    bool                        async_signaled_             ()                                      { return is_signaled(); }
-//    string                      obj_name                    () const                                { return Scheduler_object::obj_name(); }
-//
-//
-//  //File_path                   directory_path              () const                                { return _directory_path; }
-//    Directory_tree*             directory_tree              () const                                { return _directory_tree; }
-//
-//    bool                     is_signaled                    ()                                      { return _directory_event.signaled(); }
-//    void                    set_signaled                    ( const string& text )                  { _directory_event.set_signaled( text ); }
-//
-//    void                        activate                    ();
-//    bool                     is_activated                   () const                                { return _is_activated; }
-//
-//    bool                        check                       ( double minimum_age = 0 );
-//
-//
-//  private:
-//    Fill_zero                  _zero_;
-//    Event                      _directory_event;
-//    ptr<Directory_tree>        _directory_tree;
-//    int                        _directory_watch_interval;
-//    double                     _last_change_at;
-//    double                     _read_again_at;
-//    bool                       _is_activated;
-//};
-
 //-------------------------------------------------------------------------------------------------
 
 } //namespace directory_observer

@@ -12,17 +12,6 @@ using namespace directory_observer;
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
-const int                       file_timestamp_delay        = 2+1;      // FAT-Zeitstempel sind 2 Sekunden genau
-const int                       remove_delay                = 2;        // Nur Dateien, die solange weg sind, gelten als gelöscht. Sonst wird removed/added zu modified
-
-#ifdef Z_WINDOWS
-    const int                   directory_watch_interval_min = 60;
-    const int                   directory_watch_interval_max = 60;
-#else
-    const int                   directory_watch_interval_min =  5;
-    const int                   directory_watch_interval_max = 60;
-#endif
-
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
@@ -204,8 +193,6 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
         if( _last_change_at + minimum_age <= now )
         {
-          //if( _read_again_at < now )  _read_again_at = 0;     // Verstrichen?
-
             ptr<Directory> directory;
             
             if( _live_directory_observer )
@@ -228,12 +215,6 @@ bool Folder_subsystem::handle_folders( double minimum_age )
             }
             
             if( something_changed )  _last_change_at = now;
-
-            //_directory_watch_interval = now - _last_change_at < directory_watch_interval_max? directory_watch_interval_min
-            //                                                                                : directory_watch_interval_max;
-
-            //if( _read_again_at )  set_async_next_gmtime( _read_again_at );
-            //                else  set_async_delay( _directory_watch_interval );
         }
     }
 
@@ -781,22 +762,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             if( !directory_entry->is_aging() )
             {
-                string name = directory_entry->_file_info->path().name();
+                string name              = directory_entry->_file_info->path().name();
+                bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
+                                           current_file_based  &&
+                                           current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
 
-                //if( old_file_based )  old_file_based->_base_file_check_removed_again_at = 0;  // _base_file_removed_at > 0 ==> Datei ist gelöscht und gleich wieder hinzugefügt worden
-
-                //file_path = File_path( folder()->directory(), directory_entry->_file_info->file_path().name() );
-
-                bool timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
-                                         current_file_based  &&
-                                         current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
-
-                //bool read_again = !timestamp_changed  &&  
-                //                  current_file_based  &&
-                //                  current_file_based->_read_again  &&
-                //                  current_file_based->_base_file_info._info_timestamp + file_timestamp_delay <= now;    // Falls Datei geändert, aber Zeitstempel nicht
-
-                if( is_new  ||  timestamp_changed ) // ||  read_again )
+                if( is_new  ||  timestamp_changed )
                 {
                     string content;
                   //Md5    content_md5;
@@ -819,19 +790,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         }
                     }
                     else
-                    //if( read_again  &&                                              // Inhalt nach file_timestamp_delay nochmal prüfen?
-                    //    content_md5 == current_file_based->_md5  &&                 // Inhalt hat sich nicht geändert?
-                    //    !current_file_based->_error_ignored )   
-                    //{
-                    //    current_file_based->_read_again = false;
-                    //}
-                    //else
                     {   
                         something_changed = true;
 
                         file_based = subsystem()->call_new_file_based();
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
-                      //file_based->_read_again = !current_file_based  ||  current_file_based->base_file_info()._last_write_time != directory_entry->_file_info->last_write_time();
                       //file_based->_md5        = content_md5;
                         file_based->set_base_file_info( Base_file_info( *directory_entry ) );
                         file_based->set_folder_path( folder()->path() );
@@ -847,13 +810,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         if( old_file_based ) 
                         {
                             old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, t.as_string(), subsystem()->object_type_name() ) );
-                            //if( !read_again  ||  // Doppeltes Ereignis wegen _read_again vermeiden
-                            //    directory_entry->_file_info->last_write_time() != current_file_based->base_file_info()._last_write_time ||   
-                            //    content_md5 != current_file_based->_md5 )  
-                            {
-                                old_file_based->handle_event( File_based::bfevt_modified ); 
-                            }
-
+                            old_file_based->handle_event( File_based::bfevt_modified ); 
                             old_file_based->set_replacement( file_based );
                             current_file_based = NULL;
                         }
@@ -913,35 +870,22 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             something_changed = true;
 
-            //if( !old_file_based->_base_file_check_removed_again_at )
-            //{
-            //    old_file_based->_base_file_check_removed_again_at = now + remove_delay;
-            //    folder()->subsystem()->set_read_again_at_or_later( old_file_based->_base_file_check_removed_again_at );  
-            //}
-            //else
-            //if( old_file_based->_base_file_check_removed_again_at <= now )
-            {
-                string p = folder()->make_path( old_file_based->base_file_info()._filename );
-                old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
+            string p = folder()->make_path( old_file_based->base_file_info()._filename );
+            old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
-                file_based = old_file_based;                // Für catch()
-                assert( file_based->_file_is_removed );
-                
-                file_based->handle_event( File_based::bfevt_removed );
-                file_based->remove();
-                file_based = NULL;
-            }
+            file_based = old_file_based;                // Für catch()
+            assert( file_based->_file_is_removed );
+            
+            file_based->handle_event( File_based::bfevt_removed );
+            file_based->remove();
+            file_based = NULL;
         }
     }
     catch( exception& x )
     {
         if( !file_based )  throw;   // Sollte nicht passieren
 
-      //file_based->_error_ignored = file_based->_read_again  &&  file_based->_state < File_based::s_initialized;   // Wegen langsam schreibender Editoren
-
-        Log_level log_level = //file_based->_error_ignored? log_info : 
-                              log_error;
-        string    msg;
+        string msg;
 
 
         if( directory_entry )        // Fehler beim Löschen soll das Objekt nicht als fehlerhaft markieren
@@ -960,9 +904,9 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                                                    file_based->subsystem()->object_type_name(), x );
         }
 
-        file_based->log()->log( log_level, msg );
+        file_based->log()->error( msg );
 
-        if( msg != ""  &&  _spooler->_mail_on_error  &&  log_level > log_info )
+        if( msg != ""  &&  _spooler->_mail_on_error )
         {
             Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
             scheduler_event.set_error( x );
@@ -974,16 +918,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
             scheduler_event.send_mail( mail_defaults );
         }
     }
-
-
-    //if( file_based  &&  file_based->_read_again )  
-    //{
-    //    double at = now + file_timestamp_delay;
-    //    folder()->subsystem()->set_read_again_at_or_later( at );  
-    //    file_based->log()->debug( message_string( "SCHEDULER-896", file_timestamp_delay, Time().set_utc( at ).as_string() ) );
-    //}
-
-
     return something_changed;
 }
 
@@ -991,9 +925,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 
 void Typed_folder::check_for_duplicate_configuration_file( File_based* file_based, const Directory_entry* directory_entry )
 {
-    if( file_based  &&  
-        directory_entry  &&  
-        //!directory_entry->is_aging()  &&
+    if( file_based  &&  directory_entry  &&  
         file_based->_duplicate_version != directory_entry->_duplicate_version )  
     {
         if( directory_entry->_duplicate_version )  file_based->log()->error( message_string( "SCHEDULER-703" ) );

@@ -2483,8 +2483,6 @@ bool Spooler::run_continue( const Time& now )
 
     if( _state != Spooler::s_paused )
     {
-        //if( _folder_subsystem->is_signaled() )  something_done |= _folder_subsystem->async_continue();
-
         // PROZESSE FORTSETZEN
         something_done |= _process_class_subsystem->async_continue();
 
