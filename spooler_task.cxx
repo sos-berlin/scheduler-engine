@@ -1262,7 +1262,7 @@ bool Task::do_something()
 
                         case s_running_remote_process:
                             assert( _module_instance->_module->kind() == Module::kind_process &&
-                                    _module_instance->kind()      == Module::kind_remote     );
+                                    _module_instance->kind()          == Module::kind_remote     );
 
                             if( !_operation )
                             {

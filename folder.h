@@ -24,7 +24,7 @@ extern const char               folder_separator;
 
 //-------------------------------------------------------------------------------------------------
 
-inline bool                     file_info_is_lesser         ( const file::File_info* a, const file::File_info* b )  { return a->path() < b->path(); }
+inline bool                     file_info_is_lesser         ( const file::File_info* a, const file::File_info* b )  { return (string)a->path() < (string)b->path(); }
 
 //------------------------------------------------------------------------------------------Pendant
 
@@ -85,6 +85,7 @@ struct Base_file_info
                                                                                                       _normalized_name(normalized_name) {}
 
     bool                        operator <                  ( const Base_file_info& f ) const       { return _normalized_name < f._normalized_name; }
+  //bool                        operator <                  ( const Base_file_info& f ) const       { return _filename < f._filename; }
     bool                        operator ==                 ( const Base_file_info& f ) const       { return _filename == f._filename  &&
                                                                                                              _last_write_time == f._last_write_time; }
     bool                        operator !=                 ( const Base_file_info& f ) const       { return !( *this == f ); }

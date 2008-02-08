@@ -169,12 +169,11 @@ bool Directory::read( Read_flags read_what, double minimum_age )
     {
         if( read_what & read_subdirectories )  _last_read_at = now;
 
-        Folder_directory_lister dir   ( _directory_tree->log() );
+        Folder_directory_lister       dir               ( _directory_tree->log() );
         list< ptr<file::File_info> >  file_info_list;
         vector< file::File_info*>     ordered_file_infos;       // Geordnete Liste der vorgefundenen Dateien    
 
         dir.open( _directory_tree->directory_path(), path() );
-
         if( dir.is_opened() )
         {
             while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( &*file_info );

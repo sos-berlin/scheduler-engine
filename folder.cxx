@@ -150,11 +150,11 @@ ptr<Folder> Folder_subsystem::new_file_based()
     zschimmer::throw_xc( Z_FUNCTION );    // Subfolder_folder::on_base_file_changed() legt selbst Folder an
 }
 
-//----------------------------------------------------------------Folder_subsystem::async_continue_
+//------------------------------------------------------------Folder_subsystem::on_handle_directory
 
 bool Folder_subsystem::on_handle_directory( directory_observer::Directory_observer* )
 {
-    Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _live_directory_observer->directory_tree()->directory_path() << "\n" );
+    //Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _live_directory_observer->directory_tree()->directory_path() << "\n" );
 
     handle_folders();
     
@@ -657,21 +657,21 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
     
 bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& directory_entries )
 {
-    bool                     something_changed  = false;
-    vector<const Directory*> ordered_directory_entries;     // Geordnete Liste der Dateinamen
-    vector<File_based*>      ordered_file_baseds;           // Geordnete Liste der bereits bekannten (geladenen) Dateien
+    bool                           something_changed  = false;
+    vector<const Directory_entry*> ordered_directory_entries;     // Geordnete Liste der Dateinamen
+    vector<File_based*>            ordered_file_baseds;           // Geordnete Liste der bereits bekannten (geladenen) Dateien
 
-    ordered_diretory_entries.reserve( _file_based_map.size() );
-    Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_diretory_entries.push_back( &*fb->second );
-    sort( ordered_diretory_entries.begin(), ordered_diretory_entries.end(), File_based::less_dereferenced );
+    ordered_directory_entries.reserve( _file_based_map.size() );
+    Z_FOR_EACH_CONST( list<const Directory_entry*>, directory_entries, de )  ordered_directory_entries.push_back( *de );
+    sort( ordered_directory_entries.begin(), ordered_directory_entries.end(), Directory_entry::normalized_less_dereferenced );
 
     ordered_file_baseds.reserve( _file_based_map.size() );
     Z_FOR_EACH( File_based_map, _file_based_map, fb )  ordered_file_baseds.push_back( &*fb->second );
     sort( ordered_file_baseds.begin(), ordered_file_baseds.end(), File_based::less_dereferenced );
 
 
-    list<const Directory_entry*>::const_iterator de = ordered_directory_entries.begin();
-    vector<File_based*         >::const_iterator fb = ordered_file_baseds.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
+    vector<const Directory_entry*>::const_iterator de = ordered_directory_entries.begin();
+    vector<File_based*           >::const_iterator fb = ordered_file_baseds.begin();      // Vorgefundene Dateien mit geladenenen Dateien abgleichen
 
     while( de != ordered_directory_entries.end()  ||
            fb != ordered_file_baseds.end() )

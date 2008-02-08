@@ -64,6 +64,9 @@ struct Directory_tree : Scheduler_object,
 
 struct Directory_entry
 {
+    static bool                 normalized_less_dereferenced( const Directory_entry* a, const Directory_entry* b )  { return a->_normalized_name < b->_normalized_name; }
+
+
                                 Directory_entry             ();
 
     bool                        is_aging                    () const                                { return _is_aging_until > 0; }
