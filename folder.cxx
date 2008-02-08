@@ -724,7 +724,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& di
 
 bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry )
 {
-#   if 1//def Z_DEBUG
+#   ifdef Z_DEBUG
         if( zschimmer::Log_ptr log = "joacim" )
         {
             log << Z_FUNCTION << "( ";
@@ -763,7 +763,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 string name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
                 bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                            current_file_based  &&
-                                           current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time();
+                                           current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time(); //  ||
+                                             //current_file_based->name() != name );      // Objekt ist unter anderer Groﬂschreibung bekannt?
 
                 if( !is_new  &&  !timestamp_changed )
                 {
