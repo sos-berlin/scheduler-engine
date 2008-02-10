@@ -64,7 +64,7 @@ struct Directory_tree : Scheduler_object,
 
 struct Directory_entry
 {
-    static bool                 normalized_less_dereferenced( const Directory_entry* a, const Directory_entry* b )  { return a->_normalized_name < b->_normalized_name; }
+    static bool                 normalized_less_dereferenced( const Directory_entry*, const Directory_entry* );
 
 
                                 Directory_entry             ();
