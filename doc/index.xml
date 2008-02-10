@@ -57,7 +57,7 @@
         Der Job Scheduler startet Jobs und überwacht sie.
         Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
         Der Job Scheduler kennt Aufträge, die durch Job-Ketten geschleust werden.
-        Er wird unter Windows, Linux, Solaris und HP-UX betrieben.
+        Er wird unter Windows, Linux, Solaris, HP-UX und AIX betrieben.
     </p>
     <!--table cellspacing="0" cellpadding="0" style="width: 100%">
         <tr>
@@ -85,7 +85,8 @@
                                 Der Job Scheduler wird mit <scheduler_a href="konfiguration.xml">XML-Dateien</scheduler_a> und .ini-Dateien konfiguriert
                                 und kennt <scheduler_a href="command_line.xml">Kommandozeilenoptionen</scheduler_a>. Jobs und Job-Ketten etc. können
                                 aus <em>Hot Folders</em> <scheduler_a href="dynamic_configuration.xml"> dynamisch konfiguriert</scheduler_a> werden.<br/><br/>
-                                Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> werden.
+                                Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> Job Scheduler <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> 
+                                und an andere Instanzen repliziert werden.
                             </p>
                         </dd>
 

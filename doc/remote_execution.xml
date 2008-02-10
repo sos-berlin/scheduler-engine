@@ -15,7 +15,7 @@
 
 
     <p>
-      API-Jobs können auf einem entfernten Job Scheduler ausgeführt werden. 
+      Jobs können auf einem entfernten Job Scheduler ausgeführt werden. 
     </p>
     
     <p>
@@ -148,12 +148,22 @@ function spooler_process_before() {
     
     <p>
       Alle API-Aufrufe beziehen sich auf den lokalen, aufrufenden Job Scheduler. 
-      So liefert z.B. die Methode <pre>spooler.ini_path</pre> den Namen der 
-      Datei <i>factory.ini</i> beim lokalen, aufrufenden Job Scheduler und nicht beim entfernten Job Scheduler zurück. 
-      Dieser Dateiname steht möglicherweise beim entfernten Dateisystem nicht zur Verfügung. 
-      Das Gleiche gilt für die Methode <pre>spooler.directory</pre> 
-      denn die beiden Job Scheduler können unterschiedliche Basisverzeichnisse verwenden.
+      Allerdings liefern einige Methoden Werte des entfernten Job Schedulers und nicht des aufrufenden Job Schedulers zurück:
     </p>
+    <ul>
+        <li>
+            <scheduler_method class="Spooler" property="directory"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="log_dir"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="ini_path"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="include_path"/>
+        </li>
+    </ul>
     
     
     
@@ -188,7 +198,7 @@ function spooler_process_before() {
     </p>
     
     
-    
+    <!--
     <h2>Shell Scripte auf einem entfernten Rechner ausführen</h2>
     
     <p>
@@ -200,5 +210,6 @@ function spooler_process_before() {
       Ein beim Job angegebener <scheduler_element name="job" attribute="timeout"/> wird nicht ausgewertet, 
       d.h. die Task wird nicht abgebrochen, wenn der als Timeout angegebene Wert erreicht ist.
     </p>
+    -->
     
 </description>

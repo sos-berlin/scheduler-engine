@@ -14,11 +14,11 @@
         <revision jira="JS-221" type="new" title="Cache für zentrale Konfiguration und parallele lokale Konfiguration">
             <description>
                 <p>
-                    Eine vom Supervisor geladene Konfiguration wird im neuen Verzeichnis <code>cache</code>
-                    (das ist im Verzeichnis der Konfigurationsdatei) gehalten.
+                    Eine vom Supervisor geladene <a href="central_configuration.xml">zentrale Konfiguration</a> wird im neuen Verzeichnis <code>./config/cache</code>
+                    gehalten.
                 </p>
                 <p>
-                    Der Scheduler mischt die zentrale mit der lokalen Konfiguration.
+                    Der Job Scheduler mischt die zentrale mit der lokalen Konfiguration.
                     Ein zentral konfiguriertes Objekt kann nicht lokal überschrieben werden.
                 </p>
                 <ul>
@@ -42,7 +42,7 @@
                         <scheduler_method class="Spooler" property="configuration_directory"/>
                     </li>
                     <li>
-                        <scheduler_method class="Job" property="configuration_directory"/>
+                        <scheduler_method class="Job" property="folder_path"/>
                     </li>
                 </ul>
             </description>
@@ -50,11 +50,11 @@
     </change>
 
     <change date="2008-02-04" version="2.0.197" subversion_revision="5594">
-        <revision jira="JS-255" type="modification" title="Prozessklassen auch für Nicht-API-Jobs möglich">
+        <revision jira="JS-255" type="modification" title="Prozessklassen auch für Nicht-API Jobs möglich">
             <description>
                 <p>
-                    Nicht-API-Jobs können einer Prozessklasse zugeordnet werden (Default: die Prozessklasse mit dem leeren Namen <code>""</code>).
-                    D.h. die in der Prozessklasse eingestellte Begrenzung der Prozess wirkt auch auf Nicht-API-Jobs.
+                    Nicht-API Jobs können einer Prozessklasse zugeordnet werden (Default: die Prozessklasse mit dem leeren Namen <code>""</code>).
+                    D.h. die in der Prozessklasse eingestellte Begrenzung der Prozesse wirkt auch auf Nicht-API Jobs.
                 </p>
                 <p>
                     Die voreingestellte Begrenzung ist von 10 auf 30 erhöht worden.
@@ -70,11 +70,11 @@
             </description>
         </revision>
 
-        <revision jira="JS-213" type="new" title="Nicht-API-Tasks lassen sich unter entferntem Scheduler ausführen">
+        <revision jira="JS-213" type="new" title="Nicht-API Jobs lassen sich unter entferntem Job Scheduler ausführen">
             <description>
                 <p>
-                    Für Nicht-API-Jobs 
-                    lässt sich eine Prozessklasse mit entferntem Scheduler angeben.
+                    Für Nicht-API Jobs 
+                    lässt sich eine Prozessklasse mit entferntem Job Scheduler angeben.
                 </p>
                 <ul>
                     <li>
@@ -101,8 +101,8 @@
         <revision jira="JS-204" type="new" title="Zentrale Konfiguration">
             <description>
                 <p>
-                    Ein als Supervisor laufender Scheduler kann Konfigurationsdateien (-verzeichnisse) für andere Scheduler bereitstellen.
-                    Änderungen werden laufen übernommen.
+                    Ein als Supervisor laufender Job Scheduler kann Konfigurationsdateien und -verzeichnisse einer <a href="central_configuration.xml">zentralen Konfiguration</a> für andere Job Scheduler bereitstellen.
+                    Änderungen werden laufend übernommen.
                 </p>
                 <ul>
                     <li>
@@ -134,10 +134,10 @@
                 <p>
                     Ausgaben nach <code>stdout</code> und <code>stderr</code> werden nicht mehr erst am Ende der Task,
                     sondern laufend übernommen.
-                    Das geschieht sekündlich. Wenn keine Ausgabe kommt, verlängert sich die Period auf zehn Sekunden.
+                    Das geschieht sekündlich. Wenn keine Ausgabe kommt, verlängert sich die Periode auf zehn Sekunden.
                 </p>
                 <p>
-                    Bei API-Tasks, die auf einem entfernten Scheduler laufen (<scheduler_element name="process_class" attribute="remote_scheduler"/>),
+                    Bei API-Jobs, deren Tasks auf einem entfernten Job Scheduler ablaufen (<scheduler_element name="process_class" attribute="remote_scheduler"/>),
                     werden Ausgaben nach Beendigung des Skripts (also kurz vor Beendigung des Prozesses) nicht übernommen.
                 </p>
             </description>
@@ -161,7 +161,7 @@
     </change>
 
     <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
-        <revision type="new" title="Scheduler für AIX bereitgestellt"/>
+        <revision type="new" title="Job Scheduler für AIX bereitgestellt"/>
     </change>
 
     <change date="2008-01-14" version="2.0.196" subversion_revision="5515">
@@ -250,7 +250,7 @@
                     <scheduler_element name="config" attribute="central_configuration_directory"/>
                 </p>
                 <p>
-                    Der Supervisor kann jetzt die Konfiguration überschreiben.
+                    Der Supervisor kann jetzt die lokalen Konfigurationen mit einer <a href="central_configuration.xml">zentralen Konfiguration</a> überschreiben.
                 </p>
                 <ul>
                     <li>
@@ -266,17 +266,17 @@
     </change>
 
     <change date="2007-12-21" version="2.0.192" subversion_revision="5444">
-        <revision type="correction" title="&lt;file_order_source> ohne regex= konnte Scheduler abbrechen">
+        <revision type="correction" title="&lt;file_order_source> ohne regex= konnte Job Scheduler abbrechen">
             <description>
                 <p>
                     Bei <scheduler_element name="file_order_source"/> mit leerem Attribut <code>regex=</code>
-                    konnte der Scheduler abbrechen, 
+                    konnte der Job Scheduler abbrechen, 
                     nachdem ein Dateiname auf die Schwarze Liste gesetzt worden ist
                     (weil er nach Auftragsführung noch vorhanden ist).
                     Das ist behoben.
                 </p>
                 <p>
-                    Zwischenlösung im bisherigen Scheduler: <code>regex="."</code>
+                    Zwischenlösung im bisherigen Job Scheduler: <code>regex="."</code>
                 </p>
             </description>
         </revision>
@@ -350,7 +350,7 @@
                 <p>
                     Unter Windows wird bei machen Fehlern ("undefined value") die Zeilennummer der ersten Zeile 
                     des Abschnitts, aber nicht der fehlerhaften Zeile gemeldet.
-                    Das scheint eine Besonderheit von ActivePerl zus ein.
+                    Das scheint eine Besonderheit von ActivePerl zu sein.
                 </p>
             </description>
         </revision>
@@ -372,7 +372,7 @@
             <description>
                 <p>
                     Weil manche PostgresQL-Installationen Latin-1 nicht unterstützen, 
-                    prüft der Scheduler nur noch den ASCII-Zeichenvorrat (Basic Latin).
+                    prüft der Job Scheduler nur noch den ASCII-Zeichenvorrat (Basic Latin).
                 </p>
                 <scheduler_message level="error" code="SCHEDULER-452"/>
             </description>
@@ -392,10 +392,10 @@
     </change>
     
     <change date="2007-11-18" version="2.0.192" subversion_revision="5394">
-        <revision type="new" title="PostgresQL wird besser unterstützt, Scheduler prüft Datenbank">
+        <revision type="new" title="PostgresQL wird besser unterstützt, Job Scheduler prüft Datenbank">
             <description>
                 <p>
-                    Beim Start führt der Scheduler einfache Tests des Datenbankmoduls durch:
+                    Beim Start führt der Job Scheduler einfache Tests des Datenbankmoduls durch:
                 </p>
                 <ul>
                     <li>
