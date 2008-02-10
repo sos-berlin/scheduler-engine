@@ -487,19 +487,19 @@ void Folder::remove_duplicates_from_list( list< const Directory_entry* >* direct
             {
                 log()->warn( message_string( "SCHEDULER-889", it->second->_file_info->path().name(), duplicate_name ) );      // Doppelte Datei
 
-                if( _spooler->_mail_on_error )
-                {
-                    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
-                    scheduler_event.set_error( x );
+                //if( _spooler->_mail_on_error )
+                //{
+                //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                //    scheduler_event.set_error( x );
 
-                    Mail_defaults mail_defaults( spooler() );
-                    mail_defaults.set( "subject", x.what() );
-                    mail_defaults.set( "body"   , x.what() );
+                //    Mail_defaults mail_defaults( spooler() );
+                //    mail_defaults.set( "subject", x.what() );
+                //    mail_defaults.set( "body"   , x.what() );
 
-                    scheduler_event.send_mail( mail_defaults );
-                }
+                //    scheduler_event.send_mail( mail_defaults );
+                //}
 
-              //_known_duplicate_filenames.insert( duplicate_name );
+                //_known_duplicate_filenames.insert( duplicate_name );
                 de = directory_entry_list->erase( de );
             }
         }
