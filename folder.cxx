@@ -12,6 +12,7 @@ using namespace directory_observer;
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
+
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
@@ -413,10 +414,6 @@ bool Folder::adjust_with_directory( Directory* directory )
 
         if( !base_file_is_removed() )
         {
-            string last_normalized_name;
-            string last_extension;
-            string last_filename;
-
             Z_FOR_EACH( Directory::Entry_list, directory->_ordered_list, directory_iterator )
             {
                 Directory_entry* directory_entry      = &*directory_iterator;
@@ -446,34 +443,7 @@ bool Folder::adjust_with_directory( Directory* directory )
                 {
                     directory_entry->_normalized_name = typed_folder->subsystem()->normalized_name( name );
 
-                    if( directory_entry->_normalized_name == last_normalized_name  &&
-                        extension                         == last_extension           )
-                    {
-                        zschimmer::Xc x ( "SCHEDULER-889", last_filename, filename );
-
-                        log()->warn( x.what() );
-
-                        // Liefert min¸tlich eine eMail:
-                        //if( _spooler->_mail_on_error )
-                        //{
-                        //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
-                        //    scheduler_event.set_error( x );
-
-                        //    Mail_defaults mail_defaults( spooler() );
-                        //    mail_defaults.set( "subject", x.what() );
-                        //    mail_defaults.set( "body"   , x.what() );
-
-                        //    scheduler_event.send_mail( mail_defaults );
-                        //}
-                    }
-                    else
-                    {
-                        file_list_map[ typed_folder ].push_back( directory_entry );
-                    }
-
-                    last_normalized_name = directory_entry->_normalized_name;
-                    last_extension       = normalized_extension;
-                    last_filename        = filename;
+                    file_list_map[ typed_folder ].push_back( directory_entry );
                 }
             }
         }
@@ -481,6 +451,8 @@ bool Folder::adjust_with_directory( Directory* directory )
         Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
         {
             Typed_folder* typed_folder = it->second;
+
+            remove_duplicates_from_list( &file_list_map[ typed_folder ] );
 
             something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
         }
@@ -495,6 +467,48 @@ bool Folder::adjust_with_directory( Directory* directory )
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  it->second->handle_replace_or_remove_candidates();
 
     return something_changed;
+}
+
+//------------------------------------------------------------------------Folder::remove_duplicates
+
+void Folder::remove_duplicates_from_list( list< const Directory_entry* >* directory_entry_list )
+{
+    typedef stdext::hash_map<string,const Directory_entry*>  Normalized_names_map ;
+    Normalized_names_map                                     used_normalized_names;
+
+    for( list< const Directory_entry* >::iterator de = directory_entry_list->begin(); de != directory_entry_list->end(); )
+    {
+        Normalized_names_map::iterator it = used_normalized_names.find( (*de)->_normalized_name );
+        if( it != used_normalized_names.end() )
+        {
+            string duplicate_name = (*de)->_file_info->path().name();
+
+          //if( !set_includes( _known_duplicate_filenames, duplicate_name ) )
+            {
+                log()->warn( message_string( "SCHEDULER-889", it->second->_file_info->path().name(), duplicate_name ) );      // Doppelte Datei
+
+                if( _spooler->_mail_on_error )
+                {
+                    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                    scheduler_event.set_error( x );
+
+                    Mail_defaults mail_defaults( spooler() );
+                    mail_defaults.set( "subject", x.what() );
+                    mail_defaults.set( "body"   , x.what() );
+
+                    scheduler_event.send_mail( mail_defaults );
+                }
+
+              //_known_duplicate_filenames.insert( duplicate_name );
+                de = directory_entry_list->erase( de );
+            }
+        }
+        else
+        {
+            used_normalized_names[ (*de)->_normalized_name ] = *de;
+            de++;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------Folder::dom_element
@@ -657,9 +671,10 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
     
 bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& directory_entries )
 {
-    bool                           something_changed  = false;
-    vector<const Directory_entry*> ordered_directory_entries;     // Geordnete Liste der Dateinamen
-    vector<File_based*>            ordered_file_baseds;           // Geordnete Liste der bereits bekannten (geladenen) Dateien
+    bool                           something_changed        = false;
+    vector<const Directory_entry*> ordered_directory_entries;       // Geordnete Liste der Dateinamen
+    vector<File_based*>            ordered_file_baseds;             // Geordnete Liste der bereits bekannten (geladenen) Dateien
+                                                             
 
     ordered_directory_entries.reserve( _file_based_map.size() );
     Z_FOR_EACH_CONST( list<const Directory_entry*>, directory_entries, de )  ordered_directory_entries.push_back( *de );
@@ -763,8 +778,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 string name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
                 bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                            current_file_based  &&
-                                           current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time(); //  ||
-                                             //current_file_based->name() != name );      // Objekt ist unter anderer Groﬂschreibung bekannt?
+                                           ( current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
+                                             current_file_based->name() != name );      // Objekt ist unter anderer Groﬂschreibung bekannt?
 
                 if( !is_new  &&  !timestamp_changed )
                 {

@@ -21,6 +21,13 @@ const int                       remove_delay                = 2;        // Nur D
     const int                   directory_watch_interval_max = 60;
 #endif
 
+//------------------------------------------------------------------------------file_info_is_lesser
+    
+static bool file_info_is_lesser( const file::File_info* a, const file::File_info* b )
+{ 
+    return (string)a->path() < (string)b->path(); 
+}
+
 //-------------------------------------------------------------------Directory_tree::Directory_tree
 
 Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path )

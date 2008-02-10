@@ -22,10 +22,6 @@ struct Subfolder_folder;
 
 extern const char               folder_separator;
 
-//-------------------------------------------------------------------------------------------------
-
-inline bool                     file_info_is_lesser         ( const file::File_info* a, const file::File_info* b )  { return (string)a->path() < (string)b->path(); }
-
 //------------------------------------------------------------------------------------------Pendant
 
 struct Pendant
@@ -390,6 +386,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
   private:
     void                        add_to_typed_folder_map     ( Typed_folder* );
+    void                        remove_duplicates_from_list ( list< const directory_observer::Directory_entry* >* );
 
     Fill_zero                  _zero_;
 
@@ -407,6 +404,8 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     ptr<Job_chain_folder_interface> _job_chain_folder;
     ptr<Standing_order_folder>      _standing_order_folder;
     ptr<Subfolder_folder>           _subfolder_folder;         // Unterordner
+
+  //stdext::hash_set<string>        _known_duplicate_filenames;       // Doppelte Dateien mit unterschiedlicher Groﬂschreibung (vor der Normalisierung)
 };
 
 //---------------------------------------------------------------------------------Subfolder_folder
