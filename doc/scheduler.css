@@ -30,8 +30,8 @@ div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 ul              { margin-top: 0.5em; margin-left: 12pt; padding-left: 0pt; }
 ul.big          { margin-top: 0em; margin-left: 12pt; padding-left: 0pt; }
-li              { font-size: 10pt; max-width: 88ex; list-style: square inside; vertical-align: top; }
-ul.big li       { margin-top: 1em; font-size: 10pt; max-width: 88ex; }
+li              { font-size: 10pt; max-width: 88ex; }
+ul.big li       { font-size: 10pt; max-width: 88ex; margin-top: 1em; }
 ol              { margin-left: 24pt; padding-left: 0pt; }
 .example        { background-color: #ffffe8; }
 pre             { background-color: #ffffe8; font-family: "Lucida Console", monospace; font-size: 9pt; 

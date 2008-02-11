@@ -59,8 +59,6 @@ void Folder_subsystem::set_directory( const File_path& directory )
 
     _live_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
     _live_directory_observer->register_directory_handler( this );
-
-    //handle_folders();
 }
 
 //------------------------------------------------------------Folder_subsystem::set_cache_directory
@@ -73,8 +71,6 @@ void Folder_subsystem::set_cache_directory( const File_path& directory )
     _cache_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
     _cache_directory_observer->directory_tree()->set_is_cache( true );
     _cache_directory_observer->register_directory_handler( this );
-
-    //handle_folders();
 }
 
 //-----------------------------------------------------------Folder_subsystem::subsystem_initialize
@@ -112,22 +108,24 @@ bool Folder_subsystem::subsystem_activate()
 {
     bool result = false;
 
+    if( _cache_directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
+    {
+        _cache_directory_observer->activate();
+        _cache_directory_observer->run_handler();
+        result = true;
+    }
+
     if( _live_directory_observer->directory_tree()->directory_path().exists() )
     {
         _live_directory_observer->activate();
         _live_directory_observer->run_handler();
-
-        _subsystem_state = subsys_active;
-
-        file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
-
         result = true;
     }
 
-    if( _cache_directory_observer )
+    if( result )
     {
-        _cache_directory_observer->activate();
-        _cache_directory_observer->run_handler();
+        _subsystem_state = subsys_active;
+        file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
     }
 
     return result;
@@ -204,7 +202,10 @@ bool Folder_subsystem::handle_folders( double minimum_age )
             if( _live_directory_observer )
             {
                 directory = _live_directory_observer->directory_tree()->root_directory();
-                directory->read_deep( 0.0 );
+
+                Directory::Read_flags read_flags = subsystem_state() == subsys_active? Directory::read_subdirectories
+                                                                                     : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal nicht altern lassen, Dateien sofort lesen
+                directory->read( Directory::read_subdirectories_suppress_aging, 0.0 );     
             }
 
             if( _cache_directory_observer )
@@ -822,20 +823,20 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 
                         ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
-                        string rel_path = folder()->make_path( name );
+                        //string rel_path = folder()->make_path( name );
                         Time   t; 
                         t.set_utc( directory_entry->_file_info->last_write_time() );
 
                         if( old_file_based ) 
                         {
-                            old_file_based->log()->info( message_string( "SCHEDULER-892", rel_path, t.as_string(), subsystem()->object_type_name() ) );
+                            old_file_based->log()->info( message_string( "SCHEDULER-892", directory_entry->_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
                             old_file_based->handle_event( File_based::bfevt_modified ); 
                             old_file_based->set_replacement( file_based );
                             current_file_based = NULL;
                         }
                         else
                         {
-                            file_based->log()->info( message_string( "SCHEDULER-891", rel_path, t.as_string(), subsystem()->object_type_name() ) );
+                            file_based->log()->info( message_string( "SCHEDULER-891", directory_entry->_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
                             file_based->handle_event( File_based::bfevt_added );
 
                             add_file_based( file_based );
@@ -887,7 +888,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             something_changed = true;
 
-            string p = folder()->make_path( old_file_based->base_file_info()._filename );
+            string p = folder()->make_path( old_file_based->base_file_info()._path );
             old_file_based->log()->info( message_string( "SCHEDULER-890", p, subsystem()->object_type_name() ) );
 
             file_based = old_file_based;                // Für catch()

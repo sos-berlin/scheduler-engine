@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-02-08" version="2.0.199" subversion_revision="5608">
+    <change date="2008-02-11" version="2.0.199" subversion_revision="5618">
         <revision jira="JS-221" type="new" title="Cache für zentrale Konfiguration und parallele lokale Konfiguration">
             <description>
                 <p>

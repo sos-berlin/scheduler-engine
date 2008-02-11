@@ -82,16 +82,17 @@ Directory* Directory_tree::directory_or_null( const string& name )
 //    }
 //}
 
+//----------------------------------------------------Directory_entry::normalized_less_dereferenced
+
 bool Directory_entry::normalized_less_dereferenced( const Directory_entry* a, const Directory_entry* b )
 { 
     int cmp = strcmp( a->_normalized_name.c_str(), b->_normalized_name.c_str() );
     if( cmp == 0 )
     {
-        cmp = strcmp( a->_file_info->path().name().c_str(), b->_file_info->path().name().c_str() );
+        cmp = strcmp( a->_file_info->path().name().c_str(), b->_file_info->path().name().c_str() );     // Nur im Fall einer Namenskollision
     }
 
     return cmp < 0;
-    //return a->_normalized_name < b->_normalized_name; 
 }
 
 //-----------------------------------------------------------------Directory_entry::Directory_entry

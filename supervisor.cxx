@@ -459,8 +459,8 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     ptr<Directory> merged_directory = all_directory;
     
 
-    Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories_suppress_aging :     // Beim ersten Aufruf sofort antworten, Dateien nicht altern lassen
-                                                          Directory::read_subdirectories;
+    Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories:     
+                                                          Directory::read_subdirectories_suppress_aging;   // Beim ersten Aufruf sofort antworten, Dateien nicht altern lassen
 
     if( all_directory )  all_directory->read( read_flags, allowed_directory_age );
     if( my_directory  )  my_directory ->read( read_flags, allowed_directory_age ),  merged_directory = my_directory;
