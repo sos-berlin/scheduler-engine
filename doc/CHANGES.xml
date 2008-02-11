@@ -21,6 +21,9 @@
                     Der Job Scheduler mischt die zentrale mit der lokalen Konfiguration.
                     Ein zentral konfiguriertes Objekt kann nicht lokal überschrieben werden.
                 </p>
+                <p>
+                    Unter Windows sind wegen der weiteren Verzeichnisüberwachung noch 25 TCP-Verbindungen möglich.
+                </p>
                 <ul>
                     <li>
                         <scheduler_element name="config" attribute="supervisor"/>
@@ -42,7 +45,7 @@
                         <scheduler_method class="Spooler" property="configuration_directory"/>
                     </li>
                     <li>
-                        <scheduler_method class="Job" property="folder_path"/>
+                        <scheduler_method class="Job" property="configuration_directory"/>
                     </li>
                 </ul>
             </description>
