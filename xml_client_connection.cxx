@@ -150,7 +150,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
                 }
                 catch( exception& x ) { log()->info( x.what() ); }
 
-                _state = s_connecting;
+                _state = _socket_operation->state() == Buffered_socket_operation::s_connecting? s_connecting : s_connected;
                 something_done = true;
                 break;
             }
