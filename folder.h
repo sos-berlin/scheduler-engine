@@ -290,6 +290,7 @@ struct Typed_folder : Scheduler_object,
     void                        add_to_replace_or_remove_candidates( const File_based& file_based );
     void                        handle_replace_or_remove_candidates();
     void                        ignore_duplicate_configuration_file( File_based*, File_based*, const directory_observer::Directory_entry& );
+    void                        remove_duplicates_from_list ( list< const directory_observer::Directory_entry* >* );
 
     virtual File_based_subsystem* file_based_subsystem      () const                                = 0;
     virtual bool                is_empty_name_allowed       () const                                { return false; }
@@ -386,7 +387,6 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
   private:
     void                        add_to_typed_folder_map     ( Typed_folder* );
-    void                        remove_duplicates_from_list ( list< const directory_observer::Directory_entry* >* );
 
     Fill_zero                  _zero_;
 

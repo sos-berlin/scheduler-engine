@@ -453,7 +453,7 @@ bool Folder::adjust_with_directory( Directory* directory )
         {
             Typed_folder* typed_folder = it->second;
 
-            remove_duplicates_from_list( &file_list_map[ typed_folder ] );
+            typed_folder->remove_duplicates_from_list( &file_list_map[ typed_folder ] );
 
             something_changed |= typed_folder->adjust_with_directory( file_list_map[ typed_folder ] );
         }
@@ -468,48 +468,6 @@ bool Folder::adjust_with_directory( Directory* directory )
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  it->second->handle_replace_or_remove_candidates();
 
     return something_changed;
-}
-
-//------------------------------------------------------------------------Folder::remove_duplicates
-
-void Folder::remove_duplicates_from_list( list< const Directory_entry* >* directory_entry_list )
-{
-    typedef stdext::hash_map<string,const Directory_entry*>  Normalized_names_map ;
-    Normalized_names_map                                     used_normalized_names;
-
-    for( list< const Directory_entry* >::iterator de = directory_entry_list->begin(); de != directory_entry_list->end(); )
-    {
-        Normalized_names_map::iterator it = used_normalized_names.find( (*de)->_normalized_name );
-        if( it != used_normalized_names.end() )
-        {
-            string duplicate_name = (*de)->_file_info->path().name();
-
-          //if( !set_includes( _known_duplicate_filenames, duplicate_name ) )
-            {
-                log()->warn( message_string( "SCHEDULER-889", it->second->_file_info->path().name(), duplicate_name ) );      // Doppelte Datei
-
-                //if( _spooler->_mail_on_error )
-                //{
-                //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
-                //    scheduler_event.set_error( x );
-
-                //    Mail_defaults mail_defaults( spooler() );
-                //    mail_defaults.set( "subject", x.what() );
-                //    mail_defaults.set( "body"   , x.what() );
-
-                //    scheduler_event.send_mail( mail_defaults );
-                //}
-
-                //_known_duplicate_filenames.insert( duplicate_name );
-                de = directory_entry_list->erase( de );
-            }
-        }
-        else
-        {
-            used_normalized_names[ (*de)->_normalized_name ] = *de;
-            de++;
-        }
-    }
 }
 
 //------------------------------------------------------------------------------Folder::dom_element
@@ -666,6 +624,48 @@ Typed_folder::Typed_folder( Folder* folder, Type_code type_code )
     _folder(folder)
 {
     log()->set_prefix( obj_name() );     // Noch ohne Pfad
+}
+
+//--------------------------------------------------------Typed_folder::remove_duplicates_from_list
+
+void Typed_folder::remove_duplicates_from_list( list< const Directory_entry* >* directory_entry_list )
+{
+    typedef stdext::hash_map<string,const Directory_entry*>  Normalized_names_map ;
+    Normalized_names_map                                     used_normalized_names;
+
+    for( list< const Directory_entry* >::iterator de = directory_entry_list->begin(); de != directory_entry_list->end(); )
+    {
+        Normalized_names_map::iterator it = used_normalized_names.find( (*de)->_normalized_name );
+        if( it != used_normalized_names.end() )
+        {
+            string duplicate_name = (*de)->_file_info->path().name();
+
+          //if( !set_includes( _known_duplicate_filenames, duplicate_name ) )
+            {
+                log()->warn( message_string( "SCHEDULER-889", it->second->_file_info->path().name(), duplicate_name ) );      // Doppelte Datei
+
+                //if( _spooler->_mail_on_error )
+                //{
+                //    Scheduler_event scheduler_event ( scheduler::evt_base_file_error, log_error, spooler() );
+                //    scheduler_event.set_error( x );
+
+                //    Mail_defaults mail_defaults( spooler() );
+                //    mail_defaults.set( "subject", x.what() );
+                //    mail_defaults.set( "body"   , x.what() );
+
+                //    scheduler_event.send_mail( mail_defaults );
+                //}
+
+                //_known_duplicate_filenames.insert( duplicate_name );
+                de = directory_entry_list->erase( de );
+            }
+        }
+        else
+        {
+            used_normalized_names[ (*de)->_normalized_name ] = *de;
+            de++;
+        }
+    }
 }
 
 //--------------------------------------------------------------Typed_folder::adjust_with_directory
