@@ -12,7 +12,7 @@
         </process_classes>
         
         <jobs>
-<!--
+
             <job name="shell">
                 <script language="shell">@echo off
 type s:\01-ff.txt                
@@ -28,7 +28,7 @@ echo
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
--->
+
             <job name="api">
                 <script language="javascript">
                     <![CDATA[
@@ -52,7 +52,7 @@ function spooler_process()
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-<!--
+
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
@@ -86,7 +86,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
--->
+
         </jobs>
     </config>
 </spooler>

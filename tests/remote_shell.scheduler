@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="sos" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="localhost" max_processes="50"/>
         </process_classes>
 
 
@@ -28,7 +28,7 @@ exit 27
                 ]]>
                 </script>
 
-                <monitor>
+                <!--monitor>
                     <script language="javascript">
                         <![CDATA[ 
                         
@@ -37,7 +37,7 @@ spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
 
 ]]>
                     </script>
-                </monitor>
+                </monitor-->
                 <run_time once="yes"/>
             </job>
 
