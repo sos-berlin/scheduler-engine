@@ -940,35 +940,37 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 }
 
 //------------------------------------------------Typed_folder::ignore_duplicate_configuration_file
+// Doppelte Dateinamen beim Mischen (cache und live) ignorieren
 
 void Typed_folder::ignore_duplicate_configuration_file( File_based* current_file_based, File_based* new_file_based, const Directory_entry& directory_entry )
 {
     //if( new_file_based  &&  current_file_based )  new_file_based->_duplicate_version = current_file_based->_duplicate_version;
 
-    File_based* file_based = new_file_based? new_file_based : current_file_based;
-
-    if( directory_entry._duplicate_version  &&  
-        directory_entry._duplicate_version != file_based->_duplicate_version  &&
-        !directory_entry.is_aging() )
+    if( File_based* file_based = new_file_based? new_file_based : current_file_based )
     {
-        if( !new_file_based )
+        if( directory_entry._duplicate_version  &&  
+            directory_entry._duplicate_version != file_based->_duplicate_version  &&
+            !directory_entry.is_aging() )
         {
-            // Lokale Datei geändert, Objekt ist aber zentral definiert: 
-            file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Geänderte lokale Datei wird ignoriert
+            if( !new_file_based )
+            {
+                // Lokale Datei geändert, Objekt ist aber zentral definiert: 
+                file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Geänderte lokale Datei wird ignoriert
+            }
+            else
+            //if( current_file_based  &&  !current_file_based->_is_from_cache )
+            //{
+            //    file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Bereits gelesene lokale Datei wird durch zentrale ersetzt
+            //}
+            //else
+            {
+                file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Lokale Datei wird ignoriert und zentrale Version wird genommen
+            }
         }
-        else
-        //if( current_file_based  &&  !current_file_based->_is_from_cache )
-        //{
-        //    file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Bereits gelesene lokale Datei wird durch zentrale ersetzt
-        //}
-        //else
-        {
-            file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Lokale Datei wird ignoriert und zentrale Version wird genommen
-        }
-    }
 
-    if( current_file_based )  current_file_based->_duplicate_version = directory_entry._duplicate_version;
-    if( new_file_based     )  new_file_based    ->_duplicate_version = directory_entry._duplicate_version;
+        if( current_file_based )  current_file_based->_duplicate_version = directory_entry._duplicate_version;
+        if( new_file_based     )  new_file_based    ->_duplicate_version = directory_entry._duplicate_version;
+    }
 }
 
 //-----------------------------------------------------Typed_folder::new_initialized_file_based_xml
