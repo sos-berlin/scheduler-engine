@@ -1746,21 +1746,23 @@ bool Cluster::subsystem_activate()
 
 void Cluster::create_table_when_needed()
 {
+    string null = db()->dbms_kind() == dbms_sybase? " null" : "";
+
     Transaction ta ( db() );
 
-    db()->create_table_when_needed( &ta, _spooler->_clusters_tablename,
+    db()->create_table_when_needed( &ta, _spooler->_clusters_tablename, S() << 
             "`member_id`"                      " varchar(100)" " not null, "
             "`scheduler_id`"                   " varchar(100)" " not null, "
-            "`precedence`"                     " integer"          " null, "
-            "`last_heart_beat`"                " integer"          " null, "        // time_t
-            "`next_heart_beat`"                " integer"          " null, "        // time_t
-            "`active`"                         " boolean"          " null, "        // null oder 1 (not null)
-            "`exclusive`"                      " boolean"          " null, "        // null oder 1 (not null)
-            "`dead`"                           " boolean"          " null, "        // null oder 1 (not null)
-            "`command`"                        " varchar(250)"     " null, "
-            "`http_url`"                       " varchar(100)"     " null, "
-            "`deactivating_member_id`"         " varchar(100)"     " null, "
-            "`xml`"                            " clob"             " null, "
+            "`precedence`"                     " integer"         << null << ","  
+            "`last_heart_beat`"                " integer"         << null << ","    // time_t
+            "`next_heart_beat`"                " integer"         << null << ","    // time_t
+            "`active`"                         " boolean"         << null << ","    // null oder 1 (not null)
+            "`exclusive`"                      " boolean"         << null << ","    // null oder 1 (not null)
+            "`dead`"                           " boolean"         << null << ","    // null oder 1 (not null)
+            "`command`"                        " varchar(250)"    << null << ","
+            "`http_url`"                       " varchar(100)"    << null << ","
+            "`deactivating_member_id`"         " varchar(100)"    << null << ","
+            "`xml`"                            " clob"            << null << ","
             "primary key( `member_id` )" );
 
     ta.commit( Z_FUNCTION );

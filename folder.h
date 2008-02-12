@@ -437,6 +437,7 @@ struct File_based_subsystem : Subsystem
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
     virtual void                assert_xml_element_name     ( const xml::Element_ptr& ) const;
+    virtual void                assert_xml_elements_name    ( const xml::Element_ptr& ) const;
     virtual string              xml_element_name            () const                                = 0;
     virtual string              xml_elements_name           () const                                = 0;
     virtual string              normalized_name             ( const string& name ) const            { return name; }

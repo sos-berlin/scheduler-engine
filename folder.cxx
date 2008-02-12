@@ -1197,7 +1197,7 @@ File_based* Typed_folder::file_based_or_null( const string& name ) const
 
 void Typed_folder::set_dom( const xml::Element_ptr& element )
 {
-    if( !element.nodeName_is( subsystem()->xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", subsystem()->xml_elements_name(), element.nodeName() );
+    subsystem()->assert_xml_elements_name( element );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -1961,6 +1961,13 @@ void File_based_subsystem::check_file_based_element( const xml::Element_ptr& ele
 void File_based_subsystem::assert_xml_element_name( const xml::Element_ptr& e ) const
 { 
     if( !e.nodeName_is( xml_element_name() ) )  z::throw_xc( "SCHEDULER-409", xml_element_name(), e.nodeName() );
+}
+
+//---------------------------------------------------File_based_subsystem::assert_xml_elements_name
+
+void File_based_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
+{ 
+    if( !e.nodeName_is( xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", xml_elements_name(), e.nodeName() );
 }
 
 //---------------------------------------------------------------------------------Pendant::Pendant

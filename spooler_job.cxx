@@ -61,6 +61,7 @@ struct Job_subsystem : Job_subsystem_interface
 
     string                      xml_element_name            () const                                { return "job"; }
     string                      xml_elements_name           () const                                { return "jobs"; }
+    void                        assert_xml_elements_name    ( const xml::Element_ptr& ) const;
     string                      object_type_name            () const                                { return "Job"; }
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
@@ -207,6 +208,13 @@ bool Job_subsystem::is_any_task_queued()
     }
 
     return false;
+}
+
+//----------------------------------------------------------Job_subsystem::assert_xml_elements_name
+
+void Job_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
+{ 
+    if( !e.nodeName_is( "add_jobs" ) )  File_based_subsystem::assert_xml_elements_name( e );
 }
 
 //-------------------------------------------------------Job_folder_interface::Job_folder_interface
