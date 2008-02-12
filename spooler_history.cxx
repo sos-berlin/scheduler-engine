@@ -785,7 +785,7 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         bool created = create_table_when_needed( &ta, _spooler->_orders_tablename, S() <<
-                         S() << "`job_chain`"                   " varchar(250)" << chararacter_set << " not null,"                                    // Primärschlüssel
+                                "`job_chain`"                   " varchar(250)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`id`"                          " varchar(" << const_order_id_length_max << ")" << chararacter_set << " not null,"    // Primärschlüssel
                                 "`spooler_id`"                  " varchar(100)" << chararacter_set << " not null,"                                    // Primärschlüssel
                                 "`distributed_next_time`"       " datetime"        << null << ","     // Auftrag ist verteilt ausführbar
@@ -836,7 +836,7 @@ void Database::create_tables_when_needed()
             Transaction ta ( this );
 
             created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
-                         S() << "`history_id`"  " integer"      " not null,"             // Primärschlüssel
+                                "`history_id`"  " integer"      " not null,"             // Primärschlüssel
                                 "`job_chain`"   " varchar(250)" " not null,"
                                 "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
                                 "`spooler_id`"  " varchar(100)" " not null,"
@@ -893,7 +893,7 @@ void Database::create_tables_when_needed()
         Transaction ta ( this );
 
         create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
-                         S() << "`history_id`"  " integer"      " not null,"             // Primärschlüssel
+                                "`history_id`"  " integer"      " not null,"             // Primärschlüssel
                                 "`step`"        " integer"      " not null,"             // Primärschlüssel
                                 "`task_id`"     " integer"      " not null,"
                                 "`state`"       " varchar(100)" " not null,"
