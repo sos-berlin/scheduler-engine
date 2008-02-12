@@ -479,12 +479,9 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
     Xml_writer xml_writer ( response );
 
-    if( merged_directory )
-    {
-        xml_writer.begin_element( "configuration.directory" );
-        write_updated_files_to_xml( &xml_writer, merged_directory, element );
-        xml_writer.end_element( "configuration.directory" );
-    }
+    xml_writer.begin_element( "configuration.directory" );
+    if( merged_directory )  write_updated_files_to_xml( &xml_writer, merged_directory, element );
+    xml_writer.end_element( "configuration.directory" );
 
     xml_writer.close();
 

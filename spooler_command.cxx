@@ -957,7 +957,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         {
             if( modify_order_element.bool_getAttribute( "setback" ) )
             {
-                throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
+                z::throw_xc( "SCHEDULER-351", modify_order_element.getAttribute( "setback" ) );
                 //order->setback();
             }
             else
@@ -1754,7 +1754,7 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text )
     {
         string text = command_doc.error_text();
         _spooler->log()->error( text );       // Log ist möglicherweise noch nicht geöffnet
-        throw_xc( "XML-ERROR", text );
+        z::throw_xc( "XML-ERROR", text );
     }
 
     Z_LOG2( "scheduler.xml", "XML-Dokument ist eingelesen\n" );

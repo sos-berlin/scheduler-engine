@@ -129,7 +129,7 @@ struct Client
             x.set_code( error_element.getAttribute( "code" ) );
             x.set_name( error_element.getAttribute( "class" ) );
             x.set_what( error_element.getAttribute( "text" ) );
-            throw_xc( x );
+            z::throw_xc( x );
         }
     }
 
@@ -203,12 +203,12 @@ struct Client
             if( arg[0] != '-' )
             {
                 const char* equal = strchr( arg, '=' );
-                if( !equal )  throw_xc( "= fehlt" );
+                if( !equal )  z::throw_xc( "= fehlt" );
 
                 _variables.push_back( pair<string,string>( string( arg, equal - arg ), equal + 1 ) );
             }
             else
-                throw_xc( "Ungültiger Parameter" );
+                z::throw_xc( "Ungültiger Parameter" );
         }
     }
 

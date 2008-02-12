@@ -31,7 +31,7 @@ xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const
         if( e.nodeName_is( name ) )  result = e, count++;
     }
 
-    if( count > 1 )  throw_xc( "SOS-1423", name );
+    if( count > 1 )  z::throw_xc( "SOS-1423", name );
 
     return result;
 /*
@@ -40,7 +40,7 @@ xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const
     int len = list.length();
     if( len == 0 )  return xml::Element_ptr();
 
-    if( len > 1 )  throw_xc( "SOS-1423", name );
+    if( len > 1 )  z::throw_xc( "SOS-1423", name );
 
     return list.item(0);
 */
@@ -63,7 +63,7 @@ xml::Element_ptr default_single_element( const xml::Element_ptr& element, const 
 xml::Element_ptr single_element( const xml::Element_ptr& element, const string& name )
 {
     xml::Element_ptr result = optional_single_element( element, name );
-    if( result == NULL )  throw_xc( "SOS-1422", name );
+    if( result == NULL )  z::throw_xc( "SOS-1422", name );
 
     return result;
 }

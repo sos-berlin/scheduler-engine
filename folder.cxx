@@ -1890,7 +1890,7 @@ void File_based::handle_event( Base_file_event base_file_event )
             case bfevt_added:       job_path = spooler()->_configuration_start_job_after_added;     break;
             case bfevt_modified:    job_path = spooler()->_configuration_start_job_after_modified;  break;
             case bfevt_removed :    job_path = spooler()->_configuration_start_job_after_deleted;   break;
-            default:                assert(0), throw_xc(__FUNCTION__ );
+            default:                assert(0), z::throw_xc( Z_FUNCTION );
         }
 
         if( !job_path.empty() )

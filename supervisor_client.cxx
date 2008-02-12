@@ -407,13 +407,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                 }
 
                 _is_ready = true;   // Nach Verbindungsverlust bereits true
-
-                try
-                {
-                    if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
-                        _spooler->folder_subsystem()->handle_folders( 0.0 );  
-                }
-                catch( exception& x ) { log()->warn( x.what() ); }
+                _spooler->folder_subsystem()->set_signaled( "Supervisor_client_connection" );   // live-Verzeichnis lesen
 
                 break;
 

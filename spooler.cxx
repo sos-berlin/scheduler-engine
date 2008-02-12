@@ -671,10 +671,10 @@ Spooler::Spooler()
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
-    if( spooler_ptr )  throw_xc( "spooler_ptr" );
+    if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
-    if( !SOS_LICENCE( licence_scheduler ) )  throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+    if( !SOS_LICENCE( licence_scheduler ) )  z::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
 
     _pid = getpid();
 
@@ -975,7 +975,7 @@ void Spooler::register_process_handle( Process_handle p )
 #   ifdef _DEBUG
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  throw_xc( "register_process_handle" );              // Bereits registriert
+            if( _process_handles[i] == p )  z::throw_xc( "register_process_handle" );              // Bereits registriert
         }
 #   endif
 
@@ -1202,7 +1202,7 @@ void Spooler::send_cmd()
     {
         string text = xml_doc.error_text();
         _log->error( text );       // Log ist möglicherweise noch nicht geöffnet
-        throw_xc( "XML-ERROR", text );
+        z::throw_xc( "XML-ERROR", text );
     }
 
 
@@ -3305,7 +3305,7 @@ static string full_path( const string& path )
     Sos_limited_text<MAX_PATH> full;
 
     char* p = _fullpath( full.char_ptr(), path.c_str(), full.size() );
-    if( !p )  throw_xc( "fullpath", path );
+    if( !p )  z::throw_xc( "fullpath", path );
 
     return full.char_ptr();
 }

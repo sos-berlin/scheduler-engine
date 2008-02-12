@@ -884,13 +884,13 @@ void Job::prepare_on_exit_commands()
              commands_element = commands_element.nextSibling() )
         {
             string on_exit_code = commands_element.getAttribute( "on_exit_code" );
-            if( on_exit_code == "" )  throw_xc( "SCHEDULER-324", on_exit_code );
+            if( on_exit_code == "" )  z::throw_xc( "SCHEDULER-324", on_exit_code );
 
             if( on_exit_code == "error" )
             {
-                if( passed_error_commands )  throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
+                if( passed_error_commands )  z::throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
                 passed_error_commands = true;
-                //if( _error_commands_element )  throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
+                //if( _error_commands_element )  z::throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
                 //_error_commands_element = commands_element;  // Das behandeln wir am Ende
             }
             else
@@ -911,7 +911,7 @@ void Job::prepare_on_exit_commands()
                         try
                         {
                             string v = values[ i ];
-                            if( v.empty() )  throw_xc( "SCHEDULER-324", on_exit_code, "(missing value)" );
+                            if( v.empty() )  z::throw_xc( "SCHEDULER-324", on_exit_code, "(missing value)" );
                             
                             if( v == "signal" )                                        _exit_code_commands_on_signal = commands_element;
                             else
@@ -924,7 +924,7 @@ void Job::prepare_on_exit_commands()
                                                          else  exit_codes.push_back( -signal );
                             }
                         }
-                        catch( exception& x ) { throw_xc( "SCHEDULER-324", on_exit_code, x.what() ); }
+                        catch( exception& x ) { z::throw_xc( "SCHEDULER-324", on_exit_code, x.what() ); }
                     }
                 }
 

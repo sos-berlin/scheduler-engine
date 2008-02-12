@@ -519,7 +519,7 @@ void Parser::add_text( const char* text, int len )
         if( rest > 0 )  
         {
             if( rest == 2  &&  string_ends_with( _text, "\r\n" ) )  {}  // Okay für Firefox
-                                                              else  throw_xc( "SPOOLER-HTTP toomuchdata" );
+                                                              else  z::throw_xc( "SPOOLER-HTTP toomuchdata" );
         }
 
         _request->_body.assign( _text.data() + _body_start, _content_length ); 
@@ -1569,7 +1569,7 @@ bool Log_chunk_reader::next_chunk_is_ready()
             }
 
             default:
-                throw_xc( Z_FUNCTION );
+                z::throw_xc( Z_FUNCTION );
         }
     }
 

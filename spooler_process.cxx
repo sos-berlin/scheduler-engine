@@ -385,7 +385,7 @@ void Process::remove_module_instance( Module_instance* )
 
 void Process::start()
 {
-    if( started() )  assert(0), throw_xc( Z_FUNCTION );
+    if( started() )  assert(0), z::throw_xc( Z_FUNCTION );
 
     if( _process_class )  _remote_scheduler = _process_class->remote_scheduler();
 
