@@ -454,9 +454,10 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _remote_configurations->resolve_configuration_directory_names();
 
 
-    Directory*     all_directory    = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
-    Directory*     my_directory     = configuration_directory_or_null();
-    ptr<Directory> merged_directory = all_directory;
+    ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path() ) );
+    Directory*          all_directory        = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
+    Directory*          my_directory         = configuration_directory_or_null();
+    ptr<Directory>      merged_directory     = all_directory;
     
 
     Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories:     
@@ -464,13 +465,19 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
 
     if( all_directory )  all_directory->read( read_flags, allowed_directory_age );
     if( my_directory  )  my_directory ->read( read_flags, allowed_directory_age ),  merged_directory = my_directory;
-    if( !merged_directory )  log()->info( message_string( "SCHEDULER-455", obj_name() ) );
     _repeated_reading = true;
 
     if( all_directory && my_directory )
     {
         merged_directory = my_directory->clone();
         merged_directory->merge_new_entries( all_directory );
+    }
+
+    if( !merged_directory )  
+    {
+        log()->info( message_string( "SCHEDULER-455", obj_name() ) );
+        merged_directory = empty_directory_tree->root_directory();
+        assert( merged_directory );
     }
 
 
@@ -480,7 +487,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     Xml_writer xml_writer ( response );
 
     xml_writer.begin_element( "configuration.directory" );
-    if( merged_directory )  write_updated_files_to_xml( &xml_writer, merged_directory, element );
+    write_updated_files_to_xml( &xml_writer, merged_directory, element );
     xml_writer.end_element( "configuration.directory" );
 
     xml_writer.close();

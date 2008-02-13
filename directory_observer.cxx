@@ -136,7 +136,7 @@ Directory_entry Directory_entry::clone( Directory* new_parent ) const
 //    return false;
 //}
 
-//------------------------------------------------------------------------------irectory::Directory
+//-----------------------------------------------------------------------------Directory::Directory
 
 Directory::Directory( Directory_tree* tree, Directory* parent, const string& name ) 
 : 
@@ -184,8 +184,9 @@ bool Directory::read( Read_flags read_what, double minimum_age )
     bool   directory_has_changed = false;
     double now                   = double_from_gmtime();
 
-    if( !( read_what & read_subdirectories )  ||
-        _last_read_at + minimum_age <= now )
+    if( _name != ""  &&                                 // Verzeichnis "" ist leer
+        ( !( read_what & read_subdirectories )  ||
+          _last_read_at + minimum_age <= now ) )
     {
         if( read_what & read_subdirectories )  _last_read_at = now;
 

@@ -1808,7 +1808,7 @@ void Spooler::start()
 
 void Spooler::activate()
 {
-    if( _supervisor_client && _supervisor_client->is_using_central_configuration() )
+    if( _supervisor_client )   //&& _supervisor_client->is_using_central_configuration() )
     {
         _folder_subsystem->set_cache_directory( _configuration_cache_directory );
         if( _configuration_directory.exists() )  _folder_subsystem->set_directory( _configuration_directory );
