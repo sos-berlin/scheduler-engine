@@ -814,7 +814,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\n"
     "<xsd:attribute name=\"absolute_repeat\" type=\"Duration\"/>\n"
-    "<xsd:attribute name=\"start_once\"    type=\"Yes_no\" default=\"no\">\n"
+    "<xsd:attribute name=\"start_once\"    type=\"Yes_no\">\n"
     "<xsd:annotation>\n"
     "<xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>\n"
     "</xsd:annotation>\n"
@@ -1876,7 +1876,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1202893373 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1202896510 },
     { NULL, NULL, 0 }
 };
 

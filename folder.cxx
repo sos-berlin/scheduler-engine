@@ -400,8 +400,6 @@ Absolute_path Folder::make_path( const string& name )
 
 bool Folder::adjust_with_directory( Directory* directory )
 {
-    assert( directory );  if( !directory )  z::throw_xc( Z_FUNCTION, "directory==NULL" );
-
     typedef stdext::hash_map< Typed_folder*, list< const Directory_entry* > >   File_list_map;
     
     File_list_map file_list_map;
@@ -413,7 +411,7 @@ bool Folder::adjust_with_directory( Directory* directory )
     {
         // DATEINAMEN EINSAMMELN
 
-        if( !base_file_is_removed() )
+        if( directory  &&  !base_file_is_removed() )
         {
             Z_FOR_EACH( Directory::Entry_list, directory->_ordered_list, directory_iterator )
             {
@@ -554,6 +552,8 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
 
         if( directory_entry )
         {
+            Z_DEBUG_ONLY( assert( directory_entry->_subdirectory ) );
+
             subfolder->set_base_file_info( Base_file_info( *directory_entry ) );
             subfolder->set_to_be_removed( false ); 
             something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
@@ -563,7 +563,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         {
             string p = folder()->make_path( subfolder->base_file_info()._filename );
             subfolder->log()->info( message_string( "SCHEDULER-898" ) );
-            subfolder->adjust_with_directory( directory_entry->_subdirectory );
+            subfolder->adjust_with_directory( NULL );
             subfolder->remove();
 
             something_changed = true;
@@ -572,7 +572,7 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
         {
             // Verzeichnis ist gelöscht, aber es leben vielleicht noch Objekte, die gelöscht werden müssen.
             // adjust_with_directory() wird diese mit handle_replace_or_remove_candidates() löschen
-            something_changed = subfolder->adjust_with_directory( directory_entry->_subdirectory );    
+            something_changed = subfolder->adjust_with_directory( NULL );    
         }
     }
 
