@@ -515,6 +515,7 @@ const char file_scheduler_xsd[] =
     "</xsd:sequence>\n"
     "\n"
     "<xsd:attribute name=\"name\"               type=\"Name\"/>\n"
+    "<xsd:attribute name=\"replace\"            type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"visible\"            type=\"Yes_no_never\"/>\n"
     "<xsd:attribute name=\"orders_recoverable\" type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"distributed\"        type=\"Yes_no\"/>\n"
@@ -1875,7 +1876,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1201864400 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1202893373 },
     { NULL, NULL, 0 }
 };
 

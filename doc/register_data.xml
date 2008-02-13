@@ -1266,6 +1266,10 @@
     <register_keyword_display><code>idle_timeout=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_idle_timeout' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='idle_timeout' type='definition'/>
 </register_keyword>
+<register_keyword keyword='ignore'>
+    <register_keyword_display><code>ignore=</code></register_keyword_display>
+    <register_entry register_file='xml/process_classes.xml#attribute_ignore' register_title='&lt;process_classes&gt; (Konfiguration)'  register_keyword='ignore' type='definition'/>
+</register_keyword>
 <register_keyword keyword='ignore_error'>
     <register_keyword_display><code>ignore_error=</code></register_keyword_display>
     <register_entry register_file='xml/process.xml#attribute_ignore_error' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='ignore_error' type='definition'/>

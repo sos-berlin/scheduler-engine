@@ -506,6 +506,7 @@
             </xsd:sequence>
 
             <xsd:attribute name="name"               type="Name"/>
+            <xsd:attribute name="replace"            type="Yes_no"/>
             <xsd:attribute name="visible"            type="Yes_no_never"/>
             <xsd:attribute name="orders_recoverable" type="Yes_no"/>
             <xsd:attribute name="distributed"        type="Yes_no"/>

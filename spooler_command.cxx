@@ -739,17 +739,18 @@ xml::Element_ptr Command_processor::execute_job_chain( const xml::Element_ptr& j
 {
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
 
+    _spooler->root_folder()->job_chain_folder()->add_or_replace_file_based_xml( job_chain_element );
 
-    // Siehe auch Spooler::set_dom()
 
-    ptr<Job_chain> job_chain = new Job_chain( _spooler );
-    job_chain->set_folder_path( root_path );
-    job_chain->set_name( job_chain_element.getAttribute( "name" ) );
-    job_chain->set_dom( job_chain_element );
+    //// Siehe auch Spooler::set_dom()
+    //ptr<Job_chain> job_chain = new Job_chain( _spooler );
+    //job_chain->set_folder_path( root_path );
+    //job_chain->set_name( job_chain_element.getAttribute( "name" ) );
+    //job_chain->set_dom( job_chain_element );
 
-    job_chain->initialize();
-    _spooler->root_folder()->job_chain_folder()->add_job_chain( job_chain );
-    job_chain->activate();
+    //job_chain->initialize();
+    //_spooler->root_folder()->job_chain_folder()->add_job_chain( job_chain );
+    //job_chain->activate();
 
     return _answer.createElement( "ok" );
 }
