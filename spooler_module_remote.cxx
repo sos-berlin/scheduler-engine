@@ -502,7 +502,7 @@ AGAIN:
                 params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
                 params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
 
-                int PROCESS_ENVIRONMENT_FEHLT; //_module->_process_environment
+                //int PROCESS_ENVIRONMENT_FEHLT; //_module->_process_environment
 
                 Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
                 {

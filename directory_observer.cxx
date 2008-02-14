@@ -708,7 +708,7 @@ bool Folder_directory_lister::open( const File_path& root, const Absolute_path& 
             _log->debug3( x.what() );
         }
         else
-        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt.
+        if( x.code() == ( S() << "ERRNO-" << EINVAL ).to_string() )  // ERRNO-22 "invalid argument"? Die Bedeutung ist nicht bekannt. Für Püschel. Möglicherweise eine Datei statt einem Verzeichnis
         {
             _log->info( x.what() ); 
         }

@@ -94,7 +94,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-221", "<day day=\"$1\">: only the days from $2 to $3 are possible" },
     { "SCHEDULER-222", "This command <$1> is only executable by way of a TCP connection" },
     { "SCHEDULER-223", "Supervisor has reported an error: $1" },
-    { "SCHEDULER-224", "The serving scheduler has closed the connection" },
+    { "SCHEDULER-224", "Supervisor has closed the connection" },
     { "SCHEDULER-225", "start_new_file() is only applicable for the main protocol" },
     { "SCHEDULER-226", "Order has not been processed because the task has been terminated before the processing step (spooler_process())" },
     { "SCHEDULER-227", "Scheduler script has logged an error: $1" },

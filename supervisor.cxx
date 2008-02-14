@@ -782,7 +782,7 @@ Remote_configurations::~Remote_configurations()
 
 void Remote_configurations::close()
 {
-    if( _directory_observer )    _directory_observer->close();
+    if( _directory_observer )  _directory_observer->close();
 }
 
 //------------------------------------------------------------------Remote_configurations::activate
