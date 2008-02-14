@@ -688,11 +688,10 @@ struct Folder_subsystem : Object,
 
 
     // directory_observer::Directory_observer::Directory_handler
-    bool                        on_handle_directory          ( directory_observer::Directory_observer* );
+    bool                        on_handle_directory         ( directory_observer::Directory_observer* );
 
 
-    void                    set_directory                   ( const file::File_path& );
-    void                    set_cache_directory             ( const file::File_path& );
+    void                        initialize_cache_directory  ();
 
     Folder*                     folder                      ( const Absolute_path& path )           { return file_based( path ); }
     Folder*                     folder_or_null              ( const Absolute_path& path )           { return file_based_or_null( path ); }

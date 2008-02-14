@@ -1110,6 +1110,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\directory_observer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\file_logger.h"
 				>
 			</File>

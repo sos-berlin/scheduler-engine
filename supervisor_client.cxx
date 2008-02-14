@@ -168,6 +168,9 @@ void Supervisor_client::close()
     
 bool Supervisor_client::subsystem_initialize()
 {
+    _subsystem_state = subsys_initialized;
+
+
     if( !_spooler->_configuration_cache_directory.exists() )
     {
         #ifdef Z_WINDOWS
@@ -178,8 +181,8 @@ bool Supervisor_client::subsystem_initialize()
         if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
     }
 
+    _spooler->folder_subsystem()->initialize_cache_directory();
 
-    _subsystem_state = subsys_initialized;
     _client_connection->set_async_manager( _spooler->_connection_manager );
     _client_connection->connect();
 
@@ -392,6 +395,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                     {
                         _supervisor_client->_is_using_central_configuration = true;
                         update_directory_structure( root_path, directory_element );
+                        _spooler->folder_subsystem()->handle_folders();     // cache-Verzeichnis würde reichen
                     }
                     
                     _state = s_configuration_fetched;
@@ -408,8 +412,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
                     _start_update_configuration_delayed = false;
                 }
 
-                _is_ready = true;   // Nach Verbindungsverlust bereits true
-                _spooler->folder_subsystem()->set_signaled( "Supervisor_client_connection" );   // live-Verzeichnis lesen
+                _is_ready = true;   // Nach Wiederholung wegen Verbindungsverlusts bereits true
 
                 break;
 

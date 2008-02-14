@@ -105,7 +105,7 @@ extern const double             delete_temporary_files_retry;
     const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
                                                                           // 2007-09-11  Neues Handle für Folder_subsystem
                                                                           // 2007-12-27  Neues Handle für supervisor::Configuration_observer
-                                                                          // 2008-02-06  Neues Handle für _configuration_cache_directory
+                                                                          // 2008-02-06  Neues Handle für Remote_configuration_observer
 #else
     const int                   max_processes                 =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
     const int                   max_communication_connections =   800;    // Limit ist FD_SETSIZE, inkl. udp und listen()

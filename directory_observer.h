@@ -48,8 +48,11 @@ struct Directory_tree : Scheduler_object,
     void                        set_last_change_at          ( double t )                            { _last_change_at = t; }
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
+    void                        withdraw_aging              ();
     bool                        is_cache                    () const                                { return _is_cache; }
     void                    set_is_cache                    ( bool b )                              { _is_cache = b; }
+    void                    set_is_watched                  ()                                      { _is_watched = true; }
+    bool                        is_watched                  () const                                { return _is_watched; }
 
   private:
     Fill_zero                  _zero_;
@@ -58,6 +61,7 @@ struct Directory_tree : Scheduler_object,
     double                     _last_change_at;
     double                     _refresh_aged_entries_at;
     bool                       _is_cache;                   // Verzeichnis des Caches mit der zentralen Konfiguration
+    bool                       _is_watched;
 };
 
 //----------------------------------------------------------------------------------Directory_entry
@@ -111,17 +115,21 @@ struct Directory : Object
     ptr<Directory>              clone                       () const                                { return clone2( NULL ); }
     ptr<Directory>              clone2                      ( Directory* parent ) const;
     void                        merge_new_entries           ( const Directory* );
+    void                        withdraw_aging_deep         ();
     void                        assert_ordered_list         ();
 
 
   private:
+    void                        set_aging_until             ( Directory_entry*, double until );
+
+
     Fill_zero                  _zero_;
     string                     _name;
     int                        _version;
     double                     _last_read_at;
     Directory*                 _parent;
     Directory_tree* const      _directory_tree;
-    bool                       _repeated_read;
+  //bool                       _repeated_read;
 
   public:
     typedef list<Directory_entry>  Entry_list;
@@ -165,8 +173,7 @@ struct Directory_observer : Scheduler_object,
     ptr<Directory_tree>        _directory_tree;
   //int                        _directory_watch_interval;
     double                     _next_check_at;
-    bool                       _is_activated;
-    Directory_handler*           _directory_handler;
+    Directory_handler*         _directory_handler;
 };
 
 //-------------------------------------------------------------------------------------------------

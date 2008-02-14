@@ -1093,7 +1093,7 @@
                 <title>Haupt-Scheduler hat Verbindung geschlossen</title>
             </text>
             <text xml:lang="en">
-                <title>The serving scheduler has closed the connection</title>
+                <title>Supervisor has closed the connection</title>
             </text>
         </message>
 

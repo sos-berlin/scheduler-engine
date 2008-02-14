@@ -460,11 +460,13 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     ptr<Directory>      merged_directory     = all_directory;
     
 
-    Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories:     
-                                                          Directory::read_subdirectories_suppress_aging;   // Beim ersten Aufruf sofort antworten, Dateien nicht altern lassen
+    if( all_directory )  all_directory->read_deep(allowed_directory_age );
+    if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  merged_directory = my_directory;
+    //Directory::Read_flags read_flags = _repeated_reading? Directory::read_subdirectories:     
+    //                                                      Directory::read_subdirectories_suppress_aging;   // Beim ersten Aufruf sofort antworten, Dateien nicht altern lassen
 
-    if( all_directory )  all_directory->read( read_flags, allowed_directory_age );
-    if( my_directory  )  my_directory ->read( read_flags, allowed_directory_age ),  merged_directory = my_directory;
+    //if( all_directory )  all_directory->read( read_flags, allowed_directory_age );
+    //if( my_directory  )  my_directory ->read( read_flags, allowed_directory_age ),  merged_directory = my_directory;
     _repeated_reading = true;
 
     if( all_directory && my_directory )
@@ -867,7 +869,7 @@ void Remote_configurations::resolve_configuration_directory_names()
                                 new_hostport_directory_map[ host_and_port ] = e->_file_info->path().name();
                             }
                         }
-                        catch( exception& x ) { log()->warn( x.what() ); }    // Ungültiger Verzeichnisname
+                        catch( exception& x ) { log()->warn( S() << x.what() << ", " << e->_file_info->path() ); }    // Ungültiger Verzeichnisname
                     }
                 }
             }

@@ -82,6 +82,14 @@ Directory* Directory_tree::directory_or_null( const string& name )
 //    }
 //}
 
+//-------------------------------------------------------------------Directory_tree::withdraw_aging
+
+void Directory_tree::withdraw_aging()
+{
+    reset_aging();
+    _root_directory->withdraw_aging_deep();
+}
+
 //----------------------------------------------------Directory_entry::normalized_less_dereferenced
 
 bool Directory_entry::normalized_less_dereferenced( const Directory_entry* a, const Directory_entry* b )
@@ -175,6 +183,17 @@ const Directory_entry* Directory::entry_or_null( const string& name ) const
     return NULL;
 }
 
+//-------------------------------------------------------------------Directory::withdraw_aging_deep
+
+void Directory::withdraw_aging_deep()
+{
+    Z_FOR_EACH( Entry_list, _ordered_list, de )  
+    {
+        de->_is_aging_until = 0;
+        if( de->_subdirectory )  de->_subdirectory->withdraw_aging_deep();
+    }
+}
+
 //----------------------------------------------------------------------------------Directory::read
 
 bool Directory::read( Read_flags read_what, double minimum_age )
@@ -236,9 +255,8 @@ bool Directory::read( Read_flags read_what, double minimum_age )
 
                     if( e->_file_info->last_write_time() != (*fi)->last_write_time() ) 
                     {
-                        e->_file_info      = *fi;
-                        e->_is_aging_until = now + file_timestamp_delay;
-                        _directory_tree->set_aging_until( e->_is_aging_until );
+                        e->_file_info = *fi;
+                        set_aging_until( &*e, now + file_timestamp_delay );
                     }
                     else
                     if( now < e->_is_aging_until )      // Noch nicht genug gealtert?
@@ -277,10 +295,9 @@ bool Directory::read( Read_flags read_what, double minimum_age )
                     directory_has_changed = true;
                 }
                 else
-                if( !( read_what & read_suppress_aging )  ||  _repeated_read )
+                if( !( read_what & read_suppress_aging ) )
                 {
-                    new_entry->_is_aging_until = now + file_timestamp_delay;
-                    _directory_tree->set_aging_until( new_entry->_is_aging_until );
+                    set_aging_until( &*new_entry, now + file_timestamp_delay );
                 }
 
                 fi++;
@@ -306,9 +323,8 @@ bool Directory::read( Read_flags read_what, double minimum_age )
                 else
                 if( !e->_is_removed )
                 {
-                    e->_is_removed     = true;
-                    e->_is_aging_until = now + remove_delay;
-                    _directory_tree->set_aging_until( e->_is_aging_until );
+                    e->_is_removed = true;
+                    set_aging_until( &*e, now + remove_delay );
                     e++;
                 }
                 else
@@ -333,9 +349,20 @@ bool Directory::read( Read_flags read_what, double minimum_age )
 
     assert_ordered_list();
 
-    _repeated_read = true;
+    //_repeated_read = true;
     if( directory_has_changed )  _version++;
     return directory_has_changed;
+}
+
+//-------------------------------------------------------------------------------Directory::set_aging_until
+
+void Directory::set_aging_until( Directory_entry* directory_entry, double until )
+{
+    if( _directory_tree->is_watched() )
+    {
+        directory_entry->_is_aging_until = until;
+        _directory_tree->set_aging_until( directory_entry->_is_aging_until );
+    }
 }
 
 //--------------------------------------------------------------------------------Directory::clone2
@@ -530,7 +557,7 @@ void Directory_observer::register_directory_handler( Directory_handler* director
 
 void Directory_observer::activate()
 {
-    if( !_is_activated )
+    if( !_directory_tree->is_watched() )
     {
         if( !_directory_tree->directory_path().exists()  ||
             !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
@@ -562,7 +589,11 @@ void Directory_observer::activate()
         //async_wake();
         //async_continue();
 
-        _is_activated = true;
+        double now = double_from_gmtime();
+        _next_check_at = now + directory_watch_interval_min;
+        set_alarm();
+
+        _directory_tree->set_is_watched();
     }
 }
 

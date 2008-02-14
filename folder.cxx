@@ -50,27 +50,15 @@ void Folder_subsystem::close()
     }
 }
 
-//------------------------------------------------------------------Folder_subsystem::set_directory
+//-----------------------------------------------------Folder_subsystem::initialize_cache_directory
 
-void Folder_subsystem::set_directory( const File_path& directory )
+void Folder_subsystem::initialize_cache_directory()
 {
-    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
-    assert( !_live_directory_observer );
-
-    _live_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
-    _live_directory_observer->register_directory_handler( this );
-}
-
-//------------------------------------------------------------Folder_subsystem::set_cache_directory
-
-void Folder_subsystem::set_cache_directory( const File_path& directory )
-{
-    assert_subsystem_state( subsys_initialized, Z_FUNCTION );
-    assert( !_cache_directory_observer );
-
-    _cache_directory_observer = Z_NEW( Directory_observer( spooler(), directory ) );
-    _cache_directory_observer->directory_tree()->set_is_cache( true );
-    _cache_directory_observer->register_directory_handler( this );
+    if( !_cache_directory_observer )
+    {
+        _cache_directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_cache_directory ) );
+        _cache_directory_observer->directory_tree()->set_is_cache( true );
+    }
 }
 
 //-----------------------------------------------------------Folder_subsystem::subsystem_initialize
@@ -90,14 +78,18 @@ bool Folder_subsystem::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
 
-    if( _live_directory_observer   &&  _live_directory_observer ->directory_tree()->directory_path().exists()  ||
-        _cache_directory_observer  &&  _cache_directory_observer->directory_tree()->directory_path().exists() )
+    if( !_spooler->_configuration_directory.exists() )
     {
-        _root_folder->load();
-        handle_folders();
+        log()->warn( message_string( "SCHEDULER-895", _spooler->_configuration_directory ) );
     }
     else
-        log()->warn( message_string( "SCHEDULER-895", _live_directory_observer->directory_tree()->directory_path() ) );
+    {
+        _live_directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_directory ) );
+        _live_directory_observer->register_directory_handler( this );
+    }
+
+    _root_folder->load();
+    handle_folders();
 
     return true;
 }
@@ -110,15 +102,14 @@ bool Folder_subsystem::subsystem_activate()
 
     if( _cache_directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
     {
-        _cache_directory_observer->activate();
-        _cache_directory_observer->run_handler();
+        //_cache_directory_observer->activate();
         result = true;
     }
 
-    if( _live_directory_observer->directory_tree()->directory_path().exists() )
+    if( _live_directory_observer )
     {
         _live_directory_observer->activate();
-        _live_directory_observer->run_handler();
+        //_live_directory_observer->run_handler();
         result = true;
     }
 
@@ -126,6 +117,7 @@ bool Folder_subsystem::subsystem_activate()
     {
         _subsystem_state = subsys_active;
         file_based_subsystem<Folder>::subsystem_activate();     // Tut bislang nichts, außer für jeden Ordner eine Meldung "SCHEDULER-893 Folder is 'active' now" auszugeben
+        handle_folders();
     }
 
     return result;
@@ -205,7 +197,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
                 Directory::Read_flags read_flags = subsystem_state() == subsys_active? Directory::read_subdirectories
                                                                                      : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal nicht altern lassen, Dateien sofort lesen
-                directory->read( Directory::read_subdirectories_suppress_aging, 0.0 );     
+                directory->read( read_flags, 0.0 );     
             }
 
             if( _cache_directory_observer )
@@ -216,9 +208,9 @@ bool Folder_subsystem::handle_folders( double minimum_age )
                 // a) überflüssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
                 // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst würde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
 
-                cache_dir->read( Directory::read_subdirectories_suppress_aging, 0.0 );     
-                if( _live_directory_observer ) directory = merged_cache_and_live_directories();
-                                          else directory = cache_dir;
+                cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched())
+                if( _live_directory_observer )  directory = merged_cache_and_live_directories();
+                                          else  directory = cache_dir;
             }
 
             if( directory )
@@ -235,9 +227,9 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
 //-------------------------------------------------------------------Folder_subsystem::set_signaled
 
-void Folder_subsystem::set_signaled( const string& text )                  
+void Folder_subsystem::set_signaled( const string& text )
 { 
-    // Besser: nur den Verzeichnisbaum signalisieren, der auch betroffen ist
+    // Besser: nur den Verzeichnisbaum signalisieren. Die Verzeichnisse müssen nicht neu gelesen werden.
     if( _live_directory_observer  )  _live_directory_observer ->set_signaled( text );
     if( _cache_directory_observer )  _cache_directory_observer->set_signaled( text );
 }
