@@ -196,7 +196,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
                 directory = _live_directory_observer->directory_tree()->root_directory();
 
                 Directory::Read_flags read_flags = subsystem_state() == subsys_active? Directory::read_subdirectories
-                                                                                     : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal nicht altern lassen, Dateien sofort lesen
+                                                                                     : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal neue Dateien nicht altern lassen, sondern sofort lesen
                 directory->read( read_flags, 0.0 );     
             }
 
@@ -208,7 +208,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
                 // a) überflüssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
                 // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst würde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
 
-                cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched())
+                cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched() weil kein activate())
                 if( _live_directory_observer )  directory = merged_cache_and_live_directories();
                                           else  directory = cache_dir;
             }
