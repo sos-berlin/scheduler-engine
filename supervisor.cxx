@@ -457,10 +457,10 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path() ) );
     Directory*          all_directory        = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
     Directory*          my_directory         = configuration_directory_or_null();
-    ptr<Directory>      directory            = all_directory;
+    ptr<Directory>      directory;
     
 
-    if( all_directory )  all_directory->read_deep( allowed_directory_age );
+    if( all_directory )  all_directory->read_deep( allowed_directory_age ),  directory = all_directory;
     if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  directory = my_directory;
 
     if( all_directory && my_directory )

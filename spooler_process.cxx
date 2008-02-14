@@ -245,7 +245,7 @@ Process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_
     Base_class(c),
     _zero_(this+1)
 {
-    set_thread_name( "Process::Com_server_thread" );
+    set_thread_name( "scheduler::Process::Com_server_thread" );
 }
 
 //----------------------------------------------------------Process::Com_server_thread::thread_main
