@@ -1219,12 +1219,12 @@ bool Task::do_something()
                                 {
                                     _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
                                     _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
-                                }
 
-                                if( _file_logger->has_files() )
-                                {
-                                    _file_logger->set_async_manager( _spooler->_connection_manager );
-                                    _file_logger->start();
+                                    if( _file_logger->has_files() )
+                                    {
+                                        _file_logger->set_async_manager( _spooler->_connection_manager );
+                                        _file_logger->start();
+                                    }
                                 }
 
                                 State next_state;
@@ -2422,14 +2422,15 @@ void Module_task::do_close__end()
             _exit_code = -termination_signal;
         }
  
-        _file_logger->finish();
-        _file_logger->close();
 
-        //if( !stdout_ok )
+        //if( !_file_logger->has_files() )     // add_file() nicht aufgerufen? (Vielleicht wegen Fehler)  Dann selbst loggen:
         //{
         //    _log->log_file( _module_instance->stdout_path(), "stdout:" );
         //    _log->log_file( _module_instance->stderr_path(), "stderr:" );
         //}
+
+        _file_logger->finish();
+        _file_logger->close();
 
         //_module_instance = NULL;    // Nach set_error(), weil set_error() _exit_code auf 1 setzt
     }

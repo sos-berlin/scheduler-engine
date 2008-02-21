@@ -355,33 +355,32 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
 {
     if( !params )  return;
 
-    HRESULT hr;
-
     THREAD_LOCK( _lock )
     {
         DOM_FOR_EACH_ELEMENT( params, e )
         {
             if( e.nodeName_is( variable_element_name ) ) 
             {
-                string name;
-                string value;
+                set_variable( e, variable_sets );
+                //string name;
+                //string value;
 
-                get_variable_name_and_value( e, &name, &value );
-                
-                if( variable_sets )
-                {
-                    Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
-                    if( it != variable_sets->end() )
-                    {
-                        value = subst_env( value, +it->second );
-                    }
-                }
+                //get_variable_name_and_value( e, &name, &value );
+                //
+                //if( variable_sets )
+                //{
+                //    Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
+                //    if( it != variable_sets->end() )
+                //    {
+                //        value = subst_env( value, +it->second );
+                //    }
+                //}
 
-                Bstr    name_bstr = name;
-                Variant value_vt = value;
+                //Bstr    name_bstr = name;
+                //Variant value_vt = value;
 
-                hr = put_Var( name_bstr, &value_vt );                       
-                if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+                //hr = put_Var( name_bstr, &value_vt );                       
+                //if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
             else
             if( e.nodeName_is( "copy_params" ) )
@@ -393,8 +392,55 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
 
                 if( it->second )  merge( it->second );
             }
+            else
+            if( e.nodeName_is( "include" )  )
+            {
+                string xpath = e.getAttribute( "node" );
+
+                //Include_command include_command ( _spooler, e );
+                //xml::Document_ptr included_doc = include_command.dom_from_content();
+                //
+                //xml::Xpath_nodes nodes = included_doc.select_nodes( xpath );
+                //for( int i = 0; i < nodes.count(); i++ )
+                //{
+                //    if( nodes[i].is_type( xml::ELEMENT_NODE ) )
+                //    {
+                //        xml::Element_ptr ee = nodes[i];
+
+                //        if( ee.nodeName_is( variable_element_name ) ) 
+                //        {
+                //            set_variable( ee, variable_sets );
+                //        }
+                //    }
+                //}
+            }
         }
     }
+}
+
+//-------------------------------------------------------------------Com_variable_set::set_variable
+
+void Com_variable_set::set_variable( const xml::Element_ptr& element, Variable_set_map* variable_sets )
+{
+    string name;
+    string value;
+
+    get_variable_name_and_value( element, &name, &value );
+    
+    if( variable_sets )
+    {
+        Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
+        if( it != variable_sets->end() )
+        {
+            value = subst_env( value, +it->second );
+        }
+    }
+
+    Bstr    name_bstr = name;
+    Variant value_vt = value;
+
+    HRESULT hr = put_Var( name_bstr, &value_vt );                       
+    if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
 }
 
 //----------------------------------------------------------------------Com_variable_set::put_value

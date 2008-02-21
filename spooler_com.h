@@ -158,6 +158,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
     void                    set_dom                         ( const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
+    void                    set_variable                    ( const xml::Element_ptr&, Variable_set_map* );
 
     xml::Document_ptr           dom                         ( const string& element_name, const string& subelement_name );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );

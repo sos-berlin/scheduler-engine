@@ -199,7 +199,16 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 
 Com_remote_module_instance_server::~Com_remote_module_instance_server()
 {
-    if( _file_logger )  _file_logger->close();
+    if( _file_logger )  
+    {
+        try
+        {
+            _file_logger->finish();
+        }
+        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+        
+        _file_logger->close();
+    }
 }
 
 //------------------------------------------------Com_remote_module_instance_server::QueryInterface
@@ -507,6 +516,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             {
                 _log = dynamic_cast<Com_log_proxy*>( object ),  assert( _log );
                 _server->set_log( _log );
+                _server->_module->set_log( _log );
                 _server->_module_instance->set_log( _log );
             }
         }
@@ -528,6 +538,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
             
             if( _file_logger->has_files() )  _file_logger->start_thread();
+
+            // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und
+            // gibt dann selbst stdout und stderr aus (soweit nicht remote)
         }
 
         operation->async_finish();
@@ -558,8 +571,6 @@ STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VAR
             _server->_module_instance->end__start( succeeded != 0 ) -> async_finish();
             _server->_module_instance->end__end();
         }
-
-        if( _file_logger )  _file_logger->finish();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::end" ); }
 
