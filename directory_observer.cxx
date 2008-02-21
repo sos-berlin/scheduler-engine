@@ -555,12 +555,12 @@ void Directory_observer::register_directory_handler( Directory_handler* director
 
 //---------------------------------------------------------------------Directory_observer::activate
 
-void Directory_observer::activate()
+bool Directory_observer::activate()
 {
-    if( !_directory_tree->is_watched() )
+    if( !_directory_tree->is_watched()  &&  _directory_tree->directory_path().exists() )
     {
-        if( !_directory_tree->directory_path().exists()  ||
-            !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
+        //if( !_directory_tree->directory_path().exists()  ||
+        //    !file::File_info( _directory_tree->directory_path() ).is_directory() )  z::throw_xc( "SCHEDULER-458", _directory_tree->directory_path() );
 
 #       ifdef Z_WINDOWS
         {
@@ -595,6 +595,8 @@ void Directory_observer::activate()
 
         _directory_tree->set_is_watched();
     }
+
+    return is_active();
 }
 
 //--------------------------------------------------------------Directory_observer::async_continue_

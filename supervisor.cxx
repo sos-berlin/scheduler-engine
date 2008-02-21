@@ -150,7 +150,7 @@ struct Remote_configurations : Object,
 
     void                        close                       ();
     Directory_tree*             directory_tree              () const                                { return _directory_observer? _directory_observer->directory_tree() : NULL; }
-    void                        activate                    ();
+    bool                        activate                    ();
     void                        set_alarm                   ();
     void                        resolve_configuration_directory_names();
     Directory*                  configuration_directory_for_host_and_port( const Host_and_port& );
@@ -448,25 +448,31 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     set_async_delay( double_time_max );   // UDP-Nachricht nicht mehr wiederholen
 
 
-    _supervisor->switch_subsystem_state( subsys_active );
-    _remote_configurations->activate();
-
-    _remote_configurations->resolve_configuration_directory_names();
-
-
     ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path() ) );
-    Directory*          all_directory        = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
-    Directory*          my_directory         = configuration_directory_or_null();
     ptr<Directory>      directory;
-    
+    Directory*          all_directory        = NULL;
+    Directory*          my_directory         = NULL;
 
-    if( all_directory )  all_directory->read_deep( allowed_directory_age ),  directory = all_directory;
-    if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  directory = my_directory;
 
-    if( all_directory && my_directory )
+    _supervisor->switch_subsystem_state( subsys_active );
+    bool is_active = _remote_configurations->activate(); 
+
+    if( is_active )
     {
-        directory = my_directory->clone();
-        directory->merge_new_entries( all_directory->clone() );
+        _remote_configurations->resolve_configuration_directory_names();
+
+        all_directory = _remote_configurations->configuration_directory_for_all_schedulers_or_null();
+        my_directory  = configuration_directory_or_null();
+        
+
+        if( all_directory )  all_directory->read_deep( allowed_directory_age ),  directory = all_directory;
+        if( my_directory  )  my_directory ->read_deep( allowed_directory_age ),  directory = my_directory;
+
+        if( all_directory && my_directory )
+        {
+            directory = my_directory->clone();
+            directory->merge_new_entries( all_directory->clone() );
+        }
     }
 
     if( !directory )  
@@ -504,7 +510,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _configuration_changed       = false;
     _configuration_transfered_at = Time::now();
 
-    _remote_configurations->set_alarm();    // Für alternde Dateieinträge: Nach kurzer Zeit Verzeichnis nochmal prüfen 
+    if( is_active )  _remote_configurations->set_alarm();    // Für alternde Dateieinträge: Nach kurzer Zeit Verzeichnis nochmal prüfen 
 
     return +response;
 }
@@ -788,9 +794,9 @@ void Remote_configurations::close()
 
 //------------------------------------------------------------------Remote_configurations::activate
 
-void Remote_configurations::activate()
+bool Remote_configurations::activate()
 {
-    _directory_observer->activate();
+    return _directory_observer->activate();
 }
 
 //-------------------------------------------------------Remote_configurations::on_handle_directory

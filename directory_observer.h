@@ -158,11 +158,12 @@ struct Directory_observer : Scheduler_object,
     string                      obj_name                    () const;
 
     void                        close                       ();
-    void                        activate                    ();
+    bool                        activate                    ();
     bool                        run_handler                 ();
     void                        set_alarm                   ();
     void                        set_signaled                ( const string& text );
     void                        register_directory_handler  ( Directory_handler* );
+    bool                        is_active                   () const                                { return _directory_tree && _directory_tree->is_watched(); }
 
     Directory_tree*             directory_tree              () const                                { return _directory_tree; }
 
