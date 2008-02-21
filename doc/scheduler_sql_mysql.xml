@@ -109,8 +109,22 @@ Type=InnoDB;</pre>
 Type=InnoDB;
 
 CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );
-CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );</pre>
-
+CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );
+CREATE INDEX SCHEDULER_O_HISTORY_START_TIME on SCHEDULER_ORDER_HISTORY ( "START_TIME" );</pre>
+  
+    
+    <pre>CREATE TABLE <b>SCHEDULER_ORDER_STEP_HISTORY</b>
+(
+  "HISTORY_ID"          integer       not null,
+  "STEP"                integer       not null,
+  "TASK_ID"             integer       not null,
+  "STATE"               varchar(100)          ,
+  "START_TIME"          datetime      not null,
+  "END_TIME"            datetime              ,
+  primary key ( "HISTORY_ID","STEP" )
+);</pre>
+    
+    
     <pre>CREATE TABLE <b>SCHEDULER_CLUSTERS</b>
 (
     "MEMBER_ID"              varchar(100) not null, 

@@ -40,6 +40,9 @@
         <li>
             <scheduler_a href="scheduler_sql_postgresql.xml"/>
         </li>
+        <li>
+            <scheduler_a href="scheduler_sql_sybase.xml"/>
+        </li>
     </ul>    
 
 </description>

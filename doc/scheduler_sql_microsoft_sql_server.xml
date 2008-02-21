@@ -35,8 +35,8 @@
     "JOB_NAME"          varchar(255) not null,
     "ENQUEUE_TIME"      datetime,
     "START_AT_TIME"     datetime,
-    "PARAMETERS"        NTEXT,
-    "TASK_XML"          NTEXT,
+    "PARAMETERS"        ntext,
+    "TASK_XML"          ntext,
     primary key( "TASK_ID" )
 );</pre>
 
@@ -51,11 +51,11 @@
     "CAUSE"             varchar(50),
     "STEPS"             integer,
     "EXIT_CODE"         integer,
-    "ERROR"             BIT,
+    "ERROR"             bit,
     "ERROR_CODE"        varchar(50),
     "ERROR_TEXT"        varchar(250),
-    "PARAMETERS"        NTEXT,
-    "LOG"               IMAGE,
+    "PARAMETERS"        ntext,
+    "LOG"               image,
     primary key( "ID" )
 );
 
@@ -78,10 +78,10 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ( "CLUSTER_MEMBER
     "CREATED_TIME"                datetime not null,
     "MOD_TIME"                    datetime,
     "ORDERING"                    integer not null,
-    "PAYLOAD"                     NTEXT,
+    "PAYLOAD"                     ntext,
     "INITIAL_STATE"               varchar(100),
-    "RUN_TIME"                    NTEXT,
-    "ORDER_XML"                   NTEXT,
+    "RUN_TIME"                    ntext,
+    "ORDER_XML"                   ntext,
     primary key( "SPOOLER_ID", "JOB_CHAIN", "ID" );
 );</pre>
 
@@ -96,11 +96,42 @@ CREATE INDEX SCHEDULER_H_CLUSTER_MEMBER   on SCHEDULER_HISTORY ( "CLUSTER_MEMBER
     "STATE_TEXT" varchar(100),
     "START_TIME" datetime not null,
     "END_TIME"   datetime not null,
-    "LOG" IMAGE,
+    "LOG"        image,
     primary key( "HISTORY_ID" );
 );
 
 CREATE INDEX SCHEDULER_O_HISTORY_SPOOLER_ID on SCHEDULER_ORDER_HISTORY ( "SPOOLER_ID" );
-CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );</pre>
+CREATE INDEX SCHEDULER_O_HISTORY_JOB_CHAIN  on SCHEDULER_ORDER_HISTORY ( "JOB_CHAIN" );
+CREATE INDEX SCHEDULER_O_HISTORY_START_TIME on SCHEDULER_ORDER_HISTORY ( "START_TIME" );</pre>
+
+
+    <pre>CREATE TABLE <b>SCHEDULER_ORDER_STEP_HISTORY</b>
+(
+  "HISTORY_ID"          numeric(9)     not null,
+  "STEP"                numeric(9)     not null,
+  "TASK_ID"             numeric(9)     not null,
+  "STATE"               varchar(100)           ,
+  "START_TIME"          datetime       not null,
+  "END_TIME"            datetime               ,
+  primary key ( "HISTORY_ID","STEP" )
+);</pre>
+    
+    
+    <pre>CREATE TABLE <b>SCHEDULER_CLUSTERS</b>
+(
+    "MEMBER_ID"              varchar(100) not null, 
+    "SCHEDULER_ID"           varchar(100) not null, 
+    "PRECEDENCE"             integer, 
+    "LAST_HEART_BEAT"        integer,
+    "NEXT_HEART_BEAT"        integer, 
+    "ACTIVE"                 numeric(1),
+    "EXCLUSIVE"              numeric(1),
+    "DEAD"                   numeric(1),
+    "COMMAND"                varchar(250),
+    "HTTP_URL"               varchar(100),
+    "DEACTIVATING_MEMBER_ID" varchar(100),
+    "XML"                    ntext, 
+    primary key( "MEMBER_ID" )
+);</pre>
 
 </description>
