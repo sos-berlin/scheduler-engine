@@ -124,7 +124,8 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
                 if( e.nodeName_is( "include" ) )
                 {
                     xml::Element_ptr include_element = _dom_document.createElement( "include" );
-                    include_element.setAttribute( "file", e.getAttribute( "file" ) );
+                    include_element.setAttribute( "file"     , e.getAttribute( "file"      ) );
+                    include_element.setAttribute( "live_file", e.getAttribute( "live_file" ) );
 
                     _dom_document.documentElement().appendChild( include_element );
                 }

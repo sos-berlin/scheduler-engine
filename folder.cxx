@@ -421,6 +421,12 @@ bool Folder::adjust_with_directory( Directory* directory )
                 }
                 else
                 {
+                    // Hier abhängige Dateien (die keine Objekte sind) prüfen, nur für live/, nicht für cache!
+                    // Pfad im zentralen Register nachsehen, 
+                    // Objekt ermitteln
+                    // Wenn Zeitstempel des Pfads im Objekt verschieden ist:
+                    //      Objekt ersetzen:  object->reread();     load_from_xml(), set_replacement(), später ersetzen. Aber mehrfache Ersetzung vermeiden, also nur signalisieren.
+
                     name = object_name_of_filename( filename );
                     
                     if( name != "" )

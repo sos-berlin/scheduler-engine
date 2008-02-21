@@ -288,7 +288,8 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"include\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"file\" type=\"File\" use=\"required\"/>\n"
+    "<xsd:attribute name=\"file\"          type=\"File\"/>\n"
+    "<xsd:attribute name=\"live_file\"     type=\"File\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -796,7 +797,8 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"include\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"file\" type=\"File\" use=\"required\"/>\n"
+    "<xsd:attribute name=\"file\"      type=\"File\"/>\n"
+    "<xsd:attribute name=\"live_file\" type=\"File\"/>\n"
     "<xsd:attribute name=\"node\" type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
@@ -1876,7 +1878,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1202902296 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1203590917 },
     { NULL, NULL, 0 }
 };
 

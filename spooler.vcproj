@@ -377,6 +377,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\java_subsystem.cxx"
 				>
 			</File>
@@ -1119,6 +1123,10 @@
 			</File>
 			<File
 				RelativePath=".\folder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include.h"
 				>
 			</File>
 			<File

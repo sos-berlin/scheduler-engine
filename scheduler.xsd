@@ -279,7 +279,8 @@
     
     <xsd:element name="include">
         <xsd:complexType>
-            <xsd:attribute name="file" type="File" use="required"/>
+            <xsd:attribute name="file"          type="File"/>
+            <xsd:attribute name="live_file"     type="File"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -787,7 +788,8 @@
 
                     <xsd:element name="include">
                         <xsd:complexType>
-                            <xsd:attribute name="file" type="File" use="required"/>
+                            <xsd:attribute name="file"      type="File"/>
+                            <xsd:attribute name="live_file" type="File"/>
                             <xsd:attribute name="node" type="String"/>
                         </xsd:complexType>
                     </xsd:element>

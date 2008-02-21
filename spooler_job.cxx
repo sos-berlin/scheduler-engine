@@ -499,6 +499,8 @@ void Job::close()
     if( _run_time )  _run_time->close();
 
     _lock_requestor = NULL;
+    
+    //remove_dependant( spooler()->schedule_subsystem(), _schedule_path );
 
     File_based::close();
 }
@@ -843,6 +845,8 @@ void Job::set_dom( const xml::Element_ptr& element )
             }
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
+            //else
+            //if( e.nodeName_is( "scheduler.use" ) &&  !_spooler->_manual )  set_run_time( e );
         }
     }
 }
@@ -1005,7 +1009,19 @@ void Job::init_run_time()
 void Job::set_run_time( const xml::Element_ptr& element )
 {
     init_run_time();
-    _run_time->set_dom( element );
+
+    //if( element.nodeName_is( "schedule.use" ) )
+    //{
+    //    _schedule_path = Absolute_path( folder_path(), Absolute_path( folder_path(), element.getAttribute( "schedule" ) ) );
+    //    add_dependant( spooler()->schedule_subsystem(), _schedule_path );   int REMOVE_DEPENDENT;
+    //    _run_time = spooler()->schedule_subsystem()->schedule_or_null( _schedule_path );
+    //    int RUN_TIME_KANN_NULL_SEIN;
+    //}
+    //else
+    {
+        assert( element.nodeName_is( "run_time" ) );
+        _run_time->set_dom( element );
+    }
 
     _start_once    = _run_time->once();
     _period._begin = 0;
