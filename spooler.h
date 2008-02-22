@@ -173,7 +173,15 @@ namespace directory_observer
 
 namespace folder
 {
-    enum   Which_configuration_directory;
+    enum Which_configuration_directory
+    {
+        confdir_none,
+        confdir_local,
+        confdir_cache,
+
+        confdir__max = confdir_cache
+    };
+
     struct File_based;
 }
 using namespace folder;

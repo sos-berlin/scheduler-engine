@@ -22,17 +22,6 @@ struct Subfolder_folder;
 
 extern const char               folder_separator;
 
-//--------------------------------------------------------------------Which_configuration_directory
-
-enum Which_configuration_directory
-{
-    confdir_none,
-    confdir_local,
-    confdir_cache,
-
-    confdir__max = confdir_cache
-};
-
 //------------------------------------------------------------------------------------------Pendant
 
 struct Pendant                  // Abhängig von anderen File_based
