@@ -19,6 +19,7 @@ objects = \
  file_logger.o\
  folder.o\
  java_subsystem.o\
+ include.o\
  lock.o\
  scheduler_client.o\
  scheduler_messages.o\
