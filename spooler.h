@@ -178,7 +178,6 @@ namespace folder
         confdir_none,
         confdir_local,
         confdir_cache,
-
         confdir__max = confdir_cache
     };
 
