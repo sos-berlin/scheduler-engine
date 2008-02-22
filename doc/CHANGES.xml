@@ -125,7 +125,7 @@
                 <message level="info"  code="SCHEDULER-455"/>
                 <message level="error" code="SCHEDULER-456"/>
                 <message level="error" code="SCHEDULER-457"/>
-                <message level="error" code="SCHEDULER-458"/>
+                <!--message level="error" code="SCHEDULER-458"/-->
                 <message level="info"  code="SCHEDULER-701"/>
                 <message level="info"  code="SCHEDULER-702"/>
                 <message level="warn"  code="SCHEDULER-899"/>

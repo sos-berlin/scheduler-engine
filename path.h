@@ -37,10 +37,11 @@ struct Path : string
     void                    set_absolute                    ( const Absolute_path& absolute_base, const Path& relative );
   //void                        prepend_folder_path         ( const string& );
     const string&               to_string                   () const                                { return *static_cast<const string*>( this ); }
-    void                    set_path                        ( const string& path )                  { *static_cast<string*>( this ) = path; }
+    void                    set_path                        ( const string& );
     bool                     is_absolute_path               () const;
     string                      absolute_path               () const;
     bool                     is_root                        () const;
+  //int                         depth                       () const;
     string                      to_filename                 () const;
 
   private:
@@ -68,7 +69,8 @@ struct Absolute_path : Path
                                 Absolute_path               ( const Absolute_path& absolute_directory, const char*   path )  { set_absolute( absolute_directory, path ); }
     explicit                    Absolute_path               ( const Path& );
 
-    void                    set_path                        ( const string& path );
+    void                    set_path                        ( const string& );
+    void                    set_simplified_dot_dot_path     ( const string& );
 
     string                      with_slash                  () const;
     string                      without_slash               () const;

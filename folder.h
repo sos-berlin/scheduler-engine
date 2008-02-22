@@ -22,9 +22,20 @@ struct Subfolder_folder;
 
 extern const char               folder_separator;
 
+//--------------------------------------------------------------------Which_configuration_directory
+
+enum Which_configuration_directory
+{
+    confdir_none,
+    confdir_local,
+    confdir_cache,
+
+    confdir__max = confdir_cache
+};
+
 //------------------------------------------------------------------------------------------Pendant
 
-struct Pendant
+struct Pendant                  // Abhängig von anderen File_based
 {
                                 Pendant                     ();
     virtual                    ~Pendant                     ();
@@ -98,6 +109,7 @@ struct Base_file_info
 
 struct File_based : Scheduler_object,
                     Pendant,
+                    Has_includes,
                     zschimmer::Has_addref_release
 {
     enum State
@@ -125,15 +137,20 @@ struct File_based : Scheduler_object,
 
 
     // Scheduler_object
-
     void                        close                       ();
     string                      obj_name                    () const;
+
 
     // Pendant
     bool                        on_dependant_loaded         ( File_based* );
     bool                        on_dependant_to_be_removed  ( File_based* );
     void                        on_dependant_removed        ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+
+
+    // Has_includes
+    Spooler*                    spooler                     () const                                { return Scheduler_object::spooler(); }
+    void                        on_include_changed          ();
 
 
     void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );
@@ -161,6 +178,7 @@ struct File_based : Scheduler_object,
     Absolute_path               path                        () const;
     string                      normalized_name             () const;
     string                      normalized_path             () const;
+    File_path                   configuration_root_directory() const;
 
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
@@ -659,6 +677,14 @@ struct file_based_subsystem : File_based_subsystem
     int                        _file_based_map_version;
 };
 
+//-------------------------------------------------------------------------------------------------
+
+struct Configuration
+{
+    ptr<directory_observer::Directory_observer>  _directory_observer;                         // Konfigurationsverzeichnis
+    ptr<Include_register>                        _include_register;
+};
+
 //---------------------------------------------------------------------------------Folder_subsystem
 
 struct Folder_subsystem : Object,
@@ -698,11 +724,12 @@ struct Folder_subsystem : Object,
     Folder*                     root_folder                 () const                                { return _root_folder; }
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
     bool                        is_valid_extension          ( const string& );
+    Configuration*              configuration               ( Which_configuration_directory );
 
     void                    set_signaled                    ( const string& text );
 
   //void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
-    ptr<directory_observer::Directory> merged_cache_and_live_directories();
+    ptr<directory_observer::Directory> merged_cache_and_local_directories();
 
     bool                        handle_folders              ( double minimum_age = 0 );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
@@ -712,8 +739,13 @@ struct Folder_subsystem : Object,
     Fill_zero                  _zero_;
     ptr<Folder>                _root_folder;
     double                     _last_change_at;
-    ptr<directory_observer::Directory_observer>  _live_directory_observer;                          // Konfigurationsverzeichnis
-    ptr<directory_observer::Directory_observer>  _cache_directory_observer;                         // Cache mit Konfiguration vom Supervisor, s. Supervisor_client
+
+    vector<Configuration>      _configurations;
+    //ptr<directory_observer::Directory_observer>  _local_directory_observer;                         // Konfigurationsverzeichnis
+    //ptr<Includes_register>                       _local_includes;
+
+    //ptr<directory_observer::Directory_observer>  _cache_directory_observer;                         // Cache mit Konfiguration vom Supervisor, s. Supervisor_client
+    //ptr<Includes_register>                       _cache_includes;
 };
 
 
@@ -728,9 +760,6 @@ inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* schedul
 //-------------------------------------------------------------------------------------------------
 
 } //namespace folder
-
-using namespace folder;
-
 } //namespace scheduler
 } //namespace sos
 

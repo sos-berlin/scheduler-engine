@@ -1504,21 +1504,21 @@ void Spooler::load_arg()
     }
 
 
-    if( _configuration_directory == "" )
+    if( _local_configuration_directory == "" )
     {
         if( file::File_info( _configuration_file_path ).is_directory() )
         {
-            _configuration_directory = File_path( _configuration_file_path, "" );
-            _configuration_directory_as_option_set = true;
+            _local_configuration_directory = File_path( _configuration_file_path, "" );
+            _local_configuration_directory_as_option_set = true;
             _configuration_file_path = File_path( _configuration_file_path, "scheduler.xml" );
         }
         else
         {
-            _configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
+            _local_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
         }
     }
 
-    _configuration_cache_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
+    _cache_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
@@ -1660,7 +1660,7 @@ void Spooler::update_console_title( int level )
             {
                 title << name() << "  ";
 
-                if( _configuration_directory_as_option_set )  title << _configuration_directory;
+                if( _local_configuration_directory_as_option_set )  title << _local_configuration_directory;
                                                         else  title << _configuration_file_path;
                 title << "  pid=" << getpid() << "  ";
                 title << state_name();

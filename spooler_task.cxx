@@ -1603,6 +1603,7 @@ bool Task::do_something()
                             
                             if( ok )
                             {
+                                if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
                                 finish();
                                 set_state( s_closed );

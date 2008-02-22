@@ -759,7 +759,7 @@ void Job::set_dom( const xml::Element_ptr& element )
                 _module->_process_environment->set_dom( e, NULL, "variable" );
             }
             else
-            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map );  
+            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map, "param", this );    // Kann <include> registrieren
             else
             if( e.nodeName_is( "script"     ) )  
             {
@@ -2309,6 +2309,13 @@ bool Job::on_dependant_to_be_removed( File_based* file_based )
     end_tasks( message_string( "SCHEDULER-885", file_based->obj_name() ) );
     return true;
 }
+
+//--------------------------------------------------------------------------Job::on_include_changed
+
+//void Job::on_include_changed()
+//{
+//    int TODO;
+//}
 
 //-------------------------------------------------------------------------------Job::task_to_start
 

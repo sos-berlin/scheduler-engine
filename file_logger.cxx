@@ -62,7 +62,7 @@ void File_logger::close()
     {
         File_line_reader* file_line_reader = *it;
 
-        if( _remove_files )  file_line_reader->_file.unlink_later();
+        //if( _remove_files )  file_line_reader->_file.unlink_later();
         file_line_reader->close();
     }
 

@@ -143,6 +143,9 @@
 <register_keyword keyword='Arbeitsverzeichnis'>
     <register_entry register_file='settings.xml' register_title='Einstellungen'  register_keyword='Arbeitsverzeichnis'/>
 </register_keyword>
+<register_keyword keyword='ASE, Sybase'>
+    <register_entry register_file='scheduler_sql_sybase.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für Sybase ASE'  register_keyword='ASE, Sybase'/>
+</register_keyword>
 <register_keyword keyword='at'>
     <register_keyword_display><code>&lt;at&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__at' register_title='Änderungsprotokoll'  register_keyword='at'/>
@@ -3599,6 +3602,9 @@
 <register_keyword keyword='suspended (property)'>
     <register_keyword_display><code>suspended</code> (property)</register_keyword_display>
     <register_entry register_file='api/Order.xml#method__suspended' register_title='Order.suspended' register_keyword='suspended' type='definition'/>
+</register_keyword>
+<register_keyword keyword='Sybase ASE'>
+    <register_entry register_file='scheduler_sql_sybase.xml' register_title='Vom Scheduler verwendete SQL-Anweisungen für Sybase ASE'  register_keyword='Sybase ASE'/>
 </register_keyword>
 <register_keyword keyword='task'>
     <register_keyword_display><code>&lt;task&gt;</code></register_keyword_display>

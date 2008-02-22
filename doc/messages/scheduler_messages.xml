@@ -2794,11 +2794,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-458">
+        <!--message code="SCHEDULER-458">
             <text xml:lang="en">
                 <title>Remote configuration directory '<p1/>' is missing</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-459">
             <text xml:lang="en">
@@ -2809,6 +2809,12 @@
         <message code="SCHEDULER-460">
             <text xml:lang="en">
                 <title><p1>object</p1> is centrally defined and cannot be locally overwritten</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-461">
+            <text xml:lang="en">
+                <title>Path reaches beyond root (too many '..'): <p1/></title>
             </text>
         </message>
     </messages>

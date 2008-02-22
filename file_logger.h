@@ -49,7 +49,7 @@ struct File_logger : Async_operation
     void                        close                       ();
     void                        set_object_name             ( const string& text )                  { _for_object = text; }
     bool                        has_files                   () const                                { return !_file_line_reader_list.empty(); }
-    void                        set_remove_files            ( bool b )                              { _remove_files = b; }
+  //void                        set_remove_files            ( bool b )                              { _remove_files = b; }
     void                        add_file                    ( const File_path&, const string& prefix );
     void                        start                       ();
     void                        start_thread                ();
@@ -75,7 +75,7 @@ struct File_logger : Async_operation
     Has_log*                   _log;
     File_line_reader_list      _file_line_reader_list;
     ptr<File_logger_thread>    _thread;
-    bool                       _remove_files;
+  //bool                       _remove_files;
     string                     _for_object;
 };
 

@@ -110,6 +110,7 @@ struct Directory : Object
     bool                        read_deep                   ( double minimum_age )                  { return read( read_subdirectories, minimum_age ); }
     bool                        read_without_subdirectories ()                                      { return read( read_no_subdirectories ); }
     const Directory_entry*      entry_or_null               ( const string& name ) const;
+    const Directory_entry*      entry_of_path_or_null       ( const File_path& ) const;
   //Directory*                  subdirectory                ( const string& name ) const;
     int                         version                     () const                                { return _version; }
     ptr<Directory>              clone                       () const                                { return clone2( NULL ); }

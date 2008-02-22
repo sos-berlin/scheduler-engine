@@ -635,6 +635,12 @@ Module_instance::Module_instance( Module* module )
 
 Module_instance::~Module_instance()
 {
+    try
+    {
+        detach_process();
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
+
     if( _com_log  )  _com_log ->set_log ( NULL );
     if( _com_task )  _com_task->set_task( NULL );
 }
@@ -963,7 +969,6 @@ Async_operation* Module_instance::close__start()
 void Module_instance::close__end()
 {
     close_monitor();
-    detach_process();
 }
 
 //------------------------------------------------------------------Module_instance::detach_process

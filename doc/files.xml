@@ -99,6 +99,12 @@
     <!--file path="register.xml"/>
     <file path="register_data.xml"/-->
     <file path="scheduler_sql.xml"/>
+    <file path="scheduler_sql_db2.xml"/>
+    <file path="scheduler_sql_microsoft_sql_server.xml"/>
+    <file path="scheduler_sql_mysql.xml"/>
+    <file path="scheduler_sql_oracle.xml"/>
+    <file path="scheduler_sql_postgresql.xml"/>
+    <file path="scheduler_sql_sybase.xml"/>
     <file path="script_language_javascript.xml"/>
     <file path="service.xml"/>
     <file path="settings.xml"/>

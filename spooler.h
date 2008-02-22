@@ -173,8 +173,18 @@ namespace directory_observer
 
 namespace folder
 {
+    enum   Which_configuration_directory;
     struct File_based;
 }
+using namespace folder;
+
+
+namespace include
+{
+    struct Include_register;
+    struct Has_includes;
+};
+using namespace include;
 
 
 namespace lock
@@ -245,6 +255,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_wait.h"
 #include "path.h"
 #include "directory_observer.h"
+#include "include.h"
 #include "folder.h"
 #include "scheduler_script.h"
 #include "spooler_communication.h"
@@ -615,9 +626,9 @@ struct Spooler : Object,
     file::File_path            _configuration_file_path;            // -config=
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
-    file::File_path            _configuration_directory;
-    bool                       _configuration_directory_as_option_set;
-    file::File_path            _configuration_cache_directory;          // Für Dateien der zentralen Konfiguration
+    file::File_path            _local_configuration_directory;
+    bool                       _local_configuration_directory_as_option_set;
+    file::File_path            _cache_configuration_directory;          // Für Dateien der zentralen Konfiguration
     Absolute_path              _configuration_start_job_after_added;
     Absolute_path              _configuration_start_job_after_modified;
     Absolute_path              _configuration_start_job_after_deleted;

@@ -18,7 +18,8 @@ const char                      folder_separator            = '/';
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
 :
     file_based_subsystem<Folder>( scheduler, this, type_folder_subsystem ),
-    _zero_(this+1)
+    _zero_(this+1),
+    _configurations(confdir__max+1)
   //_directory_watch_interval( directory_watch_interval_max )
 {
 }
@@ -38,8 +39,11 @@ Folder_subsystem::~Folder_subsystem()
 
 void Folder_subsystem::close()
 {
-    if( _live_directory_observer  )  _live_directory_observer ->close();
-    if( _cache_directory_observer )  _cache_directory_observer->close();
+    Z_FOR_EACH( vector<Configuration>, _configurations, c )
+    {
+        if( c->_directory_observer  )  c->_directory_observer->close();
+    }
+
     _subsystem_state = subsys_stopped;
 
     if( _root_folder )  
@@ -54,10 +58,10 @@ void Folder_subsystem::close()
 
 void Folder_subsystem::initialize_cache_directory()
 {
-    if( !_cache_directory_observer )
+    if( !_configurations[ confdir_cache ]._directory_observer )
     {
-        _cache_directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_cache_directory ) );
-        _cache_directory_observer->directory_tree()->set_is_cache( true );
+        _configurations[ confdir_cache ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_cache_configuration_directory ) );
+        _configurations[ confdir_cache ]._directory_observer->directory_tree()->set_is_cache( true );
     }
 }
 
@@ -78,14 +82,14 @@ bool Folder_subsystem::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
 
-    if( !_spooler->_configuration_directory.exists() )
+    if( !_spooler->_local_configuration_directory.exists() )
     {
-        log()->warn( message_string( "SCHEDULER-895", _spooler->_configuration_directory ) );
+        log()->warn( message_string( "SCHEDULER-895", _spooler->_local_configuration_directory ) );
     }
     else
     {
-        _live_directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_directory ) );
-        _live_directory_observer->register_directory_handler( this );
+        _configurations[ confdir_local ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_local_configuration_directory ) );
+        _configurations[ confdir_local ]._directory_observer->register_directory_handler( this );
     }
 
     _root_folder->load();
@@ -100,16 +104,15 @@ bool Folder_subsystem::subsystem_activate()
 {
     bool result = false;
 
-    if( _cache_directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
+    if( _configurations[ confdir_cache ]._directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
     {
         //_cache_directory_observer->activate();
         result = true;
     }
 
-    if( _live_directory_observer )
+    if( _configurations[ confdir_local ]._directory_observer )
     {
-        _live_directory_observer->activate();
-        //_live_directory_observer->run_handler();
+        _configurations[ confdir_local ]._directory_observer->activate();
         result = true;
     }
 
@@ -123,12 +126,12 @@ bool Folder_subsystem::subsystem_activate()
     return result;
 }
 
-//----------------------------------------------Folder_subsystem::merged_cache_and_live_directories
+//---------------------------------------------Folder_subsystem::merged_cache_and_local_directories
 
-ptr<Directory> Folder_subsystem::merged_cache_and_live_directories()
+ptr<Directory> Folder_subsystem::merged_cache_and_local_directories()
 {
-    ptr<Directory> result = _cache_directory_observer->directory_tree()->root_directory()->clone();
-    result->merge_new_entries( _live_directory_observer->directory_tree()->root_directory() );
+    ptr<Directory> result = _configurations[ confdir_cache ]._directory_observer->directory_tree()->root_directory()->clone();
+    result->merge_new_entries( _configurations[ confdir_local ]._directory_observer->directory_tree()->root_directory() );
 
     return result;
 }
@@ -145,7 +148,7 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 bool Folder_subsystem::on_handle_directory( directory_observer::Directory_observer* )
 {
-    //Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _live_directory_observer->directory_tree()->directory_path() << "\n" );
+    //Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _local_directory_observer->directory_tree()->directory_path() << "\n" );
 
     handle_folders();
     
@@ -191,25 +194,25 @@ bool Folder_subsystem::handle_folders( double minimum_age )
         {
             ptr<Directory> directory;
             
-            if( _live_directory_observer )
+            if( _configurations[ confdir_local ]._directory_observer )
             {
-                directory = _live_directory_observer->directory_tree()->root_directory();
+                directory = _configurations[ confdir_local ]._directory_observer->directory_tree()->root_directory();
 
                 Directory::Read_flags read_flags = subsystem_state() == subsys_active? Directory::read_subdirectories
                                                                                      : Directory::read_subdirectories_suppress_aging;   // Beim ersten Mal neue Dateien nicht altern lassen, sondern sofort lesen
                 directory->read( read_flags, 0.0 );     
             }
 
-            if( _cache_directory_observer )
+            if( _configurations[ confdir_cache ]._directory_observer )
             {
-                Directory* cache_dir = _cache_directory_observer->directory_tree()->root_directory();
+                Directory* cache_dir = _configurations[ confdir_cache ]._directory_observer->directory_tree()->root_directory();
 
                 // Die Dateien aus dem Cache lassen wir nicht altern.
                 // a) überflüssig, weil der Scheduler selbst die Dateien erzeugt hat, sie werden nicht gleichzeitig geschrieben und gelesen
                 // b) damit beim Start des Scheduler die vorrangigen cache-Dateien sofort gelesen werden (sonst würde in den ersten zwei Sekunden nur das live-Verzeichnis gelten)
 
                 cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched() weil kein activate())
-                if( _live_directory_observer )  directory = merged_cache_and_live_directories();
+                if( _configurations[ confdir_local ]._directory_observer )  directory = merged_cache_and_local_directories();
                                           else  directory = cache_dir;
             }
 
@@ -230,8 +233,17 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 void Folder_subsystem::set_signaled( const string& text )
 { 
     // Besser: nur den Verzeichnisbaum signalisieren. Die Verzeichnisse müssen nicht neu gelesen werden.
-    if( _live_directory_observer  )  _live_directory_observer ->set_signaled( text );
-    if( _cache_directory_observer )  _cache_directory_observer->set_signaled( text );
+    if( _configurations[ confdir_local ]._directory_observer )  _configurations[ confdir_local ]._directory_observer->set_signaled( text );
+    if( _configurations[ confdir_cache ]._directory_observer )  _configurations[ confdir_cache ]._directory_observer->set_signaled( text );
+}
+
+//------------------------------------------------------------------Folder_subsystem::configuration
+
+Configuration* Folder_subsystem::configuration( Which_configuration_directory which )
+{
+    Configuration* result = &_configurations[ which ];
+    if( !result )  z::throw_xc( Z_FUNCTION, (int)which );
+    return result;
 }
 
 //-----------------------------------------------------------------------------------Folder::Folder
@@ -396,6 +408,7 @@ bool Folder::adjust_with_directory( Directory* directory )
     
     File_list_map file_list_map;
     bool          something_changed = false;
+  //Absolute_path folder_path       = path();
 
     Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )  file_list_map[ it->second ] = list< const Directory_entry* >();
 
@@ -426,6 +439,7 @@ bool Folder::adjust_with_directory( Directory* directory )
                     // Objekt ermitteln
                     // Wenn Zeitstempel des Pfads im Objekt verschieden ist:
                     //      Objekt ersetzen:  object->reread();     load_from_xml(), set_replacement(), später ersetzen. Aber mehrfache Ersetzung vermeiden, also nur signalisieren.
+                    //folder_subsystem()->Included_files()->check_file( Absolute_path( folder_path, name ), directory_entry->_file_info );
 
                     name = object_name_of_filename( filename );
                     
@@ -1444,6 +1458,13 @@ void File_based::on_dependant_removed( File_based* file_based )
     Pendant::on_dependant_removed( file_based );
 }
 
+//-------------------------------------------------------------------File_based::on_include_changed
+
+void File_based::on_include_changed()
+{
+    int TODO;
+}
+
 //---------------------------------------------------------------------File_based::assert_is_loaded
 
 void File_based::assert_is_initialized()
@@ -1832,6 +1853,20 @@ string File_based::normalized_name() const
 string File_based::normalized_path() const
 { 
     return _file_based_subsystem->normalized_path( path() ); 
+}
+
+//---------------------------------------------------------File_based::configuration_root_directory
+
+File_path File_based::configuration_root_directory() const
+{
+    assert( has_base_file() );
+
+    string result = _is_from_cache? _spooler->_cache_configuration_directory 
+                                  : _spooler->_local_configuration_directory;
+
+    assert( string_begins_with( _base_file_info._path, result ) );
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------File_based::obj_name

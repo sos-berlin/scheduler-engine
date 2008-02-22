@@ -351,7 +351,8 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------------------Com_variable_set::set_dom
 
-void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, const string& variable_element_name )
+void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, 
+                                const string& variable_element_name, File_based* source_file_based )
 {
     if( !params )  return;
 
@@ -362,25 +363,6 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
             if( e.nodeName_is( variable_element_name ) ) 
             {
                 set_variable( e, variable_sets );
-                //string name;
-                //string value;
-
-                //get_variable_name_and_value( e, &name, &value );
-                //
-                //if( variable_sets )
-                //{
-                //    Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
-                //    if( it != variable_sets->end() )
-                //    {
-                //        value = subst_env( value, +it->second );
-                //    }
-                //}
-
-                //Bstr    name_bstr = name;
-                //Variant value_vt = value;
-
-                //hr = put_Var( name_bstr, &value_vt );                       
-                //if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
             else
             if( e.nodeName_is( "copy_params" ) )
@@ -395,24 +377,33 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
             else
             if( e.nodeName_is( "include" )  )
             {
+#ifndef Z_DEBUG
+    int INCLUDE_FEHLT;
+#else
                 string xpath = e.getAttribute( "node" );
 
-                //Include_command include_command ( _spooler, e );
-                //xml::Document_ptr included_doc = include_command.dom_from_content();
-                //
-                //xml::Xpath_nodes nodes = included_doc.select_nodes( xpath );
-                //for( int i = 0; i < nodes.count(); i++ )
-                //{
-                //    if( nodes[i].is_type( xml::ELEMENT_NODE ) )
-                //    {
-                //        xml::Element_ptr ee = nodes[i];
+                Include_command include_command ( *source_file_based, e );
 
-                //        if( ee.nodeName_is( variable_element_name ) ) 
-                //        {
-                //            set_variable( ee, variable_sets );
-                //        }
-                //    }
-                //}
+                try
+                {
+                    xml::Document_ptr included_doc = file::string_from_file( include_command.file_path() );
+
+                    xml::Xpath_nodes nodes = included_doc.select_nodes( xpath );
+                    for( int i = 0; i < nodes.count(); i++ )
+                    {
+                        xml::Element_ptr ee = nodes[i];
+
+                        if( ee.nodeName_is( variable_element_name ) ) 
+                        {
+                            set_variable( ee, variable_sets );
+                        }
+                    }
+
+                    if( source_file_based && include_command.denotes_configuration_file() )
+                        source_file_based->add_include( include_command.path() );
+                }
+                catch( z::Xc& x )  { x.append_text( include_command.file_path() );  throw; }
+#endif
             }
         }
     }
@@ -4134,7 +4125,7 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
     THREAD_LOCK( _lock )
     try
     {
-        string dir = _spooler->_configuration_directory;
+        string dir = _spooler->_local_configuration_directory;
         
         if( string_ends_with( dir, "/" ) ||
             string_ends_with( dir, Z_DIR_SEPARATOR ) )  dir.erase( dir.length() - 1 );

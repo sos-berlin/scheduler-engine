@@ -171,16 +171,44 @@ File_path Directory::file_path() const
     return File_path( _directory_tree->directory_path(), path() );
 }
 
-//---------------------------------------------------------------------------------Directory::entry
+//-------------------------------------------------------------------------Directory::entry_or_null
 
 const Directory_entry* Directory::entry_or_null( const string& name ) const
 {
     Z_FOR_EACH_CONST( Entry_list, _ordered_list, it )  
     {
-        if( it->_file_info->path().name() == name )  return &*it;
+        #ifdef Z_WINDOWS
+            if( stricmp( it->_file_info->path().name().c_str(), name.c_str() ) == 0 )  return &*it;
+        #else
+            if( it->_file_info->path().name() == name )  return &*it;
+        #endif
     }
 
     return NULL;
+}
+
+//-----------------------------------------------------------------Directory::entry_of_path_or_null
+
+const Directory_entry* Directory::entry_of_path_or_null( const File_path& path ) const
+{
+    const Directory_entry* result = NULL;
+
+    int a = 0;
+    while( a < path.length()  &&  is_directory_separator( path[ a ] ) )  a++;       // '/' am Anfang
+
+    int b = a;
+    while( b < path.length()  &&  !is_directory_separator( path[ b ] ) )  b++;
+
+    if( const Directory_entry* entry = entry_or_null( path.substr( a, b - a ) ) )
+    {
+        while( b < path.length()  &&  is_directory_separator( path[ b ] ) )  b++;
+
+        if( b == path.length() )    result = entry;     // Fertig
+        else
+        if( entry->_subdirectory )  result = entry->_subdirectory->entry_of_path_or_null( path.substr( b ) );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------Directory::withdraw_aging_deep

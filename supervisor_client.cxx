@@ -171,14 +171,14 @@ bool Supervisor_client::subsystem_initialize()
     _subsystem_state = subsys_initialized;
 
 
-    if( !_spooler->_configuration_cache_directory.exists() )
+    if( !_spooler->_cache_configuration_directory.exists() )
     {
         #ifdef Z_WINDOWS
-            int err = mkdir( _spooler->_configuration_cache_directory.c_str() );
+            int err = mkdir( _spooler->_cache_configuration_directory.c_str() );
         #else
-            int err = mkdir( _spooler->_configuration_cache_directory.c_str(), 0777 );
+            int err = mkdir( _spooler->_cache_configuration_directory.c_str(), 0777 );
         #endif
-        if( err )  z::throw_errno( errno, "mkdir", _spooler->_configuration_cache_directory.c_str() );
+        if( err )  z::throw_errno( errno, "mkdir", _spooler->_cache_configuration_directory.c_str() );
     }
 
     _spooler->folder_subsystem()->initialize_cache_directory();
@@ -467,7 +467,7 @@ void Supervisor_client_connection::update_directory_structure( const Absolute_pa
     DOM_FOR_EACH_ELEMENT( element, e )
     {
         Absolute_path path      ( directory_path, e.getAttribute( "name" ) );
-        File_path     file_path ( _spooler->_configuration_cache_directory, path );
+        File_path     file_path ( _spooler->_cache_configuration_directory, path );
 
         if( e.nodeName_is( "configuration.directory" ) )
         {
@@ -543,7 +543,7 @@ void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* x
 {
     Folder_directory_lister dir ( _log );
     
-    bool ok = dir.open( _spooler->_configuration_cache_directory, path );
+    bool ok = dir.open( _spooler->_cache_configuration_directory, path );
 
     if( ok )
     {
@@ -569,7 +569,7 @@ void Supervisor_client_connection::write_directory_structure( xml::Xml_writer* x
                 {
                     //if( spooler()->folder_subsystem()->is_valid_extension( extension ) ) 
                     {
-                        File_path file_path       ( spooler()->_configuration_cache_directory, Absolute_path( path, filename ) );
+                        File_path file_path       ( spooler()->_cache_configuration_directory, Absolute_path( path, filename ) );
                         Time      last_write_time ( file_info->last_write_time(), Time::is_utc );
 
                         xml_writer->begin_element( "configuration.file" );
