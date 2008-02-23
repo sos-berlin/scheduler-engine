@@ -173,7 +173,7 @@ namespace directory_observer
 
 namespace folder
 {
-    enum Which_configuration_directory
+    enum Which_configuration
     {
         confdir_none,
         confdir_local,
@@ -181,6 +181,7 @@ namespace folder
         confdir__max = confdir_cache
     };
 
+    struct Configuration;
     struct File_based;
 }
 using namespace folder;
@@ -633,13 +634,13 @@ struct Spooler : Object,
     file::File_path            _configuration_file_path;            // -config=
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
-    file::File_path            _local_configuration_directory;
-    bool                       _local_configuration_directory_as_option_set;
-    file::File_path            _cache_configuration_directory;          // Für Dateien der zentralen Konfiguration
+
+    vector<file::File_path>    _configuration_directories;
+    vector<bool>               _configuration_directories_as_option_set;
     Absolute_path              _configuration_start_job_after_added;
     Absolute_path              _configuration_start_job_after_modified;
     Absolute_path              _configuration_start_job_after_deleted;
-    file::File_path            _central_configuration_directory;
+    file::File_path            _central_configuration_directory;         // Für den Supervisor zur Replikation
     bool                       _central_configuration_directory_as_option_set;
 
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)

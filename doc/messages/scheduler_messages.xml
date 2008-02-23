@@ -736,7 +736,7 @@
                 <title>XML-Element &lt;variable> erwartet</title>
             </text>
             <text xml:lang="en">
-                <title>Expecting XML element &lt;variable></title>
+                <title>Expecting XML element &lt;<p1/>></title>
             </text>
         </message>
 

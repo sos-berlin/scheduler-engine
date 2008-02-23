@@ -34,7 +34,7 @@ struct Folder_directory_lister : file::Directory_lister
 struct Directory_tree : Scheduler_object,
                         Object
 {
-                                Directory_tree              ( Scheduler*, const file::File_path& directory_path );
+                                Directory_tree              ( Scheduler*, const file::File_path& directory_path, Which_configuration );
                                ~Directory_tree              ();
 
     file::File_path             directory_path              () const                                { return _directory_path; }
@@ -49,8 +49,7 @@ struct Directory_tree : Scheduler_object,
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
     void                        withdraw_aging              ();
-    bool                        is_cache                    () const                                { return _is_cache; }
-    void                    set_is_cache                    ( bool b )                              { _is_cache = b; }
+    Which_configuration         which_configuration         () const                                { return _which_configuration; }
     void                    set_is_watched                  ()                                      { _is_watched = true; }
     bool                        is_watched                  () const                                { return _is_watched; }
 
@@ -60,7 +59,7 @@ struct Directory_tree : Scheduler_object,
     ptr<Directory>             _root_directory;
     double                     _last_change_at;
     double                     _refresh_aged_entries_at;
-    bool                       _is_cache;                   // Verzeichnis des Caches mit der zentralen Konfiguration
+    Which_configuration        _which_configuration;        // cache/ oder live/ ?
     bool                       _is_watched;
 };
 
@@ -82,7 +81,7 @@ struct Directory_entry
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
     double                     _is_aging_until;
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
-    bool                       _is_from_cache;
+    Which_configuration        _which_configuration;
     int                        _version;
     int                        _duplicate_version;          // Für merged_new_entries() und Meldung SCHEDULER-703
     string                     _normalized_name;
@@ -144,11 +143,11 @@ struct Directory_observer : Scheduler_object,
 {
     struct Directory_handler
     {
-        virtual bool            on_handle_directory          ( Directory_observer* )                 = 0;
+        virtual bool            on_handle_directory         ( Directory_observer* )                 = 0;
     };
 
 
-                                Directory_observer          ( Scheduler*, const File_path& directory );
+                                Directory_observer          ( Scheduler*, const File_path& directory, Which_configuration w );
                                ~Directory_observer          ();
 
     // Async_operation

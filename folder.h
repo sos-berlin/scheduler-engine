@@ -139,7 +139,7 @@ struct File_based : Scheduler_object,
 
     // Has_includes
     Spooler*                    spooler                     () const                                { return Scheduler_object::spooler(); }
-    void                        on_include_changed          ();
+    Which_configuration         which_configuration         () const                                { return _which_configuration; }
 
 
     void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );
@@ -245,7 +245,7 @@ struct File_based : Scheduler_object,
     int                        _duplicate_version;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
-    bool                       _is_from_cache;              // Aus dem Cache, also zentral konfiguriert (File_based darf nicht lokal überschrieben werden)
+    Which_configuration        _which_configuration;        // Aus live/ oder aus cache/ ?
     ptr<File_based>            _replacement;
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
@@ -666,12 +666,12 @@ struct file_based_subsystem : File_based_subsystem
     int                        _file_based_map_version;
 };
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------Configuration
 
 struct Configuration
 {
     ptr<directory_observer::Directory_observer>  _directory_observer;                         // Konfigurationsverzeichnis
-    ptr<Include_register>                        _include_register;
+  //ptr<Include_register>                        _include_register;
 };
 
 //---------------------------------------------------------------------------------Folder_subsystem
@@ -713,7 +713,7 @@ struct Folder_subsystem : Object,
     Folder*                     root_folder                 () const                                { return _root_folder; }
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
     bool                        is_valid_extension          ( const string& );
-    Configuration*              configuration               ( Which_configuration_directory );
+    Configuration*              configuration               ( Which_configuration );
 
     void                    set_signaled                    ( const string& text );
 

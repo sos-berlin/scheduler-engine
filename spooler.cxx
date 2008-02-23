@@ -650,7 +650,9 @@ Spooler::Spooler()
     _validate_xml(true),
     _environment( variable_set_from_environment() ),
     _holidays(this),
-    _next_process_id(1)
+    _next_process_id(1),
+    _configuration_directories(confdir__max+1),
+    _configuration_directories_as_option_set(confdir__max+1)
 {
     Z_DEBUG_ONLY( self_test() );
 
@@ -1504,21 +1506,21 @@ void Spooler::load_arg()
     }
 
 
-    if( _local_configuration_directory == "" )
+    if( _configuration_directories[ confdir_local ] == "" )
     {
         if( file::File_info( _configuration_file_path ).is_directory() )
         {
-            _local_configuration_directory = File_path( _configuration_file_path, "" );
-            _local_configuration_directory_as_option_set = true;
+            _configuration_directories[ confdir_local ] = File_path( _configuration_file_path, "" );
+            _configuration_directories_as_option_set[ confdir_local ] = true;
             _configuration_file_path = File_path( _configuration_file_path, "scheduler.xml" );
         }
         else
         {
-            _local_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
+            _configuration_directories[ confdir_local ] = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
         }
     }
 
-    _cache_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
+    _configuration_directories[ confdir_cache ] = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
@@ -1660,7 +1662,7 @@ void Spooler::update_console_title( int level )
             {
                 title << name() << "  ";
 
-                if( _local_configuration_directory_as_option_set )  title << _local_configuration_directory;
+                if( _configuration_directories_as_option_set[ confdir_local ] )  title << _configuration_directories[ confdir_local ];
                                                         else  title << _configuration_file_path;
                 title << "  pid=" << getpid() << "  ";
                 title << state_name();

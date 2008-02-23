@@ -282,6 +282,8 @@ void Absolute_path::set_simplified_dot_dot_path( const string& path )
             p = part_list.erase( p );
             p = part_list.erase( p );
         }
+        else 
+            p++;
     }
 
     set_path( "/" + join( "/", part_list ) );

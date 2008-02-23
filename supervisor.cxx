@@ -448,7 +448,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     set_async_delay( double_time_max );   // UDP-Nachricht nicht mehr wiederholen
 
 
-    ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path() ) );
+    ptr<Directory_tree> empty_directory_tree = Z_NEW( Directory_tree( _spooler, File_path(), confdir_none ) );
     ptr<Directory>      directory;
     Directory*          all_directory        = NULL;
     Directory*          my_directory         = NULL;
@@ -770,7 +770,7 @@ Remote_configurations::Remote_configurations( Supervisor* supervisor, const File
     _supervisor(supervisor)
 {
     //_directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
-    _directory_observer = Z_NEW( Directory_observer( spooler(), directory_path ) );
+    _directory_observer = Z_NEW( Directory_observer( spooler(), directory_path, confdir_none ) );
     _directory_observer->register_directory_handler( this );
 }
 

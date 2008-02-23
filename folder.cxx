@@ -60,8 +60,8 @@ void Folder_subsystem::initialize_cache_directory()
 {
     if( !_configurations[ confdir_cache ]._directory_observer )
     {
-        _configurations[ confdir_cache ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_cache_configuration_directory ) );
-        _configurations[ confdir_cache ]._directory_observer->directory_tree()->set_is_cache( true );
+        _configurations[ confdir_cache ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_directories[ confdir_cache ], confdir_cache ) );
+      //_configurations[ confdir_cache ]._include_register   = Z_NEW( Include_register );
     }
 }
 
@@ -82,14 +82,15 @@ bool Folder_subsystem::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
 
-    if( !_spooler->_local_configuration_directory.exists() )
+    if( !_spooler->_configuration_directories[ confdir_local ].exists() )
     {
-        log()->warn( message_string( "SCHEDULER-895", _spooler->_local_configuration_directory ) );
+        log()->warn( message_string( "SCHEDULER-895", _spooler->_configuration_directories[ confdir_local ] ) );
     }
     else
     {
-        _configurations[ confdir_local ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_local_configuration_directory ) );
+        _configurations[ confdir_local ]._directory_observer = Z_NEW( Directory_observer( spooler(), _spooler->_configuration_directories[ confdir_local ], confdir_local ) );
         _configurations[ confdir_local ]._directory_observer->register_directory_handler( this );
+      //_configurations[ confdir_local ]._include_register   = Z_NEW( Include_register );
     }
 
     _root_folder->load();
@@ -239,7 +240,7 @@ void Folder_subsystem::set_signaled( const string& text )
 
 //------------------------------------------------------------------Folder_subsystem::configuration
 
-Configuration* Folder_subsystem::configuration( Which_configuration_directory which )
+Configuration* Folder_subsystem::configuration( Which_configuration which )
 {
     Configuration* result = &_configurations[ which ];
     if( !result )  z::throw_xc( Z_FUNCTION, (int)which );
@@ -792,7 +793,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
                                            current_file_based  &&
                                            ( current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
-                                             current_file_based->name() != name );      // Objekt ist unter anderer Großschreibung bekannt?
+                                             current_file_based->name() != name )  ||       // Objekt ist unter anderer Großschreibung bekannt?
+                                             current_file_based->include_has_changed();     // <include> geändert?
 
                 if( !is_new  &&  !timestamp_changed )
                 {
@@ -831,7 +833,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         file_based->set_folder_path( folder()->path() );
                         file_based->set_name( name );
                         file_based->fix_name();
-                        file_based->_is_from_cache = directory_entry->_is_from_cache;
+                        file_based->_which_configuration = directory_entry->_which_configuration;
 
                         ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
@@ -970,7 +972,7 @@ void Typed_folder::ignore_duplicate_configuration_file( File_based* current_file
                 file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Geänderte lokale Datei wird ignoriert
             }
             else
-            //if( current_file_based  &&  !current_file_based->_is_from_cache )
+            //if( current_file_based  &&  !current_file_based->_which_configuration )
             //{
             //    file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Bereits gelesene lokale Datei wird durch zentrale ersetzt
             //}
@@ -1458,13 +1460,6 @@ void File_based::on_dependant_removed( File_based* file_based )
     Pendant::on_dependant_removed( file_based );
 }
 
-//-------------------------------------------------------------------File_based::on_include_changed
-
-void File_based::on_include_changed()
-{
-    int TODO;
-}
-
 //---------------------------------------------------------------------File_based::assert_is_loaded
 
 void File_based::assert_is_initialized()
@@ -1526,8 +1521,8 @@ void File_based::set_replacement( File_based* replacement )
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
     
     if( replacement  &&  
-        _is_from_cache  &&  
-        !replacement->_is_from_cache &&
+        _which_configuration == confdir_cache &&  
+        replacement->_which_configuration != confdir_cache &&
         _base_file_info._path.exists() )    // Außer, die zentrale Datei ist gelöscht
     {
         z::throw_xc( "SCHEDULER-460", subsystem()->object_type_name() );  // Original ist zentral konfiguriert, aber Ersatz nicht
@@ -1861,8 +1856,8 @@ File_path File_based::configuration_root_directory() const
 {
     assert( has_base_file() );
 
-    string result = _is_from_cache? _spooler->_cache_configuration_directory 
-                                  : _spooler->_local_configuration_directory;
+    string result = _which_configuration == confdir_cache? _spooler->_configuration_directories[ confdir_cache ] 
+                                                         : _spooler->_configuration_directories[ confdir_local ];
 
     assert( string_begins_with( _base_file_info._path, result ) );
 
