@@ -512,7 +512,7 @@ static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, v
 {
     Z_LOGI2( "scheduler", "\nService HandlerEx(" << string_from_handler_control(dwControl) << "," << 
           ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) << "," <<
-          event_data << ")\n" )
+          event_data << ")\n" );
 
     DWORD result = ERROR_CALL_NOT_IMPLEMENTED;
 

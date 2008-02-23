@@ -11,7 +11,7 @@ using namespace zschimmer::file;
 
 //-----------------------------------------------------------------Include_command::Include_command
 
-Include_command::Include_command( const File_based* source_file_based, const xml::Element_ptr& element )
+Include_command::Include_command( Scheduler* scheduler, const File_based* source_file_based, const xml::Element_ptr& element )
 :
     _zero_(this+1)
 {
@@ -42,9 +42,13 @@ Include_command::Include_command( const File_based* source_file_based, const xml
         _file_path = File_path( configuration_root_directory, path );
     }
     else
+    if( scheduler )
+    {
+        _file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
+    }
+    else
     {
         z::throw_xc( "SCHEDULER-462" );     // live_file="..." hier nicht möglich
-        //_file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
     }
 }
 

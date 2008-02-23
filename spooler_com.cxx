@@ -382,7 +382,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
 #else
                 string xpath = e.getAttribute( "node" );
 
-                Include_command   include_command ( source_file_based, e );
+                Include_command   include_command ( (Scheduler*)NULL, source_file_based, e );
                 xml::Document_ptr included_doc   = include_command.add_include_and_read_content( source_file_based );      // Registriert <include>
                 xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
 

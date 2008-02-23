@@ -11,13 +11,13 @@ namespace include {
 
 struct Include_command
 {
-                                Include_command             ( const File_based*, const xml::Element_ptr& );
+                                Include_command             ( Scheduler*, const File_based*, const xml::Element_ptr& );
 
     bool                        denotes_configuration_file  () const                                { return !_path.empty(); }
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
     string                      add_include_and_read_content( File_based* source_file_based );
-  //string                      read_content                ();
+    string                      read_content                ()                                      { return add_include_and_read_content( NULL ); }
   //file::File_info*            file_info                   ();
 
   private:

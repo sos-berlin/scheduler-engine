@@ -1302,11 +1302,13 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
             {
                 if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-390", max_include_nesting, "<holidays>" );
 
-                File_path file = subst_env( e2.getAttribute( "file" ) );
+                Include_command include_command ( _spooler, (File_based*)NULL, e );
+                File_path       file            = include_command.file_path();
 
                 try
                 {
-                    if( !file.is_absolute_path() )  file.prepend_directory( _spooler->_configuration_file_path.directory() );
+                    if( !include_command.denotes_configuration_file()  &&   // <include file="...">
+                        !file.is_absolute_path() )  file.prepend_directory( _spooler->_configuration_file_path.directory() );
                     
                     string xml_text = string_from_file( file );
                     Z_LOG2( "scheduler", Z_FUNCTION << "  " << xml_text << "\n" );
