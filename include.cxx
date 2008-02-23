@@ -15,8 +15,8 @@ Include_command::Include_command( const File_based* source_file_based, const xml
 :
     _zero_(this+1)
 {
-    string file      = element.getAttribute( "file"      );
-    string live_file = element.getAttribute( "live_file" );
+    string file      = subst_env( element.getAttribute( "file"      ) );
+    string live_file = subst_env( element.getAttribute( "live_file" ) );
 
     if( file == ""  &&  live_file == "" )  z::throw_xc( "SCHEDULER-231", "live_file" );
     if( file != ""  &&  live_file != "" )  z::throw_xc( "SCHEDULER-442", "file", "live_file" );

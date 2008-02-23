@@ -732,11 +732,8 @@
         </message-->
 
         <message code="SCHEDULER-182">
-            <text xml:lang="de">
-                <title>XML-Element &lt;variable> erwartet</title>
-            </text>
             <text xml:lang="en">
-                <title>Expecting XML element &lt;<p1/>></title>
+                <title>Expecting XML element &lt;<p1/>> instead of &lt;<p2/>></title>
             </text>
         </message>
 
@@ -4105,7 +4102,7 @@
         
         <message code="SCHEDULER-892">
             <text xml:lang="en">
-                <title>Changed configuration file '<p1/>' (<p2>timestamp</p2>) is going to replace this <p3>type</p3></title>
+                <title>This <p3>type</p3> is going to be replaced due to changed configuration file '<p1/>' (<p2>timestamp</p2>)</title>
             </text>
         </message>
         

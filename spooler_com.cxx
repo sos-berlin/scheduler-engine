@@ -389,7 +389,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
                 for( int i = 0; i < nodes.count(); i++ )
                 {
                     xml::Element_ptr ee = nodes[i];
-                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-182", variable_element_name );
+                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-182", variable_element_name, ee.nodeName() );
                     set_variable( ee, variable_sets );
                 }
 #endif
@@ -868,7 +868,7 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
                 if( FAILED( hr ) )  break;
             }
             else
-                z::throw_xc( "SCHEDULER-182", "param" );
+                z::throw_xc( "SCHEDULER-182", "param", e.nodeName() );
         }
 
     }
