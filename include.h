@@ -11,13 +11,14 @@ namespace include {
 
 struct Include_command
 {
-                                Include_command             ( const File_based&, const xml::Element_ptr& );
+                                Include_command             ( const File_based*, const xml::Element_ptr& );
 
     bool                        denotes_configuration_file  () const                                { return !_path.empty(); }
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
-    string                      read_content                ();
-    file::File_info*            file_info                   () const;
+    string                      add_include_and_read_content( File_based* source_file_based );
+  //string                      read_content                ();
+  //file::File_info*            file_info                   ();
 
   private:
     Fill_zero                  _zero_;
@@ -42,7 +43,7 @@ struct Has_includes       // <include live_file="...">
     void                        add_include                 ( const Absolute_path&, file::File_info* );
     void                        remove_include              ( const Absolute_path& );
     void                        remove_includes             ();
-    bool                        include_has_changed         ();
+    file::File_info*            changed_included_file_info  ();
     
   private:
     typedef stdext::hash_map< string, ptr<file::File_info> >   Include_map;

@@ -382,25 +382,16 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
 #else
                 string xpath = e.getAttribute( "node" );
 
-                Include_command include_command ( *source_file_based, e );
+                Include_command   include_command ( source_file_based, e );
+                xml::Document_ptr included_doc   = include_command.add_include_and_read_content( source_file_based );      // Registriert <include>
+                xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
 
-                try
+                for( int i = 0; i < nodes.count(); i++ )
                 {
-                    xml::Document_ptr included_doc = include_command.read_content();        // Setzt include_command.file_info()
-
-                    xml::Xpath_nodes nodes = included_doc.select_nodes( xpath );
-                    for( int i = 0; i < nodes.count(); i++ )
-                    {
-                        xml::Element_ptr ee = nodes[i];
-
-                        if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-182", variable_element_name );
-                        set_variable( ee, variable_sets );
-                    }
-
-                    if( source_file_based && include_command.denotes_configuration_file() )
-                        source_file_based->add_include( include_command.path(), include_command.file_info() );  // file_info() ist von read_content() gesetzt worden
+                    xml::Element_ptr ee = nodes[i];
+                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-182", variable_element_name );
+                    set_variable( ee, variable_sets );
                 }
-                catch( z::Xc& x )  { x.append_text( include_command.file_path() );  throw; }
 #endif
             }
         }

@@ -769,7 +769,6 @@ Remote_configurations::Remote_configurations( Supervisor* supervisor, const File
     _zero_(this+1),
     _supervisor(supervisor)
 {
-    //_directory_tree = Z_NEW( Directory_tree( spooler(), directory_path ) );
     _directory_observer = Z_NEW( Directory_observer( spooler(), directory_path, confdir_none ) );
     _directory_observer->register_directory_handler( this );
 }

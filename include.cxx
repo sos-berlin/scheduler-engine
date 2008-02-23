@@ -11,7 +11,7 @@ using namespace zschimmer::file;
 
 //-----------------------------------------------------------------Include_command::Include_command
 
-Include_command::Include_command( const File_based& source_file_based, const xml::Element_ptr& element )
+Include_command::Include_command( const File_based* source_file_based, const xml::Element_ptr& element )
 :
     _zero_(this+1)
 {
@@ -27,39 +27,84 @@ Include_command::Include_command( const File_based& source_file_based, const xml
     #endif
 
     
-    if( file != "" )
+    if( file != "" )    // file="..."
     {
         _file_path = file;
     }
+    else    // live_file="..."
+    if( source_file_based )
+    {
+        Path path = source_file_based->path().folder_path() + "/" + live_file;
+        _path.set_simplified_dot_dot_path( path );
+
+        string configuration_root_directory = source_file_based->has_base_file()? source_file_based->configuration_root_directory() 
+                                                                                : source_file_based->spooler()->_configuration_directories[ confdir_local ];
+        _file_path = File_path( configuration_root_directory, path );
+    }
     else
     {
-        assert( source_file_based.has_base_file() );
-        _path.set_simplified_dot_dot_path( source_file_based.path().folder_path() + "/" + live_file );
-
-        string configuration_root_directory = source_file_based.has_base_file()? source_file_based.configuration_root_directory() 
-                                                                               : source_file_based.spooler()->_configuration_directories[ confdir_local ];
-        _file_path = File_path( configuration_root_directory, _path );
+        z::throw_xc( "SCHEDULER-462" );     // live_file="..." hier nicht möglich
+        //_file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
     }
+}
+
+//----------------------------------------------------Include_command::add_include_and_read_content
+    
+string Include_command::add_include_and_read_content( File_based* source_file_based )
+{
+    file::Mapped_file file;
+
+    if( file.try_open( file_path(), "rb" ) )
+    {
+        ptr<file::File_info> file_info = Z_NEW( file::File_info() );
+        file_info->set_path( file_path() );
+
+        file_info->call_fstat( file.file_no() );
+        file_info->last_write_time();      // Jetzt diesen Wert holen
+        _file_info = file_info;
+    }
+
+
+    if( source_file_based  &&  denotes_configuration_file() )
+    {
+        source_file_based->add_include( path(), _file_info );       // Auch wenn Datei sich nicht öffnen lässt
+    }
+
+    file.check_error( "open" );
+
+    return string( (const char*)file.map(), file.map_length() );
 }
 
 //--------------------------------------------------------------------Include_command::read_content
     
-string Include_command::read_content()
-{
-    _file_info = Z_NEW( file::File_info( file_path() ) );
-    _file_info->last_write_time();      // Jetzt diesen Wert holen
-
-    file::Mapped_file file ( file_path(), "rb" );
-    return string( (const char*)file.map(), file.map_length() );
-}
+//string Include_command::read_content()
+//{
+//    file::Mapped_file file ( file_path(), "rb" );
+//    return string( (const char*)file.map(), file.map_length() );
+//}
 
 //-----------------------------------------------------------------------Include_command::file_info
 
-file::File_info* Include_command::file_info() const
-{
-    assert( _file_info );
-    return _file_info;
-}
+//file::File_info* Include_command::file_info() 
+//{
+//    if( !_file_info )
+//    {
+//        ptr<file::File_info> file_info = Z_NEW( file::File_info() );
+//        file_info->set_path( file_path() );
+//
+//        try
+//        {
+//            if( file_info->try_call_stat() )    // Datei ist da?
+//            {
+//                file_info->last_write_time();      // Jetzt diesen Wert holen
+//                _file_info = file_info;
+//            }
+//        }
+//        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }      // Für andere Fehler als ENOENT
+//    }
+//
+//    return _file_info;
+//}
 
 //-----------------------------------------------------------------------Has_includes::Has_includes
     
@@ -88,9 +133,11 @@ Has_includes::~Has_includes()
 
 void Has_includes::add_include( const Absolute_path& path, file::File_info* file_info )
 {
+    assert( !path.empty() );
+
     _configuration = spooler()->folder_subsystem()->configuration( which_configuration() );
 
-    _include_map[ path ] = file_info;
+    _include_map[ path ] = file_info;   // NULL, wenn Datei nicht da ist
     //_configuration->_include_register->add_include( this, path );
 }
 
@@ -121,9 +168,9 @@ void Has_includes::remove_includes()
 
 //----------------------------------------------------------------Has_includes::include_has_changed
 
-bool Has_includes::include_has_changed()
+file::File_info* Has_includes::changed_included_file_info()
 {
-    bool result = false;
+    file::File_info* result = NULL;
 
     if( _configuration )
     {
@@ -134,13 +181,17 @@ bool Has_includes::include_has_changed()
 
             if( const Directory_entry* directory_entry = _configuration->_directory_observer->directory_tree()->root_directory()->entry_of_path_or_null( path ) )
             {
-                if( !directory_entry->is_aging()  &&
-                    directory_entry->_file_info->last_write_time() != file_info->last_write_time() )
+                if( !directory_entry->is_aging() )
                 {
-                    result = true;
-                    break;
+                    if( !file_info )  result = directory_entry->_file_info;  // Datei ist neu hinzugekommen
+                    else
+                    if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  result = directory_entry->_file_info;  // Datei geändert
                 }
             }
+            else
+            if( file_info )  result = file_info;      // Datei ist gelöscht (oder sollte das ignoriert werden, sodass der Job weiterläuft?)
+
+            if( result )  break;
         }
     }
 

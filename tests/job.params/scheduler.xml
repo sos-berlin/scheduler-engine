@@ -8,14 +8,22 @@
         <jobs>
             <job name="no_folder">
 
+                <params>
+                    <param name="a" value="job"/>
+                    <include live_file="/x/../a.params.xml" node="params/param"/>
+                    <!--include file="b.params.xml"      node="params/param"/-->
+                    <param name="b" value="job"/>
+                </params>
+
                 <script language="JavaScript">
-                <![CDATA[
+                    <![CDATA[
 
-spooler_log.info( "spooler.configuration_directory='"         + spooler.configuration_directory + "'" );
-//spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
-spooler_log.info( "spooler_job.configuration_directory='"         + spooler_job.configuration_directory + "'" );
+var task_params = spooler_task.params;
+spooler_log.info( "a=" + task_params( "a" ) );
+spooler_log.info( "b=" + task_params( "b" ) );
+spooler_log.info( "c=" + task_params( "c" ) );
 
-                ]]>
+                    ]]>
                 </script>
 
                 <run_time once="yes"/>

@@ -3,7 +3,7 @@
 
     <params>
         <param name="a" value="job"/>
-        <include live_file="a.params.xml" node="params/param"/>
+        <include live_file="/x/../a.params.xml" node="params/param"/>
         <!--include file="b.params.xml"      node="params/param"/-->
         <param name="b" value="job"/>
     </params>

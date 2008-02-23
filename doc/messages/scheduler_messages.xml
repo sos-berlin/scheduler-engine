@@ -2817,6 +2817,12 @@
                 <title>Path reaches beyond root (too many '..'): <p1/></title>
             </text>
         </message>
+
+        <message code="SCHEDULER-462">
+            <text xml:lang="en">
+                <title>Attribute live_file is possibly only in file based objects. Use attribute file</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

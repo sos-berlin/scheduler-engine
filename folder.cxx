@@ -775,6 +775,8 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                                          old_file_based->_file_is_removed;     // Datei ist wieder aufgetaucht?
     File_path       file_path;
 
+    assert( is_new || current_file_based );
+
     if( old_file_based )  
     {
         if( !old_file_based->_file_is_removed )  old_file_based->_remove_xc = zschimmer::Xc();      // Datei ist wieder da
@@ -789,12 +791,21 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
         {
             if( !directory_entry->is_aging() )
             {
-                string name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
-                bool   timestamp_changed = is_new  ||                 // Dieselbe Datei ist wieder aufgetaucht
-                                           current_file_based  &&
-                                           ( current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
-                                             current_file_based->name() != name )  ||       // Objekt ist unter anderer Großschreibung bekannt?
-                                             current_file_based->include_has_changed();     // <include> geändert?
+                string               name              = Folder::object_name_of_filename( directory_entry->_file_info->path().name() );
+                ptr<file::File_info> changed_file_info = directory_entry->_file_info;
+                bool                 timestamp_changed = false;
+                
+                if( !is_new )
+                {
+                    timestamp_changed = current_file_based->_base_file_info._last_write_time != directory_entry->_file_info->last_write_time()  ||
+                                        current_file_based->name() != name;   // Objekt ist unter anderer Großschreibung bekannt?
+
+                    if( !timestamp_changed )
+                    {
+                        changed_file_info = current_file_based->changed_included_file_info();       // <include> geändert?
+                        if( changed_file_info )  timestamp_changed = true;
+                    }
+                }
 
                 if( !is_new  &&  !timestamp_changed )
                 {
@@ -803,13 +814,11 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 else
                 {
                     string content;
-                  //Md5    content_md5;
                     z::Xc  content_xc;
-                    
+
                     try
                     {
                         content = string_from_file( directory_entry->_file_info->path() );
-                        //content_md5 = md5( content );
                     }
                     catch( exception& x ) { content_xc = x; }
 
@@ -828,7 +837,6 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 
                         file_based = subsystem()->call_new_file_based();
                         file_based->set_file_based_state( File_based::s_undefined );    // Erst set_dom() definiert das Objekt
-                      //file_based->_md5        = content_md5;
                         file_based->set_base_file_info( Base_file_info( *directory_entry ) );
                         file_based->set_folder_path( folder()->path() );
                         file_based->set_name( name );
@@ -837,20 +845,19 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
 
                         ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
-                        //string rel_path = folder()->make_path( name );
                         Time   t; 
-                        t.set_utc( directory_entry->_file_info->last_write_time() );
+                        t.set_utc( changed_file_info->last_write_time() );
 
                         if( old_file_based ) 
                         {
-                            old_file_based->log()->info( message_string( "SCHEDULER-892", directory_entry->_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            old_file_based->log()->info( message_string( "SCHEDULER-892", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
                             old_file_based->handle_event( File_based::bfevt_modified ); 
                             old_file_based->set_replacement( file_based );
                             current_file_based = NULL;
                         }
                         else
                         {
-                            file_based->log()->info( message_string( "SCHEDULER-891", directory_entry->_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
+                            file_based->log()->info( message_string( "SCHEDULER-891", changed_file_info->path(), t.as_string(), subsystem()->object_type_name() ) );
                             file_based->handle_event( File_based::bfevt_added );
 
                             add_file_based( file_based );
