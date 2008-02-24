@@ -733,7 +733,7 @@
 
         <message code="SCHEDULER-182">
             <text xml:lang="en">
-                <title>Expecting XML element &lt;<p1/>> instead of &lt;<p2/>></title>
+                <title>Unexpected XML element &lt;<p1/>></title>
             </text>
         </message>
 

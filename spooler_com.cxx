@@ -385,25 +385,24 @@ void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_
                 if( it->second )  merge( it->second );
             }
             else
-            if( e.nodeName_is( "include" )  )
+            if( e.nodeName_is( "include" )  &&  scheduler )
             {
-#ifndef Z_DEBUG
-    int INCLUDE_FEHLT;
-#else
                 string xpath = e.getAttribute( "node" );
+                if( xpath == "" )  xpath = "/params/param";
 
                 Include_command   include_command ( scheduler, source_file_based, e, scheduler->include_path() );
-                xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );      // Registriert <include>
+                xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );  // Registrierung nur wenn source_file_based != NULL
                 xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
 
                 for( int i = 0; i < nodes.count(); i++ )
                 {
                     xml::Element_ptr ee = nodes[i];
-                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-182", variable_element_name, ee.nodeName() );
+                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-409", variable_element_name, ee.nodeName() );
                     set_variable( ee, variable_sets );
                 }
-#endif
             }
+            else
+                z::throw_xc( "SCHEDULER-182", e.nodeName() );
         }
     }
 }
@@ -878,7 +877,7 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
                 if( FAILED( hr ) )  break;
             }
             else
-                z::throw_xc( "SCHEDULER-182", "param", e.nodeName() );
+                z::throw_xc( "SCHEDULER-409", "param", e.nodeName() );
         }
 
     }

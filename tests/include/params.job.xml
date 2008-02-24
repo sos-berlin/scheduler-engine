@@ -5,7 +5,7 @@
     <params>
         <param name="a" value="job"/>
         <param name="b" value="job"/>
-        <include live_file="/x/../a.params.xml" node="params/param"/>
+        <include live_file="/x/../a.params.xml"/>
         <include file="$SCHEDULER_TEST/include/scheduler.xml" node="//job [ @name='nur_parameter' ]/params/param"/>
     </params>
     
