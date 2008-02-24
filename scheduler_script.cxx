@@ -65,7 +65,7 @@ Scheduler_script::Scheduler_script( Scheduler_script_subsystem* subsystem )
     _zero_(this+1),
     _ordering(1)
 {
-    _module = Z_NEW( Module( subsystem->spooler(), subsystem->spooler()->include_path(), _log ) );
+    _module = Z_NEW( Module( subsystem->spooler(), (File_based*)NULL, subsystem->spooler()->include_path(), _log ) );
     _module->_dont_remote = true;
     _com_log = new Com_log( _log );
 }

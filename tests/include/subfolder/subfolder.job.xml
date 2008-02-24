@@ -5,12 +5,13 @@
     <params>
         <param name="a" value="job"/>
         <param name="b" value="job"/>
-        <include live_file="/x/../a.params.xml" node="params/param"/>
-        <include file="$SCHEDULER_TEST/include/scheduler.xml" node="//job [ @name='nur_parameter' ]/params/param"/>
+        <include live_file="../a.params.xml" node="params/param"/>
+        <include live_file="/scheduler.xml" node="//job [ @name='nur_parameter' ]/params/param"/>
     </params>
-    
+
     <script language="JavaScript">
         <include live_file="/check.js"/>
+        
         <![CDATA[
 
 check_task_param( "a", "job" );
@@ -18,8 +19,7 @@ check_task_param( "b", "b a.params.xml" );
 check_task_param( "c", "c a.params.xml" );
 check_task_param( "xpath", "XPATH" );
 
-    ]]>
-    </script>
+        ]]></script>
 
     <run_time once="yes"/>
     

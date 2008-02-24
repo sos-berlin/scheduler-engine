@@ -2817,7 +2817,7 @@
 
         <message code="SCHEDULER-462">
             <text xml:lang="en">
-                <title>Attribute live_file is possibly only in file based objects. Use attribute file</title>
+                <title>Attribute live_file= is not possible here. Use attribute file=</title>
             </text>
         </message>
     </messages>

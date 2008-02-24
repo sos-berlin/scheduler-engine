@@ -30,7 +30,7 @@ DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_i
 
 Remote_module_instance_server::Remote_module_instance_server( const string& include_path )
 :
-    Com_module_instance_base( Z_NEW( Module( NULL, include_path, NULL ) ) ),
+    Com_module_instance_base( Z_NEW( Module( (Scheduler*)NULL, (File_based*)NULL, include_path, NULL ) ) ),
     _zero_(_end_)
 {
 }
@@ -340,7 +340,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "monitor.language" ) // Muss der erste Parameter für den Module_monitor sein!
                 {
                     monitor = Z_NEW( Module_monitor );
-                    monitor->_module = Z_NEW( Module( NULL, include_path, NULL ) );  
+                    monitor->_module = Z_NEW( Module( (Scheduler*)NULL, (File_based*)NULL, include_path, NULL ) );  
                     monitor->_module->_language = value;
                 }
                 else                                                                         

@@ -485,7 +485,7 @@ AGAIN:
                 params_array[ nr++ ] = "java_options="    + _module->_java_options;
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
-                params_array[ nr++ ] = "script="          + _module->_text_with_includes.xml();
+                params_array[ nr++ ] = "script="          + _module->_text_with_includes.includes_resolved().xml();
                 params_array[ nr++ ] = "job="             + _job_name;
                 params_array[ nr++ ] = "task_id="         + as_string( _task_id );
                 params_array[ nr++ ] = "environment="     + _process_environment->dom( "environment", "variable" ).xml();  // Wird bisher nur von Process_module_instance benutzt 2008-10-31
@@ -493,16 +493,11 @@ AGAIN:
                 if( _has_order )
                 params_array[ nr++ ] = "has_order=1";
 
-                //if( _module->kind() == Module::kind_process )
-                //params_array[ nr++ ] = "log_stdout_stderr=1";
-
                 params_array[ nr++ ] = "process.filename="      + _module->_process_filename;
                 params_array[ nr++ ] = "process.param_raw="     + _module->_process_param_raw;
                 params_array[ nr++ ] = "process.log_filename="  + _module->_process_log_filename;
                 params_array[ nr++ ] = "process.ignore_error="  + as_string( (int)_module->_process_ignore_error );
                 params_array[ nr++ ] = "process.ignore_signal=" + as_string( (int)_module->_process_ignore_signal );
-
-                //int PROCESS_ENVIRONMENT_FEHLT; //_module->_process_environment
 
                 Z_FOR_EACH( Module_monitors::Monitor_map, _module->_monitors->_monitor_map, m )
                 {

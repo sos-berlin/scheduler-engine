@@ -34,12 +34,58 @@ typedef list< ptr<Module_instance> >    Module_instance_list;
 struct                                  Module_monitors;
 struct                                  Module_monitor_instance;
 
+//--------------------------------------------------------------------------------------Source_part
+
+//struct Source_part
+//{
+//    Source_part                 ( int linenr, const string& text, const Time& mod_time );
+//
+//                                operator const string&      () const                                { return _text; }
+//    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
+//
+//
+//    int                        _linenr;
+//    string                     _text;
+//    Time                       _modification_time;
+//};
+//
+////-----------------------------------------------------------------------------Source_with_includes
+//
+//struct Source_with_parts
+//{
+//                                Source_with_parts           ()                                      {}
+//                                Source_with_parts           ( const string& text )                  { assign( text); }
+//                                Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
+//
+//    void                        add                         ( int linenr, const string& text, const Time& mod_time );
+//    bool                        empty                       ()                                      { return _parts.empty(); }
+//    void                        clear                       ()                                      { _parts.clear(); }
+//
+//    string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
+//                                operator string             () const                                { return text(); }
+//
+//    xml::Document_ptr           dom_document                () const;
+//    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
+//
+//    Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
+//    void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
+//
+//    Source_with_parts&          operator =                  ( const xml::Element_ptr& dom )         { assign_dom( dom );  return *this; }
+//
+//    void                        assign_dom                  ( const xml::Element_ptr& dom );
+//
+//
+//    typedef list<Source_part>   Parts;
+//
+//    Parts                      _parts;
+//    Time                       _max_modification_time;
+//};
+
 //-------------------------------------------------------------------------------Text_with_includes
 
 struct Text_with_includes : Non_cloneable
 {
-                                Text_with_includes          ()                                      { initialize(); }
-                                Text_with_includes          ( const xml::Element_ptr& e )           { initialize(); append_dom( e ); }
+                                Text_with_includes          ( Scheduler*, File_based*, const xml::Element_ptr& = xml::Element_ptr() );
 
     bool                        is_empty                    () const;
 
@@ -50,6 +96,7 @@ struct Text_with_includes : Non_cloneable
 
     string                      xml                         ()                                      { return _dom_document.xml(); }
     void                    set_xml                         ( const string& x )                     { _dom_document.load_xml( x ); }
+    xml::Document_ptr           includes_resolved           () const;
 
     xml::Element_ptr            dom_element                 ()                                      { return _dom_document.documentElement(); }
     void                        append_dom                  ( const xml::Element_ptr& dom );
@@ -57,6 +104,9 @@ struct Text_with_includes : Non_cloneable
   private:
     void                        initialize                  ();
 
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    File_based*                _file_based;
     xml::Document_ptr          _dom_document;
   //Time                       _max_modification_time;
 };
@@ -84,8 +134,8 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler*, const string& include_path, Has_log* = NULL );
-    explicit                    Module                      ( Spooler*, const xml::Element_ptr&, const string& include_path );
+                                Module                      ( Spooler*, File_based*, const string& include_path, Has_log* = NULL );
+    explicit                    Module                      ( Spooler*, File_based*, const xml::Element_ptr&, const string& include_path );
                                ~Module                      ()                                      {}
 
     void                        set_log                     ( Has_log* log )                        { _log.set_log( log ); }
@@ -115,6 +165,7 @@ struct Module : Object
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    File_based*                _file_based;
     Delegated_log              _log;
     bool                       _set;
 

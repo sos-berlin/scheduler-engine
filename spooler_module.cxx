@@ -49,8 +49,8 @@ const string shell_language_name         = "shell";
 //{
 //}
 //
-////--------------------------------------------------------xml::Element_ptr Source_part::dom_element
-//
+////-------------------------------------------------------------------------Source_part::dom_element
+//    
 //xml::Element_ptr Source_part::dom_element( const xml::Document_ptr& doc ) const
 //{
 //    xml::Element_ptr part_element = doc.createElement( "part_element" );
@@ -62,6 +62,76 @@ const string shell_language_name         = "shell";
 //    return part_element;
 //}
 //
+////-------------------------------------------------------------------Source_with_parts::dom_element
+//
+//xml::Element_ptr Source_with_parts::dom_element( const xml::Document_ptr& doc ) const
+//{
+//    xml::Element_ptr source_element = doc.createElement( "source" );
+//
+//    Z_FOR_EACH_CONST( Parts, _parts, part )
+//    {
+//        xml::Element_ptr part_element = part->dom_element(doc);
+//        source_element.appendChild( part_element );
+//    }
+//
+//    return source_element;
+//}
+//
+////------------------------------------------------------------------Source_with_parts::dom_document
+//
+//xml::Document_ptr Source_with_parts::dom_document() const
+//{
+//    xml::Document_ptr doc;
+//
+//    doc.create();
+//    doc.appendChild( dom_element(doc) );
+//
+//    return doc;
+//}
+//
+////--------------------------------------------------------------------Source_with_parts::assign_dom
+//// Für spooler_module_remote_server.cxx
+//
+//void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
+//{
+//    clear();
+//
+//    if( !source_element.nodeName_is( "source" ) )  throw_xc( Z_FUNCTION );
+//
+//    DOM_FOR_EACH_ELEMENT( source_element, part )
+//    {
+//        Sos_optional_date_time dt = part.getAttribute( "modtime" );
+//        add( part.int_getAttribute( "linenr", 1 ), part.getTextContent(), dt.time_as_double() );
+//    }
+//}
+//
+////---------------------------------------------------------------------------Source_with_parts::add
+//
+//void Source_with_parts::add( int linenr, const string& text, const Time& mod_time )
+//{
+//    // text ist nicht leer?
+//    int i;
+//    for( i = 0; i < text.length(); i++ )  if( !isspace( (unsigned char)text[i] ) )  break;
+//    if( i < text.length() )
+//    {
+//        _parts.push_back( Source_part( linenr, text, mod_time ) );
+//    }
+//
+//    if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
+//}
+
+//-----------------------------------------------------------Text_with_includes::Text_with_includes
+
+Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based, const xml::Element_ptr& e ) 
+: 
+    _zero_(this+1),
+    _spooler(spooler),
+    _file_based(file_based) 
+{ 
+    initialize(); 
+    if( e )  append_dom( e ); 
+}
+
 //-------------------------------------------------------------------Text_with_includes::initialize
 
 void Text_with_includes::initialize()
@@ -140,6 +210,36 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
     }
 }
 
+//------------------------------------------------------------Text_with_includes::includes_resolved
+
+xml::Document_ptr Text_with_includes::includes_resolved() const
+{
+    // Löst die <include> auf und macht sie zu <source_part>
+
+    xml::Document_ptr result;
+
+    result.create();
+    result.appendChild( result.clone( _dom_document.documentElement() ) );
+
+    DOM_FOR_EACH_ELEMENT( result.documentElement(), element )
+    {
+        if( element.nodeName_is( "include" ) )
+        {
+            Include_command include_command ( _spooler, _file_based, element, _file_based->spooler()->include_path() );
+
+            xml::Element_ptr include_element = _dom_document.createElement( "include" );
+            include_element.setAttribute( "file"     , element.getAttribute( "file"      ) );
+            include_element.setAttribute( "live_file", element.getAttribute( "live_file" ) );
+
+            xml::Element_ptr part_element = result.createElement( "source_part" );
+            part_element.appendChild( result.createTextNode( include_command.read_content() ) );
+            element.replace_with( part_element );
+        }
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------Text_with_includes::read_text
 
 string Text_with_includes::read_text( const string& include_path ) 
@@ -169,10 +269,12 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
     {
         try
         {
-            File_path path = subst_env( element.getAttribute( "file" ) );
-            if( path.is_relative_path() )  path.prepend_directory( include_path );
+            Include_command include_command ( _spooler, _file_based, element, include_path );
+            //File_path path = subst_env( element.getAttribute( "file" ) );
+            //if( path.is_relative_path() )  path.prepend_directory( include_path );
 
-            result = string_from_file( path );
+            //result = string_from_file( path );
+            result = include_command.read_content();
         }
         catch( exception& x )  { z::throw_xc( "SCHEDULER-399", x ); }
     }
@@ -218,25 +320,28 @@ bool Text_with_includes::is_empty() const
 
 //-----------------------------------------------------------------------------------Module::Module
 
-Module::Module( Spooler* sp, const string& include_path, Has_log* log )
+Module::Module( Spooler* sp, File_based* file_based, const string& include_path, Has_log* log )
 : 
     _zero_(_end_), 
     _spooler(sp), 
+    _file_based(file_based),
     _log(log),
     _process_environment( new Com_variable_set() ),
-    _include_path(include_path)
+    _include_path(include_path),
+    _text_with_includes(sp,file_based)
 {
     init0();
 }
 
 //-----------------------------------------------------------------------------------Module::Module
     
-Module::Module( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  
+Module::Module( Spooler* sp, File_based* file_based, const xml::Element_ptr& e, const string& include_path )  
 : 
     _zero_(_end_),
     _spooler(sp),
     _process_environment( new Com_variable_set() ),
-    _include_path(include_path)
+    _include_path(include_path),
+    _text_with_includes(sp,file_based)
 { 
     init0();
     set_dom( e ); 
@@ -1207,7 +1312,7 @@ void Module_monitors::set_dom( const xml::Element_ptr& element )
     {
         monitor = Z_NEW( Module_monitor() );
         monitor->_name   = name;
-        monitor->_module = Z_NEW( Module( _main_module->_spooler, _main_module->_spooler->include_path(), &_main_module->_log ) );
+        monitor->_module = Z_NEW( Module( _main_module->_spooler, _main_module->_file_based, _main_module->_spooler->include_path(), &_main_module->_log ) );
         add_monitor( monitor );
     }
 

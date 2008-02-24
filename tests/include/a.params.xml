@@ -1,7 +1,7 @@
 <params xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
 >
 
-    <param name="b" value="a.params.xml"/>
-    <param name="c" value="a.params.xml"/>
+    <param name="b" value="b a.params.xml"/>
+    <param name="c" value="c a.params.xml"/>
 
 </params>

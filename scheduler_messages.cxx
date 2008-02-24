@@ -309,7 +309,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-459", "Error in dependant after '$1' has been loaded:\n$2" },
     { "SCHEDULER-460", "$1 is centrally defined and cannot be locally overwritten" },
     { "SCHEDULER-461", "Path reaches beyond root (too many '..'): $1" },
-    { "SCHEDULER-462", "Attribute live_file is possibly only in file based objects. Use attribute file" },
+    { "SCHEDULER-462", "Attribute live_file= is not possible here. Use attribute file=" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

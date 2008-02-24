@@ -11,12 +11,13 @@ using namespace zschimmer::file;
 
 //-----------------------------------------------------------------Include_command::Include_command
 
-Include_command::Include_command( Scheduler* scheduler, const File_based* source_file_based, const xml::Element_ptr& element )
+Include_command::Include_command( Scheduler* scheduler, const File_based* source_file_based, 
+                                  const xml::Element_ptr& element, const File_path& include_path )
 :
     _zero_(this+1)
 {
-    string file      = subst_env( element.getAttribute( "file"      ) );
-    string live_file = subst_env( element.getAttribute( "live_file" ) );
+    File_path file      = subst_env( element.getAttribute( "file"      ) );
+    File_path live_file = subst_env( element.getAttribute( "live_file" ) );
 
     if( file == ""  &&  live_file == "" )  z::throw_xc( "SCHEDULER-231", "live_file" );
     if( file != ""  &&  live_file != "" )  z::throw_xc( "SCHEDULER-442", "file", "live_file" );
@@ -30,31 +31,38 @@ Include_command::Include_command( Scheduler* scheduler, const File_based* source
     if( file != "" )    // file="..."
     {
         _file_path = file;
+        if( _file_path.is_relative_path() )  _file_path.prepend_directory( include_path );
     }
-    else    // live_file="..."
-    if( source_file_based )
+    else
     {
-        Path path = source_file_based->path().folder_path() + "/" + live_file;
-        _path.set_simplified_dot_dot_path( path );
+        assert( live_file != "" );
 
-        string configuration_root_directory = source_file_based->has_base_file()? source_file_based->configuration_root_directory() 
-                                                                                : source_file_based->spooler()->_configuration_directories[ confdir_local ];
-        _file_path = File_path( configuration_root_directory, path );
-    }
-    else
-    if( scheduler )
-    {
-        _file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
-    }
-    else
-    {
-        z::throw_xc( "SCHEDULER-462" );     // live_file="..." hier nicht möglich
+        if( source_file_based )
+        {
+            Path path = live_file.is_relative_path()? source_file_based->path().folder_path() + "/" + live_file 
+                                                    : live_file;
+
+            _path.set_simplified_dot_dot_path( path );
+
+            string configuration_root_directory = source_file_based->has_base_file()? source_file_based->configuration_root_directory() 
+                                                                                    : source_file_based->spooler()->_configuration_directories[ confdir_local ];
+            _file_path = File_path( configuration_root_directory, path );
+        }
+        else
+        if( scheduler )
+        {
+            _file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
+        }
+        else
+        {
+            z::throw_xc( "SCHEDULER-462" );     // live_file="..." hier nicht möglich
+        }
     }
 }
 
-//----------------------------------------------------Include_command::add_include_and_read_content
+//-----------------------------------------------Include_command::register_include_and_read_content
     
-string Include_command::add_include_and_read_content( File_based* source_file_based )
+string Include_command::register_include_and_read_content( File_based* source_file_based )
 {
     file::Mapped_file file;
 
@@ -71,7 +79,7 @@ string Include_command::add_include_and_read_content( File_based* source_file_ba
 
     if( source_file_based  &&  denotes_configuration_file() )
     {
-        source_file_based->add_include( path(), _file_info );       // Auch wenn Datei sich nicht öffnen lässt
+        source_file_based->register_include( path(), _file_info );       // Auch wenn Datei sich nicht öffnen lässt
     }
 
     file.check_error( "open" );
@@ -133,25 +141,25 @@ Has_includes::~Has_includes()
     //#endif
 }
 
-//------------------------------------------------------------------------Has_includes::add_include
+//-------------------------------------------------------------------Has_includes::register_include
 
-void Has_includes::add_include( const Absolute_path& path, file::File_info* file_info )
+void Has_includes::register_include( const Absolute_path& path, file::File_info* file_info )
 {
     assert( !path.empty() );
 
     _configuration = spooler()->folder_subsystem()->configuration( which_configuration() );
 
     _include_map[ path ] = file_info;   // NULL, wenn Datei nicht da ist
-    //_configuration->_include_register->add_include( this, path );
+    //_configuration->_include_register->register_include( this, path );
 }
 
 //---------------------------------------------------------------------Has_includes::remove_include
 
-void Has_includes::remove_include( const Absolute_path& path )
-{
-    //if( _configuration )  _configuration->_include_register->remove_include( this, path );
-    _include_map.erase( path );
-}
+//void Has_includes::remove_include( const Absolute_path& path )
+//{
+//    //if( _configuration )  _configuration->_include_register->remove_include( this, path );
+//    _include_map.erase( path );
+//}
 
 //--------------------------------------------------------------------Has_includes::remove_includes
 
@@ -216,9 +224,9 @@ file::File_info* Has_includes::changed_included_file_info()
 //{
 //}
 //
-////--------------------------------------------------------------------Include_register::add_include
+////--------------------------------------------------------------------Include_register::register_include
 //
-//void Include_register::add_include( Has_includes* has_includes, const Absolute_path& path )
+//void Include_register::register_include( Has_includes* has_includes, const Absolute_path& path )
 //{
 //    _include_map[ path ]._has_includes_set.insert( has_includes );
 //}

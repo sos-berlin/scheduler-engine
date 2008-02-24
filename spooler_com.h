@@ -157,7 +157,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable_set"; }
 
     STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
-    void                    set_dom                         ( const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param", File_based* = NULL );
+    void                    set_dom                         ( const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
+    void                    register_include_and_set_dom    ( Scheduler*, File_based*, const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
     void                    set_variable                    ( const xml::Element_ptr&, Variable_set_map* );
 
     xml::Document_ptr           dom                         ( const string& element_name, const string& subelement_name );

@@ -418,7 +418,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _log = Z_NEW( Prefix_log( this ) );
     set_log();
 
-    _module = module? module : Z_NEW( Module( _spooler, _spooler->include_path() ) );
+    _module = module? module : Z_NEW( Module( _spooler, this, _spooler->include_path() ) );
     _module->set_log( _log );
 
     _com_job  = new Com_job( this );
@@ -738,7 +738,10 @@ void Job::set_dom( const xml::Element_ptr& element )
         {
             if( e.nodeName_is( "description" ) )
             {
-                try { _description = Text_with_includes( e ).read_text( _spooler->include_path() ); }
+                try 
+                { 
+                    _description = Text_with_includes( _spooler, this, e ).read_text( _spooler->include_path() ); 
+                }
                 catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
             }
@@ -756,10 +759,10 @@ void Job::set_dom( const xml::Element_ptr& element )
             else
             if( e.nodeName_is( "environment" ) )
             {
-                _module->_process_environment->set_dom( e, NULL, "variable" );
+                _module->_process_environment->set_dom( e, (Variable_set_map*)NULL, "variable" );
             }
             else
-            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e, &_spooler->_variable_set_map, "param", this );    // Kann <include> registrieren
+            if( e.nodeName_is( "params"     ) )  _default_params->register_include_and_set_dom( _spooler, this, e, &_spooler->_variable_set_map, "param" );    // Kann <include> registrieren
             else
             if( e.nodeName_is( "script"     ) )  
             {

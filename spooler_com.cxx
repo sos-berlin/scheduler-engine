@@ -349,10 +349,20 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
+
 //------------------------------------------------------------------------Com_variable_set::set_dom
 
 void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, 
-                                const string& variable_element_name, File_based* source_file_based )
+                                const string& variable_element_name )
+{
+    register_include_and_set_dom( (Scheduler*)NULL, (File_based*)NULL, params, variable_sets, variable_element_name );
+}
+    
+//---------------------------------------------------Com_variable_set::register_include_and_set_dom
+
+void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_based* source_file_based,
+                                                     const xml::Element_ptr& params, Variable_set_map* variable_sets, 
+                                                     const string& variable_element_name )
 {
     if( !params )  return;
 
@@ -382,8 +392,8 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map
 #else
                 string xpath = e.getAttribute( "node" );
 
-                Include_command   include_command ( (Scheduler*)NULL, source_file_based, e );
-                xml::Document_ptr included_doc   = include_command.add_include_and_read_content( source_file_based );      // Registriert <include>
+                Include_command   include_command ( scheduler, source_file_based, e, scheduler->include_path() );
+                xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );      // Registriert <include>
                 xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
 
                 for( int i = 0; i < nodes.count(); i++ )

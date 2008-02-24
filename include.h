@@ -11,13 +11,13 @@ namespace include {
 
 struct Include_command
 {
-                                Include_command             ( Scheduler*, const File_based*, const xml::Element_ptr& );
+                                Include_command             ( Scheduler*, const File_based*, const xml::Element_ptr&, const File_path& include_path );
 
     bool                        denotes_configuration_file  () const                                { return !_path.empty(); }
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
-    string                      add_include_and_read_content( File_based* source_file_based );
-    string                      read_content                ()                                      { return add_include_and_read_content( NULL ); }
+    string                      register_include_and_read_content( File_based* source_file_based );
+    string                      read_content                ()                                      { return register_include_and_read_content( NULL ); }
   //file::File_info*            file_info                   ();
 
   private:
@@ -40,8 +40,8 @@ struct Has_includes       // <include live_file="...">
     virtual Which_configuration which_configuration         () const                                = 0;
     virtual Spooler*            spooler                     () const                                = 0;
 
-    void                        add_include                 ( const Absolute_path&, file::File_info* );
-    void                        remove_include              ( const Absolute_path& );
+    void                        register_include            ( const Absolute_path&, file::File_info* );
+  //void                        remove_include              ( const Absolute_path& );
     void                        remove_includes             ();
     file::File_info*            changed_included_file_info  ();
     
@@ -60,7 +60,7 @@ struct Has_includes       // <include live_file="...">
 //                                Include_register            ();
 //                               ~Include_register            ();
 //
-//    void                        add_include                 ( Has_includes*, const Absolute_path& );
+//    void                        register_include                 ( Has_includes*, const Absolute_path& );
 //    void                        remove_include              ( Has_includes*, const Absolute_path& );
 //    void                        check_files                 ( const directory_observer::Directory* );
 //    void                        assert_no_has_includes      ( const Has_includes* );
