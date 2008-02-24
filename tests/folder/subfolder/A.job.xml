@@ -18,6 +18,4 @@ function spooler_process()
     ]]>
     </script>
 
-    <run_time once="yes"/>
-    
 </job>
