@@ -89,6 +89,8 @@ string Include_command::read_content()
     
 string Include_command::register_include_and_read_content( File_based* source_file_based )
 {
+    //Z_LOG2( "joacim", Z_FUNCTION << " " << obj_name() << "\n" );
+
     initialize();
 
     file::Mapped_file file;
@@ -236,9 +238,15 @@ file::File_info* Has_includes::changed_included_file_info()
             {
                 if( !directory_entry->is_aging() )
                 {
-                    if( !file_info )  result = directory_entry->_file_info;  // Datei ist neu hinzugekommen
+                    if( !file_info )  
+                    {
+                        //Soll nicht sein.  result = directory_entry->_file_info;  // Datei ist neu hinzugekommen
+                    }
                     else
-                    if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  result = directory_entry->_file_info;  // Datei geändert
+                    if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  
+                    {
+                        result = directory_entry->_file_info;  // Datei geändert
+                    }
                 }
             }
             else

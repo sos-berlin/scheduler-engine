@@ -10,8 +10,9 @@
     </params>
 
     <script language="JavaScript">
+
         <include live_file="/check.js"/>
-        
+
         <![CDATA[
 
 spooler_log.info( "spooler.configuration_directory='" + spooler.configuration_directory + "'" );
