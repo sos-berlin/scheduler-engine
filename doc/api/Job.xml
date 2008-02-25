@@ -674,6 +674,48 @@ spooler_job.max_order_setbacks = 5;                      // Die 5. Rückstellung
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="folder_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Pfad des Ordners, in dem der Job sich befindet.
+        </title>
+
+        <description>
+            <p>
+                <code>""</code>, wenn der Job nicht aus dem lokalen Konfigurationsverzeichnis
+                (<scheduler_element name="config" attribute="configuration_directory"/>) stammt.
+            </p>
+            
+            
+            <!-- Aus Püschels eMail vom 24.2.2008 17:12 -->
+            <p>
+                Liefert den Pfad des Jobs relativ zum Live-Directory.
+                Der Pfad beginnt mit  einem "/", alle Bestandteile eines Pfads sind durch "/" getrennt
+            </p>
+            <p>
+                Beispiele:
+            </p>
+            <ul>
+                <li>
+                    für einen Job <code>c:\scheduler\config\live\somewhere\excel\sample.job.xml</code> wird <code>"/somewhere/excel"</code> zurückgeliefert
+                </li>
+                <li>
+                    für einen Job <code>c:\scheduler\config\live\sample.xml</code> wird <code>"/"</code> zurückgeliefert
+                </li>
+                <li>
+                    für einen Job außerhalb des Live-Verzeichnisses wird <code>""</code> (Leerstring) zurückgeliefert
+                </li>
+            </ul>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <description>
         <p>
             Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.

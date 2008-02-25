@@ -66,6 +66,31 @@ check_task_param( "xpath", "XPATH" );
                 <script language="javascript"> // </script>
             </job>
 
+            <job name="java">
+
+                <script java_class="spooler_job.test.My_job">
+                    <![CDATA[
+
+package spooler_job.test;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "spooler.configuration_directory='"     + spooler.configuration_directory() + "'" );
+        spooler_log.info( "spooler_job.configuration_directory='" + spooler_job.configuration_directory() + "'" );
+        spooler_log.info( "spooler_job.folder_path='"             + spooler_job.folder_path() + "'" );
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <!--run_time once="yes" start_time_function="my_start_time_function"/-->
+                <run_time once="yes"/>
+            </job>
         </jobs>
 
     </config>

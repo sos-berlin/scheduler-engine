@@ -62,8 +62,10 @@
         </xml_attribute>
 
 
-        <xml_attribute name="configuration_directory" type="path" initial="live" setting="configuration_directory">
+        <xml_attribute name="configuration_directory" type="path" initial="live" setting="configuration_directory" title="Lokales Konfigurationsverzeichnis">
             <description>
+                <scheduler_keyword keyword="Lokales Konfigurationsverzeichnis"/>
+                <scheduler_keyword keyword="Konfigurationsverzeichnis, lokales"/>
                 <p>
                     Voreingestellt ist das Verzeichnis <code>live</code> 
                     im Verzeichnis der Konfigurationsdatei,

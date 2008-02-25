@@ -364,6 +364,7 @@
 <register_keyword keyword='config'>
     <register_keyword_display><code>&lt;config&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
+    <register_entry register_file='api/Job.xml#use_element__config' register_title='Job'  register_keyword='config'/>
     <register_entry register_file='api/Spooler.xml#use_element__config' register_title='Spooler'  register_keyword='config'/>
     <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
     <register_entry register_file='central_configuration.xml#use_element__config' register_title='Zentrale Konfiguration durch einen Supervisor Job Scheduler'  register_keyword='config'/>
@@ -1031,6 +1032,10 @@
 <register_keyword keyword='finished'>
     <register_entry register_file='xml/answer/job_chain.xml' register_title='&lt;job_chain&gt; (Antwort)'  register_keyword='finished'/>
 </register_keyword>
+<register_keyword keyword='folder_path (property)'>
+    <register_keyword_display><code>folder_path</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Job.xml#method__folder_path' register_title='Job.folder_path' register_keyword='folder_path' type='definition'/>
+</register_keyword>
 <register_keyword keyword='force_idle_timeout'>
     <register_keyword_display><code>force_idle_timeout=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_force_idle_timeout' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='force_idle_timeout' type='definition'/>
@@ -1691,6 +1696,9 @@
     <register_entry register_file='settings.xml' register_title='Einstellungen'  register_keyword='Konfiguration'/>
     <register_entry register_file='xml/base.xml' register_title='&lt;base&gt; (Konfiguration)'  register_keyword='Konfiguration'/>
 </register_keyword>
+<register_keyword keyword='Konfigurationsverzeichnis, lokales'>
+    <register_entry register_file='xml/config.xml' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='Konfigurationsverzeichnis, lokales'/>
+</register_keyword>
 <register_keyword keyword='language'>
     <register_keyword_display><code>-language=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_language' register_title='Kommandozeilenoptionen'  register_keyword='language' type='definition'/>
@@ -2021,6 +2029,9 @@
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='job' entry='log_mail_to'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='spooler' entry='log_mail_to'/>
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='log_mail_to'/>
+</register_keyword>
+<register_keyword keyword='Lokales Konfigurationsverzeichnis'>
+    <register_entry register_file='xml/config.xml' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='Lokales Konfigurationsverzeichnis'/>
 </register_keyword>
 <register_keyword keyword='loop'>
     <register_keyword_display><code>loop=</code></register_keyword_display>

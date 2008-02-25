@@ -1,5 +1,5 @@
 <job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
-     process_class="single"
+     process_class="/single"
 >
 
     <params>
@@ -14,6 +14,9 @@
         
         <![CDATA[
 
+spooler_log.info( "spooler.configuration_directory='" + spooler.configuration_directory + "'" );
+spooler_log.info( "spooler_job.configuration_directory='" + spooler_job.configuration_directory + "'" );
+spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
 check_task_param( "a", "job" );
 check_task_param( "b", "b a.params.xml" );
 check_task_param( "c", "c a.params.xml" );
