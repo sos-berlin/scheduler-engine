@@ -21,6 +21,10 @@ check_task_param( "xpath", "XPATH" );
     ]]>
     </script>
 
-    <run_time once="yes"/>
-    
+    <run_time once="yes">
+        <holidays>
+            <include live_file="my_holidays.xml"/>
+        </holidays>
+    </run_time>
+
 </job>

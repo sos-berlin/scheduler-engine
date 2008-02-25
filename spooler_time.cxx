@@ -1285,7 +1285,7 @@ Period Ultimo_set::next_period( const Time& tim, With_single_start single_start 
 
 //--------------------------------------------------------------------------------Holidays::set_dom
 
-void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
+void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e, int include_nesting )
 {
     if( e.nodeName_is( "holidays" ) )
     {
@@ -1302,8 +1302,7 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
             {
                 if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-390", max_include_nesting, "<holidays>" );
 
-                Include_command include_command ( _spooler, (File_based*)NULL, e, _spooler->_configuration_file_path.directory() );
-                File_path       file            = include_command.file_path();
+                Include_command include_command ( _spooler, source_file_based, e2, _spooler->include_path() );
 
                 try
                 {
@@ -1314,14 +1313,13 @@ void Holidays::set_dom( const xml::Element_ptr& e, int include_nesting )
                     doc.load_xml( xml_text );
                     if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
 
-                    if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-319", "", file );
+                    if( !doc.documentElement() )  z::throw_xc( "SCHEDULER-239", "holidays" );
 
-                    set_dom( doc.documentElement(), include_nesting+1 );
+                    set_dom( source_file_based, doc.documentElement(), include_nesting+1 );
                 }
-                catch( z::Xc& x )
+                catch( exception& x )
                 {
-                    x.append_text( S() << "in <holiday><include file=\"" << file << "\"/>" );
-                    throw;
+                    z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x );
                 }
             }
             else
@@ -1613,12 +1611,13 @@ const Com_method Run_time::_methods[] =
 
 //-------------------------------------------------------------------------------Run_time::Run_time
 
-Run_time::Run_time( Scheduler_object* host_object )
+Run_time::Run_time( Scheduler_object* host_object, File_based* source_file_based )
 :
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1),
     _spooler(host_object->_spooler),
     _host_object(host_object),
+    _source_file_based(source_file_based),
     _holidays(host_object->_spooler),
     _months(12)
 {
@@ -1885,12 +1884,12 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         if( e.nodeName_is( "holidays" ) )
         {
             _holidays.clear();
-            _holidays.set_dom( e );
+            _holidays.set_dom( _source_file_based, e );
         }
         else
         if( e.nodeName_is( "holiday" ) )
         {
-            _holidays.set_dom( e );
+            _holidays.set_dom( _source_file_based, e );
         }
     }
 

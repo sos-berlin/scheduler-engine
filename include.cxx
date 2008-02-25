@@ -14,56 +14,83 @@ using namespace zschimmer::file;
 Include_command::Include_command( Scheduler* scheduler, const File_based* source_file_based, 
                                   const xml::Element_ptr& element, const File_path& include_path )
 :
-    _zero_(this+1)
+    _zero_(this+1),
+    _spooler(scheduler),
+    _source_file_based(source_file_based),
+    _include_path(include_path)
 {
-    File_path file      = subst_env( element.getAttribute( "file"      ) );
-    File_path live_file = subst_env( element.getAttribute( "live_file" ) );
+    // Hier keine Exception auslösen
+    // Anwendung:  
+    //      Include_command include_command ( ... );
+    //      try { include_command.xxx(); } catch( x ) { throw ... include_command.obj_name() ...; }
 
-    if( file == ""  &&  live_file == "" )  z::throw_xc( "SCHEDULER-231", "live_file" );
-    if( file != ""  &&  live_file != "" )  z::throw_xc( "SCHEDULER-442", "file", "live_file" );
+    _attribute_file      = subst_env( element.getAttribute( "file"      ) );
+    _attribute_live_file = subst_env( element.getAttribute( "live_file" ) );
+}
 
-    #ifdef Z_WINDOWS
-        if( live_file.find( ':' ) != string::npos )  z::throw_xc( "SCHEDULER-417", live_file );     // Laufwerksbuchstabe?
-        for( int i = 0; i < live_file.length(); i++ )  if( live_file[i] == '\\' )  live_file[i] = '/';
-    #endif
-
+//----------------------------------------------------------------------Include_command::initialize
     
-    if( file != "" )    // file="..."
+void Include_command::initialize()
+{
+    if( !_is_initialized )
     {
-        _file_path = file;
-        if( _file_path.is_relative_path() )  _file_path.prepend_directory( include_path );
-    }
-    else
-    {
-        assert( live_file != "" );
+        if( _attribute_file == ""  &&  _attribute_live_file == "" )  z::throw_xc( "SCHEDULER-231", "include", "file" );
+        if( _attribute_file != ""  &&  _attribute_live_file != "" )  z::throw_xc( "SCHEDULER-442", "file", "live_file" );
 
-        if( source_file_based )
+        #ifdef Z_WINDOWS
+            if( _attribute_live_file.find( ':' ) != string::npos )  z::throw_xc( "SCHEDULER-417", _attribute_live_file );     // Laufwerksbuchstabe?
+            for( int i = 0; i < _attribute_live_file.length(); i++ )  if( _attribute_live_file[i] == '\\' )  _attribute_live_file[i] = '/';
+        #endif
+
+        
+        if( _attribute_file != "" )    // _attribute_file="..."
         {
-            Path path = live_file.is_relative_path()? source_file_based->path().folder_path() + "/" + live_file 
-                                                    : live_file;
-
-            _path.set_simplified_dot_dot_path( path );
-
-            string configuration_root_directory = source_file_based->has_base_file()? source_file_based->configuration_root_directory() 
-                                                                                    : source_file_based->spooler()->_configuration_directories[ confdir_local ];
-            _file_path = File_path( configuration_root_directory, path );
-        }
-        else
-        if( scheduler )
-        {
-            _file_path = File_path( scheduler->_configuration_directories[ confdir_local ], live_file );
+            _file_path = _attribute_file;
+            if( _file_path.is_relative_path() )  _file_path.prepend_directory( _include_path );
         }
         else
         {
-            z::throw_xc( "SCHEDULER-462" );     // live_file="..." hier nicht möglich
+            assert( _attribute_live_file != "" );
+
+            if( _source_file_based )
+            {
+                Path path = _attribute_live_file.is_relative_path()? _source_file_based->path().folder_path() + "/" + _attribute_live_file 
+                                                                   : _attribute_live_file;
+
+                _path.set_simplified_dot_dot_path( path );
+
+                string configuration_root_directory = _source_file_based->has_base_file()? _source_file_based->configuration_root_directory() 
+                                                                                         : _source_file_based->spooler()->_configuration_directories[ confdir_local ];
+                _file_path = File_path( configuration_root_directory, path );
+            }
+            else
+            if( _spooler )
+            {
+                _file_path = File_path( _spooler->_configuration_directories[ confdir_local ], _attribute_live_file );
+            }
+            else
+            {
+                z::throw_xc( "SCHEDULER-462" );     // _attribute_live_file="..." hier nicht möglich
+            }
         }
+
+        _is_initialized = true;
     }
+}
+
+//--------------------------------------------------------------------Include_command::read_content
+
+string Include_command::read_content()
+{ 
+    return register_include_and_read_content( (File_based*)NULL ); 
 }
 
 //-----------------------------------------------Include_command::register_include_and_read_content
     
 string Include_command::register_include_and_read_content( File_based* source_file_based )
 {
+    initialize();
+
     file::Mapped_file file;
 
     if( file.try_open( file_path(), "rb" ) )
@@ -85,6 +112,20 @@ string Include_command::register_include_and_read_content( File_based* source_fi
     file.check_error( "open" );
 
     return string( (const char*)file.map(), file.map_length() );
+}
+
+//------------------------------------------------------------------------Include_command::obj_name
+
+string Include_command::obj_name() const
+{
+    ptr<xml::Xml_string_writer> xml_writer = Z_NEW( xml::Xml_string_writer() );
+    
+    xml_writer->begin_element( "include" );
+    xml_writer->set_attribute_optional( "file",     _attribute_file );
+    xml_writer->set_attribute_optional( "live_file", _attribute_live_file );
+    xml_writer->end_element( "include" );
+
+    return xml_writer->to_string();
 }
 
 //--------------------------------------------------------------------Include_command::read_content
@@ -268,7 +309,7 @@ file::File_info* Has_includes::changed_included_file_info()
 //        }
 //        else
 //        {
-//            Z_LOG2( "joacim", Z_FUNCTION << " <include live_file='" << path << "'>: Datei fehlt\n" );
+//            Z_LOG2( "joacim", Z_FUNCTION << " <include _attribute_live_file='" << path << "'>: Datei fehlt\n" );
 //            // Wenn die inkludierte Datei gelöscht ist, lassen wir den Job in Ruhe
 //        }
 //    }

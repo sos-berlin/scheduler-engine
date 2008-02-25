@@ -272,7 +272,7 @@ bool Scripting_engine_module_instance::load()
 
     DOM_FOR_EACH_ELEMENT( _module->_text_with_includes.dom_element(), element )
     {
-        string text = _module->_text_with_includes.read_text_element( element, _module->_include_path );
+        string text = _module->_text_with_includes.read_text_element( element );
         if( text != "" )
         {
             int line_number = _module->_text_with_includes.text_element_linenr( element );

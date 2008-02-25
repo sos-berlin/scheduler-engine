@@ -16,13 +16,14 @@
                 
 if( !check_js )  spooler_log.error( "check_fs fehlt" );
 
-                ]]></script>
+                ]]>
+            </script>
         </scheduler_script>
 
 
         <holidays>
             <include live_file="my_holidays.xml"/>
-            <include live_file="$SCHEDULER_TEST/holidays.xml"/>
+            <include file="$SCHEDULER_TEST/holidays.xml"/>
         </holidays>
 
         <jobs>
@@ -48,7 +49,9 @@ check_task_param( "xpath", "XPATH" );
                     ]]>
                 </script>
 
-                <run_time once="yes"/>
+                <run_time once="yes">
+                    <period single_start="08:00"/>
+                </run_time>
             </job>
 
             <job name="nur_parameter">

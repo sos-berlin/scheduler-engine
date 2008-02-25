@@ -6553,7 +6553,7 @@ void Order::run_time_modified_event()
 
 void Order::set_run_time( const xml::Element_ptr& e )
 {
-    _run_time = Z_NEW( Run_time( this ) );
+    _run_time = Z_NEW( Run_time( this, (File_based*)NULL ) );
     _run_time->set_modified_event_handler( this );
 
     if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()

@@ -184,12 +184,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             else
             if( e.nodeName_is( "holidays" ) )
             {
-                _holidays.set_dom( e );
+                _holidays.set_dom( (File_based*)NULL, e );
             }
             else
             if( e.nodeName_is( "holiday" ) )
             {
-                _holidays.set_dom( e);
+                _holidays.set_dom( (File_based*)NULL, e );
             }
             else
             if( e.nodeName_is( "http_server" ) )

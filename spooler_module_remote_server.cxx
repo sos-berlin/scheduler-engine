@@ -310,7 +310,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
-                if( key_word == "script"           )  _server->_module->set_xml_text_with_includes( value );
+                if( key_word == "script"           )  _server->_module->set_xml_text_with_includes( value );    // 2008-02-25 JS-215: <include> sind schon vom Client aufgelöst worden
                 else
                 if( key_word == "java_options"     )  java_options                     += " " + value;
                 else

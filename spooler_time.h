@@ -394,7 +394,7 @@ struct Holidays
 
     void                        clear                       ()                                      { _set.clear(); }
     bool                        is_filled                   () const                                { return !_set.empty(); }
-    void                        set_dom                     ( const xml::Element_ptr&, int include_nesting = 0 );
+    void                        set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, int include_nesting = 0 );
     void                        include                     ( time_t t )                            { _set.insert( t ); }
     bool                        is_included                 ( const Time& t )                       { return _set.find( t.midnight().as_time_t() ) != _set.end(); }
 
@@ -455,7 +455,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     static const Com_method    _methods[];
 
 
-                                Run_time                    ( Scheduler_object* host_object );
+                                Run_time                    ( Scheduler_object* host_object, File_based* source_file_based );
 
 
     // IDispatch
@@ -526,6 +526,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Scheduler_object*          _host_object;
+    File_based*                _source_file_based;          // == _host_object oder == NULL
   //Application                _application;
     Modified_event_handler*    _modified_event_handler;
     bool                       _set;

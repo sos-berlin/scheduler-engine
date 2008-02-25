@@ -85,12 +85,12 @@ struct                                  Module_monitor_instance;
 
 struct Text_with_includes : Non_cloneable
 {
-                                Text_with_includes          ( Scheduler*, File_based*, const xml::Element_ptr& = xml::Element_ptr() );
+                                Text_with_includes          ( Scheduler*, File_based*, const File_path& include_path, const xml::Element_ptr& = xml::Element_ptr() );
 
     bool                        is_empty                    () const;
 
-    string                      read_text                   ( const string& include_path );
-    string                      read_text_element           ( const xml::Element_ptr&, const string& include_path );
+    string                      read_text                   ();
+    string                      read_text_element           ( const xml::Element_ptr& );
     int                         text_element_linenr         ( const xml::Element_ptr& );
     string                      text_element_filepath       ( const xml::Element_ptr& );
 
@@ -107,6 +107,7 @@ struct Text_with_includes : Non_cloneable
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     File_based*                _file_based;
+    File_path                  _include_path;
     xml::Document_ptr          _dom_document;
   //Time                       _max_modification_time;
 };
@@ -142,7 +143,6 @@ struct Module : Object
     void                        set_folder_path             ( const Absolute_path& p )              { _folder_path = p; }
     void                        set_dom                     ( const xml::Element_ptr& );
     void                        set_xml_text_with_includes  ( const string& xml );
-    Text_with_includes          source_with_parts           ();
     void                        set_process                 ();                                     // Für <process>
     void                        init0                       ();
     void                        init                        ();
@@ -156,7 +156,7 @@ struct Module : Object
     void                        set_priority                ( const string& );
 
     bool                        has_source_script           () const                                { return !_text_with_includes.is_empty(); }
-    string                      read_source_script          ()                                      { return _text_with_includes.read_text( _include_path ); }
+    string                      read_source_script          ()                                      { return _text_with_includes.read_text(); }
     bool                        needs_java                  ();
 
     Process_class*              process_class               () const;

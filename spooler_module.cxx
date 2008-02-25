@@ -122,11 +122,12 @@ const string shell_language_name         = "shell";
 
 //-----------------------------------------------------------Text_with_includes::Text_with_includes
 
-Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based, const xml::Element_ptr& e ) 
+Text_with_includes::Text_with_includes( Spooler* spooler, File_based* file_based, const File_path& include_path, const xml::Element_ptr& e ) 
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _file_based(file_based) 
+    _file_based(file_based),
+    _include_path(include_path)
 { 
     initialize(); 
     if( e )  append_dom( e ); 
@@ -225,15 +226,15 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
     {
         if( element.nodeName_is( "include" ) )
         {
-            Include_command include_command ( _spooler, _file_based, element, _file_based->spooler()->include_path() );
+            Include_command include_command ( _spooler, _file_based, element, _include_path );
 
-            xml::Element_ptr include_element = _dom_document.createElement( "include" );
-            include_element.setAttribute( "file"     , element.getAttribute( "file"      ) );
-            include_element.setAttribute( "live_file", element.getAttribute( "live_file" ) );
-
-            xml::Element_ptr part_element = result.createElement( "source_part" );
-            part_element.appendChild( result.createTextNode( include_command.read_content() ) );
-            element.replace_with( part_element );
+            try
+            {
+                xml::Element_ptr part_element = result.createElement( "source_part" );
+                part_element.appendChild( result.createTextNode( include_command.read_content() ) );
+                element.replace_with( part_element );
+            }
+            catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
         }
     }
 
@@ -242,13 +243,13 @@ xml::Document_ptr Text_with_includes::includes_resolved() const
 
 //--------------------------------------------------------------------Text_with_includes::read_text
 
-string Text_with_includes::read_text( const string& include_path ) 
+string Text_with_includes::read_text() 
 {
     String_list result;
 
     DOM_FOR_EACH_ELEMENT( dom_element(), element )
     {
-        result.append( read_text_element( element, include_path ) );
+        result.append( read_text_element( element ) );
     }
 
     return result;
@@ -256,7 +257,7 @@ string Text_with_includes::read_text( const string& include_path )
 
 //------------------------------------------------------------Text_with_includes::read_text_element
 
-string Text_with_includes::read_text_element( const xml::Element_ptr& element, const string& include_path )
+string Text_with_includes::read_text_element( const xml::Element_ptr& element )
 {
     string result;
 
@@ -267,16 +268,13 @@ string Text_with_includes::read_text_element( const xml::Element_ptr& element, c
     else
     if( element.nodeName_is( "include" ) )
     {
+        Include_command include_command ( _spooler, _file_based, element, _include_path );
+
         try
         {
-            Include_command include_command ( _spooler, _file_based, element, include_path );
-            //File_path path = subst_env( element.getAttribute( "file" ) );
-            //if( path.is_relative_path() )  path.prepend_directory( include_path );
-
-            //result = string_from_file( path );
             result = include_command.read_content();
         }
-        catch( exception& x )  { z::throw_xc( "SCHEDULER-399", x ); }
+        catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
     }
     else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
@@ -328,7 +326,7 @@ Module::Module( Spooler* sp, File_based* file_based, const string& include_path,
     _log(log),
     _process_environment( new Com_variable_set() ),
     _include_path(include_path),
-    _text_with_includes(sp,file_based)
+    _text_with_includes(sp,file_based,include_path)
 {
     init0();
 }
@@ -341,7 +339,7 @@ Module::Module( Spooler* sp, File_based* file_based, const xml::Element_ptr& e, 
     _spooler(sp),
     _process_environment( new Com_variable_set() ),
     _include_path(include_path),
-    _text_with_includes(sp,file_based)
+    _text_with_includes(sp,file_based,include_path)
 { 
     init0();
     set_dom( e ); 

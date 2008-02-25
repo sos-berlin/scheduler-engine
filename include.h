@@ -17,19 +17,27 @@ struct Include_command
     File_path                   file_path                   () const                                { return _file_path; }
     Absolute_path               path                        () const                                { return _path; }
     string                      register_include_and_read_content( File_based* source_file_based );
-    string                      read_content                ()                                      { return register_include_and_read_content( NULL ); }
+    string                      read_content                ();
   //file::File_info*            file_info                   ();
+    void                        initialize                  ();
+    string                      obj_name                    () const;
 
   private:
     Fill_zero                  _zero_;
+    File_path                  _attribute_file;
+    File_path                  _attribute_live_file;
     Absolute_path              _path;                       // Mit Dateinamensendung
     File_path                  _file_path;
     ptr<file::File_info>       _file_info;
+    const File_based*          _source_file_based;
+    Spooler*                   _spooler;
+    File_path                  _include_path;
+    bool                       _is_initialized;
 };
 
 //-------------------------------------------------------------------------------------Has_includes
 
-struct Has_includes       // <include live_file="..."> 
+struct Has_includes             // <include live_file="..."> 
 {
                                 Has_includes                ();
     virtual                    ~Has_includes                ();

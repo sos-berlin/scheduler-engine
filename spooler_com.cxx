@@ -388,18 +388,23 @@ void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_
             if( e.nodeName_is( "include" )  &&  scheduler )
             {
                 string xpath = e.getAttribute( "node" );
-                if( xpath == "" )  xpath = "/params/param";
+                if( xpath == "" )  xpath = "/params/*";
 
-                Include_command   include_command ( scheduler, source_file_based, e, scheduler->include_path() );
-                xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );  // Registrierung nur wenn source_file_based != NULL
-                xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
+                Include_command include_command ( scheduler, source_file_based, e, scheduler->include_path() );
 
-                for( int i = 0; i < nodes.count(); i++ )
+                try
                 {
-                    xml::Element_ptr ee = nodes[i];
-                    if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-409", variable_element_name, ee.nodeName() );
-                    set_variable( ee, variable_sets );
+                    xml::Document_ptr included_doc   = include_command.register_include_and_read_content( source_file_based );  // Registrierung nur wenn source_file_based != NULL
+                    xml::Xpath_nodes  nodes          = included_doc.select_nodes( xpath );
+
+                    for( int i = 0; i < nodes.count(); i++ )
+                    {
+                        xml::Element_ptr ee = nodes[i];
+                        if( !ee.nodeName_is( variable_element_name ) )  z::throw_xc( "SCHEDULER-409", variable_element_name, ee.nodeName() );
+                        set_variable( ee, variable_sets );
+                    }
                 }
+                catch( exception& x )  { z::throw_xc( "SCHEDULER-399", include_command.obj_name(), x ); }
             }
             else
                 z::throw_xc( "SCHEDULER-182", e.nodeName() );

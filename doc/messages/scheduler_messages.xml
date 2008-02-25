@@ -2437,7 +2437,7 @@
 
         <message code="SCHEDULER-399">
             <text xml:lang="en">
-                <title>Error in &lt;include>: <p1/></title>
+                <title>Error in <p1>include_xml_element</p1>:<br/><p2/></title>
             </text>
         </message>
 

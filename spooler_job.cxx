@@ -740,7 +740,7 @@ void Job::set_dom( const xml::Element_ptr& element )
             {
                 try 
                 { 
-                    _description = Text_with_includes( _spooler, this, e ).read_text( _spooler->include_path() ); 
+                    _description = Text_with_includes( _spooler, this, _spooler->include_path(), e ).read_text(); 
                 }
                 catch( const exception& x  ) { _log->warn( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _log->warn(d);  _description = d; }
@@ -1003,7 +1003,7 @@ void Job::init_start_when_directory_changed( Task* task )
 
 void Job::init_run_time()
 {
-    _run_time = Z_NEW( Run_time( this ) );
+    _run_time = Z_NEW( Run_time( this, this ) );
     _run_time->set_holidays( _spooler->holidays() );
 }
 
