@@ -28,7 +28,6 @@ if( !check_js )  spooler_log.error( "check_fs fehlt" );
 
         <jobs>
             <job name="no_folder" process_class="single">
-
                 <params>
                     <param name="a" value="job"/>
                     <param name="b" value="job"/>
