@@ -339,8 +339,8 @@ library Spooler
         [id(19),propget]                                                                               
         HRESULT                 Process_class               ( [out,retval] Iprocess_class** );
 
-      //[id(20),propget]        
-      //HRESULT                 Folder_path                 ( [out,retval] BSTR* );
+        [id(20),propget]        
+        HRESULT                 Folder_path                 ( [out,retval] BSTR* );
 
         [id(21),propget]        
         HRESULT                 Configuration_directory     ( [out,retval] BSTR* );

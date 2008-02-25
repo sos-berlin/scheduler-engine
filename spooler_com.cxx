@@ -1913,7 +1913,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     , 16, "Remove"                        , (Com_method_ptr)&Com_job::Remove                      , VT_EMPTY      },
     { DISPATCH_METHOD     , 17, "Execute_command"               , (Com_method_ptr)&Com_job::Execute_command             , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
-  //{ DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 21, "Configuration_directory"       , (Com_method_ptr)&Com_job::get_Configuration_directory , VT_BSTR       },
     {}
 };
@@ -2304,6 +2304,15 @@ STDMETHODIMP Com_job::get_Process_class( spooler_com::Iprocess_class** result )
 //-------------------------------------------------------------------------Com_job::get_Folder_path
 
 STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
+
+// eMail von Püschel, 2008-02-24 17:12
+// Rückgabewert: liefert den Pfad des Jobs relativ zum Live-Directory. Der Pfad beginnt mit  einem "/", alle Bestandteile eines Pfads sind durch "/" getrennt
+// Beispiele: 
+// - für einen Job c:\scheduler\config\live\somewhere\excel\sample.job.xml wird "/somewhere/excel" zurückgeliefert 
+// - für einen Job c:\scheduler\config\live\sample.xml wird "/"  zurückgeliefert 
+// - für einen Job außerhalb des Live-Verzeichnisses wird "" (Leerstring) zurückgeliefert
+// - die Methode liefert nicht null
+
 {
     HRESULT hr = NOERROR;
 
@@ -2312,7 +2321,11 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        hr = String_to_bstr( _job->has_base_file()? _job->folder_path() : Absolute_path(), result );
+        hr = String_to_bstr( _job->has_base_file() && 
+                             _job->which_configuration() == confdir_local?  // Siehe Püschels eMail vom 2008-02-24 17:12
+                                _job->folder_path() 
+                              : Absolute_path(), result );
+
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
