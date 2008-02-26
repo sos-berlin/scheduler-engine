@@ -23,6 +23,10 @@
 
         <revision jira="JS-215" type="new" title="&lt;params> mit &lt;include>">
             <description>
+                <p>
+                    In Dateien abgelegte Parameter können inkludiert werden. 
+                    Mit einem XPath-Ausdruck lassen sich die <scheduler_element name="param"/> adressieren.
+                </p>
                 <ul>
                     <li>
                         <scheduler_element name="params" child="include"/>
@@ -31,7 +35,7 @@
             </description>
         </revision>
 
-        <revision jira="JS-240" type="new" title="&lt;params mit &lt;include>">
+        <revision jira="JS-240" type="new" title="&lt;include live_file=&quot;…&quot;>">
             <description>
                 <ul>
                     <li>
@@ -46,6 +50,9 @@
                         <scheduler_element name="job" child="description"/>
                     </li>
                     <li>
+                        <scheduler_element name="job" child="params"/>
+                    </li>
+                    <li>
                         <scheduler_element name="job" child="run_time"/>
                     </li>
                     <li>
@@ -58,6 +65,10 @@
                         <scheduler_element name="script"/>
                     </li>
                 </ul>
+                <p>
+                    Unter <scheduler_element name="job" child="params"/> führt eine Änderung der mit <code>live_file=</code> angegebenen Datei
+                    zum Erneuten Lesen des Jobs.
+                </p>
             </description>
         </revision>
 
