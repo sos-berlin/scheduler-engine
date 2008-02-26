@@ -262,6 +262,7 @@ struct Day : Object
     Period                      next_period                 ( const Time& time_of_day, With_single_start single_start ) const { return _period_set.empty()? Period(): next_period_(time_of_day,single_start); }
     Period                      next_period_                ( const Time& time_of_day, With_single_start single_start ) const;
     void                        add                         ( const Period& p )                     { _period_set.insert( p ); }       
+    void                        merge                       ( const Day& );
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Day& o )            { o.print(s); return s; }

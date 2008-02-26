@@ -1027,6 +1027,13 @@ void Day::set_default()
     _period_set.insert( period );
 }
 
+//---------------------------------------------------------------------------------------Day::merge
+
+void Day::merge( const Day& other_day )
+{
+    _period_set.insert( other_day._period_set.begin(), other_day._period_set.end() );
+}
+
 //------------------------------------------------------------------------------------Day::has_time
 
 bool Day::has_time( const Time& time_of_day )
@@ -1151,8 +1158,13 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
                 
                 Z_FOR_EACH( list<int>, day_numbers, d )
                 {
+#ifdef Z_DEBUG
+                    if( _days[ *d ] )  _days[ *d ]->merge( *day );
+                                 else  _days[ *d ] = day;
+#else
                     if( _days[ *d ] )  z::throw_xc( "SCHEDULER-444", *d );
                     _days[ *d ] = day;
+#endif
                 }
 
                 _is_day_set_filled = true;
@@ -1302,7 +1314,7 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
             {
                 if( include_nesting >= max_include_nesting )  z::throw_xc( "SCHEDULER-390", max_include_nesting, "<holidays>" );
 
-                Include_command include_command ( _spooler, source_file_based, e2, _spooler->include_path() );
+                Include_command include_command ( _spooler, source_file_based, e2, _spooler->_configuration_file_path.directory() );
 
                 try
                 {
@@ -1441,10 +1453,16 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
             ptr<Day>  day            = Z_NEW( Day( e, &my_default_day, default_period ) );
             list<int> day_numbers    = get_day_numbers( e.getAttribute( "day" ) );
 
-            Z_FOR_EACH( list<int>, day_numbers, it )
+            Z_FOR_EACH( list<int>, day_numbers, d )
             {
-                if( _days[ *it ] )  z::throw_xc( "SCHEDULER-444", *it );
-                _days[ *it ] = day;
+#ifdef Z_DEBUG
+                if( _days[ *d ] )  _days[ *d ]->merge( *day );
+                             else  _days[ *d ] = day;
+                int MELDUNG_SCHEDULER_444_AUSBAUEN;
+#else
+                if( _days[ *d ] )  z::throw_xc( "SCHEDULER-444", *d );
+                _days[ *d ] = day;
+#endif
             }
 
             _is_day_set_filled = true;

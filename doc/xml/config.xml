@@ -249,7 +249,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute setting="include_path"/>
+        <xml_attribute setting="include_path" subst_env="yes"/>
 
         <!-- Veraltet: xml_attribute name="priority_max" type="zahl" initial="1000">
             <description>

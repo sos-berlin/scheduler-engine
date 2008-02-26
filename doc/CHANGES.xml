@@ -10,7 +10,57 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-02-25" version="2.0.200" subversion_revision="5663">
+    <change date="2008-02-25" version="2.0.200" subversion_revision="5665">
+        <revision type="modification" title="&lt;include include_path=&quot;...&quot;>: Umgebungsvariablen können abgerufen werden">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="include_path" value="$HOME/..."/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-215" type="new" title="&lt;params> mit &lt;include>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="params" child="include"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-240" type="new" title="&lt;params mit &lt;include>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="include" attribute="live_file"/>
+                    </li>
+                </ul>
+                <p>
+                    Das neue Attribut <code>live_file=</code> kann verwendet werden direkt unter
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" child="description"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job" child="run_time"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job"/><scheduler_element name="run_time" child="holidays"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="holidays"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="script"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision jira="JS-222" type="new" title="Neuer Aufruf job.folder_path()">
             <description>
                 <ul>

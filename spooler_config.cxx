@@ -155,7 +155,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
         if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
         if( !_spooler_param_as_option_set )  _spooler_param = config_element.getAttribute( "param"        , _spooler_param );
-        if( !_include_path_as_option_set  )  _include_path  = config_element.getAttribute( "include_path" , _include_path  );
+        if( !_include_path_as_option_set  )  _include_path  = subst_env( config_element.getAttribute( "include_path" , _include_path  ) );
 
       //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 

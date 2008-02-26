@@ -24,6 +24,14 @@
     <xml_child_elements>
         <xml_child_element name="param"         multiple="yes"/>
         <xml_child_element name="copy_params"   multiple="yes"/>
+        <xml_child_element name="include"       multiple="yes">
+            <description>
+                <p>
+                    Kann verwendet werden in <code>&lt;params></code> direkt unter <scheduler_element name="job"/>.
+                </p>
+            </description>
+            
+        </xml_child_element>
     </xml_child_elements>
 
 

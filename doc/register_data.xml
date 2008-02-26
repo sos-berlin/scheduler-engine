@@ -750,6 +750,7 @@
     <register_entry register_file='xml.xml#use_element__description' register_title='Alle XML-Elemente'  register_keyword='description'/>
     <register_entry register_file='xml/answer/description.xml#' register_title='&lt;description&gt; (Antwort)'  register_keyword='description' type='definition'/>
     <register_entry register_file='xml/description.xml#' register_title='&lt;description&gt; (Konfiguration)'  register_keyword='description' type='definition'/>
+    <register_entry register_file='xml/include.xml#use_element__description' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='description'/>
     <register_entry register_file='xml/show_state.xml#use_element__description' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='description'/>
 </register_keyword>
 <register_keyword keyword='Dienst'>
@@ -1463,9 +1464,11 @@
     <register_entry register_file='xml/answer/replacement.xml#use_element__job' register_title='&lt;replacement&gt; (Antwort)'  register_keyword='job'/>
     <register_entry register_file='xml/commands.xml#use_element__job' register_title='&lt;commands&gt;'  register_keyword='job'/>
     <register_entry register_file='xml/copy_params.xml#use_element__job' register_title='&lt;copy_params&gt;'  register_keyword='job'/>
+    <register_entry register_file='xml/include.xml#use_element__job' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/job.xml#' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/job.xml#use_element__job' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/order.xml#use_element__job' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='job'/>
+    <register_entry register_file='xml/params.xml#use_element__job' register_title='&lt;params&gt;'  register_keyword='job'/>
     <register_entry register_file='xml/process.xml#use_element__job' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/process_class.xml#use_element__job' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='job'/>
     <register_entry register_file='xml/show_jobs.xml#use_element__job' register_title='&lt;show_jobs&gt; (Kommando)'  register_keyword='job'/>
@@ -1788,6 +1791,10 @@
 <register_keyword keyword='line'>
     <register_keyword_display><code>line=</code></register_keyword_display>
     <register_entry register_file='xml/answer/ERROR.xml#attribute_line' register_title='&lt;ERROR&gt; (Antwort)'  register_keyword='line' type='definition'/>
+</register_keyword>
+<register_keyword keyword='live_file'>
+    <register_keyword_display><code>live_file=</code></register_keyword_display>
+    <register_entry register_file='xml/include.xml#attribute_live_file' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='live_file' type='definition'/>
 </register_keyword>
 <register_keyword keyword='load_file'>
     <register_keyword_display><code>load_file()</code></register_keyword_display>
@@ -2382,6 +2389,10 @@
     <register_keyword_display><code>next_state</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job_chain_node.xml#method__next_state' register_title='Job_chain_node.next_state' register_keyword='next_state' type='definition'/>
 </register_keyword>
+<register_keyword keyword='node'>
+    <register_keyword_display><code>node=</code></register_keyword_display>
+    <register_entry register_file='xml/include.xml#attribute_node' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='node' type='definition'/>
+</register_keyword>
 <register_keyword keyword='node (property)'>
     <register_keyword_display><code>node</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__node' register_title='Job_chain.node' register_keyword='node' type='definition'/>
@@ -2533,6 +2544,7 @@
     <register_entry register_file='CHANGES.xml#use_element__param' register_title='Änderungsprotokoll'  register_keyword='param'/>
     <register_entry register_file='xml.xml#use_element__param' register_title='Alle XML-Elemente'  register_keyword='param'/>
     <register_entry register_file='xml/copy_params.xml#use_element__param' register_title='&lt;copy_params&gt;'  register_keyword='param'/>
+    <register_entry register_file='xml/include.xml#use_element__param' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='param'/>
     <register_entry register_file='xml/param.xml#' register_title='&lt;param&gt;'  register_keyword='param' type='definition'/>
 </register_keyword>
 <register_keyword keyword='param'>
@@ -2555,6 +2567,7 @@
     <register_entry register_file='api/Variable_set.xml#use_element__params' register_title='Variable_set'  register_keyword='params'/>
     <register_entry register_file='xml.xml#use_element__params' register_title='Alle XML-Elemente'  register_keyword='params'/>
     <register_entry register_file='xml/copy_params.xml#use_element__params' register_title='&lt;copy_params&gt;'  register_keyword='params'/>
+    <register_entry register_file='xml/include.xml#use_element__params' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='params'/>
     <register_entry register_file='xml/param.xml#use_element__params' register_title='&lt;param&gt;'  register_keyword='params'/>
     <register_entry register_file='xml/params.xml#' register_title='&lt;params&gt;'  register_keyword='params' type='definition'/>
     <register_entry register_file='xml/payload.xml#use_element__params' register_title='&lt;payload&gt;'  register_keyword='params'/>

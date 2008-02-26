@@ -7,6 +7,7 @@
         <param name="b" value="job"/>
         <include live_file="/x/../a.params.xml"/>
         <include file="$SCHEDULER_TEST/include/scheduler.xml" node="//job [ @name='nur_parameter' ]/params/param"/>
+        <include file="include_path.params.xml"/>
     </params>
     
     <script language="JavaScript">
@@ -19,6 +20,7 @@ spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path 
 check_task_param( "a", "job" );
 check_task_param( "b", "b a.params.xml" );
 check_task_param( "c", "c a.params.xml" );
+check_task_param( "d", "d include_path.params.xml" );
 check_task_param( "xpath", "XPATH" );
 
     ]]>

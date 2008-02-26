@@ -16,5 +16,3 @@ function check_task_param( name, expected_value )
 }
 
 var check_js = true;
-
-FEHLER
