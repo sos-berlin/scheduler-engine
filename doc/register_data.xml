@@ -1559,6 +1559,7 @@
 </register_keyword>
 <register_keyword keyword='monthdays'>
     <register_keyword_display><code>&lt;monthdays&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__monthdays' register_title='Änderungsprotokoll'  register_keyword='monthdays'/>
     <register_entry register_file='xml.xml#use_element__monthdays' register_title='Alle XML-Elemente'  register_keyword='monthdays'/>
     <register_entry register_file='xml/day.xml#use_element__monthdays' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='monthdays'/>
     <register_entry register_file='xml/monthdays.xml#' register_title='&lt;monthdays&gt; (Konfiguration)'  register_keyword='monthdays' type='definition'/>
@@ -2580,6 +2581,7 @@
 </register_keyword>
 <register_keyword keyword='ultimos'>
     <register_keyword_display><code>&lt;ultimos&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__ultimos' register_title='Änderungsprotokoll'  register_keyword='ultimos'/>
     <register_entry register_file='xml.xml#use_element__ultimos' register_title='Alle XML-Elemente'  register_keyword='ultimos'/>
     <register_entry register_file='xml/day.xml#use_element__ultimos' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='ultimos'/>
     <register_entry register_file='xml/run_time.xml#use_element__ultimos' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='ultimos'/>
@@ -2709,6 +2711,7 @@
 </register_keyword>
 <register_keyword keyword='weekdays'>
     <register_keyword_display><code>&lt;weekdays&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__weekdays' register_title='Änderungsprotokoll'  register_keyword='weekdays'/>
     <register_entry register_file='xml.xml#use_element__weekdays' register_title='Alle XML-Elemente'  register_keyword='weekdays'/>
     <register_entry register_file='xml/day.xml#use_element__weekdays' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='weekdays'/>
     <register_entry register_file='xml/run_time.xml#use_element__weekdays' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='weekdays'/>
