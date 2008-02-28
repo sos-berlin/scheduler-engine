@@ -292,7 +292,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-441", "Invalid value in <$1 $2=\"$3\">" },
     { "SCHEDULER-442", "Attribute $1 cannot be combined with $2" },
     { "SCHEDULER-443", "<month month=\"$1\"> has been defined already" },
-    { "SCHEDULER-444", "<day day=\"$1\"> has been defined already" },
     { "SCHEDULER-445", "Invalid weekday '$1'" },
     { "SCHEDULER-446", "<weekday day=\"$1\" which=\"$2\" has been defined already" },
     { "SCHEDULER-447", "Error in $1: \n$2" },

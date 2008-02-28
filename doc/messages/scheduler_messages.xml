@@ -2707,11 +2707,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-444">
+        <!--message code="SCHEDULER-444">
             <text xml:lang="en">
                 <title>&lt;day day="<p1/>"> has been defined already</title>
             </text>
-        </message>
+        </message-->
         
         <message code="SCHEDULER-445">
             <text xml:lang="en">

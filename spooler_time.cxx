@@ -1158,13 +1158,8 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
                 
                 Z_FOR_EACH( list<int>, day_numbers, d )
                 {
-#ifdef Z_DEBUG
-                    if( _days[ *d ] )  _days[ *d ]->merge( *day );
-                                 else  _days[ *d ] = day;
-#else
-                    if( _days[ *d ] )  z::throw_xc( "SCHEDULER-444", *d );
-                    _days[ *d ] = day;
-#endif
+                    if( !_days[ *d ] )  _days[ *d ] = Z_NEW( Day( *day ) );
+                                  else  _days[ *d ]->merge( *day );
                 }
 
                 _is_day_set_filled = true;
@@ -1455,14 +1450,8 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 
             Z_FOR_EACH( list<int>, day_numbers, d )
             {
-#ifdef Z_DEBUG
-                if( _days[ *d ] )  _days[ *d ]->merge( *day );
-                             else  _days[ *d ] = day;
-                int MELDUNG_SCHEDULER_444_AUSBAUEN;
-#else
-                if( _days[ *d ] )  z::throw_xc( "SCHEDULER-444", *d );
-                _days[ *d ] = day;
-#endif
+                if( !_days[ *d ] )  _days[ *d ] = Z_NEW( Day( *day ) );
+                              else  _days[ *d ]->merge( *day );
             }
 
             _is_day_set_filled = true;

@@ -24,58 +24,46 @@ spooler_log.info( "hallo" );
                 </script>
 
                 <run_time begin="07:00" repeat="60">
-                    <month month="november">
+                    <month month="march">
                         <period begin="02:00" end="02:01" absolute_repeat="60"/>
                         <period begin="02:02" end="02:03" absolute_repeat="60"/>
                         <weekdays>
-                            <day day="tuesday friday"/>
+                            <day day="monday"/>
+                            <day day="tuesday friday">
+                                <period single_start="02:05"/>
+                            </day>
+                            <day day="tuesday sunday">
+                                <period single_start="02:07"/>
+                            </day>
                         </weekdays>
                         <monthdays>
+                            <day day="12 13">
+                                <period single_start="12:13"/>
+                            </day>
                             <day day="12">
                                 <period single_start="12:00"/>
                             </day>
                         </monthdays>
                         <ultimos>
-                            <day day="0">
-                                <period single_start="23:59"/>
+                            <day day="10">
+                                <period single_start="10:10"/>
                             </day>
-                            <day day="3">
-                                <period begin="01:11" end="02:22" repeat="00:00:33"/>
+                            <day day="10 9">
+                                <period single_start="10:09"/>
+                            </day>
+                            <day day="10 8">
+                                <period single_start="10:08"/>
                             </day>
                         </ultimos>
                     </month>
 
-                    <month month="december">
+                    <!--month month="march">
                         <ultimos>
                             <day day="0">
                                 <period single_start="12:00"/>
                             </day>
                         </ultimos>
-                    </month>
-
-                    <month month="january">
-                        <monthdays>
-                            <day day="1">
-                                <period single_start="01:00"/>
-                            </day>
-                        </monthdays>
-                    </month>
-
-                    <month month="february">
-                        <weekdays>
-                            <day day="monday">
-                                <period single_start="02:00"/>
-                            </day>
-                        </weekdays>
-                    </month>
-
-                    <month month="march may">
-                        <ultimos>
-                            <day day="0 2 4">
-                                <period single_start="03:00"/>
-                            </day>
-                        </ultimos>
-                    </month>
+                    </month-->
 
                     <month month="april">
                         <monthdays>
@@ -85,20 +73,23 @@ spooler_log.info( "hallo" );
                         </monthdays>
                     </month>
 
-                    <month month="june">
-                        <monthdays>
-                            <day day="6">
-                                <period single_start="06:00"/>
+                    <month month="may">
+                        <weekdays>
+                            <day day="monday">
+                                <period single_start="05:00"/>
                             </day>
-                        </monthdays>
+                            <day day="monday">
+                                <period single_start="05:55"/>
+                            </day>
+                        </weekdays>
                     </month>
 
-                    <month month="july">
-                        <monthdays>
-                            <day day="7 17">
-                                <period single_start="07:00"/>
+                    <month month="june july">
+                        <ultimos>
+                            <day day="0 2 4">
+                                <period single_start="06:00"/>
                             </day>
-                        </monthdays>
+                        </ultimos>
                     </month>
 
                     <month month="august">
@@ -121,7 +112,7 @@ spooler_log.info( "hallo" );
             </job>
 
             
-            <job name="set_run_time_1">
+            <!--job name="set_run_time_1">
         
                 <script language="JavaScript"><![CDATA[
 
@@ -158,7 +149,7 @@ spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
 
                 <run_time/>
 
-            </job>
+            </job-->
 
 
             <!--job name="repeat">

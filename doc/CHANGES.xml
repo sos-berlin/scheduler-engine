@@ -10,6 +10,45 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-02-28" version="2.0.201" subversion_revision="5670">
+        <revision type="new" title="Attribut day= lässt bereits angegebene Tage zu">
+            <description>
+                <p>
+                    In <scheduler_element name="weekdays"/> und
+                    <scheduler_element name="monthdays"/>
+                    können Tage wiederholt angegeben werden. 
+                    Der Scheduler mischt die Perioden.
+                    
+                    Die Meldung <code>SCHEDULER-444</code> entfällt.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="weekdays"/><scheduler_element name="day" attribute="day"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="monthdays"/><scheduler_element name="day" attribute="day"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="ultimos"/><scheduler_element name="day" attribute="day"/>
+                    </li>
+                </ul>
+                <scheduler_example>
+                    <pre>&lt;monthdays>
+    &lt;day day="12 13">
+        &lt;period single_start="13:12"/>
+    &lt;/day>
+    &lt;day day="12">
+        &lt;period single_start="12:00"/>
+    &lt;/day>
+&lt;/monthdays></pre>
+                    <p>
+                        Das ergibt für den 12. eines Monats zwei Startzeiten: 12:00 und 13:12.
+                    </p>
+                </scheduler_example>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-02-25" version="2.0.200" subversion_revision="5665">
         <revision type="modification" title="&lt;include include_path=&quot;...&quot;>: Umgebungsvariablen können abgerufen werden">
             <description>
