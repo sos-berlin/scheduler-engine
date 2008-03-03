@@ -109,8 +109,7 @@
 			Standalone-Jobs in verteilten Schedulern
 		</h3>
 		<p>
-			Eigenständige Jobs, die keine Aufträge verarbeiten, werden in einem Scheduler Cluster nur von einem Job Scheduler ausgeführt,
-			um ungewollte Mehrfachausführung zu verhindern. Dieser Job Scheduler muss zusätzlich mit der Option 
-			<scheduler_option name="exclusive"/> gestartet werden.
+			Eigenständige Jobs, die keine Aufträge verarbeiten, werden in einem Scheduler Cluster von dem Job Scheduler ausgeführt,
+			in dem sie konfiguriert werden.
 		</p>
 	</description>
