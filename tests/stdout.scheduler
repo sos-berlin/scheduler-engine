@@ -53,6 +53,18 @@ function spooler_process()
                 <run_time once="yes" repeat="1"/>
             </job>
 
+            <job name="perl">
+                <script language="perl">
+                    <![CDATA[
+
+print( "STDOUT VON PERL\n" );
+print( "Zeile ohne Ende" );
+
+                    ]]>
+                </script>
+                <run_time once="yes" repeat="1"/>
+            </job>
+
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off

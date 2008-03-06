@@ -1215,7 +1215,7 @@ bool Task::do_something()
 
                                 if( _job->_history.min_steps() == 0 )  _history.start();
 
-                                if( !dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )      // Der Remote_module_instance_server protokolliert selbst
+                                //if( !dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )      // Der Remote_module_instance_server protokolliert selbst
                                 {
                                     _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
                                     _file_logger->add_file( _module_instance->stderr_path(), "stderr" );

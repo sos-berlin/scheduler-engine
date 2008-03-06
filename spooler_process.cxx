@@ -503,6 +503,9 @@ void Process::fill_connection( object_server::Connection* connection )
         {
             stdin_xml_writer.set_attribute( "stdout_path", c->stdout_path() );
             stdin_xml_writer.set_attribute( "stderr_path", c->stderr_path() );
+
+            if( _log_stdout_and_stderr )
+                stdin_xml_writer.set_attribute( "log_stdout_and_stderr", "yes" );
         }
 
         if( _environment )  

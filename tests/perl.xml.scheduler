@@ -7,6 +7,9 @@
 
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
+        <process_classes>
+            <process_class name="remote" remote_scheduler="localhost:6360"/>
+        </process_classes>
 
         <jobs>
             <job name="start">
@@ -38,12 +41,19 @@ use strict;
                 <run_time once="no"/>
             </job>
 
-            <job name="fehler">
+            <job name="fehler" process_class="remote">
                 <script language="perl">
+    <![CDATA[
+    
+for( $i = 1; $i < 100; $i++ )
+{
+    print( "$i. PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL\n" );
+}
 
-print ( "PERL PERL\n" );
+print ( "PERL PERL ohne Zeilenende" );
 #fehler1();
 #die;
+                    ]]>
                     <include file="${SCHEDULER_TEST}/expect.pl"
 
  />

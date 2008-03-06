@@ -36,10 +36,9 @@ File_logger::~File_logger()
 
 void File_logger::add_file( const File_path& path, const string& prefix )
 {
-    Z_LOG2( "joacim", Z_FUNCTION << " " << path << " (" << prefix << ")\n" );
-
     if( path != "" )  
     {
+        Z_LOG2( "joacim", Z_FUNCTION << "(\"" << path << "\",\"" << prefix << "\")\n" );
         _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, prefix ) ) );
     }
 }
@@ -111,6 +110,29 @@ bool File_logger::flush()
     bool   something_done = false;
     string s;
 
+    if( has_files() )
+    {
+        if( log_category_is_set( "joacim" ) )
+        {
+            fprintf( stdout, "\n{joacim}---------stdout---------%s()\n", Z_FUNCTION.c_str() );
+            fprintf( stderr, "\n{joacim}---------stderr---------%s()\n", Z_FUNCTION.c_str() );
+        }
+
+        fflush( stdout );
+        fflush( stderr );
+
+        //#ifdef Z_WINDOWS
+        //    _commit( fileno( stdout ) );        // Debug-assert(), wenn Datei nicht geöffnet
+        //    _commit( fileno( stderr ) );        // Debug-assert(), wenn Datei nicht geöffnet
+        //#else
+        //    fsync( fileno( stdout ) );
+        //    fsync( fileno( stderr ) );
+        //#endif
+
+        // Die Ausgaben von PerlScript gehen verloren. In welchem Puffer stehen die?
+    }
+
+
     Z_FOR_EACH( File_line_reader_list, _file_line_reader_list, it )
     {
         File_line_reader* file_line_reader = *it;
@@ -134,6 +156,7 @@ bool File_logger::flush()
             something_done |= log_lines( s );
         }
     }
+
 
     // Nicht rufen, wenn wir in eigenem Thread sind:  close();
 
@@ -233,17 +256,26 @@ string File_logger::File_line_reader::read_lines()
     if( _file.opened()  &&  _file.length() > _read_length )
     {
         _file.seek( _read_length );
+
         lines = _file.read_string( max_line_length );
-        size_t nl = lines.rfind( '\n' );
+
+        size_t nl  = lines.rfind( '\n' );
+        size_t end;
 
         if( nl == string::npos )    // Kein \n
         {
             if( lines.length() < max_line_length )  lines = "";    // Mehr Text als max_line_length wird umgebrochen
             nl = lines.length();
+            end = nl;
         }
+        else
+            end = nl + 1;
 
-        lines.erase( nl );
-        _read_length += lines.length();
+        int before_end = nl;
+        if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
+
+        lines.erase( before_end );
+        _read_length += end;
     }
 
     return lines;

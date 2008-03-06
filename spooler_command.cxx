@@ -651,14 +651,15 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    int  tcp_port = start_task_element. int_getAttribute( "tcp_port" );
-    string kind   = start_task_element.     getAttribute( "kind" );
+    int  tcp_port = start_task_element.int_getAttribute( "tcp_port" );
+    string kind   = start_task_element.    getAttribute( "kind" );
 
 
     ptr<Process> process = Z_NEW( Process( _spooler ) );
 
     process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
     process->set_run_in_thread( kind == "process" );
+    process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
     process->start();
 
 

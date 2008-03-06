@@ -43,7 +43,7 @@ Remote_module_instance_server::~Remote_module_instance_server()
     {
         close__end();  // Synchron
     }
-    catch( exception& ) {}
+    catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
 }
 
 //--------------------------------------------------------Remote_module_instance_server::close__end
@@ -199,6 +199,15 @@ Com_remote_module_instance_server::Com_remote_module_instance_server( com::objec
 
 Com_remote_module_instance_server::~Com_remote_module_instance_server()
 {
+    if( _server )
+    {
+        try
+        {
+            _server->close__end();  // Synchron
+        }
+        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+    }
+
     if( _file_logger )  
     {
         try
@@ -531,12 +540,20 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
             _file_logger = Z_NEW( File_logger( _log ) );
             _file_logger->set_object_name( "Com_remote_module_instance_server" );   // Nur zur Info
             
-            _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stdout_path" ), "stdout" );
-            _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stderr_path" ), "stderr" );
-            // Entweder die oberen beiden oder die unteren beiden sind gültig, also nicht "". Die unteren bei Process_module_instance
-            _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );  // Process_module_instance::begin__start() hat die Dateien angelegt
-            _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
-            
+            if( _class_data->_task_process_element.bool_getAttribute( "log_stdout_and_stderr", false ) )
+            {
+                _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stdout_path" ), "stdout" );
+                _file_logger->add_file( _class_data->_task_process_element.getAttribute( "stderr_path" ), "stderr" );
+            }
+            else
+            {
+                //// Entweder die oberen beiden oder die unteren beiden sind gültig, also nicht "". Die unteren bei Process_module_instance
+
+                // Nur, wenn _module_instance eigene Dateien hat (sonst ""). So im remote_scheduler
+                _file_logger->add_file( _server->_module_instance->stdout_path(), "stdout" );  // Process_module_instance::begin__start() hat die Dateien angelegt
+                _file_logger->add_file( _server->_module_instance->stderr_path(), "stderr" );
+            }
+
             if( _file_logger->has_files() )  _file_logger->start_thread();
 
             // Bei einer Exception in dieser Methode Begin() bekommt Task::do_something() ok=false zurück und

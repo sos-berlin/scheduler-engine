@@ -129,6 +129,7 @@ struct Process : zschimmer::Object, Scheduler_object
     void                    set_environment                 ( const Com_variable_set& env )         { _environment = new Com_variable_set( env ); }
   //void                    set_environment_string          ( const string& env )                   { _environment_string = env;  _has_environment = true; }
     void                    set_run_in_thread               ( bool b )                              { _run_in_thread = b; }
+    void                    set_log_stdout_and_stderr       ( bool b )                              { _log_stdout_and_stderr = b; }
     Process_id                  process_id                  () const                                { return _process_id; }
     int                         pid                         () const;                               // Bei kind_process die PID des eigentlichen Prozesses, über Connection_to_own_server_thread
     Process_id                  remote_process_id           () const                                { return _remote_process_id; }
@@ -181,6 +182,7 @@ struct Process : zschimmer::Object, Scheduler_object
     ptr<Xml_client_connection>  _xml_client_connection;
     ptr<Close_operation>       _close_operation;
     Process_id                 _process_id;
+    bool                       _log_stdout_and_stderr;      // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
 };
 
 //----------------------------------------------------------------------Process_class_configuration
