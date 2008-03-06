@@ -112,11 +112,11 @@ bool File_logger::flush()
 
     if( has_files() )
     {
-        if( log_category_is_set( "joacim" ) )
-        {
-            fprintf( stdout, "\n{joacim}---------stdout---------%s()\n", Z_FUNCTION.c_str() );
-            fprintf( stderr, "\n{joacim}---------stderr---------%s()\n", Z_FUNCTION.c_str() );
-        }
+        //if( log_category_is_set( "joacim" ) )
+        //{
+        //    fprintf( stdout, "\n{joacim}---------stdout---------%s()\n", Z_FUNCTION.c_str() );
+        //    fprintf( stderr, "\n{joacim}---------stderr---------%s()\n", Z_FUNCTION.c_str() );
+        //}
 
         fflush( stdout );
         fflush( stderr );
