@@ -1565,6 +1565,8 @@ bool Task::do_something()
                                     // Siehe auch ~Process_module_instance
                                     Has_log* my_log = NULL; //_trying_deleting_files_until? NULL : _job->log();
 
+                                    // Folgendes könnte zusammengefasst werden mit Remote_task_close_command_response::async_continue_() als eigene Async_operation
+
                                     ok = _module_instance->try_delete_files( my_log );
                                     if( ok )
                                     {

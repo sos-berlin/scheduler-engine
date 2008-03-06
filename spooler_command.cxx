@@ -65,7 +65,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
   private:
     void                        write_file                  ( const string& what, const File_path& );
 
-    enum State { s_initial, s_waiting, s_finished };
+    enum State { s_initial, s_waiting, s_deleting_files, s_finished };
 
     Fill_zero                  _zero_;
     Process_id                 _process_id;
@@ -73,6 +73,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
     ptr<Communication::Connection>  _connection;
     ptr<Async_operation>       _operation;
     State                      _state;
+    double                     _trying_deleting_files_until;
 };
 
 //---------------------------Remote_task_close_command_response::Remote_task_close_command_response
@@ -132,17 +133,52 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
 
                 end_standard_response();
 
-                
-                _state = s_finished;
-
+                _state = s_deleting_files;    
 
                 if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _process_id );
 
-                _process    = NULL;
-                _connection = NULL;
-                
                 something_done = true;
             }
+        }
+        if( _state != s_deleting_files )  break;
+
+        case s_deleting_files:
+        {
+            bool ok = _process->try_delete_files( _process->log() );
+            if( !ok )
+            {
+                // Das könnte mit dem Code in Task (spooler_task.cxx) zusammengefasst werden, als eigene Async_operation
+                // Ebenso (aber synchron) mit Remote_module_instance_server::try_delete_files()
+
+                double now = double_from_gmtime();
+
+                if( !_trying_deleting_files_until )  
+                {
+                    string paths = join( ", ", _process->undeleted_files() );
+                    if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
+                }
+
+                if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
+                {
+                    string paths = join( ", ", _process->undeleted_files() );
+                    if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
+                    //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
+                    _state = s_finished;
+                }
+                else
+                {
+                    if( !_trying_deleting_files_until )  _trying_deleting_files_until = now + delete_temporary_files_delay;
+                    set_async_next_gmtime( min( now + delete_temporary_files_retry, _trying_deleting_files_until ) );
+                }
+            }
+            else
+            {
+                _process    = NULL;
+                _connection = NULL;
+                _state      = s_finished;
+            }
+
+            something_done = true;
             break;
         }
 

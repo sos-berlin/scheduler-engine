@@ -1006,7 +1006,7 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
 
     switch( _db.dbms_kind() )
     {
-        case dbms_access:
+        case dbms_access:         // Die Anweisung ist wirkungslos (eMail von Ghassan Beydoun 2007-03-06 12:53)
         case dbms_sql_server:
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
             break;

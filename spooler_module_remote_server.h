@@ -23,6 +23,7 @@ struct Remote_module_instance_server : Com_module_instance_base
 
     Fill_zero                  _zero_;
     ptr<Module_instance>       _module_instance;
+    ptr<File_logger>           _file_logger;
     Fill_end                   _end_;
 };
 
@@ -68,7 +69,6 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     ptr<Class_data>               _class_data;
     ptr<Com_log_proxy>            _log;
   //bool                          _log_stdout_stderr;
-    ptr<File_logger>              _file_logger;
 };
 
 //-------------------------------------------------------------------------------------------------

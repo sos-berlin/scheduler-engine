@@ -12,7 +12,7 @@
         </process_classes>
         
         <jobs>
-
+<!--
             <job name="shell">
                 <script language="shell">@echo off
 type s:\01-ff.txt                
@@ -64,7 +64,7 @@ print( "Zeile ohne Ende" );
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+-->
             <job name="remote_shell" process_class="remote">
                 <script language="shell">
                     @echo off
@@ -81,7 +81,7 @@ print( "Zeile ohne Ende" );
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+<!--
             <job name="remote_api" process_class="remote">
                 <script language="javascript">
                     <![CDATA[
@@ -98,7 +98,7 @@ stderr.put_line( "stderr fertig." );
                 </script>
                 <run_time once="yes" repeat="1"/>
             </job>
-
+-->
         </jobs>
     </config>
 </spooler>

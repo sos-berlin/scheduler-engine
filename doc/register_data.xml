@@ -610,7 +610,6 @@
     <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#option_exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive' type='definition'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='Kommandozeilenoptionen'  register_keyword='exclusive'/>
-    <register_entry register_file='distributed_orders.xml#use_option__exclusive' register_title='Verteilte Aufträge'  register_keyword='exclusive'/>
     <register_entry register_file='settings.xml#use_option__exclusive' register_title='Einstellungen'  register_keyword='exclusive'/>
     <register_entry register_file='xml/cluster.xml#use_option__exclusive' register_title='&lt;cluster&gt; (Konfiguration)'  register_keyword='exclusive'/>
     <register_entry register_file='xml/config.xml#use_option__exclusive' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='exclusive'/>
