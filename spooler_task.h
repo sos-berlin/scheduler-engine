@@ -173,6 +173,7 @@ struct Task : Object,
     string                      trigger_files               () const                                { return _trigger_files; }
     Order*                      order                       ()                                      { return _order; }
     pid_t                       pid                         () const                                { return _module_instance? _module_instance->pid() : 0; }
+    Xc_copy                     error                       ()                                      { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
     
 
   protected:
@@ -223,7 +224,6 @@ struct Task : Object,
     void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
-    Xc_copy                     error                       ()                                     { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
     void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
 
     void                    set_next_time                   ( const Time& );

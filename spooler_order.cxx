@@ -3745,6 +3745,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
         order->assert_task( Z_FUNCTION );
         order->_is_success_state = true;
+        order->_task_error = NULL;
     }
 
     return order;
@@ -4330,6 +4331,13 @@ void Order::db_update_order_step_history_record( Transaction* ta )
         
         update[ "end_time"   ].set_datetime( Time::now().as_string( Time::without_ms ) );
       //update[ "state_text" ] = state_text();
+        update[ "error"      ] = _task_error != NULL;
+
+        if( _task_error )
+        {
+            if( !_task_error.code().empty() )  update[ "error_code" ] = _task_error->code();
+            if( !_task_error.what().empty() )  update[ "error_text" ] = string( _task_error->what() ).substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04
+        }
 
         ta->execute_single( update, Z_FUNCTION );
     }
@@ -4732,9 +4740,19 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
         tip_own_job_for_new_distributed_order_state();
     }
     else
-    if( finished() )  
+    if( _spooler->_db->opened()  &&  _history_id )
     {
-        db_update_order_history_record( outer_transaction );
+        for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
+        {
+            if( update_option == update_and_release_occupation  &&  _step_number )
+                db_update_order_step_history_record( &ta );
+
+            if( finished() )  
+                db_update_order_history_record( &ta  );
+    
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", "order history", x ), Z_FUNCTION ); }
     }
 
     return update_ok;
@@ -6317,7 +6335,7 @@ void Order::postprocessing2( Job* last_job )
     }
 
 
-    if( _job_chain  &&  _is_in_database )
+    if( _job_chain )  // 2008-03-07  &&  _is_in_database )
     {
         try
         {

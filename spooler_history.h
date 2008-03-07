@@ -21,6 +21,10 @@ namespace sos {
 namespace scheduler {
 namespace database {
 
+//--------------------------------------------------------------------------------------------const
+
+extern const int                max_column_length;
+
 //-----------------------------------------------------------------------------------Archive_switch
 
 enum Archive_switch

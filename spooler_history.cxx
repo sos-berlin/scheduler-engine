@@ -39,6 +39,7 @@ const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Da
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
 const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
+const int max_column_length = 249;      // Für MySQL 249 statt 250. jz 7.1.04
 
 //-------------------------------------------------------------------------------------------------
 
@@ -892,22 +893,27 @@ void Database::create_tables_when_needed()
     {
         Transaction ta ( this );
 
-        create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
+        bool created = create_table_when_needed( &ta, _spooler->_order_step_history_tablename, S() <<
                                 "`history_id`"  " integer"      " not null,"             // Primärschlüssel
                                 "`step`"        " integer"      " not null,"             // Primärschlüssel
                                 "`task_id`"     " integer"      " not null,"
                                 "`state`"       " varchar(100)" " not null,"
                                 "`start_time`"  " datetime"     " not null,"
                                 "`end_time`"    " datetime"        << null << ","
+                                "`error`"       " boolean"         << null << ","
+                                "`error_code`"  " varchar(50)"     << null << ","
+                                "`error_text`"  " varchar(250)"    << null << ","
                                 "primary key( `history_id`, `step` )" );
 
-        //if( created )
-        //{
-        //    ta.intermediate_commit( Z_FUNCTION ); 
-        //    string cmd = S() << "ALTER TABLE " << _spooler->_order_history_tablename << " alter column `end_time` drop not null";    // War vorher "not null" (JS-150)
-        //    _log->info( cmd );
-        //    ta.execute( cmd, Z_FUNCTION );
-        //}
+        if( created )
+        {
+        }
+        else
+        {
+            bool         added = add_column( &ta, _spooler->_order_step_history_tablename, "error"     , "add `error` boolean"           );
+            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_code", "add `error_code` varchar(250)" );
+            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_text", "add `error_text` varchar(250)" );
+        }
 
         ta.commit( Z_FUNCTION );
     }
@@ -2391,7 +2397,7 @@ void Task_history::write( bool start )
                         update[ "error"      ] = _task->has_error();
 
                         if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
-                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, 249 );    // Für MySQL 249 statt 250. jz 7.1.04
+                        if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04
 
                         if( _extra_record.type() )
                         {

@@ -193,6 +193,7 @@ struct Order : Com_order,
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();
+    void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
 
     // Auftrag in einer Jobkette:
     enum Job_chain_stack_option { jc_remove_from_job_chain_stack, jc_leave_in_job_chain_stack };
@@ -321,6 +322,7 @@ struct Order : Com_order,
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     bool                       _setback_called;
+    Xc_copy                    _task_error;
 
     bool                       _is_distribution_inhibited;
     bool                       _is_in_database;

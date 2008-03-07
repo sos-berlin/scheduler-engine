@@ -10,6 +10,16 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-03-07" version="2.0.201" subversion_revision="5678">
+        <revision jira="JS-150" type="new" title="Neue Spalten ERROR, ERROR_CODE und ERROR_TEXT in der Auftragsschritthistorie">
+            <description>
+                <p>
+                    Bei einem Task-Fehler werden die neuen Felder der Tabelle <code>SCHEDULER_ORDER_STEP_HISTORY</code> gefüllt.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-02-28" version="2.0.201" subversion_revision="5671">
         <revision type="new" title="Attribut day= lässt bereits angegebene Tage zu">
             <description>
