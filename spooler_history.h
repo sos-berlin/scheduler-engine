@@ -92,7 +92,10 @@ struct Database : Object, Scheduler_object //Subsystem
   //void                        run_create_table_script ();
     void                        check_database          ();
     void                        create_tables_when_needed();
-    bool                        create_table_when_needed( Transaction*, const string& tablename, const string& fields );
+    bool                        create_table_when_needed( Transaction*, const string& table_name, const string& fields );
+    void                        recreate_table          ( Transaction*, const string& table_name, const string& column_definitions, const string& primary_key );
+    void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
+
     time_t                      reopen_time             () const                                    { return _reopen_time; }
 
     Fill_zero                  _zero_;

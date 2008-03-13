@@ -4167,7 +4167,13 @@
                 <title>Local configuration file is ignored, the central configuration file is used instead</title>
             </text>
         </message>
-        
+
+        <!--message code="SCHEDULER-704">
+            <text xml:lang="en">
+                <title>Database table <p1/> is being rebuild</title>
+            </text>
+        </message-->
+
         <!--message code="SCHEDULER-703">
             <text xml:lang="en">
                 <title>Column '<p2/>' is being changed to accept null in database table '<p1/>': cmd</title>

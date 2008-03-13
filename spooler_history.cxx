@@ -831,30 +831,26 @@ void Database::create_tables_when_needed()
     ////////////////////////////
 
     {
-        bool created;
+        bool   created;
+        string primary_key        = "`history_id`";
+        string column_definitions = S() <<
+            "`history_id`"  " integer"      " not null,"             // Primärschlüssel
+            "`job_chain`"   " varchar(250)" " not null,"
+            "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
+            "`spooler_id`"  " varchar(100)" " not null,"
+            "`title`"       " varchar(200)"    << null << ","
+            "`state`"       " varchar(100)"    << null << ","
+            "`state_text`"  " varchar(100)"    << null << ","
+            "`start_time`"  " datetime"     " not null,"
+            "`end_time`"    " datetime"        << null << ","
+            "`log`"         " blob"            << null;
+        
 
         {
             Transaction ta ( this );
 
-            created = create_table_when_needed( &ta, _spooler->_order_history_tablename, S() <<
-                                "`history_id`"  " integer"      " not null,"             // Primärschlüssel
-                                "`job_chain`"   " varchar(250)" " not null,"
-                                "`order_id`"    " varchar(" << const_order_id_length_max << ")" " not null,"
-                                "`spooler_id`"  " varchar(100)" " not null,"
-                                "`title`"       " varchar(200)"    << null << ","
-                                "`state`"       " varchar(100)"    << null << ","
-                                "`state_text`"  " varchar(100)"    << null << ","
-                                "`start_time`"  " datetime"     " not null,"
-                                "`end_time`"    " datetime"        << null << ","
-                                "`log`"         " blob"            << null << ","
-                                "primary key( `history_id` )" );
-
-            if( created )
-            {
-                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`"            , Z_FUNCTION );
-                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`, `order_id`" , Z_FUNCTION );
-                ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_START_TIME", "SCHED_O_HIST_3", "`start_time`"            , Z_FUNCTION );
-            }
+            created = create_table_when_needed( &ta, _spooler->_order_history_tablename, 
+                                                S() << column_definitions << ", primary key( " << primary_key << " )" );
 
             ta.commit( Z_FUNCTION );
         }
@@ -863,7 +859,7 @@ void Database::create_tables_when_needed()
         {
             try
             {
-                Transaction ta ( this );                                                    // JS-150
+                Transaction ta ( this );                                                    // JS-150, Spalte end_time soll null aufnehmen können
 
                 sql::Insert_stmt insert ( ta.database_descriptor() );
 
@@ -881,10 +877,30 @@ void Database::create_tables_when_needed()
             }
             catch( exception& )
             {
-                Transaction ta ( this );
-                alter_column_allow_null( &ta, _spooler->_order_history_tablename, "end_time", "datetime" );
-                ta.commit( Z_FUNCTION );
+                //if( _db.dbms_kind() == dbms_access )
+                //{
+                //    Transaction ta ( this );
+                //    ta.intermediate_commit( Z_FUNCTION );
+                //    recreate_table( &ta, _spooler->_order_history_tablename, column_definitions, primary_key );
+                //    ta.commit( Z_FUNCTION );
+                //    created = true;
+                //}
+                //else
+                //{
+                    Transaction ta ( this );
+                    alter_column_allow_null( &ta, _spooler->_order_history_tablename, "end_time", "datetime" );
+                    ta.commit( Z_FUNCTION );
+                //}
             }
+        }
+
+        if( created )
+        {
+            Transaction ta ( this );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_SPOOLER_ID", "SCHED_O_HIST_1", "`spooler_id`"            , Z_FUNCTION );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_JOB_CHAIN" , "SCHED_O_HIST_2", "`job_chain`, `order_id`" , Z_FUNCTION );
+            ta.create_index( _spooler->_order_history_tablename, "SCHEDULER_O_HISTORY_START_TIME", "SCHED_O_HIST_3", "`start_time`"            , Z_FUNCTION );
+            ta.commit( Z_FUNCTION );
         }
     }
 
@@ -973,6 +989,24 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
     return result;
 }
 
+//-------------------------------------------------------------------------Database::recreate_table
+// Wird nicht benutzt.
+
+void Database::recreate_table( Transaction* ta, const string& tablename, const string& column_definitions, const string& primary_key )
+{
+    //log()->info( message_string( "SCHEDULER-704", tablename ) );
+
+    string copy_tablename = tablename + "_copy";
+
+    ta->execute( S() << "CREATE TABLE " << copy_tablename << " ( " << column_definitions << " )", Z_FUNCTION );
+    ta->execute( S() << "INSERT into " << copy_tablename << " select *  from " << tablename     , Z_FUNCTION );
+    ta->execute( S() << "DROP TABLE " << tablename                                              , Z_FUNCTION );
+
+    ta->execute( S() << "CREATE TABLE " << tablename << " ( " << column_definitions << ", primary key( " << primary_key << " ) )", Z_FUNCTION );  // Besser: primary key nach insert einrichten
+    ta->execute( S() << "INSERT into " << tablename << " select *  from " << copy_tablename                                      , Z_FUNCTION );
+    ta->execute( S() << "DROP TABLE " << copy_tablename                                                                          , Z_FUNCTION );
+}
+
 //-----------------------------------------------------------------------------Database::add_column
 
 bool Database::add_column( Transaction* ta, const string& table_name, const string& column_name, const string add_clause )
@@ -1013,6 +1047,17 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
     switch( _db.dbms_kind() )
     {
         case dbms_access:         // Die Anweisung ist wirkungslos (eMail von Ghassan Beydoun 2007-03-06 12:53)
+        {
+            // Access kann NULL nicht wegnehmen. Und kann auch Spalten nicht umbenennen. Deshalb kopieren wir zweimal:
+
+            string column_copy_name = column_name + "_copy";
+            rename_column( ta, table_name, column_name, column_copy_name, type );
+            rename_column( ta, table_name, column_copy_name, column_name, type );
+            result = true;
+            break;
+        }
+
+
         case dbms_sql_server:
             cmd << "ALTER TABLE " << table_name << " alter column `" << column_name << "` " << type << " null";
             break;
@@ -1050,6 +1095,25 @@ bool Database::alter_column_allow_null( Transaction* ta, const string& table_nam
     }
 
     return result;
+}
+
+//--------------------------------------------------------------------------Database::rename_column
+
+void Database::rename_column( Transaction* ta, const string& table_name, const string& column_name, const string& new_column_name, const string& type )
+{
+    switch( _db.dbms_kind() )
+    {
+        case dbms_access:         // Die Anweisung ist wirkungslos (eMail von Ghassan Beydoun 2007-03-06 12:53)
+        {
+            ta->execute( S() << "ALTER TABLE " << table_name << " add column `" << new_column_name << "` " << type << " null", Z_FUNCTION );
+            ta->execute( S() << "UPDATE `" << table_name << "` set `" << new_column_name << "`=`" << column_name << "`"      , Z_FUNCTION );
+            ta->execute( S() << "ALTER TABLE " << table_name << " drop column `" << column_name << "`"                       , Z_FUNCTION );
+            break;
+        }
+
+        default:
+            z::throw_xc( Z_FUNCTION );
+    }
 }
 
 //---------------------------------------------------------------------Database::column_is_nullable

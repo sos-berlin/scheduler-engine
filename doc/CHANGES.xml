@@ -10,6 +10,20 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-03-13" version="2.0.201" subversion_revision="5679">
+        <revision jira="JS-150" type="new" title="Anpassung der Spalte SCHEDULER_ORDER_HISTORY.END_TIME in einer Access-Datenbank">
+            <description>
+                <p>
+                    Die Datenbank-Spalte <code>SCHEDULER_ORDER_HISTORY.END_TIME</code> muss mit JS-150 <code>NULL</code> aufnehmen können.
+                    Der Scheduler prüft das beim Start und ändert die Spalte.
+                    Access verlangt dazu ein besonders Verfahren: Der Scheduler legt eine Kopie der Spalte an, die er dann in die erneuerte zurückkopiert.
+                    Diese Operation, die einmal beim Start des Schedulers durchgeführt wird,
+                    sollte nicht unterbrochen werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-03-07" version="2.0.201" subversion_revision="5678">
         <revision jira="JS-150" type="new" title="Neue Spalten ERROR, ERROR_CODE und ERROR_TEXT in der Auftragsschritthistorie">
             <description>

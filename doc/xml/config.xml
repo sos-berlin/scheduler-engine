@@ -103,7 +103,7 @@
                         <tr>
                             <td style="padding-right: 2ex"><code>scheduler_live_event</code></td>
                             <td>
-                                <code>"add"</code> (<code>"modify"</code> bzw. <code>"delete"</code> für die anderen Attribute)
+                                <code>"add"</code> (<code>"modified"</code> bzw. <code>"delete"</code> für die anderen Attribute)
                             </td>
                         </tr>
                         <tr>
