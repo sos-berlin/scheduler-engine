@@ -2,6 +2,12 @@
      process_class="single"
 >
 
+    <description>
+        TEST
+        <include live_file="/check.js"/>
+        TEST
+    </description>
+
     <params>
         <param name="a" value="job"/>
         <param name="b" value="job"/>
