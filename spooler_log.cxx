@@ -572,6 +572,29 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
     }
 }
 
+//-------------------------------------------------------Prefix_log::Open_and_close::Open_and_close
+
+Prefix_log::Open_and_close::Open_and_close( Prefix_log* log )
+:
+    _log(NULL)
+{
+    if( log->_open_and_close_every_line  &&  log->is_active()  &&  log->_file == -1 )
+    {
+        _log = log;
+        _log->open_file();
+    }
+}
+
+//------------------------------------------------------Prefix_log::Open_and_close::~Open_and_close
+    
+Prefix_log::Open_and_close::~Open_and_close()
+{
+    if( _log  &&  _log->_open_and_close_every_line )
+    {
+        _log->close_file();
+    }
+}
+
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
 Prefix_log::Prefix_log( int )
@@ -703,61 +726,63 @@ void Prefix_log::set_new_filename( const string& filename )
 
 void Prefix_log::open()
 {
-    //2005-09-22  reset_highest_level();
-    //2005-09-22  _highest_msg = "";
-    
-    _closed = false;
-
-    if( _file != -1 )  return; //z::throw_xc( "SCHEDULER-134", _filename );
-
-    if( !_filename.empty() )
+    if( !is_active() )
     {
-#       ifdef Z_DEBUG
-            if( string_begins_with( file::File_path( _filename ).name(), "order." )  &&  file::File_path( _filename ).file_exists() )
-            {
-                File_path line_for_breakpoint;
-            }
-#       endif
+        //2005-09-22  reset_highest_level();
+        //2005-09-22  _highest_msg = "";
+        
+        _is_finished = false;
 
-        Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
+        if( _file != -1 )  return; //z::throw_xc( "SCHEDULER-134", _filename );
 
-        while(1)
+        if( !_filename.empty() )
         {
-            _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
-            if( _file != -1 )  break;
-            
-            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "protocol file" );
-            io_error( _spooler, _filename );
+            #ifdef Z_DEBUG
+                if( string_begins_with( file::File_path( _filename ).name(), "order." )  &&  file::File_path( _filename ).file_exists() )
+                {
+                    File_path line_for_breakpoint;
+                }
+            #endif
+
+            Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
+
+            open_file();
+
+            _instance_number++;
+
+            if( !_log_buffer.empty() )
+            {
+                write( _log_buffer.c_str(), _log_buffer.length() );
+                _log_buffer = "";
+
+                if( !_is_logging_continuing )
+                {
+                    string msg = "\n";
+                    if( _title != "" )  msg += _title + " - ";
+                    log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
+                }
+            }
+
+            if( _open_and_close_every_line )  
+            {
+                close_file();
+                _append = true;
+            }
         }
 
-        _instance_number++;
-
-        if( !_log_buffer.empty() )
-        {
-            write( _log_buffer.c_str(), _log_buffer.length() );
-            _log_buffer = "";
-
-            if( !_is_logging_continuing )
-            {
-                string msg = "\n";
-                if( _title != "" )  msg += _title + " - ";
-                log( log_info, msg + "Protocol starts in " + _filename );       // "SCHEDULER-961"
-            }
-        }
+        _started = true;
     }
-
-    _started = true;
 }
 
 //--------------------------------------------------------------------------------Prefix_log::close
 
 void Prefix_log::close()
 {
-    _closed = true;
+    _is_finished = true;
 
     if( _file != -1 )  
     {
-        close_file();
+        finish_log();
 
         /*
         try
@@ -785,9 +810,9 @@ void Prefix_log::close()
     _events.clear();
 }
 
-//---------------------------------------------------------------------------Prefix_log::close_file
+//---------------------------------------------------------------------------Prefix_log::finish_log
 
-void Prefix_log::close_file()
+void Prefix_log::finish_log()
 {
     if( _file != -1 )  
     {
@@ -796,16 +821,7 @@ void Prefix_log::close_file()
         }
         catch( const exception& ) {}
 
-        try
-        {
-            //Z_LOG2( "scheduler", "close(" << _file << ")\n" );
-
-            int ret = ::close( _file );
-            if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
-        }
-        catch( const exception& x ) { _spooler->log()->error( string("Error when closing protocol file: ") + x.what() ); }
-
-        _file = -1;
+        close_file();
 
         if( !_new_filename.empty() )
         {
@@ -817,6 +833,44 @@ void Prefix_log::close_file()
         }
 
         signal_events();
+    }
+}
+
+//----------------------------------------------------------------------------Prefix_log::open_file
+
+void Prefix_log::open_file()
+{
+    assert( _file == -1 );
+
+    if( _file == -1 )
+    {
+        while(1)
+        {
+            _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+            if( _file != -1 )  break;
+            
+            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "protocol file" );
+            io_error( _spooler, _filename );
+        }
+    }
+}
+
+//---------------------------------------------------------------------------Prefix_log::close_file
+
+void Prefix_log::close_file()
+{
+    if( _file != -1 )
+    {
+        try
+        {
+            //Z_LOG2( "scheduler", "close(" << _file << ")\n" );
+
+            int ret = ::close( _file );
+            if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
+        }
+        catch( const exception& x ) { _spooler->log()->error( string("Error when closing protocol file: ") + x.what() ); }
+            
+        _file = -1;
     }
 }
 
@@ -1058,7 +1112,8 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( Scheduler_event* scheduler_event )
 {
-    if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+    if( !is_active()  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+  //if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         //Z_LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
@@ -1076,7 +1131,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
 
         //if( _first_send == 0  &&  !mail_it )
         //{
-        //    close_file();    // Protokoll nicht senden
+        //    finish_log();    // Protokoll nicht senden
         //    _mail = NULL;
         //}
         //else
@@ -1097,7 +1152,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
                 // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
-                close_file();
+                finish_log();
                 //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
                 send_really( scheduler_event );
 
@@ -1204,7 +1259,11 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 
         bool log_to_files = level >= log_level();
 
-        _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
+        {
+            Open_and_close open_and_close ( this );
+
+            _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
+        }
     }
 }
 
@@ -1320,9 +1379,9 @@ xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, con
 
 void Prefix_log::continue_with_text( const string& text )
 {
-    if( opened() )
+    if( is_active() )
     {
-        z::throw_xc( Z_FUNCTION, "log file shall not be opened" );
+        z::throw_xc( Z_FUNCTION, "log shall not be active" );
     }
     else
     {

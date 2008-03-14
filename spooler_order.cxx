@@ -4173,7 +4173,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
     assert_no_task( Z_FUNCTION );   // Vorsichtshalber
     
 
-    if( !_log->opened() )  open_log();
+    if( !_log->is_active() )  open_log();
 
     if( _delay_storing_until_processing  &&  _job_chain  &&  _job_chain->_orders_are_recoverable  &&  !_is_in_database  &&  db()->opened() )
     {
@@ -4815,7 +4815,7 @@ void Order::db_fill_stmt( sql::Write_stmt* stmt )
 void Order::close_log_and_write_history()
 {
     _end_time = Time::now();
-    _log->close_file();
+    _log->finish_log();
     
     if( _job_chain  &&  _spooler->_db  &&  _spooler->_db->opened() ) 
     {
@@ -5084,7 +5084,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         else
         if( e.nodeName_is( "log" ) )
         {
-            assert( !_log->opened() );
+            assert( !_log->is_active() );
             _log->continue_with_text( e.text() );
         }
         else
@@ -5169,7 +5169,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _created )
         result.setAttribute( "created"   , _created.as_string() );
 
-        if( _log->opened() )
+        if( _log->is_active() )
         result.setAttribute( "log_file"  , _log->filename() );
 
         if( _is_in_database  &&  _job_chain_path != ""  &&  !_job_chain )

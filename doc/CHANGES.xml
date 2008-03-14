@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-03-14" version="2.0.201" subversion_revision="5681">
+        <revision type="modification" title="Jobprotokolldatei wird nicht mehr offengehalten">
+            <description>
+                <p>
+                    Wenn der Scheduler etwas ins Jobprotokoll schreibt, 
+                    öffnet er die Datei zuvor und schließt sie danach wieder.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-03-13" version="2.0.201" subversion_revision="5679">
         <revision jira="JS-150" type="new" title="Anpassung der Spalte SCHEDULER_ORDER_HISTORY.END_TIME in einer Access-Datenbank">
             <description>

@@ -54,7 +54,18 @@ struct Log
 
 struct Prefix_log : Object, Has_log
 {
+    struct Open_and_close
+    {
+                                Open_and_close              ( Prefix_log* );
+                               ~Open_and_close              ();
+
+      private:
+        Prefix_log*            _log;
+    };
+
+
     Fill_zero _zero_;
+
 
                                 Prefix_log                  ( int );                            // Für Spooler
                                 Prefix_log                  ( Scheduler_object* );
@@ -63,12 +74,15 @@ struct Prefix_log : Object, Has_log
     void                        init                        ( Scheduler_object*, const string& prefix = empty_string );
     void                        open                        ();
     void                        close                       ();
-    void                        close_file                  ();
+    void                        finish_log                  ();
     void                        remove_file                 ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
-    bool                        opened                      () const                            { return _file != -1; }
-    bool                        closed                      () const                            { return _closed; }
+    bool                        is_active                   () const                            { return _started && !_is_finished; }
+    //bool                        opened                      () const                            { return _file != -1; }
+    //bool                        closed                      () const                            { return _closed; }
+    bool                        is_finished                 () const                            { return _is_finished; }
     bool                        is_stderr                   () const                            { return _file == fileno(stderr); }
+    void                    set_open_and_close_every_line   ( bool b )                          { _open_and_close_every_line = b; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -169,7 +183,10 @@ struct Prefix_log : Object, Has_log
     bool                       _in_log;                     // log2() ist aktiv, Rekursion vermeiden!
 
   protected:
+    friend struct               Open_and_close;
 
+    void                        open_file                   ();
+    void                        close_file                  ();
     void                        write                       ( const char*, int );
   //void                        set_mail_header             ();
 
@@ -204,12 +221,14 @@ struct Prefix_log : Object, Has_log
     int                        _err_no;
     bool                       _started;                    // open() gerufen
     bool                       _closed;
+    bool                       _is_finished;
+    bool                       _open_and_close_every_line;
     bool                       _mail_defaults_set;
     bool                       _mail_on_warning;
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;
-    First_and_last           _mail_on_delay_after_error;
+    First_and_last             _mail_on_delay_after_error;
     bool                       _mail_it;
     ptr<Com_mail>              _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen

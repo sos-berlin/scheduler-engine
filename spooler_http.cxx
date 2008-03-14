@@ -1536,7 +1536,7 @@ bool Log_chunk_reader::next_chunk_is_ready()
                     }
                     else
                     {
-                        if( _log->closed() )
+                        if( _log->is_finished() )
                         {
                             _file.close();
                             _state = s_finished;

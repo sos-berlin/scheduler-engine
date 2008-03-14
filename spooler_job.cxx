@@ -416,6 +416,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     if( name != "" )  set_name( name );
 
     _log = Z_NEW( Prefix_log( this ) );
+    _log->set_open_and_close_every_line( true );
     set_log();
 
     _module = module? module : Z_NEW( Module( _spooler, this, _spooler->include_path() ) );
@@ -489,7 +490,7 @@ void Job::close()
         }
     }
 
-    _log->close_file();
+    _log->finish_log();
     _history.close();
     _log->close();
 
