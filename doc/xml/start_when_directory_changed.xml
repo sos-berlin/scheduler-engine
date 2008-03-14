@@ -34,6 +34,10 @@
                     Wenn Sie hier einen Regulären Ausdruck angeben,
                     werden nur Dateinamen beachtet, die ihm entsprechen.
                 </p>
+                <p>
+                    Das Löschen einer Datei, deren Namen dem Regulären Ausdruck entsprach,
+                    führt nicht zum Start des Jobs.
+                </p>
             </description>
         </xml_attribute>
 
