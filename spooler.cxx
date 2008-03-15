@@ -676,7 +676,7 @@ Spooler::Spooler()
     if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
-    if( !SOS_LICENCE( licence_scheduler ) )  z::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
 
     _pid = getpid();
 
