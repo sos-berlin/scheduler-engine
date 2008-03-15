@@ -473,8 +473,13 @@ void Job::close()
         catch( const exception& x ) { Z_LOG2( "scheduler", *task << ".kill() => " << x.what() << "\n" ); }
     }
 
-    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->job_close();
-    _running_tasks.clear();
+    for( Task_list::iterator t = _running_tasks.begin();  t != _running_tasks.end(); )
+    {
+        ptr<Task> task = *t;
+        task->job_close();
+        t = _running_tasks.erase( t );
+        task = NULL;        // ~Task()
+    }
 
 
     Z_FOR_EACH( Task_list, *_task_queue, t )  (*t)->job_close();
