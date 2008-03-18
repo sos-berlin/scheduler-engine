@@ -365,7 +365,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
 
     if( !show.is_set( show_for_database_only ) )
     {
+        if( _job )
         task_element.setAttribute( "job"             , _job->path() );
+
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
@@ -535,7 +537,7 @@ void Task::cmd_end( End_mode end_mode )
 
         if( _state == s_none )
         {
-            _job->kill_queued_task( _id );
+            if( _job )  _job->kill_queued_task( _id );
             // this ist hier möglicherweise ungültig!
         }
     }
@@ -608,14 +610,22 @@ void Task::set_error_xc( const zschimmer::Xc& x )
     if( _is_connection_reset_error  &&  !_non_connection_reset_error )  
     {
         S s;
-        if( _job->_ignore_every_signal )  
-            s << "all";
+
+        if( !_job )
+        {
+            s << "(no job)";
+        }
         else
         {
-            Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it )
+            if( _job->_ignore_every_signal )  
+                s << "all";
+            else
             {
-                if( s.length() > 0 )  s << " ";
-                s << signal_name_from_code( *it );
+                Z_FOR_EACH( stdext::hash_set<int>, _job->_ignore_signals_set, it )
+                {
+                    if( s.length() > 0 )  s << " ";
+                    s << signal_name_from_code( *it );
+                }
             }
         }
 
@@ -728,21 +738,24 @@ void Task::set_state( State new_state )
         }
 
 
-        if( _next_time && !_let_run )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
+        if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
         if( _end )  _next_time = 0;   // Falls vor set_state() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
 
         if( new_state != _state )
         {
-            if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
-            if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
+            if( _job  &&  _spooler->_task_subsystem )
+            {
+                if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
+                if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
+            }
 
             if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
             State old_state = _state;
             _state = new_state;
 
-            if( is_idle() )
+            if( is_idle()  &&  _job )
                 if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
 
 
@@ -800,7 +813,7 @@ void Task::signal( const string& signal_name )
         _signaled = true;
         set_next_time( 0 );
 
-        _spooler->_task_subsystem->signal( signal_name );
+        if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
     }
 }

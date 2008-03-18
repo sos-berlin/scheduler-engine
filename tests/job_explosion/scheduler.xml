@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <params>
+            <param name="n" value="2000"/>
+        </params>
+
+        <script language="perl">
+            <![CDATA[
+
+eval
+{
+    my $configuration_directory = $spooler->configuration_directory;
+    system( "rm -rf $configuration_directory/tmp/" );
+    mkdir "$configuration_directory/tmp/", 0755  or die;
+
+    my $n = $spooler->variables->value( "n" );
+
+    for( my $i = 1; $i <= $n; $i++ )
+    {
+        link $configuration_directory/clone.job.xml, $configuration_directory/tmp/$i.job.xml  or die;
+    }
+    
+    $spooler->execute_xml( "<check_folders/>" );
+};
+if( $@ )
+{
+    $spooler_log->error( $@ );
+}
+  
+        ]]>
+        </script>
+
+    </config>
+</spooler>
