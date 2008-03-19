@@ -23,7 +23,7 @@ eval
 
     for( my $i = 1; $i <= $n; $i++ )
     {
-        link $configuration_directory/clone.job.xml, $configuration_directory/tmp/$i.job.xml  or die;
+        link "$configuration_directory/clone.job.xml", "$configuration_directory/tmp/$i.job.xml"  or die;
     }
     
     $spooler->execute_xml( "<check_folders/>" );

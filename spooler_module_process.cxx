@@ -327,10 +327,8 @@ bool Process_module_instance::begin__end()
         _spooler->register_process_handle( _process_handle );
     }
 
-#   ifdef Z_WINDOWS
-        _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
-        _stderr_file.close();
-#   endif
+    _stdout_file.close();       // Schließen, damit nicht ein anderer Prozess die Handles erbt und damit das Löschen verhindert (ERRNO-13 Permission denied)
+    _stderr_file.close();
 
     return true;
 }
@@ -690,6 +688,9 @@ bool Process_module_instance::begin__end()
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;
     }
+
+    _stdout_file.close();
+    _stderr_file.close();
 
     //_operation = &dummy_sync_operation;
 
