@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-03-31" version="2.0.201" subversion_revision="5692">
+        <revision jira="JS-60" type="modification" title="&lt;script> &lt;/script> wirkt wie &lt;script/>">
+            <description>
+                <p>
+                    Leere Textknoten (nur Leerzeichen, Zeilenwechsel und Tabulator) im XML-Element <scheduler_element name="script"/> ignoriert der Scheduler.
+                    Wenn das XML-Element <code>&lt;script></code> nur einen leeren Textknoten enthält, gilt das als nicht angegebener Quell-Code.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-03-14" version="2.0.201" subversion_revision="5684">
         <revision type="modification" title="Jobprotokolldatei wird nicht mehr offengehalten">
             <description>
