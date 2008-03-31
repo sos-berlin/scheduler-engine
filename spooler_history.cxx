@@ -926,9 +926,9 @@ void Database::create_tables_when_needed()
         }
         else
         {
-            bool         added = add_column( &ta, _spooler->_order_step_history_tablename, "error"     , "add `error` boolean"           );
-            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_code", "add `error_code` varchar(250)" );
-            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_text", "add `error_text` varchar(250)" );
+            bool         added = add_column( &ta, _spooler->_order_step_history_tablename, "error"     , S() << "add `error` boolean" << null );
+            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_code", S() << "add `error_code` varchar(250)" << null );
+            if( added )  added = add_column( &ta, _spooler->_order_step_history_tablename, "error_text", S() << "add `error_text` varchar(250)" << null );
         }
 
         ta.commit( Z_FUNCTION );

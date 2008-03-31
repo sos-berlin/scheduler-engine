@@ -171,10 +171,16 @@ void Text_with_includes::append_dom( const xml::Element_ptr& element )
 
             TEXT:
             {
-                xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
+                const char* p = text.c_str();   
+                while( *p  &&  isspace( (unsigned char)*p ) )  p++;     // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
 
-                e.setAttribute( "linenr", linenr_base );
-              //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
+                if( *p )    // Nur nicht leeren Text berücksichtigen
+                {
+                    xml::Element_ptr e = _dom_document.documentElement().append_new_cdata_or_text_element( "source_part", text );
+
+                    e.setAttribute( "linenr", linenr_base );
+                  //e.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
+                }
 
                 linenr_base += count( text.begin(), text.end(), '\n' );
                 break;
@@ -305,15 +311,13 @@ bool Text_with_includes::is_empty() const
     if( !_dom_document )  return true;
     if( !_dom_document.documentElement().firstChild() )  return true;
 
-    
+    return !_dom_document.documentElement().first_child_element();
+
     // Jira JS-60: Die SOS schreibt gerne <script> </script>, was dasselbe sein soll wie <script/>.
-
-    if( _dom_document.documentElement().first_child_element() )  return false;
-
-    string text = _dom_document.documentElement().text();
-    const char* p = text.c_str();
-    while( *p  &&  isspace( (unsigned char)*p ) )  p++;
-    return *p == '\0';
+    //string text = _dom_document.documentElement().text();
+    //const char* p = text.c_str();
+    //while( *p  &&  isspace( (unsigned char)*p ) )  p++;
+    //return *p == '\0';
 }
 
 //-----------------------------------------------------------------------------------Module::Module
