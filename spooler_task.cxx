@@ -1264,6 +1264,7 @@ bool Task::do_something()
                             
                             if( _module_instance->process_has_signaled() )
                             {
+                                _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 set_state( s_ending );
                                 loop = true;
@@ -2399,6 +2400,7 @@ void Module_task::do_close__end()
     if( _module_instance )
     {
         _module_instance->close__end();
+        _file_logger->flush();
 
         int exit_code = _module_instance->exit_code();
         if( exit_code )
