@@ -51,6 +51,7 @@ public class My_job  extends sos.spooler.Job_impl
 {   
     public boolean spooler_process()  throws Exception
     {
+        Thread.sleep( 15*1000 );
         spooler_log.info( "HALLO 2" );
         return false;
     }
