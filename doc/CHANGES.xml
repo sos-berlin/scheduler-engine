@@ -10,6 +10,11 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-04-02" version="2.0.201" subversion_revision="5696">
+        <revision type="modification" title="Anpassungen an Sybase Adaptive Server Enterprise">
+        </revision>
+    </change>
+
     <change date="2008-03-31" version="2.0.201" subversion_revision="5692">
         <revision jira="JS-60" type="modification" title="&lt;script> &lt;/script> wirkt wie &lt;script/>">
             <description>
