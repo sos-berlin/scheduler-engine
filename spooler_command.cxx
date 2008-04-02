@@ -853,11 +853,11 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         if( history_id == "" )
         {
             Any_file sel = ta.open_result_set(
-                           " select max(\"HISTORY_ID\") as history_id_max "
+                           " select max(`history_id`) as history_id_max "
                            "  from " + _spooler->_order_history_tablename +
-                           "  where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
-                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_path.without_slash() ) +
-                            " and \"ORDER_ID\"="    + sql::quoted( id_string ),
+                           "  where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
+                            " and `job_chain`="   + sql::quoted( job_chain_path.without_slash() ) +
+                            " and `order_id`="    + sql::quoted( id_string ),
                             Z_FUNCTION );
 
             if( !sel.eof() )  history_id = sel.get_record().as_string( "history_id_max" );
@@ -866,9 +866,9 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         if( history_id != "" )  
         {
             S select_sql;
-            select_sql <<  "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+            select_sql <<  "select `order_id`, `start_time`, `title`, `state`, `state_text`"
                            "  from " << _spooler->_order_history_tablename <<
-                           "  where \"HISTORY_ID\"=" << history_id;
+                           "  where `history_id`=" << history_id;
             if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
 
             Any_file sel = ta.open_result_set( S() << select_sql, Z_FUNCTION );
@@ -879,7 +879,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
                 //order = Z_NEW( Order( _spooler, sel.get_record() );
                 order = new Order( _spooler );
-                order->set_id        ( record.as_string( "id"         ) );
+                order->set_id        ( record.as_string( "order_id"   ) );
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
                 order->set_title     ( record.as_string( "title"      ) );
@@ -888,8 +888,8 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
                 if( show.is_set( show_log ) )
                 {
-                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=\"LOG\"" 
-                                             " where \"HISTORY_ID\"=" << history_id );
+                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=log" 
+                                             " where `history_id`=" << history_id );
                 }
 
                 /* Payload steht nicht in der Historie

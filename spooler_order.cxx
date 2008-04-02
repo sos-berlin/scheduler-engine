@@ -1784,7 +1784,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
             Any_file sel = ta.open_result_set( S() <<
                            "select %limit(" << show_what._max_order_history << ")"
-                           " `order_id` as `id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
+                           " `order_id`, `history_id`, `job_chain`, `start_time`, `end_time`, `title`, `state`, `state_text`"
                            " from " << _spooler->_order_history_tablename <<
                            " where `job_chain`=" << sql::quoted( path().without_slash() ) <<
                              " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
@@ -1796,7 +1796,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                 Record record = sel.get_record();
 
                 ptr<Order> order = new Order( _spooler );
-                order->set_id        ( record.as_string( "id"         ) );
+                order->set_id        ( record.as_string( "order_id"   ) );
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
                 order->set_title     ( record.as_string( "title"      ) );
