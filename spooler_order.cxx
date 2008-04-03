@@ -3591,11 +3591,11 @@ void Order_queue::set_next_announced_distributed_order_time( const Time& t, bool
     
     //Z_DEBUG_ONLY( assert( is_now? t <= Time::now() : t > Time::now() ) );
 
-    if( is_now )
+    //if( is_now )
     {
         //_is_distributed_order_requested = false;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
+            if( Job* job = job_node->job_or_null() )  job->signal_earlier_order( t, obj_name(), Z_FUNCTION );
     }
 }
 
@@ -3633,7 +3633,7 @@ void Order_queue::tip_for_new_distributed_order()
     {
         _has_tip_for_new_order = true;
         if( Job_node* job_node = Job_node::try_cast( _order_queue_node ) )
-            if( Job* job = job_node->job_or_null() )  job->signal( Z_FUNCTION );
+            if( Job* job = job_node->job_or_null() )  job->signal_earlier_order( next_time(), obj_name(), Z_FUNCTION );
     }
 }
 

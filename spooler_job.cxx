@@ -2184,12 +2184,22 @@ void Job::calculate_next_time( const Time& now )
 
 void Job::signal_earlier_order( Order* order )
 {
-    Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << obj_name() << "  " << order->obj_name() << " " << order->next_time().as_string() << "\n" );
+    signal_earlier_order( order->next_time(), order->obj_name(), Z_FUNCTION );
+}
 
-    if( _next_time > 0   &&  _next_time > order->next_time() )
+//------------------------------------------------------------------------Job::signal_earlier_order
+
+void Job::signal_earlier_order( const Time& next_time, const string& order_name, const string& function )
+{
+    if( !next_time.is_never() )
     {
-        Time now = Time::now();
-        calculate_next_time( now );
+        Z_LOG2( "scheduler.signal", Z_FUNCTION << "  " << function << " " << obj_name() << "  " << order_name << " " << next_time.as_string() << "\n" );
+
+        if( _next_time > 0   &&  _next_time > next_time )
+        {
+            Time now = Time::now();
+            calculate_next_time( now );
+       }
     }
 }
 

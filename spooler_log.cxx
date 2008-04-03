@@ -578,7 +578,10 @@ Prefix_log::Open_and_close::Open_and_close( Prefix_log* log )
 :
     _log(NULL)
 {
-    if( log->_open_and_close_every_line  &&  log->is_active()  &&  log->_file == -1 )
+    if( log->_open_and_close_every_line  &&  
+        log->is_active()  &&  
+        log->_file == -1  &&  
+       !log->_filename.empty() )
     {
         _log = log;
         _log->open_file();

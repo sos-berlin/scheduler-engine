@@ -228,6 +228,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );
     void                        signal_earlier_order        ( Order* );
+    void                        signal_earlier_order        ( const Time& next_time, const string& order_name, const string& function );
 
     Time                        next_time                   ()                                      { return _next_time; }
     Time                        next_start_time             ();
