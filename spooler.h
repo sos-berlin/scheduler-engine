@@ -391,6 +391,7 @@ struct Spooler : Object,
     string                      directory                   () const                            { return _directory; }
     string                      string_need_db              () const;
 
+    void                        log_show_state              ( Prefix_log* log = NULL );
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 

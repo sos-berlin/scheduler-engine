@@ -3266,6 +3266,9 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
     element.setAttribute( "length"         , order_count( &ta ) );
     element.setAttribute( "next_start_time", next_time().as_string() );
+    
+    if( !_next_announced_distributed_order_time.is_never() )
+    element.setAttribute( "next_announced_distributed_order_time", _next_announced_distributed_order_time.xml_value() );
 
     if( show_what.is_set( show_orders ) )
     {

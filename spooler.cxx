@@ -1154,6 +1154,7 @@ void Spooler::set_state( State state )
 
     if( _state == state )  return;
 
+    State old_state = _state;
     _state = state;
 
     try
@@ -1174,6 +1175,13 @@ void Spooler::set_state( State state )
     catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
+
+    if( _state == s_running  &&  old_state != s_paused  ||
+        _state == s_paused   ||
+        _state == s_stopping )
+    {
+        log_show_state();
+    }
 }
 
 //------------------------------------------------------------------------------Spooler::state_name
@@ -1802,8 +1810,6 @@ void Spooler::start()
 
     if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_initialized );
     if( _cluster           )  _cluster          ->switch_subsystem_state( subsys_active );
-
-    Z_LOG2( "scheduler", Command_processor( this, Security::seclev_all ).execute( "<show_state what='jobs job_params job_commands tasks job_chains'/>", true ) );
 }
 
 //--------------------------------------------------------------------------------Spooler::activate
@@ -2988,6 +2994,33 @@ void Spooler::detect_warning_and_send_mail()
     }
 }
 
+//--------------------------------------------------------------------------Spooler::log_show_state
+
+void Spooler::log_show_state( Prefix_log* log )
+{
+    try
+    {
+        Command_processor cp     ( this, Security::seclev_all );
+        bool              indent = true;
+        string xml = cp.execute( "<show_state what='jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", indent );
+
+        if( log )
+        {
+            try
+            {
+                log->info( xml );   // Blockiert bei ENOSPC nicht wegen _state == s_stopping
+            }
+            catch( exception& ) 
+            { 
+                log = NULL; 
+            }
+        }
+
+        if( !log )  Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" );
+    } 
+    catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
+}
+
 //----------------------------------------------------------------------------------Spooler::launch
 
 int Spooler::launch( int argc, char** argv, const string& parameter_line )
@@ -3063,19 +3096,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
                 try 
                 { 
-                    try
-                    {
-                        Command_processor cp ( this, Security::seclev_all );
-                        bool indent = true;
-                        string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers operations' />", indent );
-                        try
-                        {
-                            _log->info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
-                        }
-                        catch( exception& ) { Z_LOG2( "scheduler", "\n\n" << xml << "\n\n" ); }
-                    } 
-                    catch( exception& ) {}
-
+                    log_show_state( _log );
                     stop( &x ); 
                 } 
                 catch( exception& x ) { _log->error( x.what() ); }
