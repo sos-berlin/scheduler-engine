@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="A" order="yes" tasks="2">
+                <script language="javascript">
+var hostware = new ActiveXObject( "hostware.global" );
+
+function spooler_process()
+{
+    if( !spooler.variables.value( "a" ) )  
+    {
+        spooler_task.order.remove_from_job_chain();
+        hostware.sleep( 7 );
+        spooler.variables.value( "a" ) = "1";
+    }
+}
+                </script>
+            </job>
+
+            <!--job name="B" order="yes">
+                <script language="javascript">
+
+                </script>
+            </job-->
+        </jobs>
+
+        <job_chains>
+            <job_chain name="file_order.remove">
+                <file_order_source directory="s:/tmp/x" regex=".txt$" repeat="5"/>
+                <job_chain_node  state="A" job="A"/>
+                <file_order_sink state="C" remove="yes"/>
+            </job_chain>
+        </job_chains>
+    </config>
+</spooler>
