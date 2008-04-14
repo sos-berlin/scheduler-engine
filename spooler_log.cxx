@@ -1408,6 +1408,7 @@ string Prefix_log::as_string_ignore_error()
     }
     catch( exception& x )
     {
+        _spooler->log()->warn( x.what() );
         result = x.what();
     }
 
