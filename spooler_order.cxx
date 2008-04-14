@@ -4256,7 +4256,7 @@ void Order::db_update_order_history_record( Transaction* outer_transaction )
 
             if( _spooler->_order_history_with_log )
             {
-                string log_text = log()->as_string();
+                string log_text = log()->as_string_ignore_error();
                 if( log_text != "" )
                 {
                     try 
@@ -5202,7 +5202,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     }
 
-    if( show_what.is_set( show_run_time ) )  result.appendChild( _run_time->dom_element( dom_document ) );  // Vor _period setzen!
+    if( show_what.is_set( show_run_time )  &&  _run_time )  result.appendChild( _run_time->dom_element( dom_document ) );  // Vor _period setzen!
 
     if( show_what.is_set( show_for_database_only ) )
     {
@@ -6021,7 +6021,7 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 void Order::set_next_start_time()
 {
-    if( _state == _initial_state  &&  !_setback  &&  _run_time->set() )
+    if( _state == _initial_state  &&  !_setback  &&  _run_time  &&  _run_time->set() )
     {
         set_setback( next_start_time( true ) );     // Braucht für <run_time start_time_function=""> das Scheduler-Skript
     }

@@ -278,7 +278,7 @@ void Combined_job_nodes::close()
 
 void Combined_job_nodes::connect_job_node( Job_node* job_node )
 {
-    _job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
+    //_job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
 
     _job_node_set.insert( job_node );
 }
@@ -287,7 +287,7 @@ void Combined_job_nodes::connect_job_node( Job_node* job_node )
 
 void Combined_job_nodes::disconnect_job_node( Job_node* job_node )
 {
-    _job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
+    //_job->log()->debug( S() << Z_FUNCTION << "  " << job_node->obj_name() );
 
     _job_node_set.erase( job_node );
 }

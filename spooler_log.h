@@ -147,7 +147,9 @@ struct Prefix_log : Object, Has_log
     //                                                                                                                                                : 0; }
 
     void                        continue_with_text          ( const string& );
+    
     string                      as_string                   ();
+    string                      as_string_ignore_error      ();
 
     void                    set_mail_on_error               ( bool b )                          { _mail_on_error = b; }
     bool                        mail_on_error               ()                                  { return _mail_on_error; }

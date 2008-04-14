@@ -1396,6 +1396,24 @@ void Prefix_log::continue_with_text( const string& text )
     if( _log_buffer != "" )  _is_logging_continuing = true;
 }
 
+//---------------------------------------------------------------Prefix_log::as_string_ignore_error
+
+string Prefix_log::as_string_ignore_error()
+{
+    string result;
+
+    try
+    {
+        result = as_string();
+    }
+    catch( exception& x )
+    {
+        result = x.what();
+    }
+
+    return result;
+}
+
 //----------------------------------------------------------------------------Prefix_log::as_string
 
 string Prefix_log::as_string()
@@ -1404,18 +1422,19 @@ string Prefix_log::as_string()
 
     if( _started )
     {
-#       ifdef Z_WINDOWS
+        #ifdef Z_WINDOWS
 
             result = File( filename(), "r" ).read_all();        // Ersetzt \r\n zu \n
 
-#        else
+        #else
 
             result = string_from_file( filename() );
 
-#       endif
+        #endif
     }
 
     result.append( _log_buffer );
+
     return result;
 }
 
