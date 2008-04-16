@@ -4,13 +4,13 @@ PROD_DIR = $(shell cd ../.. && /bin/pwd)
 
 DEP_PRODUCTS := kram file fs zschimmer
 
-#HPUX: Hostjava einbinden
-ifeq ($(shell uname),HP-UX)
-#ifeq ($(shell uname -m),ia64)
-#else
-DEP_PRODUCTS += hostjava hostole
+##HPUX: Hostjava einbinden
+#ifeq ($(shell uname),HP-UX)
+##ifeq ($(shell uname -m),ia64)
+##else
+#DEP_PRODUCTS += hostjava hostole
+##endif
 #endif
-endif
 
 
 objects = \
@@ -135,10 +135,10 @@ else
 #LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/server
 endif
 
-ifeq ($(NO_PERL),)
-# HP-UX: Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
-SOS_LIBS += $(PROD_DIR)/zschimmer/$(O_DIR)/libsosperlscript.a
-endif
+#ifeq ($(NO_PERL),)
+## HP-UX: Der folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
+#SOS_LIBS += $(PROD_DIR)/zschimmer/$(O_DIR)/libsosperlscript.a
+#endif
 endif
 
 
