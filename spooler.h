@@ -9,7 +9,7 @@
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
 
-#if defined Z_HPUX  //_PARISC //&& !defined __IA64__
+#if defined Z_LINK_STATIC
 #   define SCHEDULER_WITH_HOSTJAVA
 #endif
 
