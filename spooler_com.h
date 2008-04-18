@@ -874,6 +874,9 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            get_Suspended               ( VARIANT_BOOL* );
 
     STDMETHODIMP            get_Log                     ( spooler_com::Ilog** );
+    
+    STDMETHODIMP            put_End_state               ( VARIANT* );
+    STDMETHODIMP            get_End_state               ( VARIANT* );
 
   private:
     Fill_zero                  _zero_;

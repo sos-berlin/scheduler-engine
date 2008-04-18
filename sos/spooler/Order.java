@@ -231,4 +231,7 @@ public class Order extends Idispatch
     public boolean          suspended           ()                                  { return         boolean_com_call( "<suspended" ); }
     
     public Log              log                 ()                                  { return (Log)           com_call( "<log" ); }
+
+    public void         set_end_state           ( String value )                    {                   com_call( ">end_state", value  ); }
+    public String           end_state           ()                                  { return (String)   com_call( "<end_state"         ); }
 }

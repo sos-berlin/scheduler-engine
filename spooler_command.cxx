@@ -989,6 +989,9 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->set_state( state );
         }
 
+        if( modify_order_element.hasAttribute( "end_state" ) )
+            order->set_end_state( modify_order_element.getAttribute( "end_state" ) );
+
         if( at != "" )  order->set_at( Time::time_with_now( at ) );
 
         if( modify_order_element.hasAttribute( "setback" ) )

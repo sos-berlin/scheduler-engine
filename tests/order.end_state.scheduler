@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="javascript">
+            <![CDATA[
+
+var order = spooler.create_order();
+order.id = "A";
+//spooler.job_chain( "order_params.scheduler" ).add_or_replace_order( order );
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( spooler_task.order.end_state );
+    //spooler_task.order.end_state = "";
+    //spooler_log.info( spooler_task.order.end_state );
+    //spooler.execute_xml( "<modify_order job_chain='order_params.scheduler' order='1' end_state='dwa'/>" );
+    //spooler_log.info( spooler_task.order.end_state );
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+
+            <job name="java" order="yes">
+
+                <script java_class="spooler_job.test.My_job">
+                    <![CDATA[
+
+package spooler_job.test;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Order order = spooler_task.order();
+        spooler_log.info( order.end_state() );
+        order.set_end_state( "dwa" );
+        spooler_log.info( order.end_state() );
+        return true;
+    }
+}
+                ]]>
+                </script>
+            </job>
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="order_params.scheduler" orders_recoverable="yes">
+                <job_chain_node state="edno" job="java"/>
+                <job_chain_node state="dwa"  job="javascript"/>
+                <job_chain_node state="tri"  job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order_params.scheduler" id="1" title="You say party!" end_state="" replace="yes"/>
+        </commands>
+
+    </config>
+</spooler>

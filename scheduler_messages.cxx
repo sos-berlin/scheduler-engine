@@ -482,6 +482,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-701", "Replicating '$1'" },
     { "SCHEDULER-702", "Removing '$1'" },
     { "SCHEDULER-703", "Local configuration file is ignored, the central configuration file is used instead" },
+    { "SCHEDULER-704", "Order has reached its end_state='$1'" },
     {}
 };
 } //namespace sos

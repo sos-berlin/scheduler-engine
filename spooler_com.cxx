@@ -4884,6 +4884,8 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYPUT, 25, "Suspended"                 , (Com_method_ptr)&Com_order::put_Suspended         , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 25, "Suspended"                 , (Com_method_ptr)&Com_order::get_Suspended         , VT_BOOL       },
     { DISPATCH_PROPERTYGET, 26, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT, 27, "End_state"                 , (Com_method_ptr)&Com_order::put_End_state         , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+    { DISPATCH_PROPERTYGET, 27, "End_state"                 , (Com_method_ptr)&Com_order::get_End_state         , VT_VARIANT    },
   //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
     {}
 };
@@ -5663,6 +5665,44 @@ STDMETHODIMP Com_order::get_Log( Ilog** result )
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_order::put_End_state
+
+STDMETHODIMP Com_order::put_End_state( VARIANT* state )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_end_state( *state );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_order::get_End_state
+
+STDMETHODIMP Com_order::get_End_state( VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        return _order->end_state().CopyTo( result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }

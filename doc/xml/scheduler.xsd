@@ -649,6 +649,7 @@
             <xsd:attribute name="setback"   type="No"/>
             <xsd:attribute name="suspended" type="Yes_no"/>
             <xsd:attribute name="at"        type="Date_time_with_now"/>
+            <xsd:attribute name="end_state" type="String"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -728,6 +729,7 @@
         <xsd:attribute name="priority"          type="xsd:integer"/>
         <xsd:attribute name="title"             type="String"/>
         <xsd:attribute name="state"             type="String"/>
+        <xsd:attribute name="end_state"         type="String"/>
         <xsd:attribute name="web_service"       type="Name"/>
         <xsd:attribute name="replace"           type="Yes_no"/>
         <xsd:attribute name="at"                type="Date_time_with_now"/>

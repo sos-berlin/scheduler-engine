@@ -130,6 +130,8 @@ struct Order : Com_order,
     static void                 check_state             ( const State& );
     State                       initial_state           ()                                          { return _initial_state; }
 
+    void                    set_end_state               ( const State& );
+    State                       end_state               ()                                          { return _end_state; }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { return _state_text; }
@@ -267,6 +269,7 @@ struct Order : Com_order,
     Id                         _id;
     State                      _state;
     bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
+    State                      _end_state;
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     string                     _state_text;

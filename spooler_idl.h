@@ -652,6 +652,9 @@ struct Iorder : IDispatch
     virtual HRESULT     get_Suspended               ( VARIANT_BOOL* )                               = 0;
 
     virtual HRESULT     get_Log                     ( Ilog** )                                      = 0;
+
+    virtual HRESULT     put_End_state               ( VARIANT* value )                              = 0;
+    virtual HRESULT     get_End_state               ( VARIANT* result )                             = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

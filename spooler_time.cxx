@@ -732,6 +732,7 @@ string Daylight_saving_time_transition_detector::async_state_text_() const
 }
 
 //------------------------------------------------------------------------------Period::set_default
+#if 1
 
 void Period::set_default()
 {
@@ -2093,6 +2094,7 @@ void Run_time::append_calendar_dom_elements( const xml::Element_ptr& element, Sh
     }
 }
 
+#endif
 //----------------------------------------------------------------------------------Run_time::print
 
 //void Run_time::print( ostream& s ) const

@@ -263,6 +263,9 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     _job_folder              = spooler()->job_subsystem             ()->new_job_folder           ( this );
     _job_chain_folder        = spooler()->order_subsystem           ()->new_job_chain_folder     ( this );
     _standing_order_folder   = spooler()->standing_order_subsystem  ()->new_standing_order_folder( this );
+#ifdef Z_SCHEDULE_DEVELEPMENT
+    _schedule_folder         = spooler()->schedule_subsystem        ()->new_schedule_folder      ( this );
+#endif
     _subfolder_folder        = spooler()->folder_subsystem          ()->new_subfolder_folder     ( this );
 
   //add_to_typed_folder_map( _scheduler_script_folder );
@@ -270,6 +273,9 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     add_to_typed_folder_map( _lock_folder             );
     add_to_typed_folder_map( _job_folder              );
     add_to_typed_folder_map( _job_chain_folder        );
+#ifdef Z_SCHEDULE_DEVELEPMENT
+    add_to_typed_folder_map( _schedule_folder         );
+#endif
     add_to_typed_folder_map( _standing_order_folder   );
     add_to_typed_folder_map( _subfolder_folder        );
 

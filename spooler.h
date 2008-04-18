@@ -3,6 +3,8 @@
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
+//#define Z_SCHEDULE_DEVELEPMENT
+
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/string_list.h"
 #include "../kram/sos.h"
@@ -121,6 +123,7 @@ using namespace ::std;
 using namespace ::zschimmer::file;
 
 
+struct Command_processor;
 struct Communication;
 struct Event;
 struct File_logger;
@@ -229,6 +232,18 @@ namespace order
 using namespace order;
 
 
+namespace schedule
+{
+    struct Schedule;
+    struct Schedule_folder;
+    struct Schedule_subsystem_interface;
+}
+using schedule::Schedule;  
+using schedule::Schedule_folder;  
+using schedule::Schedule_subsystem_interface;  
+
+
+
 namespace supervisor
 {
     struct Remote_scheduler_interface;
@@ -265,6 +280,7 @@ typedef stdext::hash_set<string> String_set;
 #include "directory_observer.h"
 #include "include.h"
 #include "folder.h"
+#include "schedule.h"
 #include "scheduler_script.h"
 #include "spooler_communication.h"
 #include "spooler_http.h"

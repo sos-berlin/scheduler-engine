@@ -5005,6 +5005,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string id               = element.getAttribute( "id"        );
     string title            = element.getAttribute( "title"     );
     string state_name       = element.getAttribute( "state"     );
+    string end_state        = element.getAttribute( "end_state" );
     string web_service_name = element.getAttribute( "web_service" );
     string at_string        = element.getAttribute( "at" );
     string setback          = element.getAttribute( "setback" );
@@ -5018,6 +5019,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( id               != "" )  set_id      ( id.c_str() );
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
+    if( end_state        != "" )  set_end_state( end_state );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_virgin = !element.bool_getAttribute( "touched" );
 
@@ -5137,6 +5139,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         if( !_state.is_empty() )
         result.setAttribute( "state"     , debug_string_from_variant( _state ) );
+
+        result.setAttribute_optional( "end_state", _end_state.as_string() );
 
         if( !_initial_state.is_empty() )
         result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
@@ -5729,6 +5733,18 @@ void Order::set_state2( const State& order_state, bool is_error_state )
     if( !_initial_state_set )  _initial_state = order_state,  _initial_state_set = true;
 }
 
+//-------------------------------------------------------------------------Job_chain::set_end_state
+
+void Order::set_end_state( const State& end_state )                  
+{ 
+    if( !end_state.is_null_or_empty_string() )
+    {
+        if( Job_chain* job_chain = this->job_chain() )  job_chain->referenced_node_from_state( end_state );       // Prüfen
+    }
+
+    _end_state = end_state;
+}
+
 //------------------------------------------------------------------------Order::set_job_chain_node
 
 void Order::set_job_chain_node( Node* node, bool is_error_state )
@@ -5880,6 +5896,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
     if( job_chain->state() != Job_chain::s_loaded  &&  
         job_chain->state() != Job_chain::s_active  &&
         job_chain->state() != Job_chain::s_stopped )  z::throw_xc( "SCHEDULER-151" );
+
+    if( !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
 
     bool is_new = true;
 
@@ -6101,8 +6119,19 @@ void Order::postprocessing( bool success )
             if( !success  &&  job_node->is_on_error_suspend() )  
                 set_suspended();
             else
-                set_state1( success? job_node->next_state()
-                                   : job_node->error_state() );
+            if( success )
+            {
+                if( _state == _end_state )
+                {
+                    log()->info( message_string( "SCHEDULER-704", _end_state ) );
+                    set_end_state_reached();
+                    handle_end_state();
+                }
+                else
+                    set_state1( job_node->next_state() );
+            }
+            else
+                set_state1( job_node->error_state() );
         }
     }
     else

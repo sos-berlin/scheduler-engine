@@ -10,6 +10,27 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-04-18" version="2.0.202" subversion_revision="5721">
+        <revision jira="JS-265" type="new" title="Order.end_state">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="order" attribute="end_state"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="add_order" attribute="end_state"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="end_state"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Order" property="end_state"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-04-02" version="2.0.201" subversion_revision="5696">
         <revision type="modification" title="Anpassungen an Sybase Adaptive Server Enterprise">
         </revision>

@@ -43,11 +43,6 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_lock_requestor:               return "Lock.Use";
         case type_lock_subsystem:               return "Lock_subsystem";
         case type_lock_use:                     return "Use";
-        case type_web_service:                  return "Web_service";
-        case type_web_service_operation:        return "Web_service_operation";
-        case type_web_service_request:          return "Web_service_request";
-        case type_web_service_response:         return "Web_service_response";
-        case type_web_services:                 return "Web_services";
         case type_order:                        return "Order";
         case type_order_queue:                  return "Order_queue";
         case type_order_subsystem:              return "Order_subsystem";
@@ -58,6 +53,9 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_remote_configuration_observer:return "Remote_configuration_observer";
         case type_remote_scheduler:             return "Remote_scheduler";
         case type_remote_schedulers_configuration: return "Remote_schedulers_configuration";
+        case type_schedule:                     return "Schedule";
+        case type_schedule_folder:              return "Schedule_folder";
+        case type_schedule_subsystem:           return "Schedule_subsystem";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler_script_folder:      return "Scheduler_script_folder";
@@ -71,6 +69,11 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_supervisor_client_connection: return "Supervisor_client_connection";
         case type_task:                         return "Task";
         case type_task_subsystem:               return "Task_subsystem";
+        case type_web_service:                  return "Web_service";
+        case type_web_service_operation:        return "Web_service_operation";
+        case type_web_service_request:          return "Web_service_request";
+        case type_web_service_response:         return "Web_service_response";
+        case type_web_services:                 return "Web_services";
         case type_xml_client_connection:        return "Xml_client_connection";
         default:                                return S() << "Type_code(" << type_code << ")";
     }

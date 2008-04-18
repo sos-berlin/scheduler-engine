@@ -748,7 +748,33 @@ spooler_log.info( "For both order log and task log" );</pre>
         </example>
 
     </property>
-    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="end_state">
+        <com>
+            <com.result>
+                <com.type type="VARIANT"/>
+            </com.result>
+        </com>
+
+        <title>
+            Zustand, vor dessen erfolgreichen Verlassen der Auftrag enden soll
+        </title>
+
+        <description>
+            <p>
+                Wenn ein Auftrag einen eigenen End-Zustand hat (<code>end_state</code> ungleich <code>""</code>),
+                endet der Auftrag, bevor er diesen Zustand erfolgreich verlassen würde,
+                also nach Ausführung des dem End-Zustand zugeordneten Jobs
+                (siehe <scheduler_element name="job_chain_node"/>).
+            </p>
+            <p>
+                Der Zustand muss in der Jobkette bekannt sein.
+            </p>
+        </description>
+    </property>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <title>

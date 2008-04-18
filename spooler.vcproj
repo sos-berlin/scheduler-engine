@@ -397,6 +397,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\schedule.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\scheduler_client.cxx"
 				>
 			</File>
@@ -1143,6 +1147,10 @@
 			</File>
 			<File
 				RelativePath=".\register.h"
+				>
+			</File>
+			<File
+				RelativePath=".\schedule.h"
 				>
 			</File>
 			<File

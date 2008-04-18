@@ -127,6 +127,16 @@
             </description>
         </xml_attribute>
 
+        
+        <xml_attribute name="end_state" type="text" title="Zustand, vor dessen erfolgreichen Verlassen der Auftrag enden soll">
+            <description>
+                <p>
+                    Wie <scheduler_method class="Order" property="end_state"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
     </xml_attributes>
 
 
