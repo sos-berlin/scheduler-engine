@@ -5005,7 +5005,6 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     string id               = element.getAttribute( "id"        );
     string title            = element.getAttribute( "title"     );
     string state_name       = element.getAttribute( "state"     );
-    string end_state        = element.getAttribute( "end_state" );
     string web_service_name = element.getAttribute( "web_service" );
     string at_string        = element.getAttribute( "at" );
     string setback          = element.getAttribute( "setback" );
@@ -5019,7 +5018,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     if( id               != "" )  set_id      ( id.c_str() );
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
-    if( end_state        != "" )  set_end_state( end_state );
+    if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_virgin = !element.bool_getAttribute( "touched" );
 
@@ -5139,8 +5138,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
         if( !_state.is_empty() )
         result.setAttribute( "state"     , debug_string_from_variant( _state ) );
-
-        result.setAttribute_optional( "end_state", _end_state.as_string() );
 
         if( !_initial_state.is_empty() )
         result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
@@ -5279,6 +5276,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
     }
     
+    result.setAttribute_optional( "end_state", _end_state.as_string() );
+
     return result;
 }
 
@@ -5743,6 +5742,7 @@ void Order::set_end_state( const State& end_state )
     }
 
     _end_state = end_state;
+    _order_xml_modified = true;
 }
 
 //------------------------------------------------------------------------Order::set_job_chain_node

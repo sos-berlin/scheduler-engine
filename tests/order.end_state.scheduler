@@ -55,6 +55,7 @@ public class My_job  extends sos.spooler.Job_impl
         spooler_log.info( order.end_state() );
         order.set_end_state( "dwa" );
         spooler_log.info( order.end_state() );
+        spooler.terminate();
         return true;
     }
 }
@@ -74,7 +75,7 @@ public class My_job  extends sos.spooler.Job_impl
         </job_chains>
 
         <commands>
-            <add_order job_chain="order_params.scheduler" id="1" title="You say party!" end_state="" replace="yes"/>
+            <!--add_order job_chain="order_params.scheduler" id="1" title="You say party!" end_state="" replace="yes"/-->
         </commands>
 
     </config>

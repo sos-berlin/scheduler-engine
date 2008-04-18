@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-04-18" version="2.0.202" subversion_revision="5721">
+    <change date="2008-04-18" version="2.0.202" subversion_revision="5722">
         <revision jira="JS-265" type="new" title="Order.end_state">
             <description>
                 <ul>
