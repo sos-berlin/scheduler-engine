@@ -2437,7 +2437,7 @@ void Cluster::assert_database_integrity( const string& message_text )
 void Cluster::check_empty_member_record()
 {
     Record record;
-    bool   second_try = false;
+    bool   second_try;
 
 
     do
@@ -2499,9 +2499,13 @@ void Cluster::check_empty_member_record()
             }
 
             ta.commit( Z_FUNCTION );
+
+            second_try = false;
         }
-        catch( exception& )
+        catch( exception& x )
         {
+            Z_LOG( Z_FUNCTION << " ERROR " << x.what() << "\n" );
+
             if( second_try )  throw;
             second_try = true;
         }
