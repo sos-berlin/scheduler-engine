@@ -10,6 +10,17 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-04-21" version="2.0.202" subversion_revision="5728">
+        <revision type="correction" title="Problem beim gleichzeitigen Start zweier Cluster-Scheduler behoben">
+            <description>
+                <p>
+                    Beim gleichzeitigen Start zweier Scheduler desselben Clusters konnte ein Scheduler beim Start hängen bleiben.
+                    Das ist behoben.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-04-18" version="2.0.202" subversion_revision="5723">
         <revision jira="JS-265" type="new" title="Order.end_state">
             <description>
