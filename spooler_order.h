@@ -17,6 +17,7 @@ struct Order;
 struct Order_id_space;
 struct Order_id_spaces;
 struct Order_queue;
+struct Order_schedule_use;
 struct Order_subsystem;
 struct Standing_order_folder;
 struct Standing_order_subsystem;
@@ -48,8 +49,7 @@ typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
-               Scheduler_object,
-               Modified_event_handler
+               Scheduler_object
 {
     typedef Variant             Payload;
     typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
@@ -165,7 +165,6 @@ struct Order : Com_order,
 
     Task*                       task                    () const                                    { return _task; }
 
-    Run_time*                   run_time                ()                                          { return _run_time; }
 
     Com_job*                    com_job                 ();
 
@@ -189,7 +188,6 @@ struct Order : Com_order,
     bool                     is_setback                 ()                                          { return _setback_count > 0; }
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
-  //void                    set_run_time_xml            ( const string& );
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
     Time                        next_time               ();
@@ -216,14 +214,16 @@ struct Order : Com_order,
     void                        on_carried_out          ();
     void                        connect_with_standing_order( Standing_order* standing_order )       { _standing_order = standing_order; };
 
-    void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* = NULL );
+    void                    set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, Variable_set_map* = NULL );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
     xml::Document_ptr           dom                     ( const Show_what& ) const;
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
-    void                    set_run_time                ( const xml::Element_ptr& );
-    void                        on_before_modify_run_time();
-    void                        run_time_modified_event ();
+    void                    set_schedule                ( File_based* source_file_based, const xml::Element_ptr& );
+    Schedule_use*               schedule_use            ();
+    void                        on_schedule_loaded      ();
+    void                        on_schedule_modified    ();
+    bool                        on_schedule_to_be_removed();
 
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
@@ -291,8 +291,8 @@ struct Order : Com_order,
     bool                       _is_on_blacklist;        // assert( _job_chain )
     bool                       _suspended;
 
-    ptr<Run_time>              _run_time;
-    bool                       _run_time_modified;
+    ptr<Order_schedule_use>    _schedule_use;
+    bool                       _schedule_modified;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist (bei _setback_count > 0, sonst Startzeitpunkt "at")
     bool                       _order_xml_modified;     // Datenbankspalte xml neu schreiben!
     bool                       _is_replacement;         // _replacement_for != NULL => _is_replacement
@@ -315,7 +315,7 @@ struct Order : Com_order,
     string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
     Standing_order*            _standing_order;         // Dateibasierter Dauerauftrag?
 
-    Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
+    Period                     _period;                 // Bei _schedule.set(): Aktuelle oder nächste Periode
 
     bool                       _initial_state_set;
     bool                       _is_in_order_queue;      // Auftrag ist in _job_chain_node->order_queue() eingehängt

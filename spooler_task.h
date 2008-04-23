@@ -12,9 +12,9 @@ namespace scheduler {
 enum Start_cause
 {
     cause_none                  = 0,    // Noch nicht gestartet
-    cause_period_once           = 1,    // <run_time once="yes">
-    cause_period_single         = 2,    // <run_time single_start="yes">
-    cause_period_repeat         = 3,    // <run_time repeat="..">
+    cause_period_once           = 1,    // <schedule once="yes">
+    cause_period_single         = 2,    // <schedule single_start="yes">
+    cause_period_repeat         = 3,    // <schedule repeat="..">
   //cause_job_repeat            = 4,    // spooler_job.repeat = ..
     cause_queue                 = 5,    // <start_job at="">
     cause_queue_at              = 6,    // <start_job at="..">

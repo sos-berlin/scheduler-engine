@@ -32,7 +32,7 @@ enum Show_what_enum
     show_task_history       = 0x40,
   //show_order_history      = 0x80,
     show_remote_schedulers  = 0x100,
-    show_run_time           = 0x200,
+    show_schedule           = 0x200,
     show_job_chains         = 0x400,
     show_job_chain_jobs     = 0x800,
     show_jobs               = 0x1000,   // <jobs>

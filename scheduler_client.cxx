@@ -31,7 +31,7 @@ struct Client
     }
 
 
-    void write_run_time()
+    void write_schedule()
     {
         _xml_writer->begin_element( "run_time" );
 
@@ -78,7 +78,7 @@ struct Client
             _xml_writer->end_element( "script" );
 
 
-            write_run_time();
+            write_schedule();
 
         _xml_writer->end_element( "job" );
     }

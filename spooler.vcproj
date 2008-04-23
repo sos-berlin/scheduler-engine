@@ -361,6 +361,34 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\_precompiled_headers.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\cluster.cxx"
 				>
 			</File>
@@ -413,176 +441,28 @@
 				>
 			</File>
 			<File
-				RelativePath="spooler.cxx"
+				RelativePath=".\spooler.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						UsePrecompiledHeader="1"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="1"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_com.cxx"
+				RelativePath=".\spooler_com.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_command.cxx"
+				RelativePath=".\spooler_command.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_common.cxx"
 				>
 			</File>
 			<File
-				RelativePath="spooler_communication.cxx"
+				RelativePath=".\spooler_communication.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_config.cxx"
+				RelativePath=".\spooler_config.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_dll.cxx"
@@ -653,37 +533,8 @@
 				>
 			</File>
 			<File
-				RelativePath="spooler_history.cxx"
+				RelativePath=".\spooler_history.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_http.cxx"
@@ -694,181 +545,44 @@
 				>
 			</File>
 			<File
-				RelativePath="spooler_log.cxx"
+				RelativePath=".\spooler_log.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_mail.cxx"
+				RelativePath=".\spooler_mail.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_module.cxx"
+				RelativePath=".\spooler_module.cxx"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_module_com.cxx"
+				RelativePath=".\spooler_module_com.cxx"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_module_internal.cxx"
 				>
 			</File>
 			<File
-				RelativePath="spooler_module_java.cxx"
+				RelativePath=".\spooler_module_java.cxx"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_module_process.cxx"
 				>
 			</File>
 			<File
-				RelativePath="spooler_module_remote.cxx"
+				RelativePath=".\spooler_module_remote.cxx"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_module_remote_server.cxx"
+				RelativePath=".\spooler_module_remote_server.cxx"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_order.cxx"
+				RelativePath=".\spooler_order.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_order_file.cxx"
@@ -879,206 +593,32 @@
 				>
 			</File>
 			<File
-				RelativePath="spooler_security.cxx"
+				RelativePath=".\spooler_security.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_service.cxx"
+				RelativePath=".\spooler_service.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_subprocess.cxx"
 				>
 			</File>
 			<File
-				RelativePath="spooler_task.cxx"
+				RelativePath=".\spooler_task.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_thread.cxx"
+				RelativePath=".\spooler_thread.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_time.cxx"
+				RelativePath=".\spooler_time.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="spooler_wait.cxx"
+				RelativePath=".\spooler_wait.cxx"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release-DLL|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-						PrecompiledHeaderThrough="spooler.h"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_web_service.cxx"
@@ -1086,6 +626,10 @@
 			</File>
 			<File
 				RelativePath=".\spooler_xslt_stylesheet.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_xslt_stylesheet.h"
 				>
 			</File>
 			<File
@@ -1102,6 +646,10 @@
 			</File>
 			<File
 				RelativePath=".\supervisor_client.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\version.cxx"
 				>
 			</File>
 			<File
@@ -1215,6 +763,10 @@
 			</File>
 			<File
 				RelativePath="spooler_module_com.h"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_module_internal.h"
 				>
 			</File>
 			<File

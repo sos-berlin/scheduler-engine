@@ -881,8 +881,13 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"run_time\" type=\"run_time\"/>      <!-- F\xc3" "\xbc" "r Order.Run_time.xml = \"<run_time>\" -->\n"
+    "\n"
     "\n"
     "<xsd:element name=\"s\" type=\"Show_state\"/>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"schedule\" type=\"run_time\"/>\n"
     "\n"
     "\n"
     "<xsd:element name=\"script\">\n"
@@ -1428,8 +1433,10 @@ const char file_scheduler_xsd[] =
     "</xsd:choice>\n"
     "</xsd:sequence>\n"
     "\n"
-    "<xsd:attribute name=\"name\"              type=\"String\"/>\n"
-    "<xsd:attribute name=\"schedule\"          type=\"String\"/>\n"
+    "\n"
+    "<xsd:attribute name=\"schedule\"          type=\"String\"/>             <!-- Nur zum Abruf (\"<schedule.use>\") -->\n"
+    "\n"
+    "<xsd:attribute name=\"name\"              type=\"String\"/>             <!-- Nur zur Definition eines benannten <schedule> -->\n"
     "<xsd:attribute name=\"single_start\"      type=\"Time_of_day\"/>\n"
     "<xsd:attribute name=\"begin\"             type=\"Time_of_day\"/>\n"
     "<xsd:attribute name=\"end\"               type=\"Time_of_day\"/>\n"
@@ -1880,7 +1887,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1208870730 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1208857407 },
     { NULL, NULL, 0 }
 };
 

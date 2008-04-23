@@ -146,7 +146,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         if( !_ip_address_as_option_set )
             _ip_address = config_element.getAttribute( "ip_address" );
 
-        _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
+      //_priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
          
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
         _config_java_options    = subst_env( config_element.getAttribute( "java_options"    ) );
@@ -207,6 +207,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             {
                 if( !_ignore_process_classes_set )  _ignore_process_classes = e.bool_getAttribute( "ignore", _ignore_process_classes );
                 if( !_ignore_process_classes )  root_folder()->process_class_folder()->set_dom( e );
+            }
+            else
+            if( e.nodeName_is( "schedules" ) )
+            {
+                root_folder()->schedule_folder()->set_dom( e );
             }
             else
             if( e.nodeName_is( "locks" ) )

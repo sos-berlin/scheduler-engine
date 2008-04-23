@@ -267,7 +267,7 @@ void Standing_order::set_dom( const xml::Element_ptr& element )
 
     ptr<Order> order = new Order( spooler() );
     order->set_id( order_id() ); 
-    order->set_dom( element );
+    order->set_dom( this, element );
 
     if( order->string_id() != order_id() )  z::throw_xc( "SCHEDULER-436" );     // Bei <add_order> vom Schema erlaubt
     

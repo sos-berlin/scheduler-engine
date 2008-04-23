@@ -104,9 +104,10 @@ struct File_based : Scheduler_object,
     enum State
     {
         s_undefined,            // Fehler in XML-Definition
-        s_not_initialized,      // on_initialized() gscheitert
-        s_initialized,          // on_initiailzed() ok, Objekt sieht gut aus
+        s_not_initialized,      // on_initialized() gescheitert
+        s_initialized,          // on_initialized() ok, Objekt sieht gut aus
         s_loaded,               // Mit Daten gefüllt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
+        s_incomplete,           // Dependant fehlt
         s_active,
         s_closed
     };
@@ -205,6 +206,7 @@ struct File_based : Scheduler_object,
     virtual bool                on_initialize               ()                                      = 0;
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
+    virtual string              incomplete_string           ()                                      { return ""; }
 
     virtual void                on_remove_now               ();
     virtual void                prepare_to_remove           ();
@@ -388,6 +390,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
     Job_chain_folder_interface* job_chain_folder            ()                                      { return _job_chain_folder; }
     Standing_order_folder*      standing_order_folder       ()                                      { return _standing_order_folder; }
+    Schedule_folder*            schedule_folder             ()                                      { return _schedule_folder; }
     Scheduler_script_folder*    scheduler_script_folder     ();
 
     string                      obj_name                    () const;
@@ -410,7 +413,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     ptr<Job_folder>                 _job_folder;
     ptr<Job_chain_folder_interface> _job_chain_folder;
     ptr<Standing_order_folder>      _standing_order_folder;
-#ifdef Z_SCHEDULE_DEVELEPMENT
+#ifdef Z_SCHEDULE_DEVELOPMENT
     ptr<Schedule_folder>            _schedule_folder;
 #endif
     ptr<Subfolder_folder>           _subfolder_folder;         // Unterordner

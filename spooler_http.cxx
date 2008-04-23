@@ -28,7 +28,6 @@
 
 
 #include "spooler.h"
-#include "spooler_version.h"
 #include "../zschimmer/charset.h"
 #include "../zschimmer/regex_class.h"
 
@@ -1163,7 +1162,7 @@ void Response::finish()
     if( _chunked )  _headers_stream << "Transfer-Encoding: chunked\r\n";
           //  else  _headers_stream << "Content-Length: ???\r\n";
 
-    _headers_stream << "Server: Scheduler " VER_PRODUCTVERSION_STR;
+    _headers_stream << "Server: Scheduler " << version_string;
     //if( Web_service_operation* wso = _operation->_web_service_operation )
     //    _headers_stream << wso->_web_service->obj_name();
 

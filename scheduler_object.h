@@ -61,6 +61,7 @@ struct Scheduler_object
         type_schedule,
         type_schedule_folder,
         type_schedule_subsystem,
+        type_schedule_use,
         type_scheduler,
         type_scheduler_event_manager,
         type_scheduler_script,

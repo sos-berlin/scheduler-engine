@@ -3,7 +3,7 @@
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
-//#define Z_SCHEDULE_DEVELEPMENT
+#define Z_SCHEDULE_DEVELOPMENT
 
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/string_list.h"
@@ -92,6 +92,7 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
     
+extern const char               version_string[];
 extern const string             temporary_process_class_name;
 extern volatile int             ctrl_c_pressed;
 extern const string             xml_schema_path;            // "scheduler.xsd"
@@ -234,11 +235,15 @@ using namespace order;
 
 namespace schedule
 {
+    struct Period;
     struct Schedule;
+    struct Schedule_use;
     struct Schedule_folder;
     struct Schedule_subsystem_interface;
 }
+using schedule::Period;
 using schedule::Schedule;  
+using schedule::Schedule_use;  
 using schedule::Schedule_folder;  
 using schedule::Schedule_subsystem_interface;  
 
@@ -395,14 +400,14 @@ struct Spooler : Object,
     int                         tcp_port                    () const                            { return _tcp_port; }
     File_path                   include_path                () const                            { return _include_path; }
     string                      temp_dir                    () const                            { return _temp_dir; }
-    int                         priority_max                () const                            { return _priority_max; }
+  //int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Ip_address& );
-    const time::Holidays&       holidays                    () const                            { return _holidays; }
+    const schedule::Holidays&   holidays                    () const                            { return _holidays; }
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
     string                      string_need_db              () const;
@@ -515,6 +520,7 @@ struct Spooler : Object,
     Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             ();
     Standing_order_subsystem*   standing_order_subsystem    ();
+    Schedule_subsystem_interface* schedule_subsystem        ();
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
 
@@ -547,7 +553,7 @@ struct Spooler : Object,
     string                     _temp_dir;
     string                     _spooler_param;              // -param= Parameter für Skripten
     bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
-    int                        _priority_max;               // <config priority_max=...>
+  //int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     bool                       _tcp_port_as_option_set;
     int                        _udp_port;                   // <config udp=...>
@@ -631,6 +637,7 @@ struct Spooler : Object,
     ptr<Task_subsystem>              _task_subsystem;
     ptr<Order_subsystem_interface>   _order_subsystem;
     ptr<Standing_order_subsystem>    _standing_order_subsystem;
+    ptr<Schedule_subsystem_interface>_schedule_subsystem;
     ptr<http::Http_server_interface> _http_server;
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;
@@ -669,7 +676,7 @@ struct Spooler : Object,
     Killpid                    _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
     bool                       _are_all_tasks_killed;
 
-    time::Holidays             _holidays;                   // Feiertage für alle Jobs
+    schedule::Holidays         _holidays;                   // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 

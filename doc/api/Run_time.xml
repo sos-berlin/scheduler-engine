@@ -37,9 +37,9 @@
         </p>
     </description>
 
-    <messages>
+    <!--messages>
         <message level="error" code="SCHEDULER-352"/>
-    </messages>
+    </messages-->
 
 </property>
 

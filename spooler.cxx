@@ -21,7 +21,6 @@
 */
 
 #include "spooler.h"
-#include "spooler_version.h"
 #include "scheduler_client.h"
 
 #include <time.h>
@@ -634,7 +633,7 @@ Spooler::Spooler()
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
-    _version(VER_PRODUCTVERSION_STR),
+    _version(version_string),
     _security(this),
     _communication(this), 
     _base_log(this),
@@ -656,9 +655,25 @@ Spooler::Spooler()
 {
     Z_DEBUG_ONLY( self_test() );
 
+    if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
+    spooler_ptr = this;
+
+    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+
+    _pid          = getpid();
+    _tcp_port     = 0;
+    _udp_port     = 0;
+  //_priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
+    _com_log      = new Com_log( _log );
+    _com_spooler  = new Com_spooler( this );
+    _variables    = new Com_variable_set();
+
+    if( _validate_xml )  _schema.read( xml::Document_ptr( embedded_files.string_from_embedded_file( xml_schema_path ) ) );
+
     _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
     _folder_subsystem           = new_folder_subsystem( this );
     _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
+    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
     _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
     _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
     _job_subsystem              = new_job_subsystem( this );
@@ -672,25 +687,6 @@ Spooler::Spooler()
     _supervisor                 = supervisor::new_supervisor( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
-
-    if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
-    spooler_ptr = this;
-
-    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
-
-    _pid = getpid();
-
-    _tcp_port = 0;
-    _udp_port = 0;
-    _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
-            
-    _com_log     = new Com_log( _log );
-    _com_spooler = new Com_spooler( this );
-    _variables   = new Com_variable_set();
-
-
-    if( _validate_xml )  _schema.read( xml::Document_ptr( embedded_files.string_from_embedded_file( xml_schema_path ) ) );
-
 
 
 #   ifndef Z_WINDOWS
@@ -733,6 +729,7 @@ void Spooler::close()
     _job_subsystem              = NULL;
     _lock_subsystem             = NULL;
     _process_class_subsystem    = NULL;
+    _schedule_subsystem         = NULL;
     _scheduler_script_subsystem = NULL;
     _folder_subsystem           = NULL;
     _db                         = NULL;
@@ -830,7 +827,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)start_time() ).as_string() );
     state_element.setAttribute( "state"                , state_name() );
     state_element.setAttribute( "log_file"             , _base_log.filename() );
-    state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
+    state_element.setAttribute( "version"              , version_string );
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
     state_element.setAttribute( "host"                 , _short_hostname );
@@ -1089,6 +1086,15 @@ Standing_order_subsystem* Spooler::standing_order_subsystem()
     if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Standing_order_subsystem is not initialized" );
 
     return _standing_order_subsystem; 
+}
+
+//----------------------------------------------------------------------Spooler::schedule_subsystem
+
+Schedule_subsystem_interface* Spooler::schedule_subsystem()
+{ 
+    if( !_schedule_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Schedule_subsystem is not initialized" );
+
+    return _schedule_subsystem; 
 }
 
 //---------------------------------------------------------------------------Spooler::job_subsystem
@@ -1592,6 +1598,7 @@ void Spooler::load()
 
     _supervisor              ->switch_subsystem_state( subsys_initialized );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
+    _schedule_subsystem      ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
     _order_subsystem         ->switch_subsystem_state( subsys_initialized );
@@ -1821,6 +1828,7 @@ void Spooler::activate()
     if( !_ignore_process_classes )
     _process_class_subsystem->switch_subsystem_state( subsys_loaded );
 
+    _schedule_subsystem      ->switch_subsystem_state( subsys_loaded );
     _lock_subsystem          ->switch_subsystem_state( subsys_loaded );
     _job_subsystem           ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
     _order_subsystem         ->switch_subsystem_state( subsys_loaded );
@@ -1838,6 +1846,7 @@ void Spooler::activate()
     if( !_ignore_process_classes )
     _process_class_subsystem ->switch_subsystem_state( subsys_active );
 
+    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
     _lock_subsystem          ->switch_subsystem_state( subsys_active );
     _job_subsystem           ->switch_subsystem_state( subsys_active );
     _order_subsystem         ->switch_subsystem_state( subsys_active );
@@ -1976,6 +1985,7 @@ void Spooler::stop( const exception* )
     _task_subsystem            ->switch_subsystem_state( subsys_stopped );
     _lock_subsystem            ->switch_subsystem_state( subsys_stopped );
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
+    _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
     _java_subsystem            ->switch_subsystem_state( subsys_stopped );
     _supervisor                ->switch_subsystem_state( subsys_stopped );
@@ -3517,10 +3527,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
+            if( opt.flag      ( "V"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string );
             else
             if( opt.flag      ( "?"                )
-             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR ), scheduler::print_usage();
+             || opt.flag      ( "h"                ) )  need_call_scheduler = false, fprintf( stderr, "Scheduler %s\n", scheduler::version_string ), scheduler::print_usage();
             else
             if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
             else
@@ -3611,7 +3621,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             log_start( log_filename );
         }
 
-        Z_LOG2( "scheduler", "Scheduler " VER_PRODUCTVERSION_STR "\n" );
+        Z_LOG2( "scheduler", "Scheduler " << scheduler::version_string << "\n" );
 
 
         if( is_scheduler_client )

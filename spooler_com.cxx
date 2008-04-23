@@ -5394,7 +5394,7 @@ STDMETHODIMP Com_order::get_Run_time( Irun_time** result )
     {
         if( !_order )  return E_POINTER;
 
-        *result = +_order->run_time();
+        *result = +_order->schedule_use()->schedule();  int AENDERN;  // Siehe Lieberts eMail vom 21. April 2008: nicht benanntes <schedule> liefern!
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -5450,7 +5450,7 @@ STDMETHODIMP Com_order::get_Xml( BSTR, BSTR* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = String_to_bstr( _order->dom( Show_what( show_payload | show_run_time | show_log ) ).xml(), result );
+        hr = String_to_bstr( _order->dom( Show_what( show_payload | show_schedule | show_log ) ).xml(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

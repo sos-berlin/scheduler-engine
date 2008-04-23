@@ -871,10 +871,15 @@
         </xsd:complexType>
     </xsd:element>
 
+
+    <xsd:element name="run_time" type="run_time"/>      <!-- Für Order.Run_time.xml = "<run_time>" -->
     
 
     <xsd:element name="s" type="Show_state"/>
 
+
+    <xsd:element name="schedule" type="run_time"/>
+    
     
     <xsd:element name="script">
         <xsd:complexType mixed="true">
@@ -1419,8 +1424,10 @@
             </xsd:choice>
         </xsd:sequence>
 
-        <xsd:attribute name="name"              type="String"/>
-        <xsd:attribute name="schedule"          type="String"/>
+
+        <xsd:attribute name="schedule"          type="String"/>             <!-- Nur zum Abruf ("<schedule.use>") -->
+
+        <xsd:attribute name="name"              type="String"/>             <!-- Nur zur Definition eines benannten <schedule> -->
         <xsd:attribute name="single_start"      type="Time_of_day"/>
         <xsd:attribute name="begin"             type="Time_of_day"/>
         <xsd:attribute name="end"               type="Time_of_day"/>

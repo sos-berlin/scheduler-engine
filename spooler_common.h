@@ -61,14 +61,6 @@ enum Visibility
     visible_yes
 };
 
-//---------------------------------------------------------------------------Modified_event_handler
-
-struct Modified_event_handler
-{
-    virtual void                on_before_modify_run_time()                                      {}
-    virtual void                run_time_modified_event     () = 0;
-};
-
 //-------------------------------------------------------------------------------------------------
 
 typedef int64                   Process_id;   // Für Process

@@ -6,7 +6,7 @@
 1                       TYPELIB MOVEABLE PURE   "release\\spooler.tlb"
 #endif
 
-#include "spooler_version.h"
+#include "version.h"
 #include "../kram/sosvers.rc"
 
 //? 2  ICON "scheduler.ico"

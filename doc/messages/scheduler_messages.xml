@@ -2170,11 +2170,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-352">
+        <!--message code="SCHEDULER-352">
             <text xml:lang="en">
                 <title>Only the run_time of an order can be renewed</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-353">
             <text xml:lang="en">

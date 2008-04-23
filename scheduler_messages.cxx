@@ -216,7 +216,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-349", "Database column $1.$2 could not be expanded" },
     { "SCHEDULER-350", "Width of database column $1.$2 is unknown. We assume $3" },
     { "SCHEDULER-351", "<modify_order_... setback=\"$1\">: Invalid value for attribute setback=" },
-    { "SCHEDULER-352", "Only the run_time of an order can be renewed" },
     { "SCHEDULER-353", "No immediate response from command <$1>" },
     { "SCHEDULER-354", "Scheduler Java classes (sos.spooler.jar $1 expected) are not up to date: $2" },
     { "SCHEDULER-355", "SQL update statement changed more than one record, $1: $2" },

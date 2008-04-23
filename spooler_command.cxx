@@ -7,7 +7,6 @@
 
 
 #include "spooler.h"
-#include "spooler_version.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/embedded_files.h"
@@ -561,7 +560,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "run_time" ) )  { job->set_run_time( e );  break; }
+        if( e.nodeName_is( "run_time" ) )  { job->set_schedule( e );  break; }
     }
 
 
@@ -918,7 +917,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     //string job_name = add_order_element.getAttribute( "job" );
 
     ptr<Order> order = new Order( _spooler );
-    order->set_dom( add_order_element, &_variable_set_map );
+    order->set_dom( (File_based*)NULL, add_order_element, &_variable_set_map );
 
 
     //if( job_name == "" )
@@ -966,7 +965,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
         if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
         {
-            order->set_run_time( run_time_element );
+            order->set_schedule( (File_based*)NULL, run_time_element );
         }
 
         if( xml::Element_ptr params_element = modify_order_element.select_node( "params" ) )
@@ -1236,7 +1235,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
         else
-        if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_run_time;
+        if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_schedule;
         else
         if( string_equals_prefix_then_skip( &p, "job_chain_jobs"   ) )  show |= show_job_chain_jobs;
         else

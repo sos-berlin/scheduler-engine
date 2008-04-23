@@ -201,6 +201,22 @@ struct Database_order_detector : Async_operation, Scheduler_object
     Time                       _blacklist_database_distributed_next_time;
 };
 
+//-------------------------------------------------------------------------------Order_schedule_use
+
+struct Order_schedule_use : Schedule_use
+{
+                                Order_schedule_use          ( Order* order )                        : Schedule_use(order), _order(order) {}
+
+    void                        on_schedule_loaded          ()                                      { return _order->on_schedule_loaded(); }
+    void                        on_schedule_modified        ()                                      { return _order->on_schedule_modified(); }
+    bool                        on_schedule_to_be_removed   ()                                      { return _order->on_schedule_to_be_removed(); }
+  //void                        on_schedule_removed         ()                                      { return _order->on_schedule_removed(); }
+    string                      name_for_function           () const                                { return _order->string_id(); }
+
+  private:
+    Order*                     _order;
+};
+
 //-----------------------------------------------------------------FOR_EACH_DISTRIBUTED_ORDER_QUEUE
 
 #define FOR_EACH_DISTRIBUTED_ORDER_QUEUE( ORDER_QUEUE )                                             \
@@ -587,9 +603,8 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
                 ptr<Order> order = new Order( _spooler );
                 order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
-                
-                if( order->run_time() )
-                    order->run_time()->append_calendar_dom_elements( element, options );
+
+                order->schedule_use()->append_calendar_dom_elements( element, options );
             }
             catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
         }
@@ -3319,7 +3334,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     order->load_record( job_chain_path, record );
                     order->load_order_xml_blob( &ta );
                     if( show_what.is_set( show_payload  ) )  order->load_payload_blob( &ta );
-                    if( show_what.is_set( show_run_time ) )  order->load_run_time_blob( &ta );
+                    if( show_what.is_set( show_schedule ) )  order->load_run_time_blob( &ta );
 
 
                     xml::Element_ptr order_element = order->dom_element( document, show_what );
@@ -3860,42 +3875,6 @@ Time Order_queue::next_time()
     return result;
 }
 
-//-----------------------------------------------------------------------Order_queue::order_or_null
-
-//ptr<Order> Order_queue::order_or_null( const Order::Id& id )
-//{
-//    int NOT_DISTRIBUTED;
-//
-//    FOR_EACH( Queue, _queue, it )  if( (*it)->_id == id )  return *it;
-//
-//    return NULL;
-//}
-
-//---------------------------------------------------------------Order_queue::make_where_expression
-
-//string Order_queue::db_where_expression_for_distributed_orders()
-//{
-//    int is_in_any_job_chain = 0;
-//
-//    FOR_EACH_JOB_CHAIN( job_chain )
-//    {
-//        if( job_chain->is_distributed() )
-//        {
-//            string w = db_where_expression( job_chain );
-//            if( w != "" )
-//            {
-//                if( is_in_any_job_chain )  result << " or ";
-//                is_in_any_job_chain++;
-//
-//                result << w;
-//            }
-//        }
-//    }
-//
-//    return is_in_any_job_chain <= 1? result
-//                                   : "( " + result + " )";
-//}
-
 //-------------------------------------------------Order_queue::db_where_expression
 
 string Order_queue::db_where_expression( )
@@ -3905,25 +3884,6 @@ string Order_queue::db_where_expression( )
            << " and `job_chain`="  << sql::quoted( _job_chain->path().without_slash() ) 
            << " and `state`="      << sql::quoted( _order_queue_node->order_state().as_string() );
     return result;
-
-    //bool is_in_job_chain = false;
-    //Z_FOR_EACH( Job_chain::Node_list, job_chain->_node_list, n )
-    //{
-    //    Node* node = *n;
-
-    //    if( node->_job == _job )
-    //    {
-    //        result << ( is_in_job_chain? " or " : "(" );
-    //        is_in_any_job_chain = true;
-
-    //        result << "`job_chain`="  << sql::quoted( job_chain->name() ) <<
-    //                  " and `state`=" << sql::quoted( string_from_variant( node->_state ) );
-    //    }
-    //}
-
-    //if( is_in_job_chain )  result << ")";
-
-    //return result;
 }
 
 //-------------------------------------------------------------------------------------Order::Order
@@ -3934,9 +3894,6 @@ Order::Order( Spooler* spooler )
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
     _zero_(this+1)
 {
-    //_log = Z_NEW( Prefix_log( this ) );
-    //_log->set_prefix( obj_name() );
-
     _com_log = new Com_log;
     _com_log->set_log( log() );
 
@@ -3944,7 +3901,8 @@ Order::Order( Spooler* spooler )
     _is_virgin     = true;
     //_signaled_next_time = Time::never;
 
-    set_run_time( NULL );
+    _schedule_use = Z_NEW( Order_schedule_use( this ) );
+    _schedule_use->set_scheduler_holidays_usage( schedule::without_scheduler_holidays );  // <config><holidays> nicht übernehmen, eMail von Andreas Liebert 2008-04-21
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -3972,7 +3930,7 @@ Order::~Order()
         _replaced_by->set_replacement( false );
     }
 
-    if( _run_time )  _run_time->close();
+    _schedule_use = NULL;
     if( _com_log  )  _com_log->set_log( NULL );
 }
 
@@ -4023,7 +3981,7 @@ void Order::load_blobs( Read_transaction* ta )
 void Order::load_order_xml_blob( Read_transaction* ta )
 {
     string order_xml = db_read_clob( ta, "order_xml" );
-    if( order_xml != "" )  set_dom( xml::Document_ptr( order_xml ).documentElement() );
+    if( order_xml != "" )  set_dom( (File_based*)NULL, xml::Document_ptr( order_xml ).documentElement() );
 }
 
 //------------------------------------------------------------------------Order::load_run_time_blob
@@ -4031,7 +3989,7 @@ void Order::load_order_xml_blob( Read_transaction* ta )
 void Order::load_run_time_blob( Read_transaction* ta )
 {
     string run_time_xml = db_read_clob( ta, "run_time" );
-    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
+    if( run_time_xml != "" )  set_schedule( (File_based*)NULL, xml::Document_ptr( run_time_xml ).documentElement() );
 }
 
 //-------------------------------------------------------------------------Order::load_payload_blob
@@ -4142,14 +4100,6 @@ void Order::assert_is_not_distributed( const string& debug_text )
 void Order::set_distributed( bool distributed )
 {
     assert( distributed );
-
-    if( distributed )
-    {
-#     ifndef Z_DEBUG  //test
-        //2007-07-27 if( _run_time->set() )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
-#     endif
-        //if( !job_chain()  ||  !job_chain()->_is_distributed )  z::throw_xc( Z_FUNCTION, obj_name(), "no job_chain or job_chain is not distributed" );
-    }
 
     _is_distributed = distributed;
 }
@@ -4543,9 +4493,9 @@ bool Order::db_try_insert( bool throw_exists_exception )
             if( order_element.hasAttributes()  ||  order_element.firstChild() )
                 db_update_clob( &ta, "order_xml", order_document.xml() );
 
-            if( run_time() )
+            if( _schedule_use->is_defined() )
             {
-                xml::Document_ptr doc = run_time()->dom_document();
+                xml::Document_ptr doc = _schedule_use->schedule()->dom_document();
                 if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
             }
 
@@ -4692,11 +4642,11 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                 else
                 //if( !finished() )
                 {
-                    // _run_time_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
+                    // _schedule_modified gilt nicht für den Datenbanksatz, sondern für den Auftragsneustart
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
-                    if( run_time() ) 
+                    if( _schedule_use->is_defined() ) 
                     {
-                        xml::Document_ptr doc = run_time()->dom_document();
+                        xml::Document_ptr doc = _schedule_use->schedule()->dom_document();
                         if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
                                                                                                           else  update[ "run_time" ].set_direct( "null" );
                     }
@@ -4985,7 +4935,8 @@ void Order::close()
     //else
     if( _job_chain )  _job_chain->remove_order( this );
 
-    if( _run_time )  _run_time->close(), _run_time = NULL;
+    _schedule_use->close();
+    _schedule_use = NULL;
 
     if( _standing_order )  _standing_order->check_for_replacing_or_removing();
 
@@ -4994,7 +4945,7 @@ void Order::close()
 
 //-----------------------------------------------------------------------------------Order::set_dom
 
-void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable_set_map )
+void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& element, Variable_set_map* variable_set_map )
 {
     if( !element )  return;
     if( !element.nodeName_is( "order" )  && 
@@ -5077,7 +5028,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
         else
         if( e.nodeName_is( "run_time" ) )       // Attribut at="..." setzt nächste Startzeit
         { 
-            set_run_time( e );
+            set_schedule( source_file_based, e );
         }
         else
         if( e.nodeName_is( "period" ) )
@@ -5203,13 +5154,13 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     }
 
-    if( show_what.is_set( show_run_time )  &&  _run_time )  result.appendChild( _run_time->dom_element( dom_document ) );  // Vor _period setzen!
+    if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( dom_document, Show_what() ) );  // Vor _period setzen!
 
     if( show_what.is_set( show_for_database_only ) )
     {
         // Nach <run_time> setzen!
         if( _period.repeat() < Time::never ||
-            _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <run_time>
+            _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <schedule>
     }
 
     if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
@@ -5294,28 +5245,26 @@ void Order::append_calendar_dom_elements( const xml::Element_ptr& element, Show_
         element.appendChild( setback_element );
     }
 
-    if( _run_time )
+
+    _schedule_use->append_calendar_dom_elements( element, options );
+
+    for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
+         node;
+         node = node.nextSibling() )
     {
-        _run_time->append_calendar_dom_elements( element, options );
-
-        for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
-             node;
-             node = node.nextSibling() )
+        if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
         {
-            if( xml::Element_ptr e = xml::Element_ptr( node, xml::Element_ptr::no_xc ) )
+            if( setback_element  &&                                           // Duplikat?
+                e != setback_element  && 
+                e.nodeName_is( setback_element.nodeName() )  &&  
+                e.getAttribute( "at" ) == setback_element.getAttribute( "at" ) )
             {
-                if( setback_element  &&                                           // Duplikat?
-                    e != setback_element  && 
-                    e.nodeName_is( setback_element.nodeName() )  &&  
-                    e.getAttribute( "at" ) == setback_element.getAttribute( "at" ) )
-                {
-                    element.removeChild( setback_element );
-                    setback_element = NULL;
-                }
-
-                if( _job_chain_path != "" )  e.setAttribute( "job_chain", _job_chain_path );
-                e.setAttribute( "order", string_id() );
+                element.removeChild( setback_element );
+                setback_element = NULL;
             }
+
+            if( _job_chain_path != "" )  e.setAttribute( "job_chain", _job_chain_path );
+            e.setAttribute( "order", string_id() );
         }
     }
 }
@@ -6039,9 +5988,9 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 void Order::set_next_start_time()
 {
-    if( _state == _initial_state  &&  !_setback  &&  _run_time  &&  _run_time->set() )
+    if( _state == _initial_state  &&  !_setback  &&  _schedule_use->is_defined() )
     {
-        set_setback( next_start_time( true ) );     // Braucht für <run_time start_time_function=""> das Scheduler-Skript
+        set_setback( next_start_time( true ) );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
     }
     else
     {
@@ -6181,11 +6130,11 @@ void Order::handle_end_state()
     }
     else
     {
-        bool is_first_call = _run_time_modified;
-        _run_time_modified = false;
+        bool is_first_call = _schedule_modified;
+        _schedule_modified = false;
         Time next_start = next_start_time( is_first_call );
 
-        if( next_start != Time::never  &&  _state != _initial_state )   // <run_time> verlangt Wiederholung?
+        if( next_start != Time::never  &&  _state != _initial_state )   // <schedule> verlangt Wiederholung?
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
@@ -6257,7 +6206,7 @@ bool Order::handle_end_state_of_nested_job_chain()
         }
         else
         {
-            // Bei <run_time> Auftrag an den Anfang der ersten Jobkette setzen
+            // Bei <schedule> Auftrag an den Anfang der ersten Jobkette setzen
             end_state_reached = true;
         }
 
@@ -6278,7 +6227,7 @@ bool Order::handle_end_state_of_nested_job_chain()
 
 void Order::handle_end_state_repeat_order( const Time& next_start )
 {
-    // Auftrag wird wegen <run_time> wiederholt
+    // Auftrag wird wegen <schedule> wiederholt
 
     Absolute_path first_nested_job_chain_path;
 
@@ -6510,13 +6459,13 @@ Time Order::next_start_time( bool first_call )
 {
     Time result = Time::never;
 
-    if( _run_time  &&  _run_time->set() )
+    if( _schedule_use->is_defined() )
     {
         Time now = Time::now();
 
         if( first_call )
         {
-            _period = _run_time->next_period( now, time::wss_next_period_or_single_start );
+            _period = _schedule_use->next_period( now, schedule::wss_next_period_or_single_start );
 
             if( !_period.absolute_repeat().is_never() )
             {
@@ -6524,7 +6473,7 @@ Time Order::next_start_time( bool first_call )
 
                 if( result.is_never() )
                 {
-                    _period = _run_time->next_period( _period.end(), time::wss_next_period_or_single_start );
+                    _period = _schedule_use->next_period( _period.end(), schedule::wss_next_period_or_single_start );
                     result = _period.begin();
                 }
             }
@@ -6539,7 +6488,7 @@ Time Order::next_start_time( bool first_call )
 
             if( result >= _period.end() )       // Periode abgelaufen?
             {
-                Period next_period = _run_time->next_period( _period.end(), time::wss_next_begin );
+                Period next_period = _schedule_use->next_period( _period.end(), schedule::wss_next_begin );
                 //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
                 if( _period.repeat().is_never()
@@ -6551,7 +6500,7 @@ Time Order::next_start_time( bool first_call )
 
                 if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?
                 {
-                    next_period = _run_time->next_period( now );
+                    next_period = _schedule_use->next_period( now );
                     result = next_period.begin();
                 }
 
@@ -6561,7 +6510,7 @@ Time Order::next_start_time( bool first_call )
 
             // Aber gibt es ein single_start vorher?
 
-            Period next_single_start_period = _run_time->next_period( now, time::wss_next_single_start );
+            Period next_single_start_period = _schedule_use->next_period( now, schedule::wss_next_single_start );
             if( next_single_start_period._single_start  &&  result > next_single_start_period.begin() )
             {
                 _period = next_single_start_period;
@@ -6575,39 +6524,57 @@ Time Order::next_start_time( bool first_call )
     return result;
 }
 
-//-----------------------------------------------------------------Order::on_before_modify_run_time
+//------------------------------------------------------------------------Order::on_schedule_loaded
 
-void Order::on_before_modify_run_time()
+void Order::on_schedule_loaded()
 {
-# ifndef Z_DEBUG  //test
-    //2007-07-27 if( _is_distributed )  z::throw_xc( "SCHEDULER-397", "<run_time>" );
-# endif
-
-  //if( _task       )  z::throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
-  //if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
-  //if( _job_chain  )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path );
+    on_schedule_modified();
 }
 
-//-------------------------------------------------------------------Order::run_time_modified_event
+//----------------------------------------------------------------------Order::on_schedule_modified
 
-void Order::run_time_modified_event()
+void Order::on_schedule_modified()
 {
     _setback = 0;           // Änderung von <run_time> überschreibt Order.at
     set_next_start_time();
 
-    //if( _state == _initial_state )  set_setback( _run_time->set()? next_start_time( true ) : Time(0) );
-    //                         else  _run_time_modified = true;
+    //if( _state == _initial_state )  set_setback( _schedule->set()? next_start_time( true ) : Time(0) );
+    //                         else  _schedule_modified = true;
 }
 
-//------------------------------------------------------------------------------Order::set_run_time
+//-----------------------------------------------------------------Order::on_schedule_to_be_removed
 
-void Order::set_run_time( const xml::Element_ptr& e )
+bool Order::on_schedule_to_be_removed()
 {
-    _run_time = Z_NEW( Run_time( this, (File_based*)NULL ) );
-    _run_time->set_modified_event_handler( this );
+    _schedule_use->disconnect();
 
-    if( e )  _run_time->set_dom( e );       // Ruft set_setback() über modify_event()
-       else  run_time_modified_event();
+    int DOPPELT;
+    _setback = 0;           // Änderung von <run_time> überschreibt Order.at
+    set_next_start_time();
+
+    return true;
+}
+
+//-----------------------------------------------------------------------Order::on_schedule_removed
+
+//void Order::on_schedule_removed()
+//{
+//    // Schon in on_schedule_to_be_removed() erledigt
+//}
+
+//------------------------------------------------------------------------------Order::set_schedule
+
+void Order::set_schedule( File_based* source_file_based, const xml::Element_ptr& e )
+{
+    _schedule_use->set_dom( source_file_based, e );       // Ruft add_depandent() auf.
+    // Bereits aufgerufen von _schedule_use->set_dom(): on_schedule_modified();
+}
+
+//------------------------------------------------------------------------------Order::schedule_use
+
+Schedule_use* Order::schedule_use()
+{
+    return +_schedule_use;
 }
 
 //---------------------------------------------------------------------------Order::set_replacement

@@ -263,7 +263,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     _job_folder              = spooler()->job_subsystem             ()->new_job_folder           ( this );
     _job_chain_folder        = spooler()->order_subsystem           ()->new_job_chain_folder     ( this );
     _standing_order_folder   = spooler()->standing_order_subsystem  ()->new_standing_order_folder( this );
-#ifdef Z_SCHEDULE_DEVELEPMENT
+#ifdef Z_SCHEDULE_DEVELOPMENT
     _schedule_folder         = spooler()->schedule_subsystem        ()->new_schedule_folder      ( this );
 #endif
     _subfolder_folder        = spooler()->folder_subsystem          ()->new_subfolder_folder     ( this );
@@ -273,7 +273,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     add_to_typed_folder_map( _lock_folder             );
     add_to_typed_folder_map( _job_folder              );
     add_to_typed_folder_map( _job_chain_folder        );
-#ifdef Z_SCHEDULE_DEVELEPMENT
+#ifdef Z_SCHEDULE_DEVELOPMENT
     add_to_typed_folder_map( _schedule_folder         );
 #endif
     add_to_typed_folder_map( _standing_order_folder   );
@@ -1377,7 +1377,8 @@ bool File_based::activate2()
     {
         load2();
 
-        if( _state == s_loaded  &&  subsystem()->subsystem_state() >= subsys_active )
+        if( ( _state == s_loaded  ||  _state == s_incomplete )  &&  
+            subsystem()->subsystem_state() >= subsys_active )
         {
             ok = on_activate();
             
@@ -1397,11 +1398,22 @@ void File_based::set_file_based_state( State state )
 { 
     if( _state != state )
     {
-        assert( _state == s_not_initialized && state == s_undefined  ||  _state < state );
+        assert( _state == s_not_initialized && state == s_undefined  ||  
+                _state == s_active          && state == s_incomplete ||
+                _state < state );
+        State previous_state = _state;
         _state = state; 
 
-        log()->log( _state == s_active? log_info : log_debug9,
-                    message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name() ) );
+        if( _state == s_incomplete )
+        {
+            log()->log( log_info, message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name(), incomplete_string() ) );
+        }
+        else
+        {
+            log()->log( _state == s_active || previous_state == s_active? log_info 
+                                                                        : log_debug9,
+                        message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name() ) );
+        }
     }
 }
 
@@ -1477,9 +1489,7 @@ void File_based::on_dependant_removed( File_based* file_based )
 
 void File_based::assert_is_initialized()
 {
-    if( _state != s_initialized  &&
-        _state != s_loaded  &&
-        _state != s_active )  
+    if( _state < s_initialized  ||  _state > s_active )  
     {
         if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_initialized ), _base_file_xc );
                                else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_initialized ) );
@@ -1490,8 +1500,7 @@ void File_based::assert_is_initialized()
 
 void File_based::assert_is_loaded()
 {
-    if( _state != s_loaded  &&
-        _state != s_active )  
+    if( _state < s_loaded  ||  _state > s_active )  
     {
         if( base_file_has_error() )  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_loaded ), _base_file_xc );
                                else  z::throw_xc( "SCHEDULER-153", obj_name(), file_based_state_name( s_loaded ) );
@@ -1762,6 +1771,7 @@ string File_based::file_based_state_name( State state )
         case s_not_initialized: return "not_initialized";
         case s_initialized:     return "initialized";
         case s_loaded:          return "loaded";
+        case s_incomplete:      return "incomplete";
         case s_active:          return "active";
         case s_closed:          return "closed";
         default:                return S() << "File_based_state-" << state;

@@ -55,6 +55,7 @@ struct Job_subsystem : Job_subsystem_interface
     bool                        has_any_order               ();
     bool                        is_any_task_queued          ();
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
+    Schedule*                   default_schedule            ()                                      { return _default_schedule; }
 
 
     // File_based_subsystem:
@@ -66,6 +67,24 @@ struct Job_subsystem : Job_subsystem_interface
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     ptr<Job>                    new_file_based              ();
+
+    ptr<Schedule>              _default_schedule;
+};
+
+//---------------------------------------------------------------------------------Job_schedule_use
+
+struct Job_schedule_use : Schedule_use
+{
+                                Job_schedule_use            ( Job* job )                            : Schedule_use(job), _job(job) {}
+
+    void                        on_schedule_loaded          ()                                      { _job->on_schedule_loaded(); }
+    void                        on_schedule_modified        ()                                      { _job->on_schedule_modified(); }
+    bool                        on_schedule_to_be_removed   ()                                      { return _job->on_schedule_to_be_removed(); }
+  //void                        on_schedule_removed         ()                                      { _job->on_schedule_removed(); }
+    string                      name_for_function           () const                                { return _job->name(); }
+
+  private:
+    Job*                       _job;
 };
 
 //-------------------------------------------------------------------------------Job_lock_requestor
@@ -104,6 +123,8 @@ Job_subsystem::Job_subsystem( Scheduler* scheduler )
 : 
     Job_subsystem_interface( scheduler, type_job_subsystem )
 {
+    _default_schedule = _spooler->schedule_subsystem()->new_schedule();
+    _default_schedule->set_xml( (File_based*)NULL, "<run_time/>" );
 }
 
 //-----------------------------------------------------------------------------Job_subsystem::close
@@ -122,7 +143,7 @@ bool Job_subsystem::subsystem_initialize()
     _subsystem_state = subsys_initialized;
     
     file_based_subsystem<Job>::subsystem_initialize();
-    
+
     return true;
 }
 
@@ -424,7 +445,8 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 
     _com_job  = new Com_job( this );
 
-    init_run_time();
+    _schedule_use = Z_NEW( Job_schedule_use( this ) );
+  //_schedule_use->set_default_schedule( _spooler->job_subsystem()->default_schedule() );   // Falls <schedule> unbekannt ist
 
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
@@ -446,7 +468,7 @@ Job::~Job()
     }
     catch( exception& x ) { _log->warn( x.what() ); }     
 
-    if( _run_time )  _run_time->close();
+    _schedule_use = NULL;
 }
 
 //---------------------------------------------------------------------------------------Job::close
@@ -502,8 +524,7 @@ void Job::close()
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_job  )  _com_job->close(), _com_job  = NULL;
 
-    if( _run_time )  _run_time->close();
-
+    if( _schedule_use )  _schedule_use->close(), _schedule_use = NULL;
     _lock_requestor = NULL;
     
     //remove_dependant( spooler()->schedule_subsystem(), _schedule_path );
@@ -532,14 +553,20 @@ bool Job::on_initialize()
             if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
             if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
-            _next_start_time = Time::never;
-            _period._begin = 0;
-            _period._end   = 0;
+            //_next_start_time = Time::never;
+            //_period._begin = 0;
+            //_period._end   = 0;
+            set_next_start_time( Time::never );
 
             if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
 
             prepare_on_exit_commands();
             
+            if( !_schedule_use->is_defined()  &&  _schedule_use->schedule_path() == "" )            // Job ohne <run_time>?
+            {
+                _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
+            }
+
             if( _lock_requestor )  
             {
                 _lock_requestor->initialize();
@@ -616,38 +643,45 @@ bool Job::on_activate()
     {
         try
         {
-            if( !_run_time->set() )  _run_time->set_default();
-          //if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
-
-            set_state( s_pending );
-            
-            _delay_until = 0;
-            init_start_when_directory_changed();
-            check_min_tasks( "job initialization" );
-
-            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+            bool ok = _schedule_use->try_load();
+            if( !ok )    // Nach _schedule_use->set_default_schedule() immer true
             {
-                if( (*it)->filename_pattern() != "" )  
-                {
-                    _start_once_for_directory = true;
-                    break;
-                }
+                set_file_based_state( s_incomplete );
             }
+            else
+            {
+                set_state( s_pending );
+                
+                _delay_until = 0;
+                init_start_when_directory_changed();
+                check_min_tasks( Z_FUNCTION );
 
-            set_next_start_time( Time::now() );
+                if( _tasks_count == 0 )
+                {
+                    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+                    {
+                        if( (*it)->filename_pattern() != "" )  
+                        {
+                            _start_once_for_directory = true;
+                            break;
+                        }
+                    }
+                }
 
+                set_next_start_time( Time::now() );
 
-            //TODO
-            // Man könnte hier warnen, wenn die Run_time keine Periode hat und in der Warteschlange eine Task ohne Startzeit ist.
-            // Die würde nie gestartet werden.
+                //TODO
+                // Man könnte hier warnen, wenn die Schedule keine Periode hat und in der Warteschlange eine Task ohne Startzeit ist.
+                // Die würde nie gestartet werden.
+
+                result = true;
+            }
         }
         catch( exception& x )
         {
             _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
             throw;
         }
-
-        result = true;
     }
 
     return result;
@@ -736,8 +770,8 @@ void Job::set_dom( const xml::Element_ptr& element )
         //text = element.getAttribute( "output_level" );
         //if( !text.empty() )  _output_level = as_int( text );
 
-        //for( time::Holiday_set::iterator it = _spooler->_run_time->_holidays.begin(); it != _spooler->_run_time->_holidays.end(); it++ )
-        //    _run_time->_holidays.insert( *it );
+        //for( time::Holiday_set::iterator it = _spooler->_schedule_use->_holidays.begin(); it != _spooler->_schedule_use->_holidays.end(); it++ )
+        //    _schedule_use->_holidays.insert( *it );
         
 
         DOM_FOR_EACH_ELEMENT( element, e )
@@ -853,9 +887,7 @@ void Job::set_dom( const xml::Element_ptr& element )
                 }
             }
             else
-            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
-            //else
-            //if( e.nodeName_is( "scheduler.use" ) &&  !_spooler->_manual )  set_run_time( e );
+            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_schedule( e );
         }
     }
 }
@@ -1005,40 +1037,83 @@ void Job::init_start_when_directory_changed( Task* task )
     }
 }
 
-//-------------------------------------------------------------------------------Job::init_run_time
+//--------------------------------------------------------------------------------Job::set_schedule
 
-void Job::init_run_time()
+void Job::set_schedule( const xml::Element_ptr& element )
 {
-    _run_time = Z_NEW( Run_time( this, this ) );
-    _run_time->set_holidays( _spooler->holidays() );
+    _schedule_use->set_dom( this, element );    // Ruft add_depandent() auf
+
+    //Bereits aufgerufen von _schedule_use->set_dom(): on_schedule_modified();
+
+    //if( !_schedule_use->schedule_path().empty() )
+    //{
+    //    add_dependant( spooler()->schedule_subsystem(), _schedule_use->schedule_path() );   int REMOVE_DEPENDENT;
+    //}
 }
 
-//--------------------------------------------------------------------------------Job::set_run_time
+//--------------------------------------------------------------------------Job::on_schedule_loaded
 
-void Job::set_run_time( const xml::Element_ptr& element )
+void Job::on_schedule_loaded()
 {
-    init_run_time();
+    if( file_based_state() == s_incomplete )  activate();
 
-    //if( element.nodeName_is( "schedule.use" ) )
-    //{
-    //    _schedule_path = Absolute_path( folder_path(), Absolute_path( folder_path(), element.getAttribute( "schedule" ) ) );
-    //    add_dependant( spooler()->schedule_subsystem(), _schedule_path );   int REMOVE_DEPENDENT;
-    //    _run_time = spooler()->schedule_subsystem()->schedule_or_null( _schedule_path );
-    //    int RUN_TIME_KANN_NULL_SEIN;
-    //}
-    //else
+    on_schedule_modified();
+}
+
+//------------------------------------------------------------------------Job::on_schedule_modified
+
+void Job::on_schedule_modified()
+{
+    _start_once = _tasks_count == 0  &&  _schedule_use->schedule()->once();
+    _period     = Period();
+    set_next_start_time( Time::now() );
+}
+
+//-------------------------------------------------------------------Job::on_schedule_to_be_removed
+
+bool Job::on_schedule_to_be_removed()
+{
+    string schedule_name = _schedule_use->schedule()->obj_name();
+
+    _schedule_use->disconnect();            // Schaltet auf default_schedule um, falls gesetzt
+
+    if( !_schedule_use->is_defined() )
     {
-        assert( element.nodeName_is( "run_time" ) );
-        _run_time->set_dom( element );
+        set_file_based_state( s_incomplete );
+        end_tasks( message_string( "SCHEDULER-885", schedule_name ) );
     }
 
-    _start_once    = _run_time->once();
-    _period._begin = 0;
-    _period._end   = 0;
-    _next_single_start = Time::never;
+    _period = Period();
+    set_next_start_time( Time::now() );
 
-    if( _state >= s_pending )  set_next_start_time( Time::now() );
+    return true;
 }
+
+//---------------------------------------------------------------------------Job::incomplete_string
+
+string Job::incomplete_string()
+{
+    S result;
+
+    if( file_based_state() == s_incomplete )
+    {
+        if( !_schedule_use->is_defined() )
+        {
+            result << _spooler->schedule_subsystem()->object_type_name() << " " << _schedule_use->schedule_path();
+        }
+
+        // Hier Process_class und Lock aufnehmen...
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------Job::on_schedule_removed
+
+//void Job::on_schedule_removed()
+//{
+//    // Schon in on_schedule_to_be_removed() erledigt
+//}
 
 //---------------------------------------------------------------------------Job::prepare_to_remove
 
@@ -1255,7 +1330,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
             task->_let_run        = true;
             task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
 
-            if( !start_at  &&  !_run_time->period_follows( now ) ) 
+            if( !start_at  &&  !_schedule_use->period_follows( now ) ) 
             {
                 try{ z::throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
             }
@@ -1537,11 +1612,11 @@ void Job::enqueue_task( Task* task )
 
     if( _state > s_loaded )
     {
-        if( !task->_start_at  &&  !_run_time->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
+        if( !task->_start_at  &&  !_schedule_use->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
     }
     else
     {
-        // _run_time ist noch nicht gesetzt (<run_time next_start_function=""> kann erst nach dem Laden des Scheduler-Skripts ausgeführt werden)
+        // _schedule_use ist noch nicht gesetzt (<schedule next_start_function=""> kann erst nach dem Laden des Scheduler-Skripts ausgeführt werden)
         // Kann nur beim Laden des Scheduler-Skripts passieren
     }
 
@@ -1932,16 +2007,24 @@ string Job::trigger_files( Task* task )
 
 void Job::select_period( const Time& now )
 {
-    if( now >= _period.end() )       // Periode abgelaufen?
+    if( now.is_never()  ||  !_schedule_use->is_defined() )
     {
-        _period = _run_time->next_period(now);  
-
-        if( _period.begin() != Time::never )
+        _period = Period();
+    }
+    else
+    {
+        if( now >= _period.end()  ||                                        // Periode abgelaufen?
+            _period.begin().is_never() && _period.end().is_never()  )       // oder noch nicht gesetzt?
         {
-            _log->debug( message_string( "SCHEDULER-921", _period.to_xml() ) );
+            _period = _schedule_use->next_period( now );  
+
+            if( _period.begin() != Time::never )
+            {
+                _log->debug( message_string( "SCHEDULER-921", _period.to_xml() ) );
+            }
+            else 
+                _log->debug( message_string( "SCHEDULER-922" ) );
         }
-        else 
-            _log->debug( message_string( "SCHEDULER-922" ) );
     }
 }
 
@@ -1956,102 +2039,106 @@ bool Job::is_in_period( const Time& now )
 
 void Job::set_next_start_time( const Time& now, bool repeat )
 {
+    Time next_start_time = Time::never;
+
     select_period( now );
-
-    Time   next_start_time = Time::never;
-    string msg;
-
     _next_single_start = Time::never;
 
-    if( _delay_until )
+
+    if( !now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined() )
     {
-        next_start_time = _period.next_try( _delay_until );
-        //if( next_start_time.is_never() )  next_start_time = _run_time->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
-        if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
-    }
-    else
-    if( is_order_controlled()  &&  !_start_min_tasks  ) 
-    {
-        next_start_time = Time::never;
-    }
-    else
-    if( _state == s_pending  &&  _max_tasks > 0 )
-    {
-        if( !_period.is_in_time( _next_start_time ) )
+        string msg;
+
+        if( _delay_until )
         {
-            if( !_repeat )  _next_single_start = _spooler->_zschimmer_mode? _run_time->next_any_start( now ) : _run_time->next_single_start( now );
-
-            if( _start_once  ||  
-                _start_min_tasks  ||  
-                !repeat  &&  _period.has_repeat_or_once() )
+            next_start_time = _period.next_try( _delay_until );
+            //if( next_start_time.is_never() )  next_start_time = _schedule_use->next_period( _delay_until, time::wss_next_period_or_single_start ).begin();   // Jira JS-137
+            if( _spooler->_debug )  msg = message_string( "SCHEDULER-923", next_start_time );   // "Wiederholung wegen delay_after_error"
+        }
+        else
+        if( is_order_controlled()  &&  !_start_min_tasks  ) 
+        {
+            next_start_time = Time::never;
+        }
+        else
+        if( _state == s_pending  &&  _max_tasks > 0 )
+        {
+            if( !_period.is_in_time( _next_start_time ) )
             {
-                if( _period.begin() > now )
-                {
-                    next_start_time = _period.begin();
-                    if( _spooler->_debug )  msg = message_string( "SCHEDULER-924", next_start_time );   // "Erster Start zu Beginn der Periode "
-                }
-                else
-                {
-                    next_start_time = now;
-                }
-            }
-            else
-            if( repeat )
-            {
-                if( _repeat > 0 )       // spooler_task.repeat
-                {
-                    next_start_time = _period.next_try( now + _repeat );
-                    if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
-                    _repeat = 0;
-                }
-                else
-                if( now >= _period.begin()  &&  !_period.repeat().is_never() )
-                {
-                    next_start_time = _period.next_repeated( now );
+                if( !_repeat )  _next_single_start = _spooler->_zschimmer_mode? _schedule_use->next_any_start( now ) : _schedule_use->next_single_start( now );
 
-                    if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
-
-                    if( next_start_time >= _period.end() )
+                if( _start_once  ||  
+                    _start_min_tasks  ||  
+                    !repeat  &&  _period.has_repeat_or_once() )
+                {
+                    if( _period.begin() > now )
                     {
-                        Period next_period = _run_time->next_period( _period.end() );
+                        next_start_time = _period.begin();
+                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-924", next_start_time );   // "Erster Start zu Beginn der Periode "
+                    }
+                    else
+                    {
+                        next_start_time = now;
+                    }
+                }
+                else
+                if( repeat )
+                {
+                    if( _repeat > 0 )       // spooler_task.repeat
+                    {
+                        next_start_time = _period.next_try( now + _repeat );
+                        if( _spooler->_debug )  msg = message_string( "SCHEDULER-925", _repeat, next_start_time );   // "Wiederholung wegen spooler_job.repeat="
+                        _repeat = 0;
+                    }
+                    else
+                    if( now >= _period.begin()  &&  !_period.repeat().is_never() )
+                    {
+                        next_start_time = _period.next_repeated( now );
 
-                        if( _period.end()    == next_period.begin()  &&  
-                            _period.repeat() == next_period.repeat()  &&  
-                            _period.absolute_repeat().is_never() )
+                        if( _spooler->_debug && next_start_time != Time::never )  msg = message_string( "SCHEDULER-926", _period.repeat(), next_start_time );   // "Nächste Wiederholung wegen <period repeat=\""
+
+                        if( next_start_time >= _period.end() )
                         {
-                            if( _spooler->_debug )  msg += " (in the following period)";
-                        }
-                        else
-                        {
-                            next_start_time = Time::never;
-                            if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
-                                              else  msg = "";
+                            Period next_period = _schedule_use->next_period( _period.end() );
+
+                            if( _period.end()    == next_period.begin()  &&  
+                                _period.repeat() == next_period.repeat()  &&  
+                                _period.absolute_repeat().is_never() )
+                            {
+                                if( _spooler->_debug )  msg += " (in the following period)";
+                            }
+                            else
+                            {
+                                next_start_time = Time::never;
+                                if( _spooler->_debug )  msg = message_string( "SCHEDULER-927" );    // "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode "
+                                                  else  msg = "";
+                            }
                         }
                     }
                 }
+                //else  
+                //if( !_period.absolute_repeat().is_never() )
+                //{
+                //    Time t = _period.next_repeated( now );
+                //    if( t < _period.end() )  next_start_time = t;
+                //}
             }
-            //else  
-            //if( !_period.absolute_repeat().is_never() )
-            //{
-            //    Time t = _period.next_repeated( now );
-            //    if( t < _period.end() )  next_start_time = t;
-            //}
         }
-    }
-    else
-    if( _state == s_running )
-    {
-        if( _start_min_tasks )  next_start_time = min( now, _period.begin() );
-    }
-    else
-    {
-        next_start_time = Time::never;
-    }
+        else
+        if( _state == s_running )
+        {
+            if( _start_min_tasks )  next_start_time = min( now, _period.begin() );
+        }
+        else
+        {
+            next_start_time = Time::never;
+        }
 
-    if( _spooler->_debug )
-    {
-        if( _next_single_start < next_start_time )  msg = message_string( "SCHEDULER-928", _next_single_start );
-        if( !msg.empty() )  _log->debug( msg );
+        if( _spooler->_debug )
+        {
+            if( _next_single_start < next_start_time )  msg = message_string( "SCHEDULER-928", _next_single_start );
+            if( !msg.empty() )  _log->debug( msg );
+        }
     }
 
     _next_start_time = next_start_time;
@@ -2627,22 +2714,20 @@ bool Job::do_something()
             {
                 calculate_next_time( now );
 
+                Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
+                        obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
+                        " _next_time=" << _next_time <<
+                        " _next_start_time=" << _next_start_time <<
+                        " _next_single_start=" << _next_single_start <<
+                        " _directory_watcher_next_time=" << _directory_watcher_next_time <<
+                        " _period=" << _period.obj_name() <<
+                        " _repeat=" << _repeat <<
+                        " _waiting_for_process=" << _waiting_for_process <<
+                        "\n" );
+
                 if( _next_time <= now )
                 {
-                    Z_LOG2( "scheduler", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
                     _next_time = Time::now() + 1;
-                }
-                else
-                {
-                    Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
-                            " _next_time=" << _next_time <<
-                            " _next_start_time=" << _next_start_time <<
-                            " _next_single_start=" << _next_single_start <<
-                            " _directory_watcher_next_time=" << _directory_watcher_next_time <<
-                            " _period=" << _period.obj_name() <<
-                            " _repeat=" << _repeat <<
-                            " _waiting_for_process=" << _waiting_for_process <<
-                            "\n" );
                 }
             }
         }
@@ -3052,7 +3137,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
-        if( show_what.is_set( show_run_time ) )  result.appendChild( _run_time->dom_element( document ) );
+        if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->schedule()->dom_element( document, show_what ) );
 
         dom_append_nl( result );
 
@@ -3151,7 +3236,7 @@ void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_ca
     {
         xml::Node_ptr node_before = element.lastChild();
 
-        _run_time->append_calendar_dom_elements( element, options );
+        _schedule_use->append_calendar_dom_elements( element, options );
 
         for( xml::Simple_node_ptr node = node_before? node_before.nextSibling() : element.firstChild();
              node;

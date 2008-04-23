@@ -11,6 +11,7 @@ namespace scheduler {
 struct Task;
 struct Module_task;
 struct Job_folder;
+struct Job_schedule_use;
 
 //------------------------------------------------------------------------------Combined_job_nodes
 
@@ -133,6 +134,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        on_load                     (); 
   //void                        on_load                     ( Transaction* );
     bool                        on_activate                 ();
+    string                      incomplete_string           ();
     bool                        can_be_removed_now          ();
 
 
@@ -161,8 +163,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        init_start_when_directory_changed( Task* = NULL );
     void                        prepare_on_exit_commands    ();
     void                        set_log                     ();
-    void                        init_run_time               ();
-    void                        set_run_time                ( const xml::Element_ptr& );
+    void                        set_schedule                ( const xml::Element_ptr& );
+    void                        on_schedule_loaded          ();
+    void                        on_schedule_modified        ();
+    bool                        on_schedule_to_be_removed   ();
+
 
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
@@ -347,7 +352,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 
-    ptr<Run_time>              _run_time;
+    ptr<Job_schedule_use>      _schedule_use;
     Period                     _period;                     // Derzeitige oder nächste Period
     xml::Document_ptr          _commands_document;          // <commands>...
     typedef map<int,xml::Element_ptr>  Exit_code_commands_map;
@@ -436,6 +441,8 @@ struct Job_subsystem_interface: Object,
     virtual int                 remove_temporary_jobs       ()                                      = 0;
     virtual bool                is_any_task_queued          ()                                      = 0;
     virtual void                append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* ) = 0;
+    virtual Schedule*           default_schedule            ()                                      = 0;
+
     Job*                        job                         ( const Absolute_path& job_path )       { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const Absolute_path& job_path )       { return file_based_or_null( job_path ); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "jobs" ); }

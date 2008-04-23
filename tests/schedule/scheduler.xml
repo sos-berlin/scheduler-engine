@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <schedules>
+            <schedule name="trettio">
+                <period absolute_repeat="30"/>
+            </schedule>
+        </schedules>
+
+        
+        <script language="JavaScript">
+            <![CDATA[
+
+//
+
+            ]]>
+        </script>
+
+        
+        <jobs>
+            <job name="A">
+                <script language="javascript">
+                    <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+spooler_log.info( "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );                    
+hostware.sleep( 5 );
+                    
+                    ]]>
+                </script>
+
+                <run_time schedule="trettio"/>
+            </job>
+
+            
+            <job name="B">
+                <script language="javascript">
+                    <![CDATA[
+                    
+var hostware = new ActiveXObject( "hostware.global" );
+spooler_log.info( "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" );                    
+hostware.sleep( 5 );
+                    
+                    ]]>
+                </script>
+            </job>
+
+            
+            <job name="C">
+                <script language="javascript">
+                    <![CDATA[
+                    
+var hostware = new ActiveXObject( "hostware.global" );
+spooler_log.info( "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" );                    
+hostware.sleep( 5 );
+                    
+                    ]]>
+                </script>
+
+                <run_time schedule="file"/>
+            </job>
+        </jobs>
+
+    </config>
+</spooler>

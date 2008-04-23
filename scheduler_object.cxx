@@ -56,6 +56,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_schedule:                     return "Schedule";
         case type_schedule_folder:              return "Schedule_folder";
         case type_schedule_subsystem:           return "Schedule_subsystem";
+        case type_schedule_use:                 return "Schedule_use";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler_script_folder:      return "Scheduler_script_folder";

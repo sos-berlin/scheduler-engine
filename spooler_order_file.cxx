@@ -5,7 +5,7 @@
 
     request_order() durch ein Abonnement ersetzen: 
     Job oder Task kann Aufträge abonnieren und das Abonnement auch wieder abbestellen.
-    Dann wird das Verzeichnis außerhalb der <run_time/> nicht überwacht.
+    Dann wird das Verzeichnis außerhalb der <schedule/> nicht überwacht.
 
     Wir brauchen ein Verzeichnis der Abonnementen (struct Job/Task : Order_source_abonnent)
 */
