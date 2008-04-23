@@ -21,6 +21,8 @@ objects = \
  java_subsystem.o\
  include.o\
  lock.o\
+ path.o\
+ schedule.o\
  scheduler_client.o\
  scheduler_messages.o\
  scheduler_object.o\
@@ -62,7 +64,7 @@ objects = \
  subsystem.o\
  supervisor.o\
  supervisor_client.o\
- path.o\
+ version.o\
  xml_client_connection.o
 
 
