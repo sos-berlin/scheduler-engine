@@ -75,7 +75,19 @@ struct Job_subsystem : Job_subsystem_interface
 
 struct Job_schedule_use : Schedule_use
 {
-                                Job_schedule_use            ( Job* job )                            : Schedule_use(job), _job(job) {}
+    Job_schedule_use( Job* job )
+    : 
+        Schedule_use(job), 
+        _job(job) 
+    {
+        _job->add_accompanying_dependant( this );
+    }
+
+    ~Job_schedule_use()
+    {
+        _job->remove_accompanying_dependant( this );
+    }
+
 
     void                        on_schedule_loaded          ()                                      { _job->on_schedule_loaded(); }
     void                        on_schedule_modified        ()                                      { _job->on_schedule_modified(); }
@@ -91,7 +103,19 @@ struct Job_schedule_use : Schedule_use
 
 struct Job_lock_requestor : lock::Requestor
 {
-                                Job_lock_requestor          ( Job* job )                            : Requestor( job ), _job(job) {}
+    Job_lock_requestor( Job* job )
+    : 
+        Requestor( job ), 
+        _job(job) 
+    {
+        //_job->add_accompanying_dependant( this );
+    }
+
+    ~Job_lock_requestor()
+    {
+        //_job->remove_accompanying_dependant( this );
+    }
+
 
     // Requestor:
     void                        on_locks_are_available      ()                                      { _job->signal( Z_FUNCTION ); }
@@ -447,7 +471,6 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
   //_schedule_use->set_default_schedule( _spooler->job_subsystem()->default_schedule() );   // Falls <schedule> unbekannt ist
-    add_accompanying_dependant( _schedule_use );
 
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;

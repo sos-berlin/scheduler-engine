@@ -180,7 +180,10 @@ struct Use : Object,
 
 //----------------------------------------------------------------------------------------Requestor
 
-struct Requestor : Object, Scheduler_object, Non_cloneable
+struct Requestor : Object, 
+                   Scheduler_object, 
+                   Dependant,
+                   Non_cloneable
 {
                                 Requestor                   ( Scheduler_object* );
                                ~Requestor                   ();

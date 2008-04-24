@@ -46,7 +46,8 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     void                        remove_requisite            ( const Requisite_path& );
     void                        remove_requisites           ();
     list<Requisite_path>        missing_requisites          ();
-    void                        add_accompanying_dependant  ( Dependant* d )                        { _accompanying_dependants.push_back( d ); }
+    void                        add_accompanying_dependant   ( Dependant* );
+    void                        remove_accompanying_dependant( Dependant* );
 
     int                         append_requisite_dom_elements( const xml::Element_ptr& );
 
@@ -62,7 +63,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
     typedef stdext::hash_map< File_based_subsystem*, Requisite_set >  Requisite_sets;
 
     Requisite_sets             _requisite_sets;
-    list<Dependant*>           _accompanying_dependants;    // missing_requistes() liefert auch die Vermissten dieser Dependants, z.B. Schedule_use für Job
+    stdext::hash_set<Dependant*> _accompanying_dependants;    // missing_requistes() liefert auch die Vermissten dieser Dependants, z.B. Schedule_use für Job
 };
 
 //-------------------------------------------------------------------------------------Dependencies

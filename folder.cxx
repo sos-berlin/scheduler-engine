@@ -2127,13 +2127,27 @@ list<Requisite_path> Dependant::missing_requisites()
         }
     }
 
-    Z_FOR_EACH_CONST( list<Dependant*>, _accompanying_dependants, p )
+    Z_FOR_EACH_CONST( stdext::hash_set<Dependant*>, _accompanying_dependants, p )
     {
         list<Requisite_path> missings = (*p)->missing_requisites();
         result.insert( result.end(), missings.begin(), missings.end() );
     }
 
     return result;
+}
+
+//------------------------------------------------------------Dependant::add_accompanying_dependant
+
+void Dependant::add_accompanying_dependant( Dependant* d )
+{ 
+    _accompanying_dependants.insert( d ); 
+}
+
+//---------------------------------------------------------Depandant::remove_accompanying_dependant
+
+void Depandant::remove_accompanying_dependant( Dependant* d )
+{ 
+    _accompanying_dependants.erase( d ); 
 }
 
 //-----------------------------------------------------------------Dependant::requistes_dom_element
@@ -2174,7 +2188,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
         }
     }
 
-    Z_FOR_EACH_CONST( list<Dependant*>, _accompanying_dependants, p )
+    Z_FOR_EACH_CONST( stdext::hash_set<Dependant*>, _accompanying_dependants, p )
     {
         result += (*p)->append_requisite_dom_elements( element );
     }

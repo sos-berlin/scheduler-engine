@@ -113,6 +113,8 @@ body#job_description    { background-color: #80ecff }
 /* Anklickbar */
 .hover                  { text-decoration: underline }
 
+.has_title:hover        { border-bottom: dotted 1px black;  border-top: dotted 1px black; }
+
 
 /* Fürs Protokoll */
 body.log                { margin-left: 0; padding-left: 0 }

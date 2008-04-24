@@ -2949,9 +2949,11 @@
         </xsl:choose>
 
         <xsl:if test="parent::job/file_based/@state and parent::job/file_based/@state != .">
-            <xsl:text> (</xsl:text>
-            <xsl:value-of select="parent::job/file_based/@state"/>
-            <xsl:text>)</xsl:text>
+            <xsl:text> ›</xsl:text>
+            <span class="has_title" title="generic state">
+                <xsl:value-of select="parent::job/file_based/@state"/>
+            </span>
+            <xsl:text>‹</xsl:text>
         </xsl:if>
 
         <xsl:choose>
