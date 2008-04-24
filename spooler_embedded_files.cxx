@@ -1376,7 +1376,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"at\" minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"at\" type=\"Date_time\"/>\n"
+    "<xsd:attribute name=\"at\" type=\"Loose_date_time\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1437,6 +1437,11 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"schedule\"          type=\"String\"/>             <!-- Nur zum Abruf (\"<schedule.use>\") -->\n"
     "\n"
     "<xsd:attribute name=\"name\"              type=\"String\"/>             <!-- Nur zur Definition eines benannten <schedule> -->\n"
+    "\n"
+    "<xsd:attribute name=\"substitute\"        type=\"Path\"/>               <!-- F\xc3" "\xbc" "r \xc3" "\xbc" "berdeckendes <schedule> -->\n"
+    "<xsd:attribute name=\"valid_from\"        type=\"Date_time\"/>\n"
+    "<xsd:attribute name=\"valid_to\"          type=\"Date_time\"/>\n"
+    "\n"
     "<xsd:attribute name=\"single_start\"      type=\"Time_of_day\"/>\n"
     "<xsd:attribute name=\"begin\"             type=\"Time_of_day\"/>\n"
     "<xsd:attribute name=\"end\"               type=\"Time_of_day\"/>\n"
@@ -1621,6 +1626,16 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:simpleType name=\"Date_time\">\n"
+    "<xsd:annotation>\n"
+    "<xsd:documentation>\"yyyy-mm-dd HH:MM[:SS]\"</xsd:documentation>\n"
+    "</xsd:annotation>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:pattern value=\"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}(:[0-9]{2})?\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "\n"
+    "\n"
+    "<xsd:simpleType name=\"Loose_date_time\">\n"
     "<xsd:annotation>\n"
     "<xsd:documentation>\"yyyy-mm-dd HH:MM[:SS]\"</xsd:documentation>\n"
     "</xsd:annotation>\n"
@@ -1887,7 +1902,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1208958157 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209053465 },
     { NULL, NULL, 0 }
 };
 

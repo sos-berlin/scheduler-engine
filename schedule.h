@@ -305,14 +305,30 @@ enum Scheduler_holidays_usage                               // eMail von Andreas
 
 //-------------------------------------------------------------------------------------Schedule_use
 
-struct Schedule_use : Object,
+struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_time>, 
+                      spooler_com::Ihas_java_class_name,
                       Scheduler_object,
                       Dependant,
                       Non_cloneable
 {
+    static Class_descriptor     class_descriptor;
+    static const Com_method    _methods[];
+
+
                                 Schedule_use                ( Scheduler_object* using_object );
     virtual                    ~Schedule_use                ();
 
+    // Irun_time
+    STDMETHODIMP            put_Xml                         ( BSTR xml );
+
+    // IDispatch
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
+
+    // Ihas_java_class_name
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Run_time"; }
 
     // Scheduler_object 
     void                        close                       ();
@@ -330,6 +346,7 @@ struct Schedule_use : Object,
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     void                    set_schedule                    ( Schedule* );
     Schedule*                   schedule                    ();
+    void                    set_xml                         ( File_based* source_file_based, const string& );
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                    set_scheduler_holidays_usage    ( Scheduler_holidays_usage u )          { _scheduler_holidays_usage = u; }
@@ -367,12 +384,58 @@ struct Schedule_use : Object,
 
 //-----------------------------------------------------------------------------------------Schedule
 
-struct Schedule : idispatch_implementation< Schedule, spooler_com::Irun_time>, 
+struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>, 
                   spooler_com::Ihas_java_class_name,
                   file_based< Schedule, Schedule_folder, Schedule_subsystem_interface >
 {
     static Class_descriptor     class_descriptor;
     static const Com_method    _methods[];
+
+
+    struct Inlay : Object
+    {
+        // Schedule.xml = "<schedule>..." soll den Schedule vollständig ersetzen.
+        // Die SOS bevorzugt dies vor der üblichen und eleganten Lösung, das Objekt zu verwerfen und ein neues anzulegen (Spooler.create_schedule()).
+        // Deshalb unterscheiden wir hier zwischen Schedule und Inlay, damit
+        // letzteres von schedule.xml= entfernt und durch ein neues Inlay ersetzt werden kann.
+        // Siehe eMail von Andreas Liebert 2008-04-21.
+                                    Inlay                       ( Schedule* );
+
+        void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
+        xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+        Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start );
+        int                         month_index_by_name         ( const string& );
+        list<int>                   month_indices_by_names      ( const string& );
+        void                        check                       ();                              
+        bool                        is_filled                   () const;
+        Prefix_log*                 log                         ()                                  { return _schedule->log(); }
+
+      private:
+        friend struct               Schedule;
+
+        Period                      call_function               ( Schedule_use*, const Time& beginning_time );
+        Time                        next_time                   ( const Time& );
+
+        Fill_zero                  _zero_;
+        bool                       _once;
+        At_set                     _at_set;
+        Date_set                   _date_set;
+        Weekday_set                _weekday_set;
+        Monthday_set               _monthday_set;
+        Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
+        vector< ptr<Month> >       _months;
+        Holidays                   _holidays;
+        xml::Document_ptr          _dom;
+        string                     _start_time_function;
+        bool                       _start_time_function_error;
+        Absolute_path              _covered_schedule_path;
+        ptr<Schedule>              _covered_schedule;
+        Time                       _covered_schedule_begin;
+        Time                       _covered_schedule_end;
+        Spooler*                   _spooler;
+        Schedule*                  _schedule;
+    };
 
 
                                 Schedule                    ( Schedule_subsystem_interface*, Scheduler_holidays_usage = with_scheduler_holidays );
@@ -382,7 +445,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Irun_time>,
     // Scheduler_object
 
     void                        close                       ();
-    void                        clear                       ();
+  //void                        clear                       ();
   //string                      obj_name                    () const;
 
 
@@ -401,7 +464,8 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Irun_time>,
 
     // Irun_time
 
-    STDMETHODIMP            put_Xml                         ( BSTR xml );
+    STDMETHODIMP            put_Xml                         ( BSTR );
+    STDMETHODIMP            get_Xml                         ( BSTR* );
   //STDMETHODIMP            put_Name                        ( BSTR );     
   //STDMETHODIMP            get_Name                        ( BSTR* result )                        { return String_to_bstr( name(), result ); }
   //STDMETHODIMP                Remove                      ();
@@ -426,51 +490,30 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Irun_time>,
 
     void                    set_dom                         ( const xml::Element_ptr& e )           { set_dom( (File_based*)NULL, e ); }
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& d, const Show_what& w )           { return _inlay->dom_element( d, w ); }
     xml::Document_ptr           dom_document                ();
     void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
   //bool                        operator ==                 ( const Schedule& );
 
-    bool                        is_filled                   () const;
-
     void                        add_use                     ( Schedule_use* );
     void                        remove_use                  ( Schedule_use* );
 
     void                    set_xml                         ( File_based* source_file_based, const string& );
+    Inlay*                      inlay                       ()                                      { return _inlay; }
+    bool                        once                        ()                                      { return _inlay->_once; }
 
-    int                         month_index_by_name         ( const string& );
-    list<int>                   month_indices_by_names      ( const string& );
-    void                        check                       ();                              
-
-  //void                        set_default                 ();
-
-    bool                        once                        ()                                      { return _once; }
-  //void                    set_once                        ( bool b = true )                       { _once = b; }
-
-    Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start );
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Schedule& o )       { o.print(s); return s; }
 
 
   private:
-    Period                      call_function               ( Schedule_use*, const Time& beginning_time );
-    Time                        next_time                   ( const Time& );
-
+    void                        release_inlay               ();
 
     Fill_zero                  _zero_;
-    bool                       _once;
-    At_set                     _at_set;
-    Date_set                   _date_set;
-    Weekday_set                _weekday_set;
-    Monthday_set               _monthday_set;
-    Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
-    vector< ptr<Month> >       _months;
-    Holidays                   _holidays;
-    xml::Document_ptr          _dom;
-    string                     _start_time_function;
-    bool                       _start_time_function_error;
+    ptr<Inlay>                 _inlay;
+    Scheduler_holidays_usage   _scheduler_holidays_usage;
 
     typedef stdext::hash_set<Schedule_use*>  Use_set;
     Use_set                                 _use_set;

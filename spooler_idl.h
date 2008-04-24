@@ -188,6 +188,17 @@ struct Irun_time: IDispatch
     virtual HRESULT     put_Xml                         ( BSTR )                                = 0;
 };
 
+//----------------------------------------------------------------------------------------Irun_time
+
+DEFINE_GUID(  IID_Ischedule, 0xfeee47ba, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );     // {feee47ba-6c1b-11d8-8103-000476ee8afb}
+//DEFINE_GUID( CLSID_Run_time,  );
+
+struct Irun_time: IDispatch
+{
+    virtual HRESULT     put_Xml                         ( BSTR )                                = 0;
+    virtual HRESULT     get_Xml                         ( BSTR* )                               = 0;
+};
+
 //------------------------------------------------------------------------------------------Job
 
 DEFINE_GUID(  IID_Ijob,  0xfeee478b, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );

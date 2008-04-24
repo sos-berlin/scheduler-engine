@@ -1367,7 +1367,7 @@
 
             <xsd:element name="at" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
-                    <xsd:attribute name="at" type="Date_time"/>
+                    <xsd:attribute name="at" type="Loose_date_time"/>
                 </xsd:complexType>
             </xsd:element>
 
@@ -1428,6 +1428,11 @@
         <xsd:attribute name="schedule"          type="String"/>             <!-- Nur zum Abruf ("<schedule.use>") -->
 
         <xsd:attribute name="name"              type="String"/>             <!-- Nur zur Definition eines benannten <schedule> -->
+
+        <xsd:attribute name="substitute"        type="Path"/>               <!-- Für überdeckendes <schedule> -->
+        <xsd:attribute name="valid_from"        type="Date_time"/>
+        <xsd:attribute name="valid_to"          type="Date_time"/>
+
         <xsd:attribute name="single_start"      type="Time_of_day"/>
         <xsd:attribute name="begin"             type="Time_of_day"/>
         <xsd:attribute name="end"               type="Time_of_day"/>
@@ -1612,6 +1617,16 @@
 
 
     <xsd:simpleType name="Date_time">
+        <xsd:annotation>
+            <xsd:documentation>"yyyy-mm-dd HH:MM[:SS]"</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="String">
+            <xsd:pattern value="[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}(:[0-9]{2})?"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="Loose_date_time">
         <xsd:annotation>
             <xsd:documentation>"yyyy-mm-dd HH:MM[:SS]"</xsd:documentation>
         </xsd:annotation>

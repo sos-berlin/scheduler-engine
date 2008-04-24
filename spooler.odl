@@ -257,15 +257,26 @@ library Spooler
         HRESULT                 Xml                         ( [in] BSTR );
     }
 
-    /*
+    //------------------------------------------------------------------------------------Ischedule
+
     [
-        uuid       (  )
+        uuid       ( feee47ba-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
     ]
-    coclass Run_time
+    interface Ischedule : IDispatch
     {
-        interface Irun_time;
+        [id(1),propget]
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [id(2),propput]
+        HRESULT                 Xml                         ( [in] BSTR );
+
+        [id(2),propget]
+        HRESULT                 Xml                         ( [out,retval] BSTR* );
     }
-    */
+
     //------------------------------------------------------------------------------------------Job
 
     [
@@ -1865,7 +1876,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47ba-6c1b-11d8-8103-000476ee8afb
 feee47bb-6c1b-11d8-8103-000476ee8afb
 feee47bc-6c1b-11d8-8103-000476ee8afb
 feee47bd-6c1b-11d8-8103-000476ee8afb

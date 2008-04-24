@@ -57,7 +57,9 @@ struct Schedule_subsystem : Schedule_subsystem_interface
 
 //-------------------------------------------------------------------------------------------------
 
-Schedule::Class_descriptor      Schedule::class_descriptor  ( &typelib, "sos.spooler.Run_time", Schedule::_methods );
+Schedule    ::Class_descriptor  Schedule    ::class_descriptor  ( &typelib, "sos.spooler.Schedule", Schedule    ::_methods );
+Schedule_use::Class_descriptor  Schedule_use::class_descriptor  ( &typelib, "sos.spooler.Run_time", Schedule_use::_methods );
+
 const int                       max_include_nesting         = 10;
 
 const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "do"        , "fr"     , "sa"      ,
@@ -182,11 +184,23 @@ Schedule_folder::~Schedule_folder()
 {
 }
 
+//-------------------------------------------------------------------------------Schedule::_methods
+
+const Com_method Schedule_use::_methods[] =
+{
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Schedule,  1, Java_class_name, VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Schedule,  2, Xml            ,              0, VT_BSTR ),
+#endif
+    {}
+};
+
 //-----------------------------------------------------------------------Schedule_use::Schedule_use
 
 Schedule_use::Schedule_use( Scheduler_object* using_object )
 :
-    Scheduler_object( using_object->spooler(), this, type_schedule_use ),
+    Idispatch_implementation( &class_descriptor ),
+    Scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
     _zero_(this+1),
     _using_object(using_object),
     _scheduler_holidays_usage(with_scheduler_holidays)
@@ -206,6 +220,17 @@ Schedule_use::~Schedule_use()
     {
         Z_LOG( Z_FUNCTION << " ERROR " <<  x.what() << "\n" );
     }
+}
+
+//---------------------------------------------------------------------Schedule_use::QueryInterface
+
+STDMETHODIMP Schedule_use::QueryInterface( const IID& iid, void** result )
+{
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Irun_time           , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IDispatch                        , result );
+
+    return Idispatch_implementation::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------------Schedule_use::close
@@ -245,6 +270,16 @@ Schedule* Schedule_use::schedule()
     if( !_schedule )  z::throw_xc( Z_FUNCTION );
 
     return _schedule;
+}
+
+//----------------------------------------------------------------------------Schedule_use::set_xml
+
+void Schedule_use::set_xml( File_based* source_file_based, const string& xml )
+{
+    xml::Document_ptr doc ( xml );
+    if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml ) );
+
+    set_dom( source_file_based, doc.documentElement() );
 }
 
 //----------------------------------------------------------------------------Schedule_use::set_dom
@@ -370,7 +405,7 @@ Time Schedule_use::next_any_start( const Time& time )
 
 Period Schedule_use::next_period( const Time& t, With_single_start single_start ) 
 { 
-    return schedule()->next_period( this, t, single_start ); 
+    return schedule()->inlay()->next_period( this, t, single_start ); 
 }
 
 //-------------------------------------------------------Schedule_use::append_calendar_dom_elements
@@ -422,13 +457,21 @@ string Schedule_use::obj_name() const
     return result;
 }
 
-//-------------------------------------------------------------------------------Schedule::_methods
+//----------------------------------------------------------------------------Schedule_use::put_Xml
+
+STDMETHODIMP Schedule_use::put_Xml( BSTR xml )
+{
+    Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml ) ) );
+}
+
+//-------------------------------------------------------------------------------------------------
 
 const Com_method Schedule::_methods[] =
 {
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Schedule,  1, Java_class_name, VT_BSTR    , 0 ),
     COM_PROPERTY_PUT( Schedule,  2, Xml            ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Schedule,  2, Xml            ,              0, VT_BSTR ),
 #endif
     {}
 };
@@ -438,25 +481,17 @@ const Com_method Schedule::_methods[] =
 Schedule::Schedule( Schedule_subsystem_interface* schedule_subsystem_interface, Scheduler_holidays_usage scheduler_holidays_usage )
 :
     Idispatch_implementation( &class_descriptor ),
-    My_file_based( schedule_subsystem_interface, static_cast<spooler_com::Irun_time*>( this ), type_schedule ),
-    _zero_(this+1),
-    //_host_object(host_object),
-    _holidays(schedule_subsystem_interface->_spooler),
-    _months(12)
+    My_file_based( schedule_subsystem_interface, static_cast<spooler_com::Ischedule*>( this ), type_schedule ),
+    _scheduler_holidays_usage(scheduler_holidays_usage),
+    _zero_(this+1)
 {
     //if( _host_object->scheduler_type_code() == Scheduler_object::type_order )
     //{
     //    _once = true;
     //}
+    int ORDER_ONCE;
 
-
-    if( scheduler_holidays_usage == with_scheduler_holidays )       // Nur bei Order nicht (warum auch immer)
-    {
-        _holidays = _spooler->holidays();       // Kopie des Objekts (kein Zeiger)
-    }
-
-    _dom.create();
-    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>
+    _inlay = Z_NEW( Inlay( this ) );
 }
 
 //------------------------------------------------------------------------------Schedule::~Schedule
@@ -483,7 +518,7 @@ void Schedule::close()
 
 STDMETHODIMP Schedule::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Irun_time           , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Ischedule           , result );
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Ihas_java_class_name, result );
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IDispatch                        , result );
 
@@ -499,10 +534,22 @@ STDMETHODIMP Schedule::QueryInterface( const IID& iid, void** result )
 //    int PRUEFEN;
 //}
 
+//-----------------------------------------------------------------Schedule::release_inlay
+
+void Schedule::release_inlay()
+{
+    if( _inlay )
+    {
+        if( _inlay->_covered_schedule_path != "" )  remove_requisite( Requisite_path( subsystem(), _inlay->_covered_schedule_path ) );
+        _inlay = NULL;
+    }
+}
+
 //--------------------------------------------------------------------------Schedule::on_initialize
 
 bool Schedule::on_initialize()
 {
+    if( _inlay->_covered_schedule_path != "" )  add_requisite( Requisite_path( subsystem(), _inlay->_covered_schedule_path ) );
     return true;
 }
 
@@ -567,13 +614,6 @@ Schedule* Schedule::on_replace_now()
     return this;
 }
 
-//--------------------------------------------------------------------------------Schedule::put_Xml
-
-STDMETHODIMP Schedule::put_Xml( BSTR xml )
-{
-    Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml ) ) );
-}
-
 //----------------------------------------------------------------------------Schedule::operator ==
 
 //bool Schedule::operator == ( const Schedule& r )
@@ -609,204 +649,91 @@ void Schedule::remove_use( Schedule_use* use )
     _use_set.erase( use );
 }
 
-//----------------------------------------------------------------------------------Schedule::clear
+//---------------------------------------------------------------------------Schedule::dom_document
 
-void Schedule::clear()
+xml::Document_ptr Schedule::dom_document() 
 {
-    _once                      = false;
-    _at_set                    = At_set();
-    _date_set                  = Date_set();
-    _weekday_set               = Weekday_set();
-    _monthday_set              = Monthday_set();
-    _ultimo_set                = Ultimo_set();
-    _months.clear();
-    _holidays                  = Holidays( _spooler );
-    _dom                       = NULL;
-    _start_time_function       = "";
-    _start_time_function_error = false;
-}
+    xml::Document_ptr document;
 
-//----------------------------------------------------------------------------Schedule::next_period
+    document.create();
+    document.appendChild( _inlay->dom_element( document, Show_what() ) );
 
-Period Schedule::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start )
-{
-    Period result;
-    Time   tim   = beginning_time;
-    bool   is_no_function_warning_logged = false; 
-    Period last_function_result;
-    
-    last_function_result.set_single_start( 0 );
-
-    while( tim < Time::never )
-    {
-        bool something_called = false;
-
-        if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
-        {
-            if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
-            {
-                log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
-                is_no_function_warning_logged = true;
-            }
-            else
-            if( last_function_result.begin() < tim )
-            {
-                try
-                {
-                    last_function_result = min( result, call_function( use, tim ) );
-                    result = last_function_result;
-                }
-                catch( exception& x )
-                {
-                    log()->error( x.what() );
-                    log()->error( message_string( "SCHEDULER-398", _start_time_function ) );
-                }
-            }
-
-            something_called = true;
-        }
-
-        if( !tim.is_never()  ||  is_filled() )
-        {
-            if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
-            if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
-
-            int m = tim.month_nr() - 1;
-            if( _months[ m ] )
-            {
-                result = min( result, _months[ m ]->next_period( tim, single_start ) );
-            }
-            else
-            {
-                if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
-                if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
-                if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
-            }
-
-            something_called = true;
-        }
-
-        if( !something_called )  break;                         // <run_time> ist leer
-
-        if( result.begin() != Time::never )
-        {
-            if( !_holidays.is_included( result.begin() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
-
-            // Feiertag
-            tim    = result.begin().midnight() + 24*60*60;      // Nächsten Tag probieren
-            result = Period();
-        }
-        else
-        {
-            tim = tim.midnight() + 24*60*60;                    // Keine Periode? Dann nächsten Tag probieren
-        }
-
-        if( tim >= beginning_time + 366*24*60*60 )  break;     // Längstens ein Jahr ab beginning_time voraussehen
-    }
-
-
-    return result;
-}
-
-//--------------------------------------------------------------------------Schedule::call_function
-
-Period Schedule::call_function( Schedule_use* use, const Time& requested_beginning )
-{
-    // Die Funktion sollte keine Zeit in der wiederholten Stunde nach Ende der Sommerzeit liefern.
-
-
-    Period result;
-
-    if( !_start_time_function_error )
-    {
-        try
-        {
-
-            string            date_string      = requested_beginning.as_string( Time::without_ms );
-            string            param2           = use->name_for_function();
-            Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
-            string            function_name    = _start_time_function;
-            if( scheduler_script ->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
-
-            Variant v = scheduler_script ->module_instance()->call( function_name, date_string, param2 );
-            
-            if( !v.is_null_or_empty_string() )
-            {
-                Time t;
-                if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
-                else
-                if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
-                else                           
-                                               t.set_datetime( v.as_string() );
-
-                if( t < requested_beginning )
-                {
-                    //if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
-                    z::throw_xc( "SCHEDULER-394", _start_time_function, t, requested_beginning );
-                }
-                else 
-                if( !t.is_never() ) 
-                {
-                    result.set_single_start( t );
-                }
-            }
-        }
-        catch( exception& x )
-        {
-            _start_time_function_error = true;
-            z::throw_xc( "SCHEDULER-393", _start_time_function, x );
-        }
-    }
-
-    return result;
-}
-
-//--------------------------------------------------------------------Schedule::month_index_by_name
-
-int Schedule::month_index_by_name( const string& mm )
-{
-    string m = lcase( mm );
-
-    for( int i = 0; i < 12; i++ )
-    {
-        if( m == month_names[ i ] )  return i;
-    }
-
-    int result = as_int( m );
-    if( result >= 1  &&  result <= 12 )  return result - 1;
-
-    z::throw_xc( "INVALID-MONTH", mm );      // Sollte wegen XML-Schemas nicht passieren
-}
-
-//-----------------------------------------------------------------Schedule::month_indices_by_names
-
-list<int> Schedule::month_indices_by_names( const string& mm )
-{
-    list<int>      result;
-    vector<string> names  = vector_split( " +", mm );
-
-    Z_FOR_EACH( vector<string>, names, it )
-    {
-        result.push_back( month_index_by_name( *it ) );
-    }
-
-    return result;
+    return document;
 }
 
 //--------------------------------------------------------------------------------Schedule::set_xml
 
-void Schedule::set_xml( File_based* source_file_based, const string& xml )
+void Schedule::set_xml( File_based* source_file_based, const string& xml_string )
 {
-    xml::Document_ptr doc ( xml );
-    if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml ) );
+    xml::Document_ptr doc ( xml_string );
+    if( _spooler->_validate_xml )  _spooler->_schema.validate( xml::Document_ptr( xml_string ) );
 
-    clear();
-    set_dom( source_file_based, doc.documentElement() );
+    release_inlay();
+    _inlay = Z_NEW( Inlay( this ) );
+    _inlay->set_dom( source_file_based, doc.documentElement() );
 }
 
 //--------------------------------------------------------------------------------Schedule::set_dom
 
 void Schedule::set_dom( File_based* source_file_based, const xml::Element_ptr& element )
+{
+    if( !element )  return;
+    assert( element.nodeName_is( "run_time" )  ||  element.nodeName_is( "schedule" ) );
+    assert_is_not_initialized();
+
+
+    if( _scheduler_holidays_usage == with_scheduler_holidays )       // Nur bei Order nicht (warum auch immer)
+    {
+        _inlay->_holidays = _spooler->holidays();       // Kopie des Objekts (kein Zeiger)
+    }
+
+    _inlay->set_dom( source_file_based, element );
+
+    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
+}
+
+//--------------------------------------------------------------------------------Schedule::put_Xml
+
+STDMETHODIMP Schedule::put_Xml( BSTR xml_bstr )
+{
+    Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml_bstr ) ) );
+}
+
+//--------------------------------------------------------------------------------Schedule::get_Xml
+
+STDMETHODIMP Schedule::get_Xml( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        xml::Document_ptr dom_document;
+        dom_document.create();
+
+        hr = String_to_bstr( dom_element( dom_document, Show_what() ).xml(), result );
+    }
+    catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------------Schedule::Inlay::Inlay
+
+Schedule::Inlay::Inlay( Schedule* schedule )
+:
+    _zero_(this+1),
+    _schedule(schedule),
+    _spooler(schedule->spooler()),
+    _holidays(schedule->spooler()),
+    _months(12)
+{
+    _dom.create();
+    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>
+}
+
+//-------------------------------------------------------------------------Schedule::Inlay::set_dom
+    
+void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element_ptr& element )
 {
     if( !element )  return;
     assert( element.nodeName_is( "run_time" )  ||  element.nodeName_is( "schedule" ) );
@@ -824,7 +751,10 @@ void Schedule::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     _once = element.bool_getAttribute( "once", _once );
     //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
 
-    _start_time_function = element.getAttribute( "start_time_function" );
+    _start_time_function   = element.getAttribute( "start_time_function" );
+    _covered_schedule_path = Absolute_path( source_file_based? source_file_based->folder_path() : root_path, element.getAttribute( "substitute" ) );
+    _covered_schedule_begin.set_datetime( element.getAttribute( "valid_from"          ) );
+    _covered_schedule_end  .set_datetime( element.getAttribute( "valid_to"  , "never" ) );
 
     default_period.set_dom( element );
     default_day = default_period;
@@ -914,33 +844,18 @@ void Schedule::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     //    default_month->_weekday_set.fill_with_default( default_day );
     //    for( int i = 0; i < 12; i++ )  if( !_months[ i ] )  _months[ i ] = default_month;
     //}
-
-
-    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
 }
 
-//----------------------------------------------------------------------------Schedule::dom_element
+//---------------------------------------------------------------------Schedule::Inlay::dom_element
 
-xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& document, const Show_what& ) 
+xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document, const Show_what& ) 
 {
     return document.clone( _dom.documentElement() );
 }
 
-//---------------------------------------------------------------------------Schedule::dom_document
+//-----------------------------------------------------------------------Schedule::Inlay::is_filled
 
-xml::Document_ptr Schedule::dom_document() 
-{
-    xml::Document_ptr document;
-
-    document.create();
-    document.appendChild( dom_element( document, Show_what() ) );
-
-    return document;
-}
-
-//------------------------------------------------------------------------------Schedule::is_filled
-
-bool Schedule::is_filled() const
+bool Schedule::Inlay::is_filled() const
 {
     bool result = _at_set  .is_filled() 
                || _date_set.is_filled();
@@ -952,6 +867,173 @@ bool Schedule::is_filled() const
             result = _months[ i ]  &&  _months[ i ]->is_filled();
             if( result )  break;
         }
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------------------Schedule::Inlay::next_period
+
+Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start )
+{
+    Period result;
+    Time   tim   = beginning_time;
+    bool   is_no_function_warning_logged = false; 
+    Period last_function_result;
+    
+    last_function_result.set_single_start( 0 );
+
+    while( tim < Time::never )
+    {
+        bool something_called = false;
+
+        if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
+        {
+            if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
+            {
+                log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
+                is_no_function_warning_logged = true;
+            }
+            else
+            if( last_function_result.begin() < tim )
+            {
+                try
+                {
+                    last_function_result = min( result, call_function( use, tim ) );
+                    result = last_function_result;
+                }
+                catch( exception& x )
+                {
+                    log()->error( x.what() );
+                    log()->error( message_string( "SCHEDULER-398", _start_time_function ) );
+                }
+            }
+
+            something_called = true;
+        }
+
+        if( !tim.is_never()  ||  is_filled() )
+        {
+            if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
+            if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
+
+            int m = tim.month_nr() - 1;
+            if( _months[ m ] )
+            {
+                result = min( result, _months[ m ]->next_period( tim, single_start ) );
+            }
+            else
+            {
+                if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
+                if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
+                if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
+            }
+
+            something_called = true;
+        }
+
+        if( !something_called )  break;                         // <run_time> ist leer
+
+        if( result.begin() != Time::never )
+        {
+            if( !_holidays.is_included( result.begin() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+
+            // Feiertag
+            tim    = result.begin().midnight() + 24*60*60;      // Nächsten Tag probieren
+            result = Period();
+        }
+        else
+        {
+            tim = tim.midnight() + 24*60*60;                    // Keine Periode? Dann nächsten Tag probieren
+        }
+
+        if( tim >= beginning_time + 366*24*60*60 )  break;     // Längstens ein Jahr ab beginning_time voraussehen
+    }
+
+
+    return result;
+}
+
+//-------------------------------------------------------------------Schedule::Inlay::call_function
+
+Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_beginning )
+{
+    // Die Funktion sollte keine Zeit in der wiederholten Stunde nach Ende der Sommerzeit liefern.
+
+
+    Period result;
+
+    if( !_start_time_function_error )
+    {
+        try
+        {
+
+            string            date_string      = requested_beginning.as_string( Time::without_ms );
+            string            param2           = use->name_for_function();
+            Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
+            string            function_name    = _start_time_function;
+            if( scheduler_script ->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+
+            Variant v = scheduler_script ->module_instance()->call( function_name, date_string, param2 );
+            
+            if( !v.is_null_or_empty_string() )
+            {
+                Time t;
+                if( variant_is_numeric( v ) )  t = (time_t)v.as_int64();
+                else
+                if( v.vt == VT_DATE         )  t = seconds_since_1970_from_com_date( V_DATE( &v ) );
+                else                           
+                                               t.set_datetime( v.as_string() );
+
+                if( t < requested_beginning )
+                {
+                    //if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
+                    z::throw_xc( "SCHEDULER-394", _start_time_function, t, requested_beginning );
+                }
+                else 
+                if( !t.is_never() ) 
+                {
+                    result.set_single_start( t );
+                }
+            }
+        }
+        catch( exception& x )
+        {
+            _start_time_function_error = true;
+            z::throw_xc( "SCHEDULER-393", _start_time_function, x );
+        }
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------Schedule::Inlay::month_index_by_name
+
+int Schedule::Inlay::month_index_by_name( const string& mm )
+{
+    string m = lcase( mm );
+
+    for( int i = 0; i < 12; i++ )
+    {
+        if( m == month_names[ i ] )  return i;
+    }
+
+    int result = as_int( m );
+    if( result >= 1  &&  result <= 12 )  return result - 1;
+
+    z::throw_xc( "INVALID-MONTH", mm );      // Sollte wegen XML-Schemas nicht passieren
+}
+
+//----------------------------------------------------------Schedule::Inlay::month_indices_by_names
+
+list<int> Schedule::Inlay::month_indices_by_names( const string& mm )
+{
+    list<int>      result;
+    vector<string> names  = vector_split( " +", mm );
+
+    Z_FOR_EACH( vector<string>, names, it )
+    {
+        result.push_back( month_index_by_name( *it ) );
     }
 
     return result;

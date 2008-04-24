@@ -43,7 +43,7 @@ int                             Time::static_current_difference_to_utc  = 0;
 extern const int                       never_int                   = INT_MAX;
 extern const Time                      latter_day                  = never_int;
        const Time                      Time::never                 = never_int;
-static const char                      last_day_name[]             = "never";
+static const char                      never_name[]                = "never";
 static const char                      immediately_name[]          = "now";
 static const int64                     base_filetime               = 116444736000000000LL;
 
@@ -117,7 +117,7 @@ Time time_from_string( const string& str )
         return dt.time_as_double();
     }
     else
-    if( str == "never" )
+    if( str == never_name )
     {
         return Time::never;
     }
@@ -239,7 +239,7 @@ void Time::set( const string& t )
 {
     _is_utc = false;
 
-    if( t == "never" )
+    if( t == never_name )
     {
         *this = Time::never;
     }
@@ -267,7 +267,7 @@ void Time::set( double t )
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == never_int? time::last_day_name
+                    else  _time_as_string = _time == never_int? time::never_name
                                                               : as_string();
 #   endif
 }
@@ -353,17 +353,24 @@ Time& Time::set_utc( double t )
 
 Time& Time::set_datetime( const string& t )
 {
-    bool   is_utc = false;
-    string my_t   = t;
-
-    if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  is_utc = true;
+    if( t == never_name )
+    {
+        set_never();
+    }
     else
-    if( string_ends_with( my_t, "+0000" ) )  my_t.erase( my_t.length() - 5 ),  is_utc = true;
+    {
+        bool   is_utc = false;
+        string my_t   = t;
 
-    double fraction = cut_fraction( &my_t );
+        if( string_ends_with( my_t, "Z"     ) )  my_t.erase( my_t.length() - 1 ),  is_utc = true;
+        else
+        if( string_ends_with( my_t, "+0000" ) )  my_t.erase( my_t.length() - 5 ),  is_utc = true;
 
-    if( is_utc )  set_utc( Sos_optional_date_time( my_t ).as_time_t() + fraction );
-            else  set    ( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+        double fraction = cut_fraction( &my_t );
+
+        if( is_utc )  set_utc( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+                else  set    ( Sos_optional_date_time( my_t ).as_time_t() + fraction );
+    }
 
     return *this;
 }
@@ -408,7 +415,7 @@ string Time::as_string( With_ms with ) const
 
     if( is_never() )
     {
-        result = last_day_name;
+        result = never_name;
     }
     else
     if( is_null() )
@@ -731,7 +738,7 @@ void Gmtime::set( double t )
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time <= 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == double_time_max? time::last_day_name
+                    else  _time_as_string = _time == double_time_max? time::never_name
                                                                     : as_string();
 #   endif
 }
@@ -768,7 +775,7 @@ string Gmtime::as_string( With_ms with ) const
 
     if( _time == double_time_max )
     {
-        return time::last_day_name;
+        return time::never_name;
     }
     else
     if( _time == 0 )
