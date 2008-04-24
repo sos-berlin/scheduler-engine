@@ -224,6 +224,7 @@ struct Order : Com_order,
     void                        on_schedule_loaded      ();
     void                        on_schedule_modified    ();
     bool                        on_schedule_to_be_removed();
+  //void                        on_schedule_removed     ();
 
     void                        db_insert               ();
     bool                        db_try_insert           ( bool throw_exists_exception = false );
@@ -558,7 +559,7 @@ struct Order_queue_node : Node
 //------------------------------------------------------------------------------job_chain::Job_node
 
 struct Job_node : Order_queue_node,
-                  Pendant
+                  Dependant
 {
     typedef Order_queue_node    Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Job_node, n_job )
@@ -574,8 +575,8 @@ struct Job_node : Order_queue_node,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
 
-    // Pendant
-    bool                        on_dependant_loaded         ( folder::File_based* found_job );
+    // Dependant
+    bool                        on_requisite_loaded         ( folder::File_based* found_job );
     string                      obj_name                    () const                                { return Order_queue_node::obj_name(); }
     Prefix_log*                 log                         ()                                      { return Order_queue_node::log(); }
 

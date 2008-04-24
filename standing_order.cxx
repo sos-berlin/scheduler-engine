@@ -139,7 +139,7 @@ void Standing_order::close()
         _order = NULL;
     }
 
-    remove_dependant( order_subsystem(), _job_chain_path );
+    remove_requisite( Requisite_path( order_subsystem(), _job_chain_path ) );
 }
 
 //-------------------------------------------------------------------------Standing_order::set_name
@@ -155,9 +155,9 @@ void Standing_order::set_name( const string& name )
     _job_chain_path = Absolute_path( folder_path(), _job_chain_name );
 }
 
-//-------------------------------------------------------Standing_order::on_dependant_to_be_removed
+//-------------------------------------------------------Standing_order::on_requisite_to_be_removed
 
-//bool Standing_order::on_dependant_to_be_removed( File_based* )
+//bool Standing_order::on_requisite_to_be_removed( File_based* )
 //{
 //    if( !_order  ||  _order->job_chain_path() == "" )  
 //    {
@@ -174,7 +174,7 @@ bool Standing_order::on_initialize()
 {
     bool result = true;
 
-    add_dependant( order_subsystem(), _job_chain_path );
+    add_requisite( Requisite_path( order_subsystem(), _job_chain_path ) );
 
     if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( job_chain_name() ) )
     {

@@ -13,6 +13,15 @@ using namespace directory_observer;
 
 const char                      folder_separator            = '/';
 
+//-------------------------------------------------------------------------Requisite_path::obj_name
+
+string Requisite_path::obj_name() const
+{
+    S result;
+    result << _subsystem->object_type_name() << " " << _path;
+    return result;
+}
+
 //---------------------------------------------------------------Folder_subsystem::Folder_subsystem
 
 Folder_subsystem::Folder_subsystem( Scheduler* scheduler )
@@ -1352,7 +1361,7 @@ bool File_based::load2()
             if( ok )
             {
                 set_file_based_state( s_loaded );
-                subsystem()->dependencies()->announce_dependant_loaded( this ); 
+                subsystem()->dependencies()->announce_requisite_loaded( this ); 
             }
         }
     }
@@ -1406,7 +1415,11 @@ void File_based::set_file_based_state( State state )
 
         if( _state == s_incomplete )
         {
-            log()->log( log_info, message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name(), incomplete_string() ) );
+            list<Requisite_path> missings = missing_requisites();
+            S                    s;
+            Z_FOR_EACH( list<Requisite_path>, missings, m )  s << ( s.empty()? "" :  ", " ) << m->obj_name();
+
+            log()->log( log_warn, message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name(), "missing " + s ) );
         }
         else
         {
@@ -1454,9 +1467,9 @@ bool File_based::switch_file_based_state( State state )
     return result;
 }
 
-//------------------------------------------------------------------File_based::on_dependant_loaded
+//------------------------------------------------------------------File_based::on_requisite_loaded
 
-bool File_based::on_dependant_loaded( File_based* )
+bool File_based::on_requisite_loaded( File_based* )
 {
     bool result = false;
 
@@ -1466,23 +1479,23 @@ bool File_based::on_dependant_loaded( File_based* )
     return result;
 }
 
-//-----------------------------------------------------------File_based::on_dependant_to_be_removed
+//-----------------------------------------------------------File_based::on_requisite_to_be_removed
 
-bool File_based::on_dependant_to_be_removed( File_based* file_based )
+bool File_based::on_requisite_to_be_removed( File_based* file_based )
 {
     assert( file_based->is_in_folder() );
 
     return true;
 }
 
-//-----------------------------------------------------------------File_based::on_dependant_removed
+//-----------------------------------------------------------------File_based::on_requisite_removed
 
-void File_based::on_dependant_removed( File_based* file_based )
+void File_based::on_requisite_removed( File_based* file_based )
 {
     assert( file_based->is_in_folder() );
 
-    check_for_replacing_or_removing();
-    Pendant::on_dependant_removed( file_based );
+    //check_for_replacing_or_removing();
+    //Dependant::on_requisite_removed( file_based );
 }
 
 //---------------------------------------------------------------------File_based::assert_is_loaded
@@ -1561,7 +1574,7 @@ void File_based::prepare_to_remove()
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
     set_to_be_removed( true );
-    subsystem()->dependencies()->announce_dependant_to_be_removed( this ); 
+    subsystem()->dependencies()->announce_requisite_to_be_removed( this ); 
 }
 
 //------------------------------------------------------------------------File_based::on_remove_now
@@ -1818,35 +1831,38 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& element, c
     element.setAttribute         ( "path", path().with_slash() );
     element.setAttribute_optional( "name", name() );
 
-    if( has_base_file() )  element.appendChild( File_based::dom_element( element.ownerDocument(), show_what ) );
-    if( replacement()   )  element.append_new_element( "replacement" ).appendChild( replacement()->dom_element( element.ownerDocument(), show_what ) );
+    element.appendChild( File_based::dom_element( element.ownerDocument(), show_what ) );
+
+    if( replacement() )  element.append_new_element( "replacement" ).appendChild( replacement()->dom_element( element.ownerDocument(), show_what ) );
 }
 
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
-    xml::Element_ptr element;   
+    xml::Element_ptr result = document.createElement( "file_based" );
 
-    element = document.createElement( "file_based" );
+    result.setAttribute( "state", file_based_state_name() );
 
     if( has_base_file() )
     {
-        element.setAttribute_optional( "file", _base_file_info._path );
-        if( _file_is_removed )  element.setAttribute( "removed", "yes" );
+        result.setAttribute_optional( "file", _base_file_info._path );
+        if( _file_is_removed )  result.setAttribute( "removed", "yes" );
 
         Time t;
         t.set_utc( _base_file_info._last_write_time );
-        element.setAttribute( "last_write_time", t.xml_value() );
+        result.setAttribute( "last_write_time", t.xml_value() );
 
-        element.setAttribute( "state", file_based_state_name() );
-
-        if( base_file_has_error() )  element.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
-
-        if( !_remove_xc.is_empty() )  element.append_new_element( "removed" ).appendChild( create_error_element( document, _remove_xc ) );
+        if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
     }
 
-    return element;
+    const xml::Element_ptr& requisites_element = document.createElement( "requisites" );
+    int count = append_requisite_dom_elements( requisites_element );
+    if( count > 0 )  result.appendChild( requisites_element );
+
+    if( !_remove_xc.is_empty() )  result.append_new_element( "removed" ).appendChild( create_error_element( document, _remove_xc ) );
+
+    return result;
 }
 
 //---------------------------------------------------------------------------------File_based::path
@@ -2021,66 +2037,149 @@ void File_based_subsystem::assert_xml_elements_name( const xml::Element_ptr& e )
     if( !e.nodeName_is( xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", xml_elements_name(), e.nodeName() );
 }
 
-//---------------------------------------------------------------------------------Pendant::Pendant
+//-----------------------------------------------------------------------------Dependant::Dependant
 
-Pendant::Pendant()
+Dependant::Dependant()
 {
 }
 
-//--------------------------------------------------------------------------------Pendant::~Pendant
+//----------------------------------------------------------------------------Dependant::~Dependant
 
-Pendant::~Pendant()
+Dependant::~Dependant()
 {
     try
     {
-        remove_dependants();
+        remove_requisites();
     }
     catch( exception& x )  { Z_LOG( Z_FUNCTION << "  ERROR  " << x.what() << "\n" ); }
 }
 
-//-----------------------------------------------------------------------Pendant::remove_dependants
+//---------------------------------------------------------------------Dependant::remove_requisites
 
-void Pendant::remove_dependants()
+void Dependant::remove_requisites()
 {
-    Z_FOR_EACH( Dependant_sets, _dependants_sets, it )
+    Z_FOR_EACH( Requisite_sets, _requisite_sets, it )
     {
-        File_based_subsystem* subsystem     = it->first;
-        Dependant_set&        dependant_set = it->second;
+        File_based_subsystem* subsystem      = it->first;
+        Requisite_set&        requisite_path = it->second;
 
-        Z_FOR_EACH( Dependant_set, dependant_set, it2 )
+        Z_FOR_EACH( Requisite_set, requisite_path, it2 )
         {
-            subsystem->dependencies()->remove_dependant( this, *it2 );
+            subsystem->dependencies()->remove_requisite( this, *it2 );
         }
     }
 }
 
-//---------------------------------------------------------------------------Pendant::add_dependant
+//-------------------------------------------------------------------------Dependant::add_requisite
 
-void Pendant::add_dependant( File_based_subsystem* subsystem, const Absolute_path& path )
+void Dependant::add_requisite( const Requisite_path& r )
 {
-    _dependants_sets[ subsystem ].insert( subsystem->normalized_path( path ) );
-    subsystem->dependencies()->add_dependant( this, path );
+    _requisite_sets[ r._subsystem ].insert( r._subsystem->normalized_path( r._path ) );
+    r._subsystem->dependencies()->add_requisite( this, r._path );
 }
 
-//------------------------------------------------------------------------Pendant::remove_dependant
+//----------------------------------------------------------------------Dependant::remove_requisite
 
-void Pendant::remove_dependant( File_based_subsystem* subsystem, const Absolute_path& path )
+void Dependant::remove_requisite( const Requisite_path& r )
 {
-    _dependants_sets[ subsystem ].erase( subsystem->normalized_path( path ) );
-    subsystem->dependencies()->remove_dependant( this, path );
+    _requisite_sets[ r._subsystem ].erase( r._subsystem->normalized_path( r._path ) );
+    r._subsystem->dependencies()->remove_requisite( this, r._path );
 }
 
-//--------------------------------------------------------------Pendant::on_dependant_to_be_removed
+//------------------------------------------------------------Dependant::on_requisite_to_be_removed
 
-bool Pendant::on_dependant_to_be_removed( File_based* )
+bool Dependant::on_requisite_to_be_removed( File_based* )
 {
     return false;
 }
 
-//--------------------------------------------------------------------Pendant::on_dependant_removed
+//------------------------------------------------------------------Dependant::on_requisite_removed
 
-void Pendant::on_dependant_removed( File_based* )
+void Dependant::on_requisite_removed( File_based* )
 {
+}
+
+//--------------------------------------------------------------------Dependant::missing_requisites
+
+list<Requisite_path> Dependant::missing_requisites()
+{
+    list<Requisite_path> result;
+
+    Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )
+    {
+        File_based_subsystem* subsystem = ds->first;
+
+        Z_FOR_EACH_CONST( Requisite_set, ds->second, d )
+        {
+            Absolute_path path      ( *d );
+            File_based*   requisite = subsystem->file_based_or_null( path );
+            
+            if( requisite )
+            {
+                list<Requisite_path> missings = requisite->missing_requisites();
+                result.insert( result.end(), missings.begin(), missings.end() );
+            }
+
+            if( !requisite  ||  !requisite->is_active_and_not_to_be_removed() )
+            {
+                result.push_back( Requisite_path( subsystem, path ) );
+            }
+        }
+    }
+
+    Z_FOR_EACH_CONST( list<Dependant*>, _accompanying_dependants, p )
+    {
+        list<Requisite_path> missings = (*p)->missing_requisites();
+        result.insert( result.end(), missings.begin(), missings.end() );
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------Dependant::requistes_dom_element
+
+//xml::Element_ptr Dependant::requistes_dom_element( const xml::Document_ptr& document, const Show_what& )
+//{
+//    xml::Element_ptr result = document.create_element( "requisites" );
+//
+//    append_requisite_dom_elements( result );
+//
+//    return result;
+//}
+
+//---------------------------------------------------------Dependant::append_requisite_dom_elements
+
+int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
+{
+    int result = 0;
+
+    Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )
+    {
+        File_based_subsystem* subsystem = ds->first;
+
+        Z_FOR_EACH_CONST( Requisite_set, ds->second, d )
+        {
+            Absolute_path path      ( *d );
+            File_based*   requisite = subsystem->file_based_or_null( path );
+
+            xml::Element_ptr e = element.append_new_element( "requisite" );
+            e.setAttribute( "type", subsystem->object_type_name() );
+            e.setAttribute( "path", path );
+
+            if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
+
+            result++;
+
+            if( requisite )  result += requisite->append_requisite_dom_elements( element );     // Auch indirekte Requisiten (möglicherweise doppelt, könnten identifiziert werden)
+        }
+    }
+
+    Z_FOR_EACH_CONST( list<Dependant*>, _accompanying_dependants, p )
+    {
+        result += (*p)->append_requisite_dom_elements( element );
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------Dependencies::Dependencies
@@ -2098,26 +2197,26 @@ Dependencies::~Dependencies()
 {
 }
 
-//----------------------------------------------------------------------Dependencies::add_dependant
+//----------------------------------------------------------------------Dependencies::add_requisite
 
-void Dependencies::add_dependant( Pendant* pendant, const string& missings_path )
+void Dependencies::add_requisite( Dependant* dependant, const string& missings_path )
 {
-    _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( pendant );
+    _path_requestors_map[ _subsystem->normalized_path( missings_path ) ].insert( dependant );
 }
 
-//-------------------------------------------------------------------Dependencies::remove_dependant
+//-------------------------------------------------------------------Dependencies::remove_requisite
 
-void Dependencies::remove_dependant( Pendant* pendant, const string& missings_path )
+void Dependencies::remove_requisite( Dependant* dependant, const string& missings_path )
 {
     Requestor_set&  requestors_set = _path_requestors_map[ missings_path ];
     
-    requestors_set.erase( pendant );
+    requestors_set.erase( dependant );
     if( requestors_set.empty() )  _path_requestors_map.erase( _subsystem->normalized_path( missings_path ) );
 }
 
-//----------------------------------------------------------Dependencies::announce_dependant_loaded
+//----------------------------------------------------------Dependencies::announce_requisite_loaded
 
-void Dependencies::announce_dependant_loaded( File_based* found_missing )
+void Dependencies::announce_requisite_loaded( File_based* found_missing )
 {
     assert( found_missing->subsystem() == _subsystem );
 
@@ -2129,24 +2228,24 @@ void Dependencies::announce_dependant_loaded( File_based* found_missing )
 
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
-            Requestor_set::iterator next_it2 = it2;  next_it2++;
-            Pendant*                pendant  = *it2;
+            Requestor_set::iterator next_it2  = it2;  next_it2++;
+            Dependant*              dependant = *it2;
         
             try
             {
-                pendant->on_dependant_loaded( found_missing );
+                dependant->on_requisite_loaded( found_missing );
             }
             catch( exception& x )
             {
-                pendant->log()->error( message_string( "SCHEDULER-459", found_missing->obj_name(), x.what() ) );
+                dependant->log()->error( message_string( "SCHEDULER-459", found_missing->obj_name(), x.what() ) );
             }
         }
     }
 }
 
-//---------------------------------------------------Dependencies::announce_dependant_to_be_removed
+//---------------------------------------------------Dependencies::announce_requisite_to_be_removed
 
-bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
+bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
 {
     assert( to_be_removed->subsystem() == _subsystem );
 
@@ -2160,11 +2259,11 @@ bool Dependencies::announce_dependant_to_be_removed( File_based* to_be_removed )
 
         Z_FOR_EACH( Requestor_set, requestor_set, it2 )
         {
-            Requestor_set::iterator next_it2 = it2;  next_it2++;
-            Pendant*                pendant  = *it2;
+            Requestor_set::iterator next_it2  = it2;  next_it2++;
+            Dependant*              dependant = *it2;
         
-            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << pendant->obj_name() << " on_dependant_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
-            result = pendant->on_dependant_to_be_removed( to_be_removed );
+            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            result = dependant->on_requisite_to_be_removed( to_be_removed );
             if( !result )  break;
         }
     }

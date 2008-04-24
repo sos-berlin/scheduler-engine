@@ -447,6 +447,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 
     _schedule_use = Z_NEW( Job_schedule_use( this ) );
   //_schedule_use->set_default_schedule( _spooler->job_subsystem()->default_schedule() );   // Falls <schedule> unbekannt ist
+    add_accompanying_dependant( _schedule_use );
 
     _next_time      = Time::never; //Einmal do_something() ausführen Time::never;
     _directory_watcher_next_time = Time::never;
@@ -527,7 +528,7 @@ void Job::close()
     if( _schedule_use )  _schedule_use->close(), _schedule_use = NULL;
     _lock_requestor = NULL;
     
-    //remove_dependant( spooler()->schedule_subsystem(), _schedule_path );
+    //remove_requisite( spooler()->schedule_subsystem(), _schedule_path );
 
     File_based::close();
 }
@@ -546,7 +547,7 @@ bool Job::on_initialize()
 
             if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
             
-            add_dependant( spooler()->process_class_subsystem(), _module->_process_class_path );
+            add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
 
             //_module->set_folder_path( folder_path() );
             _module->init();
@@ -1047,7 +1048,7 @@ void Job::set_schedule( const xml::Element_ptr& element )
 
     //if( !_schedule_use->schedule_path().empty() )
     //{
-    //    add_dependant( spooler()->schedule_subsystem(), _schedule_use->schedule_path() );   int REMOVE_DEPENDENT;
+    //    add_requisite( spooler()->schedule_subsystem(), _schedule_use->schedule_path() );   int REMOVE_DEPENDENT;
     //}
 }
 
@@ -1089,24 +1090,35 @@ bool Job::on_schedule_to_be_removed()
     return true;
 }
 
-//---------------------------------------------------------------------------Job::incomplete_string
+//-------------------------------------------------------------------------Job::on_schedule_removed
 
-string Job::incomplete_string()
-{
-    S result;
+//void Job::on_schedule_removed()
+//{
+//    assert( !_schedule_use->is_defined() );
+//}
 
-    if( file_based_state() == s_incomplete )
-    {
-        if( !_schedule_use->is_defined() )
-        {
-            result << _spooler->schedule_subsystem()->object_type_name() << " " << _schedule_use->schedule_path();
-        }
+//----------------------------------------------------------------------------Job::missing_requisites
 
-        // Hier Process_class und Lock aufnehmen...
-    }
-
-    return result;
-}
+//list<Requisite_path> Job::missing_requisites()
+//{
+//    // Kann File_based das nicht selber herausfinden?
+//    // Die Pendants sind in Schedule_use eingetragen. Schedule_use ist ein Teil von Job
+//    // Vielleicht die Pendants in Job eintragen. Der Job benachrichtigt dann Schedule_use.
+//
+//    list<Requisite_path> result;
+//
+//    if( file_based_state() == s_incomplete )
+//    {
+//        if( !_schedule_use->is_defined() )
+//        {
+//            result.push_back( Requisite_path( _spooler->schedule_subsystem(), _schedule_use->schedule_path() ) );
+//        }
+//
+//        // Hier Process_class und Lock aufnehmen...
+//    }
+//
+//    return result;
+//}
 
 //-------------------------------------------------------------------------Job::on_schedule_removed
 
@@ -2389,7 +2401,7 @@ void Job::remove_waiting_job_from_process_list()
 
 //---------------------------------------------------------------------Job::on_process_class_active
 
-bool Job::on_dependant_loaded( File_based* file_based )
+bool Job::on_requisite_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->process_class_subsystem() );
 
@@ -2409,9 +2421,9 @@ bool Job::on_dependant_loaded( File_based* file_based )
     return true;
 }
 
-//------------------------------------------------------------------Job::on_dependant_to_be_removed
+//------------------------------------------------------------------Job::on_requisite_to_be_removed
 
-bool Job::on_dependant_to_be_removed( File_based* file_based )
+bool Job::on_requisite_to_be_removed( File_based* file_based )
 {
     end_tasks( message_string( "SCHEDULER-885", file_based->obj_name() ) );
     return true;

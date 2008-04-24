@@ -307,7 +307,7 @@ enum Scheduler_holidays_usage                               // eMail von Andreas
 
 struct Schedule_use : Object,
                       Scheduler_object,
-                      Pendant,
+                      Dependant,
                       Non_cloneable
 {
                                 Schedule_use                ( Scheduler_object* using_object );
@@ -319,10 +319,10 @@ struct Schedule_use : Object,
     string                      obj_name                    () const;
 
 
-    // Pendant
-    bool                        on_dependant_loaded         ( File_based* );
-    bool                        on_dependant_to_be_removed  ( File_based* );
-  //void                        on_dependant_removed        ( File_based* );
+    // Dependant
+    bool                        on_requisite_loaded         ( File_based* );
+    bool                        on_requisite_to_be_removed  ( File_based* );
+  //void                        on_requisite_removed        ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
 

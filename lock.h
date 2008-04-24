@@ -139,7 +139,7 @@ struct Lock_folder : typed_folder< Lock >
 // Verbindet Lock mit Lock_requestor
 
 struct Use : Object, 
-             Pendant,
+             Dependant,
              Scheduler_object, 
              Non_cloneable
 {
@@ -156,8 +156,8 @@ struct Use : Object,
     void                    set_folder_path                 ( const Absolute_path& p )              { _folder_path = p; }
 
 
-    // Pendant:
-    bool                        on_dependant_loaded         ( File_based* );
+    // Dependant:
+    bool                        on_requisite_loaded         ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
 

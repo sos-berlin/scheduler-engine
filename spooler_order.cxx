@@ -1206,7 +1206,7 @@ Job_node::~Job_node()
     
 void Job_node::close()
 {
-    remove_dependant( job_subsystem(), _job_path );
+    remove_requisite( Requisite_path( job_subsystem(), _job_path ) );
     disconnect_job();
 
     Base_class::close();
@@ -1220,7 +1220,7 @@ bool Job_node::initialize()
 
     if( ok )
     {
-        add_dependant( job_subsystem(), _job_path );
+        add_requisite( Requisite_path( job_subsystem(), _job_path ) );
     }
 
     return ok;
@@ -1283,9 +1283,9 @@ void Job_node::disconnect_job()
     }
 }
 
-//--------------------------------------------------------------------Job_node::on_dependant_loaded
+//--------------------------------------------------------------------Job_node::on_requisite_loaded
 
-bool Job_node::on_dependant_loaded( File_based* file_based )
+bool Job_node::on_requisite_loaded( File_based* file_based )
 {
     assert( file_based->subsystem() == spooler()->job_subsystem() );
     assert( file_based->normalized_path() == normalized_job_path() );
@@ -1423,7 +1423,7 @@ void Nested_job_chain_node::close()
 bool Nested_job_chain_node::initialize()
 {
     bool ok = Base_class::initialize();
-    _job_chain->add_dependant( _spooler->order_subsystem(), _nested_job_chain_path );
+    _job_chain->add_requisite( Requisite_path( _spooler->order_subsystem(), _nested_job_chain_path ) );
 
     if( ok )
     {
@@ -6546,12 +6546,9 @@ void Order::on_schedule_modified()
 
 bool Order::on_schedule_to_be_removed()
 {
-    _schedule_use->disconnect();
-
     int DOPPELT;
     _setback = 0;           // Änderung von <run_time> überschreibt Order.at
     set_next_start_time();
-
     return true;
 }
 
@@ -6559,7 +6556,7 @@ bool Order::on_schedule_to_be_removed()
 
 //void Order::on_schedule_removed()
 //{
-//    // Schon in on_schedule_to_be_removed() erledigt
+//    assert( !_schedule_use->is_defined() );
 //}
 
 //------------------------------------------------------------------------------Order::set_schedule

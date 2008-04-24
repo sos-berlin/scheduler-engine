@@ -108,6 +108,8 @@ body#job_description    { background-color: #80ecff }
 
 .cluster                { background-color: #ffffa0 }
 
+.requisite_missing      { color: red; }  /* text-decoration: line-through; */
+
 /* Anklickbar */
 .hover                  { text-decoration: underline }
 

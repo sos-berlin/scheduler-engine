@@ -134,14 +134,14 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        on_load                     (); 
   //void                        on_load                     ( Transaction* );
     bool                        on_activate                 ();
-    string                      incomplete_string           ();
+    list<Requisite_path>        missing_requisites          ();
     bool                        can_be_removed_now          ();
 
 
-    // Pendant:
-    bool                        on_dependant_loaded         ( File_based* );
-    bool                        on_dependant_to_be_removed  ( File_based* );
-  //void                        on_dependant_removed        ( File_based* );
+    // Dependant:
+    bool                        on_requisite_loaded         ( File_based* );
+    bool                        on_requisite_to_be_removed  ( File_based* );
+  //void                        on_requisite_removed        ( File_based* );
 
 
     // Has_includes:
@@ -167,6 +167,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        on_schedule_loaded          ();
     void                        on_schedule_modified        ();
     bool                        on_schedule_to_be_removed   ();
+  //void                        on_schedule_removed         ();
 
 
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }

@@ -2437,7 +2437,7 @@ void Cluster::assert_database_integrity( const string& message_text )
 void Cluster::check_empty_member_record()
 {
     Record record;
-    bool   second_try;
+    bool   second_try = false;
 
 
     do

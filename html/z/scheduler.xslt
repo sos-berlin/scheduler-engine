@@ -2698,7 +2698,7 @@
                 <td>
                     <span class="label">state:</span>
                 </td>
-                <td colspan="99">
+                <td colspan="3">
                     <xsl:apply-templates select="@state"/>
 
                     <!--xsl:if test="@waiting_for_process='yes'">
@@ -2712,6 +2712,28 @@
                             <xsl:with-param name="text" select="@state_text"/>
                         </xsl:call-template>
                     </xsl:if>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <span class="label">requisites:</span>
+                </td>
+                <td colspan="3">
+                    <xsl:for-each select="file_based/requisites/requisite">
+                        <xsl:if test="position() > 1">, </xsl:if>
+                        
+                        <xsl:element name="span">
+                            <xsl:if test="@is_missing='yes'">
+                                <xsl:attribute name="class">requisite_missing</xsl:attribute>
+                                <xsl:attribute name="title">is missing</xsl:attribute>
+                            </xsl:if>
+                        </xsl:element>
+
+                        <xsl:value-of select="@type"/>
+                        <xsl:text> </xsl:text>
+                        <xsl:value-of select="@path"/>
+                    </xsl:for-each>
                 </td>
             </tr>
 
@@ -2925,6 +2947,12 @@
                 </span>
             </xsl:otherwise>
         </xsl:choose>
+
+        <xsl:if test="parent::job/file_based/@state and parent::job/file_based/@state != .">
+            <xsl:text> (</xsl:text>
+            <xsl:value-of select="parent::job/file_based/@state"/>
+            <xsl:text>)</xsl:text>
+        </xsl:if>
 
         <xsl:choose>
             <xsl:when test="parent::job/@delay_until">

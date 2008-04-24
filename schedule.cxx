@@ -212,7 +212,7 @@ Schedule_use::~Schedule_use()
 
 void Schedule_use::close()
 {
-    remove_dependant( spooler()->schedule_subsystem(), _schedule_path );
+    remove_requisite( Requisite_path( spooler()->schedule_subsystem(), _schedule_path ) );
 
     _schedule_path.clear();
     set_schedule( NULL );
@@ -257,7 +257,7 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     if( element.nodeName_is( "run_time" )  &&  element.hasAttribute( "schedule" ) )     // Besser "schedule.use"
     {
         _schedule_path = Absolute_path( source_file_based->folder_path(), element.getAttribute( "schedule" ) );
-        add_dependant( spooler()->schedule_subsystem(), _schedule_path );
+        add_requisite( Requisite_path( spooler()->schedule_subsystem(), _schedule_path ) );
         set_schedule( _spooler->schedule_subsystem()->schedule_or_null( _schedule_path ) );
     }
     else
@@ -306,14 +306,12 @@ bool Schedule_use::try_load()
     return _schedule != NULL;
 }
 
-//----------------------------------------------------------------Schedule_use::on_dependant_loaded
+//----------------------------------------------------------------Schedule_use::on_requisite_loaded
 
-bool Schedule_use::on_dependant_loaded( File_based* file_based )
+bool Schedule_use::on_requisite_loaded( File_based* file_based )
 {
-    Schedule_subsystem_interface* schedule_subsystem = spooler()->schedule_subsystem();
-
-    assert( file_based->subsystem() == schedule_subsystem );
-    assert( file_based->normalized_path() == schedule_subsystem->normalized_path( _schedule_path ) );
+    assert( file_based->subsystem()       == spooler()->schedule_subsystem() );
+    assert( file_based->normalized_path() == spooler()->schedule_subsystem()->normalized_path( _schedule_path ) );
 
     Schedule* schedule = dynamic_cast<Schedule*>( file_based );
     assert( schedule );
@@ -326,9 +324,9 @@ bool Schedule_use::on_dependant_loaded( File_based* file_based )
     return true;
 }
 
-//---------------------------------------------------------Schedule_use::on_dependant_to_be_removed
+//---------------------------------------------------------Schedule_use::on_requisite_to_be_removed
 
-bool Schedule_use::on_dependant_to_be_removed( File_based* )
+bool Schedule_use::on_requisite_to_be_removed( File_based* )
 {
     bool ok = on_schedule_to_be_removed();
     assert( ok );   // false nicht geprüft
@@ -341,10 +339,11 @@ bool Schedule_use::on_dependant_to_be_removed( File_based* )
     return ok;
 }
 
-//---------------------------------------------------------------Schedule_use::on_dependant_removed
+//---------------------------------------------------------------Schedule_use::on_requisite_removed
 
-//void Schedule_use::on_dependant_removed( File_based* )
+//void Schedule_use::on_requisite_removed( File_based* )
 //{
+//    _using_object->on_schedule_removed();
 //}
 
 //------------------------------------------------------------------Schedule_use::next_single_start
@@ -614,9 +613,17 @@ void Schedule::remove_use( Schedule_use* use )
 
 void Schedule::clear()
 {
-    Use_set use_set = _use_set;
-    *this = Schedule( _spooler->schedule_subsystem() );
-    _use_set = use_set;
+    _once                      = false;
+    _at_set                    = At_set();
+    _date_set                  = Date_set();
+    _weekday_set               = Weekday_set();
+    _monthday_set              = Monthday_set();
+    _ultimo_set                = Ultimo_set();
+    _months.clear();
+    _holidays                  = Holidays( _spooler );
+    _dom                       = NULL;
+    _start_time_function       = "";
+    _start_time_function_error = false;
 }
 
 //----------------------------------------------------------------------------Schedule::next_period

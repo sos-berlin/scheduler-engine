@@ -22,29 +22,47 @@ struct Subfolder_folder;
 
 extern const char               folder_separator;
 
-//------------------------------------------------------------------------------------------Pendant
+//-----------------------------------------------------------------------------------Requisite_path
 
-struct Pendant                  // Abhängig von anderen File_based
+struct Requisite_path
 {
-                                Pendant                     ();
-    virtual                    ~Pendant                     ();
+                                Requisite_path              ( File_based_subsystem* s, const Absolute_path& p ) : _subsystem(s), _path(p) {}
 
-    virtual string              obj_name                    () const                                = 0;
-    void                        add_dependant               ( File_based_subsystem*, const Absolute_path& );
-    void                        remove_dependant            ( File_based_subsystem*, const Absolute_path& );
-    void                        remove_dependants           ();
+    string                      obj_name                    () const;
 
-    virtual bool                on_dependant_loaded         ( File_based* )                         = 0;
-    virtual bool                on_dependant_to_be_removed  ( File_based* );
-    virtual void                on_dependant_removed        ( File_based* );
+
+    File_based_subsystem*      _subsystem;
+    Absolute_path              _path;
+};
+
+//----------------------------------------------------------------------------------------Dependant
+
+struct Dependant                // Abhängig von anderen File_based (Requisite)
+{
+                                Dependant                   ();
+    virtual                    ~Dependant                   ();
+
+    void                        add_requisite               ( const Requisite_path& );
+    void                        remove_requisite            ( const Requisite_path& );
+    void                        remove_requisites           ();
+    list<Requisite_path>        missing_requisites          ();
+    void                        add_accompanying_dependant  ( Dependant* d )                        { _accompanying_dependants.push_back( d ); }
+
+    int                         append_requisite_dom_elements( const xml::Element_ptr& );
+
+    virtual bool                on_requisite_loaded         ( File_based* )                         = 0;
+    virtual bool                on_requisite_to_be_removed  ( File_based* );
+    virtual void                on_requisite_removed        ( File_based* );
     virtual Prefix_log*         log                         ()                                      = 0;
+    virtual string              obj_name                    () const                                = 0;
 
     
   private:
-    typedef stdext::hash_set< string >                                Dependant_set;
-    typedef stdext::hash_map< File_based_subsystem*, Dependant_set >  Dependant_sets;
+    typedef stdext::hash_set< string >                                Requisite_set;
+    typedef stdext::hash_map< File_based_subsystem*, Requisite_set >  Requisite_sets;
 
-    Dependant_sets             _dependants_sets;
+    Requisite_sets             _requisite_sets;
+    list<Dependant*>           _accompanying_dependants;    // missing_requistes() liefert auch die Vermissten dieser Dependants, z.B. Schedule_use für Job
 };
 
 //-------------------------------------------------------------------------------------Dependencies
@@ -54,15 +72,15 @@ struct Dependencies
                                 Dependencies                ( File_based_subsystem* );
                                ~Dependencies                ();
 
-    void                        add_dependant               ( Pendant*, const string& missing_path );
-    void                        remove_dependant            ( Pendant*, const string& missing_path );
-    void                        announce_dependant_loaded   ( File_based* found_missing );
-    bool                        announce_dependant_to_be_removed( File_based* to_be_removed );
-  //void                        announce_dependant_removed  ( File_based* );
+    void                        add_requisite               ( Dependant*, const string& missing_path );
+    void                        remove_requisite            ( Dependant*, const string& missing_path );
+    void                        announce_requisite_loaded   ( File_based* found_missing );
+    bool                        announce_requisite_to_be_removed( File_based* to_be_removed );
+  //void                        announce_requisite_removed  ( File_based* );
 
 
   private:
-    typedef stdext::hash_set< Pendant* >               Requestor_set;
+    typedef stdext::hash_set< Dependant* >             Requestor_set;
     typedef stdext::hash_map< string, Requestor_set >  Path_requestors_map;            // Vermisster Pfad -> { Requestor ... }
 
     Fill_zero                  _zero_;
@@ -97,7 +115,7 @@ struct Base_file_info
 //---------------------------------------------------------------------------------------File_based
 
 struct File_based : Scheduler_object,
-                    Pendant,
+                    Dependant,
                     Has_includes,
                     zschimmer::Has_addref_release
 {
@@ -131,10 +149,10 @@ struct File_based : Scheduler_object,
     string                      obj_name                    () const;
 
 
-    // Pendant
-    bool                        on_dependant_loaded         ( File_based* );
-    bool                        on_dependant_to_be_removed  ( File_based* );
-    void                        on_dependant_removed        ( File_based* );
+    // Dependant
+    bool                        on_requisite_loaded         ( File_based* );
+    bool                        on_requisite_to_be_removed  ( File_based* );
+    void                        on_requisite_removed        ( File_based* );
     Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
 
@@ -178,6 +196,8 @@ struct File_based : Scheduler_object,
     void                    set_to_be_removed               ( bool );
     bool                     is_to_be_removed               () const                                { return _is_to_be_removed; }
 
+    bool                     is_active_and_not_to_be_removed() const                                { return _state == s_active  &&  !is_to_be_removed(); }
+
     void                    set_replacement                 ( File_based* );
     File_based*                 replacement                 () const                                { return _replacement; }
 
@@ -206,7 +226,6 @@ struct File_based : Scheduler_object,
     virtual bool                on_initialize               ()                                      = 0;
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
-    virtual string              incomplete_string           ()                                      { return ""; }
 
     virtual void                on_remove_now               ();
     virtual void                prepare_to_remove           ();
@@ -240,7 +259,6 @@ struct File_based : Scheduler_object,
     State                      _state;
     Base_file_info             _base_file_info;
     bool                       _name_is_fixed;
-  //Md5                        _md5;
     zschimmer::Xc              _base_file_xc;
     double                     _base_file_xc_time;
     zschimmer::Xc              _remove_xc;
@@ -446,6 +464,9 @@ struct File_based_subsystem : Subsystem
 
     Dependencies*               dependencies                ()                                      { return &_dependencies; }
 
+    File_based*                 file_based_or_null          ( const Absolute_path& path ) const     { return file_based_or_null_( path ); }
+    File_based*                 file_based                  ( const Absolute_path& path ) const     { return file_based_( path ); }
+
     virtual void                check_file_based_element    ( const xml::Element_ptr& );
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
@@ -461,6 +482,8 @@ struct File_based_subsystem : Subsystem
   protected:
     friend struct               Typed_folder;
 
+    virtual File_based*         file_based_or_null_         ( const Absolute_path& path ) const     = 0;
+    virtual File_based*         file_based_                 ( const Absolute_path& path ) const     = 0;
     virtual ptr<File_based>     call_new_file_based         ()                                      = 0;
     virtual void                add_file_based              ( File_based* )                         = 0;
     virtual void                remove_file_based           ( File_based* )                         = 0;
@@ -581,7 +604,7 @@ struct file_based_subsystem : File_based_subsystem
                                           : it->second;
     }
 
-    
+
     FILE_BASED* file_based( const Absolute_path& path ) const
     {
         FILE_BASED* result = file_based_or_null( path );
@@ -615,6 +638,11 @@ struct file_based_subsystem : File_based_subsystem
 
         return result;
     }
+
+
+  protected:
+    File_based*                 file_based_or_null_         ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
+    File_based*                 file_based_                 ( const Absolute_path& path ) const     { return file_based( path ); }
 
 
   private:
@@ -723,7 +751,6 @@ struct Folder_subsystem : Object,
 
     void                    set_signaled                    ( const string& text );
 
-  //void                    set_read_again_at_or_later      ( double at )                           { if( _read_again_at < at )  _read_again_at = at; }
     ptr<directory_observer::Directory> merged_cache_and_local_directories();
 
     bool                        handle_folders              ( double minimum_age = 0 );
@@ -736,11 +763,6 @@ struct Folder_subsystem : Object,
     double                     _last_change_at;
 
     vector<Configuration>      _configurations;
-    //ptr<directory_observer::Directory_observer>  _local_directory_observer;                         // Konfigurationsverzeichnis
-    //ptr<Includes_register>                       _local_includes;
-
-    //ptr<directory_observer::Directory_observer>  _cache_directory_observer;                         // Cache mit Konfiguration vom Supervisor, s. Supervisor_client
-    //ptr<Includes_register>                       _cache_includes;
 };
 
 

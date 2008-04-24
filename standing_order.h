@@ -31,7 +31,7 @@ struct Standing_order : file_based< Standing_order, Standing_order_folder, Stand
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-  //bool                        on_dependant_to_be_removed  ( File_based* );
+  //bool                        on_requisite_to_be_removed  ( File_based* );
 
     bool                        on_initialize               (); 
     bool                        on_load                     (); 

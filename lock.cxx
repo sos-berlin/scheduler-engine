@@ -945,7 +945,7 @@ void Use::close()
         lock->unregister_lock_use( this );
     }
 
-    remove_dependant( spooler()->lock_subsystem(), _lock_path );
+    remove_requisite( Requisite_path( spooler()->lock_subsystem(), _lock_path ) );
 }
 
 //-------------------------------------------------------------------------------------Use::set_dom
@@ -978,7 +978,7 @@ void Use::set_dom( const xml::Element_ptr& lock_use_element )
 
 void Use::initialize()
 {
-    add_dependant( spooler()->lock_subsystem(), _lock_path );
+    add_requisite( Requisite_path( spooler()->lock_subsystem(), _lock_path ) );
 }
 
 //----------------------------------------------------------------------------------------Use::load
@@ -990,12 +990,12 @@ void Use::load()
         lock->register_lock_use( this );
     }
     //else
-    //    add_dependant( spooler()->lock_subsystem(), _lock_path );
+    //    add_requisite( spooler()->lock_subsystem(), _lock_path );
 }
 
-//-------------------------------------------------------------------------Use::on_dependant_loaded
+//-------------------------------------------------------------------------Use::on_requisite_loaded
 
-bool Use::on_dependant_loaded( File_based* file_based )
+bool Use::on_requisite_loaded( File_based* file_based )
 {
     Lock_subsystem* lock_subsystem = spooler()->lock_subsystem();
 
