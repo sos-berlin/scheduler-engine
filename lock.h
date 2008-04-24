@@ -182,7 +182,6 @@ struct Use : Object,
 
 struct Requestor : Object, 
                    Scheduler_object, 
-                   Dependant,
                    Non_cloneable
 {
                                 Requestor                   ( Scheduler_object* );

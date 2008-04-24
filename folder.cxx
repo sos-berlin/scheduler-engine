@@ -2145,7 +2145,7 @@ void Dependant::add_accompanying_dependant( Dependant* d )
 
 //---------------------------------------------------------Depandant::remove_accompanying_dependant
 
-void Depandant::remove_accompanying_dependant( Dependant* d )
+void Dependant::remove_accompanying_dependant( Dependant* d )
 { 
     _accompanying_dependants.erase( d ); 
 }
