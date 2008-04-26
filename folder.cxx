@@ -1415,7 +1415,9 @@ void File_based::set_file_based_state( State state )
             S                    s;
             Z_FOR_EACH( list<Requisite_path>, missings, m )  s << ( s.empty()? "" :  ", " ) << m->obj_name();
 
-            log()->log( log_warn, message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name(), "missing " + s ) );
+            log()->log( subsystem()->subsystem_state() == subsys_active? log_warn 
+                                                                       : log_debug, 
+                        message_string( "SCHEDULER-893", subsystem()->object_type_name(), file_based_state_name(), "missing " + s ) );
         }
         else
         {
@@ -2085,6 +2087,21 @@ void Dependant::remove_requisite( const Requisite_path& r )
 {
     _requisite_sets[ r._subsystem ].erase( r._subsystem->normalized_path( r._path ) );
     r._subsystem->dependencies()->remove_requisite( this, r._path );
+}
+
+//---------------------------------------------------------------Dependant::requisite_is_registered
+
+bool Dependant::requisite_is_registered( const Requisite_path& r )
+{
+    bool result = false;
+
+    const Requisite_sets::const_iterator it = _requisite_sets.find( r._subsystem );
+    if( it != _requisite_sets.end() )  
+    {
+        result = it->second.find( r._path ) != it->second.end();
+    }
+    
+    return result;
 }
 
 //------------------------------------------------------------Dependant::on_requisite_to_be_removed

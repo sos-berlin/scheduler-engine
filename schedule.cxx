@@ -485,7 +485,6 @@ Schedule::Schedule( Schedule_subsystem_interface* schedule_subsystem_interface, 
     
 Schedule::~Schedule()
 {
-    
     try
     {
         close();
@@ -500,17 +499,6 @@ Schedule::~Schedule()
     assert( !_covered_schedule );
 }
 
-//----------------------------------------------------------------------------------Schedule::close
-
-void Schedule::close()
-{
-    disconnect_covering_schedules();
-    assert( _covering_schedules.empty() );
-
-    set_inlay( NULL );
-    assert( _use_set.empty() );
-}
-
 //-------------------------------------------------------------------------Schedule::QueryInterface
 
 STDMETHODIMP Schedule::QueryInterface( const IID& iid, void** result )
@@ -522,14 +510,16 @@ STDMETHODIMP Schedule::QueryInterface( const IID& iid, void** result )
     return Idispatch_implementation::QueryInterface( iid, result );
 }
 
-//--------------------------------------------------------------------Schedule::can_be_replaced_now
+//----------------------------------------------------------------------------------Schedule::close
 
-//bool Schedule::can_be_replaced_now()
-//{
-//    return replacement()  &&  
-//           replacement()->file_based_state() == File_based::s_initialized;
-//    int PRUEFEN;
-//}
+void Schedule::close()
+{
+    disconnect_covering_schedules();
+    assert( _covering_schedules.empty() );
+
+    set_inlay( NULL );
+    assert( _use_set.empty() );
+}
 
 //------------------------------------------------------------------------------Schedule::set_inlay
 
@@ -555,9 +545,9 @@ void Schedule::set_inlay( Inlay* inlay )
                 initialize_inlay();
             }
 
-            if( file_based_state() >= s_incomplete )  
+            if( file_based_state() > s_loaded )
             {
-                activate_inlay();
+                try_activate_inlay();
                 Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
             }
         }
@@ -574,14 +564,18 @@ void Schedule::initialize_inlay()
     }
 }
 
-//-------------------------------------------------------------------------Schedule::activate_inlay
+//---------------------------------------------------------------------Schedule::try_activate_inlay
 
-void Schedule::activate_inlay()
+bool Schedule::try_activate_inlay()
 {
+    bool result = true;
+
     if( _inlay->_covered_schedule_path != "" )
     {
-        try_connect_covered_schedule();
+        result = try_connect_covered_schedule();
     }
+
+    return result;
 }
 
 //--------------------------------------------------------------------Schedule::cover_with_schedule
@@ -617,46 +611,25 @@ void Schedule::uncover_from_schedule( Schedule* covering_schedule )
     _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin );
 }
 
-//--------------------------------------------------------------Schedule::set_covered_schedule_path
-
-//void Schedule::set_covered_schedule_path( const Absolute_path& path )
-//{
-//    if( file_based_state() >= s_initialized )
-//    {
-//        if( _inlay->_covered_schedule_path != "" )
-//        {
-//            remove_requisite( Requisite_path( subsystem(), _inlay->_covered_schedule_path ) );
-//            disconnect_covered_schedule();
-//        }
-//
-//        _inlay->_covered_schedule_path = path;
-//
-//        if( _inlay->_covered_schedule_path != "" )
-//        {
-//            add_requisite( Requisite_path( subsystem(), _inlay->_covered_schedule_path ) );
-//            try_connect_covered_schedule();
-//        }
-//    }
-//}
-
 //-----------------------------------------------------------Schedule::try_connect_covered_schedule
 
 bool Schedule::try_connect_covered_schedule()
 {
-    if( _inlay->_covered_schedule_path != "" )  
+    if( !_covered_schedule &&  _inlay->_covered_schedule_path != "" )  
     {
-        if( _covered_schedule )
-        {
-            assert( _covered_schedule == _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path ) );
-        }
-        else
         if( Schedule* covered_schedule = _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path ) )
         {
-            covered_schedule->cover_with_schedule( this );  // Löst Exception aus
+            covered_schedule->cover_with_schedule( this );  // Löst Exception aus bei nicht eindeutiger Überdeckung
             _covered_schedule = covered_schedule;
+        }
+        else
+        if( file_based_state() == s_active )
+        {
+            set_file_based_state( s_incomplete );
         }
     }
 
+    assert( _covered_schedule == _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path ) );
     return _covered_schedule != NULL;
 }
 
@@ -668,6 +641,12 @@ void Schedule::disconnect_covered_schedule()
     {
         _covered_schedule->uncover_from_schedule( this );
         _covered_schedule = NULL;
+
+        if( file_based_state() == s_active  &&
+            requisite_is_registered( Requisite_path( _spooler->schedule_subsystem(), _inlay->_covered_schedule_path ) ) )
+        {
+            set_file_based_state( s_incomplete );
+        }
     }
 }
 
@@ -675,6 +654,8 @@ void Schedule::disconnect_covered_schedule()
 
 void Schedule::disconnect_covering_schedules()
 {
+    assert( _covering_schedules.empty() );   // Schedule::on_requisite_to_be_removed() sollte bereits die Verbindungen gelöst haben
+
     Covering_schedules covering_schedules = _covering_schedules;
 
     Z_FOR_EACH( Covering_schedules, covering_schedules, c )
@@ -689,11 +670,10 @@ void Schedule::disconnect_covering_schedules()
 
 bool Schedule::on_requisite_loaded( File_based* file_based )
 {
-    assert( file_based->subsystem()       == spooler()->schedule_subsystem() );
-    assert( file_based->normalized_path() == spooler()->schedule_subsystem()->normalized_path( _inlay->_covered_schedule_path ) );
-
     Schedule* schedule = dynamic_cast<Schedule*>( file_based );
     assert( schedule );
+    assert( schedule->normalized_path() == spooler()->schedule_subsystem()->normalized_path( _inlay->_covered_schedule_path ) );
+
 
     try_connect_covered_schedule();
     assert( _covered_schedule );
@@ -735,8 +715,7 @@ bool Schedule::on_load()
 
 bool Schedule::on_activate()
 {
-    activate_inlay();
-    return true;
+    return try_activate_inlay();
 }
 
 //---------------------------------------------------------------------Schedule::can_be_removed_now
@@ -745,40 +724,6 @@ bool Schedule::can_be_removed_now()
 {
     return _use_set.empty(); 
 }
-
-//----------------------------------------------------------------------Schedule::prepare_to_remove
-
-//void Schedule::prepare_to_remove()
-//{
-//    //Use_set use_set = _use_set;
-//
-//    //Z_FOR_EACH( Use_set, use_set, u )  
-//    //{
-//    //    (*u)->on_schedule_to_be_removed();      // Soll Schedule_use aus _use_set entfernen
-//    //}
-//
-//    //assert( _use_set.empty() );
-//
-//
-//    My_file_based::prepare_to_remove();
-//}
-
-//----------------------------------------------------------------------------Schedule::operator ==
-
-//bool Schedule::operator == ( const Schedule& r )
-//{
-//    return dom_document().xml() == r.dom_document().xml();
-//}
-
-//----------------------------------------------------------------------------Schedule::set_default
-
-//void Schedule::set_default()
-//{
-//    Day default_day;
-//
-//    default_day.set_default();
-//    _weekday_set.fill_with_default( default_day );
-//}
 
 //--------------------------------------------------------------------------------Schedule::add_use
 
@@ -1246,16 +1191,6 @@ list<int> Schedule::Inlay::month_indices_by_names( const string& mm )
     return result;
 }
 
-//------------------------------------------------------------------------------Period::set_default
-
-//void Period::set_default()
-//{
-//    _begin           = 0;             // = "00:00:00";
-//    _end             = 24*60*60;      // = "24:00:00";
-//    _repeat          = Time::never;
-//    _absolute_repeat = Time::never;
-//}
-
 //-------------------------------------------------------------------------Period::set_single_start
 
 void Period::set_single_start( const Time& t )
@@ -1530,17 +1465,6 @@ void Day::set_dom_periods( const xml::Element_ptr& element, const Day* default_d
         _period_set.insert( Period( e, default_period ) );
     }
 }
-
-//---------------------------------------------------------------------------------Day::set_default
-
-//void Day::set_default()
-//{
-//    Period period;
-//    period.set_default();
-//
-//    _period_set.clear();
-//    _period_set.insert( period );
-//}
 
 //---------------------------------------------------------------------------------------Day::merge
 
@@ -1953,8 +1877,6 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 {
     if( !element )  return;
 
-    //Period my_default_period ( element, default_period );
-
     DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "day" ) )
@@ -2039,16 +1961,6 @@ list<int> Day_set::get_weekday_numbers( const string& weekday_names )
 
     return result;
 }
-
-//-------------------------------------------------------------------------------Month::set_default
-
-//void Month::set_default()
-//{
-//    Day default_day;
-//
-//    default_day.set_default();
-//    _weekday_set.fill_with_default( default_day );
-//}
 
 //-----------------------------------------------------------------------------------Month::set_dom
 

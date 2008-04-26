@@ -44,6 +44,7 @@ struct Dependant                // Abhängig von anderen File_based (Requisite)
 
     void                        add_requisite               ( const Requisite_path& );
     void                        remove_requisite            ( const Requisite_path& );
+    bool                        requisite_is_registered     ( const Requisite_path& );
     void                        remove_requisites           ();
     list<Requisite_path>        missing_requisites          ();
     void                        add_accompanying_dependant   ( Dependant* );

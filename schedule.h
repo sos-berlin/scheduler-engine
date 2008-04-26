@@ -46,7 +46,6 @@ struct Period
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p._begin += t; p._end += t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
 
-  //void                        set_default                 ();
     void                        set_single_start            ( const Time& );
 
     enum With_or_without_date { without_date, with_date };
@@ -67,9 +66,6 @@ struct Period
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;
     Time                        next_absolute_repeated      ( const Time&, int next ) const;
-  //Time                        next_repeated_before_end    ( const Time& ) const;
-
-  //void                        set_next_start_time         ( const Time& );
 
     void                        check                       ( With_or_without_date ) const;
     string                      to_xml                      () const;
@@ -177,15 +173,6 @@ struct Monthday_set : Day_set
     void                        print                       ( ostream& s ) const                    { s << "Monthday_set("; Day_set::print(s); s << ")"; }
     friend ostream&             operator <<                 ( ostream& s, const Monthday_set& o )   { o.print(s); return s; }
 
-
-    //struct Month_weekday
-    //{
-    //    int                    _weekday_number;
-    //    int                    _which;                      // 1...4: 1. bis 4. Wochentag des Monats, -1...-4 letzer bis viertletzer Wochentag des Monats
-    //};
-
-    //typedef stdext::hash_set<Month_weekday> Month_weekday_set;
-    //Month_weekday_set          _month_weekday_set;
 
   private:
     Fill_zero                  _zero_;
@@ -473,8 +460,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     // Dependant
     bool                        on_requisite_loaded         ( File_based* );
     bool                        on_requisite_to_be_removed  ( File_based* );
-  //void                        on_requisite_removed        ( File_based* );
-  //Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
 
     // file_based<>
 
@@ -499,14 +484,11 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     xml::Document_ptr           dom_document                ();
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
-  //bool                        operator ==                 ( const Schedule& );
-
     void                        add_use                     ( Schedule_use* );
     void                        remove_use                  ( Schedule_use* );
 
     void                        cover_with_schedule         ( Schedule* );
     void                        uncover_from_schedule       ( Schedule* );
-  //void                    set_covered_schedule_path       ( const Absolute_path& );
 
     void                    set_xml                         ( File_based* source_file_based, const string& );
     Inlay*                      inlay                       ()                                      { return _inlay; }
@@ -522,7 +504,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
   private:
     void                        set_inlay                   ( Inlay* );
     void                        initialize_inlay            ();
-    void                        activate_inlay              ();
+    bool                        try_activate_inlay          ();
     void                        assert_no_overlapped_covering( Schedule* );
     bool                        try_connect_covered_schedule();
     void                        disconnect_covered_schedule ();
@@ -549,7 +531,6 @@ struct Schedule_folder : typed_folder< Schedule >
                                 Schedule_folder             ( Folder* );
                                ~Schedule_folder             ();
 
-  //void                        set_dom                     ( const xml::Element_ptr& );
   //void                        execute_xml_schedule        ( const xml::Element_ptr& );
     void                        add_schedule                ( Schedule* schedule )                  { add_file_based( schedule ); }
     void                        remove_schedule             ( Schedule* schedule )                  { remove_file_based( schedule ); }

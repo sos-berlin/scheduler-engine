@@ -2033,7 +2033,7 @@ Schedule_use* Job::schedule_use() const
 
 void Job::reset_scheduling()
 {
-    if( file_based_state() >= s_loaded )
+    if( file_based_state() >= s_active )
     {
         _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->once();
         _period     = Period();
