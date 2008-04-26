@@ -160,7 +160,7 @@ struct File_based : Scheduler_object,
 
     // Has_includes
     Spooler*                    spooler                     () const                                { return Scheduler_object::spooler(); }
-    Which_configuration         which_configuration         () const                                { return _which_configuration; }
+    Configuration_origin        configuration_origin        () const                                { return _configuration_origin; }
 
 
     void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );
@@ -267,7 +267,7 @@ struct File_based : Scheduler_object,
     int                        _duplicate_version;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
-    Which_configuration        _which_configuration;        // Aus live/ oder aus cache/ ?
+    Configuration_origin       _configuration_origin;        // Aus live/ oder aus cache/ ?
     ptr<File_based>            _replacement;
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
     Typed_folder*              _typed_folder;
@@ -745,7 +745,7 @@ struct Folder_subsystem : Object,
     Folder*                     root_folder                 () const                                { return _root_folder; }
     ptr<Subfolder_folder>       new_subfolder_folder        ( Folder* folder )                      { return Z_NEW( Subfolder_folder( folder ) ); }
     bool                        is_valid_extension          ( const string& );
-    Configuration*              configuration               ( Which_configuration );
+    Configuration*              configuration               ( Configuration_origin );
 
     void                    set_signaled                    ( const string& text );
 

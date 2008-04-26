@@ -278,7 +278,7 @@ void Schedule_use::set_xml( File_based* source_file_based, const string& xml )
 void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_ptr& element )
 {
     assert( element );
-    source_file_based->assert_not_initialized();
+    //_using_object->assert_is_not_initialized();
 
     close();
 
@@ -418,7 +418,8 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
         {
             //check_for_once = false;
 
-            if( period.begin() >= options->_from  &&  period.begin() != last_begin )
+            //2008-04-26 if( period.begin() >= options->_from  &&  period.begin() != last_begin )
+            if( period.end() > options->_from  &&  period.begin() != last_begin )
             {
                 element.appendChild( period.dom_element( element.ownerDocument() ) );
                 options->_count++;
@@ -746,41 +747,65 @@ void Schedule::remove_use( Schedule_use* use )
 Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start ) 
 { 
     Period result;
-    Time   next_switch = tim;   // Zuerst tim, dann nächster Beginn oder Ende eines überdeckenden Schedule
+    Time   interval_begin = 0;            // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
+    Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein überdeckendes Schedule >= t
+    Time   t              = tim;
 
+    
     while(1)    // Überdeckende Schedule prüfen, <schedule substitute="...">
     {
-        Covering_schedules::iterator next = _covering_schedules.upper_bound( next_switch );
-        assert( next == _covering_schedules.end() || next_switch < next->second->_inlay->_covered_schedule_begin );
+        Covering_schedules::iterator next = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
+        assert( next == _covering_schedules.end()  ||  t < next->second->_inlay->_covered_schedule_begin );
 
-        if( next != _covering_schedules.begin() )
+        if( next == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+        { 
+            interval_begin = 0;
+        }
+        else
         {
-            Covering_schedules::iterator before = next;  before--;
+            Covering_schedules::iterator before = next;  
+            before--;
+            assert( before->second->_inlay->_covered_schedule_begin < t );
 
-            assert( before->second->_inlay->_covered_schedule_begin < next_switch );
+            Schedule* covering_schedule = before->second;
 
-            if( next_switch < before->second->_inlay->_covered_schedule_end )  
+            if( covering_schedule->is_covering_at( t ) )   // Überdeckendes Schedule ist vor t, schon vergangen
             {
-                Schedule* covering_schedule = before->second;
-                result = covering_schedule->_inlay->next_period( use, next_switch, single_start );
-                next_switch = covering_schedule->_inlay->_covered_schedule_end;
-                if( result._begin < next_switch )  break;     // Periode beginnt im überdeckenden Schedule? Gut!
+                interval_begin = covering_schedule->_inlay->_covered_schedule_begin;
+                interval_end   = covering_schedule->_inlay->_covered_schedule_end;
+                assert( t >= interval_begin  &&  t < interval_end );
+
+                result = covering_schedule->_inlay->next_period( use, t, single_start );
+                if( result._begin < interval_end )  break;     // Periode beginnt im überdeckenden Schedule? Gut!
+
+                t = interval_end;   // Das überdeckende Scheduler hat keine Periode. Also weiter in unserem Standard-Schedule!
             }
+
+            interval_begin = covering_schedule->_inlay->_covered_schedule_end;      // Beginn der Lücke nach dem letzten überdeckenden Schedule
         }
 
-        result = _inlay->next_period( use, next_switch, single_start );       // Unser nicht überdecktes Schedule
+        interval_end = next != _covering_schedules.end()? next->second->_inlay->_covered_schedule_begin     // Ende der Lücke
+                                                        : Time::never;
 
-        if( next == _covering_schedules.end() )                     // Kein weiteres überdeckendes Schedule?
+        assert( t >= interval_begin  &&  t <= interval_end );
+
+        if( interval_begin < interval_end )     // Die Lücke zwischen zwei überdeckenden Schedule ist länger als 0?
         {
-            next_switch = Time::never;
-            break;
+            result = _inlay->next_period( use, t, single_start );       // Unser Standard-Schedule
+            if( result.begin() < interval_end )  break;
         }
 
-        next_switch = next->second->_inlay->_covered_schedule_begin;
-        if( result.begin() < next_switch )  break;
+        t = interval_end;
+        if( t.is_never() )  break;
     }
 
-    if( !result.is_single_start()  &&  result._end > next_switch )  result._end = next_switch;
+    assert( t >= interval_begin  &&  t <= interval_end );
+
+    if( !result.is_single_start() )
+    {
+        if( result._begin < interval_begin )  result._begin = interval_begin;
+        if( result._end   > interval_end   )  result._end   = interval_end;
+    }
 
     return result;
 }

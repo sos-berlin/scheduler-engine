@@ -30,13 +30,13 @@ static bool file_info_is_lesser( const file::File_info* a, const file::File_info
 
 //-------------------------------------------------------------------Directory_tree::Directory_tree
 
-Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path, Which_configuration w )
+Directory_tree::Directory_tree( Scheduler* scheduler, const file::File_path& directory_path, Configuration_origin w )
 :
     Scheduler_object( scheduler, this, type_directory_tree ),
     _zero_(this+1),
     _directory_path(directory_path),
     _refresh_aged_entries_at(double_time_max),
-    _which_configuration(w)
+    _configuration_origin(w)
 {
     _root_directory = Z_NEW( Directory( this, (Directory*)NULL, root_path ) );
 }
@@ -314,7 +314,7 @@ bool Directory::read( Read_flags read_what, double minimum_age )
             {
                 list<Directory_entry>::iterator new_entry = _ordered_list.insert( e, Directory_entry() );
                 new_entry->_file_info           = *fi;
-                new_entry->_which_configuration = _directory_tree->which_configuration();
+                new_entry->_configuration_origin = _directory_tree->configuration_origin();
                 
                 if( (*fi)->is_directory() )  
                 {
@@ -534,7 +534,7 @@ void Directory::assert_ordered_list()
 
 //-----------------------------------------------------------Directory_observer::Directory_observer
 
-Directory_observer::Directory_observer( Scheduler* scheduler, const File_path& directory_path, Which_configuration w )
+Directory_observer::Directory_observer( Scheduler* scheduler, const File_path& directory_path, Configuration_origin w )
 :
     Scheduler_object( scheduler, this, type_directory_observer ),
     _zero_(this+1)

@@ -34,7 +34,7 @@ struct Folder_directory_lister : file::Directory_lister
 struct Directory_tree : Scheduler_object,
                         Object
 {
-                                Directory_tree              ( Scheduler*, const file::File_path& directory_path, Which_configuration );
+                                Directory_tree              ( Scheduler*, const file::File_path& directory_path, Configuration_origin );
                                ~Directory_tree              ();
 
     file::File_path             directory_path              () const                                { return _directory_path; }
@@ -49,7 +49,7 @@ struct Directory_tree : Scheduler_object,
     void                        set_aging_until             ( double t )                            { if( _refresh_aged_entries_at > t )  _refresh_aged_entries_at = t; }
     void                        reset_aging                 ()                                      { _refresh_aged_entries_at = double_time_max; }
     void                        withdraw_aging              ();
-    Which_configuration         which_configuration         () const                                { return _which_configuration; }
+    Configuration_origin        configuration_origin        () const                                { return _configuration_origin; }
     void                    set_is_watched                  ()                                      { _is_watched = true; }
     bool                        is_watched                  () const                                { return _is_watched; }
 
@@ -59,7 +59,7 @@ struct Directory_tree : Scheduler_object,
     ptr<Directory>             _root_directory;
     double                     _last_change_at;
     double                     _refresh_aged_entries_at;
-    Which_configuration        _which_configuration;        // cache/ oder live/ ?
+    Configuration_origin       _configuration_origin;       // cache/ oder live/ ?
     bool                       _is_watched;
 };
 
@@ -81,7 +81,7 @@ struct Directory_entry
     ptr<Directory>             _subdirectory;               // ( _subdirectory != NULL ) == _file_info.is_directory()
     double                     _is_aging_until;
     bool                       _is_removed;                 // _is_removed -> _is_aging_until > 0
-    Which_configuration        _which_configuration;
+    Configuration_origin       _configuration_origin;
     int                        _version;
     int                        _duplicate_version;          // Für merged_new_entries() und Meldung SCHEDULER-703
     string                     _normalized_name;
@@ -147,7 +147,7 @@ struct Directory_observer : Scheduler_object,
     };
 
 
-                                Directory_observer          ( Scheduler*, const File_path& directory, Which_configuration w );
+                                Directory_observer          ( Scheduler*, const File_path& directory, Configuration_origin w );
                                ~Directory_observer          ();
 
     // Async_operation

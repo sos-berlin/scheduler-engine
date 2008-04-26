@@ -249,7 +249,7 @@ void Folder_subsystem::set_signaled( const string& text )
 
 //------------------------------------------------------------------Folder_subsystem::configuration
 
-Configuration* Folder_subsystem::configuration( Which_configuration which )
+Configuration* Folder_subsystem::configuration( Configuration_origin which )
 {
     Configuration* result = &_configurations[ which ];
     if( !result )  z::throw_xc( Z_FUNCTION, (int)which );
@@ -852,7 +852,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         file_based->set_folder_path( folder()->path() );
                         file_based->set_name( name );
                         file_based->fix_name();
-                        file_based->_which_configuration = directory_entry->_which_configuration;
+                        file_based->_configuration_origin = directory_entry->_configuration_origin;
 
                         ignore_duplicate_configuration_file( current_file_based, file_based, *directory_entry );
                         
@@ -990,7 +990,7 @@ void Typed_folder::ignore_duplicate_configuration_file( File_based* current_file
                 file_based->log()->warn( message_string( "SCHEDULER-460", subsystem()->object_type_name() ) );  // Geänderte lokale Datei wird ignoriert
             }
             else
-            //if( current_file_based  &&  !current_file_based->_which_configuration )
+            //if( current_file_based  &&  !current_file_based->_configuration_origin )
             //{
             //    file_based->log()->warn( message_string( "SCHEDULER-703" ) );   // Bereits gelesene lokale Datei wird durch zentrale ersetzt
             //}
@@ -1554,8 +1554,8 @@ void File_based::set_replacement( File_based* replacement )
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
     
     if( replacement  &&  
-        _which_configuration == confdir_cache &&  
-        replacement->_which_configuration != confdir_cache &&
+        _configuration_origin == confdir_cache &&  
+        replacement->_configuration_origin != confdir_cache &&
         _base_file_info._path.exists() )    // Außer, die zentrale Datei ist gelöscht
     {
         z::throw_xc( "SCHEDULER-460", subsystem()->object_type_name() );  // Original ist zentral konfiguriert, aber Ersatz nicht
@@ -1898,8 +1898,8 @@ File_path File_based::configuration_root_directory() const
 {
     assert( has_base_file() );
 
-    string result = _which_configuration == confdir_cache? _spooler->_configuration_directories[ confdir_cache ] 
-                                                         : _spooler->_configuration_directories[ confdir_local ];
+    string result = _configuration_origin == confdir_cache? _spooler->_configuration_directories[ confdir_cache ] 
+                                                          : _spooler->_configuration_directories[ confdir_local ];
 
     assert( string_begins_with( _base_file_info._path, result ) );
 

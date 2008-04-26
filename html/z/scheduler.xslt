@@ -2571,13 +2571,21 @@
 
             <col/>
             <col/>
-            
+            <col/>
+            <col/>
+
             <thead>
                 <xsl:call-template name="card_top"/>
 
                 <tr>
                     <th class="head1">
                         Date
+                    </th>
+                    <th class="head">
+                        Until
+                    </th>
+                    <th class="head">
+                        Repetition
                     </th>
                     <th class="head">
                         Object
@@ -2598,6 +2606,37 @@
                             <xsl:value-of select="@at__xslt_datetime_with_diff_plus"/>
                             <xsl:value-of select="@begin__xslt_datetime_with_diff_plus"/>
                         </td>
+
+                        <td style="padding-right: 2ex">
+                            <xsl:if test="self::period">
+                                <xsl:choose>
+                                    <xsl:when test="substring-before( @begin, 'T' ) != substring-before( @end, 'T' ) and substring-after( @end, 'T' ) = '00:00:00'">
+                                        <xsl:text>24:00:00</xsl:text>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <xsl:value-of select="substring( @end__xslt_datetime_with_diff_plus, 12 )"/>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:if>
+                        </td>
+
+                        <td style="padding-right: 2ex">
+                            <xsl:if test="self::period">
+                                <xsl:choose>
+                                    <xsl:when test="@absolute_repeat">
+                                        <xsl:text>every </xsl:text>
+                                        <xsl:value-of select="@absolute_repeat"/>
+                                        <xsl:text>s</xsl:text>
+                                    </xsl:when>
+                                    <xsl:when test="@repeat">
+                                        <xsl:text>repeats after </xsl:text>
+                                        <xsl:value-of select="@absolute_repeat"/>
+                                        <xsl:text>s</xsl:text>
+                                    </xsl:when>
+                                </xsl:choose>
+                            </xsl:if>
+                        </td>
+
                         <xsl:choose>
                             <xsl:when test="@job_chain">
                                 <xsl:element name="td">

@@ -493,6 +493,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     void                    set_xml                         ( File_based* source_file_based, const string& );
     Inlay*                      inlay                       ()                                      { return _inlay; }
     bool                     is_covering                    ()                                      { return _inlay->_covered_schedule_path != ""; }
+    bool                     is_covering_at                 ( const Time& t )                       { return t >= _inlay->_covered_schedule_begin &&  t < _inlay->_covered_schedule_end; }
     bool                        once                        ()                                      { return _inlay->_once; }
     Period                      next_period                 ( Schedule_use*, const Time&, With_single_start );
 
@@ -517,11 +518,11 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     typedef stdext::hash_set<Schedule_use*>    Use_set;
     Use_set                                   _use_set;
 
-    typedef stdext::hash_map<double,Schedule*> Covering_schedules;      
-    Covering_schedules                        _covering_schedules;      // <schedule substitute="...">, die auf dieses Schedule verweisen
+    typedef map<double,Schedule*>  Covering_schedules;      // Geordnet!
+    Covering_schedules            _covering_schedules;      // <schedule substitute="...">, die auf dieses Schedule verweisen
 
-    ptr<Inlay>                                _inlay;
-    Schedule*                                 _covered_schedule;        // <schedule substitute="...">, das zu überdeckende Schedule
+    ptr<Inlay>                    _inlay;
+    Schedule*                     _covered_schedule;        // <schedule substitute="...">, das zu überdeckende Schedule
 };
 
 //----------------------------------------------------------------------------------Schedule_folder

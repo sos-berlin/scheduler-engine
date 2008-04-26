@@ -46,7 +46,7 @@ struct Has_includes             // <include live_file="...">
   //virtual void                on_include_changed          ()                                      = 0;
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual string              obj_name                    () const                                = 0;
-    virtual Which_configuration which_configuration         () const                                = 0;
+    virtual Configuration_origin configuration_origin       () const                                = 0;
     virtual Spooler*            spooler                     () const                                = 0;
 
     void                        register_include            ( const Absolute_path&, file::File_info* );

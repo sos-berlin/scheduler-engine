@@ -2322,7 +2322,7 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
         hr = String_to_bstr( _job->has_base_file() && 
-                             _job->which_configuration() == confdir_local?  // Siehe Püschels eMail vom 2008-02-24 17:12
+                             _job->configuration_origin() == confdir_local?  // Siehe Püschels eMail vom 2008-02-24 17:12
                                 _job->folder_path() 
                               : Absolute_path(), result );
 

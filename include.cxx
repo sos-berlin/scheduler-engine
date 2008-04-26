@@ -190,7 +190,7 @@ void Has_includes::register_include( const Absolute_path& path, file::File_info*
 {
     assert( !path.empty() );
 
-    _configuration = spooler()->folder_subsystem()->configuration( which_configuration() );
+    _configuration = spooler()->folder_subsystem()->configuration( configuration_origin() );
 
     _include_map[ path ] = file_info;   // NULL, wenn Datei nicht da ist
     //_configuration->_include_register->register_include( this, path );

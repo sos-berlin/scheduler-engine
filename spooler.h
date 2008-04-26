@@ -175,7 +175,7 @@ namespace directory_observer
 
 namespace folder
 {
-    enum Which_configuration
+    enum Configuration_origin
     {
         confdir_none,
         confdir_local,
