@@ -210,7 +210,6 @@ struct Order_schedule_use : Schedule_use
     void                        on_schedule_loaded          ()                                      { return _order->on_schedule_loaded(); }
     void                        on_schedule_modified        ()                                      { return _order->on_schedule_modified(); }
     bool                        on_schedule_to_be_removed   ()                                      { return _order->on_schedule_to_be_removed(); }
-  //void                        on_schedule_removed         ()                                      { return _order->on_schedule_removed(); }
     string                      name_for_function           () const                                { return _order->string_id(); }
 
   private:
@@ -5917,8 +5916,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         _job_chain_path = job_chain->path();
         _removed_from_job_chain_path.clear();
 
-        //activate();     // Errechnet die nächste Startzeit
-        set_next_start_time();
+        activate();     // Errechnet die nächste Startzeit
 
         if( _delay_storing_until_processing ) 
         {
@@ -5977,20 +5975,24 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 //----------------------------------------------------------------------------------Order::activate
 
-//void Order::activate()
-//{
-//    //assert( order_subsystem()->subsystem_state() == subsys_active );
-//
-//    set_next_start_time();
-//}
+void Order::activate()
+{
+    bool ok = _schedule_use->try_load();
+    if( ok )  set_next_start_time();
+}
 
 //-----------------------------------------------------------------------Order::set_next_start_time
 
 void Order::set_next_start_time()
 {
-    if( _state == _initial_state  &&  !_setback  &&  _schedule_use->is_defined() )
+    if( _state == _initial_state  &&  !_setback )
     {
-        set_setback( next_start_time( true ) );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
+        if( _schedule_use->is_defined() )
+        {
+            set_setback( next_start_time( true ) );     // Braucht für <schedule start_time_function=""> das Scheduler-Skript
+        }
+        else
+            set_setback( Time::never );
     }
     else
     {

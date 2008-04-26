@@ -120,7 +120,7 @@ bool Schedule_subsystem::subsystem_activate()
 
 void Schedule_subsystem::assert_xml_element_name( const xml::Element_ptr& element ) const
 {
-    if( !element.nodeName_is( "run_time" ) )  File_based_subsystem::assert_xml_element_name( element );
+    if( !element.nodeName_is( "run_time" ) )  File_based_subsystem::assert_xml_element_name( element );    // <run_time> und <schedule> sind ungefähr gleich
 }
 
 //-----------------------------------------------------Schedule_subsystem<Schedule>::new_file_based
@@ -236,10 +236,10 @@ void Schedule_use::disconnect()
 
 void Schedule_use::set_schedule( Schedule* schedule )
 {
-    if( schedule  &&  schedule->is_covering() )  z::throw_xc( "SCHEDULER-466", schedule->obj_name() );
-
     if( schedule != _schedule )
     {
+        if( schedule  &&  schedule->is_covering() )  z::throw_xc( "SCHEDULER-466", schedule->obj_name() );
+
         if( _schedule )  _schedule->remove_use( this );
         _schedule = schedule;
         if( _schedule )  _schedule->add_use( this );
@@ -278,6 +278,8 @@ void Schedule_use::set_xml( File_based* source_file_based, const string& xml )
 void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_ptr& element )
 {
     assert( element );
+    source_file_based->assert_not_initialized();
+
     close();
 
     if( element.nodeName_is( "run_time" )  &&  element.hasAttribute( "schedule" ) )     // <run_time schedule="...">
@@ -288,6 +290,7 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     }
     else
     {
+        int WIRKLICH_NEUES_RUN_TIME; //? 
         set_schedule( Z_NEW( Schedule( _spooler->schedule_subsystem(), _scheduler_holidays_usage ) ) );     // Unbenanntes (privates) <schedule>
         _schedule->set_dom( source_file_based, element );
     }
@@ -366,13 +369,6 @@ bool Schedule_use::on_requisite_to_be_removed( File_based* )
 
     return ok;
 }
-
-//---------------------------------------------------------------Schedule_use::on_requisite_removed
-
-//void Schedule_use::on_requisite_removed( File_based* )
-//{
-//    _using_object->on_schedule_removed();
-//}
 
 //------------------------------------------------------------------Schedule_use::next_single_start
 
@@ -722,6 +718,8 @@ bool Schedule::on_activate()
 
 bool Schedule::can_be_removed_now()
 {
+    assert( _use_set.empty() );
+
     return _use_set.empty(); 
 }
 
@@ -805,7 +803,7 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
 {
     xml::Element_ptr result = _inlay->dom_element( dom_document, show_what ); 
 
-    fill_file_based_dom_element( result, show_what );
+    if( path() != "" )  fill_file_based_dom_element( result, show_what );   // Nur bei benanntem <schedule>
 
     return result;
 }

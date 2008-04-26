@@ -190,6 +190,7 @@ struct Order : Com_order,
     Time                        at                      ()                                          { return _setback; }
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
+    void                        activate                ();
     void                        reset_scheduling        ();
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );

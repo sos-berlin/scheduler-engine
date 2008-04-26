@@ -1097,43 +1097,6 @@ bool Job::on_schedule_to_be_removed()
     return true;
 }
 
-//-------------------------------------------------------------------------Job::on_schedule_removed
-
-//void Job::on_schedule_removed()
-//{
-//    assert( !_schedule_use->is_defined() );
-//}
-
-//----------------------------------------------------------------------------Job::missing_requisites
-
-//list<Requisite_path> Job::missing_requisites()
-//{
-//    // Kann File_based das nicht selber herausfinden?
-//    // Die Pendants sind in Schedule_use eingetragen. Schedule_use ist ein Teil von Job
-//    // Vielleicht die Pendants in Job eintragen. Der Job benachrichtigt dann Schedule_use.
-//
-//    list<Requisite_path> result;
-//
-//    if( file_based_state() == s_incomplete )
-//    {
-//        if( !_schedule_use->is_defined() )
-//        {
-//            result.push_back( Requisite_path( _spooler->schedule_subsystem(), _schedule_use->schedule_path() ) );
-//        }
-//
-//        // Hier Process_class und Lock aufnehmen...
-//    }
-//
-//    return result;
-//}
-
-//-------------------------------------------------------------------------Job::on_schedule_removed
-
-//void Job::on_schedule_removed()
-//{
-//    // Schon in on_schedule_to_be_removed() erledigt
-//}
-
 //---------------------------------------------------------------------------Job::prepare_to_remove
 
 void Job::prepare_to_remove()
