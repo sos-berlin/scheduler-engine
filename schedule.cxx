@@ -583,6 +583,8 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
 
     assert_no_overlapped_covering( covering_schedule );
     _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin ] = covering_schedule;
+
+    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();  int ABER_LAUFENDE_PERIODE_NICHT_UNTERBRECHEN;
 }
 
 //----------------------------------------------------------Schedule::assert_no_overlapped_covering
@@ -606,6 +608,8 @@ void Schedule::uncover_from_schedule( Schedule* covering_schedule )
     assert( _covering_schedules.find( covering_schedule->_inlay->_covered_schedule_begin ) != _covering_schedules.end() );
 
     _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin );
+
+    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();  int ABER_LAUFENDE_PERIODE_NICHT_UNTERBRECHEN;
 }
 
 //-----------------------------------------------------------Schedule::try_connect_covered_schedule
@@ -803,7 +807,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
     if( !result.is_single_start() )
     {
-        if( result._begin < interval_begin )  result._begin = interval_begin;
+        //Das verfälscht den Beginn von absolute_repeat: if( result._begin < interval_begin )  result._begin = interval_begin;
         if( result._end   > interval_end   )  result._end   = interval_end;
     }
 
