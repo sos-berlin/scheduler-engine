@@ -432,12 +432,8 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     ptr<Job_folder>                 _job_folder;
     ptr<Job_chain_folder_interface> _job_chain_folder;
     ptr<Standing_order_folder>      _standing_order_folder;
-#ifdef Z_SCHEDULE_DEVELOPMENT
     ptr<Schedule_folder>            _schedule_folder;
-#endif
     ptr<Subfolder_folder>           _subfolder_folder;         // Unterordner
-
-  //stdext::hash_set<string>        _known_duplicate_filenames;       // Doppelte Dateien mit unterschiedlicher Groﬂschreibung (vor der Normalisierung)
 };
 
 //---------------------------------------------------------------------------------Subfolder_folder

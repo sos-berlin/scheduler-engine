@@ -1,7 +1,5 @@
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
 
-#ifdef Z_SCHEDULE_DEVELOPMENT
-
 #ifndef __SCHEDULER_SCHEDULE_H
 #define __SCHEDULER_SCHEDULE_H
 
@@ -350,7 +348,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                    set_scheduler_holidays_usage    ( Scheduler_holidays_usage u )          { _scheduler_holidays_usage = u; }
-    void                    set_default_schedule            ( Schedule* s )                         { _default_schedule = s; }
+    void                    set_default_schedule            ( Schedule* );
 
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     bool                     is_defined                     ()                                      { return _schedule != NULL; }
@@ -394,12 +392,14 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
     struct Inlay : Object
     {
-        // Schedule.xml = "<schedule>..." soll den Schedule vollständig ersetzen.
-        // Die SOS bevorzugt dies vor der üblichen und eleganten Lösung, das Objekt zu verwerfen und ein neues anzulegen (Spooler.create_schedule()).
+        // Schedule::put_Xml() soll den Schedule inhaltlich vollständig ersetzen.
+        // Die SOS bevorzugt dies vor der üblichen (und eleganten) Lösung, das Objekt zu verwerfen und ein neues anzulegen (mit Spooler.create_schedule()).
         // Deshalb unterscheiden wir hier zwischen Schedule und Inlay, damit
-        // letzteres von schedule.xml= entfernt und durch ein neues Inlay ersetzt werden kann.
+        // letzteres von put_Xml() entfernt und durch ein neues Inlay ersetzt werden kann, unter Beibehaltung des Schedule.
         // Siehe eMail von Andreas Liebert 2008-04-21.
+
                                     Inlay                       ( Schedule* );
+                                   ~Inlay                       ();
 
         void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
@@ -430,7 +430,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         string                     _start_time_function;
         bool                       _start_time_function_error;
         Absolute_path              _covered_schedule_path;
-        ptr<Schedule>              _covered_schedule;
         Time                       _covered_schedule_begin;
         Time                       _covered_schedule_end;
         Spooler*                   _spooler;
@@ -471,6 +470,12 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
   //STDMETHODIMP                Remove                      ();
 
 
+    // Dependant
+    bool                        on_requisite_loaded         ( File_based* );
+    bool                        on_requisite_to_be_removed  ( File_based* );
+  //void                        on_requisite_removed        ( File_based* );
+  //Prefix_log*                 log                         ()                                      { return Scheduler_object::log(); }
+
     // file_based<>
 
     bool                        on_initialize               (); 
@@ -482,26 +487,32 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
   //zschimmer::Xc               remove_error                ();
 
   //bool                        can_be_replaced_now         ();
-    void                        prepare_to_replace          ();
-    Schedule*                   on_replace_now              ();
+  //void                        prepare_to_replace          ();
+  //Schedule*                   on_replace_now              ();
 
 
     Schedule_folder*            schedule_folder             () const                                { return typed_folder(); }
 
     void                    set_dom                         ( const xml::Element_ptr& e )           { set_dom( (File_based*)NULL, e ); }
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& d, const Show_what& w )           { return _inlay->dom_element( d, w ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Document_ptr           dom_document                ();
-    void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
   //bool                        operator ==                 ( const Schedule& );
 
     void                        add_use                     ( Schedule_use* );
     void                        remove_use                  ( Schedule_use* );
 
+    void                        cover_with_schedule         ( Schedule* );
+    void                        uncover_from_schedule       ( Schedule* );
+  //void                    set_covered_schedule_path       ( const Absolute_path& );
+
     void                    set_xml                         ( File_based* source_file_based, const string& );
     Inlay*                      inlay                       ()                                      { return _inlay; }
+    bool                     is_covering                    ()                                      { return _inlay->_covered_schedule_path != ""; }
     bool                        once                        ()                                      { return _inlay->_once; }
+    Period                      next_period                 ( Schedule_use*, const Time&, With_single_start );
 
 
     void                        print                       ( ostream& ) const;
@@ -509,14 +520,26 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
 
   private:
-    void                        release_inlay               ();
+    void                        set_inlay                   ( Inlay* );
+    void                        initialize_inlay            ();
+    void                        activate_inlay              ();
+    void                        assert_no_overlapped_covering( Schedule* );
+    bool                        try_connect_covered_schedule();
+    void                        disconnect_covered_schedule ();
+    void                        disconnect_covering_schedules();
+
 
     Fill_zero                  _zero_;
-    ptr<Inlay>                 _inlay;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
 
-    typedef stdext::hash_set<Schedule_use*>  Use_set;
-    Use_set                                 _use_set;
+    typedef stdext::hash_set<Schedule_use*>    Use_set;
+    Use_set                                   _use_set;
+
+    typedef stdext::hash_map<double,Schedule*> Covering_schedules;      
+    Covering_schedules                        _covering_schedules;      // <schedule substitute="...">, die auf dieses Schedule verweisen
+
+    ptr<Inlay>                                _inlay;
+    Schedule*                                 _covered_schedule;        // <schedule substitute="...">, das zu überdeckende Schedule
 };
 
 //----------------------------------------------------------------------------------Schedule_folder
@@ -548,7 +571,7 @@ struct Schedule_subsystem_interface : Object,
     Schedule*                   schedule                    ( const Absolute_path& path ) const     { return file_based( path ); }
     Schedule*                   schedule_or_null            ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
     ptr<Schedule>               new_schedule                ()                                      { return new_file_based(); }
-    virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& ) = 0;
+  //virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& ) = 0;
 };
 
 
@@ -560,5 +583,4 @@ ptr<Schedule_subsystem_interface> new_schedule_subsystem    ( Scheduler* );
 } //namespace scheduler
 } //namespace sos
 
-#endif
 #endif

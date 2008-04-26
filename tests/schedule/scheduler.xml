@@ -35,7 +35,7 @@ hostware.sleep( 5 );
                     ]]>
                 </script>
 
-                <run_time schedule="trettio"/>
+                <!--run_time schedule="trettio"/-->
             </job>
 
             

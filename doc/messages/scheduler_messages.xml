@@ -2820,6 +2820,30 @@
                 <title>Attribute live_file= is not possible here. Use attribute file=</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-463">
+            <text xml:lang="en">
+                <title><p1>schedule</p1>: substituted '<p2>schedule</p2>' is a substitute</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-464">
+            <text xml:lang="en">
+                <title><p1>schedule</p1>: <code>valid_from="<p2/>"></code> is not before <code>valid_to="<p3/>"</code></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-465">
+            <text xml:lang="en">
+                <title>'<p1>schedule</p1>' overlaps <p2>schedule</p2></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-466">
+            <text xml:lang="en">
+                <title>'<p1>schedule</p1>' substitutes another schedule cannot be used directly</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

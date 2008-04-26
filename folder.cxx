@@ -272,9 +272,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     _job_folder              = spooler()->job_subsystem             ()->new_job_folder           ( this );
     _job_chain_folder        = spooler()->order_subsystem           ()->new_job_chain_folder     ( this );
     _standing_order_folder   = spooler()->standing_order_subsystem  ()->new_standing_order_folder( this );
-#ifdef Z_SCHEDULE_DEVELOPMENT
     _schedule_folder         = spooler()->schedule_subsystem        ()->new_schedule_folder      ( this );
-#endif
     _subfolder_folder        = spooler()->folder_subsystem          ()->new_subfolder_folder     ( this );
 
   //add_to_typed_folder_map( _scheduler_script_folder );
@@ -282,9 +280,7 @@ Folder::Folder( Folder_subsystem* folder_subsystem, Folder* parent )
     add_to_typed_folder_map( _lock_folder             );
     add_to_typed_folder_map( _job_folder              );
     add_to_typed_folder_map( _job_chain_folder        );
-#ifdef Z_SCHEDULE_DEVELOPMENT
     add_to_typed_folder_map( _schedule_folder         );
-#endif
     add_to_typed_folder_map( _standing_order_folder   );
     add_to_typed_folder_map( _subfolder_folder        );
 
@@ -1826,14 +1822,19 @@ void File_based::set_typed_folder( Typed_folder* typed_folder )
 
 //----------------------------------------------------------File_based::fill_file_based_dom_element
 
-void File_based::fill_file_based_dom_element( const xml::Element_ptr& element, const Show_what& show_what )
+void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, const Show_what& show_what )
 {
-    element.setAttribute         ( "path", path().with_slash() );
-    element.setAttribute_optional( "name", name() );
+    result.setAttribute         ( "path", path().with_slash() );
+    result.setAttribute_optional( "name", name() );
 
-    element.appendChild( File_based::dom_element( element.ownerDocument(), show_what ) );
+    xml::Element_ptr file_based_element = result.insertBefore( File_based::dom_element( result.ownerDocument(), show_what ), result.firstChild() );
 
-    if( replacement() )  element.append_new_element( "replacement" ).appendChild( replacement()->dom_element( element.ownerDocument(), show_what ) );
+    if( replacement() ) 
+    {
+        xml::Element_ptr replacement_element = result.ownerDocument().createElement( "replacement" );
+        replacement_element.appendChild( replacement()->dom_element( result.ownerDocument(), show_what ) );
+        result.insertBefore( replacement_element, file_based_element.nextSibling() );
+    }
 }
 
 //--------------------------------------------------------------------------File_based::dom_element

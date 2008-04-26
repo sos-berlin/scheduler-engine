@@ -209,6 +209,13 @@ string Path::to_filename() const
     return result;
 }
 
+//-----------------------------------------------------------------------------Absolute_path::build
+
+Absolute_path Absolute_path::build( const File_based* source_file_based, const string& path )
+{ 
+    return Absolute_path( source_file_based? source_file_based->folder_path() : root_path, path ); 
+}
+
 //---------------------------------------------------------------------Absolute_path::Absolute_path
 
 Absolute_path::Absolute_path( const Path& path )

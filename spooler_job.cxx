@@ -677,6 +677,7 @@ bool Job::on_activate()
                 set_state( s_pending );
                 
                 _delay_until = 0;
+                reset_scheduling();
                 init_start_when_directory_changed();
                 check_min_tasks( Z_FUNCTION );
 
@@ -911,7 +912,7 @@ void Job::set_dom( const xml::Element_ptr& element )
                 }
             }
             else
-            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_schedule( e );
+            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _schedule_use->set_dom( this, e );
         }
     }
 }
@@ -1061,36 +1062,20 @@ void Job::init_start_when_directory_changed( Task* task )
     }
 }
 
-//--------------------------------------------------------------------------------Job::set_schedule
-
-void Job::set_schedule( const xml::Element_ptr& element )
-{
-    _schedule_use->set_dom( this, element );    // Ruft add_depandent() auf
-
-    //Bereits aufgerufen von _schedule_use->set_dom(): on_schedule_modified();
-
-    //if( !_schedule_use->schedule_path().empty() )
-    //{
-    //    add_requisite( spooler()->schedule_subsystem(), _schedule_use->schedule_path() );   int REMOVE_DEPENDENT;
-    //}
-}
-
 //--------------------------------------------------------------------------Job::on_schedule_loaded
 
 void Job::on_schedule_loaded()
 {
     if( file_based_state() == s_incomplete )  activate();
 
-    on_schedule_modified();
+    reset_scheduling();
 }
 
 //------------------------------------------------------------------------Job::on_schedule_modified
 
 void Job::on_schedule_modified()
 {
-    _start_once = _tasks_count == 0  &&  _schedule_use->schedule()->once();
-    _period     = Period();
-    set_next_start_time( Time::now() );
+    reset_scheduling();
 }
 
 //-------------------------------------------------------------------Job::on_schedule_to_be_removed
@@ -1107,8 +1092,7 @@ bool Job::on_schedule_to_be_removed()
         end_tasks( message_string( "SCHEDULER-885", schedule_name ) );
     }
 
-    _period = Period();
-    set_next_start_time( Time::now() );
+    reset_scheduling();
 
     return true;
 }
@@ -2038,6 +2022,25 @@ string Job::trigger_files( Task* task )
     return result;
 }
 
+//--------------------------------------------------------------------------------Job::schedule_use
+
+Schedule_use* Job::schedule_use() const                                
+{ 
+    return +_schedule_use; 
+}
+
+//----------------------------------------------------------------------------Job::reset_scheduling
+
+void Job::reset_scheduling()
+{
+    if( file_based_state() >= s_loaded )
+    {
+        _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->once();
+        _period     = Period();
+        set_next_start_time( Time::now() );
+    }
+}
+
 //-------------------------------------------------------------------------------Job::select_period
 
 void Job::select_period( const Time& now )
@@ -2048,8 +2051,8 @@ void Job::select_period( const Time& now )
     }
     else
     {
-        if( now >= _period.end()  ||                                        // Periode abgelaufen?
-            _period.begin().is_never() && _period.end().is_never()  )       // oder noch nicht gesetzt?
+        if( now >= _period.end()  ||                                       // Periode abgelaufen?
+            _period.begin().is_never() && _period.end().is_never() )       // oder noch nicht gesetzt?
         {
             _period = _schedule_use->next_period( now );  
 

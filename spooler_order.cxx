@@ -6130,8 +6130,8 @@ void Order::handle_end_state()
     }
     else
     {
-        bool is_first_call = _schedule_modified;
-        _schedule_modified = false;
+        bool is_first_call = false; //_schedule_modified;
+        //_schedule_modified = false;
         Time next_start = next_start_time( is_first_call );
 
         if( next_start != Time::never  &&  _state != _initial_state )   // <schedule> verlangt Wiederholung?
@@ -6528,15 +6528,14 @@ Time Order::next_start_time( bool first_call )
 
 void Order::on_schedule_loaded()
 {
-    on_schedule_modified();
+    reset_scheduling();
 }
 
 //----------------------------------------------------------------------Order::on_schedule_modified
 
 void Order::on_schedule_modified()
 {
-    _setback = 0;           // Änderung von <run_time> überschreibt Order.at
-    set_next_start_time();
+    reset_scheduling();
 
     //if( _state == _initial_state )  set_setback( _schedule->set()? next_start_time( true ) : Time(0) );
     //                         else  _schedule_modified = true;
@@ -6546,9 +6545,7 @@ void Order::on_schedule_modified()
 
 bool Order::on_schedule_to_be_removed()
 {
-    int DOPPELT;
-    _setback = 0;           // Änderung von <run_time> überschreibt Order.at
-    set_next_start_time();
+    reset_scheduling();
     return true;
 }
 
@@ -6572,6 +6569,14 @@ void Order::set_schedule( File_based* source_file_based, const xml::Element_ptr&
 Schedule_use* Order::schedule_use()
 {
     return +_schedule_use;
+}
+
+//--------------------------------------------------------------------------Order::reset_scheduling
+
+void Order::reset_scheduling()
+{
+    _setback = 0;           // Änderung von <run_time> überschreibt Order.at
+    set_next_start_time();
 }
 
 //---------------------------------------------------------------------------Order::set_replacement

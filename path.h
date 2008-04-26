@@ -61,6 +61,8 @@ inline void insert_into_message( Message_string* m, int index, const Path& path 
 
 struct Absolute_path : Path
 {
+    static Absolute_path        build                       ( const File_based* source_file_based, const string& relative );
+
                                 Absolute_path               ()                                      {}
                               //Absolute_path               ( const string& path )                  { set_path( path ); }
                               //Absolute_path               ( const char* path )                    { set_path( path ); }

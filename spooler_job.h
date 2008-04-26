@@ -163,7 +163,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        init_start_when_directory_changed( Task* = NULL );
     void                        prepare_on_exit_commands    ();
     void                        set_log                     ();
-    void                        set_schedule                ( const xml::Element_ptr& );
+    Schedule_use*               schedule_use                () const;
     void                        on_schedule_loaded          ();
     void                        on_schedule_modified        ();
     bool                        on_schedule_to_be_removed   ();
@@ -230,6 +230,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     void                        stop                        ( bool end_all_tasks );
     void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
+    void                        reset_scheduling            ();
     void                        set_next_start_time         ( const Time& now, bool repeat = false );
     void                        set_next_time               ( const Time& );
     void                        calculate_next_time         ( const Time& now );

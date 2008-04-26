@@ -3,8 +3,6 @@
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
-#define Z_SCHEDULE_DEVELOPMENT
-
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/string_list.h"
 #include "../kram/sos.h"
