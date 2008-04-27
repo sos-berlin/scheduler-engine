@@ -3002,7 +3002,7 @@
 
         <message code="SCHEDULER-921">
             <text xml:lang="en">
-                <title>Next period is <p1/></title>
+                <title>Next period is <p1/>, Schedule '<p2/>'</title>
             </text>
         </message>
 

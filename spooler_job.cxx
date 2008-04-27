@@ -2000,8 +2000,7 @@ void Job::reset_scheduling()
 {
     if( file_based_state() >= s_active )
     {
-        _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->once();
-        _period     = Period();
+        //_period     = Period();
         set_next_start_time( Time::now() );
     }
 }
@@ -2031,7 +2030,7 @@ void Job::select_period( const Time& now )
 
             if( _period.begin() != Time::never )
             {
-                _log->debug( message_string( "SCHEDULER-921", _period.to_xml() ) );
+                _log->debug( message_string( "SCHEDULER-921", _period.to_xml(), _period.schedule_path() ) );
             }
             else 
                 _log->debug( message_string( "SCHEDULER-922" ) );
@@ -2059,6 +2058,8 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     if( !now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined() )
     {
         string msg;
+
+        _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->active_schedule_at( now )->once();
 
         if( _delay_until )
         {
@@ -2127,12 +2128,12 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         }
                     }
                 }
-                //else  
-                //if( !_period.absolute_repeat().is_never() )
-                //{
-                //    Time t = _period.next_repeated( now );
-                //    if( t < _period.end() )  next_start_time = t;
-                //}
+                else  
+                if( !_period.absolute_repeat().is_never() )
+                {
+                    Time t = _period.next_repeated( now );
+                    if( t < _period.end() )  next_start_time = t;
+                }
             }
         }
         else

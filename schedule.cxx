@@ -1476,7 +1476,7 @@ Time Period::next_absolute_repeated( const Time& tim, int next ) const
     if( t < _begin )  t = _begin;
 
     int n = (int)( ( t - _absolute_repeat_begin ) / _absolute_repeat );
-    result = _begin + ( n + 1 ) * _absolute_repeat;
+    result = _absolute_repeat_begin + ( n + 1 ) * _absolute_repeat;
     if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
 
     assert( next == 0? result >= t : result > t );

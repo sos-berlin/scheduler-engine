@@ -330,7 +330,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-918", "state=$1$2" },
     { "SCHEDULER-919", "Task $1 enqueued" },
     { "SCHEDULER-920", "Reading script again (processing again <include>)" },
-    { "SCHEDULER-921", "Next period is $1" },
+    { "SCHEDULER-921", "Next period is $1, Schedule '$2'" },
     { "SCHEDULER-922", "No further period" },
     { "SCHEDULER-923", "Repeating at $1 due to delay_after_error" },
     { "SCHEDULER-924", "First start at the start of the period: $1" },
