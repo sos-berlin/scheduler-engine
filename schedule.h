@@ -63,6 +63,7 @@ struct Period
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
     bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
+    Absolute_path               schedule_path               () const                                { return _schedule_path; }
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;
     Time                        next_absolute_repeated      ( const Time&, int next ) const;
@@ -77,12 +78,14 @@ struct Period
 //private:
     Fill_zero                  _zero_;
     Time                       _begin;                      // Sekunden seit Mitternacht, manchmal auch mit Datum
+    Time                       _absolute_repeat_begin;      // _begin kann verschoben sein. Das ist die Basis für _absolute_repeat
     Time                       _end;                        // Sekunden seit Mitternacht, manchmal auch mit Datum
     Time                       _repeat;
     Time                       _absolute_repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
     bool                       _start_once;                 // Für Joacim Zschimmer
+    Absolute_path              _schedule_path;
 };
 
 //extern Period                   empty_period;               // gcc 3.2.1: Nicht const, weil gcc diese Variable nicht initialisiert. Das macht spooler.cxx.

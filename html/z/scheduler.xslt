@@ -2578,18 +2578,11 @@
                 <xsl:call-template name="card_top"/>
 
                 <tr>
-                    <th class="head1">
-                        Date
-                    </th>
-                    <th class="head">
-                        Until
-                    </th>
-                    <th class="head">
-                        Repetition
-                    </th>
-                    <th class="head">
-                        Object
-                    </th>
+                    <th class="head1">Date</th>
+                    <th class="head">Until</th>
+                    <th class="head">Repetition</th>
+                    <th class="head">Schedule</th>
+                    <th class="head">Object</th>
                 </tr>
                 <tr>
                     <td colspan="2" class="after_head_space">&#160;</td>
@@ -2635,6 +2628,10 @@
                                     </xsl:when>
                                 </xsl:choose>
                             </xsl:if>
+                        </td>
+
+                        <td style="padding-right: 2ex">
+                            <xsl:value-of select="@schedule"/>
                         </td>
 
                         <xsl:choose>

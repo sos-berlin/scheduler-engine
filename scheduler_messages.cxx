@@ -487,8 +487,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-702", "Removing '$1'" },
     { "SCHEDULER-703", "Local configuration file is ignored, the central configuration file is used instead" },
     { "SCHEDULER-704", "Order has reached its end_state='$1'" },
-    { "SCHEDULER-705", "Substitute '$1' is active now" },
-    { "SCHEDULER-706", "Standard '$1' is active now" },
+    { "SCHEDULER-705", "Substitute '$1' is valid now" },
+    { "SCHEDULER-706", "Standard '$1' is valid now" },
     {}
 };
 } //namespace sos

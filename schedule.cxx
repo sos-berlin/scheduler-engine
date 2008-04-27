@@ -769,7 +769,6 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
         {
             Covering_schedules::iterator before = next;  
             before--;
-            assert( before->second->_inlay->_covered_schedule_begin < t );
 
             Schedule* covering_schedule = before->second;
 
@@ -781,8 +780,13 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
 
-                result = covering_schedule->_inlay->next_period( use, t, single_start );
-                if( result._begin < interval_end )  break;     // Periode beginnt im überdeckenden Schedule? Gut!
+                Period period = covering_schedule->_inlay->next_period( use, t, single_start );
+                if( period._begin < interval_end )  
+                {
+                    result = period;
+                    result._schedule_path = covering_schedule->path();
+                    break;     // Periode beginnt im überdeckenden Schedule? Gut!
+                }
 
                 t = interval_end;   // Das überdeckende Scheduler hat keine Periode. Also weiter in unserem Standard-Schedule!
             }
@@ -798,8 +802,13 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
         if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
             assert( !covering_schedule_at( t ) );
-            result = _inlay->next_period( use, t, single_start );       // Unser Standard-Schedule
-            if( result.begin() < interval_end )  break;
+            Period period = _inlay->next_period( use, t, single_start );       // Unser Standard-Schedule
+            if( period.begin() < interval_end )  
+            {
+                result = period;
+                result._schedule_path = path();
+                break;
+            }
         }
 
         t = interval_end;
@@ -816,7 +825,8 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
     if( !result.is_single_start() )
     {
-        //Das verfälscht den Beginn von absolute_repeat: if( result._begin < interval_begin )  result._begin = interval_begin;
+        result._absolute_repeat_begin = result._begin;      // Damit absolute_repeat korrekt berechnet wird, auch wenn wir _begin verschieben
+        if( result._begin < interval_begin )  result._begin = interval_begin;
         if( result._end   > interval_end   )  result._end   = interval_end;
     }
 
@@ -836,7 +846,7 @@ Schedule* Schedule::covering_schedule_at( const Time& t )
     {
         Covering_schedules::iterator before = next;  
         before--;
-        assert( before->second->_inlay->_covered_schedule_begin < t );
+        assert( before->second->_inlay->_covered_schedule_begin <= t );
 
         Schedule* covering_schedule = before->second;
 
@@ -1454,24 +1464,20 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
 }
 //-------------------------------------------------------------------Period::next_absolute_repeated
 
-Time Period::next_absolute_repeated( const Time& t, int next ) const
+Time Period::next_absolute_repeated( const Time& tim, int next ) const
 {
     assert( next == 0  ||  next == 1 );
     assert( !_absolute_repeat.is_never() );
 
 
+    Time t      = tim;
     Time result = Time::never;
 
-    if( t < _begin )
-    {
-        result = _begin;
-    }
-    else
-    {
-        int n = (int)( ( t - _begin ) / _absolute_repeat );
-        result = _begin + ( n + 1 ) * _absolute_repeat;
-        if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
-    }
+    if( t < _begin )  t = _begin;
+
+    int n = (int)( ( t - _absolute_repeat_begin ) / _absolute_repeat );
+    result = _begin + ( n + 1 ) * _absolute_repeat;
+    if( result == t + _absolute_repeat  &&  next == 0 )  result = t;
 
     assert( next == 0? result >= t : result > t );
 
@@ -1511,6 +1517,8 @@ xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) co
         if( _repeat          != Time::never )  result.setAttribute( "repeat"         , _repeat.as_time_t() );
         if( _absolute_repeat != Time::never )  result.setAttribute( "absolute_repeat", _absolute_repeat.as_time_t() );
     }
+
+    result.setAttribute_optional( "schedule", _schedule_path );
 
     return result;
 }
