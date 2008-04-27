@@ -461,7 +461,7 @@ const Com_method Schedule::_methods[] =
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Schedule,  1, Java_class_name, VT_BSTR    , 0 ),
     COM_PROPERTY_PUT( Schedule,  2, Xml            ,              0, VT_BSTR ),
-    COM_PROPERTY_GET( Schedule,  2, Xml            ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Schedule,  2, Xml            , VT_BSTR    , 0 ),
 #endif
     {}
 };
