@@ -2623,7 +2623,7 @@
                                     </xsl:when>
                                     <xsl:when test="@repeat">
                                         <xsl:text>repeats after </xsl:text>
-                                        <xsl:value-of select="@absolute_repeat"/>
+                                        <xsl:value-of select="@repeat"/>
                                         <xsl:text>s</xsl:text>
                                     </xsl:when>
                                 </xsl:choose>

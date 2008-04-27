@@ -586,7 +586,7 @@ bool Job::on_initialize()
                 _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
             }
 
-            _active_schedule_path = _schedule_use->schedule_path();
+            _active_schedule_path = _schedule_use->schedule_path().without_slash();
 
             //_next_start_time = Time::never;
             //_period._begin = 0;
@@ -2128,12 +2128,12 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         }
                     }
                 }
-                else  
-                if( !_period.absolute_repeat().is_never() )
-                {
-                    Time t = _period.next_repeated( now );
-                    if( t < _period.end() )  next_start_time = t;
-                }
+                //else  
+                //if( !_period.absolute_repeat().is_never() )
+                //{
+                //    Time t = _period.next_repeated( now );
+                //    if( t < _period.end() )  next_start_time = t;
+                //}
             }
         }
         else

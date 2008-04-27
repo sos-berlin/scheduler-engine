@@ -788,7 +788,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
                     break;     // Periode beginnt im überdeckenden Schedule? Gut!
                 }
 
-                t = interval_end;   // Das überdeckende Scheduler hat keine Periode. Also weiter in unserem Standard-Schedule!
+                t = interval_end;   // Das überdeckende Schedule hat keine Periode. Also weiter in unserem Standard-Schedule!
             }
 
             interval_begin = covering_schedule->_inlay->_covered_schedule_end;      // Beginn der Lücke nach dem letzten überdeckenden Schedule
