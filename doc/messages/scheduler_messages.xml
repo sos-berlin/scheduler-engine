@@ -2844,6 +2844,12 @@
                 <title>'<p1>schedule</p1>' substitutes another schedule cannot be used directly</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-467">
+            <text xml:lang="en">
+                <title>Attribute '<p1>attribute</p1>' is only valid with attribute '<p2>attribute</p2>'</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
@@ -4195,6 +4201,18 @@
         <message code="SCHEDULER-704">
             <text xml:lang="en">
                 <title>Order has reached its end_state='<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-705">
+            <text xml:lang="en">
+                <title>Substitute '<p1>schedule</p1>' is valid now</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-706">
+            <text xml:lang="en">
+                <title>Standard '<p1>schedule</p1>' is valid now</title>
             </text>
         </message>
 

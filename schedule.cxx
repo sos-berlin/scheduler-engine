@@ -755,10 +755,10 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
     Time   interval_end   = Time::never;  // Standard-Schedule endet. Gilt, falls kein überdeckendes Schedule >= t
     Time   t              = tim;
 
-    
-    while(1)    // Überdeckende Schedule prüfen, <schedule substitute="...">
+    // Überdeckende Schedule prüfen, <schedule substitute="...">
+
+    for( Covering_schedules::iterator next = _covering_schedules.upper_bound( t );; next++ )   // Liefert das erste Schedule nach t
     {
-        Covering_schedules::iterator next = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
         assert( next == _covering_schedules.end()  ||  t < next->second->_inlay->_covered_schedule_begin );
 
         if( next == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
@@ -773,8 +773,10 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
             Schedule* covering_schedule = before->second;
 
-            if( covering_schedule->is_covering_at( t ) )   // Überdeckendes Schedule ist vor t, schon vergangen
+            if( covering_schedule->is_covering_at( t ) )   
             {
+                assert( covering_schedule == covering_schedule_at( t ) );
+
                 interval_begin = covering_schedule->_inlay->_covered_schedule_begin;
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
@@ -793,14 +795,21 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
         assert( t >= interval_begin  &&  t <= interval_end );
 
-        if( interval_begin < interval_end )     // Die Lücke zwischen zwei überdeckenden Schedule ist länger als 0?
+        if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
+            assert( !covering_schedule_at( t ) );
             result = _inlay->next_period( use, t, single_start );       // Unser Standard-Schedule
             if( result.begin() < interval_end )  break;
         }
 
         t = interval_end;
-        if( t.is_never() )  break;
+        if( t.is_never() )
+        {
+            assert( !covering_schedule_at( t ) );
+            break;
+        }
+
+        next++;
     }
 
     assert( t >= interval_begin  &&  t <= interval_end );
@@ -812,6 +821,56 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
     }
 
     return result;
+}
+
+//-------------------------------------------------------------------Schedule::covering_schedule_at
+
+Schedule* Schedule::covering_schedule_at( const Time& t )
+{
+    Schedule* result = NULL;
+
+    Covering_schedules::iterator next = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
+    assert( next == _covering_schedules.end()  ||  t < next->second->_inlay->_covered_schedule_begin );
+
+    if( next != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+    {
+        Covering_schedules::iterator before = next;  
+        before--;
+        assert( before->second->_inlay->_covered_schedule_begin < t );
+
+        Schedule* covering_schedule = before->second;
+
+        if( covering_schedule->is_covering_at( t ) )
+        {
+            result = covering_schedule;
+        }
+    }
+    
+    return result;
+}
+
+//---------------------------------------------------------------------Schedule::active_schedule_at
+
+Schedule* Schedule::active_schedule_at( const Time& t )
+{
+    if( Schedule* covering_schedule = covering_schedule_at( t ) )
+    {
+        return covering_schedule;
+    }
+    else
+        return this;
+}
+
+//----------------------------------------------------------------Schedule::active_schedule_path_at
+
+Absolute_path Schedule::active_schedule_path_at( const Time& t )
+{
+    if( Schedule* covering_schedule = covering_schedule_at( t ) )
+    {
+        return covering_schedule->path();
+    }
+    else
+        return path();
 }
 
 //---------------------------------------------------------------------------Schedule::dom_document
@@ -939,6 +998,12 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _covered_schedule_begin.set_datetime( element.getAttribute( "valid_from"          ) );
     _covered_schedule_end  .set_datetime( element.getAttribute( "valid_to"  , "never" ) );
     if( _covered_schedule_begin >= _covered_schedule_end )  z::throw_xc( "SCHEDULER-464", obj_name(), _covered_schedule_begin.as_string(), _covered_schedule_end.as_string() );
+
+    if( _covered_schedule_path == "" )
+    {
+        if( _covered_schedule_begin != 0           )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
+        if( _covered_schedule_end   != Time::never )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
+    }
 
 
     default_period.set_dom( element );

@@ -494,6 +494,9 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Inlay*                      inlay                       ()                                      { return _inlay; }
     bool                     is_covering                    ()                                      { return _inlay->_covered_schedule_path != ""; }
     bool                     is_covering_at                 ( const Time& t )                       { return t >= _inlay->_covered_schedule_begin &&  t < _inlay->_covered_schedule_end; }
+    Schedule*                   covering_schedule_at        ( const Time& );                        // NULL, wenn kein Schedule überdeckt
+    Schedule*                   active_schedule_at          ( const Time& );
+    Absolute_path               active_schedule_path_at     ( const Time& );
     bool                        once                        ()                                      { return _inlay->_once; }
     Period                      next_period                 ( Schedule_use*, const Time&, With_single_start );
 
