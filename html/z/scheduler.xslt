@@ -2604,7 +2604,8 @@
                             <xsl:if test="self::period">
                                 <xsl:choose>
                                     <xsl:when test="substring-before( @begin, 'T' ) != substring-before( @end, 'T' ) and substring-after( @end, 'T' ) = '00:00:00'">
-                                        <xsl:text>24:00:00</xsl:text>
+                                        <xsl:text>24:00:00 </xsl:text>
+                                        <xsl:value-of select="@end_xslt_datetime_diff_plus"/>
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:value-of select="substring( @end__xslt_datetime_with_diff_plus, 12 )"/>

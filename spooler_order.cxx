@@ -6551,13 +6551,6 @@ bool Order::on_schedule_to_be_removed()
     return true;
 }
 
-//-----------------------------------------------------------------------Order::on_schedule_removed
-
-//void Order::on_schedule_removed()
-//{
-//    assert( !_schedule_use->is_defined() );
-//}
-
 //------------------------------------------------------------------------------Order::set_schedule
 
 void Order::set_schedule( File_based* source_file_based, const xml::Element_ptr& e )

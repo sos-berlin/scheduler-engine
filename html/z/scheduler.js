@@ -250,6 +250,7 @@ Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, 
         {
             element.setAttribute( attribute_name + "__xslt_datetime"               , xslt_format_datetime              ( value, now ) );
             element.setAttribute( attribute_name + "__xslt_datetime_diff"          , xslt_format_datetime_diff         ( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_diff_plus"     , xslt_format_datetime_diff         ( value, now, true ) );
             element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff    ( value, now, false ) );
             element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff    ( value, now, true ) );
             element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time          ( value, now ) );

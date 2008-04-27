@@ -618,7 +618,9 @@ bool Schedule::try_connect_covered_schedule()
 {
     if( !_covered_schedule &&  _inlay->_covered_schedule_path != "" )  
     {
-        if( Schedule* covered_schedule = _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path ) )
+        Schedule* covered_schedule = _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path );
+
+        if( covered_schedule  &&  covered_schedule->file_based_state() >= s_loaded )
         {
             covered_schedule->cover_with_schedule( this );  // Löst Exception aus bei nicht eindeutiger Überdeckung
             _covered_schedule = covered_schedule;
@@ -630,7 +632,6 @@ bool Schedule::try_connect_covered_schedule()
         }
     }
 
-    assert( _covered_schedule == _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path ) );
     return _covered_schedule != NULL;
 }
 
@@ -817,8 +818,6 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
             assert( !covering_schedule_at( t ) );
             break;
         }
-
-        next++;
     }
 
     assert( t >= interval_begin  &&  t <= interval_end );
@@ -1410,8 +1409,9 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     if( single_start & wss_next_single_start  &&  _single_start  &&  time_of_day <= _begin )  result = true;
                                                                               // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     else
-    if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
+  //if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day < _end ) )  result = true;
     else
     if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
                                                                                                                                                 // ^ Falls zwei Perioden direkt aufeinander folgen
