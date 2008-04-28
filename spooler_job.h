@@ -355,7 +355,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 
     ptr<Job_schedule_use>      _schedule_use;
-    string                     _active_schedule_path;
     Period                     _period;                     // Derzeitige oder nächste Period
     xml::Document_ptr          _commands_document;          // <commands>...
     typedef map<int,xml::Element_ptr>  Exit_code_commands_map;

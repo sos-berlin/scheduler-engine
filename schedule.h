@@ -343,6 +343,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     bool                     is_defined                     ()                                      { return _schedule != NULL; }
     bool                        try_load                    ();
+    void                        log_changed_active_schedule ( const Time& now );
 
     Period                      first_period                ()                                      { return first_period( Time::now() ); }
     Period                      first_period                ( const Time& t )                       { return next_period( t ); }
@@ -368,6 +369,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     ptr<Schedule>              _default_schedule;           // Das Schedule, wenn sonst keins definiert ist oder benanntes Schedule nicht bekannt ist.
     Scheduler_object*          _using_object;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
+    string                     _active_schedule_path;       // == schedule()->active_schedule_path_at(now)
 };
 
 //-----------------------------------------------------------------------------------------Schedule
@@ -511,7 +513,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
   private:
     void                        set_inlay                   ( Inlay* );
     void                        initialize_inlay            ();
-    bool                        try_activate_inlay          ();
+    bool                        try_load_inlay              ();
     void                        assert_no_overlapped_covering( Schedule* );
     bool                        try_connect_covered_schedule();
     void                        disconnect_covered_schedule ();

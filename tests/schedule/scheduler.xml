@@ -24,7 +24,7 @@
 
         
         <jobs>
-            <job name="A">
+            <job name="A" order="yes" idle_timeout="60">
                 <script language="javascript">
                     <![CDATA[
 
@@ -39,7 +39,7 @@ hostware.sleep( 5 );
             </job>
 
             
-            <job name="B">
+            <job name="B" order="yes" idle_timeout="60">
                 <script language="javascript">
                     <![CDATA[
                     
@@ -63,9 +63,17 @@ hostware.sleep( 5 );
                     ]]>
                 </script>
 
-                <run_time schedule="file"/>
+                <run_time schedule="--file"/>
             </job>
         </jobs>
+
+
+        <job_chains>
+            <job_chain name="schedule">
+                <job_chain_node state="a" job="A"/>
+                <job_chain_node state="b" job="B"/>
+            </job_chain>
+        </job_chains>
 
     </config>
 </spooler>

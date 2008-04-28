@@ -191,7 +191,7 @@ struct Order : Com_order,
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
     void                        activate                ();
-    void                        reset_scheduling        ();
+    void                        handle_changed_schedule ();
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
     void                        set_next_start_time     ();

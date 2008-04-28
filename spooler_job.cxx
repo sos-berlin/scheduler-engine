@@ -586,8 +586,6 @@ bool Job::on_initialize()
                 _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
             }
 
-            _active_schedule_path = _schedule_use->schedule_path().without_slash();
-
             //_next_start_time = Time::never;
             //_period._begin = 0;
             //_period._end   = 0;
@@ -2018,13 +2016,7 @@ void Job::select_period( const Time& now )
         if( now >= _period.end()  ||                                       // Periode abgelaufen?
             _period.begin().is_never() && _period.end().is_never() )       // oder noch nicht gesetzt?
         {
-            Schedule* active_schedule = _schedule_use->schedule()->active_schedule_at( now );
-            if( _active_schedule_path != (string)active_schedule->path().without_slash() )      // Unbenannte <run_time> ist "", auch "/"
-            {
-                _log->info( message_string( active_schedule == _schedule_use->schedule()? "SCHEDULER-706" : "SCHEDULER-705", 
-                                            active_schedule->obj_name() ) );
-                _active_schedule_path = active_schedule->path().without_slash();
-            }
+            _schedule_use->log_changed_active_schedule( now );
 
             _period = _schedule_use->next_period( now );  
 

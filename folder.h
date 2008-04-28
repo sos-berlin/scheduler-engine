@@ -124,13 +124,22 @@ struct File_based : Scheduler_object,
     enum State
     {
         s_undefined,            // Fehler in XML-Definition
-        s_not_initialized,      // on_initialized() gescheitert
+        s_not_initialized,      // on_initialized() gescheitert, Objekt ist nicht im Folder
         s_initialized,          // on_initialized() ok, Objekt sieht gut aus
         s_loaded,               // Mit Daten gefüllt: bei Jobs die Task-Warteschlange, bei Jobketten die Auftragswarteschlangen
-        s_incomplete,           // Dependant fehlt
+        s_incomplete,           // Requisite fehlt (beim Versuch zu aktivieren)
         s_active,
         s_closed
     };
+
+    // Zutun: Genauer klären, was die Zustände bedeuten, für jede Klasse, besonders Fehlerfälle (einschließlich fehlender Requisiten)
+    // s_incomplete vielleicht automatisch setzen, nach on_requisite_loaded() wieder versuchen zu aktivieren
+    
+    // Diese generischen Zustände mit den Zuständen der Objekte (Job, Order) unter einem Hut bringen. 
+    // Vielleicht klassen-spezifische Sub_states.
+    // s_halted?
+
+    // Fehlerzustand: _file_based_xc und klassen-spezifische Fehler unter einem Hut bringen?
 
 
     enum Base_file_event

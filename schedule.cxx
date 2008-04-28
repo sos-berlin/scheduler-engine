@@ -221,7 +221,8 @@ void Schedule_use::close()
 {
     remove_requisite( Requisite_path( spooler()->schedule_subsystem(), _schedule_path ) );
 
-    _schedule_path.clear();
+    _active_schedule_path.clear();
+    _schedule_path       .clear();
     set_schedule( NULL );
 }
 
@@ -294,6 +295,8 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
         set_schedule( Z_NEW( Schedule( _spooler->schedule_subsystem(), _scheduler_holidays_usage ) ) );     // Unbenanntes (privates) <schedule>
         _schedule->set_dom( source_file_based, element );
     }
+
+    _active_schedule_path = _schedule_path.without_slash();
 
     on_schedule_modified();
 }
@@ -368,6 +371,22 @@ bool Schedule_use::on_requisite_to_be_removed( File_based* )
     }
 
     return ok;
+}
+
+//--------------------------------------------------------Schedule_use::log_changed_active_schedule
+
+void Schedule_use::log_changed_active_schedule( const Time& now )
+{
+    assert( is_defined() );
+
+    Schedule* active_schedule = schedule()->active_schedule_at( now );
+
+    if( _active_schedule_path != (string)active_schedule->path().without_slash() )      // Unbenannte <run_time> ist "", auch "/"
+    {
+        _using_object->log()->info( message_string( active_schedule == _schedule? "SCHEDULER-706" : "SCHEDULER-705", 
+                                                    active_schedule->obj_name() ) );
+        _active_schedule_path = active_schedule->path().without_slash();
+    }
 }
 
 //------------------------------------------------------------------Schedule_use::next_single_start
@@ -542,9 +561,9 @@ void Schedule::set_inlay( Inlay* inlay )
                 initialize_inlay();
             }
 
-            if( file_based_state() > s_loaded )
+            if( file_based_state() >= s_loaded )
             {
-                try_activate_inlay();
+                try_load_inlay();
                 Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
             }
         }
@@ -561,9 +580,9 @@ void Schedule::initialize_inlay()
     }
 }
 
-//---------------------------------------------------------------------Schedule::try_activate_inlay
+//-------------------------------------------------------------------------Schedule::try_load_inlay
 
-bool Schedule::try_activate_inlay()
+bool Schedule::try_load_inlay()
 {
     bool result = true;
 
@@ -572,7 +591,7 @@ bool Schedule::try_activate_inlay()
         result = try_connect_covered_schedule();
     }
 
-    return result;
+    return result;  // false: on_activate() setzt s_incomplete
 }
 
 //--------------------------------------------------------------------Schedule::cover_with_schedule
@@ -584,7 +603,7 @@ void Schedule::cover_with_schedule( Schedule* covering_schedule )
     assert_no_overlapped_covering( covering_schedule );
     _covering_schedules[ covering_schedule->_inlay->_covered_schedule_begin ] = covering_schedule;
 
-    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();  int ABER_LAUFENDE_PERIODE_NICHT_UNTERBRECHEN;
+    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
 }
 
 //----------------------------------------------------------Schedule::assert_no_overlapped_covering
@@ -609,7 +628,7 @@ void Schedule::uncover_from_schedule( Schedule* covering_schedule )
 
     _covering_schedules.erase( covering_schedule->_inlay->_covered_schedule_begin );
 
-    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();  int ABER_LAUFENDE_PERIODE_NICHT_UNTERBRECHEN;
+    Z_FOR_EACH( Use_set, _use_set, u )  (*u)->on_schedule_modified();
 }
 
 //-----------------------------------------------------------Schedule::try_connect_covered_schedule
@@ -620,8 +639,16 @@ bool Schedule::try_connect_covered_schedule()
     {
         Schedule* covered_schedule = _spooler->schedule_subsystem()->schedule_or_null( _inlay->_covered_schedule_path );
 
-        if( covered_schedule  &&  covered_schedule->file_based_state() >= s_loaded )
+        if( covered_schedule ) // &&  covered_schedule->file_based_state() >= s_loaded )
         {
+            // Bei Überlappung gibt es eine Exception und der überdeckende Schedule wird nicht im überdeckten eingetragen.
+            // Besser: Keine Exception, sondern return false, 
+            //         überdeckender Scheduler wird im überdeckten unwirksam eingetragen,
+            //         damit bei Änderung eines anderen überdeckenden Schedules erneut alle auf Überlappung geprüft werden können.
+            //         Zustand is_overlapping.
+            // Die SOS fordert nur "There can be more than one replacement schedule for a schedule, but the replacement schedules may not overlap."
+            // Der Überlappende Schedule muss jetzt geändert (neu gespeichert) werden, damit er wirken kann.
+
             covered_schedule->cover_with_schedule( this );  // Löst Exception aus bei nicht eindeutiger Überdeckung
             _covered_schedule = covered_schedule;
         }
@@ -680,6 +707,8 @@ bool Schedule::on_requisite_loaded( File_based* file_based )
     try_connect_covered_schedule();
     assert( _covered_schedule );
 
+    if( file_based_state() == s_incomplete )  activate();
+
     return true;
 }
 
@@ -710,6 +739,7 @@ bool Schedule::on_initialize()
 
 bool Schedule::on_load()
 {
+    try_load_inlay();
     return true;
 }
 
@@ -717,7 +747,9 @@ bool Schedule::on_load()
 
 bool Schedule::on_activate()
 {
-    return try_activate_inlay();
+    bool ok = try_load_inlay();
+    if( !ok )  set_file_based_state( s_incomplete );
+    return ok;
 }
 
 //---------------------------------------------------------------------Schedule::can_be_removed_now
@@ -971,7 +1003,7 @@ Schedule::Inlay::Inlay( Schedule* schedule )
         _holidays = _spooler->holidays();                   // Kopie des Objekts (kein Zeiger)
     }
     else
-        assert( _schedule->path() == "" );
+        assert( _schedule->path().without_slash() == "" );
 }
 
 //--------------------------------------------------------------------------Schedule::Inlay::~Inlay
@@ -1103,7 +1135,9 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 
 xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document, const Show_what& ) 
 {
-    return document.clone( _dom.documentElement() );
+    xml::Element_ptr result = document.clone( _dom.documentElement() );
+    result.setAttribute_optional( "substitute", _covered_schedule_path );
+    return result;
 }
 
 //-----------------------------------------------------------------------Schedule::Inlay::is_filled

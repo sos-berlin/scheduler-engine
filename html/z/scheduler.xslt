@@ -83,6 +83,14 @@
                 </xsl:apply-templates>
                 <!--/xsl:if-->
 
+                <xsl:if test="state/schedules">
+                    <xsl:apply-templates mode="card_selector" select="/spooler">
+                        <xsl:with-param name="name"  select="'schedules'"/>
+                        <xsl:with-param name="title" select="'Schedules'"/>
+                        <xsl:with-param name="class" select="'schedule'"/>
+                    </xsl:apply-templates>
+                </xsl:if>
+
                 <xsl:apply-templates mode="card_selector" select="/spooler">
                     <xsl:with-param name="name"  select="'calendar'"/>
                     <xsl:with-param name="title" select="'Calendar'"/>
@@ -138,6 +146,10 @@
 
         <xsl:if test="/spooler/@my_show_card='process_classes'">
             <xsl:apply-templates select="state/process_classes"/>
+        </xsl:if>
+
+        <xsl:if test="/spooler/@my_show_card='schedules'">
+            <xsl:apply-templates select="state/schedules"/>
         </xsl:if>
 
         <xsl:if test="/spooler/@my_show_card='cluster'">
@@ -597,7 +609,7 @@
                         </tr>
                     </xsl:if>
 
-                    <xsl:if test="file_based/ERROR or file_based/removed or replacement">
+                    <xsl:if test="file_based/ERROR or file_based/removed or replacement or file_based/requisites/requisite [ @is_missing='yes' ]">
                         <tr>
                             <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
                                 <xsl:apply-templates mode="file_based_line" select="."/>
@@ -2152,6 +2164,89 @@
         </table>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~schedules-->
+
+    <xsl:template match="schedules">
+        <table width="100%" cellpadding="0" cellspacing="0" class="schedules">
+            <col width="100"/>
+            <col width="$datetime_column_width"/>
+            <col width="$datetime_column_width"/>
+            <col width="*"/>
+
+            <thead>
+                <xsl:call-template name="card_top"/>
+                <tr style="">
+                    <td class="head1" style="padding-left: 2ex">Schedule</td>
+                    <td class="head">valid from</td>
+                    <td class="head">valid to</td>
+                    <td class="head">state</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="after_head_space">&#160;</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <xsl:for-each select="schedule">
+                    <xsl:sort select="translate( @path, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
+                    
+                    <xsl:if test="not( /spooler/answer/state/schedules/schedule [ @path = current()/@substitute ] ) ">
+
+                        <tr>
+                            <td colspan="4">
+                                <p style="margin: 0px; line-height: 50%">&#160;</p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3">
+                                <b>
+                                    <xsl:value-of select="@path"/>
+                                </b>
+                            </td>
+                            <td>
+                                <xsl:apply-templates select="file_based/@state"/>
+                            </td>
+                        </tr>
+
+                        <xsl:if test="file_based/ERROR or file_based/removed or replacement or file_based/requisites/requisite [ @is_missing='yes' ]">
+                            <tr>
+                                <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                                    <xsl:apply-templates mode="file_based_line" select="."/>
+                                </td>
+                            </tr>
+                        </xsl:if>
+
+                        <xsl:for-each select="parent::schedules/schedule [ @substitute = current()/@path ]">
+                            <tr>
+                                <td style="padding-left: 2ex">
+                                    <xsl:value-of select="@path"/>
+                                </td>
+                                <td>
+                                    <xsl:value-of select="@valid_from"/>
+                                </td>
+                                <td>
+                                    <xsl:value-of select="@valid_to"/>
+                                </td>
+                                <td>
+                                    <xsl:apply-templates select="file_based/@state"/>
+                                </td>
+                            </tr>
+                            
+                            <xsl:if test="file_based/ERROR or file_based/removed or replacement or file_based/requisites/requisite [ @is_missing='yes' ]">
+                                <tr>
+                                    <td colspan="4" style="padding-left: 4ex; padding-bottom: 0.5em;">
+                                        <xsl:apply-templates mode="file_based_line" select="."/>
+                                    </td>
+                                </tr>
+                            </xsl:if>
+                        </xsl:for-each>
+                    </xsl:if>
+                </xsl:for-each>
+            </tbody>
+        </table>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cluster-->
 
     <xsl:template match="cluster">
@@ -2988,7 +3083,7 @@
         <xsl:if test="parent::job/file_based/@state and parent::job/file_based/@state != .">
             <xsl:text> ›</xsl:text>
             <span class="has_title" title="generic state">
-                <xsl:value-of select="parent::job/file_based/@state"/>
+                <xsl:apply-templates select="parent::job/file_based/@state"/>
             </span>
             <xsl:text>‹</xsl:text>
         </xsl:if>
@@ -3535,28 +3630,50 @@
     <xsl:template mode="file_based_line" match="*">
         <xsl:choose>
             <xsl:when test="file_based/ERROR">
-                <span class="label" style="white-space: nowrap">Error in configuration file: </span>
-                <span class="file_based_error_message">
-                    <xsl:apply-templates select="file_based/ERROR"/>
-                </span>
+                <p style="margin: 0px">
+                    <span class="label" style="white-space: nowrap">Error in configuration file: </span>
+                    <span class="file_based_error_message">
+                        <xsl:apply-templates select="file_based/ERROR"/>
+                    </span>
+                </p>
             </xsl:when>
             <xsl:when test="replacement/*/file_based/ERROR">
-                <span class="label" style="white-space: nowrap">Error in changed file</span>
-                <span class="label" style="white-space: nowrap"> (not loaded): </span>
-                <span class="file_based_error_message">
-                <xsl:apply-templates select="replacement/*/file_based/ERROR"/>
-                </span>
+                <p style="margin: 0px">
+                    <span class="label" style="white-space: nowrap">Error in changed file</span>
+                    <span class="label" style="white-space: nowrap"> (not loaded): </span>
+                    <span class="file_based_error_message">
+                        <xsl:apply-templates select="replacement/*/file_based/ERROR"/>
+                    </span>
+                </p>
             </xsl:when>
             <xsl:when test="replacement">
-                <span class="label">Replacement is standing by</span>
+                <p style="margin: 0px">
+                    <span class="label">Replacement is standing by</span>
+                </p>
             </xsl:when>
             <xsl:when test="file_based/removed/ERROR">
-                <span class="label" style="white-space: nowrap">Removing delayed: </span>
-                <span class="file_based_error_message">
-                    <xsl:apply-templates select="file_based/removed/ERROR"/>
-                </span>
+                <p style="margin: 0px">
+                    <span class="label" style="white-space: nowrap">Removing delayed: </span>
+                    <span class="file_based_error_message">
+                        <xsl:apply-templates select="file_based/removed/ERROR"/>
+                    </span>
+                </p>
             </xsl:when>
         </xsl:choose>
+
+        <xsl:if test="file_based/requisites/requisite [ @is_missing='yes' ]">
+            <p class="small" style="margin: 0px; color: red">
+                <xsl.text>Missing</xsl.text>
+            
+                <xsl:for-each select="file_based/requisites/requisite [ @is_missing='yes' ]">
+                    <xsl:text> </xsl:text>
+                    <xsl:value-of select="@type"/>
+                    <xsl:text> '</xsl:text>
+                    <xsl:value-of select="@path"/>
+                    <xsl:text>'</xsl:text>
+                </xsl:for-each>
+            </p>
+        </xsl:if>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/ERROR-->
@@ -3565,6 +3682,28 @@
         <span class="file_based_error_message">
             <xsl:apply-templates select="ERROR"/>
         </span>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~file_based/@state-->
+
+    <xsl:template match="file_based/@state">
+
+        <span class="small">
+            <xsl:choose>
+                <xsl:when test=".='active'">
+                    <span style="color: green">
+                        <xsl:value-of select="."/>
+                    </span>
+                </xsl:when>
+
+                <xsl:otherwise>
+                    <span style="color: red">
+                        <xsl:value-of select="."/>
+                    </span>
+                </xsl:otherwise>
+            </xsl:choose>
+        </span>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~attributes_for_onclick-->
