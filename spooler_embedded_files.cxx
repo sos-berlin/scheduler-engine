@@ -520,6 +520,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"visible\"            type=\"Yes_no_never\"/>\n"
     "<xsd:attribute name=\"orders_recoverable\" type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"distributed\"        type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"title\"              type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "\n"
     "<!--libxslt xsd:key name=\"job_chain_node\">\n"
@@ -1902,7 +1903,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209053899 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209383741 },
     { NULL, NULL, 0 }
 };
 

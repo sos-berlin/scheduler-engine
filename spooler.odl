@@ -724,6 +724,9 @@ library Spooler
 
         [id(40),propget]        
         HRESULT                 Configuration_directory ( [out,retval] BSTR* );
+
+        [id(41),propget]        
+        HRESULT                 Schedule                ( [in] BSTR, [out,retval] Ischedule** );
     }
 
     [
@@ -1023,6 +1026,12 @@ library Spooler
 
         [id(13)]
         HRESULT                 Remove                  ();
+    
+        [id(14),propput]
+        HRESULT                 Title                   ( [in] BSTR );
+    
+        [id(14),propget]
+        HRESULT                 Title                   ( [out,retval] BSTR* );
     }
 
     [

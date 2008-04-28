@@ -301,6 +301,18 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     on_schedule_modified();
 }
 
+//-----------------------------------------------------------------------Schedule_use::dom_document
+
+xml::Document_ptr Schedule_use::dom_document( const Show_what& show_what ) 
+{
+    xml::Document_ptr document;
+
+    document.create();
+    document.appendChild( dom_element( document, show_what ) );
+
+    return document;
+}
+
 //------------------------------------------------------------------------Schedule_use::dom_element
 
 xml::Element_ptr Schedule_use::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
@@ -916,12 +928,12 @@ Absolute_path Schedule::active_schedule_path_at( const Time& t )
 
 //---------------------------------------------------------------------------Schedule::dom_document
 
-xml::Document_ptr Schedule::dom_document() 
+xml::Document_ptr Schedule::dom_document( const Show_what& show_what ) 
 {
     xml::Document_ptr document;
 
     document.create();
-    document.appendChild( _inlay->dom_element( document, Show_what() ) );
+    document.appendChild( _inlay->dom_element( document, show_what ) );
 
     return document;
 }
@@ -930,9 +942,19 @@ xml::Document_ptr Schedule::dom_document()
 
 xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )           
 {
-    xml::Element_ptr result = _inlay->dom_element( dom_document, show_what ); 
+    xml::Element_ptr result; 
 
-    if( path() != "" )  fill_file_based_dom_element( result, show_what );   // Nur bei benanntem <schedule>
+    if( show_what.is_set( show_for_database_only ) )
+    {
+        result = _inlay->dom_element( dom_document, show_what ); 
+    }
+    else
+    {
+        result = dom_document.createElement( "schedule" ); //_inlay->dom_element( dom_document, show_what ); 
+
+        if( path() != "" )  fill_file_based_dom_element( result, show_what );   // Nur bei benanntem <schedule>
+    }
+
 
     return result;
 }

@@ -336,6 +336,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     Schedule*                   schedule                    ();
     void                    set_xml                         ( File_based* source_file_based, const string& );
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
+    xml::Document_ptr           dom_document                ( const Show_what& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                    set_scheduler_holidays_usage    ( Scheduler_holidays_usage u )          { _scheduler_holidays_usage = u; }
     void                    set_default_schedule            ( Schedule* );
@@ -486,7 +487,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     void                    set_dom                         ( const xml::Element_ptr& e )           { set_dom( (File_based*)NULL, e ); }
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    xml::Document_ptr           dom_document                ();
+    xml::Document_ptr           dom_document                ( const Show_what& );
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
     void                        add_use                     ( Schedule_use* );

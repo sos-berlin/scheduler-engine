@@ -360,6 +360,7 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Process_classes             ( spooler_com::Iprocess_classes** )     = 0;
     virtual HRESULT     get_Supervisor_client           ( spooler_com::Isupervisor_client** )   = 0;
     virtual HRESULT     get_Configuration_directory     ( BSTR* )                               = 0;
+    virtual HRESULT     get_Schedule                    ( BSTR, Ischedule** )                  = 0;
 };
 
 //-------------------------------------------------------------------------------Ispooler_proxy 
@@ -578,7 +579,10 @@ struct Ijob_chain : IDispatch
 
     virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
 
-    virtual HRESULT         Remove                  ()                                              = 0;
+    virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
+
+    virtual HRESULT     put_Title                   ( BSTR )                                        = 0;
+    virtual HRESULT     get_Title                   ( BSTR* )                                       = 0;
 };
 
 //----------------------------------------------------------------------------------Order_queue

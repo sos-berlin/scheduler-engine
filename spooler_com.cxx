@@ -3467,6 +3467,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 38, "Process_classes"           , (Com_method_ptr)&Com_spooler::get_Process_classes  , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 39, "Supervisor_client"         , (Com_method_ptr)&Com_spooler::get_Supervisor_client, VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 40, "Configuration_directory"   , (Com_method_ptr)&Com_spooler::get_Configuration_directory, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 41, "Schedule"                  , (Com_method_ptr)&Com_spooler::get_Schedule         , VT_DISPATCH  , { V_BSTR } },
     {}
 };
 
@@ -4153,6 +4154,26 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
     return hr;
 }
 
+//------------------------------------------------------------------------Com_spooler::get_Schedule
+
+STDMETHODIMP Com_spooler::get_Schedule( BSTR path_bstr, Ischedule** result )
+{
+    Z_LOGI( __FUNCTION__ << '\n' );
+
+    if( !_spooler )  return E_POINTER;
+
+    HRESULT hr = S_OK;
+
+    try
+    {
+        *result = _spooler->schedule_subsystem()->schedule_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
 
 //----------------------------------------------------------------------Com_spooler_proxy::_methods
 
@@ -4327,6 +4348,8 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 12, "Add_or_replace_order"      , (Com_method_ptr)&Com_job_chain::Add_or_replace_order, VT_EMPTY     , { VT_DISPATCH } },
     { DISPATCH_METHOD     , 13, "Remove"                    , (Com_method_ptr)&Com_job_chain::Remove             , VT_EMPTY      },
+    { DISPATCH_PROPERTYPUT, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 14, "Title"                     , (Com_method_ptr)&Com_job_chain::get_Title          , VT_BSTR },
     {}
 };
 
@@ -4708,6 +4731,42 @@ STDMETHODIMP Com_job_chain::Remove()
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_job_chain::put_Title
+
+STDMETHODIMP Com_job_chain::put_Title( BSTR title_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->set_title( string_from_bstr( title_bstr ) );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_job_chain::get_Title
+
+STDMETHODIMP Com_job_chain::get_Title( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        hr = String_to_bstr( _job_chain->title(), result );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5394,7 +5453,7 @@ STDMETHODIMP Com_order::get_Run_time( Irun_time** result )
     {
         if( !_order )  return E_POINTER;
 
-        *result = +_order->schedule_use();  int AENDERN;  // Siehe Lieberts eMail vom 21. April 2008: nicht benanntes <schedule> liefern!
+        *result = +_order->schedule_use();  // Siehe Lieberts eMail vom 21. April 2008: nicht benanntes <schedule> liefern!
         if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

@@ -652,6 +652,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Process_classes             ( spooler_com::Iprocess_classes** );
     STDMETHODIMP            get_Supervisor_client           ( spooler_com::Isupervisor_client** );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
+    STDMETHODIMP            get_Schedule                    ( BSTR, spooler_com::Ischedule** );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
@@ -759,6 +760,9 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP                Remove_all_pending_orders( int* result );
 
     STDMETHODIMP                Remove                  ();
+
+    STDMETHODIMP            put_Title                   ( BSTR );
+    STDMETHODIMP            get_Title                   ( BSTR* );
 
   private:
     Thread_semaphore           _lock;

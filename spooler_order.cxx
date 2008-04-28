@@ -1621,6 +1621,7 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     if( !element.nodeName_is( "job_chain" ) )  z::throw_xc( "SCHEDULER-409", "job_chain", element.nodeName() );
 
     set_name( element.getAttribute( "name", name() ) );
+    _title = element.getAttribute( "title", _title );
 
     if( element.hasAttribute( "visible" ) )
         _visible = element.getAttribute( "visible" ) == "never"? visible_never :
@@ -1762,10 +1763,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     xml::Element_ptr result = document.createElement( "job_chain" );
 
     fill_file_based_dom_element( result, show_what );
-    //if( has_base_file() )  result.appendChild_if( File_based::dom_element( document, show_what ) );
-    //if( replacement()   )  result.append_new_element( "replacement" ).appendChild( replacement()->dom_element( document, show_what ) );
-
-    //result.setAttribute( "name"  , name() );
+    result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
     result.setAttribute( "state" , state_name( state() ) );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
@@ -4494,7 +4492,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
             if( _schedule_use->is_defined() )
             {
-                xml::Document_ptr doc = _schedule_use->schedule()->dom_document();
+                xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
                 if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
             }
 
@@ -4645,7 +4643,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
                     // Vorschlag: xxx_modified auflösen zugunsten eines gecachten letzten Datenbanksatzes, mit dem verglichen wird.
                     if( _schedule_use->is_defined() ) 
                     {
-                        xml::Document_ptr doc = _schedule_use->schedule()->dom_document();
+                        xml::Document_ptr doc = _schedule_use->dom_document( show_for_database_only );
                         if( doc.documentElement().hasAttributes()  ||  doc.documentElement().hasChildNodes() )  db_update_clob( &ta, "run_time", doc.xml() );
                                                                                                           else  update[ "run_time" ].set_direct( "null" );
                     }
@@ -5153,7 +5151,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     }
 
-    if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( dom_document, Show_what() ) );  // Vor _period setzen!
+    if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( dom_document, show_what ) );  // Vor _period setzen!
 
     if( show_what.is_set( show_for_database_only ) )
     {

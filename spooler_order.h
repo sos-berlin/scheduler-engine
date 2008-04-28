@@ -711,6 +711,9 @@ struct Job_chain : Com_job_chain,
     State                       state                       () const                                { return _state; }
     static string               state_name                  ( State );
 
+    void                    set_title                       ( const string& title )                 { _title = title; }
+    string                      title                       () const                                { return _title; }
+
     void                    set_visible                     ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
     void                    set_visible                     ( Visibility v )                        { _visible = v; }
     bool                     is_visible                     () const                                { return _visible == visible_yes; }
@@ -794,6 +797,7 @@ struct Job_chain : Com_job_chain,
 
     Fill_zero                  _zero_;
     State                      _state;
+    string                     _title;
     Order_id_space*            _order_id_space;
     Visibility                 _visible;
     bool                       _orders_are_recoverable;
