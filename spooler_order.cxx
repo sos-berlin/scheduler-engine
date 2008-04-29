@@ -4931,10 +4931,7 @@ void Order::close()
     //if( close_flag == cls_remove_from_job_chain )  remove_from_job_chain();
     //else
     if( _job_chain )  _job_chain->remove_order( this );
-
-    _schedule_use->close();
-    _schedule_use = NULL;
-
+    if( _schedule_use )  _schedule_use->close();
     if( _standing_order )  _standing_order->check_for_replacing_or_removing();
 
     _log->close();

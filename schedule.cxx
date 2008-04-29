@@ -1158,7 +1158,11 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document, const Show_what& ) 
 {
     xml::Element_ptr result = document.clone( _dom.documentElement() );
-    result.setAttribute_optional( "substitute", _covered_schedule_path );
+
+    result.setAttribute_optional( "substitute", _covered_schedule_path );   // Absoluten Pfad setzen
+    //steht schon drin: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
+    //steht schon drin: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
+
     return result;
 }
 

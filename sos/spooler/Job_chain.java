@@ -173,4 +173,7 @@ public class Job_chain extends Idispatch
     
     public void         set_orders_recoverable  ( boolean b )                       {                           com_call( ">orders_recoverable", b ); }
     public boolean          orders_recoverable  ()                                  { return            boolean_com_call( "<orders_recoverable" ); }
+    
+    public void         set_title               ( String title )                    {                           com_call( ">title", title ); }
+    public String           title               ()                                  { return (String)           com_call( "<title" ); }
 }

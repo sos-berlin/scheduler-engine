@@ -101,7 +101,7 @@ STDMETHODIMP Lock_subsystem::get_Lock( BSTR path_bstr, spooler_com::Ilock** resu
     try
     {
         *result = lock( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
-        if( result )  (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -117,7 +117,7 @@ STDMETHODIMP Lock_subsystem::get_Lock_or_null( BSTR path_bstr, spooler_com::Iloc
     try
     {
         *result = lock_or_null( Absolute_path( root_path, string_from_bstr( path_bstr ) ) );
-        if( result )  (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 

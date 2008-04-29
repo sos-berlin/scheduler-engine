@@ -798,6 +798,10 @@
                             <b>
                                 <xsl:value-of select="@path"/>
                             </b>
+                            <xsl:if test="@title">
+                                <xsl:text> </xsl:text>
+                                "<xsl:value-of select="@title"/>"
+                            </xsl:if>
                             <br/>&#160;
                         </td>
                     </tr>
@@ -1055,20 +1059,27 @@
                 </td>
 
                 <td class="right_border">
-                    <xsl:if test="not( /spooler/@show_job_chain_jobs_checkbox)">
-                        <xsl:if test="job_chain_node.job_chain">
-                            <xsl:value-of select="count( job_chain_node.job_chain )"/> job chains
-                            &#160;
-                        </xsl:if>
-                        <xsl:if test="job_chain_node[@job]">
-                            <xsl:value-of select="count( job_chain_node[@job] )"/> jobs,
-                            <xsl:call-template name="bold_counter">
-                                <xsl:with-param name="counter" select="count( /spooler/answer/state/jobs/job/tasks/task [ order/@job_chain=$job_chain_path ] )" />
-                                <xsl:with-param name="suffix"  select="'tasks'" />
-                            </xsl:call-template>
-                            &#160;
-                        </xsl:if>
-                    </xsl:if>
+                    <xsl:choose>
+                        <xsl:when test="not( /spooler/@show_job_chain_jobs_checkbox)">
+                            <xsl:if test="job_chain_node.job_chain">
+                                <xsl:value-of select="count( job_chain_node.job_chain )"/> job chains
+                                &#160;
+                            </xsl:if>
+                            <xsl:if test="job_chain_node[@job]">
+                                <xsl:value-of select="count( job_chain_node[@job] )"/> jobs,
+                                <xsl:call-template name="bold_counter">
+                                    <xsl:with-param name="counter" select="count( /spooler/answer/state/jobs/job/tasks/task [ order/@job_chain=$job_chain_path ] )" />
+                                    <xsl:with-param name="suffix"  select="'tasks'" />
+                                </xsl:call-template>
+                                &#160;
+                            </xsl:if>
+                        </xsl:when>
+                        <xsl:when test="@title">
+                            <xsl:text>&#160; "</xsl:text>
+                            <xsl:value-of select="@title"/>
+                            <xsl:text>" </xsl:text>
+                        </xsl:when>
+                    </xsl:choose>
 
                     <xsl:choose>
                         <xsl:when test="not( @state )"/>
