@@ -21,6 +21,7 @@
     <file path="api/Process_class.xml"/>
     <file path="api/Process_classes.xml"/>
     <file path="api/Run_time.xml"/>
+    <file path="api/Schedule.xml"/>
     <file path="api/Spooler.xml"/>
     <file path="api/Spooler_program.xml"/>
     <file path="api/Subprocess.xml"/>
@@ -218,6 +219,8 @@
     <file path="xml/remove_order.xml"/>
     <file path="xml/run_time.xml"/>
     <file path="xml/script.xml"/>
+    <file path="xml/schedule.xml"/>
+    <file path="xml/schedules.xml"/>
     <file path="xml/scheduler_script.xml"/>
     <file path="xml/security.xml"/>
     <file path="xml/select_events.xml"/>

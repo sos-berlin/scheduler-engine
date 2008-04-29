@@ -5025,12 +5025,12 @@ void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& elem
             set_schedule( source_file_based, e );
         }
         else
-        if( e.nodeName_is( "period" ) )
-        { 
-            _period = Period();
-            _period.set_dom( e, Period::with_date );
-        }
-        else
+        //if( e.nodeName_is( "period" ) )
+        //{ 
+        //    _period = Period();
+        //    _period.set_dom( e, Period::with_date );
+        //}
+        //else
         if( e.nodeName_is( "log" ) )
         {
             assert( !_log->is_active() );
@@ -5150,12 +5150,12 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( dom_document, show_what ) );  // Vor _period setzen!
 
-    if( show_what.is_set( show_for_database_only ) )
-    {
-        // Nach <run_time> setzen!
-        if( _period.repeat() < Time::never ||
-            _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <schedule>
-    }
+    //if( show_what.is_set( show_for_database_only ) )
+    //{
+    //    // Nach <run_time> setzen!
+    //    if( _period.repeat() < Time::never ||
+    //        _period.absolute_repeat() < Time::never )  result.appendChild( _period.dom_element( dom_document ) );     // Aktuelle Wiederholung merken, für <schedule>
+    //}
 
     if( show_what.is_set( show_log )  ||  show_what.is_set( show_for_database_only ) )
     {
@@ -6567,6 +6567,9 @@ Schedule_use* Order::schedule_use()
 
 void Order::handle_changed_schedule()
 {
+    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_period_or_single_start )
+                                         : Period();
+
     if( is_virgin() )
     {
         _setback = 0;           // Änderung von <run_time> überschreibt Order.at

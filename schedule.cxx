@@ -170,6 +170,7 @@ const Com_method Schedule_use::_methods[] =
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Schedule,  1, Java_class_name, VT_BSTR    , 0 ),
     COM_PROPERTY_PUT( Schedule,  2, Xml            ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Schedule,  3, Schedule       , VT_DISPATCH, 0 ),
 #endif
     {}
 };
@@ -291,7 +292,6 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
     }
     else
     {
-        int WIRKLICH_NEUES_RUN_TIME; //? 
         set_schedule( Z_NEW( Schedule( _spooler->schedule_subsystem(), _scheduler_holidays_usage ) ) );     // Unbenanntes (privates) <schedule>
         _schedule->set_dom( source_file_based, element );
     }
@@ -483,6 +483,14 @@ string Schedule_use::obj_name() const
 STDMETHODIMP Schedule_use::put_Xml( BSTR xml )
 {
     Z_COM_IMPLEMENT( set_xml( (File_based*)NULL, string_from_bstr( xml ) ) );
+}
+
+//-----------------------------------------------------------------------Schedule_use::get_Schedule
+
+STDMETHODIMP Schedule_use::get_Schedule( spooler_com::Ischedule** result )
+{
+    *result = _schedule.copy();
+    return S_OK;
 }
 
 //-------------------------------------------------------------------------------Schedule::_methods
@@ -947,6 +955,9 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
     if( show_what.is_set( show_for_database_only ) )
     {
         result = _inlay->dom_element( dom_document, show_what ); 
+        result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
+        //steht schon drin: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
+        //steht schon drin: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
     }
     else
     {
@@ -966,9 +977,7 @@ void Schedule::set_xml( File_based* source_file_based, const string& xml_string 
     xml::Document_ptr doc ( xml_string );
     if( _spooler->_validate_xml )  _spooler->_schema.validate( doc );
 
-    ptr<Inlay> new_inlay = Z_NEW( Inlay( this ) );    // Alles ersetzen! Also erneuern wir das Inlay
-    new_inlay->set_dom( source_file_based, doc.documentElement() );
-    set_inlay( new_inlay );
+    set_dom( source_file_based, doc.documentElement() );
 }
 
 //--------------------------------------------------------------------------------Schedule::set_dom
@@ -977,9 +986,11 @@ void Schedule::set_dom( File_based* source_file_based, const xml::Element_ptr& e
 {
     if( !element )  return;
     assert( element.nodeName_is( "run_time" )  ||  element.nodeName_is( "schedule" ) );
-    assert_is_not_initialized();
+    //assert_is_not_initialized();
 
-    _inlay->set_dom( source_file_based, element );
+    ptr<Inlay> new_inlay = Z_NEW( Inlay( this ) );    // Alles ersetzen! Also erneuern wir das Inlay
+    new_inlay->set_dom( source_file_based, element );
+    set_inlay( new_inlay );
 }
 
 //--------------------------------------------------------------------------------Schedule::put_Xml
@@ -1000,7 +1011,7 @@ STDMETHODIMP Schedule::get_Xml( BSTR* result )
         xml::Document_ptr dom_document;
         dom_document.create();
 
-        hr = String_to_bstr( dom_element( dom_document, Show_what() ).xml(), result );
+        hr = String_to_bstr( _inlay->dom_element( dom_document, Show_what() ).xml(), result );
     }
     catch( const exception& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 
@@ -1040,7 +1051,7 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 {
     if( !element )  return;
     assert( element.nodeName_is( "run_time" )  ||  element.nodeName_is( "schedule" ) );
-    _schedule->assert_is_not_initialized();
+    //_schedule->assert_is_not_initialized();
 
 
     Sos_optional_date_time  dt;
@@ -1158,10 +1169,6 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
 xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document, const Show_what& ) 
 {
     xml::Element_ptr result = document.clone( _dom.documentElement() );
-
-    result.setAttribute_optional( "substitute", _covered_schedule_path );   // Absoluten Pfad setzen
-    //steht schon drin: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
-    //steht schon drin: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
 
     return result;
 }

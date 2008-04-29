@@ -1998,8 +1998,10 @@ void Job::reset_scheduling()
 {
     if( file_based_state() >= s_active )
     {
-        //_period     = Period();
-        set_next_start_time( Time::now() );
+        Time now = Time::now();
+
+        _period = _schedule_use->next_period( now );  
+        set_next_start_time( now );
     }
 }
 

@@ -28,6 +28,7 @@ library Spooler
     interface Iorder;
     interface Iprocess_class;
     interface Iprocess_classes;
+    interface Ischedule;
     interface Isubprocess;
     interface Isupervisor_client;
     interface Iweb_service;
@@ -255,6 +256,9 @@ library Spooler
 
         [id(2),propput]
         HRESULT                 Xml                         ( [in] BSTR );
+
+        [id(3),propget]
+        HRESULT                 Schedule                    ( [out,retval] Ischedule** );
     }
 
     //------------------------------------------------------------------------------------Ischedule

@@ -308,6 +308,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
     // Irun_time
     STDMETHODIMP            put_Xml                         ( BSTR xml );
+    STDMETHODIMP            get_Schedule                    ( spooler_com::Ischedule** );
 
     // IDispatch
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
