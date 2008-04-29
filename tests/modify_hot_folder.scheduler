@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <commands>
+            <modify_hot_folder>
+                <process_class name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder>
+                <lock name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder>
+                <schedule name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder>
+                <job name="a">
+                </job>
+            </modify_hot_folder>
+            <modify_hot_folder>
+                <job_chain name="a">
+                    <job_chain_node state="a" job="a"/>
+                </job_chain>
+            </modify_hot_folder>
+            <modify_hot_folder folder="neu/sub">
+                <process_class name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder folder="neu/sub">
+                <lock name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder folder="neu/sub">
+                <schedule name="a"/>
+            </modify_hot_folder>
+            <modify_hot_folder folder="neu/sub">
+                <job name="a">
+                </job>
+            </modify_hot_folder>
+            <modify_hot_folder folder="neu/sub">
+                <job_chain name="a">
+                    <job_chain_node state="a" job="a"/>
+                </job_chain>
+            </modify_hot_folder>
+        </commands>
+    </config>
+</spooler>

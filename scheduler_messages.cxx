@@ -311,7 +311,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-463", "$1: substituted '$2' is a substitute" },
     { "SCHEDULER-464", "$1: valid_from=\"$2\"> is not before valid_to=\"$3\"" },
     { "SCHEDULER-465", "'$1' overlaps $2" },
-    { "SCHEDULER-466", "'$1' substitutes another schedule cannot be used directly" },
+    { "SCHEDULER-466", "'$1' is a substitute for another schedule and cannot be used directly" },
     { "SCHEDULER-467", "Attribute '$1' is only valid with attribute '$2'" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
@@ -489,6 +489,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-704", "Order has reached its end_state='$1'" },
     { "SCHEDULER-705", "Substitute '$1' is valid now" },
     { "SCHEDULER-706", "Standard '$1' is valid now" },
+    { "SCHEDULER-707", "Creating configuration directory '$1'" },
     {}
 };
 } //namespace sos

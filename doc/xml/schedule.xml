@@ -42,6 +42,12 @@
                     Ein überdeckender Zeitplan kann nicht direkt mit <scheduler_element name="run_time" attribute="schedule"/> abgerufen werden.
                 </p>
             </description>
+
+            <messages>
+                <message level="info"  code="SCHEDULER-705"/>
+                <message level="info"  code="SCHEDULER-706"/>
+                <message level="error" code="SCHEDULER-463"/>
+            </messages>
         </xml_attribute>
 
         <xml_attribute name="valid_from" type="yyyy-mm-dd HH:MM[:ss]">
@@ -51,6 +57,11 @@
                     dann wird der angegebene Schedule ab sofort überdeckt.
                 </p>
             </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-465"/>
+                <message level="error" code="SCHEDULER-466"/>
+            </messages>
         </xml_attribute>
 
         <xml_attribute name="valid_to" type="yyyy-mm-dd HH:MM[:ss]">
@@ -60,6 +71,12 @@
                     dann endet die Überdeckung nicht.
                 </p>
             </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-464"/>
+                <message level="error" code="SCHEDULER-465"/>
+                <message level="error" code="SCHEDULER-466"/>
+            </messages>
         </xml_attribute>
 
     </xml_attributes>
@@ -70,6 +87,10 @@
         <p>
             Außer den hier beschriebenen Attributen und Elementen können die von <schedule_element name="run_time"/> angegeben werden,
             aber nicht <code>schedule=</code>.
+        </p>
+        <p>
+            Bei verteilten Aufträgen wirkt die Änderung eines <code>&lt;schedule></code> erst, 
+            wenn der Auftrag das nächste Mal die Jobkette durchlaufen hat.
         </p>
     </description>
 

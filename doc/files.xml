@@ -203,6 +203,7 @@
     <file path="xml/lock.use.xml"/>
     <file path="xml/locks.xml"/>
     <file path="xml/modify_job.xml"/>
+    <file path="xml/modify_hot_folder.xml"/>
     <file path="xml/modify_order.xml"/>
     <file path="xml/modify_spooler.xml"/>
     <file path="xml/monitor.xml"/>

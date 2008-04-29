@@ -628,6 +628,10 @@ struct Spooler : Object,
     string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
+
+    typedef set<File_based_subsystem*>  File_based_subsystems;
+    File_based_subsystems              _file_based_subsystems;
+
     ptr<Scheduler_script_subsystem_interface> _scheduler_script_subsystem;
     ptr<Folder_subsystem>            _folder_subsystem;
     ptr<Process_class_subsystem>     _process_class_subsystem;

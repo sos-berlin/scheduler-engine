@@ -223,7 +223,7 @@ bool Folder_subsystem::handle_folders( double minimum_age )
 
                 cache_dir->read_deep( 0.0 );     // Ohne Alterung, weil Verzeichnis nicht überwacht wird (!is_watched() weil kein activate())
                 if( _configurations[ confdir_local ]._directory_observer )  directory = merged_cache_and_local_directories();
-                                          else  directory = cache_dir;
+                                                                      else  directory = cache_dir;
             }
 
             if( directory )
@@ -254,6 +254,55 @@ Configuration* Folder_subsystem::configuration( Configuration_origin which )
     Configuration* result = &_configurations[ which ];
     if( !result )  z::throw_xc( Z_FUNCTION, (int)which );
     return result;
+}
+
+//---------------------------------------------------Folder_subsystem::write_configuration_file_xml
+
+void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder_path, const xml::Element_ptr& element )
+{
+    if( !element )  z::throw_xc( Z_FUNCTION, "no element" );
+
+    File_path configuration_directory = _spooler->_configuration_directories[ confdir_local ];
+    File_path directory ( configuration_directory, folder_path.without_slash() );
+    
+    vector<string> directories = vector_split( "/", folder_path.without_slash() );
+    File_path      d           = _spooler->_configuration_directories[ confdir_local ];
+
+    for( int i = 0; i < directories.size(); i++ )  
+    {
+        if( directories[i] != "" )
+        {
+            d = File_path( d, directories[ i ] );
+
+            if( !d.exists() )
+            {
+                log()->info( message_string( "SCHEDULER-707", d ) );
+
+                int err = call_mkdir( d.c_str(), 0777 );
+                if( err  &&  errno != EEXIST )  z::throw_errno( errno, "mkdir", d.c_str() );
+            }
+        }
+    }
+
+    string element_name = element.nodeName();
+    string name         = element_name == "order"? element.getAttribute_mandatory( "job_chain" ) + job_chain_order_separator + element.getAttribute_mandatory( "id" )
+                                                 : element.getAttribute_mandatory( "name" );
+
+
+    Z_FOR_EACH( Spooler::File_based_subsystems, _spooler->_file_based_subsystems, s )
+    {
+        if( (*s)->xml_element_name() == element_name )
+        {
+            File file ( File_path( directory, name + (*s)->filename_extension() ), "w" );
+            string xml_string = element.xml();
+            if( !string_ends_with( xml_string, "\n" ) )  xml_string += '\n';
+            file.print( xml_string );
+            file.close();
+            break;
+        }
+    }
+
+    handle_folders();
 }
 
 //-----------------------------------------------------------------------------------Folder::Folder
@@ -2000,6 +2049,14 @@ File_based_subsystem::File_based_subsystem( Spooler* spooler, IUnknown* iunknown
     Subsystem( spooler, iunknown, type_code ),
     _dependencies( this )
 {
+    spooler->_file_based_subsystems.insert( this );
+}
+
+//------------------------------------------------------File_based_subsystem::~File_based_subsystem
+    
+File_based_subsystem::~File_based_subsystem()
+{
+    _spooler->_file_based_subsystems.erase( this );
 }
 
 //------------------------------------------------------------File_based_subsystem::normalized_path

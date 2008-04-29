@@ -167,6 +167,7 @@
             <xsd:element name="lock"                        type="lock"/>
             <xsd:element name="lock.remove"                 type="lock.remove"/>
             <xsd:element ref="modify_job"/>
+            <xsd:element ref="modify_hot_folder"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
             <xsd:element ref="job_chain.modify"/>
@@ -604,7 +605,9 @@
     </xsd:element>
 
 
-
+    <xsd:element name="modify_hot_folder" type="modify_hot_folder"/>
+    
+    
     <xsd:element name="job_chain.modify">
         <xsd:complexType>
             <xsd:attribute name="job_chain" type="Path"         use="required"/>

@@ -2841,7 +2841,7 @@
 
         <message code="SCHEDULER-466">
             <text xml:lang="en">
-                <title>'<p1>schedule</p1>' substitutes another schedule cannot be used directly</title>
+                <title>'<p1>schedule</p1>' is a substitute for another schedule and cannot be used directly</title>
             </text>
         </message>
         
@@ -4213,6 +4213,12 @@
         <message code="SCHEDULER-706">
             <text xml:lang="en">
                 <title>Standard '<p1>schedule</p1>' is valid now</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-707">
+            <text xml:lang="en">
+                <title>Creating configuration directory '<p1/>'</title>
             </text>
         </message>
 

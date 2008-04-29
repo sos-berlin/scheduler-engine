@@ -1513,6 +1513,11 @@
     <register_keyword_display><code>min_tasks=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_min_tasks' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='min_tasks' type='definition'/>
 </register_keyword>
+<register_keyword keyword='modify_hot_folder'>
+    <register_keyword_display><code>&lt;modify_hot_folder&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__modify_hot_folder' register_title='Änderungsprotokoll'  register_keyword='modify_hot_folder'/>
+    <register_entry register_file='xml.xml#use_element__modify_hot_folder' register_title='Alle XML-Elemente'  register_keyword='modify_hot_folder'/>
+</register_keyword>
 <register_keyword keyword='modify_job'>
     <register_keyword_display><code>&lt;modify_job&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__modify_job' register_title='Änderungsprotokoll'  register_keyword='modify_job'/>

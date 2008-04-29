@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 5752 2008-04-28 12:37:00Z jz $ -->
+<!-- $Id: scheduler.xsd 5757 2008-04-29 07:46:03Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 5752 2008-04-28 12:37:00Z jz $
+            $Id: scheduler.xsd 5757 2008-04-29 07:46:03Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -167,6 +167,7 @@
             <xsd:element name="lock"                        type="lock"/>
             <xsd:element name="lock.remove"                 type="lock.remove"/>
             <xsd:element ref="modify_job"/>
+            <xsd:element ref="modify_hot_folder"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
             <xsd:element ref="job_chain.modify"/>
@@ -604,7 +605,9 @@
     </xsd:element>
 
 
-
+    <xsd:element name="modify_hot_folder" type="modify_hot_folder"/>
+    
+    
     <xsd:element name="job_chain.modify">
         <xsd:complexType>
             <xsd:attribute name="job_chain" type="Path"         use="required"/>
@@ -630,8 +633,11 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
     <xsd:element name="lock" type="lock"/>
+
+
+    <xsd:element name="lock.remove" type="lock.remove"/>
 
 
     <xsd:element name="modify_order">
@@ -1284,6 +1290,20 @@
         <xsd:attribute name="lock"                      type="Path"                     use="required"/>
     </xsd:complexType>
 
+
+
+    <xsd:complexType name="modify_hot_folder">
+        <xsd:choice>
+            <xsd:element ref="job"/>
+            <xsd:element ref="job_chain"/>
+            <xsd:element ref="lock"/>
+            <xsd:element ref="order"/>
+            <xsd:element ref="process_class"/>
+            <xsd:element ref="schedule"/>
+        </xsd:choice>
+
+        <xsd:attribute name="folder" type="Path"/>
+    </xsd:complexType>
 
 
     <xsd:complexType name="monthdays">

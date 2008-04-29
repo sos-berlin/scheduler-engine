@@ -176,6 +176,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"lock\"                        type=\"lock\"/>\n"
     "<xsd:element name=\"lock.remove\"                 type=\"lock.remove\"/>\n"
     "<xsd:element ref=\"modify_job\"/>\n"
+    "<xsd:element ref=\"modify_hot_folder\"/>\n"
     "<xsd:element ref=\"modify_order\"/>\n"
     "<xsd:element ref=\"modify_spooler\"/>\n"
     "<xsd:element ref=\"job_chain.modify\"/>\n"
@@ -613,6 +614,8 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"modify_hot_folder\" type=\"modify_hot_folder\"/>\n"
+    "\n"
     "\n"
     "<xsd:element name=\"job_chain.modify\">\n"
     "<xsd:complexType>\n"
@@ -641,6 +644,9 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<xsd:element name=\"lock\" type=\"lock\"/>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"lock.remove\" type=\"lock.remove\"/>\n"
     "\n"
     "\n"
     "<xsd:element name=\"modify_order\">\n"
@@ -1295,6 +1301,20 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "\n"
+    "<xsd:complexType name=\"modify_hot_folder\">\n"
+    "<xsd:choice>\n"
+    "<xsd:element ref=\"job\"/>\n"
+    "<xsd:element ref=\"job_chain\"/>\n"
+    "<xsd:element ref=\"lock\"/>\n"
+    "<xsd:element ref=\"order\"/>\n"
+    "<xsd:element ref=\"process_class\"/>\n"
+    "<xsd:element ref=\"schedule\"/>\n"
+    "</xsd:choice>\n"
+    "\n"
+    "<xsd:attribute name=\"folder\" type=\"Path\"/>\n"
+    "</xsd:complexType>\n"
+    "\n"
+    "\n"
     "<xsd:complexType name=\"monthdays\">\n"
     "<xsd:sequence maxOccurs=\"unbounded\">\n"
     "<xsd:choice>\n"
@@ -1903,7 +1923,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209386223 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209459275 },
     { NULL, NULL, 0 }
 };
 

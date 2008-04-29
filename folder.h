@@ -467,7 +467,7 @@ struct Subfolder_folder : typed_folder< Folder >
 struct File_based_subsystem : Subsystem
 {
                                 File_based_subsystem        ( Spooler*, IUnknown*, Type_code );
-    virtual                    ~File_based_subsystem        ()                                      {}
+    virtual                    ~File_based_subsystem        ();
 
     Dependencies*               dependencies                ()                                      { return &_dependencies; }
 
@@ -762,6 +762,8 @@ struct Folder_subsystem : Object,
 
     bool                        handle_folders              ( double minimum_age = 0 );
     xml::Element_ptr            execute_xml                 ( const xml::Element_ptr& );
+
+    void                        write_configuration_file_xml( const Absolute_path& folder_path, const xml::Element_ptr& content );
 
 
   private:

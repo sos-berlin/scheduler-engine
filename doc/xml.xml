@@ -106,6 +106,7 @@
                 <scheduler_element name="lock"/><br/>
                 <scheduler_element name="lock.remove"/><br/>
                 <scheduler_element name="modify_job"/><br/>
+                <scheduler_element name="modify_hot_folder"/><br/>
                 <scheduler_element name="modify_order"/><br/>
                 <scheduler_element name="modify_spooler"/><br/>
                 <scheduler_element name="process_class"/><br/>

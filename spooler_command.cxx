@@ -448,6 +448,20 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
     return job_chain->read_order_history( _answer, id, next, show );
 }
 */
+//-----------------------------------------------------Command_processor::execute_modify_hot_folder
+
+xml::Element_ptr Command_processor::execute_modify_hot_folder( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
+
+    Absolute_path folder_path = element.hasAttribute( "folder" )? Absolute_path( root_path, element.getAttribute( "folder" ) )
+                                                                : root_path;
+
+    _spooler->folder_subsystem()->write_configuration_file_xml( folder_path, element.first_child_element() );
+
+    return _answer.createElement( "ok" );
+}
+
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )

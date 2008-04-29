@@ -11,6 +11,16 @@
     <scheduler_keyword keyword="Change log"/>
 
     <change date="2008-04-29" version="2.0.203" subversion_revision="5753">
+        <revision jira="JS-271" type="new" title="XML-Dokument in einem Konfigurationsverzeichnis anlegen: &lt;modify_hot_folder>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_hot_folder"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision jira="JS-245" type="new" title="Neues XML-Element &lt;schedule>: Benannte &lt;run_time>">
             <description>
                 <ul>

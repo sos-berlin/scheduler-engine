@@ -7,7 +7,11 @@ namespace sos {
 namespace scheduler {
 namespace order {
 
-//---------------------------------------------------------------------------------------------Standing_order
+//--------------------------------------------------------------------------------------------const
+
+extern const char               job_chain_order_separator;
+
+//-----------------------------------------------------------------------------------Standing_order
 
 struct Standing_order : file_based< Standing_order, Standing_order_folder, Standing_order_subsystem >,
                         Object

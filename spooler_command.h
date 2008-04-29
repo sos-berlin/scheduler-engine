@@ -279,6 +279,7 @@ struct Command_processor
     xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_check_folders       ( const xml::Element_ptr& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_modify_hot_folder   ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );
     xml::Element_ptr            execute_terminate           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
