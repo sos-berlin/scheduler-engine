@@ -676,6 +676,10 @@
 <register_keyword keyword='finished'>
     <register_entry register_file='xml/answer/job_chain.xml' register_title='&lt;job_chain&gt; (Antwort)'  register_keyword='finished'/>
 </register_keyword>
+<register_keyword keyword='folder'>
+    <register_keyword_display><code>folder=</code></register_keyword_display>
+    <register_entry register_file='xml/modify_hot_folder.xml#attribute_folder' register_title='&lt;modify_hot_folder&gt; (Kommando)'  register_keyword='folder' type='definition'/>
+</register_keyword>
 <register_keyword keyword='force_idle_timeout'>
     <register_keyword_display><code>force_idle_timeout=</code></register_keyword_display>
     <register_entry register_file='xml/job.xml#attribute_force_idle_timeout' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='force_idle_timeout' type='definition'/>
@@ -1517,6 +1521,7 @@
     <register_keyword_display><code>&lt;modify_hot_folder&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__modify_hot_folder' register_title='Änderungsprotokoll'  register_keyword='modify_hot_folder'/>
     <register_entry register_file='xml.xml#use_element__modify_hot_folder' register_title='Alle XML-Elemente'  register_keyword='modify_hot_folder'/>
+    <register_entry register_file='xml/modify_hot_folder.xml#' register_title='&lt;modify_hot_folder&gt; (Kommando)'  register_keyword='modify_hot_folder' type='definition'/>
 </register_keyword>
 <register_keyword keyword='modify_job'>
     <register_keyword_display><code>&lt;modify_job&gt;</code></register_keyword_display>

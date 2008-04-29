@@ -291,7 +291,8 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
 
     Z_FOR_EACH( Spooler::File_based_subsystems, _spooler->_file_based_subsystems, s )
     {
-        if( (*s)->xml_element_name() == element_name )
+        if( (*s) != this  &&    // Folder_subsystem kennt xml_element_name() nicht
+            (*s)->xml_element_name() == element_name )
         {
             File file ( File_path( directory, name + (*s)->filename_extension() ), "w" );
             string xml_string = element.xml();
