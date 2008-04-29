@@ -336,6 +336,20 @@ sub xml_attribute
 </property>
 
 
+    <property name="title" title="Der Title der Jobkette">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <description>
+            <p>
+                Siehe <scheduler_element name="job_chain" attribute="title"/>.
+            </p>
+        </description>
+    </property>
+    
 <title>
     Jobkette zur Auftragsverarbeitung
 </title>

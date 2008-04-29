@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "schedule"
+             title    = "Zeitplan"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="schedules"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Der Name des Zeitplans.
+                </p>
+                <p>
+                    Ein so benannter Zeitplan kann mit <scheduler_element name="run_time" attribute="schedule"/> abgerufen werden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        
+        <xml_attribute name="substitute" type="schedule_path" title="Zeitweilig zu überdeckender Zeitplan">
+            <description>
+                <p>                                                      
+                    Der mit <code>substitute="<i>schedule_path</i>"</code> angegebene Zeitplan
+                    soll zeitweilig durch den hier definierten überdeckt werden.
+                </p>
+                <p>
+                    Die Zeitspanne wird mit den Attributen <code>valid_from=</code> und <code>valid_to=</code> angegeben.
+                </p>
+                <p>
+                    Ein überdeckender Zeitplan kann nicht direkt mit <scheduler_element name="run_time" attribute="schedule"/> abgerufen werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="valid_from" type="yyyy-mm-dd HH:MM[:ss]">
+            <description>
+                <p>
+                    Ist <code>substitute=</code> angegeben und fehlt <code>valid_from=</code>,
+                    dann wird der angegebene Schedule ab sofort überdeckt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="valid_to" type="yyyy-mm-dd HH:MM[:ss]">
+            <description>
+                <p>
+                    Ist <code>substitute=</code> angegeben und fehlt <code>valid_to=</code>,
+                    dann endet die Überdeckung nicht.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+
+    <description>
+        <p>
+            Außer den hier beschriebenen Attributen und Elementen können die von <schedule_element name="run_time"/> angegeben werden,
+            aber nicht <code>schedule=</code>.
+        </p>
+    </description>
+
+</xml_element>

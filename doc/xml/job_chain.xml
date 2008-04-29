@@ -92,6 +92,17 @@
         </xml_attribute>
 
 
+        <xml_attribute name="title" type="String">
+            <description>
+                <p>
+                    Der Jobkette kann ein Titel gegeben werden.
+                </p>
+                <p>
+                    Siehe auch <scheduler_method class="Job_chain" property="title"/>.
+                </p>
+            </description>
+        </xml_attribute>
+        
     </xml_attributes>
 
 

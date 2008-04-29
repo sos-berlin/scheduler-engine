@@ -19,6 +19,18 @@
 
 
     <xml_attributes>
+        <xml_attribute name="schedule" path="path" title="Abzurufender Zeitplan">
+            <description>
+                <p>
+                    Gibt den benannten <schedule_element name="schedule"/> an, der verwendet werden soll.
+                </p>
+                <p>
+                    Alle anderen Attribute und Kindelement werden nicht beachtet.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        
         <xml_attribute name="start_time_function" type="name">
             <description>
                 <p>

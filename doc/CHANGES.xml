@@ -10,6 +10,34 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-04-29" version="2.0.203" subversion_revision="5753">
+        <revision jira="JS-245" type="new" title="Neues XML-Element &lt;schedule>: Benannte &lt;run_time>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="schedule"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="schedules"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision jira="JS-274" type="new" title="Job_chain.title">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job_chain" attribute="title"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job_chain" property="title"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-04-21" version="2.0.202" subversion_revision="5728">
         <revision type="correction" title="Problem beim gleichzeitigen Start zweier Cluster-Scheduler behoben">
             <description>
