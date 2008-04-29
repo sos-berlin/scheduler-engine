@@ -1320,6 +1320,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "show_history"     ) )  result = execute_show_history( element, show );
     else
+    if( element.nodeName_is( "modify_hot_folder" ) )  result = execute_modify_hot_folder( element );
+    else
     if( element.nodeName_is( "modify_spooler"   ) )  result = execute_modify_spooler( element );
     else
     if( element.nodeName_is( "terminate"        ) )  result = execute_terminate( element );

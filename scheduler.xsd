@@ -1290,23 +1290,16 @@
 
 
     <xsd:complexType name="modify_hot_folder">
-        <xsd:sequence maxOccurs="unbounded">
-            <xsd:choice>
-                <xsd:element ref="job"/>
-                <xsd:element ref="job_chain"/>
-                <xsd:element ref="lock"/>
-                <xsd:element ref="order"/>
-                <xsd:element ref="process_class"/>
-                <xsd:element ref="schedule"/>
+        <xsd:choice>
+            <xsd:element ref="job"/>
+            <xsd:element ref="job_chain"/>
+            <xsd:element ref="lock"/>
+            <xsd:element ref="order"/>
+            <xsd:element ref="process_class"/>
+            <xsd:element ref="schedule"/>
+        </xsd:choice>
 
-                <xsd:element ref="modify_job"/>
-                <xsd:element ref="modify_order"/>
-                <xsd:element ref="lock.remove"/>
-                <xsd:element ref="process_class.remove"/>
-                <xsd:element ref="remove_job_chain"/>
-                <xsd:element ref="remove_order"/>
-            </xsd:choice>
-        </xsd:sequence>
+        <xsd:attribute name="folder" type="Path"/>
     </xsd:complexType>
 
 
