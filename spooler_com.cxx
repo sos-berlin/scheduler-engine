@@ -3467,7 +3467,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 38, "Process_classes"           , (Com_method_ptr)&Com_spooler::get_Process_classes  , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 39, "Supervisor_client"         , (Com_method_ptr)&Com_spooler::get_Supervisor_client, VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 40, "Configuration_directory"   , (Com_method_ptr)&Com_spooler::get_Configuration_directory, VT_BSTR },
-    { DISPATCH_PROPERTYGET, 41, "Schedule"                  , (Com_method_ptr)&Com_spooler::get_Schedule         , VT_DISPATCH  , { V_BSTR } },
+    { DISPATCH_PROPERTYGET, 41, "Schedule"                  , (Com_method_ptr)&Com_spooler::get_Schedule         , VT_DISPATCH  , { VT_BSTR } },
     {}
 };
 

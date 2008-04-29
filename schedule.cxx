@@ -163,14 +163,14 @@ Schedule_folder::~Schedule_folder()
 {
 }
 
-//-------------------------------------------------------------------------------Schedule::_methods
+//---------------------------------------------------------------------------Schedule_use::_methods
 
 const Com_method Schedule_use::_methods[] =
 {
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Schedule,  1, Java_class_name, VT_BSTR    , 0 ),
-    COM_PROPERTY_PUT( Schedule,  2, Xml            ,              0, VT_BSTR ),
-    COM_PROPERTY_GET( Schedule,  3, Schedule       , VT_DISPATCH, 0 ),
+    COM_PROPERTY_GET( Schedule_use,  1, Java_class_name, VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Schedule_use,  2, Xml            ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Schedule_use,  3, Schedule       , VT_DISPATCH, 0 ),
 #endif
     {}
 };

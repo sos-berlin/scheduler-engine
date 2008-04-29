@@ -35,6 +35,7 @@ struct Iorder_queue;
 struct Iorder;
 struct Iprocess_class;
 struct Iprocess_classes;
+struct Ischedule;
 struct Isubprocess;
 struct Isupervisor_client;
 struct Iweb_service;
@@ -580,7 +581,7 @@ struct Ijob_chain : IDispatch
 
     virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
 
-    virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
+    virtual HRESULT         Remove                  ()                                              = 0;
 
     virtual HRESULT     put_Title                   ( BSTR )                                        = 0;
     virtual HRESULT     get_Title                   ( BSTR* )                                       = 0;
