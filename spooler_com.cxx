@@ -90,7 +90,7 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
     if( !iorder )  
     {
         //iorder = new Order( spooler, order_or_payload );
-        ptr<Order> order = new Order( spooler );
+        ptr<Order> order = new Order( spooler->standing_order_subsystem() );
         order->set_payload( order_or_payload );
 
         iorder = +order;
@@ -3760,7 +3760,7 @@ STDMETHODIMP Com_spooler::Create_order( Iorder** result )
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = new Order( _spooler );
+        *result = _spooler->standing_order_subsystem()->new_order();
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }

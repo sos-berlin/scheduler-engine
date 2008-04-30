@@ -173,6 +173,7 @@ struct File_based : Scheduler_object,
 
 
     void                        fill_file_based_dom_element ( const xml::Element_ptr& element, const Show_what& );
+    virtual void                set_identification_attributes( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual bool                is_visible_in_xml_folder    ( const Show_what& ) const              { return true; }
 

@@ -910,7 +910,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
         if( _process_class_subsystem )  state_element.appendChild( _process_class_subsystem->file_baseds_dom_element( dom, show_what ) );
 
-        if( _schedule_subsystem )  state_element.appendChild( _schedule_subsystem->file_baseds_dom_element( dom, show_what ) );
+        if( show_what.is_set( show_schedules ) && _schedule_subsystem )  state_element.appendChild( _schedule_subsystem->file_baseds_dom_element( dom, show_what ) );
     
         state_element.appendChild( order_subsystem()->file_baseds_dom_element( dom, show_what ) );
     }

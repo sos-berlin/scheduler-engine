@@ -637,7 +637,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
                         known_orders_has_been_read = true;
                     }
 
-                    order = new Order( _spooler );
+                    order = _spooler->standing_order_subsystem()->new_order();
 
                     order->set_file_path( path );
                     order->set_state( _next_state );

@@ -177,7 +177,7 @@ const Com_method Schedule_use::_methods[] =
 
 //-----------------------------------------------------------------------Schedule_use::Schedule_use
 
-Schedule_use::Schedule_use( Scheduler_object* using_object )
+Schedule_use::Schedule_use( File_based* using_object )
 :
     Idispatch_implementation( &class_descriptor ),
     Scheduler_object( using_object->spooler(), static_cast<spooler_com::Irun_time*>( this ), type_schedule_use ),
@@ -961,9 +961,24 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
     }
     else
     {
-        result = dom_document.createElement( "schedule" ); //_inlay->dom_element( dom_document, show_what ); 
+        result = _inlay->dom_element( dom_document, show_what ); 
 
         if( path() != "" )  fill_file_based_dom_element( result, show_what );   // Nur bei benanntem <schedule>
+        if( Schedule* covering_schedule = active_schedule_at( Time::now() ) )  result.setAttribute( "active_schedule", covering_schedule->path() );
+
+        Time now = Time::now();
+        result.setAttribute( "active", !active_schedule_at( now ) || is_covering_at( now )? "yes":" no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+
+        if( !_use_set.empty() )
+        {
+            xml::Element_ptr schedule_users_element = result.append_new_element( "schedule.users" );
+            
+            Z_FOR_EACH( Use_set, _use_set, u )
+            {
+                xml::Element_ptr schedule_user_element = schedule_users_element.append_new_element( "schedule.user" );
+                (*u)->using_file_based()->set_identification_attributes( schedule_user_element );         // job="/.."  oder  job_chain="/.." order=".."
+            }
+        }
     }
 
 

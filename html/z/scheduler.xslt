@@ -3717,6 +3717,18 @@
 
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~requisite-->
+    
+    <xsl:template match="requisite">
+        
+        
+        <!--xsl:value-of select="@type"/>
+        <xsl:text> '</xsl:text>
+        <xsl:value-of select="@path"/>
+        <xsl:text>'</xsl:text-->
+
+    </xsl:template>
+    "
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~attributes_for_onclick-->
     <!--
     <xsl:template name="attributes_for_onclick">

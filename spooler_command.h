@@ -47,6 +47,7 @@ enum Show_what_enum
     show_operations         = 0x400000,
     show_folders            = 0x800000,
     show_no_subfolders      = 0x1000000,
+    show_schedules          = 0x2000000,
 
   //show_web_services       = 0x20000,
   //show_web_service_operations = 0x40000,

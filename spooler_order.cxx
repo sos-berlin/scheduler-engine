@@ -21,6 +21,7 @@ const int    check_database_orders_period               = 15;
 const int    check_database_orders_period_minimum       = 1;
 const int    database_orders_read_ahead_count           = 1;
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+const char   job_chain_order_separator                  = ',';                          // Dateiname "jobchainname,orderid.order.xml"
 
 //--------------------------------------------------------------------------------------------const
 
@@ -224,6 +225,104 @@ struct Order_schedule_use : Schedule_use
             Z_FOR_EACH( Job_chain::Node_list, job_chain->_node_list, it )                           \
                 if( Order_queue_node* order_queue_node = Order_queue_node::try_cast( *it ) )        \
                     if( Order_queue* ORDER_QUEUE = order_queue_node->order_queue() )
+
+//------------------------------------------------------------------------split_standing_order_name
+
+static void split_standing_order_name( const string& name, string* job_chain_name, string* order_id )
+{
+    size_t pos = name.find( job_chain_order_separator );
+    if( pos == string::npos )  pos = 0;
+
+    *job_chain_name = name.substr( 0, pos );
+
+    if( pos < name.length() )  pos++;
+    *order_id = name.substr( pos );
+}
+
+//-----------------------------------------------Standing_order_subsystem::Standing_order_subsystem
+    
+Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
+:
+    file_based_subsystem<Order>( scheduler, this, type_standing_order_subsystem )
+{
+}
+
+//------------------------------------------------------------------Standing_order_subsystem::close
+    
+void Standing_order_subsystem::close()
+{
+    set_subsystem_state( subsys_stopped );
+    file_based_subsystem<Order>::close();
+}
+
+//---------------------------------------------------Standing_order_subsystem::subsystem_initialize
+
+bool Standing_order_subsystem::subsystem_initialize()
+{
+    file_based_subsystem<Order>::subsystem_initialize();
+    set_subsystem_state( subsys_initialized );
+    return true;
+}
+
+//---------------------------------------------------------Standing_order_subsystem::subsystem_load
+
+bool Standing_order_subsystem::subsystem_load()
+{
+    file_based_subsystem<Order>::subsystem_load();
+    set_subsystem_state( subsys_loaded );
+    return true;
+}
+
+//-----------------------------------------------------Standing_order_subsystem::subsystem_activate
+
+bool Standing_order_subsystem::subsystem_activate()
+{
+    set_subsystem_state( subsys_active );
+    file_based_subsystem<Order>::subsystem_activate();
+    return true;
+}
+
+//---------------------------------------------------------Standing_order_subsystem::new_file_based
+
+ptr<Order> Standing_order_subsystem::new_file_based()
+{
+    return new Order( this );
+}
+
+//--------------------------------------------------------Standing_order_subsystem::normalized_name
+
+string Standing_order_subsystem::normalized_name( const string& name ) const
+{
+    string job_chain_name;
+    string order_id;
+
+    split_standing_order_name( name, &job_chain_name, &order_id );
+
+    return spooler()->order_subsystem()->normalized_name( job_chain_name ) + 
+           job_chain_order_separator +
+           order_id;
+}
+
+//------------------------------------------------Standing_order_subsystem::assert_xml_element_name
+
+void Standing_order_subsystem::assert_xml_element_name( const xml::Element_ptr& e ) const
+{ 
+    if( !e.nodeName_is( "add_order" ) )  File_based_subsystem::assert_xml_element_name( e );
+}
+
+//-----------------------------------------------------Standing_order_folder::Standing_order_folder
+
+Standing_order_folder::Standing_order_folder( Folder* folder )
+:
+    typed_folder<Order>( folder->spooler()->standing_order_subsystem(), folder, type_standing_order_folder )
+{
+}
+
+//----------------------------------------------------Standing_order_folder::~Standing_order_folder
+    
+Standing_order_folder::~Standing_order_folder()
+{
+}
 
 //-------------------------------------------------Database_order_detector::Database_order_detector
 
@@ -599,7 +698,7 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
             {
                 Absolute_path job_chain_path ( root_path, record.as_string( "job_chain" ) );
 
-                ptr<Order> order = new Order( _spooler );
+                ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
                 order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
 
@@ -655,7 +754,7 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
         if( !result_set.eof() )
         {
             Record record = result_set.get_record();
-            result = new Order( _spooler );
+            result = _spooler->standing_order_subsystem()->new_order();
             result->load_record( job_chain_path, record );
             result->set_distributed();
             if( !record.null( "occupying_cluster_member_id" ) )  z::throw_xc( "SCHEDULER-379", result->obj_name(), record.as_string( "occupying_cluster_member_id" ) );
@@ -1807,7 +1906,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
             {
                 Record record = sel.get_record();
 
-                ptr<Order> order = new Order( _spooler );
+                ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
                 order->set_id        ( record.as_string( "order_id"   ) );
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
@@ -2374,7 +2473,7 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 {
     string order_id = record.as_string( "id" );
 
-    ptr<Order> order = new Order( _spooler );
+    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
     order->load_record( path(), record );
     order->load_blobs( ta );
 
@@ -3326,7 +3425,7 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
                     Absolute_path job_chain_path              ( root_path, record.as_string( "job_chain" ) );
                     string        occupying_cluster_member_id = record.as_string( "occupying_cluster_member_id" );
 
-                    ptr<Order> order = new Order( _spooler );
+                    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
                     order->load_record( job_chain_path, record );
                     order->load_order_xml_blob( &ta );
@@ -3806,7 +3905,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
         try
         {
-            order = new Order( _spooler );
+            order = _spooler->standing_order_subsystem()->new_order();
 
             order->load_record( Absolute_path( root_path, record.as_string( "job_chain" ) ), record );
             order->set_distributed();
@@ -3885,10 +3984,10 @@ string Order_queue::db_where_expression( )
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler )
+Order::Order( Standing_order_subsystem* subsystem )
 :
     Com_order(this),
-    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ),
+    file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
     _zero_(this+1)
 {
     _com_log = new Com_log;
@@ -3914,7 +4013,7 @@ Order::~Order()
         assert( !_job_chain );
         assert( !_is_on_blacklist );
         assert( !_is_in_order_queue );
-        assert( !_standing_order );
+      //assert( !_standing_order );
       //assert( !_is_replacement );
       //assert( !_replaced_by );
       //assert( !_order_queue );
@@ -3978,7 +4077,7 @@ void Order::load_blobs( Read_transaction* ta )
 void Order::load_order_xml_blob( Read_transaction* ta )
 {
     string order_xml = db_read_clob( ta, "order_xml" );
-    if( order_xml != "" )  set_dom( (File_based*)NULL, xml::Document_ptr( order_xml ).documentElement() );
+    if( order_xml != "" )  set_dom( xml::Document_ptr( order_xml ).documentElement() );
 }
 
 //------------------------------------------------------------------------Order::load_run_time_blob
@@ -4898,6 +4997,15 @@ void Order::open_log()
         }
 
         _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_path.to_filename() + "." + name + ".log" );      // Jobprotokoll
+
+        //#if defined Z_DEBUG && defined Z_WINDOWS
+        //    if( log_category_is_set( "joacim" ) )
+        //    {
+        //        _log->filename().try_unlink( _log );
+        //        assert( ( "order log file", !_log->filename().exists() ) );
+        //    }
+        //#endif
+
         _log->set_remove_after_close( true );
         _log->open();
     }
@@ -4932,14 +5040,148 @@ void Order::close()
     //else
     if( _job_chain )  _job_chain->remove_order( this );
     if( _schedule_use )  _schedule_use->close();
-    if( _standing_order )  _standing_order->check_for_replacing_or_removing();
+    check_for_replacing_or_removing();
 
     _log->close();
+
+    remove_requisite( Requisite_path( order_subsystem(), _job_chain_path ) );
+}
+
+//----------------------------------------------------------------------------------Order::set_name
+// Wird von folder.cxx aufgerufen
+
+void Order::set_name( const string& name )
+{
+    assert( has_base_file() );
+
+    file_based< Order, Standing_order_folder, Standing_order_subsystem >::set_name( name );
+
+    split_standing_order_name( name, &_file_based_job_chain_name, &_file_based_id );
+
+    if( _file_based_job_chain_name == ""  ||  _file_based_id == "" )  z::throw_xc( "SCHEDULER-435", base_file_info()._filename );
+
+    set_id( _file_based_id );
+    _file_based_job_chain_path = Absolute_path( folder_path(), _file_based_job_chain_name );
+}
+
+//-----------------------------------------------------------------------------Order::on_initialize
+
+bool Order::on_initialize()
+{
+    bool result = true;
+
+    if( has_base_file() )
+    {
+        set_id( _file_based_id ); 
+
+        if( !job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
+
+        assert( _file_based_job_chain_path != "" );
+        add_requisite( Requisite_path( order_subsystem(), _file_based_job_chain_path ) );
+
+        if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( _file_based_job_chain_name ) )
+        {
+            result = job_chain->file_based_state() >= File_based::s_loaded;
+        }
+        else
+            result = false;
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------------------Order::on_load
+
+bool Order::on_load()
+{
+    return true;
+}
+
+//----------------------------------------------------------------------Order::on_activate
+
+bool Order::on_activate()
+{
+    bool result = false;
+
+    if( Job_chain* job_chain = folder()->job_chain_folder()->job_chain_or_null( _file_based_job_chain_name ) )
+    {
+        if( job_chain->is_distributed() )  z::throw_xc( "SCHEDULER-384", job_chain->obj_name(), base_file_info()._filename );
+
+        place_or_replace_in_job_chain( job_chain );
+
+        result = true;
+    }
+
+    return result;
+}
+
+//---------------------------------------------------------Order::order_is_removable_or_replaceable
+
+bool Order::order_is_removable_or_replaceable()
+{
+    bool result;
+
+    if( _task )
+    {
+        result = false;
+    }
+    else
+    {
+        result = job_chain_path() == ""  ||  
+                 is_virgin()             || 
+                 end_state_reached();
+
+        if( !result )
+        {
+            Job_chain* job_chain = order_subsystem()->job_chain_or_null( job_chain_path() );
+            result = !job_chain  ||  job_chain->is_to_be_removed();
+        }
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------------Order::can_be_removed_now
+
+bool Order::can_be_removed_now()
+{
+    return order_is_removable_or_replaceable();
+}
+
+//-----------------------------------------------------------------------------Order::on_remove_now
+
+void Order::on_remove_now()
+{
+    remove_from_job_chain();
+
+    //if( _order )
+    //{
+    //    ptr<Order> order = _order;
+    //    
+    //    _order->connect_with_standing_order( NULL );    // Verbindung zwischen Order und Standing_order lösen,
+    //    _order = NULL;                                  // dass remove_job_chain() nicht check_for_replacing_or_removing() rufe!
+    //                                        
+    //    order->remove_from_job_chain();
+    //}
+}
+
+//--------------------------------------------------------------------------Order::set_dom
+// Wird von folder.cxx aufgerufen
+
+void Order::set_dom( const xml::Element_ptr& element )
+{
+    assert_is_not_initialized();
+    subsystem()->assert_xml_element_name( element );
+
+    set_dom( element, (Variable_set_map*)NULL );
+
+    //if( !job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
+
 }
 
 //-----------------------------------------------------------------------------------Order::set_dom
 
-void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& element, Variable_set_map* variable_set_map )
+void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable_set_map )
 {
     if( !element )  return;
     if( !element.nodeName_is( "order" )  && 
@@ -4960,7 +5202,16 @@ void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& elem
     _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
 
     if( priority         != "" )  set_priority( as_int(priority) );
-    if( id               != "" )  set_id      ( id.c_str() );
+    if( id               != "" )  set_id( id.c_str() );
+
+    if( has_base_file() )   // Sicherstellen, das job_chain= und id=, falls vorhanden, mit Angaben im Dateinamen übereinstimmen
+    {
+        Absolute_path job_chain_path ( folder_path(), element.getAttribute( "job_chain" ) );  // Bei <add_order> vom Schema erlaubt
+        if( !job_chain_path.empty()  &&  subsystem()->normalized_path( job_chain_path ) != subsystem()->normalized_path( _file_based_job_chain_path ) )  z::throw_xc( "SCHEDULER-437", job_chain_path, _file_based_job_chain_path );
+
+        if( id != "" &&  id != _file_based_id )  z::throw_xc( "SCHEDULER-436" );     // Bei <add_order> vom Schema erlaubt    }
+    }
+
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
     if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
@@ -5022,7 +5273,7 @@ void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& elem
         else
         if( e.nodeName_is( "run_time" ) )       // Attribut at="..." setzt nächste Startzeit
         { 
-            set_schedule( source_file_based, e );
+            set_schedule( this, e );
         }
         else
         //if( e.nodeName_is( "period" ) )
@@ -5051,16 +5302,31 @@ void Order::set_dom( File_based* source_file_based, const xml::Element_ptr& elem
     if( at_string != "" )  set_at( Time::time_with_now( at_string ) );
 }
 
+//-------------------------------------------------------------Order::set_identification_attributes
+
+void Order::set_identification_attributes( const xml::Element_ptr& result )
+{
+    result.setAttribute( "job_chain", _job_chain_path );
+    result.setAttribute( "order"    , string_id()     );
+}
+
 //-------------------------------------------------------------------------------Order::dom_element
 
-xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what, const string* log ) const
+xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) 
+{
+    return dom_element( dom_document, show_what, (const string*)NULL );
+}
+
+//-------------------------------------------------------------------------------Order::dom_element
+
+xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what, const string* log ) 
 {
     assert( this ); if( !this )  z::throw_xc( Z_FUNCTION );
 
 
     xml::Element_ptr result = dom_document.createElement( "order" );
 
-    if( _standing_order )  _standing_order->fill_file_based_dom_element( result, show_what );
+    if( has_base_file() )  fill_file_based_dom_element( result, show_what );
 
     if( !show_what.is_set( show_for_database_only ) )
     {
@@ -5283,7 +5549,7 @@ void Order::print_xml_child_elements_for_event( String_stream* s, Scheduler_even
 
 //---------------------------------------------------------------------------------------Order::dom
 
-xml::Document_ptr Order::dom( const Show_what& show_what ) const
+xml::Document_ptr Order::dom( const Show_what& show_what ) 
 {
     xml::Document_ptr document;
 
@@ -5762,11 +6028,8 @@ void Order::remove( File_based::Remove_flags remove_flag )
 {
     ptr<Order> hold_me = this;
 
-    if( _standing_order )  
-    {
-        _standing_order->remove( remove_flag );
-        // Löscht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
-    }
+    My_file_based::remove( remove_flag );
+    // Löscht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
 
     remove_from_job_chain(); 
 }
@@ -5805,7 +6068,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
     if( job_chain_stack_option == jc_remove_from_job_chain_stack )  
     {
         remove_from_job_chain_stack();
-        //if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );  // Kann Auftrag aus der Jobkette nehmen
+        //if( _standing_order )  _standing_order->check_for_replacing_or_removing( Order::act_now );  // Kann Auftrag aus der Jobkette nehmen
 
         if( !_task )  close();      // 2007-09-16
     }
@@ -6166,7 +6429,7 @@ void Order::handle_end_state()
     }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------Order::handle_end_state_of_nested_job_chain
 
 bool Order::handle_end_state_of_nested_job_chain()
 {
@@ -6267,7 +6530,7 @@ void Order::on_carried_out()
 {
     order_subsystem()->count_finished_orders();
 
-    if( _standing_order )  _standing_order->check_for_replacing_or_removing( Standing_order::act_now );     // Kann Auftrag aus der Jobkette nehmen
+    check_for_replacing_or_removing( act_now );     // Kann Auftrag aus der Jobkette nehmen
 }
 
 //--------------------------------------------------------------------------Order::processing_error
@@ -6306,7 +6569,7 @@ void Order::postprocessing2( Job* last_job )
         {
             if( _web_service  &&  !_http_operation )
             {
-                _web_service->forward_order( *this, last_job );
+                _web_service->forward_order( this, last_job );
             }
         }
         catch( exception x )  { _log->error( x.what() ); }

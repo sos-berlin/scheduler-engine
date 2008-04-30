@@ -45,7 +45,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_lock_use:                     return "Use";
         case type_order:                        return "Order";
         case type_order_queue:                  return "Order_queue";
-        case type_order_subsystem:              return "Order_subsystem";
+        case type_order_subsystem:              return "Job_chain_subsystem";
         case type_process:                      return "Process";
         case type_process_class:                return "Process_class";
         case type_process_class_folder:         return "Process_class_folder";

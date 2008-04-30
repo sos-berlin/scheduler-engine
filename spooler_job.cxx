@@ -2024,7 +2024,7 @@ void Job::select_period( const Time& now )
 
             if( _period.begin() != Time::never )
             {
-                _log->debug( message_string( "SCHEDULER-921", _period.to_xml(), _period.schedule_path() ) );
+                _log->debug( message_string( "SCHEDULER-921", _period.to_xml(), _period.schedule_path().name() == ""? Absolute_path() : _period.schedule_path() ) );
             }
             else 
                 _log->debug( message_string( "SCHEDULER-922" ) );

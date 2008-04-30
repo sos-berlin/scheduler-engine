@@ -303,7 +303,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     static const Com_method    _methods[];
 
 
-                                Schedule_use                ( Scheduler_object* using_object );
+                                Schedule_use                ( File_based* using_object );
     virtual                    ~Schedule_use                ();
 
     // Irun_time
@@ -332,6 +332,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
 
     void                        disconnect                  ();
+    File_based*                 using_file_based            () const                                { return _using_object; }
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     void                    set_schedule                    ( Schedule* );
     Schedule*                   schedule                    ();
@@ -369,7 +370,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     Absolute_path              _schedule_path;
     ptr<Schedule>              _schedule;                   // Bennantes <schedule> oder unbenanntes, eigenes (heißt dann <run_time>)
     ptr<Schedule>              _default_schedule;           // Das Schedule, wenn sonst keins definiert ist oder benanntes Schedule nicht bekannt ist.
-    Scheduler_object*          _using_object;
+    File_based*                _using_object;
     Scheduler_holidays_usage   _scheduler_holidays_usage;
     string                     _active_schedule_path;       // == schedule()->active_schedule_path_at(now)
 };

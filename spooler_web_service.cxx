@@ -517,11 +517,11 @@ xml::Document_ptr Web_service::transform_forward( const xml::Document_ptr& order
 
 //-----------------------------------------------------------------------Web_service::forward_order
 
-void Web_service::forward_order( const Order& order, Job* last_job )
+void Web_service::forward_order( Order* order, Job* last_job )
 {
     if( _forward_xslt_stylesheet_path != "" )
     {
-        xml::Document_ptr order_document = order.dom( show_all );
+        xml::Document_ptr order_document = order->dom( show_all );
         if( last_job )  order_document.documentElement().setAttribute( "last_job", last_job->name() );   // Stylesheet will den letzten Job haben
         forward( order_document );
     }
@@ -651,7 +651,7 @@ void Web_service_operation::begin()
         if( _http_operation->_connection->_security_level < Security::seclev_all )  throw http::Http_exception( http::status_403_forbidden );
 
 
-        ptr<Order> order = new Order( _spooler );
+        ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
         order->inhibit_distribution();
         order->set_delay_storing_until_processing( true );  // Erst speichern, wenn eine Task den Auftrag ausführt

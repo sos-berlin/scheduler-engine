@@ -82,7 +82,7 @@ struct Web_service: idispatch_implementation< Web_service, spooler_com::Iweb_ser
     xml::Document_ptr           transform_request           ( const xml::Document_ptr& request );
     xml::Document_ptr           transform_response          ( const xml::Document_ptr& command_answer );
     xml::Document_ptr           transform_forward           ( const xml::Document_ptr& order_or_task );
-    void                        forward_order               ( const Order&, Job* last_job );
+    void                        forward_order               ( Order*, Job* last_job );
     void                        forward_task                ( const Task& );
     void                        forward                     ( const xml::Document_ptr& payload );
     

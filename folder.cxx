@@ -558,6 +558,9 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
             if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
                 result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
             else
+            if( !show_what.is_set( show_schedules )  &&  typed_folder->subsystem() == spooler()->schedule_subsystem() )
+                result.append_new_comment( "<schedules> suppressed. Use what=\"schedules\"." );
+            else
             if( show_what.is_set( show_no_subfolders )  &&  typed_folder->subsystem() == spooler()->folder_subsystem() )
             {
                 // nix
@@ -1887,6 +1890,13 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
         replacement_element.appendChild( replacement()->dom_element( result.ownerDocument(), show_what ) );
         result.insertBefore( replacement_element, file_based_element.nextSibling() );
     }
+}
+
+//--------------------------------------------------------File_based::set_identification_attributes
+
+void File_based::set_identification_attributes( const xml::Element_ptr& result )
+{
+    result.setAttribute( subsystem()->xml_element_name(), path() );    // Z.B. job="/xx"
 }
 
 //--------------------------------------------------------------------------File_based::dom_element

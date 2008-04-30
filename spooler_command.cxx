@@ -360,7 +360,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
-    if( element.nodeName_is( "s" ) )  show |= show_job_chains | show_job_chain_orders | show_operations | show_folders | show_remote_schedulers;
+    if( element.nodeName_is( "s" ) )  show |= show_schedules | show_job_chains | show_job_chain_orders | show_operations | show_folders | show_remote_schedulers;
 
 
     return _spooler->state_dom_element( _answer, show );
@@ -891,7 +891,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
                 Record record = sel.get_record();
 
                 //order = Z_NEW( Order( _spooler, sel.get_record() );
-                order = new Order( _spooler );
+                order = _spooler->standing_order_subsystem()->new_order();
                 order->set_id        ( record.as_string( "order_id"   ) );
                 order->set_state     ( record.as_string( "state"      ) );
                 order->set_state_text( record.as_string( "state_text" ) );
@@ -930,8 +930,8 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 
     //string job_name = add_order_element.getAttribute( "job" );
 
-    ptr<Order> order = new Order( _spooler );
-    order->set_dom( (File_based*)NULL, add_order_element, &_variable_set_map );
+    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+    order->set_dom( add_order_element, &_variable_set_map );
 
 
     //if( job_name == "" )
@@ -1136,7 +1136,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
     if( _security_level < Security::seclev_no_add )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
-    ptr<Order> order = new Order( _spooler );
+    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
 
     order->set_state( Web_service::forwarding_job_chain_forward_state );
     order->set_payload( Variant( service_request_element.xml() ) );
@@ -1248,6 +1248,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show._max_order_history = 20;
         else
         if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
+        else
+        if( string_equals_prefix_then_skip( &p, "schedules"        ) )  show |= show_schedules;
         else
         if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_schedule;
         else

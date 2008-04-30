@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-04-29" version="2.0.203" subversion_revision="5759">
+    <change date="2008-04-29" version="2.0.203" subversion_revision="5780">
         <revision jira="JS-271" type="new" title="XML-Dokument in einem Konfigurationsverzeichnis anlegen: &lt;modify_hot_folder>">
             <description>
                 <ul>

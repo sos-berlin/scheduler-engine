@@ -38,8 +38,9 @@ namespace job_chain
     Z_FOR_EACH( Order_subsystem_interface::File_based_map, spooler()->order_subsystem()->_file_based_map, __job_chain_iterator__ )  \
         if( Job_chain* JOB_CHAIN = __job_chain_iterator__->second )
 
-//-------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------const
 
+extern const char               job_chain_order_separator;
 extern const string             scheduler_file_path_variable_name;
 
 //-------------------------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
-               Scheduler_object
+               file_based< Order, Standing_order_folder, Standing_order_subsystem >
 {
     typedef Variant             Payload;
     typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
@@ -59,7 +60,7 @@ struct Order : Com_order,
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* );
+                                Order                   ( Standing_order_subsystem* );
                                ~Order                   ();
 
 
@@ -70,6 +71,30 @@ struct Order : Com_order,
     virtual IDispatch*          idispatch                   ()                                      { return this; }
 
 
+    // file_based<>
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Com_order::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_order::Release(); }
+
+    void                    set_name                        ( const string& );
+    void                    set_dom                         ( const xml::Element_ptr& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
+    bool                        on_initialize               (); 
+    bool                        on_load                     (); 
+    bool                        on_activate                 ();
+
+    bool                        can_be_removed_now          ();
+    void                        on_remove_now               ();
+
+
+    //
+
+    Standing_order_folder*      standing_order_folder       () const                                { return typed_folder(); }
+  //string                      job_chain_name              () const                                { return _job_chain_name; }
+  //string                      order_id                    () const                                { return _order_id; }
+
+    
     void                        load_record                 ( const Absolute_path&, const Record& );
     void                        load_blobs                  ( Read_transaction* );
     void                        load_order_xml_blob         ( Read_transaction* );
@@ -214,11 +239,11 @@ struct Order : Com_order,
     void                        handle_end_state_repeat_order( const Time& );
 
     void                        on_carried_out          ();
-    void                        connect_with_standing_order( Standing_order* standing_order )       { _standing_order = standing_order; };
 
-    void                    set_dom                     ( File_based* source_file_based, const xml::Element_ptr&, Variable_set_map* = NULL );
-    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL ) const;
-    xml::Document_ptr           dom                     ( const Show_what& ) const;
+    void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
+    void                        set_identification_attributes( const xml::Element_ptr& );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log );
+    xml::Document_ptr           dom                     ( const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
     void                    set_schedule                ( File_based* source_file_based, const xml::Element_ptr& );
@@ -261,6 +286,7 @@ struct Order : Com_order,
 
   private:
     void                        postprocessing2         ( Job* last_job );
+    bool                        order_is_removable_or_replaceable();
 
 
     friend struct               Order_queue;
@@ -269,8 +295,14 @@ struct Order : Com_order,
 
     Fill_zero                  _zero_;    
 
+    string                     _file_based_job_chain_name;
+    Absolute_path              _file_based_job_chain_path;
+    string                     _file_based_id;
+
     Id                         _id;
     State                      _state;
+    bool                       _its_me_removing;
+
     bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
     State                      _end_state;
 
@@ -316,7 +348,6 @@ struct Order : Com_order,
     ptr<Order>                 _replaced_by;            // Nur wenn _task != NULL: _replaced_by soll this in der Jobkette ersetzen
     Order*                     _replacement_for;        // _replacement_for == NULL  ||  _replacement_for->_replaced_by == this && _replacement_for->_task != NULL
     string                     _replaced_order_occupator;// Task::obj:name() oder cluster_member_id, zur Info
-    Standing_order*            _standing_order;         // Dateibasierter Dauerauftrag?
 
     Period                     _period;                 // Bei _schedule.set(): Aktuelle oder nächste Periode
 
@@ -950,6 +981,65 @@ struct Order_subsystem_interface: Object,
 
 
 ptr<Order_subsystem_interface>  new_order_subsystem         ( Scheduler* );
+
+//----------------------------------------------------------------------------Standing_order_folder
+
+struct Standing_order_folder : typed_folder< Order >
+{
+                                Standing_order_folder       ( Folder* );
+                               ~Standing_order_folder       ();
+
+
+  //void                        set_dom                     ( const xml::Element_ptr& );
+  //void                        execute_xml_standing_order  ( const xml::Element_ptr& );
+  //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "standing_orders" ); }
+
+    void                        add_standing_order          ( Order* standing_order )               { add_file_based( standing_order ); }
+    void                        remove_standing_order       ( Order* standing_order )               { remove_file_based( standing_order ); }
+    Order*                      standing_order              ( const string& name )                  { return file_based( name ); }
+    Order*                      standing_order_or_null      ( const string& name )                  { return file_based_or_null( name ); }
+};
+
+//-------------------------------------------------------------------------Standing_order_subsystem
+
+struct Standing_order_subsystem : file_based_subsystem< Order >,
+                                  Object
+{
+                                Standing_order_subsystem    ( Scheduler* );
+
+    // Subsystem
+
+    void                        close                       ();
+    bool                        subsystem_initialize        ();
+    bool                        subsystem_load              ();
+    bool                        subsystem_activate          ();
+
+
+
+    // File_based_subsystem
+
+    string                      object_type_name            () const                                { return "Order"; }
+    string                      filename_extension          () const                                { return ".order.xml"; }
+    void                        assert_xml_element_name     ( const xml::Element_ptr& ) const;
+    string                      xml_element_name            () const                                { return "order"; }
+    string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
+    string                      normalized_name             ( const string& ) const;
+    ptr<Order>                  new_file_based              ();
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "standing_orders" ); }
+
+
+    ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
+    ptr<Order>                  new_order                   ()                                      { return new_file_based(); }
+
+
+    Order*                      standing_order              ( const Absolute_path& path ) const     { return file_based( path ); }
+    Order*                      standing_order_or_null      ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
+
+  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+};
+
+inline ptr<Standing_order_subsystem> new_standing_order_subsystem( Scheduler* scheduler )           { return Z_NEW( Standing_order_subsystem( scheduler ) ); }
 
 //-------------------------------------------------------------------------------------------------
 

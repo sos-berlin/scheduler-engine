@@ -26,7 +26,7 @@ struct Log
                                                               Prefix_log* extra_log = NULL, Prefix_log* order_log = NULL );
     void                        collect_stderr              ();
     
-    string                      filename                    () const                            { return _filename; }
+    File_path                   filename                    () const                            { return _filename; }
     int                         fd                          ()                                  { return _file; }
     void                        start_new_file              ();
     Time                        last_time                   () const                            { return _last_time; }
@@ -41,7 +41,7 @@ struct Log
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     string                     _directory;
-    string                     _filename;
+    File_path                  _filename;
     int                        _file;
     int                        _err_no;
     Thread_semaphore           _semaphore;
@@ -87,8 +87,8 @@ struct Prefix_log : Object, Has_log
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     void                    set_append                      ( bool b )                          { _append = b; }
-    void                    set_filename                    ( const string& );
-    string                      filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
+    void                    set_filename                    ( const File_path& );
+    File_path                   filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
     void                    set_title                       ( const string& title )             { _title = title; }
     string                      title                       ()                                  { return _title; }
     void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
@@ -215,8 +215,8 @@ struct Prefix_log : Object, Has_log
   //int                        _counter [ log_fatal - log_debug9 + 1 ];
 
     string                     _title;
-    string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
-    string                     _new_filename;               // nach close() umbenennen
+    File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
+    File_path                  _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
     int                        _instance_number;

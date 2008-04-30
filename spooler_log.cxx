@@ -336,8 +336,8 @@ void Log::open_new()
 {
     Z_MUTEX( _semaphore )
     {
-        int    old_file     = _file;
-        string old_filename = _filename;
+        int       old_file     = _file;
+        File_path old_filename = _filename;
 
         _file     = -1;
         _filename = "";
@@ -711,7 +711,7 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
 
-void Prefix_log::set_filename( const string& filename )
+void Prefix_log::set_filename( const File_path& filename )
 {
     if( _file != -1 )  throw_xc( "spooler_log::filename", filename, _filename );
     _filename = filename;
@@ -885,7 +885,14 @@ void Prefix_log::remove_file()
     {
         z_unlink( _filename );
     }
-    catch( const exception&  x ) { _spooler->log()->error( message_string( "SCHEDULER-291", x ) ); }  // Kann bei "http://.../show_log?" passieren
+    catch( const exception&  x ) 
+    { 
+        #ifdef Z_DEBUG
+            if( log_category_is_set( "joacim" ) )  assert( "Prefix_log::remove_file" );
+        #endif
+
+        _spooler->log()->error( message_string( "SCHEDULER-291", x ) );       // Kann bei "http://.../show_log?" passieren
+    }
 }
 
 //--------------------------------------------------------------------------------Prefix_log::write
