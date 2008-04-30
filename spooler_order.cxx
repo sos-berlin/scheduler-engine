@@ -3859,6 +3859,7 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
         order->assert_task( Z_FUNCTION );
         order->_is_success_state = true;
+        order->_end_state_reached = false;
         order->_task_error = NULL;
     }
 
