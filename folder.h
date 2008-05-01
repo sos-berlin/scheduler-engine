@@ -263,10 +263,6 @@ struct File_based : Scheduler_object,
     friend struct               Typed_folder;
     friend struct               Subfolder_folder;
 
-    bool                        initialize2                 ();
-    bool                        load2                       ();
-    bool                        activate2                   ();
-
     string                     _name;
     State                      _state;
     Base_file_info             _base_file_info;

@@ -1066,7 +1066,11 @@ void Job::init_start_when_directory_changed( Task* task )
 
 void Job::on_schedule_loaded()
 {
-    if( file_based_state() == s_incomplete )  activate();
+    if( file_based_state() == s_incomplete )  
+    {
+        bool ok = activate();
+        if( ok )  set_state( s_pending );
+    }
 
     reset_scheduling();
 }
@@ -1090,6 +1094,7 @@ bool Job::on_schedule_to_be_removed()
     {
         set_file_based_state( s_incomplete );
         end_tasks( message_string( "SCHEDULER-885", schedule_name ) );
+        stop( false );
     }
 
     reset_scheduling();
@@ -2000,8 +2005,15 @@ void Job::reset_scheduling()
     {
         Time now = Time::now();
 
-        _period = _schedule_use->next_period( now );  
-        set_next_start_time( now );
+        Period period            = _schedule_use->next_period      ( now );  
+        Time   next_single_start = _schedule_use->next_single_start( now );
+
+        if( period            != _period            ||
+            next_single_start != _next_single_start )
+        {
+            _period = period;
+            set_next_start_time( now );
+        }
     }
 }
 
@@ -2029,7 +2041,10 @@ void Job::select_period( const Time& now )
             else 
                 _log->debug( message_string( "SCHEDULER-922" ) );
         }
+
     }
+
+    _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->active_schedule_at( now )->once();
 }
 
 //--------------------------------------------------------------------------------Job::is_in_period
@@ -2052,8 +2067,6 @@ void Job::set_next_start_time( const Time& now, bool repeat )
     if( !now.is_never()  &&  _state >= s_pending  &&  _schedule_use->is_defined() )
     {
         string msg;
-
-        _start_once = _tasks_count == 0  &&  _schedule_use->is_defined()  &&  _schedule_use->schedule()->active_schedule_at( now )->once();
 
         if( _delay_until )
         {

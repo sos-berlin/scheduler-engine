@@ -53,6 +53,8 @@ struct Period
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        operator >                  ( const Period& t ) const               { return _begin > t._begin; }  //für set<>
+    bool                        operator ==                 ( const Period& o ) const;
+    bool                        operator !=                 ( const Period& o ) const               { return !( *this == o ); }
     bool                        is_in_time                  ( const Time& t )                       { return t >= _begin && t < _end; }
     bool                        is_comming                  ( const Time& time_of_day, With_single_start single_start ) const;
 
@@ -465,11 +467,14 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
   //STDMETHODIMP                Remove                      ();
 
 
-    // Dependant
-    bool                        on_requisite_loaded         ( File_based* );
-    bool                        on_requisite_to_be_removed  ( File_based* );
-
     // file_based<>
+
+  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+    void                    set_xml                         ( File_based* source_file_based, const string& );
+    void                    set_dom                         ( const xml::Element_ptr& );
+    void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
+    xml::Document_ptr           dom_document                ( const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     bool                        on_initialize               (); 
     bool                        on_load                     (); 
@@ -479,18 +484,19 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     bool                        can_be_removed_now          ();
   //zschimmer::Xc               remove_error                ();
 
-  //bool                        can_be_replaced_now         ();
-  //void                        prepare_to_replace          ();
-  //Schedule*                   on_replace_now              ();
+    bool                        can_be_replaced_now         ();
+    void                        prepare_to_replace          ();
+    Schedule*                   on_replace_now              ();
+
+
+    // Dependant
+
+  //bool                        on_requisite_loaded         ( File_based* );
+    bool                        on_requisite_to_be_removed  ( File_based* );
 
 
     Schedule_folder*            schedule_folder             () const                                { return typed_folder(); }
 
-    void                    set_dom                         ( const xml::Element_ptr& e )           { set_dom( (File_based*)NULL, e ); }
-    void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
-    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    xml::Document_ptr           dom_document                ( const Show_what& );
-  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
     void                        add_use                     ( Schedule_use* );
     void                        remove_use                  ( Schedule_use* );
@@ -498,7 +504,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     void                        cover_with_schedule         ( Schedule* );
     void                        uncover_from_schedule       ( Schedule* );
 
-    void                    set_xml                         ( File_based* source_file_based, const string& );
     Inlay*                      inlay                       ()                                      { return _inlay; }
     bool                     is_covering                    ()                                      { return _inlay->_covered_schedule_path != ""; }
     bool                     is_covering_at                 ( const Time& t )                       { return t >= _inlay->_covered_schedule_begin &&  t < _inlay->_covered_schedule_end; }
@@ -514,6 +519,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
 
   private:
+    void                        on_schedule_modified        ();
     void                        set_inlay                   ( Inlay* );
     void                        initialize_inlay            ();
     bool                        try_load_inlay              ();

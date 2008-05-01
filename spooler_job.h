@@ -334,18 +334,11 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     State                      _state;
     State_cmd                  _state_cmd;
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
-    Time                       _delay_until;                // Nach Fehler verzögern
-    Time                       _next_start_time;
-    Time                       _next_time;                  // Für Task_subsystem::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
-    Time                       _next_single_start;
-    Time                       _repeat;                     // spooler_task.repeat
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
-  //string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
     Visibility                 _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
-    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test
     bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
@@ -355,7 +348,15 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 
     ptr<Job_schedule_use>      _schedule_use;
+    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
     Period                     _period;                     // Derzeitige oder nächste Period
+    Time                       _next_single_start;
+    Time                       _next_start_time;
+    Time                       _next_time;                  // Für Task_subsystem::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
+
+    Time                       _repeat;                     // spooler_task.repeat
+    Time                       _delay_until;                // Nach Fehler verzögern
+
     xml::Document_ptr          _commands_document;          // <commands>...
     typedef map<int,xml::Element_ptr>  Exit_code_commands_map;
     Exit_code_commands_map     _exit_code_commands_map;

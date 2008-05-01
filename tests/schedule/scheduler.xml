@@ -71,12 +71,34 @@ hostware.sleep( 5 );
 
                 <run_time schedule="--file"/>
             </job>
+
+            <job name="perl" order="yes">
+                <script language="perlscript">
+                    <![CDATA[
+
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
+use strict;
+use warnings FATAL => "all";
+
+$spooler_log->info( "run_time->schedule->xml=" . $spooler_task->order()->run_time()->schedule()->xml() );
+$spooler_task->order()->run_time()->LetProperty( 'xml', "<run_time schedule='trettio'/>" );
+$spooler_log->info( "run_time->schedule()->xml=" . $spooler_task->order()->run_time()->schedule()->xml() );
+$spooler_task->order()->run_time()->schedule()->LetProperty( 'xml', "<run_time><period absolute_repeat='33'/></run_time>" );
+$spooler_log->info( "run_time->schedule()->xml=" . $spooler_task->order()->run_time()->schedule()->xml );
+$spooler_log->info( "spooler->schedule('trettio')->xml=" . $spooler->schedule('trettio')->xml() );
+                    
+                    ]]>
+                </script>
+
+                <run_time/>
+            </job>
         </jobs>
 
 
         <job_chains>
             <job_chain name="schedule">
-                <job_chain_node state="a" job="A"/>
+                <job_chain_node state="a" job="perl"/>
                 <job_chain_node state="b" job="B"/>
             </job_chain>
         </job_chains>
