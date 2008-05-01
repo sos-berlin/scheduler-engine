@@ -5343,25 +5343,30 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _history_id )  result.setAttribute( "history_id", _history_id );
 
         if( _setback )
-        result.setAttribute( "next_start_time", _setback.as_string() );
+            result.setAttribute( "next_start_time", _setback.as_string() );
+
+        if( _schedule_use->is_defined() )   // Wie in Job::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
+            if( Schedule* covering_schedule = _schedule_use->schedule()->active_schedule_at( Time::now() ) )  
+                if( covering_schedule->is_in_folder() )
+                    result.setAttribute( "active_schedule", covering_schedule->path() );
 
         if( _title != "" )
-        result.setAttribute( "title"     , _title );
+            result.setAttribute( "title"     , _title );
 
         if( !_state.is_empty() )
-        result.setAttribute( "state"     , debug_string_from_variant( _state ) );
+            result.setAttribute( "state"     , debug_string_from_variant( _state ) );
 
         if( !_initial_state.is_empty() )
-        result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
+            result.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( Job_chain* job_chain = this->job_chain_for_api() )
-        result.setAttribute( "job_chain" , job_chain->path().with_slash() );
+            result.setAttribute( "job_chain" , job_chain->path().with_slash() );
 
         if( _replaced_by )
-        result.setAttribute( "replaced"  , "yes" );
+            result.setAttribute( "replaced"  , "yes" );
         else
         if( _removed_from_job_chain_path != "" )
-        result.setAttribute( "removed"   , "yes" );
+            result.setAttribute( "removed"   , "yes" );
 
         if( Job* job = this->job() )  result.setAttribute( "job", job->name() );
         else
@@ -5378,18 +5383,18 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         }
 
         if( _state_text != "" )
-        result.setAttribute( "state_text", _state_text );
+            result.setAttribute( "state_text", _state_text );
 
         result.setAttribute( "priority"  , _priority );
 
         if( _created )
-        result.setAttribute( "created"   , _created.as_string() );
+            result.setAttribute( "created"   , _created.as_string() );
 
         if( _log->is_active() )
-        result.setAttribute( "log_file"  , _log->filename() );
+            result.setAttribute( "log_file"  , _log->filename() );
 
         if( _is_in_database  &&  _job_chain_path != ""  &&  !_job_chain )
-        result.setAttribute( "in_database_only", "yes" );
+            result.setAttribute( "in_database_only", "yes" );
 
         if( show_what.is_set( show_payload )  &&  !_payload.is_null_or_empty_string()  &&  !_payload.is_missing() )
         {
@@ -5412,7 +5417,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
             payload_element.appendChild( payload_content );
         }
-
     }
 
     if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( dom_document, show_what ) );  // Vor _period setzen!

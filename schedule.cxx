@@ -6,6 +6,16 @@ namespace sos {
 namespace scheduler {
 namespace schedule {
 
+//
+//  Schedule_use könnte die Schedule-Logik von Job und Order übernehmen.
+//
+//  Schedule_use::_current_period: aktuelle oder, wenn es keine gibt, die nächste Periode
+//  Schedule_use::_next_single_start: Nächster single_start
+//  Zu beiden Angaben, aus welchem Schedule sie stammen
+//  
+//  Nächster Start wegen repeat oder absolute_repeat
+//  
+
 //-------------------------------------------------------------------------------Schedule_subsystem
     
 struct Schedule_subsystem : Schedule_subsystem_interface
@@ -129,25 +139,6 @@ ptr<Schedule> Schedule_subsystem::new_file_based()
 {
     return Z_NEW( Schedule( this ) );
 }
-
-//---------------------------------------------------------------------Schedule_folder::execute_xml
-
-//xml::Element_ptr Schedule_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
-//{
-//    xml::Element_ptr result;
-//
-//    if( element.nodeName_is( "schedule" )  ||
-//        element.nodeName_is( "run_time" )     )  spooler()->root_folder()->schedule_folder()->add_or_replace_file_based_xml( element );
-//    else
-//    //if( string_begins_with( element.nodeName(), "schedule." ) ) 
-//    //{
-//    //    schedule( Absolute_path( root_path, element.getAttribute( "schedule" ) ) )->execute_xml( element, show_what );
-//    //}
-//    //else
-//        z::throw_xc( "SCHEDULER-113", element.nodeName() );
-//
-//    return command_processor->_answer.createElement( "ok" );
-//}
 
 //-----------------------------------------------------------------Schedule_folder::Schedule_folder
 
@@ -329,6 +320,10 @@ xml::Element_ptr Schedule_use::dom_element( const xml::Document_ptr& document, c
         result.setAttribute( "schedule", _schedule_path );      // (Besser: <scheduler.use schedule="...">)
     }    
 
+    //if( _schedule )
+    //    if( Schedule* covering_schedule = _schedule->active_schedule_at( Time::now() ) )  
+    //        result.setAttribute( "active_schedule", covering_schedule->path() );
+
     return result;
 }
 
@@ -459,7 +454,10 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
             }
         }
 
-        t = period._single_start? period.begin() + 1 : period.end();
+        Time new_t = period._single_start? period.begin() + 1 : period.end();
+        assert( t < new_t );
+        if( new_t <= t )  break;
+        t = new_t;
     }
 }
 
@@ -927,6 +925,22 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
     return result;
 }
 
+//----------------------------------------------------------------------------Schedule::is_covering
+
+bool Schedule::is_covering()
+{ 
+    return _inlay->_covered_schedule_path != ""; 
+}
+
+//-------------------------------------------------------------------------Schedule::is_covering_at
+
+bool Schedule::is_covering_at( const Time& t )
+{ 
+    return is_covering()  && 
+           t >= _inlay->_covered_schedule_begin &&  
+           t <  _inlay->_covered_schedule_end; 
+}
+
 //-------------------------------------------------------------------Schedule::covering_schedule_at
 
 Schedule* Schedule::covering_schedule_at( const Time& t )
@@ -998,19 +1012,19 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
     if( show_what.is_set( show_for_database_only ) )
     {
         result = _inlay->dom_element( dom_document, show_what ); 
-        result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
-        //steht schon drin: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
-        //steht schon drin: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
     }
     else
     {
         result = _inlay->dom_element( dom_document, show_what ); 
+        
+        result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
+        //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
+        //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
 
-        if( path() != "" )  fill_file_based_dom_element( result, show_what );   // Nur bei benanntem <schedule>
-        if( Schedule* covering_schedule = active_schedule_at( Time::now() ) )  result.setAttribute( "active_schedule", covering_schedule->path() );
+        if( is_in_folder() )  fill_file_based_dom_element( result, show_what );   
 
         Time now = Time::now();
-        result.setAttribute( "active", !active_schedule_at( now ) || is_covering_at( now )? "yes":" no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+        result.setAttribute( "active", !covering_schedule_at( now ) || is_covering_at( now )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
 
         if( !_use_set.empty() )
         {
@@ -1555,7 +1569,8 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     else
   //if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day <= _begin ) )  result = true;
                                                                                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
-    if( single_start & wss_next_any_start  &&  ( ( _single_start || has_repeat_or_once() ) && time_of_day < _end ) )  result = true;
+    if( single_start & wss_next_any_start  &&  ( _single_start         && time_of_day <= _begin ||
+                                                  has_repeat_or_once() && time_of_day <  _end      ) )  result = true;
     else
     if( single_start & ( wss_next_any_start | wss_next_single_start )  &&  !_absolute_repeat.is_never()  &&  !next_absolute_repeated( time_of_day, 0 ).is_never() )  result = true;
                                                                                                                                                 // ^ Falls zwei Perioden direkt aufeinander folgen

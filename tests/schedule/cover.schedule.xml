@@ -4,8 +4,8 @@
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
     
     substitute = "file"
-    valid_from = "2008-04-27 09:00:00"
-    valid_to   = "2008-04-27 10:05:00"
+    valid_from = "2008-05-01 20:00:00"
+    valid_to   = "2008-05-27 10:05:00"
 >
     
     <period repeat="30"/>

@@ -993,7 +993,7 @@ struct Standing_order_folder : typed_folder< Order >
   //void                        set_dom                     ( const xml::Element_ptr& );
   //void                        execute_xml_standing_order  ( const xml::Element_ptr& );
   //xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "standing_orders" ); }
+    xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "orders" ); }
 
     void                        add_standing_order          ( Order* standing_order )               { add_file_based( standing_order ); }
     void                        remove_standing_order       ( Order* standing_order )               { remove_file_based( standing_order ); }
@@ -1026,7 +1026,7 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     string                      xml_elements_name           () const                                { assert(0), z::throw_xc( Z_FUNCTION ); }
     string                      normalized_name             ( const string& ) const;
     ptr<Order>                  new_file_based              ();
-    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "standing_orders" ); }
+    xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "orders" ); }
 
 
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }

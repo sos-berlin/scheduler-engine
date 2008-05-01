@@ -11,6 +11,10 @@
             <schedule name="trettio">
                 <period absolute_repeat="30"/>
             </schedule>
+            
+            <schedule name="sextio">
+                <period absolute_repeat="60"/>
+            </schedule>
         </schedules>
 
         
@@ -30,18 +34,18 @@
 
 var hostware = new ActiveXObject( "hostware.global" );
 spooler_log.info( "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );                    
-spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
-spooler_task.order.run_time.xml = "<run_time schedule='trettio'/>";
-spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
-spooler_task.order.run_time.schedule.xml = "<run_time><period absolute_repeat='33'/></run_time>";
-spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
-spooler_log.info( "spooler.schedule('trettio').xml=" + spooler.schedule('trettio').xml );
+//spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
+//spooler_task.order.run_time.xml = "<run_time schedule='trettio'/>";
+//spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
+//spooler_task.order.run_time.schedule.xml = "<schedule><period absolute_repeat='33'/></schedule>";
+//spooler_log.info( "run_time.schedule.xml=" + spooler_task.order.run_time.schedule.xml );
+//spooler_log.info( "spooler.schedule('trettio').xml=" + spooler.schedule('trettio').xml );
 hostware.sleep( 5 );
                     
                     ]]>
                 </script>
 
-                <!--run_time schedule="trettio"/-->
+                <run_time schedule="sextio"/>
             </job>
 
             
@@ -98,7 +102,7 @@ $spooler_log->info( "spooler->schedule('trettio')->xml=" . $spooler->schedule('t
 
         <job_chains>
             <job_chain name="schedule">
-                <job_chain_node state="a" job="perl"/>
+                <job_chain_node state="a" job="a"/>
                 <job_chain_node state="b" job="B"/>
             </job_chain>
         </job_chains>
