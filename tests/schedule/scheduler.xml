@@ -102,7 +102,7 @@ $spooler_log->info( "spooler->schedule('trettio')->xml=" . $spooler->schedule('t
 
         <job_chains>
             <job_chain name="schedule">
-                <job_chain_node state="a" job="a"/>
+                <job_chain_node state="a" job="perl"/>
                 <job_chain_node state="b" job="B"/>
             </job_chain>
         </job_chains>

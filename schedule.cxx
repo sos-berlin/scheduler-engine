@@ -1017,26 +1017,29 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
     {
         result = _inlay->dom_element( dom_document, show_what ); 
         
-        result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
-        //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
-        //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
-
-        if( is_in_folder() )  fill_file_based_dom_element( result, show_what );   
-
-        Time now = Time::now();
-        Schedule* covering_schedule = covering_schedule_at( now );
-        result.setAttribute( "active", ( is_covering()? is_covering_at( now )
-                                                      : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
-        if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
-
-        if( show_what.is_set( show_schedules )  &&  !_use_set.empty() )
+        if( is_in_folder() )    // Benanntes <schedule>?
         {
-            xml::Element_ptr schedule_users_element = result.append_new_element( "schedule.users" );
-            
-            Z_FOR_EACH( Use_set, _use_set, u )
+            result.setAttribute_optional( "substitute", _inlay->_covered_schedule_path );   // Absoluten Pfad setzen
+            //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
+            //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
+
+            Time now = Time::now();
+            Schedule* covering_schedule = covering_schedule_at( now );
+            result.setAttribute( "active", ( is_covering()? is_covering_at( now )
+                                                          : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+            if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
+
+            fill_file_based_dom_element( result, show_what );   
+
+            if( show_what.is_set( show_schedules )  &&  !_use_set.empty() )
             {
-                xml::Element_ptr schedule_user_element = schedule_users_element.append_new_element( "schedule.user" );
-                (*u)->using_file_based()->set_identification_attributes( schedule_user_element );         // job="/.."  oder  job_chain="/.." order=".."
+                xml::Element_ptr schedule_users_element = result.append_new_element( "schedule.users" );
+                
+                Z_FOR_EACH( Use_set, _use_set, u )
+                {
+                    xml::Element_ptr schedule_user_element = schedule_users_element.append_new_element( "schedule.user" );
+                    (*u)->using_file_based()->set_identification_attributes( schedule_user_element );         // job="/.."  oder  job_chain="/.." order=".."
+                }
             }
         }
     }

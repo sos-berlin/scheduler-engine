@@ -2198,10 +2198,11 @@
             </thead>
 
             <tbody>
-                <xsl:for-each select="schedule">
+                <xsl:for-each select="schedule | run_time">
                     <xsl:sort select="translate( @path, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz' )"/>
                     
-                    <xsl:if test="not( /spooler/answer/state/schedules/schedule [ @path = current()/@substitute ] ) ">
+                    <xsl:if test="not( /spooler/answer/state/schedules/schedule [ @path = current()/@substitute ] ) and 
+                                  not( /spooler/answer/state/schedules/run_time [ @path = current()/@substitute ] )">
 
                         <tr>
                             <td colspan="4">
@@ -2234,7 +2235,8 @@
                         
                         <xsl:variable name="now_covered_by_schedule" select="@now_covered_by_schedule"/>
                         
-                        <xsl:for-each select="parent::schedules/schedule [ @substitute = current()/@path ]">
+                        <xsl:for-each select="parent::schedules/schedule [ @substitute = current()/@path ] |
+                                              parent::schedules/run_time [ @substitute = current()/@path ]">
                             <tr>
                                 <td style="padding-left: 2ex">
                                     <xsl:element name="span">
