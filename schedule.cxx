@@ -1026,7 +1026,7 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
         Time now = Time::now();
         result.setAttribute( "active", !covering_schedule_at( now ) || is_covering_at( now )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
 
-        if( !_use_set.empty() )
+        if( show_what.is_set( show_schedules )  &&  !_use_set.empty() )
         {
             xml::Element_ptr schedule_users_element = result.append_new_element( "schedule.users" );
             

@@ -30,6 +30,9 @@
                     <li>
                         <scheduler_element name="schedules"/>
                     </li>
+                    <li>
+                        <scheduler_element name="show_state" attribute="what" value="schedules"/>
+                    </li>
                 </ul>
             </description>
         </revision>

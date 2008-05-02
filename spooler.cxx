@@ -3014,7 +3014,7 @@ void Spooler::log_show_state( Prefix_log* log )
     {
         Command_processor cp     ( this, Security::seclev_all );
         bool              indent = true;
-        string xml = cp.execute( "<show_state what='jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", indent );
+        string xml = cp.execute( "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", indent );
 
         if( log )
         {

@@ -685,9 +685,9 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
             if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
                 result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
             else
-            if( !show_what.is_set( show_schedules )  &&  typed_folder->subsystem() == spooler()->schedule_subsystem() )
-                result.append_new_comment( "<schedules> suppressed. Use what=\"schedules\"." );
-            else
+            //if( !show_what.is_set( show_schedules )  &&  typed_folder->subsystem() == spooler()->schedule_subsystem() )
+            //    result.append_new_comment( "<schedules> suppressed. Use what=\"schedules\"." );
+            //else
             if( show_what.is_set( show_no_subfolders )  &&  typed_folder->subsystem() == spooler()->folder_subsystem() )
             {
                 // nix

@@ -114,6 +114,11 @@
                         Liefert auch das Element <code><a href="answer/run_time.xml">&lt;run_time></a></code>.
                     </dd>
 
+                    <dt><code>schedules</code></dt>
+                    <dd>
+                        Liefert auch die benannten <scheduler_element name="schedule"/>.
+                    </dd>
+
                     <dt><code>task_history</code></dt>
                     <dd>
                         Liefert auch die Task-Historie
