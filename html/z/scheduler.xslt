@@ -2211,9 +2211,13 @@
 
                         <tr>
                             <td colspan="3">
-                                <b>
+                                <xsl:element name="span">
+                                    <xsl:if test="@active='yes'">
+                                        <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+                                    </xsl:if>
+                                    
                                     <xsl:value-of select="@path"/>
-                                </b>
+                                </xsl:element>
                             </td>
                             <td>
                                 <xsl:apply-templates select="file_based/@state"/>
@@ -2227,11 +2231,19 @@
                                 </td>
                             </tr>
                         </xsl:if>
-
+                        
+                        <xsl:variable name="now_covered_by_schedule" select="@now_covered_by_schedule"/>
+                        
                         <xsl:for-each select="parent::schedules/schedule [ @substitute = current()/@path ]">
                             <tr>
                                 <td style="padding-left: 2ex">
-                                    <xsl:value-of select="@path"/>
+                                    <xsl:element name="span">
+                                        <xsl:if test="@active='yes'">
+                                            <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+                                        </xsl:if>
+
+                                        <xsl:value-of select="@path"/>
+                                    </xsl:element>
                                 </td>
                                 <td>
                                     <xsl:value-of select="@valid_from"/>

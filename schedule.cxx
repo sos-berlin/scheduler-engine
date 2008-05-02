@@ -1024,7 +1024,10 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
         if( is_in_folder() )  fill_file_based_dom_element( result, show_what );   
 
         Time now = Time::now();
-        result.setAttribute( "active", !covering_schedule_at( now ) || is_covering_at( now )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+        Schedule* covering_schedule = covering_schedule_at( now );
+        result.setAttribute( "active", ( is_covering()? is_covering_at( now )
+                                                      : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+        if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
 
         if( show_what.is_set( show_schedules )  &&  !_use_set.empty() )
         {

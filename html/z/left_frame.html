@@ -149,6 +149,8 @@ function update_jobs_frame()
     if( _show_card == "cluster" || _first_call )  what += " cluster";
     if( _show_card == "remote_schedulers"      )  what += " remote_schedulers";
     if( _show_card == "job_chains"             )  what += " job_chains";
+    
+    what += " schedules";
 
     var commands = "<show_state what='" + what + " check_folders' max_orders='" + max_orders + "'/>";
     
