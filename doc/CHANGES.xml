@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-04-29" version="2.0.203" subversion_revision="5781">
+    <change date="2008-05-05" version="2.0.204" subversion_revision="5769">
+        <revision jira="JS-279" type="new" title="Weitere Umgebungsvariablen für Nicht-API-Jobs">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2008-04-29" version="2.0.203" subversion_revision="5764">
         <revision jira="JS-271" type="new" title="XML-Dokument in einem Konfigurationsverzeichnis anlegen: &lt;modify_hot_folder>">
             <description>
                 <ul>

@@ -3760,8 +3760,7 @@ STDMETHODIMP Com_spooler::Create_order( Iorder** result )
     {
         if( !_spooler )  return E_POINTER;
 
-        *result = _spooler->standing_order_subsystem()->new_order();
-        (*result)->AddRef();
+        *result = _spooler->standing_order_subsystem()->new_order().copy();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }

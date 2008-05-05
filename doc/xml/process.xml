@@ -144,16 +144,68 @@ spooler.job( "process" ).start( params );
         <scheduler_keyword keyword="Umgebungsvariablen"/>
 
         <p>
-            Der Scheduler übergibt eine Umgebungsvariable:
+            Der Scheduler übergibt Umgebungsvariablen:
         </p>
         
         <dl>
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_HOST"/>
+                <code>SCHEDULER_HOST</code>
+            </dt>
+            <dd>
+                Dasselbe wie <scheduler_method class="Spooler" property="hostname"/>.
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_JOB_CHAIN"/>
+                <code>SCHEDULER_JOB_CHAIN</code>
+            </dt>
+            <dd>
+                Bei einem auftragsgesteuerten Job (<scheduler_element name="job" attribute="order" value="yes"/>)
+                <scheduler_method class="Task" object="spooler_task" property="order"/><code>.</code><scheduler_method class="Order" object="" property="job_chain"/>.<scheduler_method class="Job_chain" object="" property="name"/>.
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_JOB_NAME"/>
+                <code>SCHEDULER_JOB_NAME</code>
+            </dt>
+            <dd>
+                Der Name des Jobs
+                <!--Dasselbe wie 
+                <scheduler_method class="Task" object="spooler_task" property="job"/>.<scheduler_method class="Job" object="" property="name"/>.-->
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_ORDER_ID"/>
+                <code>SCHEDULER_ORDER_ID</code>
+            </dt>
+            <dd>
+                Bei einem auftragsgesteuerten Job (<scheduler_element name="job" attribute="order" value="yes"/>)
+                <scheduler_method class="Task" object="spooler_task" property="order"/><code>.</code><scheduler_method class="Order" object="" property="id"/>.
+            </dd>
+
             <dt>
                 <scheduler_keyword keyword="SCHEDULER_TASK_TRIGGER_FILES"/>
                 <code>SCHEDULER_TASK_TRIGGER_FILES</code>
             </dt>
             <dd>
                 Dasselbe wie <scheduler_method class="Task" object="spooler_task" property="trigger_files"/>.
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_TCP_PORT"/>
+                <code>SCHEDULER_TCP_PORT</code>
+            </dt>
+            <dd>
+                Wie <scheduler_method class="Spooler" property="tcp_port"/> oder leer, wenn kein Port festgelegt ist.
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_UDP_PORT"/>
+                <code>SCHEDULER_UDP_PORT</code>
+            </dt>
+            <dd>
+                Wie <scheduler_method class="Spooler" property="udp_port"/> oder leer, wenn kein Port festgelegt ist.
             </dd>
         </dl>
         

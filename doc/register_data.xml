@@ -2137,10 +2137,22 @@
 <register_keyword keyword='scheduler.log'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='scheduler.log'/>
 </register_keyword>
+<register_keyword keyword='SCHEDULER_HOST'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_HOST'/>
+</register_keyword>
 <register_keyword keyword='scheduler_id'>
     <register_keyword_display><code>scheduler_id=</code></register_keyword_display>
     <register_entry register_file='xml/answer/remote_scheduler.xml#attribute_scheduler_id' register_title='&lt;remote_scheduler&gt; (Antwort)'  register_keyword='scheduler_id' type='definition'/>
     <register_entry register_file='xml/select_events.xml#attribute_scheduler_id' register_title='&lt;select_events&gt; (Kommando)'  register_keyword='scheduler_id' type='definition'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_JOB_CHAIN'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_CHAIN'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_JOB_NAME'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_NAME'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_ORDER_ID'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_ORDER_ID'/>
 </register_keyword>
 <register_keyword keyword='scheduler_script'>
     <register_keyword_display><code>&lt;scheduler_script&gt;</code></register_keyword_display>
@@ -2152,6 +2164,12 @@
 </register_keyword>
 <register_keyword keyword='SCHEDULER_TASK_TRIGGER_FILES'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_TRIGGER_FILES'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_TCP_PORT'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TCP_PORT'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_UDP_PORT'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_UDP_PORT'/>
 </register_keyword>
 <register_keyword keyword='schedules'>
     <register_keyword_display><code>&lt;schedules&gt;</code></register_keyword_display>

@@ -726,6 +726,7 @@ Module_instance::In_call::~In_call()
 Module_instance::Module_instance( Module* module )
 : 
     _zero_(_end_), 
+    _spooler(module->_spooler),
     _module(module),
     _log(module?module->_log:NULL)
 {
@@ -757,7 +758,7 @@ Module_instance::~Module_instance()
 void Module_instance::init()
 {
     _initialized = true;
-    _spooler = _module->_spooler;
+    //_spooler = _module->_spooler;
 
     if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
 
@@ -882,6 +883,18 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     if( _module->kind() == Module::kind_process )
     {
         // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
+
+        _process_environment->set_var( "SCHEDULER_HOST"     , _spooler->_short_hostname );
+        _process_environment->set_var( "SCHEDULER_TCP_PORT" , _spooler->tcp_port()? as_string( _spooler->tcp_port() ) : "" );
+        _process_environment->set_var( "SCHEDULER_UDP_PORT" , _spooler->udp_port()? as_string( _spooler->udp_port() ) : "" );
+        _process_environment->set_var( "SCHEDULER_JOB_NAME" , _task->job()->name() );
+
+        if( Order* order = _task->order() )
+        {
+            _process_environment->set_var( "SCHEDULER_JOB_CHAIN", order->job_chain_path().name() );
+            _process_environment->set_var( "SCHEDULER_ORDER_ID" , order->string_id() );
+        }
+
 
         Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
             _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
