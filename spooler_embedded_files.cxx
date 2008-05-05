@@ -1457,7 +1457,8 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:attribute name=\"schedule\"          type=\"String\"/>             <!-- Nur zum Abruf (\"<schedule.use>\") -->\n"
     "\n"
-    "<xsd:attribute name=\"name\"              type=\"String\"/>             <!-- Nur zur Definition eines benannten <schedule> -->\n"
+    "<xsd:attribute name=\"name\"              type=\"Name\"/>               <!-- Nur zur Definition eines benannten <schedule> -->\n"
+    "<xsd:attribute name=\"title\"             type=\"String\"/>\n"
     "\n"
     "<xsd:attribute name=\"substitute\"        type=\"Path\"/>               <!-- F\xc3" "\xbc" "r \xc3" "\xbc" "berdeckendes <schedule> -->\n"
     "<xsd:attribute name=\"valid_from\"        type=\"Date_time\"/>\n"
@@ -1923,7 +1924,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209471386 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209971350 },
     { NULL, NULL, 0 }
 };
 

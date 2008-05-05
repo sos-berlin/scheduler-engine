@@ -415,6 +415,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         Time                        next_time                   ( const Time& );
 
         Fill_zero                  _zero_;
+        string                     _title;
         bool                       _once;
         At_set                     _at_set;
         Date_set                   _date_set;

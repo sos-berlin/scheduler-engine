@@ -1148,10 +1148,8 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     _dom.create();
     _dom.appendChild( _dom.clone( element ) );
 
-    _once = element.bool_getAttribute( "once", _once );
-    //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
-    _start_time_function = element.getAttribute( "start_time_function" );
 
+    _title = element.getAttribute( "title ");
 
     _covered_schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "substitute" ) );
     _covered_schedule_begin.set_datetime( element.getAttribute( "valid_from"          ) );
@@ -1163,6 +1161,11 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
         if( _covered_schedule_begin != 0           )  z::throw_xc( "SCHEDULER-467", "valid_from", "substitute" );
         if( _covered_schedule_end   != Time::never )  z::throw_xc( "SCHEDULER-467", "valid_to"  , "substitute" );
     }
+
+
+    _once = element.bool_getAttribute( "once", _once );
+    //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
+    _start_time_function = element.getAttribute( "start_time_function" );
 
 
     default_period.set_dom( element );

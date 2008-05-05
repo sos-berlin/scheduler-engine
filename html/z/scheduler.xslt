@@ -2219,6 +2219,12 @@
                                     
                                     <xsl:value-of select="@path"/>
                                 </xsl:element>
+
+                                <xsl:if test="@title and @title != ''">
+                                    <xsl:text>&#160; "</xsl:text>
+                                    <xsl:value-of select="@title"/>
+                                    <xsl:text>"</xsl:text>
+                                </xsl:if>
                             </td>
                             <td>
                                 <xsl:apply-templates select="file_based/@state"/>

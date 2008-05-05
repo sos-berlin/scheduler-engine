@@ -8,11 +8,11 @@
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <schedules>
-            <schedule name="trettio">
+            <schedule name="trettio" title="Dreißig">
                 <period absolute_repeat="30"/>
             </schedule>
             
-            <schedule name="sextio">
+            <schedule name="sextio" title="Sechzig">
                 <period absolute_repeat="60"/>
             </schedule>
         </schedules>

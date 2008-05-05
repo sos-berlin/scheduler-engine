@@ -1448,7 +1448,8 @@
 
         <xsd:attribute name="schedule"          type="String"/>             <!-- Nur zum Abruf ("<schedule.use>") -->
 
-        <xsd:attribute name="name"              type="String"/>             <!-- Nur zur Definition eines benannten <schedule> -->
+        <xsd:attribute name="name"              type="Name"/>               <!-- Nur zur Definition eines benannten <schedule> -->
+        <xsd:attribute name="title"             type="String"/>
 
         <xsd:attribute name="substitute"        type="Path"/>               <!-- Für überdeckendes <schedule> -->
         <xsd:attribute name="valid_from"        type="Date_time"/>
