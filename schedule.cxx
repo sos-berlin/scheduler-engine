@@ -1023,11 +1023,14 @@ xml::Element_ptr Schedule::dom_element( const xml::Document_ptr& dom_document, c
             //ist schon korrekt: if( _covered_schedule_begin           )  result.setAttribute_optional( "valid_from", _covered_schedule_begin.as_string( Time::without_ms ) );
             //ist schon korrekt: if( !_covered_schedule_end.is_never() )  result.setAttribute_optional( "valid_to"  , _covered_schedule_end  .as_string( Time::without_ms ) );
 
-            Time now = Time::now();
-            Schedule* covering_schedule = covering_schedule_at( now );
-            result.setAttribute( "active", ( is_covering()? is_covering_at( now )
-                                                          : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
-            if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
+            if( file_based_state() == s_active )
+            {
+                Time now = Time::now();
+                Schedule* covering_schedule = covering_schedule_at( now );
+                result.setAttribute( "active", ( is_covering()? is_covering_at( now )
+                                                              : !covering_schedule    )? "yes": "no" );  // Wird nicht überdeckt oder kann jetzt selbst überdecken?
+                if( covering_schedule )  result.setAttribute( "now_covered_by_schedule", covering_schedule->path() );
+            }
 
             fill_file_based_dom_element( result, show_what );   
 
