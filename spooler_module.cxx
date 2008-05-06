@@ -879,33 +879,27 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     }
 
 
-    
+    _has_order = task->order() != NULL;      // Rückgabe von Auftragsparametern über Datei ermöglichen
+
+    fill_process_environment();
+}
+
+//--------------------------------------------------------Module_instance::fill_process_environment
+
+void Module_instance::fill_process_environment()
+{
     if( _module->kind() == Module::kind_process )
     {
         // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
 
-        _process_environment->set_var( "SCHEDULER_HOST"     , _spooler->_short_hostname );
-        _process_environment->set_var( "SCHEDULER_TCP_PORT" , _spooler->tcp_port()? as_string( _spooler->tcp_port() ) : "" );
-        _process_environment->set_var( "SCHEDULER_UDP_PORT" , _spooler->udp_port()? as_string( _spooler->udp_port() ) : "" );
-        _process_environment->set_var( "SCHEDULER_JOB_NAME" , _task->job()->name() );
-
-        if( Order* order = _task->order() )
-        {
-            _process_environment->set_var( "SCHEDULER_JOB_CHAIN", order->job_chain_path().name() );
-            _process_environment->set_var( "SCHEDULER_ORDER_ID" , order->string_id() );
-        }
-
-
-        Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
+        Z_FOR_EACH_CONST( Com_variable_set::Map, _task->params()->_map, v )  
             _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
 
-        if( Order* order = task->order() )
+        if( Order* order = _task->order() )
         {
             if( Com_variable_set* order_params = order->params_or_null() )
                 Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
                     _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-
-            _has_order = true;      // Rückgabe von Auftragsparametern über Datei ermöglichen
         }
 
         // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
@@ -913,12 +907,28 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
 
     // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
-    if( task->environment_or_null() )  _process_environment->merge( task->environment_or_null() );
+    if( _task->environment_or_null() )  _process_environment->merge( _task->environment_or_null() );
 
 
     if( _module->kind() == Module::kind_process )
     {
-        _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
+        _process_environment->set_var( "SCHEDULER_HOST"              , _spooler->_short_hostname );
+        _process_environment->set_var( "SCHEDULER_TCP_PORT"          , _spooler->tcp_port()? as_string( _spooler->tcp_port() ) : "" );
+        _process_environment->set_var( "SCHEDULER_UDP_PORT"          , _spooler->udp_port()? as_string( _spooler->udp_port() ) : "" );
+
+        Host_and_port supervisor_host_and_port;
+        if( _spooler->_supervisor_client )  supervisor_host_and_port = _spooler->_supervisor_client->host_and_port();
+        _process_environment->set_var( "SCHEDULER_SUPERVISOR_HOST"   , supervisor_host_and_port.host().as_string() );
+        _process_environment->set_var( "SCHEDULER_SUPERVISOR_PORT"   , supervisor_host_and_port.string_port() );
+
+        _process_environment->set_var( "SCHEDULER_JOB_NAME"          , _task->job()->name() );
+        _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", _task->trigger_files() );
+
+        if( Order* order = _task->order() )
+        {
+            _process_environment->set_var( "SCHEDULER_JOB_CHAIN", order->job_chain_path().name() );
+            _process_environment->set_var( "SCHEDULER_ORDER_ID" , order->string_id() );
+        }
     }
 }
 

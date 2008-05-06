@@ -1900,12 +1900,12 @@ File_based* File_based::replace_now()
 
     if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
     {                                       
-        new_file_based->set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
-        new_file_based->_base_file_xc      = zschimmer::Xc();
-        new_file_based->_base_file_xc_time = 0;
+        set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
+        _base_file_xc      = zschimmer::Xc();
+        _base_file_xc_time = 0;
+        if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
     }
 
-    //new_file_based->switch_file_based_state( wished_state );
     new_file_based->activate();
     return new_file_based;
 }

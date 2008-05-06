@@ -266,6 +266,7 @@ struct Module_instance : Object
     virtual void                add_obj                     ( IDispatch*, const string& name );
     IDispatch*                  object                      ( const string& name );
     IDispatch*                  object                      ( const string& name, IDispatch* deflt );
+    void                        fill_process_environment    ();
 
     void                        end_task                    ();
 
