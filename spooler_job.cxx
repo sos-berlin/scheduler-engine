@@ -3156,8 +3156,8 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
-        if( show_what.is_set( show_schedule )  &&  _schedule_use->is_defined() )  result.appendChild( _schedule_use->dom_element( document, show_what ) ),
-                                                                                  dom_append_nl( result );
+        if( show_what.is_set( show_schedule ) )  result.appendChild( _schedule_use->dom_element( document, show_what ) ),
+                                                 dom_append_nl( result );
 
         if( _schedule_use->is_defined() )   // Wie in Order::dom_element(), besser nach Schedule_use::dom_element()  <schedule.use covering_schedule="..."/>
             if( Schedule* covering_schedule = _schedule_use->schedule()->active_schedule_at( now ) )  
