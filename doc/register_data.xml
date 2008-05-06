@@ -254,6 +254,7 @@
     <register_entry register_file='xml/config.xml#' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config' type='definition'/>
     <register_entry register_file='xml/config.xml#use_element__config' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/job.xml#use_element__config' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='config'/>
+    <register_entry register_file='xml/process.xml#use_element__config' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/process_class.xml#use_element__config' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/supervisor.xml#use_element__config' register_title='&lt;supervisor&gt; (Konfiguration)'  register_keyword='config'/>
     <register_entry register_file='xml/web_service.xml#use_element__config' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='config'/>
@@ -2161,6 +2162,12 @@
     <register_entry register_file='xml/config.xml#use_element__scheduler_script' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='scheduler_script'/>
     <register_entry register_file='xml/scheduler_script.xml#' register_title='&lt;scheduler_script&gt; (Konfiguration)'  register_keyword='scheduler_script' type='definition'/>
     <register_entry register_file='xml/script.xml#use_element__scheduler_script' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='scheduler_script'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_SUPERVISOR_HOST'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_SUPERVISOR_HOST'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_SUPERVISOR_PORT'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_SUPERVISOR_PORT'/>
 </register_keyword>
 <register_keyword keyword='SCHEDULER_TASK_TRIGGER_FILES'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_TRIGGER_FILES'/>

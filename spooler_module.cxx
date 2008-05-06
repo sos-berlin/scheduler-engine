@@ -918,7 +918,7 @@ void Module_instance::fill_process_environment()
 
         Host_and_port supervisor_host_and_port;
         if( _spooler->_supervisor_client )  supervisor_host_and_port = _spooler->_supervisor_client->host_and_port();
-        _process_environment->set_var( "SCHEDULER_SUPERVISOR_HOST"   , supervisor_host_and_port.host().as_string() );
+        _process_environment->set_var( "SCHEDULER_SUPERVISOR_HOST"   , supervisor_host_and_port.host().name_or_ip() );
         _process_environment->set_var( "SCHEDULER_SUPERVISOR_PORT"   , supervisor_host_and_port.string_port() );
 
         _process_environment->set_var( "SCHEDULER_JOB_NAME"          , _task->job()->name() );

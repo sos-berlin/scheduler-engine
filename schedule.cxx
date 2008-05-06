@@ -1114,7 +1114,8 @@ Schedule::Inlay::Inlay( Schedule* schedule )
     _months(12)
 {
     _dom.create();
-    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>
+    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>, zur Kompatibilität für nicht gesetztes <run_time> in einem Job.
+                                                                // Bei file_based_state() == s_undefined wird dann ein <run_time/> statt <schedule/> geliefert
 
     if( _schedule->_scheduler_holidays_usage == with_scheduler_holidays )      // Default. Nur bei Order nicht (siehe eMail von Andreas Liebert 2008-04-21).
     {

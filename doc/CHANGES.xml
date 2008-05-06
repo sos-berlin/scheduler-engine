@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-05-05" version="2.0.204" subversion_revision="5769">
+    <change date="2008-05-06" version="2.0.204" subversion_revision="5770">
         <revision jira="JS-279" type="new" title="Weitere Umgebungsvariablen für Nicht-API-Jobs">
             <description>
                 <ul>
