@@ -1008,6 +1008,8 @@ void Process_class_configuration::set_dom( const xml::Element_ptr& e )
     if( !e )  return;
     if( !e.nodeName_is( "process_class" ) )  z::throw_xc( "SCHEDULER-409", "process_class", e.nodeName() );
 
+    clear_source_xml();
+
     string name = e.getAttribute( "name" );
     if( name != "" )  set_name( name );         // Leere Name steht für die Default-Prozessklasse
 

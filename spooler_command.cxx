@@ -1276,6 +1276,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "folders"          ) )  show |= show_folders;
         else
         if( string_equals_prefix_then_skip( &p, "no_subfolders"    ) )  show |= show_no_subfolders;
+        else
+        if( string_equals_prefix_then_skip( &p, "source"           ) )  show |= show_source;
         //else
         //if( string_equals_prefix_then_skip( &p, "subfolders"       ) )  show |= show_subfolders;
         else

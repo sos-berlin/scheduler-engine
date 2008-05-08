@@ -5,8 +5,8 @@
 
 
 <api.class
-    name        = "Run_time"
-    object_name = "run_time"
+    name        = "Schedule"
+    object_name = "schedule"
     base_dir    = "../"
     author      = "$Author$"
     date        = "$Date$"
@@ -14,33 +14,9 @@
 
 <not_implemented programming_language="java"/>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
-    <property name="Schedule" access="read">
-        <com>
-            <com.result>
-                <com.type class="Schedule"/>
-            </com.result>
-        </com>
-
-        <title>
-            <code>&lt;schedule></code>
-        </title>
-
-        <description>
-            <p>
-            </p>
-        </description>
-
-        <!--messages>
-        <message level="error" code="SCHEDULER-352"/>
-    </messages-->
-
-    </property>
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="xml" access="write">
+<property name="xml">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -52,12 +28,12 @@
     </com>
 
     <title>
-        <code>&lt;run_time></code>
+        <code>&lt;schedule></code>
     </title>
 
     <description>
         <p>
-            Verwirft die bisherige Einstellung und setzt <code>Run_time</code> neu.
+            Verwirft die bisherige Einstellung und setzt <code>Schedule</code> neu.
         </p>
     </description>
 
@@ -73,19 +49,17 @@
 
 <description>
     <p>
-        Siehe <scheduler_element name="run_time"/>,
-        <scheduler_method class="Order"/>,
-        <scheduler_method class="Schedule"/>.
+        Siehe <scheduler_element name="schedule"/>,
+        <scheduler_element name="run_time"/>,
+        <scheduler_method class="Spooler" object="spooler" method="schedule"/>,
+        <scheduler_method class="Run_time"/>.
     </p>
 </description>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <example programming_language="javascript">
-    <pre>var order = spooler_task.order;
-
-// Repeat order daily at 15:00
-order.run_time.xml = "&lt;run_time>&lt;period single_start='15:00'/>&lt;/run_time>";</pre>
+    <pre>spooler.schedule( "my_schedule" ).xml = "&lt;schedule>&lt;period single_start='15:00'/>&lt;/schedule>";</pre>
 </example>
 
 </api.class>

@@ -496,6 +496,7 @@ void Lock::set_dom( const xml::Element_ptr& lock_element )
 {
     if( !lock_element.nodeName_is( "lock" ) )  z::throw_xc( "SCHEDULER-409", "lock", lock_element.nodeName() );
 
+    clear_source_xml();
     set_max_non_exclusive( lock_element.int_getAttribute( "max_non_exclusive", _config._max_non_exclusive ) );
 }
 

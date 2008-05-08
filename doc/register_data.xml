@@ -2074,6 +2074,7 @@
     <register_entry register_file='api/Job.xml#use_element__run_time' register_title='XXX'  register_keyword='run_time'/>
     <register_entry register_file='api/Order.xml#use_element__run_time' register_title='XXX'  register_keyword='run_time'/>
     <register_entry register_file='api/Run_time.xml#use_element__run_time' register_title='XXX'  register_keyword='run_time'/>
+    <register_entry register_file='api/Schedule.xml#use_element__run_time' register_title='XXX'  register_keyword='run_time'/>
     <register_entry register_file='api/Task.xml#use_element__run_time' register_title='XXX'  register_keyword='run_time'/>
     <register_entry register_file='directory_watch.xml#use_element__run_time' register_title='Verzeichnisüberwachung'  register_keyword='run_time'/>
     <register_entry register_file='dynamic_configuration.xml#use_element__run_time' register_title='Konfiguration aus Hot Folders'  register_keyword='run_time'/>
@@ -2119,6 +2120,7 @@
 <register_keyword keyword='schedule'>
     <register_keyword_display><code>&lt;schedule&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__schedule' register_title='Änderungsprotokoll'  register_keyword='schedule'/>
+    <register_entry register_file='api/Schedule.xml#use_element__schedule' register_title='XXX'  register_keyword='schedule'/>
     <register_entry register_file='xml/run_time.xml#use_element__schedule' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='schedule'/>
     <register_entry register_file='xml/schedule.xml#' register_title='&lt;schedule&gt; (Konfiguration)'  register_keyword='schedule' type='definition'/>
     <register_entry register_file='xml/show_state.xml#use_element__schedule' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='schedule'/>

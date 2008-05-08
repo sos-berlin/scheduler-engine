@@ -562,6 +562,22 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <property name="schedule" access="read">
+        <com>
+            <com.parameter name="path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+            
+            <com.result>
+                <com.type class="Schedule"/>
+            </com.result>
+        </com>
+
+        <title>Liefert den benannten <scheduler_method class="Schedule"/> oder <api.null/></title>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <property name="supervisor_client" access="read">
         <com>
             <com.result>

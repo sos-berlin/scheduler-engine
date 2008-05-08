@@ -23,6 +23,7 @@
     <class_reference class="Process_class"/>
     <class_reference class="Process_classes"/>
     <class_reference class="Run_time"/>
+    <class_reference class="Schedule"/>
     <class_reference class="Spooler"/>
     <class_reference class="Spooler_program"/>
     <class_reference class="Subprocess"/>

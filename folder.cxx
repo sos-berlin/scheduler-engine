@@ -1004,12 +1004,12 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                 }
                 else
                 {
-                    string content;
-                    z::Xc  content_xc;
+                    z::Xc content_xc;
+                    string source_xml;
 
                     try
                     {
-                        content = string_from_file( directory_entry->_file_info->path() );
+                        source_xml = string_from_file( directory_entry->_file_info->path() );
                     }
                     catch( exception& x ) { content_xc = x; }
 
@@ -1058,7 +1058,7 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         if( !content_xc.is_empty() )  throw content_xc;
 
 
-                        xml::Document_ptr dom_document ( content );
+                        xml::Document_ptr dom_document ( source_xml );
                         xml::Element_ptr  element      = dom_document.documentElement();
                         subsystem()->assert_xml_element_name( element );
                         if( spooler()->_validate_xml )  spooler()->_schema.validate( dom_document );
@@ -1066,9 +1066,10 @@ bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Direc
                         assert_empty_attribute( element, "spooler_id" );
                         if( !element.bool_getAttribute( "replace", true ) )  z::throw_xc( "SCHEDULER-232", element.nodeName(), "replace", element.getAttribute( "replace" ) );
 
-                        Z_LOG2( "scheduler", file_path << ":\n" << content << "\n" );
+                        Z_LOG2( "scheduler", file_path << ":\n" << source_xml << "\n" );
 
-                        file_based->set_dom( element );
+                        file_based->set_dom( element );         // Ruft clear_source_xml()
+                        file_based->_source_xml = source_xml;   
                         file_based->set_file_based_state( File_based::s_not_initialized );
 
                         file_based->initialize();
@@ -1891,19 +1892,24 @@ File_based* File_based::on_replace_now()
 
 File_based* File_based::replace_now()
 {
-    assert( replacement() );
+    ptr<File_based> replacement = this->replacement();
+    assert( replacement );
 
-    Base_file_info file_info = replacement()->base_file_info();
+    Base_file_info file_info = replacement->base_file_info();
 
     File_based* new_file_based = on_replace_now();
-    // this ist ungültig
 
     if( new_file_based == this )              // Process_class und Lock werden nicht ersetzt. Stattdessen werden die Werte übernommen
     {                                       
         set_base_file_info( file_info );        // Alte Werte geänderten Objekts überschreiben
+        _source_xml        = replacement->_source_xml;
         _base_file_xc      = zschimmer::Xc();
         _base_file_xc_time = 0;
         if( file_based_state() == s_undefined )  set_file_based_state( File_based::s_not_initialized );     // Wenn altes fehlerhaft war
+    }
+    else
+    {
+        // this ist ungültig
     }
 
     new_file_based->activate();
@@ -1967,13 +1973,31 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
     result.setAttribute         ( "path", path().with_slash() );
     result.setAttribute_optional( "name", name() );
 
-    xml::Element_ptr file_based_element = result.insertBefore( File_based::dom_element( result.ownerDocument(), show_what ), result.firstChild() );
+    xml::Node_ptr    original_first_node = result.firstChild();
+    xml::Element_ptr file_based_element  = result.insertBefore( File_based::dom_element( result.ownerDocument(), show_what ), original_first_node  );
 
     if( replacement() ) 
     {
         xml::Element_ptr replacement_element = result.ownerDocument().createElement( "replacement" );
         replacement_element.appendChild( replacement()->dom_element( result.ownerDocument(), show_what ) );
-        result.insertBefore( replacement_element, file_based_element.nextSibling() );
+        result.insertBefore( replacement_element, original_first_node );
+    }
+
+    if( show_what.is_set( show_source )  &&  _source_xml != "" )
+    {
+        xml::Element_ptr source_element = result.ownerDocument().createElement( "source" );
+        result.insertBefore( source_element, original_first_node );
+
+        try
+        {
+            xml::Document_ptr source_dom ( _source_xml );
+            source_element.appendChild( source_element.ownerDocument().clone( source_dom.documentElement() ) );      // Ein "prune()" wäre effizienter als clone()
+        }
+        catch( exception& x )
+        {
+            source_element.appendChild( result.ownerDocument().createTextNode( _source_xml ) );
+            append_error_element( source_element, x );
+        }
     }
 }
 
