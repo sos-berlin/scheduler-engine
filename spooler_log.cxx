@@ -781,7 +781,7 @@ void Prefix_log::open()
 
 void Prefix_log::close()
 {
-    _is_finished = true;
+    //_is_finished = true;
 
     if( _file != -1 )  
     {
@@ -817,6 +817,8 @@ void Prefix_log::close()
 
 void Prefix_log::finish_log()
 {
+    _is_finished = true;
+
     if( _file != -1 )  
     {
         try {
@@ -836,7 +838,7 @@ void Prefix_log::finish_log()
         }
 
         signal_events();
-    }
+    }                   
 }
 
 //----------------------------------------------------------------------------Prefix_log::open_file

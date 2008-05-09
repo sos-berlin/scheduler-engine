@@ -6243,14 +6243,18 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 void Order::activate()
 {
     bool ok = _schedule_use->try_load();
-    if( ok )  set_next_start_time();
+    if( ok )  
+    {
+        if( _setback )  set_setback( _setback );
+                  else  set_next_start_time();
+    }
 }
 
 //-----------------------------------------------------------------------Order::set_next_start_time
 
 void Order::set_next_start_time()
 {
-    if( _state == _initial_state  &&  !_setback )
+    if( _state == _initial_state )  // &&  !_setback )
     {
         if( _schedule_use->is_defined() )
         {
@@ -6401,7 +6405,8 @@ void Order::handle_end_state()
         //_schedule_modified = false;
         Time next_start = next_start_time( is_first_call );
 
-        if( next_start != Time::never  &&  _state != _initial_state )   // <schedule> verlangt Wiederholung?
+        if( ( next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
+            _state != _initial_state )   
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
@@ -6814,8 +6819,23 @@ void Order::on_schedule_modified()
 
 bool Order::on_schedule_to_be_removed()
 {
+    _schedule_use->disconnect();
     handle_changed_schedule();
     return true;
+}
+
+//-------------------------------------------------------------------Order::handle_changed_schedule
+
+void Order::handle_changed_schedule()
+{
+    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_period_or_single_start )
+                                         : Period();
+
+    if( is_virgin() )
+    {
+        //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
+        set_next_start_time();      // Änderung von <run_time> überschreibt Order.at
+    }
 }
 
 //------------------------------------------------------------------------------Order::set_schedule
@@ -6831,20 +6851,6 @@ void Order::set_schedule( File_based* source_file_based, const xml::Element_ptr&
 Schedule_use* Order::schedule_use()
 {
     return +_schedule_use;
-}
-
-//-------------------------------------------------------------------Order::handle_changed_schedule
-
-void Order::handle_changed_schedule()
-{
-    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_period_or_single_start )
-                                         : Period();
-
-    if( is_virgin() )
-    {
-        _setback = 0;           // Änderung von <run_time> überschreibt Order.at
-        set_next_start_time();
-    }
 }
 
 //---------------------------------------------------------------------------Order::set_replacement

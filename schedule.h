@@ -347,6 +347,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
     bool                     is_defined                     ()                                      { return _schedule != NULL; }
+    bool                     is_incomplete                  ()                                      { return _schedule == NULL  &&  !_schedule_path.empty(); }
     bool                        try_load                    ();
     void                        log_changed_active_schedule ( const Time& now );
 

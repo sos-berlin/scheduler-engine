@@ -427,37 +427,40 @@ Period Schedule_use::next_period( const Time& t, With_single_start single_start 
 
 void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
-    Time t          = options->_from;
-    Time last_begin;
-
-    //bool check_for_once = _once;
-
-    while( options->_count < options->_limit )
+    if( is_defined() )
     {
-        Period period = next_period( t, wss_next_any_start );  
-        if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
+        Time t          = options->_from;
+        Time last_begin;
 
-        //if( period._start_once  ||
-        //    period._single_start  ||     
-        //    _host_object->scheduler_type_code() == Scheduler_object::type_order ||
-        //    check_for_once 
+        //bool check_for_once = _once;
+
+        while( options->_count < options->_limit )
         {
-            //check_for_once = false;
+            Period period = next_period( t, wss_next_any_start );  
+            if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
 
-            //2008-04-26 if( period.begin() >= options->_from  &&  period.begin() != last_begin )
-            if( period.end() > options->_from  &&  period.begin() != last_begin )
+            //if( period._start_once  ||
+            //    period._single_start  ||     
+            //    _host_object->scheduler_type_code() == Scheduler_object::type_order ||
+            //    check_for_once 
             {
-                element.appendChild( period.dom_element( element.ownerDocument() ) );
-                options->_count++;
+                //check_for_once = false;
 
-                last_begin = period.begin();
+                //2008-04-26 if( period.begin() >= options->_from  &&  period.begin() != last_begin )
+                if( period.end() > options->_from  &&  period.begin() != last_begin )
+                {
+                    element.appendChild( period.dom_element( element.ownerDocument() ) );
+                    options->_count++;
+
+                    last_begin = period.begin();
+                }
             }
-        }
 
-        Time new_t = period._single_start? period.begin() + 1 : period.end();
-        assert( t < new_t );
-        if( new_t <= t )  break;
-        t = new_t;
+            Time new_t = period._single_start? period.begin() + 1 : period.end();
+            assert( t < new_t );
+            if( new_t <= t )  break;
+            t = new_t;
+        }
     }
 }
 

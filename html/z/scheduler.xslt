@@ -2178,7 +2178,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~schedules-->
 
     <xsl:template match="schedules">
-        <table width="100%" cellpadding="0" cellspacing="0" class="schedules">
+        <table width="100%" cellpadding="0" cellspacing="0" class="schedule">
             <col width="100"/>
             <col width="$datetime_column_width"/>
             <col width="$datetime_column_width"/>

@@ -81,11 +81,13 @@ hr.order_id_space       { color: #ff8000; background-color: #ff8000; }
 .remote_scheduler       { background-color: #ffffa0; }
 .remote_scheduler_hover { background-color: #efef8f; }
 
-.calendar               { background-color: #ffe0c0; }
+.schedule               { background-color: #ffff80; }
 
-.web_service            { background-color: #ffffa0; }
+.calendar               { background-color: #ffff80; }
 
-a                       { text-decoration: none; color: inherit; background-color: inherit; }
+.web_service            { background-color: #ffb0b0; }
+
+a                       { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline          { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline:link     { text-decoration: none     ; color: inherit; background-color: inherit; }
 a.no_underline:active   { text-decoration: none     ; color: inherit; background-color: inherit; }
