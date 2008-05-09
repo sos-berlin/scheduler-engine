@@ -235,6 +235,7 @@ struct File_based : Scheduler_object,
 
     void                        handle_event                ( Base_file_event );
 
+    virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
     virtual bool                on_initialize               ()                                      = 0;
     virtual bool                on_load                     ()                                      = 0;
@@ -413,6 +414,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
     bool                        adjust_with_directory       ( directory_observer::Directory* );
 
+    Typed_folder*               typed_folder                ( const File_based_subsystem* ) const;
     Process_class_folder*       process_class_folder        ()                                      { return _process_class_folder; }
     lock::Lock_folder*          lock_folder                 ()                                      { return _lock_folder; }
     Job_folder*                 job_folder                  ()                                      { return _job_folder; }
@@ -484,6 +486,8 @@ struct File_based_subsystem : Subsystem
     virtual string              normalized_path             ( const Path& path ) const;
     virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
+    virtual Typed_folder*       typed_folder                ( const Absolute_path& folder_path ) const = 0;
+    virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what&  );
 
   protected:
     friend struct               Typed_folder;
@@ -512,6 +516,8 @@ struct file_based_subsystem : File_based_subsystem
     int                         file_based_map_version      () const                                { return _file_based_map_version; }
     ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }
     virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
+    inline Typed_folder*        typed_folder                ( const Absolute_path& ) const;
+
 
 
     void close()
@@ -587,7 +593,6 @@ struct file_based_subsystem : File_based_subsystem
         return true;
     }
     
-
     virtual vector<FILE_BASED*> ordered_file_baseds()
     {
         vector<FILE_BASED*> result;
@@ -775,6 +780,14 @@ struct Folder_subsystem : Object,
 
 
 inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
+
+//---------------------------------------------------file_based_subsystem<FILE_BASED>::typed_folder
+
+template< class FILE_BASED >
+inline Typed_folder* file_based_subsystem<FILE_BASED>::typed_folder( const Absolute_path& path ) const     
+{ 
+    return _spooler->folder_subsystem()->folder( path )->typed_folder( this ); 
+}
 
 //------------------------------------------------------------------------------FOR_EACH_FILE_BASED
 

@@ -471,7 +471,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
 
     // file_based<>
 
-  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+  //void                        execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
     void                    set_xml                         ( File_based* source_file_based, const string& );
     void                    set_dom                         ( const xml::Element_ptr& );
     void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );

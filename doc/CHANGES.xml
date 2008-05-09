@@ -20,6 +20,16 @@
                 </ul>
             </description>
         </revision>
+
+        <revision type="new" title="&lt;schedule.remove> entfernt ein Schedule">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="schedule.remove"/> entfernt ein Schedule
+                    </li>
+                </ul>
+            </description>
+        </revision>
     </change>
 
     <change date="2008-05-06" version="2.0.204" subversion_revision="5773">

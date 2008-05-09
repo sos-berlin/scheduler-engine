@@ -474,6 +474,15 @@ void Folder::add_to_typed_folder_map( Typed_folder* typed_folder )
     }
 }
 
+//-----------------------------------------------------------------------------Folder::typed_folder
+
+Typed_folder* Folder::typed_folder( const File_based_subsystem* subsystem ) const
+{
+    Typed_folder_map::const_iterator it = _typed_folder_map.find( subsystem->filename_extension() );
+    if( it == _typed_folder_map.end() )  z::throw_xc( Z_FUNCTION, subsystem->obj_name() );
+    return it->second;
+}
+
 //----------------------------------------------------------------------------------Folder::~Folder
     
 Folder::~Folder()
@@ -2008,6 +2017,20 @@ void File_based::set_identification_attributes( const xml::Element_ptr& result )
     result.setAttribute( subsystem()->xml_element_name(), path() );    // Z.B. job="/xx"
 }
 
+//--------------------------------------------------------------------------File_based::execute_xml
+
+xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
+{
+    if( element.nodeName_is( subsystem()->xml_element_name() + ".remove" ) ) 
+    {
+        remove( File_based::rm_base_file_too );
+    }
+    else
+        z::throw_xc( "SCHEDULER-409", subsystem()->xml_element_name() + ".remove", element.nodeName() );
+
+    return command_processor->_answer.createElement( "ok" );
+}
+
 //--------------------------------------------------------------------------File_based::dom_element
 
 xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& )
@@ -2215,6 +2238,28 @@ void File_based_subsystem::assert_xml_element_name( const xml::Element_ptr& e ) 
 void File_based_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
 { 
     if( !e.nodeName_is( xml_elements_name() ) )  z::throw_xc( "SCHEDULER-409", xml_elements_name(), e.nodeName() );
+}
+
+//----------------------------------------------------------------File_based_subsystem::execute_xml
+
+xml::Element_ptr File_based_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
+{
+    xml::Element_ptr result;
+
+    if( element.nodeName_is( xml_element_name() ) )
+    {
+        typed_folder( root_path )->add_or_replace_file_based_xml( element );
+        result = command_processor->_answer.createElement( "ok" );
+    }
+    else
+    if( string_begins_with( element.nodeName(), xml_element_name() + "." ) ) 
+    {
+        result = file_based( Absolute_path( root_path, element.getAttribute( xml_element_name() ) ) )->execute_xml( command_processor, element, show_what );
+    }
+    else
+        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------Dependant::Dependant

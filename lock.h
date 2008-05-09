@@ -72,7 +72,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
+  //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
     void                    set_max_non_exclusive           ( int );
     bool                        its_my_turn                 ( const Use* );
@@ -289,7 +289,7 @@ struct Lock_subsystem : idispatch_implementation< Lock_subsystem, spooler_com::I
     Lock*                       lock                        ( const Absolute_path& path ) const     { return file_based( path ); }
     Lock*                       lock_or_null                ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
 
-    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
   private:
     static Class_descriptor     class_descriptor;

@@ -1329,6 +1329,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         result = _spooler->process_class_subsystem()->execute_xml( this, element, show );
     }
     else
+    if( string_begins_with( element_name, "schedule." ) )
+    {
+        result = _spooler->schedule_subsystem()->execute_xml( this, element, show );
+    }
+    else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else
     if( element.nodeName_is( "show_state"       ) 

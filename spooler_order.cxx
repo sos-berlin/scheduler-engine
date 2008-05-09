@@ -1840,7 +1840,10 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
         return command_processor->_answer.createElement( "ok" );
     }
     else
+    {
+        //File_based::execute_xml( command_processor, element, show_what );  <job_chain.remove>, das ist nicht vorgesehen
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
+    }
 }
 
 //--------------------------------------------------------------Job_chain::is_visible_in_xml_folder

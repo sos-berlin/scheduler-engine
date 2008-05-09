@@ -1390,17 +1390,17 @@ xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, 
 
 //-----------------------------------------------------------------------Process_class::execute_xml
 
-xml::Element_ptr Process_class::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
-{
-    if( element.nodeName_is( "process_class.remove" ) ) 
-    {
-        remove( File_based::rm_base_file_too );
-    }
-    else
-        z::throw_xc( "SCHEDULER-409", "process_class.remove", element.nodeName() );
-
-    return command_processor->_answer.createElement( "ok" );
-}
+//xml::Element_ptr Process_class::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& )
+//{
+//    if( element.nodeName_is( "process_class.remove" ) ) 
+//    {
+//        remove( File_based::rm_base_file_too );
+//    }
+//    else
+//        z::throw_xc( "SCHEDULER-409", "process_class.remove", element.nodeName() );
+//
+//    return command_processor->_answer.createElement( "ok" );
+//}
 
 //-------------------------------------------------------Process_class_folder::Process_class_folder
 
@@ -1497,26 +1497,26 @@ Process* Process_class_subsystem::new_temporary_process()
 
 //-------------------------------------------------------------Process_class_subsystem::execute_xml
 
-xml::Element_ptr Process_class_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
-{
-    xml::Element_ptr result;
-
-    if( element.nodeName_is( "process_class" ) ) 
-    {
-        //result = spooler()->root_folder()->process_class_folder()->execute_xml_process_class( command_processor, element );
-        spooler()->root_folder()->process_class_folder()->add_or_replace_file_based_xml( element );
-        result = command_processor->_answer.createElement( "ok" );
-    }
-    else
-    if( string_begins_with( element.nodeName(), "process_class." ) ) 
-    {
-        result = process_class( Absolute_path( root_path, element.getAttribute( "process_class" ) ) )->execute_xml( command_processor, element, show_what );
-    }
-    else
-        z::throw_xc( "SCHEDULER-113", element.nodeName() );
-
-    return result;
-}
+//xml::Element_ptr Process_class_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
+//{
+//    xml::Element_ptr result;
+//
+//    if( element.nodeName_is( "process_class" ) ) 
+//    {
+//        //result = spooler()->root_folder()->process_class_folder()->execute_xml_process_class( command_processor, element );
+//        spooler()->root_folder()->process_class_folder()->add_or_replace_file_based_xml( element );
+//        result = command_processor->_answer.createElement( "ok" );
+//    }
+//    else
+//    if( string_begins_with( element.nodeName(), "process_class." ) ) 
+//    {
+//        result = process_class( Absolute_path( root_path, element.getAttribute( "process_class" ) ) )->execute_xml( command_processor, element, show_what );
+//    }
+//    else
+//        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+//
+//    return result;
+//}
 
 //-------------------------------------------------------Process_class_subsystem::get_Process_class
 

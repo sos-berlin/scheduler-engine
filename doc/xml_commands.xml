@@ -36,6 +36,7 @@
         <scheduler_command name="process_class.remove" answer="ok"/>
         <scheduler_command name="remove_job_chain"     answer="ok"/>
         <scheduler_command name="remove_order"         answer="ok"/>
+        <scheduler_command name="schedule.remove"      answer="ok"/>
         <scheduler_command name="show_calendar"        answer="calendar"/>
         <scheduler_command name="show_history"         answer="history"/>
         <scheduler_command name="show_job"             answer="job"/>

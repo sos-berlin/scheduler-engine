@@ -175,23 +175,23 @@ STDMETHODIMP Lock_subsystem::Add_lock( spooler_com::Ilock* ilock )
     return hr;
 }
 
-//-------------------------------------------------------------------------Lock_folder::execute_xml
+//----------------------------------------------------------------------Lock_subsystem::execute_xml
 
-xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
-{
-    xml::Element_ptr result;
-
-    if( element.nodeName_is( "lock" ) )  spooler()->root_folder()->lock_folder()->add_or_replace_file_based_xml( element );
-    else
-    if( string_begins_with( element.nodeName(), "lock." ) ) 
-    {
-        lock( Absolute_path( root_path, element.getAttribute( "lock" ) ) )->execute_xml( element, show_what );
-    }
-    else
-        z::throw_xc( "SCHEDULER-113", element.nodeName() );
-
-    return command_processor->_answer.createElement( "ok" );
-}
+//xml::Element_ptr Lock_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
+//{
+//    xml::Element_ptr result;
+//
+//    if( element.nodeName_is( "lock" ) )  spooler()->root_folder()->lock_folder()->add_or_replace_file_based_xml( element );
+//    else
+//    if( string_begins_with( element.nodeName(), "lock." ) ) 
+//    {
+//        return lock( Absolute_path( root_path, element.getAttribute( "lock" ) ) )->execute_xml( command_processor, element, show_what );
+//    }
+//    else
+//        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+//
+//    return command_processor->_answer.createElement( "ok" );
+//}
 
 //-------------------------------------------------------------------------Lock_folder::Lock_folder
 
@@ -650,16 +650,16 @@ STDMETHODIMP Lock::Remove()
 
 //--------------------------------------------------------------------------------Lock::execute_xml
 
-void Lock::execute_xml( const xml::Element_ptr& element, const Show_what& )
-{
-    if( element.nodeName_is( "lock.remove" ) ) 
-    {
-        remove( File_based::rm_base_file_too );
-    }
-    else
-        z::throw_xc( "SCHEDULER-409", "lock.remove", element.nodeName() );
-}
-
+//void Lock::execute_xml( const xml::Element_ptr& element, const Show_what& )
+//{
+//    if( element.nodeName_is( "lock.remove" ) ) 
+//    {
+//        remove( File_based::rm_base_file_too );
+//    }
+//    else
+//        z::throw_xc( "SCHEDULER-409", "lock.remove", element.nodeName() );
+//}
+//
 //-----------------------------------------------------------------------------Requestor::Requestor
 
 Requestor::Requestor( Scheduler_object* o ) 

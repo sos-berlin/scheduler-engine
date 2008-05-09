@@ -896,6 +896,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"schedule\" type=\"run_time\"/>\n"
     "\n"
+    "<xsd:element name=\"schedule.remove\" type=\"schedule.remove\"/>\n"
     "\n"
     "<xsd:element name=\"script\">\n"
     "<xsd:complexType mixed=\"true\">\n"
@@ -1475,6 +1476,12 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "\n"
+    "<xsd:complexType name=\"schedule.remove\">\n"
+    "<xsd:attribute name=\"schedule\"          type=\"Path\"/>\n"
+    "</xsd:complexType>\n"
+    "\n"
+    "\n"
+    "\n"
     "<xsd:complexType name=\"scheduler_script\">\n"
     "<xsd:sequence>\n"
     "<xsd:element ref=\"script\"/>\n"
@@ -1924,7 +1931,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1209973769 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1210327240 },
     { NULL, NULL, 0 }
 };
 

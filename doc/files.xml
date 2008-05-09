@@ -22,6 +22,7 @@
     <file path="api/Process_classes.xml"/>
     <file path="api/Run_time.xml"/>
     <file path="api/Schedule.xml"/>
+    <file path="api/Schedule.remove.xml"/>
     <file path="api/Spooler.xml"/>
     <file path="api/Spooler_program.xml"/>
     <file path="api/Subprocess.xml"/>

@@ -42,7 +42,7 @@ struct Schedule_subsystem : Schedule_subsystem_interface
     ptr<Schedule_folder>        new_schedule_folder         ( Folder* folder )                      { return Z_NEW( Schedule_folder( folder ) ); }
 
 
-    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -139,6 +139,24 @@ ptr<Schedule> Schedule_subsystem::new_file_based()
 {
     return Z_NEW( Schedule( this ) );
 }
+
+//------------------------------------------------------------------Schedule_subsystem::execute_xml
+
+//xml::Element_ptr Schedule_subsystem::execute_xml( Command_processor* command_processor, const xml::Element_ptr& element, const Show_what& show_what )
+//{
+//    xml::Element_ptr result;
+//
+//    //if( element.nodeName_is( "schedule" ) )  spooler()->root_folder()->schedule_folder()->add_or_replace_file_based_xml( element );
+//    //else
+//    if( string_begins_with( element.nodeName(), "schedule." ) ) 
+//    {
+//        schedule( Absolute_path( root_path, element.getAttribute( "schedule" ) ) )->execute_xml( element, show_what );
+//    }
+//    else
+//        z::throw_xc( "SCHEDULER-113", element.nodeName() );
+//
+//    return command_processor->_answer.createElement( "ok" );
+//}
 
 //-----------------------------------------------------------------Schedule_folder::Schedule_folder
 

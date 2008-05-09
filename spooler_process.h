@@ -273,7 +273,7 @@ struct Process_class : Process_class_configuration
     void                        notify_a_process_is_idle    ();
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
-    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
 
   private:
@@ -340,7 +340,7 @@ struct Process_class_subsystem : idispatch_implementation< Process_class_subsyst
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
     bool                        async_continue              ();
 
-    xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
+  //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 
     // spooler_com::Iprocess_classes
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }

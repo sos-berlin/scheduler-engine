@@ -886,8 +886,9 @@
 
 
     <xsd:element name="schedule" type="run_time"/>
-    
-    
+
+    <xsd:element name="schedule.remove" type="schedule.remove"/>
+
     <xsd:element name="script">
         <xsd:complexType mixed="true">
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
@@ -1462,6 +1463,12 @@
         <xsd:attribute name="repeat"            type="Duration"/>
         <xsd:attribute name="once"              type="Yes_no"/>
         <xsd:attribute name="start_time_function" type="xsd:NMTOKEN"/>
+    </xsd:complexType>
+
+
+    
+    <xsd:complexType name="schedule.remove">
+        <xsd:attribute name="schedule"          type="Path"/>
     </xsd:complexType>
 
     

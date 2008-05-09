@@ -91,6 +91,7 @@ $spooler_log->info( "run_time->schedule()->xml=" . $spooler_task->order()->run_t
 $spooler_task->order()->run_time()->schedule()->LetProperty( 'xml', "<run_time><period absolute_repeat='33'/></run_time>" );
 $spooler_log->info( "run_time->schedule()->xml=" . $spooler_task->order()->run_time()->schedule()->xml );
 $spooler_log->info( "spooler->schedule('trettio')->xml=" . $spooler->schedule('trettio')->xml() );
+$spooler->execute_xml( "<schedule.remove schedule='/trettio'/>" );
                     
                     ]]>
                 </script>
