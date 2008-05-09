@@ -130,6 +130,16 @@
                         Liefert auch die registrierten Scheduler
                         (<scheduler_element name="remote_schedulers" directory="xml/answer/"/>).
                     </dd>
+                    <dt><code>standard</code></dt>
+                    <dd>
+                        Wie <code>what=""</code> (keine Auswahl).
+                    </dd>
+
+                    <dt><code>source</code></dt>
+                    <dd>
+                        Liefert die XML-Quellen in einem <code>&lt;source></code>-Element, soweit bekannt.
+                    </dd>
+
 
                     <dt><code>standard</code></dt>
                     <dd>

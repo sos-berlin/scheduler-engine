@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-05-09" version="2.0.205" subversion_revision="5777">
+        <revision type="new" title="&lt;show_state what=&quot;source&quot;">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="show_state" attribute="what" value="source"/> zeigt XML-Quellen
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-05-06" version="2.0.204" subversion_revision="5773">
         <revision jira="JS-279" type="new" title="Weitere Umgebungsvariablen für Nicht-API-Jobs">
             <description>
