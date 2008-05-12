@@ -21,7 +21,6 @@ const int    check_database_orders_period               = 15;
 const int    check_database_orders_period_minimum       = 1;
 const int    database_orders_read_ahead_count           = 1;
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
-const char   job_chain_order_separator                  = ',';                          // Dateiname "jobchainname,orderid.order.xml"
 
 //--------------------------------------------------------------------------------------------const
 
@@ -230,7 +229,9 @@ struct Order_schedule_use : Schedule_use
 
 static void split_standing_order_name( const string& name, string* job_chain_name, string* order_id )
 {
-    size_t pos = name.find( job_chain_order_separator );
+    // Könnte bei Bedarf nach File_based_subsystem verallgemeinert werden
+
+    size_t pos = name.find( folder_name_separator );
     if( pos == string::npos )  pos = 0;
 
     *job_chain_name = name.substr( 0, pos );
@@ -299,8 +300,22 @@ string Standing_order_subsystem::normalized_name( const string& name ) const
     split_standing_order_name( name, &job_chain_name, &order_id );
 
     return spooler()->order_subsystem()->normalized_name( job_chain_name ) + 
-           job_chain_order_separator +
+           folder_name_separator +
            order_id;
+}
+
+//--------------------------------------------------------------Standing_order_subsystem::make_path
+
+Path Standing_order_subsystem::make_path( const Path& job_chain_path, const string& order_id ) const
+{
+    return job_chain_path + folder_name_separator + order_id;
+}
+
+//--------------------------------------------------------------Standing_order_subsystem::make_path
+
+Absolute_path Standing_order_subsystem::make_path( const Absolute_path& job_chain_path, const string& order_id ) const
+{
+    return Absolute_path( make_path( static_cast<const Path&>( job_chain_path ), order_id ) );
 }
 
 //------------------------------------------------Standing_order_subsystem::assert_xml_element_name
@@ -2477,7 +2492,17 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
 {
     string order_id = record.as_string( "id" );
 
-    ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
+    ptr<Order> order = _spooler->standing_order_subsystem()->order_or_null( path(), order_id );
+    
+    if( order )  
+    {
+        Z_LOG2( "scheduler", "Auftrag aus Datenbank ändert " << order->path() << "\n" );
+    }
+    else
+    {
+        order = _spooler->standing_order_subsystem()->new_order();
+    }
+
     order->load_record( path(), record );
     order->load_blobs( ta );
 
@@ -5170,7 +5195,14 @@ void Order::on_remove_now()
     //}
 }
 
-//--------------------------------------------------------------------------Order::set_dom
+//----------------------------------------------------------------------Order::on_requisite_removed
+
+void Order::on_requisite_removed( File_based* )
+{
+    if( file_based_state() == s_active )  set_file_based_state( s_incomplete );     // Verallgemeinern nach File_based
+}
+
+//-----------------------------------------------------------------------------------Order::set_dom
 // Wird von folder.cxx aufgerufen
 
 void Order::set_dom( const xml::Element_ptr& element )
@@ -5312,7 +5344,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
 void Order::set_identification_attributes( const xml::Element_ptr& result )
 {
-    result.setAttribute( "job_chain", _job_chain_path );
+    result.setAttribute( "job_chain", _job_chain_path != ""? _job_chain_path : _file_based_job_chain_path );
     result.setAttribute( "order"    , string_id()     );
 }
 
@@ -5602,19 +5634,26 @@ void Order::set_job_by_name( const Absolute_path& job_path)
 
 void Order::set_id( const Order::Id& id )
 {
-    if( _id_locked )  z::throw_xc( "SCHEDULER-159" );
+    if( _id_locked  &&  id == _id )
+    {
+        // Dieselbe Kennung, das ist ok
+    }
+    else
+    {
+        if( _id_locked )  z::throw_xc( "SCHEDULER-159" );
 
-    string id_string = string_id( id );    // Sicherstellen, das id in einen String wandelbar ist
+        string id_string = string_id( id );    // Sicherstellen, das id in einen String wandelbar ist
 
-    if( db()->opened()  &&  id_string.length() > db()->order_id_length_max() )  
-        z::throw_xc( "SCHEDULER-345", id_string, db()->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
+        if( db()->opened()  &&  id_string.length() > db()->order_id_length_max() )  
+            z::throw_xc( "SCHEDULER-345", id_string, db()->order_id_length_max(), _spooler->_orders_tablename + "." + "id" );
 
-    if( id_string.length() > const_order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, const_order_id_length_max );
+        if( id_string.length() > const_order_id_length_max )  z::throw_xc( "SCHEDULER-344", id_string, const_order_id_length_max );
 
-    _id = id;
+        _id = id;
 
-    _log->set_prefix( obj_name() );
-    _log->set_title ( "Order " + _id.as_string() );
+        _log->set_prefix( obj_name() );
+        _log->set_title ( "Order " + _id.as_string() );
+    }
 }
 
 //----------------------------------------------------------------------------Order::set_default_id
@@ -6587,7 +6626,7 @@ void Order::postprocessing2( Job* last_job )
                 _web_service->forward_order( this, last_job );
             }
         }
-        catch( exception x )  { _log->error( x.what() ); }
+        catch( exception& x )  { _log->error( x.what() ); }
     }
 
 

@@ -139,6 +139,7 @@ using namespace directory_observer;
 //--------------------------------------------------------------------------------------------const
 
 const char                      folder_separator            = '/';
+const char                      folder_name_separator       = ',';                                  // Für mehrteilige Dateinamen: "jobchain,orderid.order.xml"
 
 //-------------------------------------------------------------------------Requisite_path::obj_name
 
@@ -411,18 +412,26 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
         }
     }
 
-    string element_name = element.nodeName();
-    string name         = element_name == "order"? element.getAttribute_mandatory( "job_chain" ) + job_chain_order_separator + element.getAttribute_mandatory( "id" )
-                                                 : element.getAttribute_mandatory( "name" );
 
+    string element_name = element.nodeName();
 
     Z_FOR_EACH( Spooler::File_based_subsystems, _spooler->_file_based_subsystems, s )
     {
-        if( (*s) != this  &&    // Folder_subsystem kennt xml_element_name() nicht
-            (*s)->xml_element_name() == element_name )
+        File_based_subsystem* subsystem = *s;
+
+        if( subsystem != this  &&    // Folder_subsystem kennt xml_element_name() nicht
+            subsystem->xml_element_name() == element_name )
         {
-            File file ( File_path( directory, name + (*s)->filename_extension() ), "w" );
-            string xml_string = element.xml();
+            // Attribute sollen gelöscht werden, also Element klonen
+            // (Mit gelöschten Attributen kann die Datei umbenannt werden, ohne dass die Attribute angepasst werden müssten.)
+            xml::Document_ptr clone;
+            clone.create();
+            clone.appendChild( clone.clone( element ) );
+
+            string name = subsystem->name_from_xml_attributes( clone.documentElement(), remove_attributes );
+
+            File file ( File_path( directory, name + subsystem->filename_extension() ), "w" );
+            string xml_string = clone.xml();
             if( !string_ends_with( xml_string, "\n" ) )  xml_string += '\n';
             file.print( xml_string );
             file.close();
@@ -431,6 +440,24 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
     }
 
     handle_folders();
+}
+
+//---------------------------------------------------File_based_subsystem::name_from_xml_attributes
+
+string File_based_subsystem::name_from_xml_attributes( const xml::Element_ptr& element, Handle_attributes handle_attributes ) const
+{
+    string         name;
+    vector<string> name_attributes = vector_split( " ", this->name_attributes() );
+
+    for( int i = 0; i < name_attributes.size(); i++ )  
+    {
+        if( i > 0 )  name += folder_name_separator;
+        name += element.getAttribute_mandatory( name_attributes[ i ] );     // name=  oder, für Order, job_chain= und id= durch Komma getrennt
+
+        if( handle_attributes == remove_attributes )  element.removeAttribute( name_attributes[ i ] );
+    }
+
+    return name;
 }
 
 //-----------------------------------------------------------------------------------Folder::Folder
@@ -1637,9 +1664,9 @@ bool File_based::on_requisite_to_be_removed( File_based* file_based )
 
 //-----------------------------------------------------------------File_based::on_requisite_removed
 
-void File_based::on_requisite_removed( File_based* file_based )
+void File_based::on_requisite_removed( File_based* )
 {
-    assert( file_based->is_in_folder() );
+    //assert( file_based->is_in_folder() );
 
     //check_for_replacing_or_removing();
     //Dependant::on_requisite_removed( file_based );
@@ -1734,8 +1761,11 @@ void File_based::on_remove_now()
 
 void File_based::remove_now()
 {
+    ptr<File_based> me = this;
+
     on_remove_now();
     typed_folder()->remove_file_based( this );
+    subsystem()->dependencies()->announce_requisite_removed( this ); 
 }
 
 //-------------------------------------------------------------------------------File_based::remove
@@ -2226,6 +2256,13 @@ void File_based_subsystem::check_file_based_element( const xml::Element_ptr& ele
     }
 }
 
+//---------------------------------------------------------------File_based_subsystem::typed_folder
+
+Typed_folder* File_based_subsystem::typed_folder( const Absolute_path& path ) const     
+{
+    return _spooler->folder_subsystem()->folder( path )->typed_folder( this ); 
+}
+
 //----------------------------------------------------File_based_subsystem::assert_xml_element_name
 
 void File_based_subsystem::assert_xml_element_name( const xml::Element_ptr& e ) const
@@ -2337,6 +2374,7 @@ bool Dependant::on_requisite_to_be_removed( File_based* )
 
 void Dependant::on_requisite_removed( File_based* )
 {
+    // Noch nicht verallgemeinern:  if( _state == s_active )  set_file_based_state( s_incomplete );    
 }
 
 //--------------------------------------------------------------------Dependant::missing_requisites
@@ -2523,6 +2561,29 @@ bool Dependencies::announce_requisite_to_be_removed( File_based* to_be_removed )
     }
 
     return result;
+}
+
+//---------------------------------------------------------Dependencies::announce_requisite_removed
+
+void Dependencies::announce_requisite_removed( File_based* to_be_removed )
+{
+    assert( to_be_removed->subsystem() == _subsystem );
+
+    Path_requestors_map::iterator it = _path_requestors_map.find( to_be_removed->normalized_path() );
+
+    if( it != _path_requestors_map.end() )
+    {
+        Requestor_set& requestor_set = it->second;
+
+        Z_FOR_EACH( Requestor_set, requestor_set, it2 )
+        {
+            Requestor_set::iterator next_it2  = it2;  next_it2++;
+            Dependant*              dependant = *it2;
+        
+            //Z_DEBUG_ONLY( _subsystem->log()->info( S() << "    " << dependant->obj_name() << " on_requisite_to_be_removed( " << to_be_removed->obj_name() << " ) " ); )
+            dependant->on_requisite_removed( to_be_removed );
+        }
+    }
 }
 
 //-------------------------------------------------------------------Base_file_info::Base_file_info

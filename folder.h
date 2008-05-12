@@ -21,6 +21,7 @@ struct Subfolder_folder;
 //--------------------------------------------------------------------------------------------const
 
 extern const char               folder_separator;
+extern const char               folder_name_separator;
 
 //-----------------------------------------------------------------------------------Requisite_path
 
@@ -78,7 +79,7 @@ struct Dependencies
     void                        remove_requisite            ( Dependant*, const string& missing_path );
     void                        announce_requisite_loaded   ( File_based* found_missing );
     bool                        announce_requisite_to_be_removed( File_based* to_be_removed );
-  //void                        announce_requisite_removed  ( File_based* );
+    void                        announce_requisite_removed  ( File_based* );
 
 
   private:
@@ -475,6 +476,12 @@ struct File_based_subsystem : Subsystem
     File_based*                 file_based_or_null          ( const Absolute_path& path ) const     { return file_based_or_null_( path ); }
     File_based*                 file_based                  ( const Absolute_path& path ) const     { return file_based_( path ); }
 
+    Typed_folder*               typed_folder                ( const Absolute_path& ) const;
+
+    enum                        Handle_attributes           { dont_remove_attributes, remove_attributes };
+    string                      name_from_xml_attributes    ( const xml::Element_ptr&, Handle_attributes = dont_remove_attributes ) const;    // Aus name= oder, bei Auftrag, job_chain= und id=
+
+
     virtual void                check_file_based_element    ( const xml::Element_ptr& );
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;
@@ -482,11 +489,11 @@ struct File_based_subsystem : Subsystem
     virtual void                assert_xml_elements_name    ( const xml::Element_ptr& ) const;
     virtual string              xml_element_name            () const                                = 0;
     virtual string              xml_elements_name           () const                                = 0;
+    virtual string              name_attributes             () const                                { return "name"; }
     virtual string              normalized_name             ( const string& name ) const            { return name; }
     virtual string              normalized_path             ( const Path& path ) const;
     virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
-    virtual Typed_folder*       typed_folder                ( const Absolute_path& folder_path ) const = 0;
     virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what&  );
 
   protected:
@@ -516,7 +523,6 @@ struct file_based_subsystem : File_based_subsystem
     int                         file_based_map_version      () const                                { return _file_based_map_version; }
     ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }
     virtual ptr<FILE_BASED>     new_file_based              ()                                      = 0;
-    inline Typed_folder*        typed_folder                ( const Absolute_path& ) const;
 
 
 
@@ -780,14 +786,6 @@ struct Folder_subsystem : Object,
 
 
 inline ptr<Folder_subsystem>    new_folder_subsystem        ( Scheduler* scheduler )                { return Z_NEW( Folder_subsystem( scheduler ) ); }
-
-//---------------------------------------------------file_based_subsystem<FILE_BASED>::typed_folder
-
-template< class FILE_BASED >
-inline Typed_folder* file_based_subsystem<FILE_BASED>::typed_folder( const Absolute_path& path ) const     
-{ 
-    return _spooler->folder_subsystem()->folder( path )->typed_folder( this ); 
-}
 
 //------------------------------------------------------------------------------FOR_EACH_FILE_BASED
 

@@ -40,7 +40,6 @@ namespace job_chain
 
 //--------------------------------------------------------------------------------------------const
 
-extern const char               job_chain_order_separator;
 extern const string             scheduler_file_path_variable_name;
 
 //-------------------------------------------------------------------------------------------------
@@ -86,6 +85,10 @@ struct Order : Com_order,
 
     bool                        can_be_removed_now          ();
     void                        on_remove_now               ();
+
+
+    // Dependant
+    void                        on_requisite_removed        ( File_based* );
 
 
     //
@@ -736,6 +739,7 @@ struct Job_chain : Com_job_chain,
     bool                        can_be_replaced_now         ();
     Job_chain*                  on_replace_now              ();
 
+
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
     void                    set_state                       ( const State& );
@@ -1027,14 +1031,19 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     string                      normalized_name             ( const string& ) const;
     ptr<Order>                  new_file_based              ();
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "orders" ); }
+    string                      name_attributes             () const                                { return "job_chain id"; }
 
 
     ptr<Standing_order_folder>  new_standing_order_folder   ( Folder* folder )                      { return Z_NEW( Standing_order_folder( folder ) ); }
     ptr<Order>                  new_order                   ()                                      { return new_file_based(); }
 
 
-    Order*                      standing_order              ( const Absolute_path& path ) const     { return file_based( path ); }
-    Order*                      standing_order_or_null      ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
+    Order*                      order                       ( const Absolute_path& job_chain_path, const string& order_id ) const  { return file_based        ( make_path( job_chain_path, order_id ) ); }
+    Order*                      order_or_null               ( const Absolute_path& job_chain_path, const string& order_id ) const  { return file_based_or_null( make_path( job_chain_path, order_id ) ); }
+
+  //string                      make_name                   ( const string&        job_chain_name, const string& order_id ) const;
+    Path                        make_path                   ( const Path&          job_chain_path, const string& order_id ) const;
+    Absolute_path               make_path                   ( const Absolute_path& job_chain_path, const string& order_id ) const;
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
 };

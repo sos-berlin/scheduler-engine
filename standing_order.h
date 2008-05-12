@@ -9,7 +9,7 @@ namespace order {
 
 ////--------------------------------------------------------------------------------------------const
 //
-//extern const char               job_chain_order_separator;
+//extern const char               folder_name_separator;
 //
 ////-----------------------------------------------------------------------------------Standing_order
 //

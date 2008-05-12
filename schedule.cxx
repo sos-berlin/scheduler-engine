@@ -393,6 +393,9 @@ bool Schedule_use::on_requisite_to_be_removed( File_based* )
     if( ok )                    // Stets true!
     {
         disconnect();           // Schaltet auf _default_schedule um (möglicherweise NULL)
+        // Das ist hier nicht ganz richtig: wenn ein on_requisite_to_be_removed() false liefert, 
+        // sollte disconnect() nicht gerufen worden sein!
+        // Das sollte nach on_requisite_removed()
     }
 
     return ok;

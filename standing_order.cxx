@@ -9,13 +9,13 @@ namespace order {
 
 ////--------------------------------------------------------------------------------------------const
 //
-//const char                  job_chain_order_separator       = ',';                                  // Dateiname "jobchainname,orderid.order.xml"
+//const char                  folder_name_separator       = ',';                                  // Dateiname "jobchainname,orderid.order.xml"
 //
 ////------------------------------------------------------------------------split_standing_order_name
 //
 //static void split_standing_order_name( const string& name, string* job_chain_name, string* order_id )
 //{
-//    size_t pos = name.find( job_chain_order_separator );
+//    size_t pos = name.find( folder_name_separator );
 //    if( pos == string::npos )  pos = 0;
 //
 //    *job_chain_name = name.substr( 0, pos );
@@ -84,7 +84,7 @@ namespace order {
 //    split_standing_order_name( name, &job_chain_name, &order_id );
 //
 //    return spooler()->order_subsystem()->normalized_name( job_chain_name ) + 
-//           job_chain_order_separator +
+//           folder_name_separator +
 //           order_id;
 //}
 //

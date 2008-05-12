@@ -8,6 +8,10 @@
 
         <commands>
             <modify_hot_folder>
+                <order job_chain="a" id="1">
+                </order>
+            </modify_hot_folder>
+            <modify_hot_folder>
                 <process_class name="a"/>
             </modify_hot_folder>
             <modify_hot_folder>
