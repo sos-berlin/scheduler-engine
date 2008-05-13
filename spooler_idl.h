@@ -631,9 +631,9 @@ struct Iorder : IDispatch
 
     virtual HRESULT     get_Job_chain_node          ( Ijob_chain_node** result )                    = 0;
 
-    virtual HRESULT     put_Job                     ( VARIANT* job_or_jobname )                     = 0;
-    virtual HRESULT  putref_Job                     ( Ijob* job )                                   = 0;
-    virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
+  //virtual HRESULT     put_Job                     ( VARIANT* job_or_jobname )                     = 0;
+  //virtual HRESULT  putref_Job                     ( Ijob* job )                                   = 0;
+  //virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
 
     virtual HRESULT     put_State                   ( VARIANT* value )                              = 0;
     virtual HRESULT     get_State                   ( VARIANT* result )                             = 0;

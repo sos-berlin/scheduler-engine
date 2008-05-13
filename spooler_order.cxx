@@ -2497,6 +2497,8 @@ Order* Job_chain::add_order_from_database_record( Read_transaction* ta, const Re
     if( order )  
     {
         Z_LOG2( "scheduler", "Auftrag aus Datenbank ändert " << order->path() << "\n" );
+        assert( !order->_job_chain );
+        assert( !order->_task );
     }
     else
     {

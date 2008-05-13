@@ -829,9 +829,9 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            get_Job_chain_node          ( spooler_com::Ijob_chain_node** );
     
-    STDMETHODIMP            put_Job                     ( VARIANT* );
-    STDMETHODIMP         putref_Job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_Job( &v ); }
-    STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
+  //STDMETHODIMP            put_Job                     ( VARIANT* );
+  //STDMETHODIMP         putref_Job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_Job( &v ); }
+  //STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
     
     STDMETHODIMP            put_State                   ( VARIANT* );
     STDMETHODIMP            get_State                   ( VARIANT* );

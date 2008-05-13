@@ -98,7 +98,7 @@ public class Order extends Idispatch
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
      */
-    public void         set_job                 ( Job job )                         {                   com_call( ">job", job           ); }
+  //public void         set_job                 ( Job job )                         {                   com_call( ">job", job           ); }
 
     
     
@@ -107,14 +107,14 @@ public class Order extends Idispatch
      * <p>
      * Besser ist der Aufruf von {@link #set_state(String)}.
      */
-    public void         set_job                 ( String job_name )                 {                   com_call( ">job", job_name      ); }
+  //public void         set_job                 ( String job_name )                 {                   com_call( ">job", job_name      ); }
     
     
     
     /*+
      * Liefert den Job, in dessen Auftragswarteschlange sich der Auftrag befindet, oder null.
      */
-    public Job              job                 ()                                  { return (Job)      com_call( "<job"                ); }
+  //public Job              job                 ()                                  { return (Job)      com_call( "<job"                ); }
     
     
     

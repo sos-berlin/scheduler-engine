@@ -4910,9 +4910,9 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET,  3, "priority"                  , (Com_method_ptr)&Com_order::get_Priority          , VT_INT        },
     { DISPATCH_PROPERTYGET,  4, "job_chain"                 , (Com_method_ptr)&Com_order::get_Job_chain         , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET,  5, "job_chain_node"            , (Com_method_ptr)&Com_order::get_Job_chain_node    , VT_DISPATCH   },
-    { DISPATCH_PROPERTYPUTREF,6,"job"                       , (Com_method_ptr)&Com_order::putref_Job            , VT_EMPTY      , { VT_DISPATCH } },
-    { DISPATCH_PROPERTYPUT,  6, "job"                       , (Com_method_ptr)&Com_order::put_Job               , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
-    { DISPATCH_PROPERTYGET,  6, "job"                       , (Com_method_ptr)&Com_order::get_Job               , VT_DISPATCH   },
+  //{ DISPATCH_PROPERTYPUTREF,6,"job"                       , (Com_method_ptr)&Com_order::putref_Job            , VT_EMPTY      , { VT_DISPATCH } },
+  //{ DISPATCH_PROPERTYPUT,  6, "job"                       , (Com_method_ptr)&Com_order::put_Job               , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+  //{ DISPATCH_PROPERTYGET,  6, "job"                       , (Com_method_ptr)&Com_order::get_Job               , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT,  7, "state"                     , (Com_method_ptr)&Com_order::put_State             , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
     { DISPATCH_PROPERTYGET,  7, "state"                     , (Com_method_ptr)&Com_order::get_State             , VT_VARIANT    },
     { DISPATCH_PROPERTYPUT,  8, "state_text"                , (Com_method_ptr)&Com_order::put_State_text        , VT_EMPTY      , { VT_BSTR     } },
@@ -5127,50 +5127,50 @@ STDMETHODIMP Com_order::get_Job_chain_node( Ijob_chain_node** result )
 
 //-------------------------------------------------------------------------------Com_order::put_job
 
-STDMETHODIMP Com_order::put_Job( VARIANT* job_or_jobname )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_order )  return E_POINTER;
-
-        switch( job_or_jobname->vt )
-        {
-            case VT_BSTR:       
-                _order->set_job_by_name( Absolute_path( root_path, string_from_bstr( V_BSTR(job_or_jobname) ) ) ); 
-                break;
-
-            default:            
-                return DISP_E_TYPEMISMATCH;
-        }
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-
-    return hr;
-}
+//STDMETHODIMP Com_order::put_Job( VARIANT* job_or_jobname )
+//{
+//    HRESULT hr = NOERROR;
+//
+//    THREAD_LOCK( _lock )
+//    try
+//    {
+//        if( !_order )  return E_POINTER;
+//
+//        switch( job_or_jobname->vt )
+//        {
+//            case VT_BSTR:       
+//                _order->set_job_by_name( Absolute_path( root_path, string_from_bstr( V_BSTR(job_or_jobname) ) ) ); 
+//                break;
+//
+//            default:            
+//                return DISP_E_TYPEMISMATCH;
+//        }
+//    }
+//    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+//    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+//
+//    return hr;
+//}
 
 //-------------------------------------------------------------------------------Com_order::get_job
 
-STDMETHODIMP Com_order::get_Job( Ijob** result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_order )  return E_POINTER;
-
-        *result = _order->com_job();
-        if( *result )  (*result)->AddRef();
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
-
-    return hr;
-}
+//STDMETHODIMP Com_order::get_Job( Ijob** result )
+//{
+//    HRESULT hr = NOERROR;
+//
+//    THREAD_LOCK( _lock )
+//    try
+//    {
+//        if( !_order )  return E_POINTER;
+//
+//        *result = _order->com_job();
+//        if( *result )  (*result)->AddRef();
+//    }
+//    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+//    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+//
+//    return hr;
+//}
 
 //-----------------------------------------------------------------------------Com_order::put_state
 

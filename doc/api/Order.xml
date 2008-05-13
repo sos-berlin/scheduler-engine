@@ -107,49 +107,6 @@
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<property name="job">
-    <com access="write">
-        <com.result name="job_or_name">
-            <com.type type="VARIANT">
-                <com.type class="Job"/>
-                <com.type type="BSTR"/>
-            </com.type>
-        </com.result>
-    </com>
-
-    <!--
-    <com access="putref">
-        <com.result>
-            <com.type type="Job"/>
-        </com.result>
-    </com>
-    -->
-
-    <com access="read">
-        <com.result>
-            <com.type class="Job"/>
-
-            <description>
-                <api.null/>, wenn der Auftrag nicht in einer Jobkette oder der Zustand ein Endzustand ist.
-            </description>
-        </com.result>
-    </com>
-
-    <title>
-        Job, der dem Zustand des Auftrags entspricht.
-    </title>
-
-    <description>
-        <p>
-            Sie können den Job auch direkt setzen.
-            Dann stellt der Scheduler den Zustand des Auftrags auf den Zustand des Jobs in der Jobkette ein.
-            In der Regel wird man aber <scheduler_method class="Order" property="state"/> verwenden.
-        </p>
-    </description>
-</property>
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-
 <property name="state">
     <com>
         <com.result>

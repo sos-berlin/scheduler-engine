@@ -1113,14 +1113,14 @@ library Spooler
         [id(5),propget]
         HRESULT                 Job_chain_node          ( [out,retval] Ijob_chain_node** Result );
 
-        [id(6),propput]
-        HRESULT                 Job                     ( [in] VARIANT* job_or_jobname );
+      //[id(6),propput]
+      //HRESULT                 Job                     ( [in] VARIANT* job_or_jobname );
 
-        [id(6),propputref]
-        HRESULT                 Job                     ( [in] Ijob* Job );
+      //[id(6),propputref]
+      //HRESULT                 Job                     ( [in] Ijob* Job );
 
-        [id(6),propget]
-        HRESULT                 Job                     ( [out,retval] Ijob** Result );
+      //[id(6),propget]
+      //HRESULT                 Job                     ( [out,retval] Ijob** Result );
 
         [id(7),propput]
         HRESULT                 State                   ( [in] VARIANT* Value );
