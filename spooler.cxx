@@ -1858,7 +1858,7 @@ void Spooler::activate()
     if( !_xml_cmd.empty() )
     {
         Command_processor cp ( this, Security::seclev_all );
-        cout << cp.execute( _xml_cmd, true );          // Bei einem Fehler Abbruch
+        cout << cp.execute( _xml_cmd, "  " );          // Bei einem Fehler Abbruch
         _xml_cmd = "";
     }
 
@@ -3013,8 +3013,7 @@ void Spooler::log_show_state( Prefix_log* log )
     try
     {
         Command_processor cp     ( this, Security::seclev_all );
-        bool              indent = true;
-        string xml = cp.execute( "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", indent );
+        string xml = cp.execute( "<show_state what='folders jobs job_params job_commands tasks task_queue job_chains orders remote_schedulers operations' />", "  " );
 
         if( log )
         {

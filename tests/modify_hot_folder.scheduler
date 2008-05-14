@@ -9,6 +9,11 @@
         <commands>
             <modify_hot_folder>
                 <order job_chain="a" id="1">
+                    <params>
+                        <param name="a" value="AA"/>
+                        <param name="b" value="BB"/>
+                        <param name="c" value="CC"/>
+                    </params>
                 </order>
             </modify_hot_folder>
             <modify_hot_folder>

@@ -2157,8 +2157,7 @@ void Cluster::execute_command( const string& command )
     try
     {
         Command_processor cp ( _spooler, Security::seclev_all );
-        bool indent = true;
-        string xml = cp.execute( "<cluster_member_command>" + command + "</cluster_member_command>", indent );  // Siehe scheduler.xsd
+        string xml = cp.execute( "<cluster_member_command>" + command + "</cluster_member_command>", "  " );  // Siehe scheduler.xsd
         _log->info( xml );   // Fehler werden im XML gemeldet
     }
     catch( exception& x )

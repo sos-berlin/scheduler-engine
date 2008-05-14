@@ -548,7 +548,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
         if( _debug )
         {
             _log->debug( message_string( "SCHEDULER-954","forward_xslt_stylesheet", _forward_xslt_stylesheet_path ) );
-            _log->debug( command_document.xml( scheduler_character_encoding, true ) );
+            _log->debug( command_document.xml( scheduler_character_encoding, "  " ) );
             if( _log_xml )  File( _log_filename_prefix + ".forward.xml", "w" ).print( command_document.xml() );
         }
 
@@ -572,7 +572,7 @@ void Web_service::forward( const xml::Document_ptr& payload_dom )
     catch( exception& x )
     {
         _log->error( "Forward: " + string(x.what()) );
-        _log->info( payload_dom.xml( scheduler_character_encoding, true ) );
+        _log->info( payload_dom.xml( scheduler_character_encoding, "  " ) );
     }
 }
 
@@ -807,7 +807,7 @@ void Web_service_operation::execute_stylesheets()
     if( _web_service->_debug )
     {
         _log->debug( "service_request.xml:\n" );
-        _log->debug( request_document.xml( scheduler_character_encoding, true ) );
+        _log->debug( request_document.xml( scheduler_character_encoding, "  " ) );
         _log->debug( "\n" );
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".service_request.xml", "w" ).print( request_document.xml() );
     }
@@ -821,7 +821,7 @@ void Web_service_operation::execute_stylesheets()
     if( _web_service->_debug )
     {
         _log->debug( message_string( "SCHEDULER-954","request_xslt_stylesheet", _web_service->_request_xslt_stylesheet_path ) );
-        _log->debug( command_document.xml( scheduler_character_encoding, true ) );
+        _log->debug( command_document.xml( scheduler_character_encoding, "  " ) );
         if( _web_service->_log_xml )  File( _log_filename_prefix + ".command.xml", "w" ).print( command_document.xml() );
     }
 
@@ -849,7 +849,7 @@ void Web_service_operation::execute_stylesheets()
         if( _web_service->_debug )
         {
             _log->debug( "Command response:\n" );
-            _log->debug( command_processor._answer.xml( scheduler_character_encoding, true ) );
+            _log->debug( command_processor._answer.xml( scheduler_character_encoding, "  " ) );
         }
     }
 

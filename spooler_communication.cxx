@@ -88,7 +88,7 @@ Xml_operation_connection::Xml_operation_connection( Communication::Connection* c
     Communication::Operation_connection( connection ),
     _zero_(this+1)
 {
-    _indent = connection->_read_socket == STDIN_FILENO;
+    _indent_string = connection->_read_socket == STDIN_FILENO? "  " : "";
 }
 
 //--------------------------------------------------Xml_operation_connection::connection_lost_event
@@ -166,7 +166,7 @@ void Xml_operation::put_request_part( const char* data, int length )
 
     if( length >= 2  &&  data[ length - 2 ] == '\r' )
     {
-        _operation_connection->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+        _operation_connection->_indent_string = "  ";      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
     }
 
     _request.append( data, length );
@@ -186,7 +186,7 @@ void Xml_operation::begin()
 
     //_connection->_log.info( message_string( "SCHEDULER-932", _request ) );
 
-    _response = command_processor.response_execute( _request, _operation_connection->_indent );
+    _response = command_processor.response_execute( _request, _operation_connection->_indent_string );
     _response->set_connection( _connection );
 
     //if( _operation_connection->_indent )  _response->_response = replace_regex( response->_response, "\n", "\r\n" );      // Für Windows-telnet

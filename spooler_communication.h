@@ -315,7 +315,7 @@ struct Xml_operation_connection : Communication::Operation_connection
 
 
     Fill_zero                  _zero_;
-    bool                       _indent;
+    string                     _indent_string;
     ptr<supervisor::Remote_scheduler_interface>  _remote_scheduler;
 };
 

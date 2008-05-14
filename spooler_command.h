@@ -103,7 +103,7 @@ void                            append_error_element        ( const xml::Element
 void                            append_error_element        ( const xml::Element_ptr&, const zschimmer::Xc& );
 Xc_copy                         xc_from_dom_error           ( const xml::Element_ptr& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
-string                          xml_as_string               ( const xml::Document_ptr&, bool indent = false );
+string                          xml_as_string               ( const xml::Document_ptr&, const string& indent_string = "" );
 
 //---------------------------------------------------------------------------------Command_response
 
@@ -249,8 +249,8 @@ struct Command_processor
 
     void                        execute_config_file         ( const string& xml_filename );
     void                        execute_http                ( http::Operation*, Http_file_directory* );
-    ptr<Command_response>       response_execute            ( const string& xml_text, bool indent = false );
-    string                      execute                     ( const string& xml_text, bool indent = false );
+    ptr<Command_response>       response_execute            ( const string& xml_text, const string& indent_string = "" );
+    string                      execute                     ( const string& xml_text, const string& indent_string = "" );
     xml::Document_ptr           execute                     ( const xml::Document_ptr& );
     void                        execute_2                   ( const string& xml_text );
     void                        execute_2                   ( const xml::Document_ptr& );

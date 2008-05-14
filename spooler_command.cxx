@@ -1411,14 +1411,14 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
 //------------------------------------------------------------------------------------xml_as_string
 
-string xml_as_string( const xml::Document_ptr& document, bool indent )
+string xml_as_string( const xml::Document_ptr& document, const string& indent_string )
 {
     string result;
 
     try 
     {
-        result = document.xml( "ASCII", indent );
-        if( indent )  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
+        result = document.xml( "ASCII", indent_string );
+        if( indent_string != "" )  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -1459,7 +1459,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                 http_response->set_header( "Cache-Control", "no-cache" );
                 //if( _log )  _log->info( message_string( "SCHEDULER-932", _request ) );
 
-                response_body = execute( xml, true );
+                response_body = execute( xml, "  " );
 
                 response_content_type = "text/xml";
             }
@@ -1705,7 +1705,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
         else
         if( http_request->_http_cmd == "POST" )
         {
-            response_body = execute( http_request->_body, true );
+            response_body = execute( http_request->_body, "  " );
             response_content_type = "text/xml";
         }
         else
@@ -1714,7 +1714,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
         if( response_body.empty() )
         {
-            response_body = execute( "<show_state what=\"all,orders\"/>", true );
+            response_body = execute( "<show_state what=\"all,orders\"/>", "  " );
             response_content_type = "text/xml";
         }
     }
@@ -1730,7 +1730,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
 //------------------------------------------------------------------------Command_processor::execute
 
-ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, bool indent )
+ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, const string& indent_string )
 {
     try 
     {
@@ -1749,7 +1749,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
     ptr<Command_response> result = _response;
     if( !result )
     {
-        ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent ) ) );
+        ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( xml_as_string( _answer, indent_string ) ) );
         result = +r;
     }
     
@@ -1758,9 +1758,9 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
 
 //------------------------------------------------------------------------Command_processor::execute
 
-string Command_processor::execute( const string& xml_text_par, bool indent )
+string Command_processor::execute( const string& xml_text_par, const string& indent_string )
 {
-    return response_execute( xml_text_par, indent )->complete_text();
+    return response_execute( xml_text_par, indent_string )->complete_text();
 }
 
 //------------------------------------------------------------------------Command_processor::execute

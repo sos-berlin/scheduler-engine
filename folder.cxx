@@ -431,7 +431,8 @@ void Folder_subsystem::write_configuration_file_xml( const Absolute_path& folder
             string name = subsystem->name_from_xml_attributes( clone.documentElement(), remove_attributes );
 
             File file ( File_path( directory, name + subsystem->filename_extension() ), "w" );
-            string xml_string = clone.xml();
+            string indent_string = "    ";
+            string xml_string = clone.xml( xml::default_character_encoding, indent_string );
             if( !string_ends_with( xml_string, "\n" ) )  xml_string += '\n';
             file.print( xml_string );
             file.close();
