@@ -6079,7 +6079,7 @@ void Order::remove( File_based::Remove_flags remove_flag )
 {
     ptr<Order> hold_me = this;
 
-    My_file_based::remove( remove_flag );
+    if( is_in_folder() )  My_file_based::remove( remove_flag );
     // Löscht erst im Endzustand, deshalb noch remove_from_job_chain() rufen
 
     remove_from_job_chain(); 

@@ -68,12 +68,11 @@ hostware.sleep( 5 );
                     
 var hostware = new ActiveXObject( "hostware.global" );
 spooler_log.info( "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" );                    
-hostware.sleep( 5 );
+hostware.sleep( 15 );
                     
                     ]]>
                 </script>
 
-                <run_time schedule="--file"/>
             </job>
 
             <job name="perl" order="yes">
