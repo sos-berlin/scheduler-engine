@@ -10,6 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-05-19" version="2.0.206" subversion_revision="5784">
+        <revision type="modification" title="Order.priority wird jetzt richtig interpretiert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="priority"/>:
+                        Höherere Priorität ordnet einen Auftrag <i>vorne</i> in die Auftragswarteschlange ein.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-05-09" version="2.0.205" subversion_revision="5781">
         <revision type="deletion" title="Order.job deleted">
             <description>

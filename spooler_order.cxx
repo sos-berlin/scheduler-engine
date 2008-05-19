@@ -3588,20 +3588,31 @@ void Order_queue::add_order( Order* order, Do_log do_log )
     {
         Order* o = *insert_before;
 
-        if( o->_suspended < order->_suspended )  continue;
+        if( o->_suspended < order->_suspended )  continue;  // False nach vorne!
         if( o->_suspended > order->_suspended )  break;
         
-        if( o->_setback < order->_setback )  continue;
+        if( o->_setback < order->_setback )  continue;      // Frühere Zeit nach vorne!
         if( o->_setback > order->_setback )  break;
 
-        if( o->_priority < order->_priority )  continue;
-        if( o->_priority > order->_priority )  break;
+        if( o->_priority > order->_priority )  continue;    // Höhere Priorität nach vorne!
+        if( o->_priority < order->_priority )  break;
     }
 
     _queue.insert( insert_before, order );
     order->_is_in_order_queue = true;
 
     //update_priorities();
+
+    #ifdef Z_DEBUG
+        // join( lamda(a,b) assert( a->_priority >= b->_priority ), _queue );
+        if( !_queue.empty() )
+            for( Queue::iterator o = _queue.begin();; )
+            {
+                Queue::iterator next_o = o;  next_o++;  if( next_o == _queue.end() )  break;
+                assert( (*o)->_priority >= (*next_o)->_priority );
+                o = next_o;
+            }
+    #endif
 
     order->handle_changed_processable_state();
 }
