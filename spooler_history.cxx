@@ -873,6 +873,14 @@ void Database::create_tables_when_needed()
                 insert.set_datetime( "start_time", Time::now().as_string(Time::without_ms) );
 
                 ta.execute( insert, Z_FUNCTION );
+
+                // Wir prüfen bei allen Datenbanken  if( _db.dbms_kind() == dbms_mysql )
+                {
+                    Record record = ta.read_single_record( "select `end_time`  from " + _spooler->_order_history_tablename + "  where `history_id` = -1", Z_FUNCTION );
+                    string end_time = record.as_string( 0 );     // MySQL kann hier Fehler auslösen, wenn es 0000-00-00 als Default in die Tabelle schreibt
+                    if( !record.null( 0 ) )  z::throw_xc( "end_time is not null:", end_time );
+                }
+
                 ta.rollback( Z_FUNCTION );
             }
             catch( exception& )

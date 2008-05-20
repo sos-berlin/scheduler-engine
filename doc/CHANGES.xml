@@ -10,7 +10,15 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-05-19" version="2.0.206" subversion_revision="5784">
+    <change date="2008-05-19" version="2.0.206" subversion_revision="5785">
+        <revision type="correction" title="Umstellung der Datenbankspalte SCHEDULER_HISTORY.END_TIME auf NULL">
+            <description>
+                <p>
+                    Anpassung an MySQL 5, das "0000-00-00" für fehlenden Feldwert schreibt, wenn die Spalte mit NOT NULL deklariert ist.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="Order.priority wird jetzt richtig interpretiert">
             <description>
                 <ul>
