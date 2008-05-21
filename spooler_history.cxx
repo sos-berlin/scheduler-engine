@@ -897,6 +897,11 @@ void Database::create_tables_when_needed()
                 //{
                     Transaction ta ( this );
                     alter_column_allow_null( &ta, _spooler->_order_history_tablename, "end_time", "datetime" );
+                    
+                    if( _db.dbms_kind() == dbms_mysql )
+                        ta.execute( S() << "UPDATE " << _spooler->_order_history_tablename << 
+                                           "  set `end_time`=NULL  where `end_time`='0000-00-00 00:00:00'", Z_FUNCTION );   // Fehler von MySQL 5 korrigieren (fehlender Wert bei NOT NULL-Spalte führt zu '0000-00-00 00:00:00')
+
                     ta.commit( Z_FUNCTION );
                 //}
             }

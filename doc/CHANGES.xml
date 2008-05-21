@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-05-19" version="2.0.206" subversion_revision="5785">
+    <change date="2008-05-19" version="2.0.206" subversion_revision="5786">
         <revision type="correction" title="Umstellung der Datenbankspalte SCHEDULER_HISTORY.END_TIME auf NULL">
             <description>
                 <p>
