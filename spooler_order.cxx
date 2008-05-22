@@ -5377,6 +5377,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     xml::Element_ptr result = dom_document.createElement( "order" );
 
+    if( _history_id )  result.setAttribute( "history_id", _history_id );
+
     if( has_base_file() )  fill_file_based_dom_element( result, show_what );
 
     if( !show_what.is_set( show_for_database_only ) )
@@ -5390,8 +5392,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( !show_what.is_set( show_for_database_only ) ) // &&  !show_what.is_set( show_id_only ) )
     {
-        if( _history_id )  result.setAttribute( "history_id", _history_id );
-
         if( _setback )
             result.setAttribute( "next_start_time", _setback.as_string() );
 
@@ -5507,6 +5507,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
             append_error_element( xml_payload_element, x );
         }
     }
+
 
     // Wenn die folgenden Werte sich ändern, _order_xml_modified = true setzen!
 

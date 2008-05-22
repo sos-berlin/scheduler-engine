@@ -3491,7 +3491,7 @@
             </xsl:if>
 
             <xsl:if test="self::order_history">
-                <col width="40"/>
+                <col width="$datetime_column_width"/>
             </xsl:if>
 
             <xsl:if test="order/@setback">
@@ -3502,6 +3502,10 @@
 
             <xsl:if test="order/@state_text">
                 <col width="*"/>
+            </xsl:if>
+
+            <xsl:if test="self::order_history">
+                <col width="$datetime_column_width"/>
             </xsl:if>
 
             <col width="  1" align="right"/>
@@ -3531,7 +3535,7 @@
                     </xsl:if>
 
                     <xsl:if test="self::order_history">
-                        <td class="head">Finished at</td>
+                        <td class="head" width="$datetime_column_width">Started at</td>
                     </xsl:if>
 
                     <xsl:if test="order/@setback">
@@ -3544,6 +3548,10 @@
                         <td class="head">State text</td>
                     </xsl:if>
 
+                    <xsl:if test="self::order_history">
+                        <td class="head" width="$datetime_column_width">Finished at</td>
+                    </xsl:if>
+                    
                     <td class="head1">&#160;</td>
                 </tr>
                 <tr>
@@ -3571,9 +3579,9 @@
                         </xsl:if>
 
                         <xsl:if test="parent::order_history">
-                            <td>
+                            <td width="$datetime_column_width">
                                 <span style="white-space: nowrap">
-                                    <xsl:value-of select="@end_time__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/>
+                                    <xsl:value-of select="@start_time__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/>
                                 </span>
                             </td>
                         </xsl:if>
@@ -3595,6 +3603,14 @@
                                 <xsl:call-template name="show_text_with_url">
                                     <xsl:with-param name="text" select="@state_text"/>
                                 </xsl:call-template>
+                            </td>
+                        </xsl:if>
+
+                        <xsl:if test="parent::order_history">
+                            <td width="$datetime_column_width">
+                                <span style="white-space: nowrap">
+                                    <xsl:value-of select="@end_time__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/>
+                                </span>
                             </td>
                         </xsl:if>
 
