@@ -4139,7 +4139,7 @@ void Order::load_payload_blob( Read_transaction* ta )
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
         ptr<Com_variable_set> v = new Com_variable_set;
-        v->put_Xml( Bstr( payload_string ) );
+        v->put_Xml( Bstr( payload_string ) );               // 2008-05-23  SCHLECHT: Löst keine Exception, sollte aber! 
         _payload = v;
     }
     else

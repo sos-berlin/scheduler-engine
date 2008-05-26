@@ -10,7 +10,9 @@
             <job name="test">
                 <script language="javascript">
                     <![CDATA[
-    
+
+    spooler_log.level = -3;
+    spooler_log.error( "level=" + spooler_log.level );
     spooler_log.debug9( "debug9" );
     spooler_log.debug8( "debug8" );
     spooler_log.debug7( "debug7" );

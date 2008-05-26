@@ -10,7 +10,33 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-05-19" version="2.0.206" subversion_revision="5786">
+    <change date="2008-05-25" version="2.0.206" subversion_revision="5789">
+        <revision type="correction" title="spidermonkey.dll und libspidermoneky.so: Verhalten bei Boole'sch true verbessert">
+            <description>
+                <p>
+                    Boole'sch true wird jetzt immer als derselbe interne Wert geliefert,
+                </p>
+                <pre>spooler_log.mail_on_success = true;
+var a = spooler_log.mail_on_success;
+if( a != true )  spooler_log.error( a + "!=" + true );  // Okay ab Spidermonkey 1.7.0.5789</pre>
+            </description>
+        </revision>
+              
+        <revision type="correction" title="Dokumentation korrigiert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Log" property="last"/> ist nur lesbar.
+                    </li>
+                    <li>
+                        <scheduler_method class="Log" property="last_error_line"/> ist nur lesbar.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+    
+    <change date="2008-05-19" version="2.0.206" subversion_revision="5787">
         <revision type="correction" title="Umstellung der Datenbankspalte SCHEDULER_HISTORY.END_TIME auf NULL">
             <description>
                 <p>
@@ -27,6 +53,15 @@
                         Höherere Priorität ordnet einen Auftrag <i>vorne</i> in die Auftragswarteschlange ein.
                     </li>
                 </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Verteilte Aufträge schreiben wieder nur einen Historiensatz">
+            <description>
+                <p>
+                    Seit Version 2.0.194.8488 (2008-01-05) schrieben verteilte Aufträge für jeden Schritt einen Historiensatz. 
+                    Das ist korrigiert.
+                </p>
             </description>
         </revision>
     </change>

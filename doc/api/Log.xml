@@ -419,7 +419,7 @@
 </property>
 
 
-<property name="last_error_line">
+<property name="last_error_line" access="read">
     <com>
         <com.result>
             <com.type type="BSTR"/>
@@ -432,7 +432,7 @@
 </property>
 
 
-<property name="last">
+<property name="last" access="read">
     <com>
         <com.parameter name="level">
             <com.type type="VARIANT">
