@@ -15,6 +15,7 @@
             <description>
                 <p>
                     Boole'sch true wird jetzt immer als derselbe interne Wert geliefert,
+                    sodass folgender Code funktioniert:
                 </p>
                 <pre>spooler_log.mail_on_success = true;
 var a = spooler_log.mail_on_success;
@@ -50,7 +51,7 @@ if( a != true )  spooler_log.error( a + "!=" + true );  // Okay ab Spidermonkey 
                 <ul>
                     <li>
                         <scheduler_method class="Order" property="priority"/>:
-                        Höherere Priorität ordnet einen Auftrag <i>vorne</i> in die Auftragswarteschlange ein.
+                        Höhere Priorität ordnet einen Auftrag <i>vorne</i> in die Auftragswarteschlange ein.
                     </li>
                 </ul>
             </description>

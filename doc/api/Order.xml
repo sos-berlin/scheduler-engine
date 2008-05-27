@@ -571,6 +571,10 @@
 
     <description>
         <p>
+            <code>params</code> wird in <scheduler_method class="Order" property="payload"/> gehalten, 
+            letzteres kann also nicht zusammen mit <code>params</code> verwendet werden.
+        </p>
+        <p>
             Siehe <scheduler_element name="add_order" child="params"/>.
         </p>
     </description>

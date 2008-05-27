@@ -3764,7 +3764,7 @@
         <xsl:text>'</xsl:text-->
 
     </xsl:template>
-    "
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~attributes_for_onclick-->
     <!--
     <xsl:template name="attributes_for_onclick">
