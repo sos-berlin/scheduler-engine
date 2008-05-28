@@ -11,6 +11,9 @@
     document_state      = "proposal"
 >
 
+    <p>
+        <scheduler_a href="software.xml" quote="yes"/>
+    </p>
 
     <p>
         <scheduler_a href="order_events.xml" quote="yes"/>

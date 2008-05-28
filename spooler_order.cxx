@@ -2333,6 +2333,8 @@ void Job_chain::remove_order( Order* order )
 {
     assert( subsystem()->normalized_path( order->_job_chain_path ) == normalized_path() );
     assert( order->_job_chain == this );
+    assert( !order->_is_db_occupied );
+
 
     ptr<Order> hold_order = order;   // Halten
 
@@ -4520,8 +4522,10 @@ void Order::db_insert()
 
 bool Order::db_try_insert( bool throw_exists_exception )
 {
-    bool   insert_ok      = false;
-    string payload_string = string_payload();
+    bool   insert_ok               = false;
+    string payload_string          = string_payload();
+    bool   record_exists_error     = false;
+    string record_exists_insertion;
 
     if( db()->opened() )
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
@@ -4610,9 +4614,13 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
                 if( !result_set.eof() )
                 {
-                    Record record = result_set.get_record();
-                    if( throw_exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path,
-                                                               record.null( "distributed_next_time" )? "in database, not distributed" : "distributed" );
+                    if( throw_exists_exception )  
+                    {
+                        Record record = result_set.get_record();
+                        record_exists_error     = true;
+                        record_exists_insertion = record.null( "distributed_next_time" )? "in database, not distributed" : "distributed";
+                    }
+
                     break;
                 }
 
@@ -4645,6 +4653,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
     }
     catch( exception& x ) { ta.reopen_database_after_error( z::Xc( "SCHEDULER-305", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
+    if( record_exists_error  &&  throw_exists_exception )  z::throw_xc( "SCHEDULER-186", obj_name(), _job_chain_path, record_exists_insertion );
 
     if( insert_ok )  tip_own_job_for_new_distributed_order_state();
 
@@ -4821,6 +4830,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
             {
                 _log->error( message_string( "SCHEDULER-816" ) );
                 db_show_occupation( log_error );
+                _is_db_occupied = false, _occupied_state = Variant();  // 2008-05-28  Nicht mehr db_release_occupation() rufen
             }
         }
 
@@ -6115,6 +6125,8 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
         db_delete( update_and_release_occupation );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
     }
+
+    assert( !_is_db_occupied );
 
     if( _job_chain )  _job_chain->remove_order( this );
 

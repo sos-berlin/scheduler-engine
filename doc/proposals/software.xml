@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Erneuerung des Codes des komplexer werdenden Schedulers"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "work_in_progress"
+>
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Datenbank</h2>
+    <ul>
+        <li>
+            Hostware ausbauen, JDBC direkt verwenden
+        </li>
+        <li>
+            Blobs können dann effizienter geschrieben und gelesen werden
+        </li>
+        <li>
+            Zugriff auf Access (bisher ODBC) über JDBC-ODBC-Brücke.
+        </li>
+        <li>
+            Erkennung von Datenbankfehlern, bei denen der Scheduler die Verbindung erneuert, verbessern: 
+            Zurzeit führt jede Exception in einer Transaktion zum erneuten Verbindungsaufbau,
+            aber nur Exceptions direkt von der Datenbank (JDBC) sollten dazu führen.
+        </li>
+    </ul>
+
+    
+    
+    <h2>Mikroscheduling</h2>
+    <ul>
+        <li>
+            Signal direkt mit ausführenden Objekt verbinden.
+            Nur das signalierte Objekt soll aufgerufen werden.
+            <ul>
+                <li>
+                    Prozessende -> Task oder Subprozess
+                </li>
+                <li>
+                    Wecker -> Task, Auftrag usw.
+                </li>
+                <li>
+                    Verzeichnisänderung -> Job, Konfigurationsdatei, Dateiauftrag
+                </li>
+                <li>
+                    TCP -> Kommando lesen oder Antwort fortsetzen
+                </li>
+                <li>
+                    ...
+                </li>
+            </ul>
+        </li>
+        <li>
+            Warteschlange der Signale(?) und nächsten Weckereignisse
+        </li>
+        <li>
+            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden.
+        </li>
+        <li>
+            Die Bremse <scheduler_message code="SCHEDULER-261"/> wird endlich überflüssig.
+        </li>
+    </ul>
+
+
+    
+    <h2>Windows</h2>
+    <ul>
+        <li>
+            Zahl der Wait-Handles (<code>MsgWaitForMultipleObjects()</code>) erhöhen:
+            mehrere Threads verrwenden; TCP-Verbindungen ohne Wait-Handles implementieren.
+        </li>    
+    </ul>
+    
+    
+    
+    <h2>Unix</h2>
+    <ul>
+        <li>
+            TCP-Ereignisse (<code>select()</code>) und Signale (<code>signal()</code>) zusammenbringen.
+            Prozessende wird derzeit gepollt (1/10s).
+        </li>
+    </ul>
+    
+    
+    
+    <h2>scheduler.log</h2>
+    <ul>
+        <li>Bestimmt können einige Zeilen ausgebaut werden</li>
+    </ul>
+
+
+    
+    <h2>Blockaden vermeiden</h2>
+    <p>
+        Einiges könnte in einem Thread laufen, ohne den Scheduler aufzuhalten:
+    </p>
+    <ul>
+        <li>
+            <code>gethostbyname()</code>, <code>gethostbyaddr()</code>
+        </li>
+        <li>
+            eMail-Versand
+        </li>
+        <li>
+            Umfangreiche Datenbank-Zugriffe für XML-Kommandos
+        </li>
+    </ul>
+
+    
+
+    <h2>TCP</h2>
+    <ul>
+        <li>
+            Schreiben und Lesen trennen.
+            Bisher kann der Scheduler nichts empfangen, wenn er am Senden ist. 
+        </li>
+        <li>
+            TCP von Task-Kommunikation mit TCP der XML-Schnittstelle vereinheitlichen.
+        </li>
+        <li>
+            Test auf Verbindungsverlust anders als mit ständigen <code>recv()</code> lösen.
+        </li>
+    </ul>
+
+
+
+    <h2>Java?</h2>
+    <ul>
+        <li>
+            Vielleicht Teile in Java implementieren?
+        </li>
+    </ul>
+
+
+    
+    <h2>UNICODE</h2>
+    <ul>
+        <li>
+            Interne Verarbeitung auf UTF-8 umstellen.
+        </li>
+        <li>
+            Alle Schnittstellen prüfen: Systemaufrufe für Dateinamen, Textdateien, XML, Java, COM.
+        </li>
+    </ul>
+
+    
+
+    <h2>Zustände der Objekte</h2>
+    <ul>
+        <li>
+            Einheitliche definierte Zustände für alle Objekte: 
+            not_initialized, initialized, loaded, active, halted(?), closed.
+        </li>
+    </ul>
+
+
+    
+    <h2>Statische Struktur: Subsysteme</h2>
+    <p>
+        Der Scheduler kann in viele Subsystem unterteilt werden:        
+    </p>
+
+    <p>
+    </p>
+    
+    <table cellspacing="0" cellpadding="0">
+        <thead>
+            <td>
+                Name
+            </td>
+            <td>
+                initialized
+            </td>
+            <td>
+                loaded
+            </td>
+            <td>
+                activated
+            </td>
+        </thead>
+        <tr>
+            <td>
+                Cluster
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Order
+            </td>
+            <td>
+                
+            </td>
+            <td>
+                Aufträge aus der Datenbank sind geladen (nicht Betrieb mit verteilten Aufträgen)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                File_order
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Job
+            </td>
+            <td>
+                <scheduler_element name="include"/> gelesen
+            </td>
+            <td>
+                
+            </td>
+            <td>
+                Nächste Startzeit aus <scheduler_element name="run_time"/> berechnet
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Task
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scheduler_script
+            </td>
+            <td>
+                
+            </td>
+            <td>
+                Geladen und gestartet
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Time
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Module?
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Communication
+            </td>
+            <td>
+                Port für TCP- und HTTP-Verbindungen geöffnet
+            </td>
+        </tr>
+        <tr>
+            <td>
+                HTTP?
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Event
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Database
+            </td>
+            <td>
+                Datenbank ist geöffnet
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Mail
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Web_service?
+            </td>
+        </tr>
+    </table>
+
+
+    <h2>Dynamische Struktur: Ereignisse und Signalisierung</h2>
+
+    
+</description>                                     
