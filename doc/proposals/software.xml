@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <description
-    title               = "Erneuerung des Codes des komplexer werdenden Schedulers"
+    title               = "Scheduler 3.0: Erneuerung des Codes des komplexer werdenden Schedulers"
     base_dir            = "../"
     parent_page         = "index.xml"
     author              = "$Author$"

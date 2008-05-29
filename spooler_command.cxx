@@ -1519,9 +1519,13 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                             if( !order  &&  job_chain->is_distributed() ) 
                             {
                                 order = _spooler->order_subsystem()->try_load_order_from_database( (Transaction*)NULL, job_chain_path, order_id );
-                                //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben
-                                http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), order->log()->title() ) ) );
-                                return;
+
+                                if( order )
+                                {
+                                    //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben
+                                    http_response->set_chunk_reader( Z_NEW( http::Html_chunk_reader( Z_NEW( http::String_chunk_reader( order->log()->as_string(), "text/plain; charset=" + scheduler_character_encoding ) ), order->log()->title() ) ) );
+                                    return;
+                                }
                             }
 
                             if( order )
