@@ -33,6 +33,9 @@
             Zurzeit führt jede Exception in einer Transaktion zum erneuten Verbindungsaufbau,
             aber nur Exceptions direkt von der Datenbank (JDBC) sollten dazu führen.
         </li>
+        <li>
+            Teile des Datenbank-Moduls könnten in Java implementiert werden.
+        </li>
     </ul>
 
     
@@ -42,6 +45,10 @@
         <li>
             Signal direkt mit ausführenden Objekt verbinden.
             Nur das signalierte Objekt soll aufgerufen werden.
+        </li>
+        <li>
+            Feststellen, welche Signale oder Ereignisse es gibt,
+            wer sie auslöst und welche Objekte benachrichtigt werden sollen.
             <ul>
                 <li>
                     Prozessende -> Task oder Subprozess
@@ -64,10 +71,24 @@
             Warteschlange der Signale(?) und nächsten Weckereignisse
         </li>
         <li>
-            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden.
+            Per XML Liste der von Objekten erwarteteten Ereignisse liefern.
+        </li>
+    </ul>
+    
+    Ziele:
+    <ul>
+        <li>
+            Klare, dokumentierte Zusammenhänge zwischen Ereignissen und behandelnden Objekten.
+        </li>
+        <li>
+            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden, 
+            weil bei einem Ereignis nicht mehr alle Objekte aufgerufen werden, sondern gleich das richtige.
         </li>
         <li>
             Die Bremse <scheduler_message code="SCHEDULER-261"/> wird endlich überflüssig.
+        </li>
+        <li>
+            Vielleicht lässt sich manche Ereignisbehandlung in einem Thread parallelisieren.
         </li>
     </ul>
 
@@ -78,7 +99,7 @@
         <li>
             Zahl der Wait-Handles (<code>MsgWaitForMultipleObjects()</code>) erhöhen:
             mehrere Threads verrwenden; TCP-Verbindungen ohne Wait-Handles implementieren.
-        </li>    
+        </li>
     </ul>
     
     
@@ -134,10 +155,14 @@
 
 
 
-    <h2>Java?</h2>
+    <h2>Mehr Java</h2>
     <ul>
         <li>
-            Vielleicht Teile in Java implementieren?
+            Neue Teile in Java implementieren und damit eine Migration zu Java vorbereiten?
+        </li>
+        <li>
+            Betriebssystem-abhängige Teile in Java implementieren,
+            soweit es neutrale Klassen bereitstellt.
         </li>
     </ul>
 
@@ -149,7 +174,7 @@
             Interne Verarbeitung auf UTF-8 umstellen.
         </li>
         <li>
-            Alle Schnittstellen prüfen: Systemaufrufe für Dateinamen, Textdateien, XML, Java, COM.
+            Alle Schnittstellen prüfen: Systemaufrufe für Dateinamen, Textdateien, XML, Java, Skriptsprachen, COM.
         </li>
     </ul>
 
@@ -161,13 +186,17 @@
             Einheitliche definierte Zustände für alle Objekte: 
             not_initialized, initialized, loaded, active, halted(?), closed.
         </li>
+        <li>
+            Zustand <code>incomplete</code> durchsetzen (bisher Schedule und teilweise Job);
+            Liste der Requisiten zeigen.
+        </li>
     </ul>
 
 
     
     <h2>Statische Struktur: Subsysteme</h2>
     <p>
-        Der Scheduler kann in viele Subsystem unterteilt werden:        
+        Scheduler weiter in Subsysteme unterteilen:
     </p>
 
     <p>
@@ -287,8 +316,6 @@
         </tr>
     </table>
 
-
-    <h2>Dynamische Struktur: Ereignisse und Signalisierung</h2>
 
     
 </description>                                     

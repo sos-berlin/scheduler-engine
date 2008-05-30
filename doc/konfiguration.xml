@@ -122,7 +122,7 @@
         &lt;/process_classes>
 
         &lt;<scheduler_a href="xml/schedules.xml">schedules></scheduler_a>
-            &lt;<scheduler_a href="xml/schedule.xml">schedule</scheduler_a> name = "…"
+            &lt;<scheduler_a href="xml/schedule.xml">schedule</scheduler_a> name = "…">
                 …
             &lt;/schedule>
             …

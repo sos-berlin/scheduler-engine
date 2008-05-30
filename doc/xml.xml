@@ -86,7 +86,9 @@
                 <scheduler_element name="process_class"/><br/>
                 <scheduler_element name="process_classes"/><br/>
                 <scheduler_element name="run_time"/><br/>
+                <scheduler_element name="schedule"/><br/>
                 <scheduler_element name="scheduler_script"/><br/>
+                <scheduler_element name="schedules"/><br/>
                 <scheduler_element name="script"/><br/>
                 <scheduler_element name="service_request"/><br/>
                 <scheduler_element name="security"/><br/>
