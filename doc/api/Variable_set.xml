@@ -215,6 +215,13 @@ while( t.hasMoreTokens() )
 
 <method name="substitute">
     <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                Die Zeichenkette mit den ersetzten $-Variablen
+            </description>
+        </com.result>
         <com.parameter>
             <com.type type="BSTR"/>
         </com.parameter>

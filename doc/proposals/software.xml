@@ -317,5 +317,32 @@
     </table>
 
 
+    <h2>Dokumentation</h2>
+    <ul>
+        <li>
+            Erstellung des Register von Perl auf XML umstellen (dann sollte auch das "XXX" verschwinden)
+        </li>
+        <li>
+            Ins Register aufnehmen:
+            <ul>
+                <li>
+                    Klassen und Methoden
+                </li>
+                <li>
+                    Kapitelüberschriften als HTML-Titel einblenden
+                </li>
+            </ul>
+        </li>
+        <li>
+            Lokale Anker (<code>#</code>...) fürs Register eindeutig machen.
+            Jetzt ist das nicht HTML-konform.
+        </li>
+        <li>
+            Umlaute (Ä) im Register richtig einsortieren
+        </li>
+        <li>
+            
+        </li>
+    </ul>
     
 </description>                                     
