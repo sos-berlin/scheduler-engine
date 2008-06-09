@@ -74,7 +74,8 @@
             Per XML Liste der von Objekten erwarteteten Ereignisse liefern.
         </li>
     </ul>
-    
+
+
     Ziele:
     <ul>
         <li>
@@ -93,12 +94,29 @@
     </ul>
 
 
+
+    <h2>Jobs</h2>
+    <ul>
+        <li>
+            <i>File_based</i>-Zustand <i>incomplete</i> auf fehlende Prozessklasse und Sperre erweitern.
+        </li>
+        <li>
+            Kann der Job jetzt einen Auftrag ausführen? Falls nein, Gründe liefern.
+            Die Gründe sollten in einem Objekt zusammengefasst sein (Voraussetzungen zur Ausführung eines Auftragsschritts).
+        </li>
+        <li>
+            Gleiches für Task-Starts.
+        </li>
+    </ul>
+
+
     
     <h2>Windows</h2>
     <ul>
         <li>
             Zahl der Wait-Handles (<code>MsgWaitForMultipleObjects()</code>) erhöhen:
-            mehrere Threads verrwenden; TCP-Verbindungen ohne Wait-Handles implementieren.
+            mehrere Threads verwenden; 
+            TCP-Verbindungen ohne Wait-Handles, mit Callbacks implementieren.
         </li>
     </ul>
     
@@ -151,6 +169,10 @@
         <li>
             Test auf Verbindungsverlust anders als mit ständigen <code>recv()</code> lösen.
         </li>
+        <li>
+            Unix: Problem mit gesperrtem Port lösen, wenn der Scheduler bei offener TCP-Verbindung beendet wird.
+            (Z.B. Gegenstelle veranlassen, die Verbindung zu schließen.)
+        </li>
     </ul>
 
 
@@ -163,6 +185,19 @@
         <li>
             Betriebssystem-abhängige Teile in Java implementieren,
             soweit es neutrale Klassen bereitstellt.
+        </li>
+    </ul>
+
+
+    
+    <h2>Javascript</h2>
+    <ul>
+        <li>
+            Übergebene Objekte – wie bei Java – nach Methodenaufruf (z.B. <scheduler_method class="Job_impl" method="spooler_process"/>)
+            freigeben, damit sie sich nicht mehr anhäufen.
+            Dass passiert jetzt bei auftragsgesteuerten Jobs.
+            Der Garbage Collector gibt die Aufträge sehr spät frei, 
+            was zu hohem Speicherbedarf im Scheduler und vielen offenen Auftragsprotokollen führt.
         </li>
     </ul>
 

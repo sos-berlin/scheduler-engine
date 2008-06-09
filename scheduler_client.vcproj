@@ -90,7 +90,6 @@
 				MapExports="true"
 				SubSystem="1"
 				OptimizeReferences="2"
-				OptimizeForWindows98="1"
 				ImportLibrary="$(OutDir)/scheduler.lib"
 				TargetMachine="1"
 			/>
@@ -193,7 +192,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
-				OptimizeForWindows98="1"
 				ImportLibrary=""
 				TargetMachine="1"
 			/>
@@ -298,7 +296,6 @@
 				MapExports="true"
 				SubSystem="1"
 				OptimizeReferences="2"
-				OptimizeForWindows98="1"
 				ImportLibrary="$(OutDir)/scheduler.lib"
 				TargetMachine="1"
 			/>

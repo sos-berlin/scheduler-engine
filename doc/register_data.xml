@@ -2121,6 +2121,7 @@
     <register_keyword_display><code>&lt;schedule&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__schedule' register_title='Änderungsprotokoll'  register_keyword='schedule'/>
     <register_entry register_file='api/Schedule.xml#use_element__schedule' register_title='XXX'  register_keyword='schedule'/>
+    <register_entry register_file='xml.xml#use_element__schedule' register_title='Alle XML-Elemente'  register_keyword='schedule'/>
     <register_entry register_file='xml/run_time.xml#use_element__schedule' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='schedule'/>
     <register_entry register_file='xml/schedule.remove.xml#use_element__schedule' register_title='&lt;schedule.remove&gt; (Kommando)'  register_keyword='schedule'/>
     <register_entry register_file='xml/schedule.xml#' register_title='&lt;schedule&gt; (Konfiguration)'  register_keyword='schedule' type='definition'/>
@@ -2190,6 +2191,7 @@
 <register_keyword keyword='schedules'>
     <register_keyword_display><code>&lt;schedules&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__schedules' register_title='Änderungsprotokoll'  register_keyword='schedules'/>
+    <register_entry register_file='xml.xml#use_element__schedules' register_title='Alle XML-Elemente'  register_keyword='schedules'/>
     <register_entry register_file='xml/schedules.xml#' register_title='&lt;schedules&gt; (Konfiguration)'  register_keyword='schedules' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Schema'>
