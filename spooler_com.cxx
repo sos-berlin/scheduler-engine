@@ -2386,12 +2386,17 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 25, "Stdout_path"               , (Com_method_ptr)&Com_task::get_Stdout_path        , VT_BSTR       },
     { DISPATCH_METHOD     , 26, "Set_error_code_and_text"   , (Com_method_ptr)&Com_task::Set_error_code_and_text, VT_EMPTY      , { VT_BSTR, VT_BSTR } },
     { DISPATCH_PROPERTYGET, 27, "Web_service"               , (Com_method_ptr)&Com_task::get_Web_service        , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 28, "Web_service_or_null"       , (Com_method_ptr)&Com_task::get_Web_service_or_null,VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 28, "Web_service_or_null"       , (Com_method_ptr)&Com_task::get_Web_service_or_null, VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 29, "Priority"                  , (Com_method_ptr)&Com_task::put_Priority           , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 29, "Priority"                  , (Com_method_ptr)&Com_task::get_Priority           , VT_INT        },
     { DISPATCH_PROPERTYPUT, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::put_Exit_code          , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::get_Exit_code          , VT_INT        },
     { DISPATCH_PROPERTYGET, 31, "Trigger_files"             , (Com_method_ptr)&Com_task::get_Trigger_files      , VT_BSTR       },
+    { DISPATCH_METHOD     , 32, "Try_lock"                                 , (Com_method_ptr)&Com_task::Try_lock                                 , VT_BOOL, { VT_BSTR } },
+    { DISPATCH_METHOD     , 33, "Try_lock_non_exclusive"                   , (Com_method_ptr)&Com_task::Try_lock_non_exclusive                   , VT_BOOL, { VT_BSTR } },
+    { DISPATCH_METHOD     , 34, "Call_me_again_when_locks_available"       , (Com_method_ptr)&Com_task::Call_me_again_when_locks_available       , VT_EMPTY },
+    { DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
+    { DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
 };
 
