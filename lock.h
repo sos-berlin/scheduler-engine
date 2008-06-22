@@ -111,8 +111,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     typedef list<Use*>          Use_list;
     vector<Use_list>           _waiting_queues;             // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
 
-    typedef stdext::hash_set<Use*>  Use_set;
-    Use_set                        _use_set;
+    Use_set                    _use_set;
 
 
     static Class_descriptor     class_descriptor;
@@ -198,6 +197,7 @@ struct Requestor : Object,
     Absolute_path               folder_path                 () const                                { return _folder_path; }
     
     Use*                        add_lock_use                ( const Absolute_path& lock_path, Lock::Lock_mode );
+    Use*                        lock_use_or_null            ( const Absolute_path& lock_path, Lock::Lock_mode );
 
     void                        initialize                  ();
     void                        load                        ();

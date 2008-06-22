@@ -424,7 +424,7 @@ bool Lock::require_lock_for( Holder* holder, Use* lock_use )
     assert( holder->is_known_requestor( lock_use->requestor() ) );
     assert( is_free_for( lock_use, holder ) );
 
-    bool result;
+    bool is_freshly_required;
 
     Holder_map::iterator h = _holder_map.find( holder );
 
@@ -434,22 +434,25 @@ bool Lock::require_lock_for( Holder* holder, Use* lock_use )
         {
             assert( _holder_map.size() == 1 );
             _lock_mode = lk_exclusive;   
-            result = true;      // Holder hat seine Haltung von lk_non_exclusive auf lk_exclusive erhöht
+            is_freshly_required = true;      // Holder hat seine Haltung von lk_non_exclusive auf lk_exclusive erhöht
         }
         else
-            result = false;     // Holder hat nix verändert
+            is_freshly_required = false;     // Holder hat nix verändert
     }
     else
     {
         _holder_map[ holder ] = Use_set();
         h = _holder_map.find( holder );
         _lock_mode = lock_use->lock_mode();
-        result = true;      // Holder hält die Sperre neu oder mit strengerem Lock_mode
+        is_freshly_required = true;      // Holder hält die Sperre neu oder mit strengerem Lock_mode
     }
 
     h->second.insert( lock_use );
 
-    return result;
+    if( is_freshly_required )
+        holder->log()->info( message_string( "SCHEDULER-855", obj_name(), lock_use->lock_mode() == lk_exclusive? "exclusively" : "non-exclusively" ) );
+
+    return is_freshly_required;
 }
 
 //---------------------------------------------------------------------------Lock::release_lock_for
@@ -486,29 +489,46 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
                 }
             }
 
-
-            Requestor* next_requestor = NULL; 
-
-            if( !_waiting_queues[ lk_exclusive ].empty() )  
+            if( is_released )
             {
-                next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
-            }
-            else
-            if( !_waiting_queues[ lk_non_exclusive ].empty() )  
-            {
-                next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
-            }
-
-            if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
-            {
-                try
+                if( int remaining = count_non_exclusive_holders() )
                 {
-                    next_requestor->on_locks_are_available();  
+                    holder->log()->info( message_string( "SCHEDULER-857", obj_name(), remaining ) );
                 }
-                catch( exception& x ) 
-                { 
-                    next_requestor->log()->error( S() << x << ", in on_lock_are_available()" );
+                else
+                {
+                    holder->log()->info( message_string( "SCHEDULER-856", obj_name() ) );
                 }
+
+
+                // Wartenden Requestor benachrichtigen
+
+                Requestor* next_requestor = NULL; 
+
+                if( !_waiting_queues[ lk_exclusive ].empty() )  
+                {
+                    next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
+                }
+                else
+                if( !_waiting_queues[ lk_non_exclusive ].empty() )  
+                {
+                    next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
+                }
+
+                if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
+                {
+                    try
+                    {
+                        next_requestor->on_locks_are_available();  
+                    }
+                    catch( exception& x ) 
+                    { 
+                        next_requestor->log()->error( S() << x << ", in on_lock_are_available()" );
+                    }
+                }
+
+
+                check_for_replacing_or_removing();
             }
         }
         //else  
@@ -837,9 +857,32 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 
 Use* Requestor::add_lock_use( const Absolute_path& lock_path, Lock::Lock_mode lock_mode )
 {
-    ptr<Use> lock_use = Z_NEW( Use( this, lock_path, lock_mode ) );
+    ptr<Use> lock_use = lock_use_or_null( lock_path, lock_mode );
 
-    _use_list.push_back( lock_use );
+    if( !lock_use )
+    {
+        lock_use = Z_NEW( Use( this, lock_path, lock_mode ) );
+        _use_list.push_back( lock_use );
+    }
+
+    return lock_use;
+}
+
+//----------------------------------------------------------------------Requestor::lock_use_or_null
+
+Use* Requestor::lock_use_or_null( const Absolute_path& lock_path, Lock::Lock_mode lock_mode )
+{
+    ptr<Use>      lock_use             = NULL;
+    Absolute_path normalized_lock_path ( _spooler->lock_subsystem()->normalized_path( lock_path ) );
+
+    Z_FOR_EACH( Use_list, _use_list, u )
+    {
+        if( _spooler->lock_subsystem()->normalized_path( (*u)->lock_path() ) == normalized_lock_path  &&
+            (*u)->lock_mode() == lock_mode )
+        {
+            lock_use = *u;
+        }
+    }
 
     return lock_use;
 }
@@ -1277,23 +1320,7 @@ void Holder::release_locks( const Requestor* requestor )
             
             try
             {
-                Lock* lock = lock_use->lock();
-
-                bool is_released = lock->release_lock_for( this, lock_use );
-
-                if( is_released )
-                {
-                    if( int remaining = lock->count_non_exclusive_holders() )
-                    {
-                        log()->info( message_string( "SCHEDULER-857", lock->obj_name(), remaining ) );
-                    }
-                    else
-                    {
-                        log()->info( message_string( "SCHEDULER-856", lock->obj_name() ) );
-                    }
-
-                    lock->check_for_replacing_or_removing();
-                }
+                lock_use->lock()->release_lock_for( this, lock_use );
             }
             catch( exception& x )
             {
@@ -1330,12 +1357,7 @@ bool Holder::try_hold( Use* lock_use )
 
 void Holder::hold_lock( Use* lock_use )
 {
-    Lock* lock = lock_use->lock();
-
-    bool is_fresh_required = lock->require_lock_for( this, lock_use );      // false, wenn Holder bereits die Sperre mit gleichen oder schwächeren Lock_mode hält
-
-    if( is_fresh_required )
-        log()->info( message_string( "SCHEDULER-855", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusively" : "non-exclusively" ) );
+    lock_use->lock()->require_lock_for( this, lock_use );      // false, wenn Holder bereits die Sperre mit gleichen oder schwächeren Lock_mode hält
 }
 
 //------------------------------------------------------------------------------Holder::dom_element

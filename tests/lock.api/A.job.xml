@@ -6,6 +6,8 @@
     <script language="JavaScript">
         <![CDATA[
 
+var count = 2;
+
 function spooler_process() 
 {
     if( spooler_task.try_lock( "Georgien" )  &&
@@ -13,11 +15,14 @@ function spooler_process()
     {
         var hostware = new ActiveXObject( "hostware.global" );
         hostware.sleep( 30 );
+        --count;
     }
     else
+    {
         spooler_task.call_me_again_when_locks_available();
+    }
     
-    return false;
+    return count > 0;
 }
 
     ]]>

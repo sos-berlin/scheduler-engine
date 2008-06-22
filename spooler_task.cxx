@@ -850,8 +850,8 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 
     switch( _state )
     {
-        case s_running_delayed_until_locks_available:   set_state( s_running  );  break;
         case s_starting_delayed_until_locks_available:  set_state( s_starting );  break;
+        case s_running_delayed_until_locks_available:   set_state( s_running  );  break;
         default:                                        z::throw_xc( Z_FUNCTION );
     }
     
@@ -1357,11 +1357,14 @@ bool Task::do_something()
                                 ok = step__end();
                                 _operation = NULL;
 
+                                lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ];
+                                if( lock_requestor )  _lock_holder->release_locks( lock_requestor );
+
                                 if( _delay_until_locks_available )
                                 {
                                     _delay_until_locks_available = false;
                                     set_state( s_running_delayed_until_locks_available );
-                                    _lock_requestors[ lock_level_process_api ]->enqueue_lock_requests( _lock_holder );
+                                    lock_requestor->enqueue_lock_requests( _lock_holder );
                                     ok = true;
                                 }
 
