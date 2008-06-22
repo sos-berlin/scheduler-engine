@@ -15,13 +15,16 @@
                 <script language="JavaScript">
                     <![CDATA[
 
+var subprocess = spooler_task.create_subprocess();
+subprocess.start( "sleep 20" );
 
 var subprocess = spooler_task.create_subprocess();
-subprocess.start( "sleep 30 );
+subprocess.own_process_group = false;
+subprocess.start( "/bin/sh -c 'sleep 21 | sleep 33 | sleep 34'" );
 
 var subprocess = spooler_task.create_subprocess();
 subprocess.own_process_group = true;
-subprocess.start( "sleep 30 );
+subprocess.start( "sleep 22" );
 
                 ]]>
                 </script>
