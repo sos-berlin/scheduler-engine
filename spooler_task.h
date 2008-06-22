@@ -7,6 +7,9 @@
 namespace sos {
 namespace scheduler {
 
+
+struct Task_lock_requestor;
+
 //--------------------------------------------------------------------------------------Start_cause
 
 enum Start_cause
@@ -41,8 +44,10 @@ struct Task : Object,
         s_waiting_for_process,  // Prozess aus Prozessklasse wählen, evtl. warten, bis ein Prozess verfügbar ist.
         s_starting,             // load, spooler_init, spooler_open
                                 // Bis hier gilt Task::starting() == true
+        s_starting_delayed_until_locks_available, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
         s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
+        s_running_delayed_until_locks_available, // spooler_process(): wegen try_hold_lock() erneut aufrufen
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_running_remote_process,   // Prozess, der über remote Scheduler läuft (über Remote_module_instance_proxy)
@@ -68,6 +73,15 @@ struct Task : Object,
         c_begin,
         c_step,
         c_end,
+    };
+
+
+    enum Lock_level 
+    {
+        lock_level_task_static,     // <lock.use>, Sperre ist am <job> definiert und gilt für die Task
+        lock_level_task_api,        // Task.try_hold_lock() in spooler_open() oder spooler_init(), gilt für die Task
+        lock_level_process_api,     // Task.try_hold_lock() in spooler_process(), gilt für nur für spooler_process()
+        lock_level__max = lock_level_process_api
     };
 
 
@@ -178,6 +192,7 @@ struct Task : Object,
 
   protected:
     friend struct               Stdout_reader;
+    friend struct               Task_lock_requestor;
 
     void                        remove_order_after_error    ();
     void                        remove_order                ();
@@ -215,6 +230,11 @@ struct Task : Object,
     
     bool                        wait_until_terminated       ( double wait_time = Time::never );
     void                        set_delay_spooler_process   ( Time );
+
+    bool                        try_hold_lock               ( const Path& lock_path, lock::Lock::Lock_mode = lock::Lock::lk_non_exclusive );
+    void                        delay_until_locks_available ();
+    void                        on_locks_are_available      ( Task_lock_requestor* );
+    Lock_level                  current_lock_level          ();
 
     void                        set_state                   ( State );
 
@@ -305,6 +325,7 @@ struct Task : Object,
     Time                       _subprocess_timeout;
     Time                       _trying_deleting_files_until;
 
+    bool                       _post_start_code_executed;
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
@@ -313,6 +334,7 @@ struct Task : Object,
     bool                       _is_first_job_delay_after_error;
     bool                       _is_last_job_delay_after_error;
     bool                       _move_order_to_error_state;
+    bool                       _delay_until_locks_available;
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;
@@ -333,9 +355,10 @@ struct Task : Object,
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
     ptr<Web_service>           _web_service;
+    vector< ptr<lock::Requestor> > _lock_requestors;        // Nur für log_level_task_api und log_level_process_api
     ptr<lock::Holder>          _lock_holder;
 
-    ptr<File_logger>          _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
+    ptr<File_logger>           _file_logger;                // Übernimmt kontinuierlich stdout und stderr ins Protokoll
 };
 
 //----------------------------------------------------------------------------------------Task_list

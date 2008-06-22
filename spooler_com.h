@@ -514,6 +514,11 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_Exit_code                   ( int );
     STDMETHODIMP            get_Exit_code                   ( int* );
     STDMETHODIMP            get_Trigger_files               ( BSTR* );
+    STDMETHODIMP            Try_lock                        ( BSTR, VARIANT_BOOL* );
+    STDMETHODIMP            Try_lock_non_exclusive          ( BSTR, VARIANT_BOOL* );
+    STDMETHODIMP            Call_me_again_when_locks_available      ();
+    STDMETHODIMP            Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* );
+    STDMETHODIMP            Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* );
 
     ptr<Task>                   task                        () const                                { return _task; }
 

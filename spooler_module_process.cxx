@@ -151,6 +151,11 @@ bool Process_module_instance::load()
 void Process_module_instance::start()
 {
     Module_instance::start();
+
+    //2008-06-15: _task_paramters an Remote Scheduler übergeben
+    //ptr<Variable_set> vs = _process_environment->clone();
+    //vs->merge( _task_parameters );
+    //_process_param = subst_env( _module->_process_param_raw, vs );
     _process_param = subst_env( _module->_process_param_raw, _process_environment );
 }
 

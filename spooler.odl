@@ -492,6 +492,21 @@ library Spooler
 
         [id(31),propget]
         HRESULT                 Trigger_files               ( [out,retval] BSTR* Result );
+
+        [id(32)]
+        HRESULT                 Try_lock                    ( [in] BSTR, [out,retval] VARIANT_BOOL* );
+
+        [id(33)]
+        HRESULT                 Try_lock_non_exclusive      ( [in] BSTR, [out,retval] VARIANT_BOOL* );
+
+        [id(34)]
+        HRESULT                 Call_me_again_when_locks_available();
+
+        [id(35)]
+        HRESULT                 Try_lock_else_call_me_again ( [in] BSTR, [out,retval] VARIANT_BOOL* );
+
+        [id(36)]
+        HRESULT                 Try_lock_non_exclusive_else_call_me_again( [in] BSTR, [out,retval] VARIANT_BOOL* );
     }
 
     [

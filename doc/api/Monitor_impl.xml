@@ -174,7 +174,7 @@
     </description>
 
     <example programming_language="java">
-<pre>public boolean spooler_task_after()  throws Exception
+<pre>public void spooler_task_after()  throws Exception
 {
     spooler_log.info( "SPOOLER_TASK_AFTER()" );
 }</pre>

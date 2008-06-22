@@ -313,6 +313,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-465", "'$1' overlaps $2" },
     { "SCHEDULER-466", "'$1' is a substitute for another schedule and cannot be used directly" },
     { "SCHEDULER-467", "Attribute '$1' is only valid with attribute '$2'" },
+    { "SCHEDULER-468", "Task.delay_until_locks_available() is not allowed here" },
+    { "SCHEDULER-469", "Task.try_lock() is not allowed here" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

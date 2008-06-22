@@ -10,6 +10,12 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-06-09" version="2.0.207" subversion_revision="5799">
+        <revision title="Auf Microsoft Visual Studio 2008 umgestellt">
+        </revision>
+    </change>
+
+
     <change date="2008-05-25" version="2.0.206" subversion_revision="5789">
         <revision type="correction" title="spidermonkey.dll und libspidermoneky.so: Verhalten bei Boole'sch true verbessert">
             <description>

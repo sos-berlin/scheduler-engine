@@ -31,142 +31,40 @@ namespace scheduler {
 static const string             spooler_get_name                = "spooler_get";
 static const string             spooler_level_name              = "spooler_level";
 
-//----------------------------------------------------------------------------Spooler_object::level
-/*
-Level Spooler_object::level()
+//------------------------------------------------------------------------------Task_lock_requestor
+
+struct Task_lock_requestor : lock::Requestor
 {
-    Variant level = com_property_get( _idispatch, spooler_level_name );
-    level.ChangeType( VT_INT );
-
-    return level.intVal;
-}
-
-//--------------------------------------------------------------------------Spooler_object::process
-
-void Spooler_object::process( Level output_level )
-{
-    com_call( _idispatch, spooler_process_name, output_level );
-}
-
-//---------------------------------------------------------------------------Object_set::Object_set
-
-Object_set::Object_set( Spooler* spooler, Module_task* task, const Sos_ptr<Object_set_descr>& descr )
-:
-    _zero_(this+1),
-    _spooler(spooler),
-    _task(task),
-    _object_set_descr(descr),
-    _class(descr->_class)
-{
-}
-
-//--------------------------------------------------------------------------Object_set::~Object_set
-
-Object_set::~Object_set()
-{
-    _idispatch = NULL;
-}
-
-//---------------------------------------------------------------------------------Object_set::open
-
-bool Object_set::open()
-{
-    bool    ok;
-    Variant object_set_vt;
-
-    if( _class->_object_interface )
+    Task_lock_requestor( Task* task )
+    : 
+        Requestor( task ), 
+        _task(task) 
     {
-        Module_instance::In_call( _task->_module_instance, "spooler_make_object_set" );
-        object_set_vt = _task->_module_instance->call( "spooler_make_object_set" );
-
-        if( object_set_vt.vt != VT_DISPATCH
-         || object_set_vt.pdispVal == NULL  )  z::throw_xc( "SCHEDULER-103", _object_set_descr->_class_name );
-
-        _idispatch = object_set_vt.pdispVal;
-    }
-    else
-    {
-        _idispatch = _task->_module_instance->dispatch();
     }
 
-    if( com_name_exists( _idispatch, spooler_open_name ) )
+    ~Task_lock_requestor()
     {
-        Module_instance::In_call in_call ( _task->_module_instance, spooler_open_name );
-        ok = check_result( com_call( _idispatch, spooler_open_name ) );
-        in_call.set_result( ok );
-    }
-    else
-        ok = true;
-
-    return ok && !_task->has_error();
-}
-
-//--------------------------------------------------------------------------------Object_set::close
-
-void Object_set::close()
-{
-    if( com_name_exists( _idispatch, spooler_close_name ) )
-    {
-        Module_instance::In_call in_call ( _task->_module_instance, spooler_close_name );
-        com_call( _idispatch, spooler_close_name );
     }
 
-    _idispatch = NULL;
-}
 
-//----------------------------------------------------------------------------------Object_set::get
+    // Requestor:
 
-Spooler_object Object_set::get()
-{
-    Spooler_object object;
-
-    while(1)
+    bool locks_are_available() const
     {
-        Module_instance::In_call in_call ( _task->_module_instance, spooler_get_name );
-        Variant obj = com_call( _idispatch, spooler_get_name );
-
-        if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
-        if( obj.vt != VT_DISPATCH
-         || obj.pdispVal == NULL  )  z::throw_xc( "SCHEDULER-102", _object_set_descr->_class_name );
-
-        object = obj.pdispVal;
-
-        if( obj.pdispVal == NULL )  break;  // EOF
-        if( _object_set_descr->_level_interval.is_in_interval( object.level() ) )  break;
-
-        //_log->info( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
+        return locks_are_available_for_holder( _task->_lock_holder );
     }
 
-    return object;
-}
-
-//---------------------------------------------------------------------------------Object_set::step
-
-bool Object_set::step( Level result_level )
-{
-  //if( eof() )  return false;
-
-    if( _class->_object_interface )
-    {
-        Spooler_object object = get();
-        if( object.is_null() )  return false;
-
-        if( _task->has_error() )  return false;       // spooler_task.error() gerufen?
-
-        Module_instance::In_call in_call ( _task->_module_instance, spooler_process_name );
-        object.process( result_level );
-
-        return true;
+    void on_locks_are_available()                                      
+    { 
+        _task->on_locks_are_available( this );
     }
-    else
-    {
-        Module_instance::In_call in_call ( _task->_module_instance, spooler_process_name );
-        bool result = check_result( _task->_module_instance->call( spooler_process_name, result_level ) );
-        in_call.set_result( result );
-        return result;
-    }
-}
-*/
+
+  //void                        on_removing_lock            ( lock::Lock* l )                       { _job->on_removing_lock( l ); }
+
+  private:
+    Task*                      _task;
+};
+
 //---------------------------------------------------------------------------------start_cause_name
 
 string start_cause_name( Start_cause cause )
@@ -199,7 +97,8 @@ Task::Task( Job* job )
     _job(job),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
-    _lock("Task")
+    _lock("Task"),
+    _lock_requestors( 1+lock_level__max )
   //_success(true)
 {
     _log = Z_NEW( Prefix_log( this ) );
@@ -213,8 +112,6 @@ Task::Task( Job* job )
 
     _idle_timeout_at = Time::never;
 
-    if( _job->_lock_requestor )  _lock_holder = Z_NEW( lock::Holder( this, _job->_lock_requestor ) );
-    
     set_subprocess_timeout();
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
@@ -705,9 +602,31 @@ void Task::set_state( State new_state )
     {
         if( new_state != s_running_waiting_for_order )  _idle_since = 0;
 
+        if( new_state != _state )
+        {
+            switch( _state )
+            {
+                case s_running:
+                    if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )  
+                    {
+                        _lock_holder->release_locks( lock_requestor );
+                        lock_requestor->dequeue_lock_requests();
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         switch( new_state )
         {
             case s_waiting_for_process:
+                _next_time = Time::never;
+                break;
+
+            case s_starting_delayed_until_locks_available:
                 _next_time = Time::never;
                 break;
 
@@ -717,6 +636,10 @@ void Task::set_state( State new_state )
 
             case s_running_delayed:
                 _next_time = _next_spooler_process;
+                break;
+
+            case s_running_delayed_until_locks_available:
+                _next_time = Time::never;
                 break;
 
             case s_running_waiting_for_order:
@@ -784,8 +707,10 @@ string Task::state_name( State state )
         case s_waiting_for_process:         return "waiting_for_process";
       //case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
+        case s_starting_delayed_until_locks_available: return "starting_delayed_until_locks_available";
         case s_running:                     return "running";
         case s_running_delayed:             return "running_delayed";
+        case s_running_delayed_until_locks_available: return "running_delayed_until_locks_available";
         case s_running_waiting_for_order:   return "running_waiting_for_order";
         case s_running_process:             return "running_process";
         case s_running_remote_process:      return "running_remote_process";
@@ -849,6 +774,88 @@ void Task::set_delay_spooler_process( Time t )
 { 
     _log->debug("delay_spooler_process=" + t.as_string() ); 
     _next_spooler_process = Time::now() + t; 
+}
+
+//------------------------------------------------------------------------------Task::try_hold_lock
+
+bool Task::try_hold_lock( const Path& lock_relative_path, lock::Lock::Lock_mode lock_mode )
+{
+    if( _state != s_starting  &&
+        _state != s_running       )  z::throw_xc( "SCHEDULER-469" );
+
+
+    Absolute_path lock_path  ( _job->folder_path(), lock_relative_path );
+    Lock_level    lock_level = current_lock_level();
+
+
+    if( _state < s_running )  assert( !_lock_requestors[ lock_level_process_api ] );
+
+    if( !_lock_requestors[ lock_level ] )
+    {
+        _lock_requestors[ lock_level ] = Z_NEW( Task_lock_requestor( this ) );
+        _lock_holder->add_requestor( _lock_requestors[ lock_level ] );
+    }
+
+    lock::Use* lock_use = _lock_requestors[ lock_level ]->add_lock_use( lock_path, lock_mode );
+
+    return _lock_holder->try_hold( lock_use );
+}
+
+//----------------------------------------------------------------Task::delay_until_locks_available
+
+void Task::delay_until_locks_available()
+{
+    if( _state != s_starting  &&
+        _state != s_running       )  z::throw_xc( "SCHEDULER-468" );        // Verhindert auch doppelten Aufruf 
+
+    Lock_level       lock_level     = current_lock_level();
+    lock::Requestor* lock_requestor = _lock_requestors[ lock_level ];
+
+    if( !lock_requestor )  z::throw_xc( "SCHEDULER-468" );   // Kein try_hold_lock()
+  //if( _lock_holder->is_holding( lock_requestor ) )  z::throw_xc( "SCHEDULER-468" );   // Sperren werden bereits gehalten
+
+    // Sicherstellen, dass try_hold_lock() ohne Erfolg aufgerufen worden ist
+    // begin__start() erneut aufrufen mit dem Parameter, dass der letzte Aufruf (spooler_init, spooler_open) wiederholt werden soll.
+    // Wie stellen wir sicher, dass wir nicht im Konstruktor sind? Wiederholen wir die Konstruktion? In Module_instance::begin__end
+    // Oder Exception erst bei der Wiederholung, etwas spät, aber es genügt.
+
+    _delay_until_locks_available = true;
+}
+
+//-------------------------------------------------------------------------Task::current_lock_level
+
+Task::Lock_level Task::current_lock_level() 
+{
+    if( _state < s_running )  return lock_level_task_api;
+    
+    if( _state == s_running  ||
+        _state == s_running_delayed_until_locks_available )  return lock_level_process_api;
+
+    z::throw_xc( Z_FUNCTION );
+}
+
+//---------------------------------------------------------------------Task::on_locks_are_available
+
+void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
+{    
+    assert( _lock_holder->is_known_requestor( lock_requestor ) );
+    assert( lock_requestor == _lock_requestors[ current_lock_level() ] );
+    assert( lock_requestor->is_enqueued() );
+    assert( lock_requestor->locks_are_available_for_holder( _lock_holder ) );
+    assert( _state == s_starting_delayed_until_locks_available ||
+            _state == s_running_delayed_until_locks_available    );
+
+    lock_requestor->dequeue_lock_requests();
+    _lock_holder->hold_locks( lock_requestor );
+
+    switch( _state )
+    {
+        case s_running_delayed_until_locks_available:   set_state( s_running  );  break;
+        case s_starting_delayed_until_locks_available:  set_state( s_starting );  break;
+        default:                                        z::throw_xc( Z_FUNCTION );
+    }
+    
+    signal( Z_FUNCTION );
 }
 
 //------------------------------------------------------------------------------Task::set_next_time
@@ -1227,10 +1234,12 @@ bool Task::do_something()
                             {
                                 ok = operation__end();
 
-                                if( _job->_history.min_steps() == 0 )  _history.start();
-
-                                //if( !dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )      // Der Remote_module_instance_server protokolliert selbst
+                                if( !_post_start_code_executed )
                                 {
+                                    _post_start_code_executed = true;
+
+                                    if( _job->_history.min_steps() == 0 )  _history.start();
+
                                     _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
                                     _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
 
@@ -1241,22 +1250,36 @@ bool Task::do_something()
                                     }
                                 }
 
-                                State next_state;
-                                if( !ok )  next_state = s_ending;
-                                else if( _module_instance->_module->kind() == Module::kind_process )
-                                        next_state = _module_instance->kind() == Module::kind_remote? s_running_remote_process 
-                                                                                                    : s_running_process;
-                                     else 
-                                        next_state = s_running;
- 
-                                set_state( next_state );
+                                if( _delay_until_locks_available )
+                                {
+                                    _delay_until_locks_available = false;
+                                    set_state( s_starting_delayed_until_locks_available );
+                                    _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
+                                    ok = true;
+                                }
+                                else
+                                {
+                                    State next_state;
+                                    if( !ok )  next_state = s_ending;
+                                    else if( _module_instance->_module->kind() == Module::kind_process )
+                                            next_state = _module_instance->kind() == Module::kind_remote? s_running_remote_process 
+                                                                                                        : s_running_process;
+                                         else 
+                                            next_state = s_running;
+     
+                                    set_state( next_state );
 
-                                loop = true;
+                                    loop = true;
+                                }
                             }
 
                             something_done = true;
                             break;
                         }
+
+
+                        case s_starting_delayed_until_locks_available: 
+                            break;
 
 
                         case s_running_process:
@@ -1334,6 +1357,14 @@ bool Task::do_something()
                                 ok = step__end();
                                 _operation = NULL;
 
+                                if( _delay_until_locks_available )
+                                {
+                                    _delay_until_locks_available = false;
+                                    set_state( s_running_delayed_until_locks_available );
+                                    _lock_requestors[ lock_level_process_api ]->enqueue_lock_requests( _lock_holder );
+                                    ok = true;
+                                }
+
                                 if( !ok || has_error() )  set_state( s_ending ), loop = true;
 
                                 if( _state != s_ending  &&  !_end )  _order_for_task_end = NULL;
@@ -1388,6 +1419,10 @@ bool Task::do_something()
                             _running_state_reached = true;
                             break;
                         }
+
+
+                        case s_running_delayed_until_locks_available: 
+                            break;
 
 
                         case s_ending:

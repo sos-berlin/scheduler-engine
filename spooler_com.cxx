@@ -2811,6 +2811,117 @@ STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
     return hr;
 }
 
+//-------------------------------------------------------------------------------Com_task::Try_lock
+
+STDMETHODIMP Com_task::Try_lock( BSTR lock_path_bstr, VARIANT_BOOL* result )
+{
+    Z_LOGI( Z_FUNCTION << '\n' );
+
+    HRESULT hr = S_OK;
+
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
+                                                                            : VARIANT_FALSE;
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_task::Try_lock_non_exclusive
+
+STDMETHODIMP Com_task::Try_lock_non_exclusive( BSTR lock_path_bstr, VARIANT_BOOL* result )
+{
+    Z_LOGI( Z_FUNCTION << '\n' );
+    
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
+                                                                                                          : VARIANT_FALSE;
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    
+    return hr;
+}
+
+//-----------------------------------------------------Com_task::Call_me_again_when_locks_available
+
+STDMETHODIMP Com_task::Call_me_again_when_locks_available()
+{
+    Z_LOGI( Z_FUNCTION << '\n' );
+    
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+
+        _task->delay_until_locks_available();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------Com_task::Try_lock_else_call_me_again
+
+STDMETHODIMP Com_task::Try_lock_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
+{
+    Z_LOGI( Z_FUNCTION << '\n' );
+    
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
+                                                                            : VARIANT_FALSE;
+        if( !*result )  _task->delay_until_locks_available();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    
+    return hr;
+}
+
+//--------------------------------------Com_task::Try_lock_non_exclusive_else_call_me_again
+
+STDMETHODIMP Com_task::Try_lock_non_exclusive_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
+{
+    Z_LOGI( Z_FUNCTION << '\n' );
+
+    HRESULT hr = S_OK;
+
+    try
+    {
+        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
+                                                                                                          : VARIANT_FALSE;
+        if( !*result )  _task->delay_until_locks_available();
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
 //--------------------------------------------------------------------------------Com_task::add_pid
 
 STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
@@ -4157,7 +4268,7 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
 
 STDMETHODIMP Com_spooler::get_Schedule( BSTR path_bstr, Ischedule** result )
 {
-    Z_LOGI( __FUNCTION__ << '\n' );
+    Z_LOGI( Z_FUNCTION << '\n' );
 
     if( !_spooler )  return E_POINTER;
 

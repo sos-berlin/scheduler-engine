@@ -236,9 +236,9 @@ Lock::~Lock()
 
 void Lock::close()
 {
-    for( Holder_set::iterator it = _holder_set.begin(); it != _holder_set.end(); )
+    for( Holder_map::iterator h = _holder_map.begin(); h != _holder_map.end(); )
     {
-        Holder* holder = *it;
+        Holder* holder = h->first;
         log()->error( message_string( "SCHEDULER-854", obj_name(), holder->obj_name() ) );
     }
 
@@ -246,9 +246,9 @@ void Lock::close()
     _waiting_queues.clear();
 
 
-    //Z_FOR_EACH( Use_set, _use_set, it )
+    //Z_FOR_EACH( Use_set, _use_set, u )
     //{
-    //    Use* use = *it;
+    //    Use* use = *u;
     //    use->disconnect();        Nicht nötig
     //}
 
@@ -261,7 +261,7 @@ bool Lock::can_be_replaced_now()
 {
     return replacement()  &&  
            replacement()->file_based_state() == File_based::s_initialized &&
-           _holder_set.empty();
+           _holder_map.empty();
 }
 
 //------------------------------------------------------------------------------Lock::on_initialize
@@ -289,7 +289,7 @@ bool Lock::on_activate()
 
 bool Lock::can_be_removed_now()
 {
-    return is_to_be_removed()  &&  _holder_set.empty();
+    return is_to_be_removed()  &&  _holder_map.empty();
 }
 
 //--------------------------------------------------------------------------Lock::prepare_to_remove
@@ -300,9 +300,9 @@ void Lock::prepare_to_remove()
     {
         //_remove = true;
 
-        //Z_FOR_EACH( Use_set, _use_set, it )
+        //Z_FOR_EACH( Use_set, _use_set, u )
         //{
-        //    Use* use = *it;
+        //    Use* use = *u;
         //    use->requestor()->on_removing_lock( this );
         //}
 
@@ -312,16 +312,16 @@ void Lock::prepare_to_remove()
 
         for( int lk = lk_exclusive; lk <= lk_non_exclusive; lk++ )
         {
-            Z_FOR_EACH( Use_list, _waiting_queues[ lk ], it )
+            Z_FOR_EACH( Use_list, _waiting_queues[ lk ], u )
             {
-                Use* lock_use = *it;
+                Use* lock_use = *u;
                 requestor_set.insert( lock_use->requestor() );
             }
         }
 
-        Z_FOR_EACH( Requestor_set, requestor_set, it )
+        Z_FOR_EACH( Requestor_set, requestor_set, r )
         {
-            Requestor* requestor = *it;
+            Requestor* requestor = *r;
             requestor->dequeue_lock_requests();
         }
     }
@@ -374,20 +374,25 @@ bool Lock::is_free() const
     // Siehe auch can_be_removed_now()
 
     return file_based_state() == File_based::s_active  &&  
-           _holder_set.empty(); 
+           _holder_map.empty(); 
 }
 
 //--------------------------------------------------------------------------------Lock::is_free_for
 
-bool Lock::is_free_for( Lock_mode lock_mode ) const
+bool Lock::is_free_for( const Use* lock_use, Holder* requesting_holder ) const
 { 
-    return lock_mode == lk_exclusive? is_free() 
-                                    : ( _lock_mode != lk_exclusive || is_free() )  &&  
-                                      count_non_exclusive_holders() < _config._max_non_exclusive;
+    bool free = lock_use->lock_mode() == lk_exclusive? is_free() 
+                                                     : ( _lock_mode != lk_exclusive || is_free() )  &&  
+                                                       count_non_exclusive_holders() < _config._max_non_exclusive;
 
-    //if( lock_mode == lk_non_exclusive  &&  _config._max_non_exclusive == 0 )  return false;
-    //return is_free()  ||   
-    //       lock_mode == lk_non_exclusive  &&  _lock_mode == lk_non_exclusive  &&  count_non_exclusive_holders() < _config._max_non_exclusive;
+    if( !free  &&  
+        requesting_holder  &&  
+        _holder_map.find( requesting_holder ) != _holder_map.end() )    // requesting_holder hält die Sperre bereits?
+    {
+        free = lock_use->lock_mode() == lk_non_exclusive  ||  _holder_map.size() == 1;
+    }
+
+    return free;
 }
 
 //--------------------------------------------------------------------------------Lock::its_my_turn
@@ -396,7 +401,7 @@ bool Lock::its_my_turn( const Use* lock_use )
 {
     bool result = false;
 
-    if( is_free_for( lock_use->lock_mode() ) )
+    if( is_free_for( lock_use, (Holder*)NULL ) )
     {
         Use_list&          queue = _waiting_queues[ lock_use->lock_mode() ];
         Use_list::iterator first = queue.begin();
@@ -413,42 +418,122 @@ bool Lock::its_my_turn( const Use* lock_use )
 
 //---------------------------------------------------------------------------Lock::require_lock_for
 
-void Lock::require_lock_for( Holder* holder, Use* lock_use )
+bool Lock::require_lock_for( Holder* holder, Use* lock_use )
 {
-    assert( is_free_for( lock_use->lock_mode() ) );
-    assert( holder->requestor() == lock_use->requestor() );
     assert_is_active();
+    assert( holder->is_known_requestor( lock_use->requestor() ) );
+    assert( is_free_for( lock_use, holder ) );
 
-    _holder_set.insert( holder );
-    _lock_mode = lock_use->lock_mode();
+    bool result;
+
+    Holder_map::iterator h = _holder_map.find( holder );
+
+    if( h != _holder_map.end() )
+    {
+        if( _lock_mode == lk_non_exclusive  &&  lock_use->lock_mode() == lk_exclusive )
+        {
+            assert( _holder_map.size() == 1 );
+            _lock_mode = lk_exclusive;   
+            result = true;      // Holder hat seine Haltung von lk_non_exclusive auf lk_exclusive erhöht
+        }
+        else
+            result = false;     // Holder hat nix verändert
+    }
+    else
+    {
+        _holder_map[ holder ] = Use_set();
+        h = _holder_map.find( holder );
+        _lock_mode = lock_use->lock_mode();
+        result = true;      // Holder hält die Sperre neu oder mit strengerem Lock_mode
+    }
+
+    h->second.insert( lock_use );
+
+    return result;
 }
 
 //---------------------------------------------------------------------------Lock::release_lock_for
 
-void Lock::release_lock_for( Holder* holder )
+bool Lock::release_lock_for( Holder* holder, Use* lock_use )
 {
-    Holder_set::iterator it = _holder_set.find( holder );
+    bool is_released = false;
 
-    if( it != _holder_set.end() )  _holder_set.erase( it );
-                             else  Z_DEBUG_ONLY( assert( !"Unbekannter Holder" ) );
-
-
-    Requestor* next_requestor = NULL; 
-
-    if( !_waiting_queues[ lk_exclusive ].empty() )  
+    Holder_map::iterator h = _holder_map.find( holder );
+    if( h != _holder_map.end() )
     {
-        next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
+        Use_set::iterator u = h->second.find( lock_use );
+        if( u != h->second.end() )
+        {
+            h->second.erase( u );
+
+            if( h->second.empty() )  
+            {
+                _holder_map.erase( h );    // Das ist der Normalfall: Der Holder hält die Sperre nur einmal und wird jetzt entfernt
+                is_released = true;
+            }
+            else
+            if( lock_use->lock_mode() == lk_exclusive )         // Der letzte exklusive Use? (nur noch nicht-exklusives Use des Holder?)
+            {
+                assert( _lock_mode == lk_exclusive );
+
+                bool has_exclusive_use = false;
+                Z_FOR_EACH_CONST( Use_set, h->second, uu )  if( (*uu)->lock_mode() == lk_exclusive )  { has_exclusive_use = true;  break; }
+                
+                if( !has_exclusive_use )  
+                {
+                    _lock_mode = lk_non_exclusive;
+                    is_released = true;                 // Wenigstens lk_non_exclusive statt vorher lk_exclusive
+                }
+            }
+
+
+            Requestor* next_requestor = NULL; 
+
+            if( !_waiting_queues[ lk_exclusive ].empty() )  
+            {
+                next_requestor = ( *_waiting_queues[ lk_exclusive ].begin() ) -> requestor();
+            }
+            else
+            if( !_waiting_queues[ lk_non_exclusive ].empty() )  
+            {
+                next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
+            }
+
+            if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
+            {
+                try
+                {
+                    next_requestor->on_locks_are_available();  
+                }
+                catch( exception& x ) 
+                { 
+                    next_requestor->log()->error( S() << x << ", in on_lock_are_available()" );
+                }
+            }
+        }
+        //else  
+        //  Z_DEBUG_ONLY( assert( !"Unbekannter Use" ) );
     }
-    else
-    if( !_waiting_queues[ lk_non_exclusive ].empty() )  
+    //else  
+    //  Z_DEBUG_ONLY( assert( !"Unbekannter Holder" ) );
+
+    return is_released;
+}
+
+//---------------------------------------------------------------------------------Lock::is_held_by
+
+bool Lock::is_held_by( Holder* holder, Lock_mode lock_mode )
+{
+    bool result = false;
+
+    Holder_map::iterator h = _holder_map.find( holder );
+    if( h != _holder_map.end() )
     {
-        next_requestor = ( *_waiting_queues[ lk_non_exclusive ].begin() ) -> requestor();
+        result = _lock_mode == lk_exclusive  || 
+                 lock_mode == lk_non_exclusive; 
     }
 
-    if( next_requestor  &&  next_requestor->locks_are_available() )     // Der Requestor kann auch die anderen Sperren belegen?
-    {
-        next_requestor->on_locks_are_available();
-    }
+    return result;
 }
 
 //---------------------------------------------------------------------------Lock::enqueue_lock_use
@@ -480,14 +565,33 @@ void Lock::dequeue_lock_use( Use* lock_use )
 {
     Use_list& list = _waiting_queues[ lock_use->lock_mode() ];
 
-    Z_FOR_EACH( Use_list, list, it )
+    Z_FOR_EACH( Use_list, list, u )
     {
-        if( *it == lock_use )  
+        if( *u == lock_use )  
         {
-            list.erase( it );
+            list.erase( u );
             break;
         }
     }
+}
+
+//----------------------------------------------------------------Lock::count_non_exclusive_holders
+
+int Lock::count_non_exclusive_holders() const
+{ 
+    // Mehrfaches kl_exclusive wird toleriert, mehrfaches lk_non_exclusive zählt aber? Das ist vielleicht inkonsequent. 
+    // Alse zählen wir doppelte Haltungen nicht.
+    // Das erfordert weitere Behandlung in is_free_for() und assert() in require_lock_for():
+    //int result = 0;
+
+    //if( _lock_mode == lk_non_exclusive )
+    //{
+    //    Z_FOR_EACH_CONST( Holder_map, _holder_map, it )  result += it->second;      // Mehrfache Haltungen desselben Holder zählen mehrfach
+    //}
+
+    //return result;
+
+    return _lock_mode == lk_non_exclusive? _holder_map.size() : 0; 
 }
 
 //------------------------------------------------------------------------------------Lock::set_dom
@@ -512,17 +616,18 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
 
     if( is_free() )  result.setAttribute( "is_free", "yes" );
 
-    if( !_holder_set.empty() )
+    if( !_holder_map.empty() )
     {
         xml::Element_ptr holders_element = result.append_new_element( "lock.holders" );
         holders_element.setAttribute( "exclusive", _lock_mode == lk_exclusive? "yes" : "no" );
 
-        Z_FOR_EACH( Holder_set, _holder_set, it )
+        Z_FOR_EACH( Holder_map, _holder_map, h )
         {
-            Holder* holder = *it;
+            Holder* holder = h->first;
 
             xml::Element_ptr holder_element = holders_element.append_new_element( "lock.holder" );
             holder->object()->write_element_attributes( holder_element );
+            if( h->second.size() > 1 )  holder_element.setAttribute( "count", (int64)h->second.size() );
         }
     }
 
@@ -535,9 +640,9 @@ xml::Element_ptr Lock::dom_element( const xml::Document_ptr& dom_document, const
             xml::Element_ptr queue_element = result.append_new_element( "lock.queue" );
             queue_element.setAttribute( "exclusive", lk == lk_exclusive? "yes" : "no" );
 
-            Z_FOR_EACH( Use_list, queue, it )
+            Z_FOR_EACH( Use_list, queue, u )
             {
-                Use* lock_use = *it;
+                Use* lock_use = *u;
                 xml::Element_ptr entry_element = queue_element.append_new_element( "lock.queue.entry" );
 
                 Scheduler_object* object = lock_use->requestor()->object();
@@ -555,7 +660,7 @@ string Lock::string_from_holders() const
 {
     S result;
 
-    if( _holder_set.empty() )
+    if( _holder_map.empty() )
     {
         result << "free";
     }
@@ -563,12 +668,14 @@ string Lock::string_from_holders() const
     {
         result << ( _lock_mode == lk_exclusive? "exclusive holder " : "non-exclusive holder " );
 
-        Z_FOR_EACH_CONST( Holder_set, _holder_set, it )
+        Z_FOR_EACH_CONST( Holder_map, _holder_map, h )
         {
-            Holder* holder = *it;
+            Holder* holder = h->first;
 
-            if( it != _holder_set.begin() )  result << ", "; 
+            if( h != _holder_map.begin() )  result << ", "; 
             result << holder->object()->obj_name();
+
+            if( h->second.size() > 1 )  result << "(" << h->second.size() << "x)";       // Anzahl der Haltungen
         }
     }
 
@@ -581,9 +688,9 @@ string Lock::string_from_uses() const
 {
     S result;
 
-    Z_FOR_EACH_CONST( Use_set, _use_set, it )
+    Z_FOR_EACH_CONST( Use_set, _use_set, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
 
         if( !result.empty() )  result << ", ";
         result << lock_use->requestor()->object()->obj_name();
@@ -686,9 +793,9 @@ Requestor::~Requestor()
 
 void Requestor::close()
 { 
-    Z_FOR_EACH( Use_list, _use_list, it )
+    Z_FOR_EACH( Use_list, _use_list, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
         
         if( Lock* lock = lock_use->lock_or_null() )
         {
@@ -707,11 +814,11 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 
     ptr<Use> lock_use;
 
-    Z_FOR_EACH( Use_list, _use_list, it )
+    Z_FOR_EACH( Use_list, _use_list, u )
     {
-        if( (*it)->lock_normalized_path() == normalized_path )
+        if( (*u)->lock_normalized_path() == normalized_path )
         {
-            lock_use = *it;
+            lock_use = *u;
             break;
         }
     }
@@ -719,20 +826,31 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
     if( !lock_use )  
     {
         lock_use = Z_NEW( Use( this ) );
-        lock_use->set_folder_path( _folder_path );
+      //lock_use->set_folder_path( _folder_path );
         _use_list.push_back( lock_use );
     }
 
     lock_use->set_dom( lock_use_element );
 }
 
+//--------------------------------------------------------------------------Requestor::add_lock_use
+
+Use* Requestor::add_lock_use( const Absolute_path& lock_path, Lock::Lock_mode lock_mode )
+{
+    ptr<Use> lock_use = Z_NEW( Use( this, lock_path, lock_mode ) );
+
+    _use_list.push_back( lock_use );
+
+    return lock_use;
+}
+
 //-----------------------------------------------------------------------Requestor::set_folder_path
 
 //void Requestor::set_folder_path( const Absolute_path& folder_path )
 //{ 
-//    Z_FOR_EACH( Use_list, _use_list, it )
+//    Z_FOR_EACH( Use_list, _use_list, u )
 //    {
-//        Use* use = *it;
+//        Use* use = *u;
 //        use->set_folder_path( folder_path );
 //    }
 //}
@@ -741,9 +859,9 @@ void Requestor::set_dom( const xml::Element_ptr& lock_use_element )
 
 void Requestor::initialize()
 {
-    Z_FOR_EACH( Use_list, _use_list, it )
+    Z_FOR_EACH( Use_list, _use_list, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
         lock_use->initialize();
     }
 }
@@ -752,9 +870,9 @@ void Requestor::initialize()
 
 void Requestor::load()
 {
-    Z_FOR_EACH( Use_list, _use_list, it )
+    Z_FOR_EACH( Use_list, _use_list, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
         lock_use->load();
     }
 }
@@ -763,9 +881,9 @@ void Requestor::load()
 
 //void Requestor::on_new_lock( Lock* lock )
 //{
-//    Z_FOR_EACH( Use_list, _use_list, it )
+//    Z_FOR_EACH( Use_list, _use_list, u )
 //    {
-//        Use* use = *it;
+//        Use* use = *u;
 //        
 //        if( use->lock_or_null() == lock )
 //        {
@@ -776,17 +894,17 @@ void Requestor::load()
 
 //-------------------------------------------------------------------Requestor::locks_are_available
 
-bool Requestor::locks_are_available() const
+bool Requestor::locks_are_available_for_holder( Holder* holder ) const
 {
     bool all_locks_are_free = true;
     bool its_my_turn        = false;
 
-    Z_FOR_EACH_CONST( Use_list, _use_list, it )
+    Z_FOR_EACH_CONST( Use_list, _use_list, u )
     {
-        Use*  lock_use = *it;
+        Use*  lock_use = *u;
         Lock* lock     = lock_use->lock_or_null();
 
-        if( !lock  ||  !lock->is_free_for( lock_use->lock_mode() ) )
+        if( !lock  ||  !lock->is_free_for( lock_use, holder ) )
         {
             all_locks_are_free = false;
             break;
@@ -804,9 +922,9 @@ bool Requestor::locks_are_known() const
 {
     bool result = true;
 
-    Z_FOR_EACH_CONST( Use_list, _use_list, it )
+    Z_FOR_EACH_CONST( Use_list, _use_list, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
         
         if( !lock_use->lock_or_null() )  
         { 
@@ -820,7 +938,7 @@ bool Requestor::locks_are_known() const
 
 //-----------------------------------------------------------------Requestor::enqueue_lock_requests
 
-bool Requestor::enqueue_lock_requests()
+bool Requestor::enqueue_lock_requests( Holder* holder )
 { 
     bool result = false;
 
@@ -831,15 +949,18 @@ bool Requestor::enqueue_lock_requests()
     {
         _is_enqueued = true; 
 
-        Z_FOR_EACH( Use_list, _use_list, it )
+        Z_FOR_EACH( Use_list, _use_list, u )
         {
-            Use*  lock_use = *it;
+            Use*  lock_use = *u;
             Lock* lock     = lock_use->lock();
             
-            int place = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
-                
-            _log->info( message_string( "SCHEDULER-860", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive", 
-                                                         place, lock->string_from_holders() ) );
+            if( !holder  ||  !lock->is_held_by( holder, lock_use->lock_mode() ) )
+            {
+                int place = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
+
+                _log->info( message_string( "SCHEDULER-860", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusive" : "non-exclusive", 
+                                                             place, lock->string_from_holders() ) );
+            }
         }
 
         result = true;
@@ -856,9 +977,9 @@ void Requestor::dequeue_lock_requests( Log_level log_level )
     {
         S lock_names;
 
-        Z_FOR_EACH( Use_list, _use_list, it )
+        Z_FOR_EACH( Use_list, _use_list, u )
         {
-            Use* lock_use = *it;
+            Use* lock_use = *u;
             
             if( !lock_names.empty() )  lock_names << ", ";
             lock_names << lock_use->lock_path();
@@ -885,9 +1006,9 @@ xml::Element_ptr Requestor::dom_element( const xml::Document_ptr& dom_document, 
 
     if( _is_enqueued )  result.setAttribute( "waiting", "yes" );
 
-    Z_FOR_EACH( Use_list, _use_list, it )
+    Z_FOR_EACH( Use_list, _use_list, u )
     {
-        Use* lock_use = *it;
+        Use* lock_use = *u;
         result.appendChild( lock_use->dom_element( dom_document, show_what ) );
     }
 
@@ -901,10 +1022,10 @@ string Requestor::obj_name() const
     S result;
     result << "Lock.Requestor(";
     
-    Z_FOR_EACH_CONST( Use_list, _use_list, it )
+    Z_FOR_EACH_CONST( Use_list, _use_list, u )
     {
-        if( it != _use_list.begin() )  result << ", ";
-        Use* lock_use = *it;
+        if( u != _use_list.begin() )  result << ", ";
+        Use* lock_use = *u;
         result << lock_use->obj_name();
     }
 
@@ -915,14 +1036,16 @@ string Requestor::obj_name() const
 
 //-----------------------------------------------------------------------------------------Use::Use
 
-Use::Use( Requestor* requestor ) 
+Use::Use( Requestor* requestor, const Absolute_path& lock_path, Lock::Lock_mode lock_mode ) 
 : 
     Scheduler_object( requestor->_spooler, this, type_lock_requestor ),
     _zero_(this+1), 
     _requestor(requestor),
-    _lock_mode( Lock::lk_exclusive )
+    _lock_path( lock_path ),
+    _lock_mode( lock_mode )
 {
     _log = requestor->_log;
+    set_folder_path( requestor->folder_path() );
 }
 
 //----------------------------------------------------------------------------------------Use::~Use
@@ -1044,7 +1167,7 @@ xml::Element_ptr Use::dom_element( const xml::Document_ptr& dom_document, const 
 
     if( Lock* lock = lock_or_null() )
     {
-        if( _requestor->is_enqueued() )  result.setAttribute( "is_available", lock->is_free_for( _lock_mode )? "yes" : "no" );
+        if( _requestor->is_enqueued() )  result.setAttribute( "is_available", lock->is_free_for( this, (Holder*)NULL )? "yes" : "no" );
     }
     else
         result.setAttribute( "is_missing", "yes" );
@@ -1073,11 +1196,10 @@ string Use::obj_name() const
 
 //-----------------------------------------------------------------------------------Holder::Holder
 
-Holder::Holder( Scheduler_object* o, const Requestor* requestor ) 
+Holder::Holder( Scheduler_object* o ) 
 : 
     Scheduler_object( o->_spooler, this, type_lock_holder ),
     _zero_(this+1), 
-    _requestor(requestor),
     _object(o)
 {
     _log = o->_log;
@@ -1098,30 +1220,36 @@ Holder::~Holder()
 
 void Holder::close()
 {
-    if( _is_holding )
+    //if( _is_holding )
     {
         release_locks();
     }
 }
 
+//----------------------------------------------------------------------------Holder::add_requestor
+
+void Holder::add_requestor( const Requestor* requestor )
+{
+    assert( !is_known_requestor( requestor ) );
+
+    _requestor_set.insert( requestor );
+}
+
 //-------------------------------------------------------------------------------Holder::hold_locks
 
-void Holder::hold_locks()
+void Holder::hold_locks( const Requestor* requestor )
 {
-    assert( !_is_holding );
-    assert( _requestor->locks_are_available() );
+  //assert( is_holding_requestor( requestor ) );
+    assert( requestor->locks_are_available_for_holder( this ) );
+    assert( is_known_requestor( requestor ) );
 
+  //_holding_requestor_set.insert( requestor );
 
-    _is_holding = true;
-
-    Z_FOR_EACH_CONST( Requestor::Use_list, _requestor->_use_list, it )
+    Z_FOR_EACH_CONST( Requestor::Use_list, requestor->_use_list, u )
     {
-        Use*  lock_use = *it;
-        Lock* lock     = lock_use->lock();
+        Use* lock_use = *u;
 
-        lock->require_lock_for( this, lock_use );
-
-        log()->info( message_string( "SCHEDULER-855", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusively" : "non-exclusively" ) );
+        hold_lock( lock_use );
     }
 }
 
@@ -1129,28 +1257,43 @@ void Holder::hold_locks()
 
 void Holder::release_locks()
 {
-    if( _is_holding )
+    Z_FOR_EACH( set<const Requestor*>, _requestor_set, r )
     {
-        Z_FOR_EACH_CONST( Requestor::Use_list, _requestor->_use_list, it ) 
+        release_locks( *r );
+    }
+}
+
+//----------------------------------------------------------------------------Holder::release_locks
+
+void Holder::release_locks( const Requestor* requestor )
+{
+    assert( is_known_requestor( requestor ) );
+
+  //if( is_holding_requestor( requestor ) )
+    {
+        Z_FOR_EACH_CONST( Requestor::Use_list, requestor->_use_list, u ) 
         {
-            Use* lock_use = *it;
+            Use* lock_use = *u;
             
             try
             {
                 Lock* lock = lock_use->lock();
 
-                lock->release_lock_for( this );
+                bool is_released = lock->release_lock_for( this, lock_use );
 
-                if( int remaining = lock->count_non_exclusive_holders() )
+                if( is_released )
                 {
-                    log()->info( message_string( "SCHEDULER-857", lock->obj_name(), remaining ) );
-                }
-                else
-                {
-                    log()->info( message_string( "SCHEDULER-856", lock->obj_name() ) );
-                }
+                    if( int remaining = lock->count_non_exclusive_holders() )
+                    {
+                        log()->info( message_string( "SCHEDULER-857", lock->obj_name(), remaining ) );
+                    }
+                    else
+                    {
+                        log()->info( message_string( "SCHEDULER-856", lock->obj_name() ) );
+                    }
 
-                lock->check_for_replacing_or_removing();
+                    lock->check_for_replacing_or_removing();
+                }
             }
             catch( exception& x )
             {
@@ -1158,11 +1301,44 @@ void Holder::release_locks()
             }
         }
 
-        _is_holding = false;
+      //_holding_requestor_set.erase( requestor );
     }
 }
 
-//-------------------------------------------------------------------------Holder::dom_element
+//---------------------------------------------------------------------------------Holder::try_hold
+
+bool Holder::try_hold( Use* lock_use )
+{
+    bool result = false;
+
+  //_is_holding = XXXX;     //?? Die per API angeforderten Sperren sind gehalten oder auch nicht
+
+
+    Lock* lock = lock_use->lock();
+    
+    if( lock->is_free_for( lock_use, this ) ) 
+    {
+        //if( lock->its_my_turn( lock_use ) ) ...   Reihenfolge der Warteanforderungen beachten wir hier nicht
+        hold_lock( lock_use );
+        result = true;
+    }
+
+    return result;
+}
+
+//--------------------------------------------------------------------------------Holder::hold_lock
+
+void Holder::hold_lock( Use* lock_use )
+{
+    Lock* lock = lock_use->lock();
+
+    bool is_fresh_required = lock->require_lock_for( this, lock_use );      // false, wenn Holder bereits die Sperre mit gleichen oder schwächeren Lock_mode hält
+
+    if( is_fresh_required )
+        log()->info( message_string( "SCHEDULER-855", lock->obj_name(), lock_use->lock_mode() == Lock::lk_exclusive? "exclusively" : "non-exclusively" ) );
+}
+
+//------------------------------------------------------------------------------Holder::dom_element
 
 //xml::Element_ptr Holder::dom_element( const xml::Document_ptr& dom_document, const Show_what& )
 //{
@@ -1177,6 +1353,20 @@ void Holder::release_locks()
 //    return result;
 //}
 
+//-----------------------------------------------------------------------Holder::is_known_requestor
+
+bool Holder::is_known_requestor( const Requestor* requestor )
+{
+    return _requestor_set.find( requestor ) != _requestor_set.end();
+}
+
+//---------------------------------------------------------------------Holder::is_holding_requestor
+
+bool Holder::is_holding_requestor( const Requestor* requestor )
+{
+    return _holding_requestor_set.find( requestor ) != _holding_requestor_set.end();
+}
+
 //---------------------------------------------------------------------------------Holder::obj_name
 
 string Holder::obj_name() const
@@ -1184,7 +1374,13 @@ string Holder::obj_name() const
     S result;
 
     result << "Holder(";
-    if( _requestor )  result << _requestor->obj_name();
+    
+    Z_FOR_EACH_CONST( set<const Requestor*>, _requestor_set, r )  
+    {
+        if( r != _requestor_set.begin() )  result << " ";
+        result << (*r)->obj_name();
+    }
+
     result << ")";
 
     return result;

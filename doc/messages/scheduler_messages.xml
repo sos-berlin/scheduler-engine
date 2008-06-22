@@ -2850,6 +2850,18 @@
                 <title>Attribute '<p1>attribute</p1>' is only valid with attribute '<p2>attribute</p2>'</title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-468">
+            <text xml:lang="en">
+                <title>Task.delay_until_locks_available() is not allowed here</title>
+            </text>
+        </message>
+        
+        <message code="SCHEDULER-469">
+            <text xml:lang="en">
+                <title>Task.try_lock() is not allowed here</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

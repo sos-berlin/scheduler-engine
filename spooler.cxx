@@ -518,6 +518,11 @@ static void be_daemon()
         case -1: throw_errno( errno, "fork" );
 
         default: ::sleep(1);  // Falls der Daemon noch was ausgibt, sollte das vor dem Shell-Prompt sein.
+            
+                 // 2008-06-12 Besser: Warten, bis der Daemon ein Okay gegeben oder sich beendet hat.
+                 // Wann ist es Okay? Nach der Datenbank, vor dem TCP-Port? 
+                 // Oder doch besser nach dem Port, also bei s_waiting_for_activation? Das wäre am saubersten.
+
                  //fprintf( stderr, "Daemon gestartet. pid=%d\n", pid ); 
                  //fflush( stderr );
                  _exit(0);

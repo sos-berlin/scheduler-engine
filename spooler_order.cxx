@@ -5127,7 +5127,8 @@ bool Order::on_initialize()
     {
         set_id( _file_based_id ); 
 
-        if( !job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
+        if( !job_chain_path().empty()  &&
+            subsystem()->normalized_path( job_chain_path() ) != subsystem()->normalized_path( _file_based_job_chain_path ) )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
 
         assert( _file_based_job_chain_path != "" );
         add_requisite( Requisite_path( order_subsystem(), _file_based_job_chain_path ) );

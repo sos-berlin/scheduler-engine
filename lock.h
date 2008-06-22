@@ -78,12 +78,13 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     bool                        its_my_turn                 ( const Use* );
     void                        register_lock_use           ( Use* lock_use )                       { _use_set.insert( lock_use ); }
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
-    void                        require_lock_for            ( Holder*, Use* );
-    void                        release_lock_for            ( Holder* );
+    bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hält
+    bool                        release_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use weiterhin hält
+    bool                        is_held_by                  ( Holder*, Lock_mode );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
-    int                         count_non_exclusive_holders () const                                { return _lock_mode == lk_non_exclusive? _holder_set.size() : 0; }
-    bool                        is_free_for                 ( Lock_mode ) const;
+    int                         count_non_exclusive_holders () const;
+    bool                        is_free_for                 ( const Use*, Holder* ) const;
     bool                        is_free                     () const;
     string                      string_from_holders         () const;
     string                      string_from_uses            () const;
@@ -103,8 +104,9 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     Lock_mode                  _lock_mode;                  // Nur gültig, wenn !_holder_set.empty()
     State                      _state;
 
-    typedef stdext::hash_set<Holder*>  Holder_set;
-    Holder_set                 _holder_set;
+    typedef stdext::hash_set<Use*>             Use_set;
+    typedef stdext::hash_map<Holder*,Use_set>  Holder_map;  
+    Holder_map                 _holder_map;                 // Derselbe Holder kann dieselbe Sperre mehrmals halten, je mit einem Use
 
     typedef list<Use*>          Use_list;
     vector<Use_list>           _waiting_queues;             // Index: Lock_mode, eine Liste für lk_non_exclusive und eine für lk_exclusive
@@ -136,14 +138,14 @@ struct Lock_folder : typed_folder< Lock >
 };
 
 //----------------------------------------------------------------------------------------------Use
-// Verbindet Lock mit Lock_requestor
+// Verbindet Lock mit Requestor
 
 struct Use : Object, 
              Dependant,
              Scheduler_object, 
              Non_cloneable
 {
-                                Use                         ( Requestor* );
+                                Use                         ( Requestor*, const Absolute_path& lock_path = Absolute_path(), Lock::Lock_mode = Lock::lk_exclusive );
                                ~Use                         ();
 
     void                        close                       ();
@@ -193,14 +195,18 @@ struct Requestor : Object,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     void                    set_folder_path                 ( const Absolute_path& p )              { _folder_path = p; }
+    Absolute_path               folder_path                 () const                                { return _folder_path; }
+    
+    Use*                        add_lock_use                ( const Absolute_path& lock_path, Lock::Lock_mode );
 
     void                        initialize                  ();
     void                        load                        ();
 
     bool                        is_enqueued                 () const                                { return _is_enqueued; }
     bool                        locks_are_known             () const;
-    bool                        locks_are_available         () const;
-    bool                        enqueue_lock_requests       ();
+    bool                        locks_are_available_for_holder( Holder* ) const;
+    virtual bool                locks_are_available         () const                                { return locks_are_available_for_holder( (Holder*)NULL ); }
+    bool                        enqueue_lock_requests       ( Holder* );
     void                        dequeue_lock_requests       ( Log_level = log_debug3 );
     Scheduler_object*           object                      () const                                { return _object; }
 
@@ -225,22 +231,30 @@ struct Requestor : Object,
     
 struct Holder : Object, Scheduler_object, Non_cloneable
 {
-                                Holder                      ( Scheduler_object*, const Requestor* );
+                                Holder                      ( Scheduler_object* );
     virtual                    ~Holder                      ();
 
     void                        close                       ();
 
-    const Requestor*            requestor                   ()                                      { return _requestor; }
-    void                        hold_locks                  ();
+  //const Requestor*            static_requestor            ()                                      { return *_requestor_list.begin(); }
+    void                        add_requestor               ( const Requestor* );
+    bool                        is_known_requestor          ( const Requestor* );
+    bool                        is_holding_requestor        ( const Requestor* );
+    void                        hold_locks                  ( const Requestor* );
+    void                        hold_lock                   ( Use* );
+    bool                        try_hold                    ( Use* );
     void                        release_locks               ();
+    void                        release_locks               ( const Requestor* );
+    bool                        is_holding                  ( const Requestor* );
     Scheduler_object*           object                      () const                                { return _object; }
 
     string                      obj_name                    () const;
 
   private:
     Fill_zero                  _zero_;
-    bool                       _is_holding;
-    const Requestor* const     _requestor;
+  //bool                       _is_holding;
+    set<const Requestor*>      _requestor_set;              // 1) <lock.use>  2) Per API für die Task  3) Per API für spooler_process()
+    set<const Requestor*>      _holding_requestor_set;      // Die Requestor, deren Sperren gehalten werden (belegt sind)
 
   protected:
     Scheduler_object*          _object;                     // Task

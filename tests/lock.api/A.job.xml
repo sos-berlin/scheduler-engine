@@ -1,0 +1,28 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+
+>
+    <lock.use lock="Georgien"/>
+
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{
+    if( spooler_task.try_lock( "Georgien" )  &&
+        spooler_task.try_lock( "Venezuela" )    )
+    {
+        var hostware = new ActiveXObject( "hostware.global" );
+        hostware.sleep( 30 );
+    }
+    else
+        spooler_task.call_me_again_when_locks_available();
+    
+    return false;
+}
+
+    ]]>
+    </script>
+
+    <run_time once="yes"/>
+
+</job>

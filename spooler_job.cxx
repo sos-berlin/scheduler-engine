@@ -2519,7 +2519,7 @@ ptr<Task> Job::task_to_start()
                 // Wir können die Task nicht starten, denn die Sperre ist nicht verfügbar
                 task = NULL, cause = cause_none, has_order = false;      
 
-                if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
+                if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests( (lock::Holder*)NULL );
             }
         }
     }
@@ -2612,7 +2612,9 @@ ptr<Task> Job::task_to_start()
 
     if( task  &&  _lock_requestor )
     {
-        task->_lock_holder->hold_locks();
+        task->_lock_holder = Z_NEW( lock::Holder( task ) );
+        task->_lock_holder->add_requestor( _lock_requestor );
+        task->_lock_holder->hold_locks( _lock_requestor );
         if( _lock_requestor->is_enqueued() )  _lock_requestor->dequeue_lock_requests( log_none );
     }
 
