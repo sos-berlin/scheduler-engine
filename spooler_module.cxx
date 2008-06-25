@@ -1168,6 +1168,9 @@ bool Module_instance::implicit_load_and_start()
 
 bool Module_instance::begin__end()
 {
+    // Wird nach Task.Call_me_again_when_locks_available() wiederholt aufgerufen.
+    // Dann soll der letzte Aufruf spooler_open() wiederholt werden.
+
     if( !_load_called )
     {
         bool ok = implicit_load_and_start();
@@ -1181,8 +1184,9 @@ bool Module_instance::begin__end()
         if( !ok )  return ok;
     }
 
-    _spooler_open_called = true;
-    return check_result( call_if_exists( spooler_open_name ) );
+    return true;
+    //_spooler_open_called = true;
+    //return check_result( call_if_exists( spooler_open_name ) );
 }
 
 //----------------------------------------------------------------------Module_instance::end__start
@@ -1286,6 +1290,11 @@ Variant Module_instance::call__end()
   //    return _com_task->_task->wait_for_subprocesses();   // Siehe auch Com_remote_module_instance_server
   //}
   //else
+    if( _call_method == spooler_open_name )
+    {
+        _spooler_open_called = true;
+    }
+    else
     if( _call_method == spooler_on_success_name   
      || _call_method == spooler_on_error_name )
     {

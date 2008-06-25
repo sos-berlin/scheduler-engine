@@ -75,7 +75,6 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
   //void                        execute_xml                 ( const xml::Element_ptr&, const Show_what& );
 
     void                    set_max_non_exclusive           ( int );
-    bool                        its_my_turn                 ( const Use* );
     void                        register_lock_use           ( Use* lock_use )                       { _use_set.insert( lock_use ); }
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
     bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hält
@@ -84,6 +83,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
     int                         count_non_exclusive_holders () const;
+    bool                        its_my_turn                 ( const Use*, Holder* ) const;
     bool                        is_free_for                 ( const Use*, Holder* ) const;
     bool                        is_free                     () const;
     string                      string_from_holders         () const;

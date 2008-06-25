@@ -8,6 +8,23 @@
 
 var count = 2;
 
+
+function spooler_open() 
+{
+    if( spooler_task.try_lock( "Venezuela" )  )
+    {
+        var hostware = new ActiveXObject( "hostware.global" );
+        hostware.sleep( 20 );
+    }
+    else
+    {
+        spooler_task.call_me_again_when_locks_available();
+    }
+
+    return true;
+}
+
+
 function spooler_process() 
 {
     if( spooler_task.try_lock( "Georgien" )  &&

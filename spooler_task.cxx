@@ -626,7 +626,7 @@ void Task::set_state( State new_state )
                 _next_time = Time::never;
                 break;
 
-            case s_starting_delayed_until_locks_available:
+            case s_opening_delayed_until_locks_available:
                 _next_time = Time::never;
                 break;
 
@@ -669,8 +669,8 @@ void Task::set_state( State new_state )
         {
             if( _job  &&  _spooler->_task_subsystem )
             {
-                if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
-                if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
+                if( new_state == s_starting ||  new_state == s_opening  ||  new_state == s_running )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
+                if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
             }
 
             if( new_state != s_running_delayed )  _next_spooler_process = 0;
@@ -707,7 +707,8 @@ string Task::state_name( State state )
         case s_waiting_for_process:         return "waiting_for_process";
       //case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
-        case s_starting_delayed_until_locks_available: return "starting_delayed_until_locks_available";
+        case s_opening:                     return "opening";
+        case s_opening_delayed_until_locks_available: return "starting_delayed_until_locks_available";
         case s_running:                     return "running";
         case s_running_delayed:             return "running_delayed";
         case s_running_delayed_until_locks_available: return "running_delayed_until_locks_available";
@@ -780,8 +781,8 @@ void Task::set_delay_spooler_process( Time t )
 
 bool Task::try_hold_lock( const Path& lock_relative_path, lock::Lock::Lock_mode lock_mode )
 {
-    if( _state != s_starting  &&
-        _state != s_running       )  z::throw_xc( "SCHEDULER-469" );
+    if( _state != s_opening  &&
+        _state != s_running     )  z::throw_xc( "SCHEDULER-469" );
 
 
     Absolute_path lock_path  ( _job->folder_path(), lock_relative_path );
@@ -805,8 +806,8 @@ bool Task::try_hold_lock( const Path& lock_relative_path, lock::Lock::Lock_mode 
 
 void Task::delay_until_locks_available()
 {
-    if( _state != s_starting  &&
-        _state != s_running       )  z::throw_xc( "SCHEDULER-468" );        // Verhindert auch doppelten Aufruf 
+    if( _state != s_opening  &&
+        _state != s_running     )  z::throw_xc( "SCHEDULER-468" );        // Verhindert auch doppelten Aufruf 
 
     Lock_level       lock_level     = current_lock_level();
     lock::Requestor* lock_requestor = _lock_requestors[ lock_level ];
@@ -826,7 +827,8 @@ void Task::delay_until_locks_available()
 
 Task::Lock_level Task::current_lock_level() 
 {
-    if( _state < s_running )  return lock_level_task_api;
+    if( _state == s_opening  ||
+        _state == s_opening_delayed_until_locks_available )  return lock_level_task_api;
     
     if( _state == s_running  ||
         _state == s_running_delayed_until_locks_available )  return lock_level_process_api;
@@ -842,16 +844,13 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
     assert( lock_requestor == _lock_requestors[ current_lock_level() ] );
     assert( lock_requestor->is_enqueued() );
     assert( lock_requestor->locks_are_available_for_holder( _lock_holder ) );
-    assert( _state == s_starting_delayed_until_locks_available ||
+    assert( _state == s_opening_delayed_until_locks_available ||
             _state == s_running_delayed_until_locks_available    );
-
-    lock_requestor->dequeue_lock_requests();
-    _lock_holder->hold_locks( lock_requestor );
 
     switch( _state )
     {
-        case s_starting_delayed_until_locks_available:  set_state( s_starting );  break;
-        case s_running_delayed_until_locks_available:   set_state( s_running  );  break;
+        case s_opening_delayed_until_locks_available:   set_state( s_opening );  break;
+        case s_running_delayed_until_locks_available:   set_state( s_running );  break;
         default:                                        z::throw_xc( Z_FUNCTION );
     }
     
@@ -1234,43 +1233,24 @@ bool Task::do_something()
                             {
                                 ok = operation__end();
 
-                                if( !_post_start_code_executed )
+                                if( _job->_history.min_steps() == 0 )  _history.start();
+
+                                _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
+                                _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
+
+                                if( _file_logger->has_files() )
                                 {
-                                    _post_start_code_executed = true;
-
-                                    if( _job->_history.min_steps() == 0 )  _history.start();
-
-                                    _file_logger->add_file( _module_instance->stdout_path(), "stdout" );
-                                    _file_logger->add_file( _module_instance->stderr_path(), "stderr" );
-
-                                    if( _file_logger->has_files() )
-                                    {
-                                        _file_logger->set_async_manager( _spooler->_connection_manager );
-                                        _file_logger->start();
-                                    }
+                                    _file_logger->set_async_manager( _spooler->_connection_manager );
+                                    _file_logger->start();
                                 }
 
-                                if( _delay_until_locks_available )
-                                {
-                                    _delay_until_locks_available = false;
-                                    set_state( s_starting_delayed_until_locks_available );
-                                    _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
-                                    ok = true;
-                                }
-                                else
-                                {
-                                    State next_state;
-                                    if( !ok )  next_state = s_ending;
-                                    else if( _module_instance->_module->kind() == Module::kind_process )
-                                            next_state = _module_instance->kind() == Module::kind_remote? s_running_remote_process 
-                                                                                                        : s_running_process;
-                                         else 
-                                            next_state = s_running;
-     
-                                    set_state( next_state );
+                                set_state( !ok? s_ending :
+                                           _module_instance->_module->kind() == Module::kind_process?
+                                                _module_instance->kind() == Module::kind_remote? s_running_remote_process 
+                                                                                               : s_running_process
+                                           : s_opening );
 
-                                    loop = true;
-                                }
+                                loop = true;
                             }
 
                             something_done = true;
@@ -1278,7 +1258,43 @@ bool Task::do_something()
                         }
 
 
-                        case s_starting_delayed_until_locks_available: 
+                        case s_opening:
+                        {
+                            if( !_operation )
+                            {
+                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_task_api ] )
+                                {
+                                    _lock_holder->hold_locks( lock_requestor );
+                                    lock_requestor->dequeue_lock_requests();
+                                }
+
+                                _operation = do_call__start( spooler_open_name );
+                            }
+                            else
+                            {
+                                bool ok = operation__end();
+
+                                if( _delay_until_locks_available )
+                                {
+                                    _delay_until_locks_available = false;
+                                    _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
+                                    set_state( s_opening_delayed_until_locks_available );
+                                    ok = true;
+                                }
+                                else
+                                {
+                                    set_state( ok? s_running : s_ending );
+                                }
+
+                                loop = true;
+                            }
+
+                            something_done = true;
+                            break;
+                        }
+
+
+                        case s_opening_delayed_until_locks_available: 
                             break;
 
 
@@ -1347,6 +1363,12 @@ bool Task::do_something()
                                     
                                     if( _step_count + 1 == _job->_history.min_steps() )  _history.start();
 
+                                    if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )
+                                    {
+                                        _lock_holder->hold_locks( lock_requestor );
+                                        lock_requestor->dequeue_lock_requests();
+                                    }
+
                                     _operation = do_step__start();
 
                                     something_done = true;
@@ -1357,16 +1379,19 @@ bool Task::do_something()
                                 ok = step__end();
                                 _operation = NULL;
 
-                                lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ];
-                                if( lock_requestor )  _lock_holder->release_locks( lock_requestor );
-
-                                if( _delay_until_locks_available )
+                                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   
                                 {
-                                    _delay_until_locks_available = false;
-                                    set_state( s_running_delayed_until_locks_available );
-                                    lock_requestor->enqueue_lock_requests( _lock_holder );
-                                    ok = true;
+                                    _lock_holder->release_locks( lock_requestor );  // Task.Try_lock() wieder aufheben
+
+                                    if( _delay_until_locks_available )
+                                    {
+                                        _delay_until_locks_available = false;
+                                        set_state( s_running_delayed_until_locks_available );
+                                        lock_requestor->enqueue_lock_requests( _lock_holder );
+                                        ok = true;
+                                    }
                                 }
+                                assert( !_delay_until_locks_available );
 
                                 if( !ok || has_error() )  set_state( s_ending ), loop = true;
 
@@ -1924,6 +1949,7 @@ bool Task::operation__end()
         switch( _state )
         {
             case s_starting:                        result = do_begin__end();    break;
+            case s_opening:                         result = do_call__end();     break;
             case s_ending:                                   do_end__end();      break;
 
             case s_ending_waiting_for_subprocesses: if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )

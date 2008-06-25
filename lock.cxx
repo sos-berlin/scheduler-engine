@@ -397,14 +397,14 @@ bool Lock::is_free_for( const Use* lock_use, Holder* requesting_holder ) const
 
 //--------------------------------------------------------------------------------Lock::its_my_turn
 
-bool Lock::its_my_turn( const Use* lock_use )
+bool Lock::its_my_turn( const Use* lock_use, Holder* holder ) const
 {
     bool result = false;
 
-    if( is_free_for( lock_use, (Holder*)NULL ) )
+    if( is_free_for( lock_use, holder ) )
     {
-        Use_list&          queue = _waiting_queues[ lock_use->lock_mode() ];
-        Use_list::iterator first = queue.begin();
+        const Use_list&          queue = _waiting_queues[ lock_use->lock_mode() ];
+        Use_list::const_iterator first = queue.begin();
 
         if( first == queue.end()  ||    // Warteschlange ist leer?
            *first == lock_use )         // Wir sind dran?
@@ -421,8 +421,8 @@ bool Lock::its_my_turn( const Use* lock_use )
 bool Lock::require_lock_for( Holder* holder, Use* lock_use )
 {
     assert_is_active();
-    assert( holder->is_known_requestor( lock_use->requestor() ) );
-    assert( is_free_for( lock_use, holder ) );
+    if( !holder->is_known_requestor( lock_use->requestor() ) )  z::throw_xc( Z_FUNCTION );
+    if( !is_free_for( lock_use, holder ) )  z::throw_xc( Z_FUNCTION );
 
     bool is_freshly_required;
 
@@ -449,8 +449,11 @@ bool Lock::require_lock_for( Holder* holder, Use* lock_use )
 
     h->second.insert( lock_use );
 
+
     if( is_freshly_required )
+    {
         holder->log()->info( message_string( "SCHEDULER-855", obj_name(), lock_use->lock_mode() == lk_exclusive? "exclusively" : "non-exclusively" ) );
+    }
 
     return is_freshly_required;
 }
@@ -953,7 +956,7 @@ bool Requestor::locks_are_available_for_holder( Holder* holder ) const
             break;
         }
 
-        if( !its_my_turn )  its_my_turn = lock->its_my_turn( lock_use );
+        if( !its_my_turn )  its_my_turn = lock->its_my_turn( lock_use, holder );
     }
 
     return all_locks_are_free  &&  its_my_turn;   

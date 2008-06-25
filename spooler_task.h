@@ -44,7 +44,8 @@ struct Task : Object,
         s_waiting_for_process,  // Prozess aus Prozessklasse wählen, evtl. warten, bis ein Prozess verfügbar ist.
         s_starting,             // load, spooler_init, spooler_open
                                 // Bis hier gilt Task::starting() == true
-        s_starting_delayed_until_locks_available, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
+        s_opening,              // spooler_open()
+        s_opening_delayed_until_locks_available, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
         s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_delayed_until_locks_available, // spooler_process(): wegen try_hold_lock() erneut aufrufen
@@ -231,7 +232,7 @@ struct Task : Object,
     bool                        wait_until_terminated       ( double wait_time = Time::never );
     void                        set_delay_spooler_process   ( Time );
 
-    bool                        try_hold_lock               ( const Path& lock_path, lock::Lock::Lock_mode = lock::Lock::lk_non_exclusive );
+    bool                        try_hold_lock               ( const Path& lock_path, lock::Lock::Lock_mode = lock::Lock::lk_exclusive );
     void                        delay_until_locks_available ();
     void                        on_locks_are_available      ( Task_lock_requestor* );
     Lock_level                  current_lock_level          ();
@@ -325,7 +326,6 @@ struct Task : Object,
     Time                       _subprocess_timeout;
     Time                       _trying_deleting_files_until;
 
-    bool                       _post_start_code_executed;
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
