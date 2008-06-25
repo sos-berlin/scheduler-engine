@@ -45,10 +45,10 @@ struct Task : Object,
         s_starting,             // load, spooler_init, spooler_open
                                 // Bis hier gilt Task::starting() == true
         s_opening,              // spooler_open()
-        s_opening_delayed_until_locks_available, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
+        s_opening_waiting_for_locks, // spooler_open() usw.: wegen try_hold_lock() erneut aufrufen
         s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
-        s_running_delayed_until_locks_available, // spooler_process(): wegen try_hold_lock() erneut aufrufen
+        s_running_waiting_for_locks, // spooler_process(): wegen try_hold_lock() erneut aufrufen
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_running_remote_process,   // Prozess, der über remote Scheduler läuft (über Remote_module_instance_proxy)

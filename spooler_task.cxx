@@ -626,7 +626,7 @@ void Task::set_state( State new_state )
                 _next_time = Time::never;
                 break;
 
-            case s_opening_delayed_until_locks_available:
+            case s_opening_waiting_for_locks:
                 _next_time = Time::never;
                 break;
 
@@ -638,7 +638,7 @@ void Task::set_state( State new_state )
                 _next_time = _next_spooler_process;
                 break;
 
-            case s_running_delayed_until_locks_available:
+            case s_running_waiting_for_locks:
                 _next_time = Time::never;
                 break;
 
@@ -708,10 +708,10 @@ string Task::state_name( State state )
       //case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
         case s_opening:                     return "opening";
-        case s_opening_delayed_until_locks_available: return "starting_delayed_until_locks_available";
+        case s_opening_waiting_for_locks:   return "opening_waiting_for_locks";
         case s_running:                     return "running";
         case s_running_delayed:             return "running_delayed";
-        case s_running_delayed_until_locks_available: return "running_delayed_until_locks_available";
+        case s_running_waiting_for_locks:   return "running_waiting_for_locks";
         case s_running_waiting_for_order:   return "running_waiting_for_order";
         case s_running_process:             return "running_process";
         case s_running_remote_process:      return "running_remote_process";
@@ -828,10 +828,10 @@ void Task::delay_until_locks_available()
 Task::Lock_level Task::current_lock_level() 
 {
     if( _state == s_opening  ||
-        _state == s_opening_delayed_until_locks_available )  return lock_level_task_api;
+        _state == s_opening_waiting_for_locks )  return lock_level_task_api;
     
     if( _state == s_running  ||
-        _state == s_running_delayed_until_locks_available )  return lock_level_process_api;
+        _state == s_running_waiting_for_locks )  return lock_level_process_api;
 
     z::throw_xc( Z_FUNCTION );
 }
@@ -844,13 +844,13 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
     assert( lock_requestor == _lock_requestors[ current_lock_level() ] );
     assert( lock_requestor->is_enqueued() );
     assert( lock_requestor->locks_are_available_for_holder( _lock_holder ) );
-    assert( _state == s_opening_delayed_until_locks_available ||
-            _state == s_running_delayed_until_locks_available    );
+    assert( _state == s_opening_waiting_for_locks ||
+            _state == s_running_waiting_for_locks    );
 
     switch( _state )
     {
-        case s_opening_delayed_until_locks_available:   set_state( s_opening );  break;
-        case s_running_delayed_until_locks_available:   set_state( s_running );  break;
+        case s_opening_waiting_for_locks:   set_state( s_opening );  break;
+        case s_running_waiting_for_locks:   set_state( s_running );  break;
         default:                                        z::throw_xc( Z_FUNCTION );
     }
     
@@ -1278,7 +1278,7 @@ bool Task::do_something()
                                 {
                                     _delay_until_locks_available = false;
                                     _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
-                                    set_state( s_opening_delayed_until_locks_available );
+                                    set_state( s_opening_waiting_for_locks );
                                     ok = true;
                                 }
                                 else
@@ -1294,7 +1294,7 @@ bool Task::do_something()
                         }
 
 
-                        case s_opening_delayed_until_locks_available: 
+                        case s_opening_waiting_for_locks: 
                             break;
 
 
@@ -1386,7 +1386,7 @@ bool Task::do_something()
                                     if( _delay_until_locks_available )
                                     {
                                         _delay_until_locks_available = false;
-                                        set_state( s_running_delayed_until_locks_available );
+                                        set_state( s_running_waiting_for_locks );
                                         lock_requestor->enqueue_lock_requests( _lock_holder );
                                         ok = true;
                                     }
@@ -1449,7 +1449,7 @@ bool Task::do_something()
                         }
 
 
-                        case s_running_delayed_until_locks_available: 
+                        case s_running_waiting_for_locks: 
                             break;
 
 
