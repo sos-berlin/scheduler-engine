@@ -545,15 +545,30 @@ bool Lock::release_lock_for( Holder* holder, Use* lock_use )
 
 //---------------------------------------------------------------------------------Lock::is_held_by
 
-bool Lock::is_held_by( Holder* holder, Lock_mode lock_mode )
+//bool Lock::is_held_by( Holder* holder, Lock_mode lock_mode )
+//{
+//    bool result = false;
+//
+//    Holder_map::iterator h = _holder_map.find( holder );
+//    if( h != _holder_map.end() )
+//    {
+//        result = _lock_mode == lk_exclusive  || 
+//                 lock_mode == lk_non_exclusive; 
+//    }
+//
+//    return result;
+//}
+
+//---------------------------------------------------------------------------------Lock::is_held_by
+
+bool Lock::is_held_by( Holder* holder, Use* lock_use )
 {
     bool result = false;
 
     Holder_map::iterator h = _holder_map.find( holder );
     if( h != _holder_map.end() )
     {
-        result = _lock_mode == lk_exclusive  || 
-                 lock_mode == lk_non_exclusive; 
+        result = h->second.find( lock_use ) != h->second.end();
     }
 
     return result;
@@ -1000,7 +1015,7 @@ bool Requestor::enqueue_lock_requests( Holder* holder )
             Use*  lock_use = *u;
             Lock* lock     = lock_use->lock();
             
-            if( !holder  ||  !lock->is_held_by( holder, lock_use->lock_mode() ) )
+            if( !holder  ||  !lock->is_held_by( holder, lock_use ) )
             {
                 int place = lock->enqueue_lock_use( lock_use );    // Bei _use_list.size() > 1 kann die Sperre frei sein. Wir tragen uns trotzdem in die Warteschlange ein
 
@@ -1281,6 +1296,17 @@ void Holder::add_requestor( const Requestor* requestor )
     _requestor_set.insert( requestor );
 }
 
+//----------------------------------------------------------------------------Holder::add_requestor
+
+void Holder::remove_requestor( const Requestor* requestor )
+{
+    assert( is_known_requestor( requestor ) );
+    assert( is_holding_none_of( requestor ) );
+
+    release_locks( requestor );         // Sollte bereits passiert sein
+    _requestor_set.erase( requestor );
+}
+
 //-------------------------------------------------------------------------------Holder::hold_locks
 
 void Holder::hold_locks( const Requestor* requestor )
@@ -1297,6 +1323,8 @@ void Holder::hold_locks( const Requestor* requestor )
 
         hold_lock( lock_use );
     }
+
+    assert( is_holding_all_of( requestor ) );
 }
 
 //----------------------------------------------------------------------------Holder::release_locks
@@ -1333,6 +1361,8 @@ void Holder::release_locks( const Requestor* requestor )
 
       //_holding_requestor_set.erase( requestor );
     }
+
+    assert( is_holding_none_of( requestor ) );
 }
 
 //---------------------------------------------------------------------------------Holder::try_hold
@@ -1385,12 +1415,52 @@ bool Holder::is_known_requestor( const Requestor* requestor )
     return _requestor_set.find( requestor ) != _requestor_set.end();
 }
 
+//------------------------------------------------------------------------Holder::is_holding_all_of
+
+bool Holder::is_holding_all_of( const Requestor* requestor )
+{
+    assert( is_known_requestor( requestor ) );
+
+    bool result = !requestor->_use_list.empty();
+
+    Z_FOR_EACH_CONST( Requestor::Use_list, requestor->_use_list, u )
+    {
+        Use*  lock_use = *u;
+        Lock* lock     = _spooler->lock_subsystem()->lock_or_null( lock_use->lock_path() );
+
+        result &= lock && lock->is_held_by( this, lock_use );
+        if( !result )  break;
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------Holder::is_holding_none_of
+
+bool Holder::is_holding_none_of( const Requestor* requestor )
+{
+    assert( is_known_requestor( requestor ) );
+
+    bool is_holding_some = false;
+
+    Z_FOR_EACH_CONST( Requestor::Use_list, requestor->_use_list, u )
+    {
+        Use*  lock_use = *u;
+        Lock* lock     = _spooler->lock_subsystem()->lock_or_null( lock_use->lock_path() );
+
+        is_holding_some |= lock && lock->is_held_by( this, lock_use );
+        if( is_holding_some )  break;
+    }
+
+    return !is_holding_some;
+}
+
 //---------------------------------------------------------------------Holder::is_holding_requestor
 
-bool Holder::is_holding_requestor( const Requestor* requestor )
-{
-    return _holding_requestor_set.find( requestor ) != _holding_requestor_set.end();
-}
+//bool Holder::is_holding_requestor( const Requestor* requestor )
+//{
+//    return _holding_requestor_set.find( requestor ) != _holding_requestor_set.end();
+//}
 
 //---------------------------------------------------------------------------------Holder::obj_name
 

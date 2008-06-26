@@ -79,7 +79,7 @@ struct Task : Object,
 
     enum Lock_level 
     {
-        lock_level_task_static,     // <lock.use>, Sperre ist am <job> definiert und gilt für die Task
+      //lock_level_task_static,     // <lock.use>, Sperre ist am <job> definiert und gilt für die Task
         lock_level_task_api,        // Task.try_hold_lock() in spooler_open() oder spooler_init(), gilt für die Task
         lock_level_process_api,     // Task.try_hold_lock() in spooler_process(), gilt für nur für spooler_process()
         lock_level__max = lock_level_process_api

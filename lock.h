@@ -79,7 +79,8 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     void                        unregister_lock_use         ( Use* lock_use )                       { _use_set.erase( lock_use ); }
     bool                        require_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use schon hält
     bool                        release_lock_for            ( Holder*, Use* );                      // false, falls Holder die Sperre mit einem anderen Use weiterhin hält
-    bool                        is_held_by                  ( Holder*, Lock_mode );
+  //bool                        is_held_by                  ( Holder*, Lock_mode );
+    bool                        is_held_by                  ( Holder*, Use* );
     int                         enqueue_lock_use            ( Use* );
     void                        dequeue_lock_use            ( Use* );
     int                         count_non_exclusive_holders () const;
@@ -238,14 +239,16 @@ struct Holder : Object, Scheduler_object, Non_cloneable
 
   //const Requestor*            static_requestor            ()                                      { return *_requestor_list.begin(); }
     void                        add_requestor               ( const Requestor* );
+    void                        remove_requestor            ( const Requestor* );
     bool                        is_known_requestor          ( const Requestor* );
-    bool                        is_holding_requestor        ( const Requestor* );
+  //bool                        is_holding_requestor        ( const Requestor* );
     void                        hold_locks                  ( const Requestor* );
     void                        hold_lock                   ( Use* );
     bool                        try_hold                    ( Use* );
     void                        release_locks               ();
     void                        release_locks               ( const Requestor* );
-    bool                        is_holding                  ( const Requestor* );
+    bool                        is_holding_all_of           ( const Requestor* );                   // Alle Sperren haltend?
+    bool                        is_holding_none_of          ( const Requestor* );
     Scheduler_object*           object                      () const                                { return _object; }
 
     string                      obj_name                    () const;
@@ -254,7 +257,7 @@ struct Holder : Object, Scheduler_object, Non_cloneable
     Fill_zero                  _zero_;
   //bool                       _is_holding;
     set<const Requestor*>      _requestor_set;              // 1) <lock.use>  2) Per API für die Task  3) Per API für spooler_process()
-    set<const Requestor*>      _holding_requestor_set;      // Die Requestor, deren Sperren gehalten werden (belegt sind)
+  //set<const Requestor*>      _holding_requestor_set;      // Die Requestor, deren Sperren gehalten werden (belegt sind)
 
   protected:
     Scheduler_object*          _object;                     // Task

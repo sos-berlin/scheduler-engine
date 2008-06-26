@@ -2853,13 +2853,13 @@
         
         <message code="SCHEDULER-468">
             <text xml:lang="en">
-                <title>Task.delay_until_locks_available() is not allowed here</title>
+                <title>Using this method is not possible in this context</title>
             </text>
         </message>
-        
+
         <message code="SCHEDULER-469">
             <text xml:lang="en">
-                <title>Task.try_lock() is not allowed here</title>
+                <title>try_lock() has failed and call_me_again_when_locks_available() has not been called</title>
             </text>
         </message>
     </messages>

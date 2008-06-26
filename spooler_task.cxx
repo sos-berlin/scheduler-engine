@@ -782,22 +782,21 @@ void Task::set_delay_spooler_process( Time t )
 bool Task::try_hold_lock( const Path& lock_relative_path, lock::Lock::Lock_mode lock_mode )
 {
     if( _state != s_opening  &&
-        _state != s_running     )  z::throw_xc( "SCHEDULER-469" );
+        _state != s_running     )  z::throw_xc( "SCHEDULER-468" );
+
+    assert( !_lock_requestors[ lock_level_process_api ]  ||  _state == s_running );
 
 
-    Absolute_path lock_path  ( _job->folder_path(), lock_relative_path );
-    Lock_level    lock_level = current_lock_level();
+    Absolute_path         lock_path      ( _job->folder_path(), lock_relative_path );
+    ptr<lock::Requestor>& lock_requestor = _lock_requestors[ current_lock_level() ];
 
-
-    if( _state < s_running )  assert( !_lock_requestors[ lock_level_process_api ] );
-
-    if( !_lock_requestors[ lock_level ] )
+    if( !lock_requestor )
     {
-        _lock_requestors[ lock_level ] = Z_NEW( Task_lock_requestor( this ) );
-        _lock_holder->add_requestor( _lock_requestors[ lock_level ] );
+        lock_requestor = Z_NEW( Task_lock_requestor( this ) );
+        _lock_holder->add_requestor( lock_requestor );
     }
 
-    lock::Use* lock_use = _lock_requestors[ lock_level ]->add_lock_use( lock_path, lock_mode );
+    lock::Use* lock_use = lock_requestor->add_lock_use( lock_path, lock_mode );
 
     return _lock_holder->try_hold( lock_use );
 }
@@ -812,8 +811,8 @@ void Task::delay_until_locks_available()
     Lock_level       lock_level     = current_lock_level();
     lock::Requestor* lock_requestor = _lock_requestors[ lock_level ];
 
-    if( !lock_requestor )  z::throw_xc( "SCHEDULER-468" );   // Kein try_hold_lock()
-  //if( _lock_holder->is_holding( lock_requestor ) )  z::throw_xc( "SCHEDULER-468" );   // Sperren werden bereits gehalten
+    if( !lock_requestor )  z::throw_xc( "SCHEDULER-468", "No try_lock()" );             // try_hold_lock() nicht aufgerufen
+    if( _lock_holder->is_holding_all_of( lock_requestor ) )  z::throw_xc( "SCHEDULER-468" );   // Sperren werden bereits gehalten
 
     // Sicherstellen, dass try_hold_lock() ohne Erfolg aufgerufen worden ist
     // begin__start() erneut aufrufen mit dem Parameter, dass der letzte Aufruf (spooler_init, spooler_open) wiederholt werden soll.
@@ -1381,6 +1380,9 @@ bool Task::do_something()
 
                                 if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   
                                 {
+                                    if( !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )  
+                                        log()->warn( message_string( "SCHEDULER-469" ) );    // Try_lock() hat versagt und Call_me_again_when_locks_available() nicht aufgerufen
+
                                     _lock_holder->release_locks( lock_requestor );  // Task.Try_lock() wieder aufheben
 
                                     if( _delay_until_locks_available )
@@ -1389,6 +1391,11 @@ bool Task::do_something()
                                         set_state( s_running_waiting_for_locks );
                                         lock_requestor->enqueue_lock_requests( _lock_holder );
                                         ok = true;
+                                    }
+                                    else
+                                    {
+                                        _lock_holder->remove_requestor( lock_requestor );
+                                        _lock_requestors[ lock_level_process_api ] = NULL;
                                     }
                                 }
                                 assert( !_delay_until_locks_available );
