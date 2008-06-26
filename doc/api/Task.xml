@@ -969,6 +969,9 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
                     <scheduler_message code="SCHEDULER-469"/>.
                 </li>
             </ul>
+            <p>
+                Siehe auch <scheduler_element name="lock.use"/>.
+            </p>
         </description>
 
         <example programming_language="javascript">
@@ -991,6 +994,41 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
 }]]></pre>
         </example>
         
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+            <message level="warn"  code="SCHEDULER-469"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="try_hold_lock_non_exclusive">
+        <title>
+            Versucht, eine Sperre nicht-exklusiv zu halten
+        </title>
+
+        <com>
+            <com.result name="success">
+                <com.type type="boolean"/>
+                <description>
+                    <code>true</code>, wenn die Task die Sperre hält.
+                </description>
+            </com.result>
+
+            <com.parameter name="lock_path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+
+        <description>
+            <p>
+                Es gelten dieselben Bedingungen wie für <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/>.
+            </p>
+            <p>
+                Siehe auch <scheduler_element name="lock.use" attribute="exclusive" value="no"/>.
+            </p>
+        </description>
+
         <messages>
             <message level="error" code="SCHEDULER-468"/>
             <message level="warn"  code="SCHEDULER-469"/>

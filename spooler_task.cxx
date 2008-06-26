@@ -120,6 +120,8 @@ Task::Task( Job* job )
     _params->merge( job->_default_params );
 
     _environment = new Com_variable_set(); 
+
+    _lock_holder = Z_NEW( lock::Holder( this ) );
 }
 
 //--------------------------------------------------------------------------------------Task::~Task

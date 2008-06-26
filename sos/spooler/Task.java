@@ -268,4 +268,8 @@ public class Task extends Idispatch
     public int              exit_code           ()                                  { return            int_com_call( "<exit_code" ); }
     
     public String           trigger_files       ()                                  { return (String)       com_call( "<trigger_files" ); }
+    
+    public boolean          try_hold_lock       ( String lock_path )                { return boolean_com_call( "try_hold_lock"              , lock_path ); }
+    public boolean          try_hold_lock_non_exclusive( String lock_path )         { return boolean_com_call( "try_hold_lock_non_exclusive", lock_path ); }
+    public void             call_me_again_when_locks_available()                    {                com_call( "call_me_again_when_locks_available"     ); }
 }
