@@ -2392,11 +2392,11 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::put_Exit_code          , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 30, "Exit_code"                 , (Com_method_ptr)&Com_task::get_Exit_code          , VT_INT        },
     { DISPATCH_PROPERTYGET, 31, "Trigger_files"             , (Com_method_ptr)&Com_task::get_Trigger_files      , VT_BSTR       },
-    { DISPATCH_METHOD     , 32, "Try_lock"                                 , (Com_method_ptr)&Com_task::Try_lock                                 , VT_BOOL, { VT_BSTR } },
-    { DISPATCH_METHOD     , 33, "Try_lock_non_exclusive"                   , (Com_method_ptr)&Com_task::Try_lock_non_exclusive                   , VT_BOOL, { VT_BSTR } },
+    { DISPATCH_METHOD     , 32, "Try_hold_lock"                            , (Com_method_ptr)&Com_task::Try_hold_lock                            , VT_BOOL, { VT_BSTR } },
+    { DISPATCH_METHOD     , 33, "Try_hold_lock_non_exclusive"              , (Com_method_ptr)&Com_task::Try_hold_lock_non_exclusive              , VT_BOOL, { VT_BSTR } },
     { DISPATCH_METHOD     , 34, "Call_me_again_when_locks_available"       , (Com_method_ptr)&Com_task::Call_me_again_when_locks_available       , VT_EMPTY },
-    { DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
-    { DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
+    //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
+    //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
 };
 
@@ -2816,9 +2816,9 @@ STDMETHODIMP Com_task::get_Trigger_files( BSTR* result )
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_task::Try_lock
+//--------------------------------------------------------------------------Com_task::Try_hold_lock
 
-STDMETHODIMP Com_task::Try_lock( BSTR lock_path_bstr, VARIANT_BOOL* result )
+STDMETHODIMP Com_task::Try_hold_lock( BSTR lock_path_bstr, VARIANT_BOOL* result )
 {
     Z_LOGI( Z_FUNCTION << '\n' );
 
@@ -2838,9 +2838,9 @@ STDMETHODIMP Com_task::Try_lock( BSTR lock_path_bstr, VARIANT_BOOL* result )
     return hr;
 }
 
-//-----------------------------------------------------------------Com_task::Try_lock_non_exclusive
+//------------------------------------------------------------Com_task::Try_hold_lock_non_exclusive
 
-STDMETHODIMP Com_task::Try_lock_non_exclusive( BSTR lock_path_bstr, VARIANT_BOOL* result )
+STDMETHODIMP Com_task::Try_hold_lock_non_exclusive( BSTR lock_path_bstr, VARIANT_BOOL* result )
 {
     Z_LOGI( Z_FUNCTION << '\n' );
     
@@ -2883,49 +2883,49 @@ STDMETHODIMP Com_task::Call_me_again_when_locks_available()
 
 //------------------------------------------------------------Com_task::Try_lock_else_call_me_again
 
-STDMETHODIMP Com_task::Try_lock_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
-{
-    Z_LOGI( Z_FUNCTION << '\n' );
-    
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
-
-        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
-                                                                            : VARIANT_FALSE;
-        if( !*result )  _task->delay_until_locks_available();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-    
-    return hr;
-}
-
-//--------------------------------------Com_task::Try_lock_non_exclusive_else_call_me_again
-
-STDMETHODIMP Com_task::Try_lock_non_exclusive_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
-{
-    Z_LOGI( Z_FUNCTION << '\n' );
-
-    HRESULT hr = S_OK;
-
-    try
-    {
-        if( !_task )  z::throw_xc( "SCHEDULER-122" );
-        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
-
-        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
-                                                                                                          : VARIANT_FALSE;
-        if( !*result )  _task->delay_until_locks_available();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-
-    return hr;
-}
+//STDMETHODIMP Com_task::Try_lock_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
+//{
+//    Z_LOGI( Z_FUNCTION << '\n' );
+//    
+//    HRESULT hr = S_OK;
+//    
+//    try
+//    {
+//        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+//        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+//
+//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
+//                                                                            : VARIANT_FALSE;
+//        if( !*result )  _task->delay_until_locks_available();
+//    }
+//    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+//    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+//    
+//    return hr;
+//}
+//
+////--------------------------------------Com_task::Try_lock_non_exclusive_else_call_me_again
+//
+//STDMETHODIMP Com_task::Try_lock_non_exclusive_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
+//{
+//    Z_LOGI( Z_FUNCTION << '\n' );
+//
+//    HRESULT hr = S_OK;
+//
+//    try
+//    {
+//        if( !_task )  z::throw_xc( "SCHEDULER-122" );
+//        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
+//
+//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
+//                                                                                                          : VARIANT_FALSE;
+//        if( !*result )  _task->delay_until_locks_available();
+//    }
+//    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+//    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
+//
+//    return hr;
+//}
 
 //--------------------------------------------------------------------------------Com_task::add_pid
 

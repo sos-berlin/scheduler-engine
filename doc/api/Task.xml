@@ -111,6 +111,45 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
+    <method name="call_me_again_when_locks_available">
+        <com>
+        </com>
+        
+        <title>
+            Wiederholt spooler_open() oder spooler_process(), sobald Sperren verfügbar
+        </title>
+
+        <description>
+            <p>
+                Veranlasst den Scheduler, 
+                nach erfolglosem
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/> oder
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock_non_exclusive"/>
+                (Aufruf hat <code>false</code> geliefert)
+                <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                <scheduler_method class="Job_impl" method="spooler_process"/>
+                zu wiederholen, sobald die angeforderten Sperren verfügbar sind.
+                Der Scheduler wiederholt dann den Aufruf mit gehaltenen Sperren,
+                so dass 
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/> bzw.
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock_non_exclusive"/>
+                erfolgreich sein werden (also <code>true</code> liefern).
+            </p>
+            <p>
+                Nach dem Aufruf hat der Rückgabewert von
+                <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                <scheduler_method class="Job_impl" method="spooler_process"/>
+                (<code>true</code> oder <code>false</code>) keine Wirkung.
+            </p>
+        </description>
+
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
     <method name="create_subprocess">
         <title>
             Start eines überwachten Subprozesses
@@ -869,6 +908,94 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
             <message level="warn" code="SCHEDULER-975"/>
         </messages>
     </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="try_hold_lock">
+        <title>
+            Versucht, eine Sperre zu halten
+        </title>
+
+        <com>
+            <com.result name="success">
+                <com.type type="boolean"/>
+                <description>
+                    <code>true</code>, wenn die Task die Sperre hält.
+                </description>
+            </com.result>
+            
+            <com.parameter name="lock_path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+
+        <description>
+            <p>
+                Versucht, die angegebene Sperre (<scheduler_method class="Lock"/>) zu halten.
+                <code>try_lock_hold()</code> kann aufgerufen werden
+            </p>
+            <ul>
+                <li>
+                    in <scheduler_method class="Job_impl" method="spooler_open"/>:
+                    die Sperre wird für die Task gehalten und erst nach Beendigung freigegeben,
+                </li>
+                <li>
+                    in <scheduler_method class="Job_impl" method="spooler_process"/>:
+                    die Sperre wird für nur für diesen Jobschritt gehalten und
+                    nach dessen Beendigung freigegeben, also beim Verlassen von <code>spooler_process()</code>.
+                </li>
+            </ul>
+            <p>
+                Wenn die Sperre nicht verfügbar ist, der Aufruf also <code>false</code> liefert,
+                kann
+            </p>
+            <ul>
+                <li>
+                    mit <scheduler_method class="Task" object="spooler_task" method="call_me_again_when_locks_available"/>
+                    der Scheduler veranlasst werden, den Aufruf
+                    <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                    <scheduler_method class="Job_impl" method="spooler_process"/>
+                    zu wiederholen, 
+                    sobald die Sperren verfügbar sind, oder
+                </li>
+                <li>
+                    <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                    <scheduler_method class="Job_impl" method="spooler_process"/>
+                    mit <code>false</code> beendet werden, 
+                    mit der dort beschriebenen Wirkung.
+                </li>
+                <li>
+                    Die Beendigung mit <code>true</code> dagegen wird als Fehler angesehen und führt zur Warnung
+                    <scheduler_message code="SCHEDULER-469"/>.
+                </li>
+            </ul>
+        </description>
+
+        <example programming_language="javascript">
+            <pre><![CDATA[function spooler_process() 
+{
+    var result = false;
+    
+    if( spooler_task.try_hold_lock( "Georgien" )  &&
+        spooler_task.try_hold_lock_non_exlusive( "Venezuela" ) )
+    {
+        // Task is holding the two locks
+        // processing code here ...
+    }
+    else
+    {
+        spooler_task.call_me_again_when_locks_available();
+    }
+    
+    return result;
+}]]></pre>
+        </example>
+        
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+            <message level="warn"  code="SCHEDULER-469"/>
+        </messages>
+    </method>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 

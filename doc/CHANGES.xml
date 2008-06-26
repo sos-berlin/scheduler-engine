@@ -10,6 +10,25 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-06-26" version="2.0.208" subversion_revision="5810">
+        <revision title="API um Sperren erweitert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Task" method="try_hold_lock"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" method="try_hold_lock_non_exclusive"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Task" method="Call_me_again_when_locks_available"/>
+                    </li>
+                </ul>
+            </description>            
+        </revision>
+    </change>
+
+
     <change date="2008-06-09" version="2.0.207" subversion_revision="5799">
         <revision title="Auf Microsoft Visual Studio 2008 umgestellt">
         </revision>

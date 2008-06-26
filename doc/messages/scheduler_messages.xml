@@ -2859,7 +2859,7 @@
 
         <message code="SCHEDULER-469">
             <text xml:lang="en">
-                <title>try_lock() has failed and call_me_again_when_locks_available() has not been called</title>
+                <title>try_hold_lock() or try_hold_lock_non_exclusive() has failed and call_me_again_when_locks_available() has not been called</title>
             </text>
         </message>
     </messages>

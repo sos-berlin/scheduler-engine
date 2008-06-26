@@ -811,7 +811,7 @@ void Task::delay_until_locks_available()
     Lock_level       lock_level     = current_lock_level();
     lock::Requestor* lock_requestor = _lock_requestors[ lock_level ];
 
-    if( !lock_requestor )  z::throw_xc( "SCHEDULER-468", "No try_lock()" );             // try_hold_lock() nicht aufgerufen
+    if( !lock_requestor )  z::throw_xc( "SCHEDULER-468", "No try_hold_lock()" );             // try_hold_lock() nicht aufgerufen
     if( _lock_holder->is_holding_all_of( lock_requestor ) )  z::throw_xc( "SCHEDULER-468" );   // Sperren werden bereits gehalten
 
     // Sicherstellen, dass try_hold_lock() ohne Erfolg aufgerufen worden ist
@@ -1380,10 +1380,10 @@ bool Task::do_something()
 
                                 if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )   
                                 {
-                                    if( !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )  
-                                        log()->warn( message_string( "SCHEDULER-469" ) );    // Try_lock() hat versagt und Call_me_again_when_locks_available() nicht aufgerufen
+                                    if( ok  &&  !_delay_until_locks_available  &&  !_lock_holder->is_holding_all_of( lock_requestor ) )  
+                                        log()->warn( message_string( "SCHEDULER-469" ) );    // Try_hold_lock() hat versagt und Call_me_again_when_locks_available() nicht aufgerufen
 
-                                    _lock_holder->release_locks( lock_requestor );  // Task.Try_lock() wieder aufheben
+                                    _lock_holder->release_locks( lock_requestor );  // Task.Try_hold_lock() wieder aufheben
 
                                     if( _delay_until_locks_available )
                                     {
