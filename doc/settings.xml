@@ -625,6 +625,11 @@ db = scheduler.mdb
              type    = "yes|no|zahl"
              initial = "no"
              title   = "Task mit spooler_process() verschickt eMail">
+        <description>
+            <p>
+                <code>yes</code> entspricht 1, <code>no</code> entspricht 0.
+            </p>
+        </description>
     </setting>
 
 

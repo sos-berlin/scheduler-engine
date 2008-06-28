@@ -1152,6 +1152,8 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYGET, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::get_Mail_on_warning     , VT_BOOL       },
     { DISPATCH_METHOD     , 28, "Start_new_file"       , (Com_method_ptr)&Com_log::Start_new_file          , VT_EMPTY      },
     { DISPATCH_METHOD     , 29, "Log_file"             , (Com_method_ptr)&Com_log::Log_file                , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT, 30, "New_filename"         , (Com_method_ptr)&Com_log::put_New_filename        , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 30, "New_filename"         , (Com_method_ptr)&Com_log::get_New_filename        , VT_BSTR       },
     {}
 };
 

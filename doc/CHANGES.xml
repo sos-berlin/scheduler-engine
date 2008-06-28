@@ -23,6 +23,13 @@
                     <li>
                         <scheduler_method class="Task" method="Call_me_again_when_locks_available"/>
                     </li>
+                    <li>
+                        Antwort-Element <scheduler_element directory="xml/answer/" name="task" attribute="state"/>: 
+                        neue Zustände 
+                        <code>opening</code>, 
+                        <code>opening_waiting_for_locks</code> und
+                        <code>running_waiting_for_locks</code>.
+                    </li>
                 </ul>
             </description>            
         </revision>

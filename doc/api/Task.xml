@@ -125,21 +125,18 @@
                 nach erfolglosem
                 <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/> oder
                 <scheduler_method class="Task" object="spooler_task" method="try_hold_lock_non_exclusive"/>
-                (Aufruf hat <code>false</code> geliefert)
+                den Aufruf von
                 <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
                 <scheduler_method class="Job_impl" method="spooler_process"/>
                 zu wiederholen, sobald die angeforderten Sperren verfügbar sind.
                 Der Scheduler wiederholt dann den Aufruf mit gehaltenen Sperren,
-                so dass 
-                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/> bzw.
-                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock_non_exclusive"/>
-                erfolgreich sein werden (also <code>true</code> liefern).
+                so dass die erstgenannten Aufrufe Erfolg haben werden.
             </p>
             <p>
                 Nach dem Aufruf hat der Rückgabewert von
                 <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
                 <scheduler_method class="Job_impl" method="spooler_process"/>
-                (<code>true</code> oder <code>false</code>) keine Wirkung.
+                (<code>true</code>/<code>false</code>) keine Wirkung.
             </p>
         </description>
 
@@ -931,8 +928,8 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
 
         <description>
             <p>
-                Versucht, die angegebene Sperre (<scheduler_method class="Lock"/>) zu halten.
-                <code>try_lock_hold()</code> kann aufgerufen werden
+                <code>try_lock_hold()</code> versucht, die angegebene Sperre (<scheduler_method class="Lock"/>) zu halten,
+                und kann aufgerufen werden
             </p>
             <ul>
                 <li>
@@ -946,8 +943,8 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
                 </li>
             </ul>
             <p>
-                Wenn die Sperre nicht verfügbar ist, der Aufruf also <code>false</code> liefert,
-                kann
+                Wenn die Sperre nicht verfügbar ist, ein Aufruf also <code>false</code> liefert,
+                kann entweder
             </p>
             <ul>
                 <li>
@@ -961,12 +958,13 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
                 <li>
                     <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
                     <scheduler_method class="Job_impl" method="spooler_process"/>
-                    mit <code>false</code> beendet werden, 
-                    mit der dort beschriebenen Wirkung.
+                    ohne vorgenannten Aufruf mit <code>false</code> beendet werden, 
+                    mit der üblichen Wirkung,
                 </li>
                 <li>
-                    Die Beendigung mit <code>true</code> dagegen wird als Fehler angesehen und führt zur Warnung
-                    <scheduler_message code="SCHEDULER-469"/>.
+                    aber nicht mit <code>true</code> beendet werden,
+                    das wird als Fehler angesehen 
+                    und führt zur Warnung <scheduler_message code="SCHEDULER-469"/>.
                 </li>
             </ul>
             <p>
@@ -984,6 +982,7 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
     {
         // Task is holding the two locks
         // processing code here ...
+        result = ...
     }
     else
     {

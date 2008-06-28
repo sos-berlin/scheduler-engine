@@ -59,8 +59,21 @@
                     <tr>
                         <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="starting"/><code>state="starting"</code></td>
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
-                            Die Task startet. <scheduler_method class="Job_impl" method="spooler_init"/>
-                            und <scheduler_method class="Job_impl" method="spooler_open"/> werden aufgerufen.
+                            Die Task startet. <scheduler_method class="Job_impl" method="spooler_init"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="opening"/><code>state="opening"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            <scheduler_method class="Job_impl" method="spooler_open"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="opening_waiting_for_locks"/><code>state="opening_waiting_for_locks"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            <scheduler_method class="Job_impl" method="spooler_open"/> hat
+                            <scheduler_method class="Task" object="spooler_task" method="call_me_again_when_locks_available"/> aufgerufen.
+                            Die Task wird fortgesetzt, sobald die angeforderten Sperren verfügbar sind.
                         </td>
                     </tr>
                     <tr>
@@ -87,6 +100,14 @@
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
                             Nur bei einem auftragsgesteuerten Job:
                             Die Task ist bereit, den nächsten Auftrag auszuführen, aber es liegt kein Auftrag vor.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_waiting_for_locks"/><code>state="running_waiting_for_locks"</code></td>
+                        <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            <scheduler_method class="Job_impl" method="spooler_process"/> hat
+                            <scheduler_method class="Task" object="spooler_task" method="call_me_again_when_locks_available"/> aufgerufen.
+                            Die Task wird fortgesetzt, sobald die angeforderten Sperren verfügbar sind.
                         </td>
                     </tr>
                     <tr>

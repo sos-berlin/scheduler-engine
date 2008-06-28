@@ -1306,6 +1306,7 @@
     <register_keyword_display><code>&lt;lock.use&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.use' register_title='Änderungsprotokoll'  register_keyword='lock.use'/>
     <register_entry register_file='api/Lock.xml#use_element__lock.use' register_title='XXX'  register_keyword='lock.use'/>
+    <register_entry register_file='api/Task.xml#use_element__lock.use' register_title='XXX'  register_keyword='lock.use'/>
     <register_entry register_file='xml.xml#use_element__lock.use' register_title='Alle XML-Elemente'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.requestor.xml#use_element__lock.use' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.use.xml#' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock.use' type='definition'/>

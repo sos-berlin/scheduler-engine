@@ -68,6 +68,7 @@ public class Variable_set extends Idispatch
      */
     public String           var                 ( String name )                     { return (String)       com_call( "<var", name              ); }
 
+    public void         set_value               ( String name, String value )       {                       com_call( ">value", name, value     ); }
     public String           value               ( String name )                     { return (String)       com_call( "<value", name            ); }
 
     /*+ Liefert die Anzahl der Variablen.
