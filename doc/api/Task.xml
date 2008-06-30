@@ -980,8 +980,7 @@ $spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title 
     if( spooler_task.try_hold_lock( "Georgien" )  &&
         spooler_task.try_hold_lock_non_exlusive( "Venezuela" ) )
     {
-        // Task is holding the two locks
-        // processing code here ...
+        // Task is holding the two locks. Insert processing code here.
         result = ...
     }
     else

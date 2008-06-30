@@ -10,6 +10,43 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-06-30" version="2.0.208" subversion_revision="5813">
+        <revision type="correction" title="Doppeltes &quot;To:&quot; aus Mail-Verzeichnis entfernt">
+            <description>
+                <p>
+                    Die im eMail-Verzeichnis (<scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_queue_dir"/>)
+                    abgelegten Dateien enthielten zur Kompatibilität mit einer alten Mail-Software eine zusätzlich "To:"-Zeile.
+                    Die Zeile wird nicht mehr eingefügt.
+                    Es sollte eine aktuelle Mail-Software (mail.jar oder w3jmail44.dll) eingesetzt werden.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Variable_set.set_value() auch in Java möglich">
+            <description>
+                <p>
+                    Der schreibende Aufruf von <scheduler_method class="Variable_set" property="value"/> 
+                    ist jetzt auch in Java möglich.
+                </p>
+                <p>
+                    Der Aufruf ist damit durchgängig eingeführt und ersetzt 
+                    <scheduler_method class="Variable_set" property="var"/>,
+                    der in JavaScript nicht möglich ist.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="spooler_log.new_filename">
+            <description>
+                <p>
+                    <scheduler_method class="Log" property="new_filename"/>
+                    kann jetzt auch unter Unix verwendet werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2008-06-26" version="2.0.208" subversion_revision="5811">
         <revision title="API um Sperren erweitert">
             <description>
