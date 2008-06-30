@@ -24,7 +24,13 @@
         <!--ini_entry setting="log_collect_within" />
         <ini_entry setting="log_collect_max" /-->
         <ini_entry setting="mail_on_error" />
-        <ini_entry setting="mail_on_process" />
+        <ini_entry setting="mail_on_process">
+            <description>
+                <p>
+                    <code>yes</code> entspricht 1, <code>no</code> entspricht 0.
+                </p>
+            </description>
+        </ini_entry>
         <ini_entry setting="mail_on_success" />
         <ini_entry setting="mail_on_delay_after_error" />
         <ini_entry setting="mail_queue_dir" />

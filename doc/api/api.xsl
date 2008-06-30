@@ -603,7 +603,15 @@
         <xsl:if test="$is_in_table">
             <td class="api_title">
                 <xsl:if test="$show_title and $title_rowspan &gt; 0 and position() = 1">
-                    <xsl:apply-templates select="parent::*/title"/>
+                    <xsl:choose>
+                        <xsl:when test="parent::*/title">
+                            <xsl:apply-templates select="parent::*/title"/>
+                        </xsl:when>
+                        <xsl:when test="parent::*/@setting">
+                            <xsl:variable name="setting" select="document( '../settings.xml' )/settings/setting[ @setting = current()/parent::*/@setting ]"/>
+                            <xsl:value-of select="$setting/@title"/>
+                        </xsl:when>
+                    </xsl:choose>
                 </xsl:if>
 
                 <xsl:apply-templates select="parent::method | parent::property" mode="comment"/>
@@ -824,7 +832,7 @@
     <xsl:if test="not( not_implemented/@programming_language=$selected_programming_language )">
 
         <xsl:apply-templates select="  method   [ com and not( not_implemented/@programming_language=$selected_programming_language ) ]
-                                    | property [ com and not( not_implemented/@programming_language=$selected_programming_language ) ]"
+                                     | property [ com and not( not_implemented/@programming_language=$selected_programming_language ) ]"
                             mode="detailed_methods">
             <xsl:sort select="@name"/>
         </xsl:apply-templates>
@@ -859,7 +867,15 @@
     </xsl:element>
 
 
-    <xsl:apply-templates select="title"/>
+    <xsl:choose>
+        <xsl:when test="title">
+            <xsl:apply-templates select="title"/>
+        </xsl:when>
+        <xsl:when test="@setting">
+            <xsl:variable name="setting" select="document( '../settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
+            <xsl:value-of select="$setting/@title"/>
+        </xsl:when>
+    </xsl:choose>
 
 
     <xsl:if test="@deprecated">
@@ -889,6 +905,11 @@
 
     <xsl:apply-templates select="." mode="example"/>
 
+
+    <xsl:if test="@setting">
+        <p>&#160;</p>
+        <xsl:apply-templates mode="setting_description" select="."/>
+    </xsl:if>
 
     <xsl:apply-templates select="." mode="api.description"/>
     <!--xsl:if test="description">
@@ -994,8 +1015,8 @@
         </xsl:if>
     </xsl:if>
 
-    
-    <xsl:if test="@setting">
+
+    <!--xsl:if test="@setting">
         <div class="see_also">
             <h3 style="margin-bottom: 0em">
                 <xsl:call-template name="phrase">
@@ -1004,7 +1025,7 @@
             </h3>
             <xsl:apply-templates mode="setting_references" select="."/>
         </div>  
-    </xsl:if>
+    </xsl:if-->
 
 
 </xsl:template>

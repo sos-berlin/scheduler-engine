@@ -1456,6 +1456,7 @@
 </register_keyword>
 <register_keyword keyword='mail_queue_dir'>
     <register_keyword_display><code>mail_queue_dir=</code></register_keyword_display>
+    <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='mail_queue_dir'/>
     <register_ini_entry register_file='api/Mail.xml' register_title='XXX' file='factory.ini' section='spooler' entry='mail_queue_dir'/>
 </register_keyword>
 <register_keyword keyword='mail_queue_only'>
@@ -1669,6 +1670,12 @@
 <register_keyword keyword='once'>
     <register_keyword_display><code>once=</code></register_keyword_display>
     <register_entry register_file='xml/run_time.xml#attribute_once' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='once' type='definition'/>
+</register_keyword>
+<register_keyword keyword='opening'>
+    <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='opening'/>
+</register_keyword>
+<register_keyword keyword='opening_waiting_for_locks'>
+    <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='opening_waiting_for_locks'/>
 </register_keyword>
 <register_keyword keyword='Optionen'>
     <register_entry register_file='command_line.xml' register_title='Kommandozeilenoptionen'  register_keyword='Optionen'/>
@@ -2111,6 +2118,9 @@
 <register_keyword keyword='running_since'>
     <register_keyword_display><code>running_since=</code></register_keyword_display>
     <register_entry register_file='xml/answer/task.xml#attribute_running_since' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_since' type='definition'/>
+</register_keyword>
+<register_keyword keyword='running_waiting_for_locks'>
+    <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_waiting_for_locks'/>
 </register_keyword>
 <register_keyword keyword='running_waiting_for_order'>
     <register_entry register_file='xml/answer/task.xml' register_title='&lt;task&gt; (Antwort)'  register_keyword='running_waiting_for_order'/>

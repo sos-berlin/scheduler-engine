@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-06-30" version="2.0.208" subversion_revision="5813">
+    <change date="2008-06-30" version="2.0.208" subversion_revision="5814">
         <revision type="correction" title="Doppeltes &quot;To:&quot; aus Mail-Verzeichnis entfernt">
             <description>
                 <p>
@@ -41,6 +41,16 @@
                 <p>
                     <scheduler_method class="Log" property="new_filename"/>
                     kann jetzt auch unter Unix verwendet werden.
+                </p>
+            </description>
+        </revision>
+
+        <revision title="Dokumentation erweitert">
+            <description>
+                <p>
+                    <scheduler_method class="Log" property="mail_on_process"/>
+                    ergänzt; 
+                    Texte aus settings.xml werden auf den API-Seiten gezeigt.
                 </p>
             </description>
         </revision>

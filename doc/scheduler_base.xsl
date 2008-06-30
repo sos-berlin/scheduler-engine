@@ -436,7 +436,9 @@
             <xsl:apply-templates select="." mode="setting_header_rest"/>
         </p>
 
-        <xsl:apply-templates mode="setting_description" select="."/>
+        <div class="indent">
+            <xsl:apply-templates mode="setting_description" select="."/>
+        </div>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
@@ -668,16 +670,28 @@
         </xsl:if>
 
         <span class="title">
-            <xsl:value-of select="@title | $setting/@title"/>
+            <xsl:apply-templates select="." mode="setting_title"/>
         </span>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~setting_title-->
+
+    <xsl:template match="*" mode="setting_title">
+        <xsl:choose>
+            <xsl:when test="@title">
+                <xsl:value-of select="@title"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
+                <xsl:value-of select="$setting/@title"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mode=setting_description-->
 
     <xsl:template match="*" mode="setting_description">
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
-
-        <div class="indent">
 
             <xsl:if test="$setting/description">
                 <xsl:apply-templates select="$setting/description"/>
@@ -724,7 +738,7 @@
             </xsl:apply-templates>
 
             <xsl:apply-templates select="example"/>
-        </div>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mode=setting_references-->
@@ -2599,7 +2613,9 @@
             <xsl:apply-templates select="." mode="setting_header_rest"/>
         </p>
 
-        <xsl:apply-templates mode="setting_description" select="."/>
+        <div class="indent">
+            <xsl:apply-templates mode="setting_description" select="."/>
+        </div>
 
         <xsl:if test="@multiple='yes'">
             <div class="indent">
@@ -2819,7 +2835,9 @@
                 </table>
             </p>
 
-            <xsl:apply-templates mode="setting_description" select="."/>
+            <div class="indent">
+                <xsl:apply-templates mode="setting_description" select="."/>
+            </div>
         </xsl:for-each>
 
     </xsl:template>
@@ -2873,8 +2891,9 @@
             <xsl:apply-templates select="." mode="setting_header_rest"/>
         </p>
 
-        <xsl:apply-templates mode="setting_description" select="."/>
-
+        <div class="indent">
+            <xsl:apply-templates mode="setting_description" select="."/>
+        </div>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_all_messages-->

@@ -623,11 +623,15 @@ db = scheduler.mdb
 
     <setting setting = "mail_on_process"
              type    = "yes|no|zahl"
-             initial = "no"
+             initial = "0"
              title   = "Task mit spooler_process() verschickt eMail">
         <description>
             <p>
-                <code>yes</code> entspricht 1, <code>no</code> entspricht 0.
+                Veranlasst den Versand des Task-Protokolls, 
+                wenn die Task wenigstens die angegebene Anzahl Schritte,
+                also Aufrufe von <scheduler_method class="Job_impl" method="spooler_process"/>,
+                ausgeführt hat.
+                Bei Nicht-API-Tasks wird immer ein Schritt gezählt.
             </p>
         </description>
     </setting>
