@@ -5,7 +5,5 @@
 
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
-        <process_classes/>
-
     </config>
 </spooler>

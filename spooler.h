@@ -191,7 +191,7 @@ using namespace folder;
 
 namespace include
 {
-    struct Include_register;
+  //struct Include_register;
     struct Has_includes;
 };
 using namespace include;

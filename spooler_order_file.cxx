@@ -507,14 +507,12 @@ void Directory_file_order_source::activate()
 
 bool Directory_file_order_source::request_order( const string& cause )
 {
-    bool result = false;
+    bool result = _new_files_index < _new_files.size();
 
     if( _expecting_request_order 
      || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
     {
         Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
-
-        result = _new_files_index < _new_files.size();
 
         if( !result )
         {

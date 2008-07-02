@@ -1178,11 +1178,11 @@
                         </xsl:if>
                     </td>
 
-                    <td colspan="2" style="text-align: right">
+                    <td style="text-align: right">
                         <xsl:if test="files/@count > 0">
                             <xsl:element name="span">
                                 <xsl:attribute name="title">
-                                    <xsl:text>Snapshot of</xsl:text>
+                                    <xsl:text>Snapshot of </xsl:text>
                                     <xsl:value-of select="files/@snapshot_time"/>
                                 </xsl:attribute>
                                 <xsl:call-template name="bold_counter">
@@ -1192,6 +1192,8 @@
                             </xsl:element>
                         </xsl:if>
                     </td>
+
+                    <td> </td>
 
                 </xsl:element>
 
