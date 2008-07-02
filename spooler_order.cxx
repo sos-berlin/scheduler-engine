@@ -5747,9 +5747,10 @@ string Order::string_payload() const
 
 void Order::set_params( const xml::Element_ptr& params_element, Variable_set_map* variable_set_map )
 {
-    ptr<Com_variable_set> pars = new Com_variable_set;
-    pars->set_dom( params_element, variable_set_map );  
-    set_payload( Variant( static_cast<IDispatch*>( pars ) ) );
+    ptr<Com_variable_set> params = new Com_variable_set;
+    params->register_include_and_set_dom( _spooler, this, params_element, variable_set_map, "param" );    // Kann <include> registrieren
+    //pars->set_dom( params_element, variable_set_map );  
+    set_payload( Variant( static_cast<IDispatch*>( params ) ) );
 }
 
 //----------------------------------------------------------------------------Order::params_or_null
