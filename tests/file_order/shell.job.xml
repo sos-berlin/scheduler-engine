@@ -9,6 +9,7 @@
 
 echo %SCHEDULER_TASK_TRIGGER_FILES%
 echo $SCHEDULER_TASK_TRIGGER_FILES
+sleep 3
 exit 0
 
     ]]>
