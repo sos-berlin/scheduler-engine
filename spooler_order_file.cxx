@@ -509,21 +509,21 @@ bool Directory_file_order_source::request_order( const string& cause )
 {
     bool result = _new_files_index < _new_files.size();
 
-    if( _expecting_request_order 
-     || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
+    if( !result )
     {
-        Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
-
-        if( !result )
+        if( _expecting_request_order 
+         || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
-            async_wake();   // Veranlasst Aufruf von async_continue_()
-        }
+            Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << "\n" );
 
-        _expecting_request_order = false;
-    }
-    else
-    {
-        //Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
+            async_wake();   // Veranlasst Aufruf von async_continue_()
+
+            _expecting_request_order = false;
+        }
+        else
+        {
+            //Z_LOG2( "scheduler.file_order", Z_FUNCTION << " cause=" << cause << ", !async_next_gmtime_reached()\n" );
+        }
     }
 
     return result;
