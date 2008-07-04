@@ -886,6 +886,11 @@ Time Task::next_time()
                                              : Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
     }
     else
+    if( _state == s_running_process  &&  !_timeout.is_never() )
+    {
+        result = Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
+    }
+    else
     {
         result = _next_time;
         if( _state == s_running_delayed  &&  result > _next_spooler_process )  result = _next_spooler_process;
@@ -1311,6 +1316,8 @@ bool Task::do_something()
                             }
                             else
                             {
+                                check_timeout( now );
+
                                 _running_state_reached = true;  // Also nicht, wenn der Prozess sich sofort beendet hat (um _min_tasks-Schleife zu vermeiden)
                                 _next_time = Time::never;       // Nach cmd_end(): Warten bis _module_instance->process_has_signaled()
                             }

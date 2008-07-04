@@ -2064,7 +2064,7 @@ xml::Element_ptr File_based::execute_xml( Command_processor* command_processor, 
 
 //--------------------------------------------------------------------------File_based::dom_element
 
-xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, const Show_what& show_what )
 {
     xml::Element_ptr result = document.createElement( "file_based" );
 
@@ -2081,6 +2081,8 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
         if( base_file_has_error() )  result.appendChild( create_error_element( document, _base_file_xc, (time_t)_base_file_xc_time ) );
     }
+
+    if( has_includes() )  result.appendChild( Has_includes::dom_element( document, show_what ) );
 
     const xml::Element_ptr& requisites_element = document.createElement( "requisites" );
     int count = append_requisite_dom_elements( requisites_element );

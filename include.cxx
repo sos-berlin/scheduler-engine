@@ -259,6 +259,26 @@ file::File_info* Has_includes::changed_included_file_info()
     return result;
 }
 
+//------------------------------------------------------------------------Has_includes::dom_element
+
+xml::Element_ptr Has_includes::dom_element( const xml::Document_ptr& document, const Show_what& )
+{
+    xml::Element_ptr result = document.createElement( "includes" );
+
+    Z_FOR_EACH( Include_map, _include_map, inc ) 
+    {
+        Path             path      = inc->first;
+        file::File_info* file_info = inc->second;
+
+        xml::Element_ptr include_element = document.createElement( "include" );
+        include_element.setAttribute( "live_file", path );
+
+        result.appendChild( include_element );
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------Include_register::Include_register
 
 //Include_register::Include_register()

@@ -12,7 +12,7 @@ function spooler_process()
 {               
     var order = spooler_task.order;
     spooler_log.info( "ORDER-ID=" + order.id );
-    hostware.sleep( 60 );
+    hostware.sleep( 5 );
     //spooler_log.info( "order.xml=" + spooler_task.order.xml );
     //spooler_log.info( "spooler_task.trigger_files=" + spooler_task.trigger_files );
     //if( spooler_task.order.params( "scheduler_file_order" ) == "/tmp/x/gen9" )  spooler.terminate();

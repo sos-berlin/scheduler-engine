@@ -43,12 +43,16 @@ struct Has_includes             // <include live_file="...">
                                 Has_includes                ();
     virtual                    ~Has_includes                ();
 
+
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+
   //virtual void                on_include_changed          ()                                      = 0;
     virtual Prefix_log*         log                         ()                                      = 0;
     virtual string              obj_name                    () const                                = 0;
     virtual Configuration_origin configuration_origin       () const                                = 0;
     virtual Spooler*            spooler                     () const                                = 0;
 
+    bool                        has_includes                () const                                { return !_include_map.empty(); }
     void                        register_include            ( const Absolute_path&, file::File_info* );
   //void                        remove_include              ( const Absolute_path& );
     void                        remove_includes             ();

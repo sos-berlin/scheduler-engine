@@ -84,8 +84,10 @@
                     geht der Scheduler von der Wurzel des Konfigurationsverzeichnisses aus.
                 </p>
                 <p>
-                    Unter <scheduler_element name="job" child="params"/> führt eine Änderung der Datei zum erneuten Lesen des Jobs
-                    (falls er aus einem Konfigurationsverzeichnis stammt).
+                    Unter <scheduler_element name="job" child="params"/> und 
+                    <scheduler_element name="order" child="params"/>
+                    führt eine Änderung der Datei zum erneuten Lesen des Jobs bzw. Auftrags,
+                    falls er dateibasiert ist, also aus einem Konfigurationsverzeichnis stammt.
                 </p>
                 <scheduler_message level="error" code="SCHEDULER-461"/>
                 <scheduler_message level="error" code="SCHEDULER-417"/>

@@ -27,7 +27,9 @@
         <xml_child_element name="include"       multiple="yes">
             <description>
                 <p>
-                    Kann verwendet werden in <code>&lt;params></code> direkt unter <scheduler_element name="job"/>.
+                    Kann verwendet werden in <code>&lt;params></code> direkt unter
+                    <scheduler_element name="job"/> und unter 
+                    <scheduler_element name="order"/>.
                 </p>
             </description>
             

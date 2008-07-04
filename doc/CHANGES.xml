@@ -10,6 +10,33 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+
+    <change date="2008-07-04" version="2.0.209" subversion_revision="5819">
+        <revision type="new" title="Aufträge mit inkludierten Parameterdateien">
+            <description>
+                <p>
+                    <scheduler_element name="order"/><scheduler_element name="params" child="include"/>
+                    ist möglich. 
+                    Bei einem dateibasierten Auftrag kann die inkludierte Datei überwacht werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2008-07-02" version="2.0.208" subversion_revision="5817">
+        <revision type="correction" title="Dateiaufträge beschleunigt">
+            <description>
+                <p>
+                    Wenn der erste Job der Jobkette mehrere Tasks erlaubt
+                    (<scheduler_element name="job" attribute="tasks"/>), 
+                    füttert der Scheduler die Jobkette jetzt schneller mit den Dateiaufträgen..
+                </p>
+            </description>
+        </revision>
+    </change>
+    
+
     <change date="2008-06-30" version="2.0.208" subversion_revision="5814">
         <revision type="correction" title="Doppeltes &quot;To:&quot; aus Mail-Verzeichnis entfernt">
             <description>
