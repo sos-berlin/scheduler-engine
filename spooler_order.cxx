@@ -6374,22 +6374,22 @@ Job_chain* Order::job_chain_for_api() const
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing( bool success )
+void Order::postprocessing( Postprocessing_mode postprocessing_mode )
 {
-    _is_success_state = success;
+    _is_success_state = postprocessing_mode == post_success;
 
     Job*      last_job          = _task? _task->job() : NULL;
     Job_node* job_node          = Job_node::cast( _job_chain_node );
     bool      force_error_state = false;
 
-    if( !success  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
+    if( !_is_success_state  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
 
     if( !_setback_called )  _setback_count = 0;
 
     if( !_suspended  &&  _setback == Time::never  &&  _setback_count > _task->job()->max_order_setbacks() )
     {
         _log->info( message_string( "SCHEDULER-943", _setback_count ) );   // " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand"
-        success = false;
+        _is_success_state = false;
         force_error_state = true;
         _setback = Time(0);
         _setback_count = 0;
@@ -6400,16 +6400,17 @@ void Order::postprocessing( bool success )
 
     _task = NULL;
 
-    if( !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  force_error_state )
+    if( postprocessing_mode != post_keep_state  &&  !is_setback()  &&  !_moved  &&  !_end_state_reached  ||  
+        force_error_state )
     {
         if( job_node )
         {
             assert( _job_chain );
 
-            if( !success  &&  job_node->is_on_error_suspend() )  
+            if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
                 set_suspended();
             else
-            if( success )
+            if( _is_success_state )
             {
                 if( _state == _end_state )
                 {

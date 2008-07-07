@@ -373,6 +373,7 @@
     <register_entry register_file='CHANGES.xml#use_element__day' register_title='Änderungsprotokoll'  register_keyword='day'/>
     <register_entry register_file='xml.xml#use_element__day' register_title='Alle XML-Elemente'  register_keyword='day'/>
     <register_entry register_file='xml/day.xml#' register_title='&lt;day&gt; (Konfiguration)'  register_keyword='day' type='definition'/>
+    <register_entry register_file='xml/holidays.xml#use_element__day' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='day'/>
 </register_keyword>
 <register_keyword keyword='day'>
     <register_keyword_display><code>day=</code></register_keyword_display>
@@ -795,6 +796,7 @@
     <register_entry register_file='xml/holidays.xml#' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='holidays' type='definition'/>
     <register_entry register_file='xml/holidays.xml#use_element__holidays' register_title='&lt;holidays&gt; (Konfiguration)'  register_keyword='holidays'/>
     <register_entry register_file='xml/include.xml#use_element__holidays' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='holidays'/>
+    <register_entry register_file='xml/period.xml#use_element__holidays' register_title='&lt;period&gt; (Konfiguration)'  register_keyword='holidays'/>
 </register_keyword>
 <register_keyword keyword='host'>
     <register_keyword_display><code>host=</code></register_keyword_display>
@@ -2825,6 +2827,11 @@
     <register_entry register_file='xml/show_order.xml#attribute_what' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_state.xml#attribute_what' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='what' type='definition'/>
     <register_entry register_file='xml/show_task.xml#attribute_what' register_title='&lt;show_task&gt; (Kommando)'  register_keyword='what' type='definition'/>
+</register_keyword>
+<register_keyword keyword='when_holiday'>
+    <register_keyword_display><code>when_holiday=</code></register_keyword_display>
+    <register_entry register_file='xml/period.xml#attribute_when_holiday' register_title='&lt;period&gt; (Konfiguration)'  register_keyword='when_holiday' type='definition'/>
+    <register_entry register_file='xml/run_time.xml#attribute_when_holiday' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='when_holiday' type='definition'/>
 </register_keyword>
 <register_keyword keyword='which'>
     <register_keyword_display><code>which=</code></register_keyword_display>

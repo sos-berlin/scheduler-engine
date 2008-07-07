@@ -104,6 +104,46 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="when_holiday" title="Umgang mit Feiertagen">
+            <description>
+                <p>
+                    Normalerweise wird eine Periode, die auf einen Feiertag 
+                    <scheduler_element name="holidays"/>
+                    fällt, unterdrückt.
+                    Aber es gibt noch weitere Möglichkeiten.
+                </p>
+                
+                <p>
+                    <code>when_holiday="suppress"</code>
+                </p>
+                <p class="list_text">
+                    Voreinstellung.
+                    Wenn die Periode auf einen Feiertag fällt, wird sie unterdrückt.
+                </p>
+
+                <p>
+                    <code>when_holiday="ignore_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie nicht unterdrückt.
+                </p>
+                
+                <p>
+                    <code>when_holiday="previous_non_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie auf den vorangehenden Nicht-Feiertag verschoben.
+                </p>
+
+                <p>
+                    <code>when_holiday="next_non_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie auf den nachfolgenden Nicht-Feiertag verschoben.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 

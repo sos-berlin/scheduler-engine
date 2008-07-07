@@ -177,7 +177,7 @@ struct Task : Object,
   //bool                        occupy_order                ( Order*, const Time& now );
     Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause );
   //void                        set_order                   ( Order* );
-    void                        postprocess_order           ( bool spooler_process_result, bool due_to_exception = false );
+    void                        postprocess_order           ( Order::Postprocessing_mode, bool due_to_exception = false );
 
     void                        add_pid                     ( int pid, const Time& timeout = Time::never );
     void                        remove_pid                  ( int pid );

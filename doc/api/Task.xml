@@ -137,6 +137,9 @@
                 <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
                 <scheduler_method class="Job_impl" method="spooler_process"/>
                 (<code>true</code>/<code>false</code>) keine Wirkung.
+                Einen Auftrag 
+                <scheduler_method class="Task" object="spooler_task" property="order"/>
+                belässt der Scheduler in seinem Zustand.
             </p>
         </description>
 

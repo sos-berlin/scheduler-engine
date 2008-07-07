@@ -25,6 +25,13 @@
     </xml_parent_elements>
 
     <xml_child_elements>
+        <xml_child_element name="weekdays">
+            <description>
+                Legt Wochentage als Feiertage fest, zum Beispiel Samstag und Sonntag.
+                Als Kind-Elemente werden leere <scheduler_element name="day"/> angegeben.
+            </description>
+        </xml_child_element>
+        
         <xml_child_element name="holiday">
             <description>
                 Für jeden Feiertag wird dieses Element wiederholt.
@@ -47,6 +54,9 @@
 
     <example>
         <pre>&lt;holidays>
+    &lt;weekdays>
+        &lt;day day="saturday sunday"/>
+    &lt;/weekdays>
     &lt;holiday date="2004-12-24"/>
     &lt;holiday date="2004-12-25"/>
     &lt;holiday date="2004-12-26"/>

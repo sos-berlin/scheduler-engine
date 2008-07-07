@@ -10,6 +10,31 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    
+    <change date="2008-07-07" version="2.0.210" subversion_revision="5823">
+        <revision type="new" title="Umgang mit Feiertagen: &lt;period when_holiday=&quot;…&quot;>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="period" attribute="when_holiday"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="run_time" attribute="when_holiday"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Wochentage, zum Beispiel Samstag und Sonntag, als Feiertage deklarierbar">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="holidays" child="weekdays"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
 
     <change date="2008-07-04" version="2.0.209" subversion_revision="5819">
         <revision type="new" title="Aufträge mit inkludierten Parameterdateien">

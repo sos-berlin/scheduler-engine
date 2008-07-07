@@ -852,7 +852,7 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
     {
         case s_opening_waiting_for_locks:   set_state( s_opening );  break;
         case s_running_waiting_for_locks:   set_state( s_running );  break;
-        default:                                        z::throw_xc( Z_FUNCTION );
+        default:                            z::throw_xc( Z_FUNCTION );
     }
     
     signal( Z_FUNCTION );
@@ -1615,13 +1615,10 @@ bool Task::do_something()
 
                                         if( !has_error() )
                                         {
-                                            bool success = _exit_code == 0;
-                                            postprocess_order( success );       
+                                            postprocess_order( _exit_code == 0? Order::post_success 
+                                                                              : Order::post_error   );       
                                         }
                                         else {}     // remove_order_after_error() wird sich drum kümmern.
-
-                                        //bool success = _exit_code == 0  &&  !has_error();   // Auftrag soll in den Fehlerzustand gehen, egal ob 
-                                        //postprocess_order( success );                       // bei einem Fehler auch der Job stoppt
                                     }                                                               
                                 }                                                               
 
@@ -1872,14 +1869,6 @@ bool Task::step__end()
 
         if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME )
         {
-            //if( _order )  
-            //{
-            //    z::Xc x = z::Xc( "SCHEDULER-351" );
-            //    _job->log()->error( x.what() );
-            //    _job->set_state( Job::s_error );
-            //    z::throw_xc( x );
-            //}
-
             result = true;
             continue_task = false;
         }
@@ -1897,7 +1886,13 @@ bool Task::step__end()
             _step_count++;
         }
 
-        if( _order )  postprocess_order( result );
+        if( _order )  
+        {
+            postprocess_order( _delay_until_locks_available? Order::post_keep_state :
+                               result                      ? Order::post_success 
+                                                           : Order::post_error        );
+        }
+
         if( _next_spooler_process )  continue_task = true;
     }
     catch( const exception& x ) 
@@ -2026,13 +2021,13 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
 
 //--------------------------------------------------------------------------Task::postprocess_order
 
-void Task::postprocess_order( bool spooler_process_result, bool due_to_exception )
+void Task::postprocess_order( Order::Postprocessing_mode postprocessing_mode, bool due_to_exception )
 {
     if( _order )
     {
         _log->info( message_string( "SCHEDULER-843", _order->obj_name(), _order->state(), _spooler->http_url() ) );
         
-        _order->postprocessing( spooler_process_result );
+        _order->postprocessing( postprocessing_mode );
         
         if( due_to_exception )
         {
@@ -2062,7 +2057,7 @@ void Task::remove_order_after_error()
         {
             // Job stoppt nicht, deshalb wechselt der Auftrag in den Fehlerzustand
 
-            postprocess_order( false, true );
+            postprocess_order( Order::post_error, true );
             // _order ist NULL
         }
     }

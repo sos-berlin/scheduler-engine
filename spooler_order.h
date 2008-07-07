@@ -235,7 +235,9 @@ struct Order : Com_order,
     void                        remove_from_job_chain_stack();
     bool                        tip_own_job_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
-    void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
+
+    enum Postprocessing_mode { post_success, post_error, post_keep_state };
+    void                        postprocessing          ( Postprocessing_mode );                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();

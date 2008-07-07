@@ -1326,8 +1326,11 @@ xml::Element_ptr Schedule::Inlay::dom_element( const xml::Document_ptr& document
 
 bool Schedule::Inlay::is_filled() const
 {
-    bool result = _at_set  .is_filled() 
-               || _date_set.is_filled();
+    bool result = _at_set      .is_filled() 
+               || _date_set    .is_filled()
+               || _weekday_set .is_filled()
+               || _monthday_set.is_filled()
+               || _ultimo_set  .is_filled();
 
     if( !result )
     {
