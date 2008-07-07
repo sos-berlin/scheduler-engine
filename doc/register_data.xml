@@ -1695,7 +1695,9 @@
     <register_entry register_file='xml.xml#use_element__order' register_title='Alle XML-Elemente'  register_keyword='order'/>
     <register_entry register_file='xml/add_order.xml#use_element__order' register_title='&lt;add_order&gt; (Kommando)'  register_keyword='order'/>
     <register_entry register_file='xml/answer/order.xml#' register_title='&lt;order&gt; (Antwort)'  register_keyword='order' type='definition'/>
+    <register_entry register_file='xml/include.xml#use_element__order' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='order'/>
     <register_entry register_file='xml/order.xml#' register_title='&lt;order&gt; (Konfiguration)'  register_keyword='order' type='definition'/>
+    <register_entry register_file='xml/params.xml#use_element__order' register_title='&lt;params&gt;'  register_keyword='order'/>
     <register_entry register_file='xml/web_service.xml#use_element__order' register_title='&lt;web_service&gt; (Konfiguration)'  register_keyword='order'/>
 </register_keyword>
 <register_keyword keyword='order'>

@@ -279,10 +279,28 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:element name=\"holidays\">\n"
     "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:element name=\"weekdays\" minOccurs=\"0\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:element name=\"day\" maxOccurs=\"unbounded\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"day\" use=\"required\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:list itemType=\"Weekday\"/>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "</xsd:sequence>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
     "<xsd:choice minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:element ref=\"holiday\"/>\n"
     "<xsd:element ref=\"include\"/>\n"
     "</xsd:choice>\n"
+    "</xsd:sequence>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -825,6 +843,18 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\n"
     "<xsd:attribute name=\"absolute_repeat\" type=\"Duration\"/>\n"
+    "\n"
+    "<xsd:attribute name=\"when_holiday\">\n"
+    "<xsd:simpleType>\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:enumeration value=\"suppress\"/>\n"
+    "<xsd:enumeration value=\"ignore_holiday\"/>\n"
+    "<xsd:enumeration value=\"previous_non_holiday\"/>\n"
+    "<xsd:enumeration value=\"next_non_holiday\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "</xsd:attribute>\n"
+    "\n"
     "<xsd:attribute name=\"start_once\"    type=\"Yes_no\">\n"
     "<xsd:annotation>\n"
     "<xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>\n"
@@ -1931,7 +1961,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1210342352 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1215424363 },
     { NULL, NULL, 0 }
 };
 

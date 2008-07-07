@@ -15,7 +15,11 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <method name="add_lock">
-        <com/>
+        <com>
+            <com.parameter>
+                <com.type class="Lock"/>
+            </com.parameter>
+        </com>
 
         <title>
             Fügt dem Scheduler eine Sperre hinzu

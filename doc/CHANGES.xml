@@ -21,6 +21,16 @@
                 </p>
             </description>
         </revision>
+
+        <revision type="new" title="&lt;job timeout=&quot;…&quot;> gilt auch für Nicht-API-Jobs">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="timeout"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
     </change>
 
 

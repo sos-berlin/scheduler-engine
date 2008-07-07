@@ -270,10 +270,28 @@
     
     <xsd:element name="holidays">
         <xsd:complexType>
-            <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                <xsd:element ref="holiday"/>
-                <xsd:element ref="include"/>
-            </xsd:choice>
+            <xsd:sequence>
+                <xsd:element name="weekdays" minOccurs="0">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="day" maxOccurs="unbounded">
+                                <xsd:complexType>
+                                    <xsd:attribute name="day" use="required">
+                                        <xsd:simpleType>
+                                            <xsd:list itemType="Weekday"/>
+                                        </xsd:simpleType>
+                                    </xsd:attribute>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element ref="holiday"/>
+                    <xsd:element ref="include"/>
+                </xsd:choice>
+            </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
 
@@ -816,6 +834,18 @@
             <xsd:attribute name="let_run"       type="Yes_no"/>
             <xsd:attribute name="repeat"        type="Duration"/>
             <xsd:attribute name="absolute_repeat" type="Duration"/>
+            
+            <xsd:attribute name="when_holiday">
+                <xsd:simpleType>
+                    <xsd:restriction base="String">
+                        <xsd:enumeration value="suppress"/>
+                        <xsd:enumeration value="ignore_holiday"/>
+                        <xsd:enumeration value="previous_non_holiday"/>
+                        <xsd:enumeration value="next_non_holiday"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+                
             <xsd:attribute name="start_once"    type="Yes_no">
                 <xsd:annotation>
                     <xsd:documentation>Test only for Joacim Zschimmer</xsd:documentation>

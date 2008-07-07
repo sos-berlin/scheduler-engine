@@ -162,7 +162,10 @@
         <xml_attribute name="timeout" type="dauer" title="Frist für eine Operation">
             <description>
                 <p>
-                    Befristet eine Task-Operation (spooler_open, spooler_process etc.).
+                    Befristet eine Task-Operation (spooler_open, spooler_process etc.)
+                    oder bei einer Nicht-API-Task 
+                    (<scheduler_element name="process"/> oder <scheduler_element name="script" attribute="language" value="shell"/>)
+                    die ganze Task.
                     Nach Ablauf der Frist bricht der Scheduler die Task ab.
                 </p>
                 <p>

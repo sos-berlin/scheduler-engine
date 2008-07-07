@@ -10,6 +10,13 @@
         </security>
         
         <process_classes/>
+
+        <holidays>
+            <weekdays>
+                <day day="saturday sunday"/>
+            </weekdays>
+            <holiday date="2008-08-01"/>
+        </holidays>
     
         <jobs>
 
@@ -84,7 +91,7 @@ spooler_log.info( "hallo" );
                         </weekdays>
                     </month>
 
-                    <month month="june july">
+                    <month month="june">
                         <ultimos>
                             <day day="0 2 4">
                                 <period single_start="06:00"/>
@@ -92,12 +99,29 @@ spooler_log.info( "hallo" );
                         </ultimos>
                     </month>
 
-                    <month month="august">
+                    <month month="july august">
                         <monthdays>
-                            <day day="8">
-                                <period single_start="08:00"/>
+                            <day day="1 2 3 4 5 6 7">
+                                <period single_start="08:11" when_holiday="suppress"/>
+                            </day>
+                            <day day="12">
+                                <period single_start="08:22" when_holiday="ignore_holiday"/>
+                            </day>
+                            <day day="19">
+                                <period single_start="08:33" when_holiday="previous_non_holiday"/>
+                            </day>
+                            <day day="26">
+                                <period single_start="08:44" when_holiday="next_non_holiday"/>
                             </day>
                         </monthdays>
+                        <weekdays>
+                            <day day="monday">
+                                <period single_start="08:01"/>
+                            </day>
+                            <day day="monday">
+                                <period single_start="08:02"/>
+                            </day>
+                        </weekdays>
                     </month>
 
                     <month month="september">

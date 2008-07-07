@@ -67,6 +67,39 @@ inline int weekday_of_day_number( int day_number )
     return ( day_number + 4 ) % 7;
 }
 
+//----------------------------------------------------------------------Day_set::get_weekday_number
+
+static int get_weekday_number( const string& weekday_name )
+{
+    int    result     = -1;
+    string day_string = lcase( weekday_name );
+    
+    for( const char** p = weekday_names; *p && result == -1; p++ )
+        if( day_string == *p )  result = ( p - weekday_names ) % 7;
+
+    if( result == -1 )
+    {
+        result = as_int( weekday_name );
+        if( result == 7 )  result = 0;      // Sonntag darf auch 7 sein
+    }
+
+    if( result < 0  ||  result > 6 )  z::throw_xc( "SCHEDULER-445", weekday_name );
+
+    return result;
+}
+
+//------------------------------------------------------------------------------get_weekday_numbers
+
+static list<int> get_weekday_numbers( const string& weekday_names )
+{
+    list<int>      result;
+    vector<string> names  = vector_split( " +", weekday_names );
+
+    Z_FOR_EACH( vector<string>, names, it )  result.push_back( get_weekday_number( *it ) );
+
+    return result;
+}
+
 //---------------------------------------------------------------------------new_schedule_subsystem
 
 ptr<Schedule_subsystem_interface> new_schedule_subsystem( Scheduler* scheduler )
@@ -1313,79 +1346,99 @@ bool Schedule::Inlay::is_filled() const
 Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start )
 {
     Period result;
-    Time   tim                           = beginning_time;
-    bool   is_no_function_warning_logged = false; 
-    Period last_function_result;
-    
-    last_function_result.set_single_start( 0 );
 
-    while( tim < Time::never )
+    if( _start_time_function != ""  ||  is_filled() )
     {
-        bool something_called = false;
+        bool   is_no_function_warning_logged = false; 
+        Period last_function_result;
+        
+        last_function_result.set_single_start( 0 );
 
-        if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
+
+        for( Time t = beginning_time; 
+             result.empty()  &&  t < beginning_time + 366*24*60*60;     // Längstens ein Jahr ab beginning_time voraussehen
+             t = t.midnight() + 24*60*60 )     
         {
-            if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
+            if( _holidays.is_included( t ) )  
             {
-                log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
-                is_no_function_warning_logged = true;
-            }
-            else
-            if( last_function_result.begin() < tim )
-            {
-                try
-                {
-                    last_function_result = min( result, call_function( use, tim ) );
-                    result = last_function_result;
-                }
-                catch( exception& x )
-                {
-                    log()->error( x.what() );
-                    log()->error( message_string( "SCHEDULER-398", _start_time_function ) );
-                }
-            }
-
-            something_called = true;
-        }
-
-        if( !tim.is_never()  ||  is_filled() )
-        {
-            if( _at_set      .is_filled() )  result = min( result, _at_set      .next_period( tim, single_start ) );
-            if( _date_set    .is_filled() )  result = min( result, _date_set    .next_period( tim, single_start ) );
-
-            int m = tim.month_nr() - 1;
-            if( _months[ m ] )
-            {
-                result = min( result, _months[ m ]->next_period( tim, single_start ) );
+                result = next_period_of_same_day( t, single_start | wss_when_holiday_ignore_holiday );     // Nur when_holiday="ignore_holiday"
             }
             else
             {
-                if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
-                if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
-                if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
+                if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
+                {
+                    if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
+                    {
+                        log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
+                        is_no_function_warning_logged = true;
+                    }
+                    else
+                    if( last_function_result.begin() < t )
+                    {
+                        try
+                        {
+                            last_function_result = min( result, call_function( use, t ) );
+                            result = last_function_result;
+                        }
+                        catch( exception& x )
+                        {
+                            log()->error( x.what() );
+                            log()->error( message_string( "SCHEDULER-398", _start_time_function ) );
+                        }
+                    }
+                }
+            
+
+                result = min( result, next_period_of_same_day( t, single_start ) );
+
+
+                // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
+
+                for( int before = -24*60*60;
+                     before >= -366*24*60*60  &&  _holidays.is_included( t + before ); 
+                     before -= 24*60*60 )
+                {
+                    Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
+                    if( !p.empty() )  result = min( result, p - before );
+                }
+
+
+                // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
+
+                for( int after = +24*60*60;
+                     after <= 366*24*60*60  &&  _holidays.is_included( t + after ); 
+                     after += 24*60*60 )
+                {
+                    Period p = next_period_of_same_day( t + after, single_start | wss_when_holiday_previous_non_holiday );
+                    if( !p.empty() )  result = min( result, p - after );
+                }
             }
-
-            something_called = true;
         }
-
-        if( !something_called )  break;                         // <run_time> ist leer
-
-        if( result.begin() != Time::never )
-        {
-            if( !_holidays.is_included( result.begin() ) )  break;     // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
-
-            // Feiertag
-            tim    = result.begin().midnight() + 24*60*60;      // Nächsten Tag probieren
-            result = Period();
-        }
-        else
-        {
-            tim = tim.midnight() + 24*60*60;                    // Keine Periode? Dann nächsten Tag probieren
-        }
-
-        if( tim >= beginning_time + 366*24*60*60 )  break;     // Längstens ein Jahr ab beginning_time voraussehen
     }
 
+    return result;
+}
+
+//---------------------------------------------------------Schedule::Inlay::next_period_of_same_day
+    
+Period Schedule::Inlay::next_period_of_same_day( const Time& t, With_single_start single_start )
+{
+    Period result;
+
+    if( _at_set  .is_filled() )  result = min( result, _at_set  .next_period_of_same_day( t, single_start ) );
+    if( _date_set.is_filled() )  result = min( result, _date_set.next_period_of_same_day( t, single_start ) );
+
+    int m = t.month_nr() - 1;
+    if( _months[ m ] )
+    {
+        result = min( result, _months[ m ]->next_period_of_same_day( t, single_start ) );
+    }
+    else
+    {
+        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
+        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
+        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
+    }
 
     return result;
 }
@@ -1573,6 +1626,16 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
     //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( Z_FUNCTION, "Attribute start_once is not supported" );
 
+
+    string when_holiday = element.getAttribute( "when_holiday" );
+    if( when_holiday == "suppress"             )  _when_holiday = wh_suppress;
+    else
+    if( when_holiday == "ignore_holiday"       )  _when_holiday = wh_ignore_holiday;
+    else
+    if( when_holiday == "next_non_holiday"     )  _when_holiday = wh_next_non_holiday;
+    else
+    if( when_holiday == "previous_non_holiday" )  _when_holiday = wh_previous_non_holiday;
+
     check( w );
 }
 
@@ -1589,12 +1652,18 @@ void Period::check( With_or_without_date w ) const
     z::throw_xc( "SCHEDULER-104", _begin.as_string(), _end.as_string() );
 }
 
-//-------------------------------------------------------------------------------Period::is_comming
+//-------------------------------------------------------------------------------Period::is_coming
 
-bool Period::is_comming( const Time& time_of_day, With_single_start single_start ) const
+bool Period::is_coming( const Time& time_of_day, With_single_start single_start ) const
 {
     bool result;
 
+    if( single_start & wss_when_holiday_ignore_holiday        &&  _when_holiday != wh_ignore_holiday       )  result = false;
+    else
+    if( single_start & wss_when_holiday_previous_non_holiday  &&  _when_holiday != wh_previous_non_holiday )  result = false;
+    else
+    if( single_start & wss_when_holiday_next_non_holiday      &&  _when_holiday != wh_next_non_holiday     )  result = false;
+    else
     if( single_start & wss_next_period  &&  !_single_start  &&  time_of_day < _end )  result = true;
                                                                          // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
     else
@@ -1614,7 +1683,7 @@ bool Period::is_comming( const Time& time_of_day, With_single_start single_start
     else
         result = false;
 
-    //Z_LOG2( "joacim", *this << ".is_comming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
+    //Z_LOG2( "joacim", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
 
     return result;
 }
@@ -1787,7 +1856,7 @@ Period Day::next_period_( const Time& time_of_day, With_single_start single_star
 {
     FOR_EACH_CONST( Period_set, _period_set, it )
     {
-        if( it->is_comming( time_of_day, single_start ) )  return *it;
+        if( it->is_coming( time_of_day, single_start ) )  return *it;
     }
 
     return Period();
@@ -1851,30 +1920,26 @@ void Weekday_set::fill_with_default( const Day& default_day )
     _is_day_set_filled = true;
 }
 
-//--------------------------------------------------------------------------------Weekday_set::next
+//-------------------------------------------------------------Weekday_set::next_period_of_same_day
 
-Period Weekday_set::next_period( const Time& tim, With_single_start single_start )
+Period Weekday_set::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
+    Period result;
+
     if( _is_day_set_filled )
     {
         Time time_of_day = tim.time_of_day();
         int  day_nr      = tim.day_nr();
         int  weekday     = weekday_of_day_number( day_nr );
 
-        for( int i = weekday; i <= weekday+7; i++ )
+        if( const Day* day = _days[ weekday % 7 ] )
         {
-            if( const Day* day = _days[ i % 7 ] )
-            {
-                Period period = day->next_period( time_of_day, single_start );
-                if( !period.empty() )  return day_nr*(24*60*60) + period;
-            }
-
-            day_nr++;
-            time_of_day = 0;
+            Period period = day->next_period( time_of_day, single_start );
+            if( !period.empty() )  result = day_nr*(24*60*60) + period;
         }
     }
 
-    return Period();
+    return result;
 }
 
 //----------------------------------------------------------------------------Monthday_set::set_dom
@@ -1923,9 +1988,9 @@ void Monthday_set::set_dom( const xml::Element_ptr& monthdays_element, const Day
     }
 }
 
-//------------------------------------------------------------------------Monthday_set::next_period
+//------------------------------------------------------------Monthday_set::next_period_of_same_day
 
-Period Monthday_set::next_period( const Time& tim, With_single_start single_start )
+Period Monthday_set::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
     Period result;
 
@@ -1935,51 +2000,41 @@ Period Monthday_set::next_period( const Time& tim, With_single_start single_star
         int                     day_nr      = tim.day_nr();
         Sos_optional_date_time  date        = tim.as_time_t();
         int                     weekday     = weekday_of_day_number( day_nr );
+        Period                  period;
 
-        for( int i = 0; i < 31; i++ )
+        if( _is_day_set_filled )
         {
-            Period period;
-
-            if( _is_day_set_filled )
+            if( const Day* day = _days[ date.day() ] )
             {
-                if( const Day* day = _days[ date.day() ] )
-                {
-                    period = day->next_period( time_of_day, single_start );
-                }
+                period = day->next_period( time_of_day, single_start );
             }
+        }
 
-            if( _month_weekdays._is_filled )
+        if( _month_weekdays._is_filled )
+        {
+            int which =  1 + ( date.day() - 1 ) / 7;
+
+            if( Day* day = _month_weekdays.day( which, weekday ) )
             {
-                int which =  1 + ( date.day() - 1 ) / 7;
-
-                if( Day* day = _month_weekdays.day( which, weekday ) )
-                {
-                    Period period2 = day->next_period( time_of_day, single_start );
-                    if( period > period2 )  period = period2;
-                }
+                Period period2 = day->next_period( time_of_day, single_start );
+                if( period > period2 )  period = period2;
             }
+        }
 
-            if( _reverse_month_weekdays._is_filled )
+        if( _reverse_month_weekdays._is_filled )
+        {
+            int reverse_which = 1 + ( last_day_of_month( date ) - date.day() ) / 7;
+
+            if( Day* day = _reverse_month_weekdays.day( reverse_which, weekday ) )
             {
-                int reverse_which = 1 + ( last_day_of_month( date ) - date.day() ) / 7;
-
-                if( Day* day = _reverse_month_weekdays.day( reverse_which, weekday ) )
-                {
-                    Period period3 = day->next_period( time_of_day, single_start );
-                    if( period > period3 )  period = period3;
-                }
+                Period period3 = day->next_period( time_of_day, single_start );
+                if( period > period3 )  period = period3;
             }
+        }
 
-            if( !period.empty() )
-            {
-                result = day_nr*(24*60*60) + period;
-                break;
-            }
-
-            day_nr++;
-            date.add_days(1);
-            if( ++weekday == 7 )  weekday = 0;
-            time_of_day = 0;
+        if( !period.empty() )
+        {
+            result = day_nr*(24*60*60) + period;
         }
     }
 
@@ -1998,31 +2053,26 @@ ptr<Day>& Monthday_set::Month_weekdays::day( int which, int weekday_number )
     return _days[ index ]; 
 }
 
-//--------------------------------------------------------------------------Ultimo_set::next_period
+//--------------------------------------------------------------Ultimo_set::next_period_of_same_day
 
-Period Ultimo_set::next_period( const Time& tim, With_single_start single_start )
+Period Ultimo_set::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
+    Period result;
+
     if( _is_day_set_filled )
     {
         Time     time_of_day = tim.time_of_day();
         int      day_nr      = tim.day_nr();
         Sos_date date        = Sos_optional_date_time( (time_t)tim );
 
-        for( int i = 0; i < 31; i++ )
+        if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
         {
-            if( const Day* day = _days[ last_day_of_month( date ) - date.day() ] )
-            {
-                const Period& period = day->next_period( time_of_day, single_start );
-                if( !period.empty() )  return day_nr*(24*60*60) + period;
-            }
-
-            day_nr++;
-            date.add_days(1);
-            time_of_day = 0;
+            Period period = day->next_period( time_of_day, single_start );
+            if( !period.empty() )  result = day_nr*(24*60*60) + period;
         }
     }
 
-    return Period();
+    return result;
 }
 
 //--------------------------------------------------------------------------------Holidays::set_dom
@@ -2033,6 +2083,18 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
     {
         DOM_FOR_EACH_ELEMENT( e, e2 )
         {
+            if( e2.nodeName_is( "weekdays" ) )
+            {
+                DOM_FOR_EACH_ELEMENT( e2, e3 )
+                {
+                    if( e3.nodeName_is( "day" ) )
+                    {
+                        list<int> weekdays = get_weekday_numbers( e3.getAttribute( "day" ) );
+                        Z_FOR_EACH( list<int>, weekdays, w )  _weekdays.insert( *w );
+                    }
+                }
+            }
+            else
             if( e2.nodeName_is( "holiday" ) )
             {
                 Sos_optional_date_time dt;
@@ -2079,6 +2141,14 @@ void Holidays::set_dom( File_based* source_file_based, const xml::Element_ptr& e
         z::throw_xc( "SCHEDULER-319", e.nodeName(), Z_FUNCTION );
 }
 
+//----------------------------------------------------------------------------Holidays::is_included
+
+bool Holidays::is_included( const Time& t )
+{ 
+    return _set.find( t.midnight().as_time_t() ) != _set.end()  ||
+           _weekdays.find( weekday_of_day_number( t.day_nr() ) ) != _weekdays.end();
+}
+
 //--------------------------------------------------------------------------------------Date::print
 
 void Date::print( ostream& s ) const
@@ -2089,12 +2159,13 @@ void Date::print( ostream& s ) const
     s << "Date(" << dt << " " << _day << ')';
 }
 
-//----------------------------------------------------------------------------Date_set::next_period
+//----------------------------------------------------------------Date_set::next_period_of_same_day
 
-Period Date_set::next_period( const Time& tim, With_single_start single_start )
+Period Date_set::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
-    Time     time_of_day = tim.time_of_day();
-    int      day_nr      = tim.day_nr();
+    Period result;
+    Time   time_of_day = tim.time_of_day();
+    int    day_nr      = tim.day_nr();
 
     FOR_EACH( set<Date>, _date_set, it )
     {
@@ -2102,12 +2173,17 @@ Period Date_set::next_period( const Time& tim, With_single_start single_start )
 
         if( date._day_nr >= day_nr )
         {
-            const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
-            if( !period.empty() )  return date._day_nr*(24*60*60) + period;
+            if( date._day_nr == day_nr )
+            {
+                const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
+                if( !period.empty() )  result = date._day_nr*(24*60*60) + period;
+            }
+
+            break;
         }
     }
 
-    return Period();
+    return result;
 }
 
 //---------------------------------------------------------------------------------Date_set::print
@@ -2124,10 +2200,12 @@ void Date_set::print( ostream& s ) const
     s << ")";
 }
 
-//------------------------------------------------------------------------------At_set::next_period
+//------------------------------------------------------------------At_set::next_period_of_same_day
 
-Period At_set::next_period( const Time& tim, With_single_start single_start )
+Period At_set::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
+    Period result;
+    
     if( single_start & wss_next_single_start )
     {
         FOR_EACH( set<Time>, _at_set, it )
@@ -2136,21 +2214,22 @@ Period At_set::next_period( const Time& tim, With_single_start single_start )
 
             if( time >= tim )
             {
-                Period result;
-                
-                result._begin           = time;
-                result._end             = time;
-                result._single_start    = true;
-                result._let_run         = true;
-                result._repeat          = Time::never;
-                result._absolute_repeat = Time::never;
+                if( time.day_nr() == tim.day_nr() )
+                {
+                    result._begin           = time;
+                    result._end             = time;
+                    result._single_start    = true;
+                    result._let_run         = true;
+                    result._repeat          = Time::never;
+                    result._absolute_repeat = Time::never;
+                }
 
-                return result;
+                break;
             }
         }
     }
 
-    return Period();
+    return result;
 }
 
 //---------------------------------------------------------------------------------Date_set::print
@@ -2225,39 +2304,6 @@ list<int> Day_set::get_day_numbers( const string& days_string )
     return result;
 }
 
-//----------------------------------------------------------------------Day_set::get_weekday_number
-
-int Day_set::get_weekday_number( const string& weekday_name )
-{
-    int    result     = -1;
-    string day_string = lcase( weekday_name );
-    
-    for( const char** p = weekday_names; *p && result == -1; p++ )
-        if( day_string == *p )  result = ( p - weekday_names ) % 7;
-
-    if( result == -1 )
-    {
-        result = as_int( weekday_name );
-        if( result == 7 )  result = 0;      // Sonntag darf auch 7 sein
-    }
-
-    if( result < 0  ||  result > 6 )  z::throw_xc( "SCHEDULER-445", weekday_name );
-
-    return result;
-}
-
-//---------------------------------------------------------------------Day_set::get_weekday_numbers
-
-list<int> Day_set::get_weekday_numbers( const string& weekday_names )
-{
-    list<int>      result;
-    vector<string> names  = vector_split( " +", weekday_names );
-
-    Z_FOR_EACH( vector<string>, names, it )  result.push_back( get_weekday_number( *it ) );
-
-    return result;
-}
-
 //-----------------------------------------------------------------------------------Month::set_dom
 
 void Month::set_dom( const xml::Element_ptr& element )
@@ -2301,29 +2347,22 @@ void Month::set_dom( const xml::Element_ptr& element )
     if( !a_day_is_set )  _weekday_set.fill_with_default( default_day );
 }
 
-//-------------------------------------------------------------------------------Month::next_period
+//-------------------------------------------------------------------Month::next_period_of_same_day
 
-Period Month::next_period( const Time& tim_, With_single_start single_start )
+Period Month::next_period_of_same_day( const Time& tim_, With_single_start single_start )
 {
     Time   tim           = tim_;
     Period result;
     int    current_month = tim.month_nr();
 
-    while( tim < Time::never )
+    if( tim.month_nr() == current_month )  
     {
-        int m = tim.month_nr();
-        if( m != current_month )  break;
-
-        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period( tim, single_start ) );
-        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period( tim, single_start ) );
-        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period( tim, single_start ) );
-        
-        if( result.begin() != Time::never )  break;
-
-        tim = tim.midnight() + 24*60*60;                        // Keine Periode? Dann nächsten Tag probieren
+        if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( tim, single_start ) );
+        if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( tim, single_start ) );
+        if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( tim, single_start ) );
     }
 
-    if( !result.begin().is_never()  &&  result.begin().month_nr() != current_month )  result = Period();
+    //if( !result.begin().is_never()  &&  result.begin().month_nr() != current_month )  result = Period();
 
     return result;
 }
