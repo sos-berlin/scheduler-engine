@@ -1402,7 +1402,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
                      before -= 24*60*60 )
                 {
                     Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
-                    if( !p.empty() )  result = min( result, p - before );
+                    if( !p.empty() )  result = min( result, p - before );   // Vergangene Periode auf heute verschieben
                 }
 
 
@@ -1413,7 +1413,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
                      after += 24*60*60 )
                 {
                     Period p = next_period_of_same_day( t + after, single_start | wss_when_holiday_previous_non_holiday );
-                    if( !p.empty() )  result = min( result, p - after );
+                    if( !p.empty() )  result = min( result, p - after );    // Zukünftige Periode auf heute verschieben
                 }
             }
         }

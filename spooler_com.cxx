@@ -270,6 +270,70 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
     return hr;
 }
 
+//------------------------------------------------------------------------Com_variable::dom_element
+
+xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const string& subelement_name )
+{
+    xml::Element_ptr result = doc.createElement( subelement_name );
+    Bstr             name;
+    Variant          value;
+
+    get_Name ( &name._bstr );
+    get_Value( &value );
+
+    result.setAttribute( "name" , string_from_bstr( name ) );
+
+    string string_value = this->string_value();
+    
+    if( io::is_valid_latin1( string_value ) )  result.setAttribute( "value"    , string_value );
+                                         else  result.setAttribute( "hex_value", lcase_hex_from_string( string_value ) );   // Jedes Hexbyte ein Unicode-Zeichen 00..FF
+
+    VARTYPE vt = (VARTYPE)-1;
+
+    if( value.vt == VT_EMPTY
+     || value.vt == VT_NULL
+     || value.vt == VT_I2
+     || value.vt == VT_I4
+     || value.vt == VT_R4       
+     || value.vt == VT_R8       
+     || value.vt == VT_CY       
+     || value.vt == VT_DATE     
+  // || value.vt == VT_BSTR          // VT_BSTR müssen wir nicht besonders kennzeichnen. Das ist Default.
+  // || value.vt == VT_DISPATCH 
+     || value.vt == VT_ERROR    
+     || value.vt == VT_BOOL     
+  // || value.vt == VT_VARIANT  
+  // || value.vt == VT_UNKNOWN  
+     || value.vt == VT_DECIMAL  
+     || value.vt == VT_I1       
+     || value.vt == VT_UI1      
+     || value.vt == VT_UI2      
+     || value.vt == VT_UI4      
+     || value.vt == VT_I8       
+     || value.vt == VT_UI8      
+     || value.vt == VT_INT      
+     || value.vt == VT_UINT     
+  // || value.vt == VT_VOID     
+     || value.vt == VT_HRESULT )
+    {
+        vt = value.vt; 
+    }
+/*
+    else
+    if( value.vt == VT_DISPATCH )
+    {
+        ptr<Variable_set> v;
+        if( V_DISPATCH(value)
+         && SUCCEEDED( V_DISPATCH(value)->QueryInterface( IID_Ivariable_set, v.pp() ) ) )  vt = value.vt;
+    }
+*/
+    if( vt != (VARTYPE)-1 )  result.setAttribute( "vt", vt );
+                       else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
+
+
+    return result;
+}
+
 //-----------------------------------------------------------------------Com_variable_set::_methods
 #ifdef Z_COM
 
@@ -554,6 +618,28 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
     return hr;
 }
 
+//---------------------------------------------------------------Com_variable_set::variable_or_null
+
+Com_variable* Com_variable_set::variable_or_null( const string& name ) const
+{
+    return variable_or_null( Bstr( name ) );
+}
+
+//---------------------------------------------------------------Com_variable_set::variable_or_null
+
+Com_variable* Com_variable_set::variable_or_null( const Bstr& name ) const
+{
+    Com_variable* result = NULL;
+
+    Bstr lname = name;
+    if( _ignore_case )  lname.to_lower();
+
+    Map::const_iterator it = _map.find( lname );
+    if( it != _map.end() )  result = it->second;
+
+    return result;
+}
+
 //------------------------------------------------------------------------Com_variable_set::get_var
 
 void Com_variable_set::get_var( BSTR name, VARIANT* value ) const
@@ -562,14 +648,9 @@ void Com_variable_set::get_var( BSTR name, VARIANT* value ) const
     {
         VariantInit( value );
 
-        Bstr lname = name;
-        if( _ignore_case )  lname.to_lower();
-
-        Map::const_iterator it = _map.find( lname );
-        if( it != _map.end()  &&  it->second )
+        if( Com_variable* v = variable_or_null( name  ) )
         {
-            HRESULT hr = it->second->get_Value( value );
-            if( !FAILED(hr))  hr = S_OK;
+            v->get_Value( value );
         }
     }
 }
@@ -649,63 +730,8 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
             Com_variable* v = it->second;
             if( v )
             {
-                Bstr    name;
-                Variant value;
-
-                v->get_Name( &name._bstr );
-                v->get_Value( &value );
-
-                xml::Element_ptr var = doc.createElement( subelement_name );
-                var.setAttribute( "name" , string_from_bstr(name) );
-
-                VARTYPE vt = (VARTYPE)-1;
-
-                if( value.vt == VT_EMPTY
-                 || value.vt == VT_NULL
-                 || value.vt == VT_I2
-                 || value.vt == VT_I4
-                 || value.vt == VT_R4       
-                 || value.vt == VT_R8       
-                 || value.vt == VT_CY       
-                 || value.vt == VT_DATE     
-              // || value.vt == VT_BSTR          // VT_BSTR müssen wir nicht besonders kennzeichnen. Das ist Default.
-              // || value.vt == VT_DISPATCH 
-                 || value.vt == VT_ERROR    
-                 || value.vt == VT_BOOL     
-              // || value.vt == VT_VARIANT  
-              // || value.vt == VT_UNKNOWN  
-                 || value.vt == VT_DECIMAL  
-                 || value.vt == VT_I1       
-                 || value.vt == VT_UI1      
-                 || value.vt == VT_UI2      
-                 || value.vt == VT_UI4      
-                 || value.vt == VT_I8       
-                 || value.vt == VT_UI8      
-                 || value.vt == VT_INT      
-                 || value.vt == VT_UINT     
-              // || value.vt == VT_VOID     
-                 || value.vt == VT_HRESULT )
-                {
-                    vt = value.vt; 
-                }
-/*
-                else
-                if( value.vt == VT_DISPATCH )
-                {
-                    ptr<Variable_set> v;
-                    if( V_DISPATCH(value)
-                     && SUCCEEDED( V_DISPATCH(value)->QueryInterface( IID_Ivariable_set, v.pp() ) ) )  vt = value.vt;
-                }
-*/
-                if( vt != (VARTYPE)-1 )  var.setAttribute( "vt", vt );
-                                   else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
-
-                string string_value = v->string_value();
-                
-                if( io::is_valid_latin1( string_value ) )  var.setAttribute( "value"    , string_value );
-                                                     else  var.setAttribute( "hex_value", lcase_hex_from_string( string_value ) );   // Jedes Hexbyte ein Unicode-Zeichen 00..FF
-
-                varset.appendChild( var );
+                xml::Element_ptr variable_element = v->dom_element( doc, subelement_name );
+                varset.appendChild( variable_element );
             }
         }
     }

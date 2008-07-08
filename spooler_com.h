@@ -131,6 +131,7 @@ struct Com_variable: spooler_com::Ivariable,
 
     string                      string_value                () const;
     string                      name                        () const                                { return string_from_bstr( _name ); }
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name );
 
 //private:
     Thread_semaphore           _lock;
@@ -159,7 +160,9 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
     void                    set_dom                         ( const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
     void                    register_include_and_set_dom    ( Scheduler*, File_based*, const xml::Element_ptr&, Variable_set_map* = NULL, const string& variable_element_name = "param" );
-    void                    set_variable                    ( const xml::Element_ptr&, Variable_set_map* );
+    void                    set_variable                    ( const xml::Element_ptr&, Variable_set_map* = NULL );
+    Com_variable*               variable_or_null            ( const Bstr& name ) const;
+    Com_variable*               variable_or_null            ( const string& name ) const;
 
     xml::Document_ptr           dom                         ( const string& element_name, const string& subelement_name );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );

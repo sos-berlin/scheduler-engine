@@ -111,6 +111,8 @@
                 <scheduler_element name="modify_hot_folder"/><br/>
                 <scheduler_element name="modify_order"/><br/>
                 <scheduler_element name="modify_spooler"/><br/>
+                <scheduler_element name="param.get"/><br/>
+                <scheduler_element name="params.get"/><br/>
                 <scheduler_element name="process_class"/><br/>
                 <scheduler_element name="process_class.remove"/><br/>
                 <scheduler_element name="remove_job_chain"/><br/>

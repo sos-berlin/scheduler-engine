@@ -783,17 +783,27 @@
         <xsd:attribute name="suspended"         type="Yes_no"/>
     </xsd:complexType-->
 
-    
+
+    <xsd:element name="param">
+        <xsd:complexType>
+            <xsd:attribute name="name"  type="String" use="required"/>
+            <xsd:attribute name="value" type="String" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="param.get">
+        <xsd:complexType>
+            <xsd:attribute name="name" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="params">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:choice  minOccurs="0" maxOccurs="unbounded">
-                    <xsd:element name="param">
-                        <xsd:complexType>
-                            <xsd:attribute name="name"  type="String" use="required"/>
-                            <xsd:attribute name="value" type="String" use="required"/>
-                        </xsd:complexType>
-                    </xsd:element>
+                    <xsd:element ref="param"/>
                     
                     <xsd:element name="copy_params">
                         <xsd:complexType>
@@ -823,7 +833,10 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:element name="params.get"/>
+
+
     <xsd:element name="period">
         <xsd:complexType>
             <xsd:attribute name="single_start"  type="Time_of_day"/>

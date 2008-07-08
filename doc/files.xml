@@ -145,6 +145,8 @@
     <file path="xml/answer/ok.xml"/>
     <file path="xml/answer/order.xml"/>
     <file path="xml/answer/order_queue.xml"/>
+    <file path="xml/answer/param.xml"/>
+    <file path="xml/answer/params.xml"/>
     <file path="xml/answer/period.xml"/>
     <file path="xml/answer/process.xml"/>
     <file path="xml/answer/process_class.xml"/>
@@ -211,7 +213,9 @@
     <file path="xml/month.xml"/>
     <file path="xml/monthdays.xml"/>
     <file path="xml/param.xml"/>
+    <file path="xml/param.get.xml"/>
     <file path="xml/params.xml"/>
+    <file path="xml/params.get.xml"/>
     <file path="xml/payload.xml"/>
     <file path="xml/period.xml"/>
     <file path="xml/process.xml"/>

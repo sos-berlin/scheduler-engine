@@ -1390,6 +1390,16 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
   //else
   //if( element.nodeName_is( "show_order_history" ) )  result = execute_show_order_history( element, show );
     else
+    if( element.nodeName_is( "param"            ) ) { _spooler->_variables->set_variable( element );  result = _answer.createElement( "ok" ); }
+    else
+    if( element.nodeName_is( "param.get"        ) ) { Com_variable* v = _spooler->_variables->variable_or_null( element.getAttribute( "name" ) );
+                                                      result = v? v->dom_element( _answer, "param" ) 
+                                                                : _answer.createElement( "ok" ); }
+    else
+    if( element.nodeName_is( "params"           ) ) { _spooler->_variables->set_dom( element );  result = _answer.createElement( "ok" ); }
+    else
+    if( element.nodeName_is( "params.get"       ) ) { result = _spooler->_variables->dom_element( _answer, "params", "param" ); }
+    else
     if( element.nodeName_is( "register_remote_scheduler" ) )  result = execute_register_remote_scheduler( element );
     else
     if( element.nodeName_is( "remove_order"     ) )  result = execute_remove_order( element );

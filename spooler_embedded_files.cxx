@@ -793,16 +793,26 @@ const char file_scheduler_xsd[] =
     "</xsd:complexType-->\n"
     "\n"
     "\n"
-    "<xsd:element name=\"params\">\n"
-    "<xsd:complexType>\n"
-    "<xsd:sequence>\n"
-    "<xsd:choice  minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
     "<xsd:element name=\"param\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"name\"  type=\"String\" use=\"required\"/>\n"
     "<xsd:attribute name=\"value\" type=\"String\" use=\"required\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"param.get\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"name\" use=\"required\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"params\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:choice  minOccurs=\"0\" maxOccurs=\"unbounded\">\n"
+    "<xsd:element ref=\"param\"/>\n"
     "\n"
     "<xsd:element name=\"copy_params\">\n"
     "<xsd:complexType>\n"
@@ -831,6 +841,9 @@ const char file_scheduler_xsd[] =
     "</xsd:sequence>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"params.get\"/>\n"
     "\n"
     "\n"
     "<xsd:element name=\"period\">\n"
@@ -1959,7 +1972,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1215435527 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1215499954 },
     { NULL, NULL, 0 }
 };
 

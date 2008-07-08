@@ -41,8 +41,11 @@
 
     <description>
         <p>
-            Bestimmt Parameter für einen Job oder für einen Auftrag.
+            Bestimmt Parameter für den Scheduler, einen Job oder einen Auftrag.
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
+        </p>
+        <p>
+            Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.
         </p>
         <p>
             Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.

@@ -32,6 +32,10 @@
         <scheduler_command name="modify_hot_folder"    answer="ok"/>
         <scheduler_command name="modify_order"         answer="ok"/>
         <scheduler_command name="modify_spooler"       answer="ok"/>
+        <scheduler_command name="param"                answer="ok"/>
+        <scheduler_command name="param.get"            answer="param"/>
+        <scheduler_command name="params"               answer="ok"/>
+        <scheduler_command name="params.get"           answer="params"/>
         <scheduler_command name="process_class"        answer="ok"/>
         <scheduler_command name="process_class.remove" answer="ok"/>
         <scheduler_command name="remove_job_chain"     answer="ok"/>
