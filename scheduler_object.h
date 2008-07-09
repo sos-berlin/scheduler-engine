@@ -24,7 +24,7 @@ struct Scheduler_object
         type_exclusive_scheduler_watchdog,
         type_folder_subsystem,
         type_folder,
-        type_folder_folder,
+        type_subfolder_folder,
         type_heart_beat,
         type_heart_beat_watchdog_thread,
         type_http_file_directory,

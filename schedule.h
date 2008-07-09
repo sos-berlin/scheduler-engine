@@ -34,19 +34,23 @@ enum With_single_start      // Welche <period> soll gesucht werden?
 
 inline With_single_start        operator|                   ( With_single_start a, With_single_start b ) { return (With_single_start)( (int)a | (int)b ); }
 
+//-------------------------------------------------------------------------------------When_holiday
+
+enum When_holiday
+{
+    wh_suppress,
+    wh_ignore_holiday,
+    wh_next_non_holiday,
+    wh_previous_non_holiday
+};
+
+string                          string_from_when_holiday    ( When_holiday );
+When_holiday                    when_holiday_from_string    ( const string& );
+
 //-------------------------------------------------------------------------------------------Period
 
 struct Period
 {
-    enum When_holiday
-    {
-        wh_suppress,
-        wh_ignore_holiday,
-        wh_next_non_holiday,
-        wh_previous_non_holiday
-    };
-
-
                                 Period                      ()                                      : _zero_(this+1) { init(); }
     explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, without_date, deflt ); }
     

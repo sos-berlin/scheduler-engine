@@ -854,17 +854,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"let_run\"       type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"repeat\"        type=\"Duration\"/>\n"
     "<xsd:attribute name=\"absolute_repeat\" type=\"Duration\"/>\n"
-    "\n"
-    "<xsd:attribute name=\"when_holiday\">\n"
-    "<xsd:simpleType>\n"
-    "<xsd:restriction base=\"String\">\n"
-    "<xsd:enumeration value=\"suppress\"/>\n"
-    "<xsd:enumeration value=\"ignore_holiday\"/>\n"
-    "<xsd:enumeration value=\"previous_non_holiday\"/>\n"
-    "<xsd:enumeration value=\"next_non_holiday\"/>\n"
-    "</xsd:restriction>\n"
-    "</xsd:simpleType>\n"
-    "</xsd:attribute>\n"
+    "<xsd:attribute name=\"when_holiday\"  type=\"When_holiday\"/>\n"
     "\n"
     "<xsd:attribute name=\"start_once\"    type=\"Yes_no\">\n"
     "<xsd:annotation>\n"
@@ -1511,6 +1501,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"end\"               type=\"Time_of_day\"/>\n"
     "<xsd:attribute name=\"let_run\"           type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"repeat\"            type=\"Duration\"/>\n"
+    "<xsd:attribute name=\"when_holiday\"      type=\"When_holiday\"/>\n"
     "<xsd:attribute name=\"once\"              type=\"Yes_no\"/>\n"
     "<xsd:attribute name=\"start_time_function\" type=\"xsd:NMTOKEN\"/>\n"
     "</xsd:complexType>\n"
@@ -1961,6 +1952,16 @@ const char file_scheduler_xsd[] =
     "</xsd:restriction>\n"
     "</xsd:simpleType>\n"
     "\n"
+    "\n"
+    "<xsd:simpleType name=\"When_holiday\">\n"
+    "<xsd:restriction base=\"String\">\n"
+    "<xsd:enumeration value=\"suppress\"/>\n"
+    "<xsd:enumeration value=\"ignore_holiday\"/>\n"
+    "<xsd:enumeration value=\"previous_non_holiday\"/>\n"
+    "<xsd:enumeration value=\"next_non_holiday\"/>\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "\n"
     "</xsd:schema>\n"
     "";
 
@@ -1972,7 +1973,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1215499954 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1215593475 },
     { NULL, NULL, 0 }
 };
 

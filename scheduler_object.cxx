@@ -23,7 +23,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_directory_tree:               return "Directory_tree";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
         case type_folder:                       return "Folder";
-        case type_folder_folder:                return "Subfolder_folder";
+        case type_subfolder_folder:             return "Subfolder_folder";
         case type_folder_subsystem:             return "Folder_subsystem";
         case type_heart_beat:                   return "Heart_beat";
         case type_heart_beat_watchdog_thread:   return "Heart_beat_watchdog_thread";

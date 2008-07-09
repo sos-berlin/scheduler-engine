@@ -196,7 +196,8 @@ struct File_based : Scheduler_object,
     virtual void            set_name                        ( const string& name );
     string                      name                        () const                                { return _name; }
     void                        fix_name                    ()                                      { _name_is_fixed = true; }
-    Absolute_path               path                        () const;
+    Absolute_path               path                        () const;                               //2008-07-09 Könnte path_or_slash() heißen?
+    Absolute_path               path_or_empty               () const;                               //2008-07-09 Könnte path() heißen?
     string                      normalized_name             () const;
     string                      normalized_path             () const;
     File_path                   configuration_root_directory() const;

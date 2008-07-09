@@ -100,6 +100,43 @@ static list<int> get_weekday_numbers( const string& weekday_names )
     return result;
 }
 
+//-------------------------------------------------------------------------string_from_when_holiday
+
+string string_from_when_holiday( When_holiday when_holiday )
+{
+    string result;
+
+    switch( when_holiday )
+    {
+        case wh_suppress:               result = "suppress";                break;
+        case wh_ignore_holiday:         result = "ignore_holiday";          break;
+        case wh_next_non_holiday:       result = "next_non_holiday";        break;
+        case wh_previous_non_holiday:   result = "previous_non_holiday";    break;
+        default:                        result = S() << "When_holiday(" << (int)when_holiday << ")";
+    }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------when_holiday_from_string
+
+When_holiday when_holiday_from_string( const string& w )
+{
+    When_holiday result;
+
+    if( w == "suppress"             )  result = wh_suppress;
+    else
+    if( w == "ignore_holiday"       )  result = wh_ignore_holiday;
+    else
+    if( w == "next_non_holiday"     )  result = wh_next_non_holiday;
+    else
+    if( w == "previous_non_holiday" )  result = wh_previous_non_holiday;
+    else
+        z::throw_xc( Z_FUNCTION, w );
+
+    return result;
+}
+
 //---------------------------------------------------------------------------new_schedule_subsystem
 
 ptr<Schedule_subsystem_interface> new_schedule_subsystem( Scheduler* scheduler )
@@ -957,7 +994,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
             if( period.begin() < interval_end )  
             {
                 result = period;
-                result._schedule_path = path();
+                result._schedule_path = path_or_empty();
                 break;
             }
         }
@@ -1629,15 +1666,7 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
     //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( Z_FUNCTION, "Attribute start_once is not supported" );
 
-
-    string when_holiday = element.getAttribute( "when_holiday" );
-    if( when_holiday == "suppress"             )  _when_holiday = wh_suppress;
-    else
-    if( when_holiday == "ignore_holiday"       )  _when_holiday = wh_ignore_holiday;
-    else
-    if( when_holiday == "next_non_holiday"     )  _when_holiday = wh_next_non_holiday;
-    else
-    if( when_holiday == "previous_non_holiday" )  _when_holiday = wh_previous_non_holiday;
+    if( element.hasAttribute( "when_holiday" ) )  _when_holiday = when_holiday_from_string( element.getAttribute( "when_holiday" ) );
 
     check( w );
 }
@@ -1784,6 +1813,7 @@ xml::Element_ptr Period::dom_element( const xml::Document_ptr& dom_document ) co
 
         if( _repeat          != Time::never )  result.setAttribute( "repeat"         , _repeat.as_time_t() );
         if( _absolute_repeat != Time::never )  result.setAttribute( "absolute_repeat", _absolute_repeat.as_time_t() );
+        if( _when_holiday                   )  result.setAttribute( "when_holiday"   , string_from_when_holiday( _when_holiday ) );
     }
 
     result.setAttribute_optional( "schedule", _schedule_path );

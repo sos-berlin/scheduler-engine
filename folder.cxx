@@ -751,7 +751,7 @@ string Folder::obj_name() const
 
 Subfolder_folder::Subfolder_folder( Folder* folder )
 :
-    typed_folder<Folder>( folder->spooler()->folder_subsystem(), folder, type_folder_folder )
+    typed_folder<Folder>( folder->spooler()->folder_subsystem(), folder, type_subfolder_folder )
 {
 }
 
@@ -2098,9 +2098,18 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 Absolute_path File_based::path() const
 { 
     return _typed_folder? _typed_folder->folder()->make_path( _name ) : 
-           _name == ""  ? root_path
+           _name == ""  ? root_path 
                         : Absolute_path( _folder_path.empty()? Absolute_path( "/(not in a folder)" ) 
                                                              : _folder_path                        , _name ); 
+}
+
+//------------------------------------------------------------------------File_based::path_or_empty
+
+Absolute_path File_based::path_or_empty() const
+{ 
+    Absolute_path result = path();
+    if( result.is_root() )  result.clear();     //2008-07-09 path() liefert "/", wenn !_typed_folder und _name = "". Warum?
+    return result;
 }
 
 //----------------------------------------------------------------------File_based::normalized_name

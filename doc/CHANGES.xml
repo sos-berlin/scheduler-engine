@@ -11,8 +11,8 @@
     <scheduler_keyword keyword="Change log"/>
 
     
-    <change date="2008-07-07" version="2.0.210" subversion_revision="5825">
-        <revision type="new" title="XML-Kommandos zum setzten und Lesen der Scheduler-Parameter">
+    <change date="2008-07-07" version="2.0.210" subversion_revision="5826">
+        <revision type="new" title="XML-Kommandos zum Setzen und Lesen der Scheduler-Parameter">
             <description>
                 <ul>
                     <li>
@@ -147,7 +147,7 @@
                         <scheduler_method class="Task" method="try_hold_lock_non_exclusive"/>
                     </li>
                     <li>
-                        <scheduler_method class="Task" method="Call_me_again_when_locks_available"/>
+                        <scheduler_method class="Task" method="call_me_again_when_locks_available"/>
                     </li>
                     <li>
                         Antwort-Element <scheduler_element directory="xml/answer/" name="task" attribute="state"/>: 

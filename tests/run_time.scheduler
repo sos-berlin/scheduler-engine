@@ -30,7 +30,13 @@ spooler_log.info( "hallo" );
                 ]]>
                 </script>
 
-                <run_time begin="07:00" repeat="60">
+                <run_time begin="07:00" repeat="60" when_holiday="next_non_holiday">
+                    <weekdays>
+                        <day day="sunday">
+                            <period single_start="00:55"/>
+                        </day>
+                    </weekdays>
+                    
                     <month month="march">
                         <period begin="02:00" end="02:01" absolute_repeat="60"/>
                         <period begin="02:02" end="02:03" absolute_repeat="60"/>
@@ -99,7 +105,7 @@ spooler_log.info( "hallo" );
                         </ultimos>
                     </month>
 
-                    <month month="july august">
+                    <month month="august">
                         <monthdays>
                             <day day="1 2 3 4 5 6 7">
                                 <period single_start="08:11" when_holiday="suppress"/>
@@ -115,7 +121,7 @@ spooler_log.info( "hallo" );
                             </day>
                         </monthdays>
                         <weekdays>
-                            <day day="monday">
+                            <day day="sunday">
                                 <period single_start="08:01"/>
                             </day>
                             <day day="monday">
