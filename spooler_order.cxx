@@ -5429,7 +5429,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _removed_from_job_chain_path != "" )
             result.setAttribute( "removed"   , "yes" );
 
-        if( Job* job = this->job() )  result.setAttribute( "job", job->name() );
+        if( Job* job = this->job() )  result.setAttribute( "job", job->path() );
         else
         if( Job_chain* job_chain = job_chain_for_api() )
         {

@@ -71,6 +71,18 @@
         <p>
             Setzt die Perioden für einen bestimmten Tag des Monats fest.
         </p>
+        <p>
+            Im Gegensatz zu anderen Elementen übernimmt <code>&lt;month></code>
+            nicht die Attribute von <scheduler_element name="run_time"/> 
+            oder die darin voreingestellten <scheduler_element name="period"/>.
+        </p>
+        <p>
+            Wenn <code>&lt;month></code> für einen Monat gilt,
+            dann gelten solange nicht die direkt unter <scheduler_element name="run_time"/> stehenden
+            <scheduler_element name="weekdays"/>,
+            <scheduler_element name="monthdays"/> oder
+            <scheduler_element name="ultimos"/>.
+        </p>
     </description>
 
 </xml_element>

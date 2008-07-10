@@ -232,6 +232,9 @@
         <p>
             Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.
         </p>
+        <p>
+            <scheduler_element name="show_calendar"/> zeigt das Ergebnis.
+        </p>
 
 
         <h3>Sommer- und Winterzeit</h3>
@@ -257,6 +260,7 @@
             <scheduler_element name="monthdays"/> und
             <scheduler_element name="ultimos"/>,
             wenn diese keine eigenen <scheduler_element name="period"/> haben.
+            Ausgenommen ist also <scheduler_element name="month"/>.
         </p>
         <pre>&lt;run_time>
     &lt;period begin="07:00" end="09:00"/>
