@@ -35,14 +35,14 @@
     </p-->
 
 
-    <p>
+    <!--p>
         <scheduler_a href="extended_run_time.xml" quote="yes"/>
-    </p>
+    </p-->
 
 
-    <p>
+    <!--p>
         <scheduler_a href="backup_scheduler.xml" quote="yes"/>
-    </p>
+    </p-->
 
 
     <!--p>
@@ -67,24 +67,6 @@
 
 
     <p>
-        Scheduler-Parameter, Umgebungsvariablen
-    </p>
-    <div class="indent">
-        <p style="margin-top: 0px">
-            Unterhalb <scheduler_element name="config"/> könnte das Element <scheduler_element name="params"/>
-            die Parameter für den Scheduler (<scheduler_method class="Spooler" property="variables"/>) setzen.
-            Die Methode dafür sollte <code>spooler.params</code> heißen, 
-            so wie z.B. <scheduler_method class="Task" property="params"/>.
-        </p>
-        <p>
-            Unterhalb <scheduler_element name="job"/> könnte das Element <scheduler_element name="environment"/>
-            die Umgebungsvariablen für eine Task setzen.
-            Bisher wird das Element nur unterhalb <scheduler_element name="process"/> erkannt.
-        </p>
-    </div>
-
-
-    <p>
         <a href="subprocess.xml">Erweiterungen der Subprozesse</a>
     </p>
     <div class="indent">
@@ -94,7 +76,7 @@
     </div>
 
 
-    <p>
+    <!--p>
         <a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>
     </p>
     <div class="indent">
@@ -102,7 +84,7 @@
             Weil <scheduler_element name="process"/>-Jobs kein <scheduler_method class="Job_impl" method="spooler_process"/> kennen,
             wird der Job für jeden Auftrag erneut gestartet.
         </p>
-    </div>
+    </div-->
 
 
     <p>
@@ -132,7 +114,7 @@
             Dann kann die Task in einem anderen Thread kontinuierlich arbeiten
             und trotzdem mit <scheduler_method class="Job_impl" method="spooler_close"/> beendet werden
             (bei geeigneter Thread-Synchronisation).
-            Kleiner Nachteil: An der Oberfläche ist nicht erkennbar, das die Task einen Thread zu laufen hat.
+            Kleiner Nachteil: An der Oberfläche ist nicht erkennbar, dass die Task einen Thread zu laufen hat.
         </p>
     </div>
 
@@ -252,16 +234,16 @@
     <p class="indent" style="margin-top: 0px">
         Vereinfachte Dokumentation von <code>&lt;run_time></code> samt einiger Erweiterungen
     </p>
-    
 
-    <p>
+
+    <!--p>
         <a href="javascript_xml.xml">
             XML in JavaScript
         </a>
     </p>
     <p class="indent" style="margin-top: 0px">
         JavaScript mit vereinfachten XML-Zugriff über COM
-    </p>
+    </p-->
 
     <p>
         <a href="external_api.xml">

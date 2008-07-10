@@ -2556,7 +2556,7 @@ ptr<Order> Job_chain::order( const Order::Id& id )
 {
     ptr<Order> result = order_or_null( id );
 
-    if( !result )  z::throw_xc( "SCHEDULER-162", debug_string_from_variant(id), name() );
+    if( !result )  z::throw_xc( "SCHEDULER-162", debug_string_from_variant(id), path() );
 
     return result;
 }
@@ -2664,7 +2664,7 @@ void Job_chain::register_order( Order* order )
 {
     string id_string = order->string_id();
     Order_map::iterator it = _order_map.find( id_string );
-    if( it != _order_map.end() )  z::throw_xc( "SCHEDULER-186", order->obj_name(), name() );
+    if( it != _order_map.end() )  z::throw_xc( "SCHEDULER-186", order->obj_name(), path() );
     _order_map[ id_string ] = order;
 }
 
@@ -5429,7 +5429,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         if( _removed_from_job_chain_path != "" )
             result.setAttribute( "removed"   , "yes" );
 
-        if( Job* job = this->job() )  result.setAttribute( "job", job->name() );
+        if( Job* job = this->job() )  result.setAttribute( "job", job->path() );
         else
         if( Job_chain* job_chain = job_chain_for_api() )
         {
@@ -5840,7 +5840,7 @@ void Order::set_job( Job* job )
 {
     if( _removed_from_job_chain_path != "" )
     {
-        _log->warn( message_string( "SCHEDULER-298", job->name() ) );   //S() << "job=" << job->name() << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
+        _log->warn( message_string( "SCHEDULER-298", job->path() ) );   //S() << "job=" << job->name() << " wird ignoriert, weil Auftrag bereits aus der Jobkette entfernt ist" );
     }
     else
     {
