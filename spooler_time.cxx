@@ -394,7 +394,7 @@ double Time::cut_fraction( string* datetime_string )
     while( p > p0  &&  p[-1] == ' ' )  p--;
 
     int digit_count = 0;
-    while( p > p0  &&  isdigit( (int)p[-1] ) )  p--, digit_count++;
+    while( p > p0  &&  isdigit( (uchar)p[-1] ) )  p--, digit_count++;
     if( p > p0  &&  digit_count > 0  &&  p[-1] == '.' )
     {
         p--;
