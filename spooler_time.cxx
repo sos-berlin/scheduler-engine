@@ -193,6 +193,68 @@ void Time::operator = ( const Sos_optional_date_time& dt )
                    else  set( dt.hour() * 60*60 + dt.minute() * 60 + dt.second() );
 }
 
+//--------------------------------------------------------------------------------Time::operator +=
+
+void Time::operator += ( double t )
+{ 
+    assert( !is_never() );
+
+    if( !is_never() )  set( as_double() + t ); 
+}
+
+//--------------------------------------------------------------------------------Time::operator -=
+
+void Time::operator -= ( double t )
+{ 
+    assert( !is_never() );
+
+    if( !is_never() )  set( as_double() - t ); 
+}
+
+//---------------------------------------------------------------------------------Time::operator +
+
+Time Time::operator + ( const Time& t )
+{ 
+    assert( !is_never() );
+    assert( !t.is_never() );
+
+    return is_never() || t.is_never()? never
+                                     : Time( as_double() + t.as_double() ); 
+}
+                                                                                                  
+//---------------------------------------------------------------------------------Time::operator +
+
+Time Time::operator + ( double t )
+{ 
+    assert( !is_never() );
+    assert( t < never_int );
+
+    return is_never()? never
+                     : Time( as_double() + t ); 
+}
+
+//---------------------------------------------------------------------------------Time::operator -
+
+Time Time::operator - ( const Time& t )
+{ 
+    assert( !is_never() );
+    assert( !t.is_never() );
+
+    return is_never() || t.is_never()? never
+                                     : Time( as_double() - t.as_double() ); 
+}
+
+//---------------------------------------------------------------------------------Time::operator -
+
+Time Time::operator - ( double t )
+{ 
+    assert( !is_never() );
+    assert( t < never_int );
+
+    return is_never()? never 
+                     : Time( as_double() - t ); 
+}
+
 //------------------------------------------------------------------------------Time::time_with_now
 
 Time Time::time_with_now( const string& time_string )
@@ -262,7 +324,7 @@ void Time::set( double t )
     _time = round(t);
     _is_utc = false;
 
-    if( _time > never_int )  _time = never_int;
+    if( _time > never_int )  assert( !"time > never" ),  _time = never_int;
 
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
@@ -324,6 +386,16 @@ int Time::month_nr() const
 
 double Time::as_double() const
 {
+    assert( !is_never() );
+    //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
+
+    return as_double_or_never();
+}
+
+//-------------------------------------------------------------------------Time::as_double_or_never
+
+double Time::as_double_or_never() const
+{
     //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
     return _is_utc? _time - current_difference_to_utc()
@@ -334,6 +406,7 @@ double Time::as_double() const
 
 double Time::as_utc_double() const
 {
+    assert( !is_never() );
     //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
     return _is_utc? _time 

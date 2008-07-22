@@ -59,38 +59,38 @@ struct Time
     void                        operator =                  ( const char* t )               { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
 
-    void                        operator +=                 ( double t )                    { set( as_double() + t ); }
-    void                        operator -=                 ( double t )                    { set( as_double() - t ); }
+    void                        operator +=                 ( double );
+    void                        operator -=                 ( double );
 
-    Time                        operator +                  ( const Time& t )               { return Time( as_double() + t.as_double() ); }
-    Time                        operator +                  ( double t )                    { return Time( as_double() + t             ); }
-    Time                        operator +                  ( int t )                       { return Time( as_double() + t             ); }
-    Time                        operator -                  ( const Time& t )               { return Time( as_double() - t.as_double() ); }
-    Time                        operator -                  ( double t )                    { return Time( as_double() - t             ); }
-    Time                        operator -                  ( int t )                       { return Time( as_double() - t             ); }
+    Time                        operator +                  ( const Time& );
+    Time                        operator +                  ( double );
+    Time                        operator +                  ( int t )                       { return *this + (double)t; }
+    Time                        operator -                  ( const Time& );
+    Time                        operator -                  ( double );
+    Time                        operator -                  ( int t )                       { return *this - (double)t; }
 
-    bool                        operator <                  ( const Time& t ) const         { return as_double() <  t.as_double(); }
-    bool                        operator <=                 ( const Time& t ) const         { return as_double() <= t.as_double(); }
-    bool                        operator ==                 ( const Time& t ) const         { return as_double() == t.as_double(); }
-    bool                        operator !=                 ( const Time& t ) const         { return as_double() != t.as_double(); }
-    bool                        operator >=                 ( const Time& t ) const         { return as_double() >= t.as_double(); }
-    bool                        operator >                  ( const Time& t ) const         { return as_double() >  t.as_double(); }
+    bool                        operator <                  ( const Time& t ) const         { return as_double_or_never() <  t.as_double_or_never(); }
+    bool                        operator <=                 ( const Time& t ) const         { return as_double_or_never() <= t.as_double_or_never(); }
+    bool                        operator ==                 ( const Time& t ) const         { return as_double_or_never() == t.as_double_or_never(); }
+    bool                        operator !=                 ( const Time& t ) const         { return as_double_or_never() != t.as_double_or_never(); }
+    bool                        operator >=                 ( const Time& t ) const         { return as_double_or_never() >= t.as_double_or_never(); }
+    bool                        operator >                  ( const Time& t ) const         { return as_double_or_never() >  t.as_double_or_never(); }
 
-    bool                        operator <                  ( double t ) const              { return as_double() <  round(t); }
-    bool                        operator <=                 ( double t ) const              { return as_double() <= round(t); }
-    bool                        operator ==                 ( double t ) const              { return as_double() == round(t); }
-    bool                        operator !=                 ( double t ) const              { return as_double() != round(t); }
-    bool                        operator >=                 ( double t ) const              { return as_double() >= round(t); }
-    bool                        operator >                  ( double t ) const              { return as_double() >  round(t); }
+    bool                        operator <                  ( double t ) const              { return as_double_or_never() <  round(t); }
+    bool                        operator <=                 ( double t ) const              { return as_double_or_never() <= round(t); }
+    bool                        operator ==                 ( double t ) const              { return as_double_or_never() == round(t); }
+    bool                        operator !=                 ( double t ) const              { return as_double_or_never() != round(t); }
+    bool                        operator >=                 ( double t ) const              { return as_double_or_never() >= round(t); }
+    bool                        operator >                  ( double t ) const              { return as_double_or_never() >  round(t); }
 
-    bool                        operator <                  ( int t ) const                 { return as_double() <  round(t); }
-    bool                        operator <=                 ( int t ) const                 { return as_double() <= round(t); }
-    bool                        operator ==                 ( int t ) const                 { return as_double() == round(t); }
-    bool                        operator !=                 ( int t ) const                 { return as_double() != round(t); }
-    bool                        operator >=                 ( int t ) const                 { return as_double() >= round(t); }
-    bool                        operator >                  ( int t ) const                 { return as_double() >  round(t); }
+    bool                        operator <                  ( int t ) const                 { return as_double_or_never() <  round(t); }
+    bool                        operator <=                 ( int t ) const                 { return as_double_or_never() <= round(t); }
+    bool                        operator ==                 ( int t ) const                 { return as_double_or_never() == round(t); }
+    bool                        operator !=                 ( int t ) const                 { return as_double_or_never() != round(t); }
+    bool                        operator >=                 ( int t ) const                 { return as_double_or_never() >= round(t); }
+    bool                        operator >                  ( int t ) const                 { return as_double_or_never() >  round(t); }
 
-                                operator double             () const                        { return as_double(); }
+                                operator double             () const                        { return as_double_or_never(); }
     bool                        operator !                  () const                        { return is_null(); }
 
     void                    set_null                        ()                              { set( 0 ); }
@@ -111,6 +111,7 @@ struct Time
     Time&                       set_utc                     ( double );
     Time&                       set_utc                     ( time_t t )                    { set( (double)t );  return *this; }
     double                      as_double                   () const;
+    double                      as_double_or_never          () const;
     double                      as_utc_double               () const;
 
 #ifdef Z_WINDOWS

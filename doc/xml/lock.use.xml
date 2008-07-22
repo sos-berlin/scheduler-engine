@@ -97,6 +97,10 @@
             Der Job kann einen Datenbestand ändern und sich darauf verlassen, 
             dass währenddessen keiner der beiden anderen Jobs den Datenbestand liest.
         </p>
+        <p>
+            Siehe auch
+            <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/>.
+        </p>
         
     </example>
 </xml_element>

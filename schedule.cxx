@@ -51,6 +51,7 @@ Schedule    ::Class_descriptor  Schedule    ::class_descriptor  ( &typelib, "sos
 Schedule_use::Class_descriptor  Schedule_use::class_descriptor  ( &typelib, "sos.spooler.Run_time", Schedule_use::_methods );
 
 const int                       max_include_nesting         = 10;
+const int                       foresee_years               = 20;       // Längstens soviele Jahre voraussehen
 
 const char* weekday_names[] = { "so"     , "mo"    , "di"      , "mi"       , "do"        , "fr"     , "sa"      ,
                                 "sonntag", "montag", "dienstag", "mittwoch" , "donnerstag", "freitag", "samstag" ,
@@ -1385,9 +1386,17 @@ bool Schedule::Inlay::is_filled() const
 
 Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start )
 {
+    // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), könnte der Algorithmus vielleicht beschleunigt werden.
+    // single_start könnte geprüft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
+    // Oder nur <at> wird weit vorhergesehen, dann könnte man direkt zum Tag springen, dann rückwärts zum vorangehenden Nicht-Feiertag.
+    // Ebenso, wenn nur <months> angegeben ist: Direkt zum nächsten angegebenen Monat springen.
+    // Ebenso <weekdays> usw.
+
+
     Period result;
 
-    if( _start_time_function != ""  ||  is_filled() )
+    if( !beginning_time.is_never()  &&
+        ( _start_time_function != ""  ||  is_filled() ) )
     {
         bool   is_no_function_warning_logged = false; 
         Period last_function_result;
@@ -1396,7 +1405,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
 
 
         for( Time t = beginning_time; 
-             result.empty()  &&  t < beginning_time + 366*24*60*60;     // Längstens ein Jahr ab beginning_time voraussehen
+             result.empty()  &&  t < beginning_time + foresee_years*366*24*60*60;     // Längstens soviele Jahre ab beginning_time voraussehen
              t = t.midnight() + 24*60*60 )     
         {
             if( _holidays.is_included( t ) )  
