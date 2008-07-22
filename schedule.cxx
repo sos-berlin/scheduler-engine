@@ -1405,7 +1405,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
 
 
         for( Time t = beginning_time; 
-             result.empty()  &&  t < beginning_time + foresee_years*366*24*60*60;     // Längstens soviele Jahre ab beginning_time voraussehen
+             result.empty()  &&  t < max( (double)time::never_int, beginning_time + foresee_years*366*24*60*60 );     // Längstens soviele Jahre ab beginning_time voraussehen
              t = t.midnight() + 24*60*60 )     
         {
             if( _holidays.is_included( t ) )  
