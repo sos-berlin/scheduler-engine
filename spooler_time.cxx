@@ -198,6 +198,7 @@ void Time::operator = ( const Sos_optional_date_time& dt )
 void Time::operator += ( double t )
 { 
     assert( !is_never() );
+    assert( t < never_int );
 
     if( !is_never() )  set( as_double() + t ); 
 }
@@ -206,9 +207,10 @@ void Time::operator += ( double t )
 
 void Time::operator -= ( double t )
 { 
-    assert( !is_never() );
+    //assert( !is_never() );
+    assert( t < never_int );
 
-    if( !is_never() )  set( as_double() - t ); 
+    set( as_double() - t );
 }
 
 //---------------------------------------------------------------------------------Time::operator +
@@ -237,22 +239,20 @@ Time Time::operator + ( double t )
 
 Time Time::operator - ( const Time& t )
 { 
-    assert( !is_never() );
+    //assert( !is_never() );
     assert( !t.is_never() );
 
-    return is_never() || t.is_never()? never
-                                     : Time( as_double() - t.as_double() ); 
+    return Time( as_double() - t.as_double() ); 
 }
 
 //---------------------------------------------------------------------------------Time::operator -
 
 Time Time::operator - ( double t )
 { 
-    assert( !is_never() );
+    //assert( !is_never() );
     assert( t < never_int );
 
-    return is_never()? never 
-                     : Time( as_double() - t ); 
+    return Time( as_double() - t ); 
 }
 
 //------------------------------------------------------------------------------Time::time_with_now

@@ -110,14 +110,14 @@ spooler_log.info( "hallo" );
                             <day day="1 2 3 4 5 6 7">
                                 <period single_start="08:11" when_holiday="suppress"/>
                             </day>
-                            <day day="12">
-                                <period single_start="08:22" when_holiday="ignore_holiday"/>
+                            <day day="10">
+                                <period single_start="08:10" when_holiday="ignore_holiday"/>
                             </day>
-                            <day day="19">
-                                <period single_start="08:33" when_holiday="previous_non_holiday"/>
+                            <day day="17">
+                                <period single_start="08:17" when_holiday="previous_non_holiday"/>
                             </day>
-                            <day day="26">
-                                <period single_start="08:44" when_holiday="next_non_holiday"/>
+                            <day day="3 24">
+                                <period single_start="08:03:24" when_holiday="next_non_holiday"/>
                             </day>
                         </monthdays>
                         <weekdays>

@@ -376,7 +376,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
     Period                      first_period                ( const Time& t )                       { return next_period( t ); }
 
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
-    Period                      next_period                 ( const Time&, With_single_start single_start = wss_next_period );
+    Period                      next_period                 ( const Time&, With_single_start single_start = wss_next_period, const Time& before = Time::never );
 
     bool                        period_follows              ( const Time& time )                    { return next_period(time).begin() != Time::never; }
 
@@ -423,7 +423,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         void                    set_dom                         ( File_based* source_file_based, const xml::Element_ptr& );
         xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-        Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start );
+        Period                      next_period                 ( Schedule_use*, const Time&, With_single_start single_start, const Time& before );
         Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
         int                         month_index_by_name         ( const string& );
         list<int>                   month_indices_by_names      ( const string& );
@@ -535,7 +535,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     Schedule*                   active_schedule_at          ( const Time& );
     Absolute_path               active_schedule_path_at     ( const Time& );
     bool                        once                        ()                                      { return _inlay->_once; }
-    Period                      next_period                 ( Schedule_use*, const Time&, With_single_start );
+    Period                      next_period                 ( Schedule_use*, const Time&, With_single_start, const Time& before );
 
 
     void                        print                       ( ostream& ) const;

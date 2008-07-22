@@ -510,9 +510,9 @@ Time Schedule_use::next_any_start( const Time& time )
 
 //------------------------------------------------------------------------Schedule_use::next_period
 
-Period Schedule_use::next_period( const Time& t, With_single_start single_start ) 
+Period Schedule_use::next_period( const Time& t, With_single_start single_start, const Time& before ) 
 { 
-    return schedule()->next_period( this, t, single_start ); 
+    return schedule()->next_period( this, t, single_start, before ); 
 }
 
 //-------------------------------------------------------Schedule_use::append_calendar_dom_elements
@@ -528,7 +528,7 @@ void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element
 
         while( options->_count < options->_limit )
         {
-            Period period = next_period( t, wss_next_any_start );  
+            Period period = next_period( t, wss_next_any_start, options->_before );  
             if( period.begin() >= options->_before  ||  period.begin() == Time::never )  break;
 
             //if( period._start_once  ||
@@ -854,9 +854,9 @@ void Schedule::assert_no_overlapped_covering( Schedule* covering_schedule )
     
     if( after != _covering_schedules.begin() )
     {
-        Covering_schedules::iterator before = after;  before--;
-        if( before->second->_inlay->_covered_schedule_end > covering_schedule->_inlay->_covered_schedule_begin )  
-            z::throw_xc( "SCHEDULER-465", covering_schedule->obj_name(), before->second->obj_name() );
+        Covering_schedules::iterator schedule_before = after;  schedule_before--;
+        if( schedule_before->second->_inlay->_covered_schedule_end > covering_schedule->_inlay->_covered_schedule_begin )  
+            z::throw_xc( "SCHEDULER-465", covering_schedule->obj_name(), schedule_before->second->obj_name() );
     }
 }
 
@@ -937,7 +937,7 @@ void Schedule::disconnect_covering_schedules()
 
 //----------------------------------------------------------------------------Schedule::next_period
 
-Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start ) 
+Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_start single_start, const Time& before ) 
 { 
     Period result;
     Time   interval_begin = 0;            // Standard-Schedule beginnt. Gilt, falls kein überdeckendes Schedule < t 
@@ -946,20 +946,20 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
 
     // Überdeckende Schedule prüfen, <schedule substitute="...">
 
-    for( Covering_schedules::iterator next = _covering_schedules.upper_bound( t );; next++ )   // Liefert das erste Schedule nach t
+    for( Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t );; next_schedule++ )   // Liefert das erste Schedule nach t
     {
-        assert( next == _covering_schedules.end()  ||  t < next->second->_inlay->_covered_schedule_begin );
+        assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
-        if( next == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+        if( next_schedule == _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
         { 
             interval_begin = 0;
         }
         else
         {
-            Covering_schedules::iterator before = next;  
-            before--;
+            Covering_schedules::iterator schedule_before = next_schedule;  
+            schedule_before--;
 
-            Schedule* covering_schedule = before->second;
+            Schedule* covering_schedule = schedule_before->second;
 
             if( covering_schedule->is_covering_at( t ) )   
             {
@@ -969,7 +969,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
                 interval_end   = covering_schedule->_inlay->_covered_schedule_end;
                 assert( t >= interval_begin  &&  t < interval_end );
 
-                Period period = covering_schedule->_inlay->next_period( use, t, single_start );
+                Period period = covering_schedule->_inlay->next_period( use, t, single_start, before );
                 if( period._begin < interval_end )  
                 {
                     result = period;
@@ -983,7 +983,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
             interval_begin = covering_schedule->_inlay->_covered_schedule_end;      // Beginn der Lücke nach dem letzten überdeckenden Schedule
         }
 
-        interval_end = next != _covering_schedules.end()? next->second->_inlay->_covered_schedule_begin     // Ende der Lücke
+        interval_end = next_schedule != _covering_schedules.end()? next_schedule->second->_inlay->_covered_schedule_begin     // Ende der Lücke
                                                         : Time::never;
 
         assert( t >= interval_begin  &&  t <= interval_end );
@@ -991,7 +991,7 @@ Period Schedule::next_period( Schedule_use* use, const Time& tim, With_single_st
         if( interval_begin < interval_end )     // Die Lücke nach dem überdeckenden Schedule ist länger als 0?
         {
             assert( !covering_schedule_at( t ) );
-            Period period = _inlay->next_period( use, t, single_start );       // Unser Standard-Schedule
+            Period period = _inlay->next_period( use, t, single_start, before );       // Unser Standard-Schedule
             if( period.begin() < interval_end )  
             {
                 result = period;
@@ -1042,16 +1042,16 @@ Schedule* Schedule::covering_schedule_at( const Time& t )
 {
     Schedule* result = NULL;
 
-    Covering_schedules::iterator next = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
-    assert( next == _covering_schedules.end()  ||  t < next->second->_inlay->_covered_schedule_begin );
+    Covering_schedules::iterator next_schedule = _covering_schedules.upper_bound( t );   // Liefert das erste Schedule nach t
+    assert( next_schedule == _covering_schedules.end()  ||  t < next_schedule->second->_inlay->_covered_schedule_begin );
 
-    if( next != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
+    if( next_schedule != _covering_schedules.begin() )   // Kein überdeckendes Schedule mit _covered_schedule_begin < t?
     {
-        Covering_schedules::iterator before = next;  
-        before--;
-        assert( before->second->_inlay->_covered_schedule_begin <= t );
+        Covering_schedules::iterator schedule_before = next_schedule;  
+        schedule_before--;
+        assert( schedule_before->second->_inlay->_covered_schedule_begin <= t );
 
-        Schedule* covering_schedule = before->second;
+        Schedule* covering_schedule = schedule_before->second;
 
         if( covering_schedule->is_covering_at( t ) )
         {
@@ -1324,11 +1324,10 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
         {
             a_day_set = true;
 
-            ptr<Month> month = Z_NEW( Month() );
+            list<int>  months = month_indices_by_names( e.getAttribute( "month" ) );
+            ptr<Month> month  = Z_NEW( Month() );
             month->set_dom( e );
 
-            list<int> months = month_indices_by_names( e.getAttribute( "month" ) );
-            
             Z_FOR_EACH( list<int>, months, it )
             {
                 if( _months[ *it ] )  z::throw_xc( "SCHEDULER-443", month_names[ *it ] );
@@ -1384,7 +1383,7 @@ bool Schedule::Inlay::is_filled() const
 
 //---------------------------------------------------------------------Schedule::Inlay::next_period
 
-Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start )
+Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_time, With_single_start single_start, const Time& before )
 {
     // Wenn mehrere Jahre vorausgesehen werden sollen (s. foresee_years), könnte der Algorithmus vielleicht beschleunigt werden.
     // single_start könnte geprüft werden: <run_time> ohne single_start usw. muss dann nicht durchsucht werden.
@@ -1403,10 +1402,10 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
         
         last_function_result.set_single_start( 0 );
 
+        Time limited_before = min( before.as_double_or_never(), beginning_time + foresee_years*366*24*60*60 );     // Längstens soviele Jahre ab beginning_time voraussehen
 
-        for( Time t = beginning_time; 
-             result.empty()  &&  t < max( (double)time::never_int, beginning_time + foresee_years*366*24*60*60 );     // Längstens soviele Jahre ab beginning_time voraussehen
-             t = t.midnight() + 24*60*60 )     
+
+        for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + 24*60*60 )     
         {
             if( _holidays.is_included( t ) )  
             {
@@ -1444,7 +1443,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
                 // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
 
                 for( int before = -24*60*60;
-                     before >= -366*24*60*60  &&  _holidays.is_included( t + before ); 
+                     before >= -foresee_years*24*60*60  &&  _holidays.is_included( t + before ); 
                      before -= 24*60*60 )
                 {
                     Period p = next_period_of_same_day( t + before, single_start | wss_when_holiday_next_non_holiday );
@@ -1455,7 +1454,7 @@ Period Schedule::Inlay::next_period( Schedule_use* use, const Time& beginning_ti
                 // Morgen ist Feiertag? Periode mit when_holiday="previous_non_holiday" suchen
 
                 for( int after = +24*60*60;
-                     after <= 366*24*60*60  &&  _holidays.is_included( t + after ); 
+                     after <= foresee_years*24*60*60  &&  t + after < time::never_int  &&  _holidays.is_included( t + after ); 
                      after += 24*60*60 )
                 {
                     Period p = next_period_of_same_day( t + after, single_start | wss_when_holiday_previous_non_holiday );
@@ -2391,13 +2390,12 @@ void Month::set_dom( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------------Month::next_period_of_same_day
 
-Period Month::next_period_of_same_day( const Time& tim_, With_single_start single_start )
+Period Month::next_period_of_same_day( const Time& tim, With_single_start single_start )
 {
-    Time   tim           = tim_;
     Period result;
-    int    current_month = tim.month_nr();
+    //int    current_month = tim.month_nr();
 
-    if( tim.month_nr() == current_month )  
+    //if( tim.month_nr() == current_month )  
     {
         if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( tim, single_start ) );
         if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( tim, single_start ) );
