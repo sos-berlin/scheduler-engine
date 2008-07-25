@@ -550,6 +550,13 @@ void Com_variable_set::set_var( const string& name, const Variant& value )
     if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
 }
 
+//------------------------------------------------------------------------Com_variable_set::set_var
+
+void Com_variable_set::set_var( const string& name, const string& value )
+{
+    set_var( name, Variant( value ) );
+}
+
 //---------------------------------------------------------------------Com_variable_set::get_string
 
 string Com_variable_set::get_string( const string& name )

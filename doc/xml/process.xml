@@ -175,11 +175,6 @@ spooler.job( "process" ).start( params );
                 <scheduler_method class="Task" object="spooler_task" property="job"/>.<scheduler_method class="Job" object="" property="name"/>.-->
             </dd>
 
-
-            _process_environment->set_var( ""   , supervisor_host_and_port.host().as_string() );
-            _process_environment->set_var( "SCHEDULER_SUPERVISOR_PORT"   , supervisor_host_and_port.string_port() );
-
-
             <dt>
                 <scheduler_keyword keyword="SCHEDULER_ORDER_ID"/>
                 <code>SCHEDULER_ORDER_ID</code>
@@ -203,6 +198,14 @@ spooler.job( "process" ).start( params );
             </dt>
             <dd>
                 Portnummer aus <scheduler_element name="config" attribute="supervisor"/>
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_TASK_ID"/>
+                <code>SCHEDULER_TASK_ID</code>
+            </dt>
+            <dd>
+                Dassselbe wie <scheduler_method class="Task" object="spooler_task" property="id"/>.
             </dd>
 
             <dt>

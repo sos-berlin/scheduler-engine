@@ -168,6 +168,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
 
     void                        set_var                     ( const string& name, const Variant& value );
+    void                        set_var                     ( const string& name, const string& value );
+    void                        set_var                     ( const string& name, const char* value )   { set_var( name, string( value ) ); }
     void                        get_var                     ( BSTR name, VARIANT* value ) const;
     string                      get_string                  ( const string& name );
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;

@@ -11,6 +11,17 @@
     <scheduler_keyword keyword="Change log"/>
 
     
+    <change date="2008-07-25" version="2.0.210" subversion_revision="5838">
+        <revision type="new" title="Neue Umgebungsvariable SCHEDULER_TASK_ID">
+            <description>
+                <p>
+                    Siehe <scheduler_element name="process"/>.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
+    
     <change date="2008-07-22" version="2.0.210" subversion_revision="5837">
         <revision type="new" title="XML-Kommandos zum Setzen und Lesen der Scheduler-Parameter">
             <description>

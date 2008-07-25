@@ -922,6 +922,7 @@ void Module_instance::fill_process_environment()
         _process_environment->set_var( "SCHEDULER_SUPERVISOR_PORT"   , supervisor_host_and_port.string_port() );
 
         _process_environment->set_var( "SCHEDULER_JOB_NAME"          , _task->job()->name() );
+        _process_environment->set_var( "SCHEDULER_TASK_ID"           , S() << _task->id() );
         _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", _task->trigger_files() );
 
         if( Order* order = _task->order() )
