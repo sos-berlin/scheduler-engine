@@ -174,8 +174,8 @@
 		<ul>
 			<li>
 				An upper menu bar, where the general configuration of the interface (language &amp; update) is carried out; 
-				any monitoring functions the Job Scheduler is to carry out is shown ??Ist korrekt? and
-				the configuration of the Job Scheduler itself in the
+				any monitoring functions the Job Scheduler is to carry out are shown and
+				the configuration of the Job Scheduler itself in the 
 				<a href="konfiguration.xml">XML configuration file</a> is shown.
 				<br/>
 				Note that here the XML configuration file is shown "read-only" - 
