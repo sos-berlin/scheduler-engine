@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
 <!--$Id$-->
@@ -12,26 +12,30 @@
              date     = "$Date$">
 
     <xml_parent_elements>
+
         <xml_parent_element name="config">
             <description>
                 Zur Einstellung der Feiertage für alle Jobs.
             </description>
         </xml_parent_element>
+
         <xml_parent_element name="run_time">
             <description>
                 Zur Einstellung der Feiertage für einen Job.
             </description>
         </xml_parent_element>
+
     </xml_parent_elements>
 
     <xml_child_elements>
+
         <xml_child_element name="weekdays">
             <description>
                 Legt Wochentage als Feiertage fest, zum Beispiel Samstag und Sonntag.
                 Als Kind-Elemente werden leere <scheduler_element name="day"/> angegeben.
             </description>
         </xml_child_element>
-        
+
         <xml_child_element name="holiday">
             <description>
                 Für jeden Feiertag wird dieses Element wiederholt.
@@ -46,6 +50,7 @@
                 (<scheduler_option name="config"/>).
             </description>
         </xml_child_element>
+
     </xml_child_elements>
 
     <description>
