@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <description title="Job Scheduler Editor" base_dir="" author="$Author: ts $" date="$Date: 2007-03-29 11:45:00 +0200 (Do, 05 Okt 2006) $">
   <h2>GUI für Konfiguration und Dokumentation</h2>
@@ -154,68 +154,138 @@
 			<br/>
     <img src="images/editor_help_documentation.jpg" width="937" height="529" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
-  <h1>Remote Connection</h1>
-    
-   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    FTP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
-
-  <h2>FTP/SFTP</h2>
-  <p>
-    Der Job Scheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. SFTP (Secure FTP) öffnen bzw.eine offene Datei per FTP/SFTP speichern. 
-
-Sie können über den Menüpunkt File -> FTP oder über den Toolbar den FTP Dialog öffnen:
-  
+		
+		
+		
+		<h1>Remote Connection</h1>
+		
+		
+		
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    FTP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+		
+		
+		
+		<h2>FTP/SFTP</h2>
+		<p>
+			Der Job Scheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. SFTP (Secure FTP) öffnen bzw.eine offene Datei per FTP/SFTP speichern. 
+			Sie können über den Menüpunkt File -> FTP oder über den Toolbar den FTP Dialog öffnen:
 		</p>
-  <img src="images/editor_menu_ftp.jpg" width="390" height="269" style="margin: 20px 0px ; border:1px solid gray;"/>
-  <br/>
-  <img src="images/editor_toolbar_ftp.jpg" width="292" height="150" style="margin: 20px 0px ; border:1px solid gray;"/>
-  <p>    Es erscheint ein Dialog, indem Sie die zu öffnenden Profile (FTP-Verbindung) und anschließend die zu öffnenden Dateien auswählen können.
-</p>
-  <img src="images/editor_ftp_dialog.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-  <p>
-    <h3>Die Bedienelemente</h3>
-    <h4>FTP Zugang auswählen</h4>
-    <p>In diesem Auswahllisten können Sie einen bereits konfigurierten FTP Zugang auswählen</p>
-    <h3>Verzeichniswechsel</h3>
-    <p>Hier steht als erstes das konfigurierte Verzeichnis auf dem FTP Server. Sobald Sie sich mit dem FTP Server verbinden,
-      wird zum Verzeichnis auf dem FTP Server gesprungen. Wenn Sie in der Dateiliste navigieren, 
-      dann steht in diesem Textfeld das aktuelle Verzeichnis am FTP Server, in dem Sie sich befinden. 
-      Sie haben die Möglichkeit jederzeit ein neues Verzeichnis anzugeben, indem Sie im Textfeld einen neuen Verzeichnisnamen angeben 
-      und auf den Button "Change Directory" klicken.
-  </p>
-    <h3>Refresh</h3>
-    <p>Aktualistert alle Verzeichnis- und Dateiinformationen vom FTP Server
-  
-  <h3>New Folder</h3>
-      <p>Legt ein neues Verzeichnis auf dem FTP Server an.</p>
-      <h3>Remove</h3>
-      <p>Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem FTP Server gelöscht.</p>
-      <h3>Open</h3>
-      <p>Wurde der FTP Dialog unter der Menüpunkt "Open by FTP" ausgewählt, dann wird beim Betätigen des Buttons "Open" die 
-         XML-Datei vom FTP Server heruntergeladen und im Editor geöffnet.
-      </p>
-      <p>Wurde der FTP Dialog unter der Menüpunkt "Open Hot Folder by FTP" ausgewählt, dann sind nur Verzeichnisse zu sehen. 
-      Dateien werden nicht in der Dateiliste angezeigt. Beim Auswählen eines Verzeichnisses werden vom FTP Server alle 
-      Dateien dieses Hot Folders heruntergeladen und im Editor geöffnet.</p>
-      <h3>Close</h3>
-      <p>Schliesst den FTP Dialog</p>
-      <h3>Log</h3>
-      <p>Zeigt den Protokolldialog. Hier können Sie alle Befehle, die an den FTP Server geschickt wurden, 
-        und die Antworten vom FTP Server sehen.</p>
-      <p/>
-      <h3>Profiles</h3>
-      <p>Hier sehen Sie alle konfigurierten FTP Zugänge. Sie haben die Möglichkeit 
-        neue FTP Zugänge anzulegen bzw. vorhandene FTP Zugänge zu editieren oder zu löschen.
-        <img src="images/editor_profiles_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-        <br/>
-        <img src="images/editor_profiles_proxy_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-        <br/>
-        <img src="images/editor_profiles_ssh_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-      </p>
-      Alle FTP Zugänge werden in einer Konfigurationsdatei gespeichert. Die Konfigurationsdatei liegt unter <code><i>scheduler_install_directory</i>/config/factory.ini</code> 
+		<p>
+			<img src="images/editor_menu_ftp.jpg" width="390" height="269" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			<img src="images/editor_toolbar_ftp.jpg" width="292" height="150" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			Es erscheint ein Dialog, indem Sie die zu öffnenden Profile (FTP-Verbindung) und anschließend die zu öffnenden Dateien auswählen können.
+		</p>
+		<p>
+			<img src="images/editor_ftp_dialog.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		
+		
+		
+		<h3>Die Bedienelemente</h3>
+		
+		<h4>FTP Zugang auswählen</h4>
+		
+		<p>
+			In diesem Auswahllisten können Sie einen bereits konfigurierten FTP Zugang auswählen
+		</p>
+		
+		
+		
+		<h3>Verzeichniswechsel</h3>
+		
+		<p>
+			Hier steht als erstes das konfigurierte Verzeichnis auf dem FTP Server. 
+			Sobald Sie sich mit dem FTP Server verbinden, wird zum Verzeichnis auf dem FTP Server gesprungen. 
+			Wenn Sie in der Dateiliste navigieren, dann steht in diesem Textfeld das aktuelle Verzeichnis am FTP Server, 
+			in dem Sie sich befinden. 
+			Sie haben die Möglichkeit jederzeit ein neues Verzeichnis anzugeben, 
+			indem Sie im Textfeld einen neuen Verzeichnisnamen angeben 
+			und auf den Button "Change Directory" klicken.
+		</p>
+		
+		
+		
+		<h3>Refresh</h3>
+		
+		<p>
+			Aktualistert alle Verzeichnis- und Dateiinformationen vom FTP Server
+		</p>
+		
+		
+		
+		<h3>New Folder</h3>
+		
+		<p>
+			Legt ein neues Verzeichnis auf dem FTP Server an.
+		</p>
+		
+		
+		
+		<h3>Remove</h3>
+		
+		<p>
+			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem FTP Server gelöscht.
+		</p>
+		
+		
+		
+		<h3>Open</h3>
+		
+		<p>
+			Wurde der FTP Dialog unter der Menüpunkt "Open by FTP" ausgewählt, 
+			dann wird beim Betätigen des Buttons "Open" die 
+			XML-Datei vom FTP Server heruntergeladen und im Editor geöffnet.
+		</p>
+		<p>Wurde der FTP Dialog unter der Menüpunkt "Open Hot Folder by FTP" ausgewählt, 
+		dann sind nur Verzeichnisse zu sehen. 
+			Dateien werden nicht in der Dateiliste angezeigt. 
+			Beim Auswählen eines Verzeichnisses werden vom FTP Server alle 
+			Dateien dieses Hot Folders heruntergeladen und im Editor geöffnet.
+		</p>
+		
+		
+		
+		<h3>Close</h3>
+		
+		<p>
+			Schliesst den FTP Dialog
+		</p>
+		
+		
+		
+		<h3>Log</h3>
+		
+		<p>
+			Zeigt den Protokolldialog. Hier können Sie alle Befehle, die an den FTP Server geschickt wurden, 
+			und die Antworten vom FTP Server sehen.
+		</p>
+		
+		
+		
+		<h3>Profiles</h3>
+		
+		<p>
+			Hier sehen Sie alle konfigurierten FTP Zugänge. Sie haben die Möglichkeit 
+			neue FTP Zugänge anzulegen bzw. vorhandene FTP Zugänge zu editieren oder zu löschen.
+			<img src="images/editor_profiles_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			<img src="images/editor_profiles_proxy_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			<img src="images/editor_profiles_ssh_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+      Alle FTP Zugänge werden in einer Konfigurationsdatei gespeichert. 
+      Die Konfigurationsdatei liegt unter <code><i>scheduler_install_directory</i>/config/factory.ini</code> 
       und hat folgende Sektion und Einträge:
-     
-     <ul>
-     <em>
+		</p>
+		<p>
+		<em>
 <br></br>     <b>[profile profilename]</b>
 <br></br>host=
 <br></br>port=
@@ -230,92 +300,154 @@ Sie können über den Menüpunkt File -> FTP oder über den Toolbar den FTP Dial
 <br></br>proxy_port=
 <br></br>auth_method=
 <br></br>auth_file=
-</em>
-     </ul>
-    </p>
-  </p>
-  
-  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   WEBDAV ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
-    <h2>WebDAV</h2>
-  <p>
-    Der Job Scheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.eine offene Datei per WebDAV speichern. 
-
-    Sie können über den Menüpunkt File -> WebDAV  den WebDAV Dialog öffnen:
-  </p>
-  <img src="images/editor_menu_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-  <p>    
-   Der Menüpunkt WebDAV ist nur aktiv, wenn die notwendigen Bibliotheken für die WebDAV-Verbindungen vorhanden sind.
-   Diese Bibliotheken sind aus Lizenzgründen nicht Teil der Job Scheduler Distribution. Sie können z.B. 
-   vom Sourceforge Projekt <code>webdavclient4j</code> unter
-   <a href="https://sourceforge.net/projects/webdavclient4j/">https://sourceforge.net/projects/webdavclient4j/</a> 
-   heruntergeladen werden. <br></br>
-   Es müssen folgende Bibliotheken im Verzeichnis <code><i>scheduler_installation_directory</i>/lib</code> vorhanden sein,
-   dabei können ggf. anderen Bibliotheksnamen oder Versionsnummern zum Einsatz kommen.
-<ul>
-<li>commons-logging.jar</li>
-<li>webdavclient4j-core-0.92.jar</li>
-<li>commons-codec-1.3.jar</li>
-<li>commons-httpclient-3.0.1.jar</li>
-</ul>
-
-
-Der Job Scheduler Editor wird über eine Kommandodatei aufgerufen, die sich unter <code><i>scheduler_installation_directory</i>/bin</code> befindet. 
-Hier muss der <code>CLASSPATH</code> um die oben genannten Bibliotheken erweitert werden. 
-</p>
-<p>
-Es erscheint ein Dialog, indem Sie das zu öffnenden Profil (WebDAV-Verbindung) und anschließend 
-die zu öffnenden Dateien auswählen können. 
-<br></br>
-<img src="images/editor_dialog_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-
-</p>
-
- <p>
-    <h3>Die Bedienelemente</h3>
-    <h4>WebDAV Zugang auswählen</h4>
-    <p>In diesen Auswahllisten können Sie einen bereits konfigurierten WebDAV Zugang auswählen</p>
-    
-    <h3>URL Wechsel</h3>
-    <p>Hier steht als erstes die konfigurierte URL auf dem WebDAV Server. 
-      Sobald Sie mit dem WebDAV Server verbunden sind, werden alle Dateien und Verzeichnisse dieser URL angezeigt. 
-      Wenn Sie im Dateiliste navigieren steht dann in diesem Textfeld der aktuelle URL auf der WebDAV Server. 
-      Sie haben aber auch die Möglichkeit jederzeit eine neue URL anzugeben, 
-      in dem Sie im Textfeld eine neue URL angeben und auf den Button "Change Directory" klicken.
-  </p>
-    <h3>Refresh</h3>
-    <p>Aktualistert alle Verzeichnis- und Dateinformationen vom WebDAV Server
-  
-  <h3>New Folder</h3>
-      <p>Legt einen neuen Verzeichnis auf dem WebDAV Server an.</p>
-      <h3>Remove</h3>
-      <p>Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem WebDAV Server gelöscht.</p>
-      <h3>Open</h3>
-      <p>Wurde der WebDAV Dialog unter dem Menüpunkt "Open by WebDAV" ausgewählt, dann wird beim Betätigen des Button "Open" die 
-       XML-Datei vom WebDAV Server heruntergeladen und im Editor geöffnet.</p>
-      <p>Wurde der WebDAV Dialog unter dem Menüpunkt "Open Hot Folder by WebDAV" ausgewählt, 
-      dann sind nur Verzeichnisse zu sehen. Dateien werden nicht in der Dateiliste angezeigt. 
-        Beim Auswählen eines Verzeichnisses werden vom WebDAV Server alle Dateien des Hot Folders heruntergeladen 
-        und im Editor geöffnet.
-      </p>
-      <h3>Close</h3>
-      <p>Schließt den WebDAV Dialog</p>
-      <h3>Log</h3>
-      <p>Zeigt den Protokolldialog. Hier können Sie alle Befehle, 
-      die an den WebDAV Server geschickt wurden, und die Antworten vom WebDAV Server sehen.</p>
-      <p/>
-      <h3>Profiles</h3>
-      <p>Hier sehen Sie alle konfigurierte WebDAV Zugänge. 
-      Sie haben die Möglichkeit neue WebDAV Zugänge anzulegen bzw. vorhandene WebDAV Zugänge zu editieren oder zu löschen.
-      <img src="images/editor_profiles_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-        <br/>
-        <img src="images/editor_profiles_proxy_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
-      </p>
-      Alle WebDAV Zugänge werden in einer Konfigurationsdatei gespeichert. 
-      Die Konfigurationsdatei liegt unter <code><i>scheduler_installation_directory</i>/config/factory.ini</code> und hat folgende Sektion und Einträge:
-  
-
-     <ul>
-     <em>
+		</em>
+		</p>
+		
+		
+		
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   WEBDAV ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+		
+		
+		
+		<h2>WebDAV</h2>
+		
+		<p>
+			Der Job Scheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.eine offene Datei per WebDAV speichern. 
+			Sie können über den Menüpunkt File -> WebDAV  den WebDAV Dialog öffnen:
+		</p>
+		<p>
+			<img src="images/editor_menu_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			Der Menüpunkt WebDAV ist nur aktiv, wenn die notwendigen Bibliotheken für die WebDAV-Verbindungen vorhanden sind.
+			Diese Bibliotheken sind aus Lizenzgründen nicht Teil der Job Scheduler Distribution. Sie können z.B. 
+			vom Sourceforge Projekt <code>webdavclient4j</code> unter
+			<a href="https://sourceforge.net/projects/webdavclient4j/">https://sourceforge.net/projects/webdavclient4j/</a> 
+			heruntergeladen werden. 
+		</p>
+		<p>
+			Es müssen folgende Bibliotheken im Verzeichnis <code><i>scheduler_installation_directory</i>/lib</code> vorhanden sein,
+			dabei können ggf. anderen Bibliotheksnamen oder Versionsnummern zum Einsatz kommen.
+		</p>
+		<ul>
+			<li>commons-logging.jar</li>
+			<li>webdavclient4j-core-0.92.jar</li>
+			<li>commons-codec-1.3.jar</li>
+			<li>commons-httpclient-3.0.1.jar</li>
+		</ul>
+		<p>
+			Der Job Scheduler Editor wird über eine Kommandodatei aufgerufen, 
+			die sich unter <code><i>scheduler_installation_directory</i>/bin</code> befindet. 
+			Hier muss der <code>CLASSPATH</code> um die oben genannten Bibliotheken erweitert werden. 
+		</p>
+		<p>
+			Es erscheint ein Dialog, indem Sie das zu öffnenden Profil (WebDAV-Verbindung) und anschließend 
+			die zu öffnenden Dateien auswählen können. 
+		</p>
+		<p>
+			<img src="images/editor_dialog_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		
+		
+		
+		<h3>Die Bedienelemente</h3>
+		
+		<h4>WebDAV Zugang auswählen</h4>
+		
+		<p>
+			In diesen Auswahllisten können Sie einen bereits konfigurierten WebDAV Zugang auswählen
+		</p>
+		
+		
+		
+		<h3>URL Wechsel</h3>
+		
+		<p>
+			Hier steht als erstes die konfigurierte URL auf dem WebDAV Server. 
+			Sobald Sie mit dem WebDAV Server verbunden sind, werden alle Dateien und Verzeichnisse dieser URL angezeigt. 
+			Wenn Sie im Dateiliste navigieren steht dann in diesem Textfeld der aktuelle URL auf der WebDAV Server. 
+			Sie haben aber auch die Möglichkeit jederzeit eine neue URL anzugeben, 
+			in dem Sie im Textfeld eine neue URL angeben und auf den Button "Change Directory" klicken.
+		</p>
+		
+		
+		
+		<h3>Refresh</h3>
+		
+		<p>
+			Aktualistert alle Verzeichnis- und Dateinformationen vom WebDAV Server
+		</p>
+		
+		
+		
+		<h3>New Folder</h3>
+		
+		<p>
+			Legt einen neuen Verzeichnis auf dem WebDAV Server an.
+		</p>
+		
+		
+		
+		<h3>Remove</h3>
+		
+		<p>
+			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem WebDAV Server gelöscht.
+		</p>
+		
+		
+		
+		<h3>Open</h3>
+		
+		<p>
+			Wurde der WebDAV Dialog unter dem Menüpunkt "Open by WebDAV" ausgewählt, 
+			dann wird beim Betätigen des Button "Open" die 
+			XML-Datei vom WebDAV Server heruntergeladen und im Editor geöffnet.
+		</p>
+		<p>
+			Wurde der WebDAV Dialog unter dem Menüpunkt "Open Hot Folder by WebDAV" ausgewählt, 
+			dann sind nur Verzeichnisse zu sehen. Dateien werden nicht in der Dateiliste angezeigt. 
+			Beim Auswählen eines Verzeichnisses werden vom WebDAV Server alle Dateien des Hot Folders heruntergeladen 
+			und im Editor geöffnet.
+		</p>
+		
+		
+		
+		<h3>Close</h3>
+		
+		<p>
+			Schließt den WebDAV Dialog
+		</p>
+		
+		
+		
+		<h3>Log</h3>
+		
+		<p>
+			Zeigt den Protokolldialog. Hier können Sie alle Befehle, 
+			die an den WebDAV Server geschickt wurden, und die Antworten vom WebDAV Server sehen.</p>
+		<p/>
+		
+		
+		
+		<h3>Profiles</h3>
+		
+		<p>
+			Hier sehen Sie alle konfigurierte WebDAV Zugänge. 
+			Sie haben die Möglichkeit neue WebDAV Zugänge anzulegen bzw. vorhandene WebDAV Zugänge zu editieren oder zu löschen.
+		</p>
+		<p>
+			<img src="images/editor_profiles_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			<img src="images/editor_profiles_proxy_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+			Alle WebDAV Zugänge werden in einer Konfigurationsdatei gespeichert. 
+			Die Konfigurationsdatei liegt unter <code><i>scheduler_installation_directory</i>/config/factory.ini</code> 
+			und hat folgende Sektion und Einträge:
+		</p>
+		<p>
+			<em>
 <br></br>     <b>[webdav_profile profilename]</b>
 <br></br>url    = 
 <br></br>user   = 
@@ -326,10 +458,8 @@ die zu öffnenden Dateien auswählen können.
 <br></br>proxy_server=
 <br></br>proxy_port=
 <br></br>debug=
-</em>
-     </ul>
-    </p>
-  </p>
+			</em>
+		</p>
 
 
 </description>
