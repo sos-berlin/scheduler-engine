@@ -142,7 +142,7 @@
 		</p>
 		
 		<p>
-			This interface is automatically installed and updated with the Job Scheduler installation package.??Stimts?
+			This interface is automatically installed and updated with the Job Scheduler installation package.<!--??Stimts?-->
 		</p>
 		
 		<p>
@@ -157,7 +157,7 @@
 			<br/>
 			This interface should not be confused with the <a href="scheduler_editor.xml">Job Scheduler Editor</a>,
 			which is a GUI used to <em>configure</em> the Job Scheduler itself, jobs &amp; job chains, orders using XML.
-			(Note that the Job Scheduler Editor can be called up from the Job Scheduler GUI.??Stimmts? This is described below.)
+			(Note that the Job Scheduler Editor can be called up from the Job Scheduler GUI.<!--??Stimmts?--> This is described below.)
 			<br/>
 			The Job Scheduler GUI should also not be confused with the Managed Jobs Administration interface, 
 			which is a part of the Job Scheduler <em>Managed Jobs</em> package.
@@ -190,7 +190,7 @@
 				in the web interface either at regular intervals (when the checkbox is selected) or manually, 
 				as required (using the button).
 				The interval with which the regular updates of the interface are carried out is set using ... 
-				??Ja, was/wo?
+		<!--??Ja, was/wo?-->
 			</li>
 			<li>
 				A working area initially showing a list of the jobs configured for the Job Scheduler,
@@ -230,12 +230,12 @@
 			This editor combines documentation of the job, its configuration and a generation function, 
 			where the job can be newly generated after changes to its configuration have been made.
 			This editor is so integrated in the Job Scheduler installation that the Job Scheduler automatically 
-			takes account of changes in a job configuration without having to be restarted.??Stimmt dies?
+			takes account of changes in a job configuration without having to be restarted.<!--??Stimmt dies?-->
 		</p>
 		
-		<p>
+<!--<p>
 			The documentation for the Job Editor can be read .... ??Wo? - Link hinzufügen?
-		</p>
+		</p>-->
 		
 		<img class="screen_shot" src="images/job_scheduler_http_job_description_reduced.jpg"/>
 		
