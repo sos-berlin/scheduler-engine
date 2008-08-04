@@ -21,7 +21,7 @@
 <h2>Beispiel</h2>
 
 <p>
-    Eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):
+    Eine einfache Konfigurationsdatei mit einem Shell Job:
 </p>
 <!--
 <p>
@@ -32,15 +32,9 @@
 &lt;spooler>
     &lt;config>
         &lt;jobs>
-            &lt;job name="test_job">
-                &lt;script language="JavaScript">&lt;![CDATA[
-
-                    function spooler_process()
-                    {
-                        spooler_log.info( "Hallo Welt!" );
-                        return false;
-                    }
-
+            &lt;job name="hallo_welt">
+                &lt;script language="shell">&lt;![CDATA[
+                    echo hallo welt
                 ]]&gt;&lt;/script>
 
                 &lt;run_time repeat="10"/>
@@ -50,8 +44,11 @@
 &lt;/spooler></pre>
 
 <p>
-    Konfiguriert ist hier der Job <code>test_job</code>, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration
-    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
+    Konfiguriert ist hier der Job <code>hallo_welt</code>, den der Scheduler alle 10 Sekunden wiederholen wird. 
+</p>
+<p>
+    Wenn diese Konfiguration
+    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten (für Windows):
 </p>
 
 <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -config=hallo_welt.xml</pre>
@@ -60,6 +57,25 @@
     Ein gestarteter Scheduler kann mit Ctrl-C abgebrochen werden.
 </p>
 
+
+<p>
+    Alternativ können individuelle Konfigurationsdateien pro Job, Jobkette etc. gebildet werden, die nur
+    die von diesem Objekt benötigten Elemente enthalten:
+</p>
+<pre>
+&lt;?xml version="1.0"><!--&lt;!DOCTYPE spooler SYSTEM "http://zsch.de/sos/scheduler/scheduler.dtd">-->
+&lt;job>
+    &lt;script language="shell">&lt;![CDATA[
+        echo hallo welt
+    ]]&gt;&lt;/script>
+
+    &lt;run_time repeat="10"/>
+&lt;/job>
+</pre>
+<p>
+    Wenn diese Konfiguration
+    in der Datei <code><i>scheduler installation path</i>/config/live/hallo_welt.job.xml</code> abgelegt ist, wird sie automatisch von einem laufenden Job Scheduler verwendet:
+</p>
 
 
 <h2>Codierung der XML-Konfiguration</h2>
@@ -85,17 +101,22 @@
 </p>
 
 <pre>&lt;<scheduler_a href="xml/spooler.xml">spooler</scheduler_a>>
-    &lt;<scheduler_a href="xml/config.xml">config</scheduler_a> include_path         = "…"
+    &lt;<scheduler_a href="xml/config.xml">config</scheduler_a> central_configuration_directory = "…"
+            configuration_add_event    = "…"
+            configuration_delete_event = "…"
+            configuration_directory    = "…"
+            configuration_update_event = "…"
+            include_path         = "…"
             ip_address           = "…"
             java_class_path      = "…"
             java_options         = "…"    
             log_dir              = "…"
             mail_xslt_stylesheet = "…"
-            supervisor           = "hostname:4444"
             param                = "…"
             port                 = "4444"
             priority_max         = "1000"
             spooler_id           = ""
+            supervisor           = "hostname:4444"
             tcp_port             = "4444"
             udp_port             = "4444">
             
@@ -114,7 +135,7 @@
                  heart_beat_timeout      = "…"
                  heart_beat_warn_timeout = "…"/>
 
-        &lt;<scheduler_a href="xml/process_classes.xml">process_classes></scheduler_a>
+        &lt;<scheduler_a href="xml/process_classes.xml">process_classes</scheduler_a> ignore  = "no">
             &lt;<scheduler_a href="xml/process_class.xml">process_class</scheduler_a> max_processes = "…"
                            name          = "…"
                            spooler_id    = "…"/>
@@ -122,9 +143,10 @@
         &lt;/process_classes>
 
         &lt;<scheduler_a href="xml/schedules.xml">schedules></scheduler_a>
-            &lt;<scheduler_a href="xml/schedule.xml">schedule</scheduler_a> name = "…">
-                …
-            &lt;/schedule>
+            &lt;<scheduler_a href="xml/schedule.xml">schedule</scheduler_a> name = "…"
+                substitute = "…"
+                valid_from = "…"
+                valid_to   = "…"/>
             …
         &lt;/schedules>
 
@@ -165,7 +187,7 @@
         &lt;<scheduler_a href="xml/holidays.xml">holidays</scheduler_a>>
             &lt;<scheduler_a href="xml/holiday.xml">holiday</scheduler_a> date="…"/>
             &lt;<scheduler_a href="xml/include.xml">include</scheduler_a> file="…"/>
-            …
+            &lt;<scheduler_a href="xml/weekdays.xml">weekdays</scheduler_a> date="…"/>
         &lt;/holidays>
 
         &lt;<scheduler_a href="xml/jobs.xml">jobs></scheduler_a>
@@ -182,9 +204,10 @@
                 spooler_id     = "…"
                 stop_on_error  = "yes"
                 tasks          = "1"
+                temporary      = "no"
                 timeout        = "…"
                 title          = "…"
-                visible        = "no"
+                visible        = "yes"
             >
 
                 &lt;<scheduler_a href="xml/description.xml">description</scheduler_a>> … &lt;/description>
@@ -214,14 +237,10 @@
                          ignore_signal= "no" 
                          log_file     = ""
                          param        = ""  >
-                    &lt;<scheduler_a href="xml/environment.xml">environment</scheduler_a>>
-                        &lt;<scheduler_a href="xml/variable.xml">variable</scheduler_a> name  = "…"
-                                  value = "…"
-                        &lt;/variable>
-                    &lt;/environment>
                 &lt;/process>
 
-                &lt;<scheduler_a href="xml/monitor.xml">monitor></scheduler_a>
+                &lt;<scheduler_a href="xml/monitor.xml">monitor</scheduler_a> name         = "…"
+                         ordering     = "…">
                    &lt;<scheduler_a href="xml/script.xml">script language="…" …></scheduler_a>…&lt;script/>
                 &lt;/monitor>
 
@@ -237,7 +256,8 @@
                             end          = "24:00"
                             let_run      = "…"
                             repeat       = "…"     
-                            single_start = "…"     />
+                            single_start = "…"
+                            when_holiday = "…"     />
 
                     &lt;<scheduler_a href="xml/date.xml">date</scheduler_a> date="yyyy-mm-dd"/>
                     …
@@ -317,6 +337,7 @@
                 &lt;<scheduler_a href="xml/commands.xml">commands on_exit_code="…"</scheduler_a>>
                     &lt;<scheduler_a href="xml/start_job.xml">start_job</scheduler_a> job="…" …>
                         &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                            &lt;<a href="xml/param.xml">param</a> name="…" value="…"/>
                             &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="task"/>
                             &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="order"/>
                             …
@@ -325,6 +346,7 @@
                      
                     &lt;<scheduler_a href="xml/add_order.xml">add_order</scheduler_a> job_chain="…" …>
                         &lt;<scheduler_a href="xml/params.xml">params</scheduler_a>>
+                            &lt;<a href="xml/param.xml">param</a> name="…" value="…"/>
                             &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="task"/>
                             &lt;<scheduler_a href="xml/copy_params.xml">copy_params</scheduler_a> from="order"/>
                             …
@@ -337,7 +359,13 @@
         &lt;/jobs>
 
         &lt;<scheduler_a href="xml/job_chains.xml">job_chains</scheduler_a>>
-            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> name="…"/>
+            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> 
+                    distributed       = "no"
+                    name              = "…"
+                    orders_recoverable= "yes"
+                    title             = "…"
+                    visible           = "yes"
+                >
                 &lt;<scheduler_a href="xml/file_order_source.xml">file_order_source</scheduler_a> 
                     delay_after_error = "…"
                     directory         = "…"  
@@ -348,19 +376,22 @@
                 />
                 …
                 &lt;<scheduler_a href="xml/job_chain_node.xml">job_chain_node</scheduler_a>
-                    job         = "…"  
+                    delay       = "…"  
                     error_state = "…"
+                    job         = "…"  
                     next_state  = "…"  
+                    on_error    = "suspend|resume"  
                     state       = "…"  
                 />
                 …
                 &lt;<scheduler_a href="xml/file_order_sink.xml">file_order_sink</scheduler_a> 
                     move_to     = "…"
                     remove      = "yes"
+                    state       = "…"
                 />
                 …
             &lt;/job_chain>
-            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> name="…"/>
+            &lt;<scheduler_a href="xml/job_chain.xml">job_chain</scheduler_a> name="…">
                 &lt;<scheduler_a href="xml/job_chain_node.job_chain.xml">job_chain_node.job_chain</scheduler_a>
                     job_chain   = "…"  
                     error_state = "…"

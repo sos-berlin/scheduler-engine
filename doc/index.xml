@@ -185,8 +185,11 @@
                             <!--scheduler_a href="CHANGES.xml"/-->
                         </td>
                         <td style="padding-left: 2em; font-size: 8pt">
-                            <!-- Meine Texte der proposals.xml bitte ich, nicht zu unterdrücken. Joacim Zschimmer 5. Juli 2007 -->
-                            &#x2192;<scheduler_a href="proposals/index.xml"/>
+                            <!-- Die Vorschläge können nicht in die Auslieferung übernommen werden,
+                                 da sie teils bereits realisiert sind, teils nicht realisiert werden
+                                 bzw. keine Entscheidung über ihre Realisierung vorliegt.
+                                 ap, 2008-08-04
+                            -->
                         </td>
                     </tr>
                 </table>
