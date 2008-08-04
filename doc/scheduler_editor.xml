@@ -157,17 +157,18 @@
 		
 		
 		
-		<h1>Remote Connection</h1>
+		<h3>Remote Connection</h3>
 		
 		
 		
-<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    FTP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    FTP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 		
 		
 		
-		<h2>FTP/SFTP</h2>
+		<h4>FTP/SFTP</h4>
 		<p>
-			Der Job Scheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. SFTP (Secure FTP) öffnen bzw.eine offene Datei per FTP/SFTP speichern. 
+			Der Job Scheduler kann eine XML-Konfigurationsdateien per FTP (File Transfer Protocol) bzw. 
+			SFTP (Secure FTP) öffnen bzw.eine offene Datei per FTP/SFTP speichern. 
 			Sie können über den Menüpunkt File -> FTP oder über den Toolbar den FTP Dialog öffnen:
 		</p>
 		<p>
@@ -177,7 +178,8 @@
 			<img src="images/editor_toolbar_ftp.jpg" width="292" height="150" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
-			Es erscheint ein Dialog, indem Sie die zu öffnenden Profile (FTP-Verbindung) und anschließend die zu öffnenden Dateien auswählen können.
+			Es erscheint ein Dialog, indem Sie die zu öffnenden Profile (FTP-Verbindung) und 
+			anschließend die zu öffnenden Dateien auswählen können.
 		</p>
 		<p>
 			<img src="images/editor_ftp_dialog.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
@@ -185,9 +187,9 @@
 		
 		
 		
-		<h3>Die Bedienelemente</h3>
+		<h5>Die Bedienelemente</h5>
 		
-		<h4>FTP Zugang auswählen</h4>
+		<h6>FTP Zugang auswählen</h6>
 		
 		<p>
 			In diesem Auswahllisten können Sie einen bereits konfigurierten FTP Zugang auswählen
@@ -195,7 +197,7 @@
 		
 		
 		
-		<h3>Verzeichniswechsel</h3>
+		<h5>Verzeichniswechsel</h5>
 		
 		<p>
 			Hier steht als erstes das konfigurierte Verzeichnis auf dem FTP Server. 
@@ -209,7 +211,7 @@
 		
 		
 		
-		<h3>Refresh</h3>
+		<h5>Refresh</h5>
 		
 		<p>
 			Aktualistert alle Verzeichnis- und Dateiinformationen vom FTP Server
@@ -217,7 +219,7 @@
 		
 		
 		
-		<h3>New Folder</h3>
+		<h5>New Folder</h5>
 		
 		<p>
 			Legt ein neues Verzeichnis auf dem FTP Server an.
@@ -225,7 +227,7 @@
 		
 		
 		
-		<h3>Remove</h3>
+		<h5>Remove</h5>
 		
 		<p>
 			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem FTP Server gelöscht.
@@ -233,7 +235,7 @@
 		
 		
 		
-		<h3>Open</h3>
+		<h5>Open</h5>
 		
 		<p>
 			Wurde der FTP Dialog unter der Menüpunkt "Open by FTP" ausgewählt, 
@@ -249,7 +251,7 @@
 		
 		
 		
-		<h3>Close</h3>
+		<h5>Close</h5>
 		
 		<p>
 			Schliesst den FTP Dialog
@@ -257,7 +259,7 @@
 		
 		
 		
-		<h3>Log</h3>
+		<h5>Log</h5>
 		
 		<p>
 			Zeigt den Protokolldialog. Hier können Sie alle Befehle, die an den FTP Server geschickt wurden, 
@@ -266,11 +268,13 @@
 		
 		
 		
-		<h3>Profiles</h3>
+		<h5>Profiles</h5>
 		
 		<p>
 			Hier sehen Sie alle konfigurierten FTP Zugänge. Sie haben die Möglichkeit 
 			neue FTP Zugänge anzulegen bzw. vorhandene FTP Zugänge zu editieren oder zu löschen.
+		</p>
+		<p>
 			<img src="images/editor_profiles_ftp.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
@@ -285,7 +289,7 @@
       und hat folgende Sektion und Einträge:
 		</p>
 		<p>
-		<em>
+			<em>
 <br></br>     <b>[profile profilename]</b>
 <br></br>host=
 <br></br>port=
@@ -300,33 +304,36 @@
 <br></br>proxy_port=
 <br></br>auth_method=
 <br></br>auth_file=
-		</em>
+			</em>
 		</p>
 		
 		
 		
-<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   WEBDAV ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   WEBDAV ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 		
 		
 		
-		<h2>WebDAV</h2>
+		<h4>WebDAV</h4>
 		
 		<p>
-			Der Job Scheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.eine offene Datei per WebDAV speichern. 
+			Der Job Scheduler kann eine XML-Konfigurationsdateien per WebDAV öffnen bzw.
+			eine offene Datei per WebDAV speichern. 
 			Sie können über den Menüpunkt File -> WebDAV  den WebDAV Dialog öffnen:
 		</p>
 		<p>
 			<img src="images/editor_menu_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
 		</p>
 		<p>
-			Der Menüpunkt WebDAV ist nur aktiv, wenn die notwendigen Bibliotheken für die WebDAV-Verbindungen vorhanden sind.
-			Diese Bibliotheken sind aus Lizenzgründen nicht Teil der Job Scheduler Distribution. Sie können z.B. 
-			vom Sourceforge Projekt <code>webdavclient4j</code> unter
+			Der Menüpunkt WebDAV ist nur aktiv, 
+			wenn die notwendigen Bibliotheken für die WebDAV-Verbindungen vorhanden sind.
+			Diese Bibliotheken sind aus Lizenzgründen nicht Teil der Job Scheduler Distribution. 
+			Sie können z.B. vom Sourceforge Projekt <code>webdavclient4j</code> unter
 			<a href="https://sourceforge.net/projects/webdavclient4j/">https://sourceforge.net/projects/webdavclient4j/</a> 
 			heruntergeladen werden. 
 		</p>
 		<p>
-			Es müssen folgende Bibliotheken im Verzeichnis <code><i>scheduler_installation_directory</i>/lib</code> vorhanden sein,
+			Es müssen folgende Bibliotheken im Verzeichnis 
+			<code><i>scheduler_installation_directory</i>/lib</code> vorhanden sein,
 			dabei können ggf. anderen Bibliotheksnamen oder Versionsnummern zum Einsatz kommen.
 		</p>
 		<ul>
@@ -350,9 +357,9 @@
 		
 		
 		
-		<h3>Die Bedienelemente</h3>
+		<h5>Die Bedienelemente</h5>
 		
-		<h4>WebDAV Zugang auswählen</h4>
+		<h6>WebDAV Zugang auswählen</h6>
 		
 		<p>
 			In diesen Auswahllisten können Sie einen bereits konfigurierten WebDAV Zugang auswählen
@@ -360,7 +367,7 @@
 		
 		
 		
-		<h3>URL Wechsel</h3>
+		<h5>URL Wechsel</h5>
 		
 		<p>
 			Hier steht als erstes die konfigurierte URL auf dem WebDAV Server. 
@@ -372,7 +379,7 @@
 		
 		
 		
-		<h3>Refresh</h3>
+		<h5>Refresh</h5>
 		
 		<p>
 			Aktualistert alle Verzeichnis- und Dateinformationen vom WebDAV Server
@@ -380,7 +387,7 @@
 		
 		
 		
-		<h3>New Folder</h3>
+		<h5>New Folder</h5>
 		
 		<p>
 			Legt einen neuen Verzeichnis auf dem WebDAV Server an.
@@ -388,7 +395,7 @@
 		
 		
 		
-		<h3>Remove</h3>
+		<h5>Remove</h5>
 		
 		<p>
 			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem WebDAV Server gelöscht.
@@ -396,7 +403,7 @@
 		
 		
 		
-		<h3>Open</h3>
+		<h5>Open</h5>
 		
 		<p>
 			Wurde der WebDAV Dialog unter dem Menüpunkt "Open by WebDAV" ausgewählt, 
@@ -412,7 +419,7 @@
 		
 		
 		
-		<h3>Close</h3>
+		<h5>Close</h5>
 		
 		<p>
 			Schließt den WebDAV Dialog
@@ -420,20 +427,21 @@
 		
 		
 		
-		<h3>Log</h3>
+		<h5>Log</h5>
 		
 		<p>
 			Zeigt den Protokolldialog. Hier können Sie alle Befehle, 
-			die an den WebDAV Server geschickt wurden, und die Antworten vom WebDAV Server sehen.</p>
-		<p/>
+			die an den WebDAV Server geschickt wurden, und die Antworten vom WebDAV Server sehen.
+		</p>
 		
 		
 		
-		<h3>Profiles</h3>
+		<h5>Profiles</h5>
 		
 		<p>
 			Hier sehen Sie alle konfigurierte WebDAV Zugänge. 
-			Sie haben die Möglichkeit neue WebDAV Zugänge anzulegen bzw. vorhandene WebDAV Zugänge zu editieren oder zu löschen.
+			Sie haben die Möglichkeit neue WebDAV Zugänge anzulegen bzw. 
+			vorhandene WebDAV Zugänge zu editieren oder zu löschen.
 		</p>
 		<p>
 			<img src="images/editor_profiles_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
