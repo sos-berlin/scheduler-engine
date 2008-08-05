@@ -226,10 +226,11 @@
 		<img class="screen_shot" src="images/job_scheduler_http_job_menu_reduced.jpg"/>
 		
 		<p>
-			The "Show description" item in the menu opens a new browser window containing the Job Editor.
-			This editor combines documentation of the job, its configuration and a generation function, 
+			The "Show description" item in the menu opens a new browser window containing the job description.
+			Job descriptions such as the one shown below can be written with the Job Editor.
+			This editor combines documentation of the job, its configuration and a generate function, 
 			where the job can be newly generated after changes to its configuration have been made.
-			This editor is so integrated in the Job Scheduler installation that the Job Scheduler automatically 
+			It is so integrated in the Job Scheduler installation that the Job Scheduler automatically 
 			takes account of changes in a job configuration without having to be restarted.
 		</p>
 		
