@@ -44,7 +44,7 @@
   <p>
 			Das Formular zur Konfiguration eines Jobs ist geöffnet:
 			<br/>
-    <img src="images/editor_job.jpg" width="1033" height="830" style="margin: 20px 0px ; border:1px solid gray;"/>
+    <img src="images/editor_job.jpg" width="890" height="701" style="margin: 20px 0px ; border:1px solid gray;"/>
     <br/>
 			Mit <strong>F1</strong> erreichen Sie die Dokumentation des XML-Elements <em>&lt;job&gt;</em>:
 			<br/>

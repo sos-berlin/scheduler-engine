@@ -234,8 +234,9 @@
 		</p>
 		
 		<p>
-			The documentation for the Job Editor can be read in the <a href="scheduler_editor.xml">Job Scheduler Editor</a>
-			section of this documentation.
+			The documentation for the Job Editor can be read in the 
+			<link href="http://www.sos-berlin.com/doc/de/scheduler_editor/sos_help.htm">Job Documentation Editor</link>
+			tutorial.
 		</p>
 		
 		<img class="screen_shot" src="images/job_scheduler_http_job_description_reduced.jpg"/>
