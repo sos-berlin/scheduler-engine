@@ -2207,7 +2207,9 @@
         <xsl:param name="content"/>
         <xsl:param name="base_dir" select="/*/@base_dir"/>
 
-        <xsl:variable name="root_element" select="document( $href )/*"/>
+        <!--xsl:variable name="href_file"    select="substring-before( concat( $href, '#' ), '#' )"/    2008-08-14 Funktioniert nicht (ie6) -->
+        <xsl:variable name="href_file"    select="$href"/>
+        <xsl:variable name="root_element" select="document( $href_file )/*"/>
         <xsl:variable name="root_title"   select="normalize-space( $root_element/@title )"/>
 
         <xsl:choose>
