@@ -15,7 +15,8 @@
     <description>
         <p>
             Das Kommando schreibt das Kind-Element in ein Konfigurationsverzeichnis.
-            Der Dateiname wird nach dem Regeln für die dateibasierte Konfiguration gebildet.
+            Der Dateiname wird nach den Regeln für die dateibasierte Konfiguration gebildet
+            (s. <scheduler_a href="../dynamic_configuration.xml#files" quote="yes"/>).
         </p>
         <p>
             Eine vorhandene Datei wird überschrieben.

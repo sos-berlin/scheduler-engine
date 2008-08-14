@@ -23,5 +23,6 @@ public class Run_time  extends Idispatch
      */
     
     public void         set_xml                 ( String xml )                      {                   com_call( ">xml", xml           ); }
+  //public String           xml                 ()                                  { return (String)   com_call( "<xml"                ); }
     public Schedule     schedule                ()                                  { return (Schedule) com_call( "<schedule"           ); }
 }

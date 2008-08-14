@@ -12,8 +12,6 @@
     date        = "$Date$"
 >
 
-<not_implemented programming_language="java"/>
-
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <property name="Schedule" access="read">

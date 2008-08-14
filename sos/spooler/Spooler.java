@@ -155,4 +155,6 @@ public class Spooler extends Idispatch
     public Supervisor_client supervisor_client()                                    { return (Supervisor_client)com_call( "<supervisor_client" ); }
     
     public String           configuration_directory()                               { return (String)        com_call( "<configuration_directory" ); }
+    
+    public Schedule         schedule( String path )                                 { return (Schedule)      com_call( "<schedule", path ); }
 }

@@ -2218,6 +2218,9 @@
 <register_keyword keyword='SCHEDULER_SUPERVISOR_PORT'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_SUPERVISOR_PORT'/>
 </register_keyword>
+<register_keyword keyword='SCHEDULER_TASK_ID'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_ID'/>
+</register_keyword>
 <register_keyword keyword='SCHEDULER_TASK_TRIGGER_FILES'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_TASK_TRIGGER_FILES'/>
 </register_keyword>

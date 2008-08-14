@@ -48,7 +48,38 @@ hostware.sleep( 5 );
                 <run_time schedule="sextio"/>
             </job>
 
-            
+
+            <job name="A.java" order="yes" idle_timeout="60">
+                <script java_class="spooler_job.test.A">
+                    <![CDATA[
+
+package spooler_job.test;
+
+import sos.spooler.*;
+
+public class A  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );                    
+      //spooler_log.info( "run_time.xml=" + spooler_task.order().run_time().xml() );
+        spooler_log.info( "run_time.schedule.xml=" + spooler_task.order().run_time().schedule().xml() );
+        spooler_task.order().run_time().set_xml( "<run_time schedule='trettio'/>" );
+        spooler_log.info( "run_time.schedule.xml=" + spooler_task.order().run_time().schedule().xml() );
+        spooler_task.order().run_time().schedule().set_xml( "<schedule><period absolute_repeat='33'/></schedule>" );
+        spooler_log.info( "run_time.schedule.xml=" + spooler_task.order().run_time().schedule().xml() );
+        spooler_log.info( "spooler.schedule('trettio').xml=" + spooler.schedule("trettio").xml() );
+        Thread.sleep( 5 );
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <run_time schedule="sextio"/>
+            </job>
+
+
             <job name="B" order="yes" idle_timeout="60">
                 <script language="javascript">
                     <![CDATA[

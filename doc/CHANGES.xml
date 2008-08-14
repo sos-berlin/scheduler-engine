@@ -10,7 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    
+
+    <change date="2008-08-14" version="2.0.210" subversion_revision="5839">
+        <revision type="new" title="Klasse Run_time für Java ermöglicht">
+            <description>
+                <p>
+                    <scheduler_method class="Run_time"/> kann auch in Java benutzt werden.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2008-07-25" version="2.0.210" subversion_revision="5838">
         <revision type="new" title="Neue Umgebungsvariable SCHEDULER_TASK_ID">
             <description>

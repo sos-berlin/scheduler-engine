@@ -12,8 +12,6 @@
     date        = "$Date$"
 >
 
-<not_implemented programming_language="java"/>
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <property name="xml">
@@ -51,7 +49,7 @@
     <p>
         Siehe <scheduler_element name="schedule"/>,
         <scheduler_element name="run_time"/>,
-        <scheduler_method class="Spooler" object="spooler" method="schedule"/>,
+        <scheduler_method class="Spooler" object="spooler" property="schedule"/>,
         <scheduler_method class="Run_time"/>.
     </p>
 </description>

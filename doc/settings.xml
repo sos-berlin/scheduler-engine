@@ -631,7 +631,7 @@ db = scheduler.mdb
                 wenn die Task wenigstens die angegebene Anzahl Schritte,
                 also Aufrufe von <scheduler_method class="Job_impl" method="spooler_process"/>,
                 ausgeführt hat.
-                Bei Nicht-API-Tasks wird immer ein Schritt gezählt.
+                Weil Nicht-API-Tasks keine Schritte haben, zählt der Scheduler für sie immer einen Schritt.
             </p>
         </description>
     </setting>
