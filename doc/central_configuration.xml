@@ -51,7 +51,7 @@
 
     <p>
         Im zentralen Konfigurationsverzeichnis <code>./config/remote</code> wird dazu pro Workload Job Scheduler ein Verzeichnis
-        mit dem Namen <code>host:port</code> angelegt. Außerdem wird pro vorhandenem Job Scheduler Cluster 
+        mit dem Namen <code>host#port</code> angelegt. Außerdem wird pro vorhandenem Job Scheduler Cluster 
         siehe <a href="backupscheduler.xml">Backup Clusters</a> und <a href="distributed_orders.xml">Load Balancing</a>, 
         ein Verzeichnis mit der <code>Scheduler ID</code> des Clusters angelegt. Die in den jeweiligen Verzeichnissen enthaltene 
         Verzeichnisstruktur wird an die zugehörigen Workload Job Scheduler bzw. an den zugehörigen Job Scheduler Cluster repliziert.
@@ -112,13 +112,13 @@
    
      <ul>
         <li>
-           Ordner für Workload Job Scheduler beim Supervisor anlegen (<code>./config/remote/host:port</code>)
+           Ordner für Workload Job Scheduler beim Supervisor anlegen (<code>./config/remote/host#port</code>)
         </li>
         <li>
          	 Ordner <code>./config/cache</code> beim Workload Job Scheduler anlegen
         </li>
         <li>
-         	 Inhalt von Ordner <code>./config/live</code> des Workload Job Schedulers nach <code>./config/remote/host:port</code> des Supervisors kopieren         		
+         	 Inhalt von Ordner <code>./config/live</code> des Workload Job Schedulers nach <code>./config/remote/host#port</code> des Supervisors kopieren         		
         </li>    
         <li>
          	 Anmeldung an an Supervisor konfigurieren. Dazu Eintrag <scheduler_element name="config" attribute="supervisor"/> 
