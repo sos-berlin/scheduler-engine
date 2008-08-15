@@ -11,7 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-08-14" version="2.0.210" subversion_revision="5839">
+    <change date="2008-08-14" version="2.0.210" subversion_revision="5859">
+        <revision type="correction" title="Perl-API unter Unix (libsosperlscript.so) verbessert">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Log" property="level"/>:
+                        $spooler_log->LetProperty( 'level', ... ) funktioniert.
+                    </li>
+                    <li>
+                        Die Perl-Schnittstelle versucht jetzt, jeden unbekannten Typ als String zu erkennen, 
+                        so dass auch folgende Sequenz funktioniert, 
+                        deren zweite Anweisungen <code>$a</code> von einem SVt_IV in einen SVt_PVIV wandelt:
+                        <pre>my $a = 1;
+my $x = "$a";
+$spooler_log->info( $a )</pre>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
         <revision type="new" title="Klasse Run_time für Java ermöglicht">
             <description>
                 <p>
