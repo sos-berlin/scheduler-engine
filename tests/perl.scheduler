@@ -19,13 +19,9 @@
 
 eval
 {
-    my $setback_counter = 0;
-    $setback_counter += 1;
-    $spooler->variables->set_var( "apitest.perl.order.setback_counter", $setback_counter );
-    $spooler_log->info( $spooler->variables->var( "apitest.perl.order.setback_counter" ) );
-
-    $spooler->variables->set_var( "TEST", 1+1 );
-    $spooler_log->info( "TEST=" . $spooler->variables->value( "TEST" ) );                    
+    my $a = 1+1;
+    my $x = "$a";
+    $spooler_log->info( $a );
 
     $spooler_log->LetProperty( 'level', 3 ); # verhindert die Error Ausgabe
     $spooler_log->LetProperty( 'level', 0 );
