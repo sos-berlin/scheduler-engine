@@ -14,7 +14,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-    <property name="Schedule" access="read">
+    <property name="schedule" access="read">
         <com>
             <com.result>
                 <com.type class="Schedule"/>
