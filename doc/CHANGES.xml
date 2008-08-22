@@ -10,7 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-
+    <change date="2008-08-22" version="2.0.210" subversion_revision="5864">
+        <revision type="correction" title="Anpassung an verschachtelte Jobketten">
+            <description>
+                <p>
+                    <scheduler_element name="add_order" attribute="state"/> und
+                    <scheduler_element name="add_order" attribute="end_state"/> sind jetzt auf verschachtelte Jobketten anwendbar.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
+    
     <change date="2008-08-14" version="2.0.210" subversion_revision="5860">
         <revision type="correction" title="Perl-API unter Unix (libsosperlscript.so) verbessert">
             <description>
