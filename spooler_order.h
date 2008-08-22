@@ -323,7 +323,7 @@ struct Order : Com_order,
     State                      _outer_job_chain_state;
     Payload                    _payload;
     string                     _xml_payload;
-    State                      _initial_state;
+    State                      _initial_state;          // Für Wiederholung mit <run_time> oder <schedule>. Bei verschachtelten Jobkette in der übergeordneten Jobkette
     ptr<Web_service>           _web_service;
 
     bool                       _is_virgin;              // Noch von keiner Task berührt

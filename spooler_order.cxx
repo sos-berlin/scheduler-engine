@@ -5390,7 +5390,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
 
     if( _history_id )  result.setAttribute( "history_id", _history_id );
 
-    if( has_base_file() )  fill_file_based_dom_element( result, show_what );
+    fill_file_based_dom_element( result, show_what );
 
     if( !show_what.is_set( show_for_database_only ) )
     {
@@ -6180,7 +6180,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         job_chain->state() != Job_chain::s_active  &&
         job_chain->state() != Job_chain::s_stopped )  z::throw_xc( "SCHEDULER-151" );
 
-    if( !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
+    if( _outer_job_chain_path == ""  &&  !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
 
     bool is_new = true;
 
@@ -6412,7 +6412,7 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
             else
             if( _is_success_state )
             {
-                if( _state == _end_state )
+                if( _outer_job_chain_path == ""  &&  _state == _end_state )
                 {
                     log()->info( message_string( "SCHEDULER-704", _end_state ) );
                     set_end_state_reached();
@@ -6472,12 +6472,12 @@ void Order::handle_end_state()
     }
     else
     {
-        bool is_first_call = false; //_schedule_modified;
-        //_schedule_modified = false;
-        Time next_start = next_start_time( is_first_call );
+        bool  is_first_call = false; //_schedule_modified;
+        Time  next_start    = next_start_time( is_first_call );
+        State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
         if( ( next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
-            _state != _initial_state )   
+            s != _initial_state )   
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
@@ -6522,38 +6522,46 @@ bool Order::handle_end_state_of_nested_job_chain()
 
     try
     {
-        Job_chain*  outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );
-        Node*       outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
-        State       next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
-                                                                  : outer_job_chain_node->error_state();
-
-        Nested_job_chain_node* next_outer_job_chain_node = Nested_job_chain_node::try_cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
-        
-
-        if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
+        if( _outer_job_chain_state == _end_state )
         {
-            Job_chain* next_job_chain = next_outer_job_chain_node->nested_job_chain();
-
-            _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
-
-            close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-            _start_time = 0;
-            _end_time = 0;
-            open_log();
-
-            _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
-            place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
-            _outer_job_chain_path = Absolute_path( root_path, outer_job_chain->path() );  // place_in_job_chain() hat's gelöscht
-
-            _log->info( message_string( "SCHEDULER-863", _job_chain->obj_name() ) );
+            log()->info( message_string( "SCHEDULER-704", _end_state ) );
+            end_state_reached = true;
         }
         else
         {
-            // Bei <schedule> Auftrag an den Anfang der ersten Jobkette setzen
-            end_state_reached = true;
-        }
+            Job_chain* outer_job_chain            = order_subsystem()->job_chain( _outer_job_chain_path );
+            Node*      outer_job_chain_node       = outer_job_chain->node_from_state( _outer_job_chain_state );
+            State      next_outer_job_chain_state = _is_success_state? outer_job_chain_node->next_state() 
+                                                                     : outer_job_chain_node->error_state();
 
-        _outer_job_chain_state = next_outer_job_chain_state;
+            Nested_job_chain_node* next_outer_job_chain_node  = Nested_job_chain_node::try_cast( outer_job_chain->node_from_state_or_null( next_outer_job_chain_state ) );
+
+            if( next_outer_job_chain_node  &&  next_outer_job_chain_node->nested_job_chain() )
+            {
+                Job_chain* previous_job_chain = _job_chain;
+                Job_chain* next_job_chain     = next_outer_job_chain_node->nested_job_chain();
+
+                _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
+
+                close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
+                _start_time = 0;
+                _end_time = 0;
+                open_log();
+
+                _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
+                place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
+                _outer_job_chain_path = Absolute_path( root_path, outer_job_chain->path() );  // place_in_job_chain() hat's gelöscht
+
+                _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
+            }
+            else
+            {
+                // Bei <schedule> Auftrag an den Anfang der ersten Jobkette setzen
+                end_state_reached = true;
+            }
+
+            _outer_job_chain_state = next_outer_job_chain_state;
+        }
     }
     catch( exception& x ) 
     { 
@@ -6576,7 +6584,7 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
 
     if( _outer_job_chain_path != "" )
     {
-        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->active_job_chain( _outer_job_chain_path )->first_node() ) )
+        if( Nested_job_chain_node* n = Nested_job_chain_node::try_cast( order_subsystem()->active_job_chain( _outer_job_chain_path )->node_from_state( _initial_state ) ) )
             first_nested_job_chain_path = n->nested_job_chain_path();
 
         remove_from_job_chain( jc_leave_in_job_chain_stack );  
