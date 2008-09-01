@@ -153,6 +153,10 @@
         <li>
             Umfangreiche Datenbank-Zugriffe für XML-Kommandos
         </li>
+        <li>
+            execl() usw. können blockieren: "Wenn der Zugriff auf die gefundene Datei gerade nicht möglich ist (der execve-Aufruf lieferte ETXTBUSY in errno), warten diese Funktionen mehrere Sekunden und versuchen periodisch die gefundene Datei auszufhren.  Dieses Problem  kann  beim  Dateizu-
+            griff ber ein Netzwerk wie z.B. mit NFS auftreten." [man execl]
+        </li>
     </ul>
 
     

@@ -206,6 +206,7 @@ struct File_based : Scheduler_object,
     State                       file_based_state            () const                                { return _state; }
     string                      file_based_state_name       () const                                { return file_based_state_name( file_based_state() ); } 
     static string               file_based_state_name       ( State );
+    bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
   //void                    set_defined                     ();                                     // Für Objekte, die kein XML brauchen
 
     void                    set_to_be_removed               ( bool );

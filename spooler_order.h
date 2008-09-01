@@ -500,6 +500,7 @@ struct Node : Com_job_chain_node,
     virtual void                close                       ();
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    State                       state                       () const                                { return _state; }
 
     virtual bool                initialize                  ();
     virtual void                activate                    ();
@@ -765,7 +766,6 @@ struct Job_chain : Com_job_chain,
   //bool                        initialize_nested_job_chains();
     bool                        check_nested_job_chains     ();
     void                        check_job_chain_node        ( job_chain::Node* );
-    void                        add_nested_job_chains_to_order_id_space( Order_id_space* );
     void                        complete_nested_job_chains  ();
 
 
@@ -807,7 +807,7 @@ struct Job_chain : Com_job_chain,
     string                      db_where_condition          () const;
 
     // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
-    void                        disconnected_nested_job_chains_and_rebuild_order_id_space();
+    void                        disconnect_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
     void                    set_order_id_space              ( Order_id_space* g )                       { _order_id_space = g; }
     String_set                  connected_job_chains        ();

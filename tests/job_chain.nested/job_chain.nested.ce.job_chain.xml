@@ -2,7 +2,7 @@
            
 >
     
-    <job_chain_node.job_chain state="CCC" job_chain="job_chain.nested.scheduler.C"/>
-    <job_chain_node.job_chain state="EEE" job_chain="job_chain.nested.scheduler.E"/>
+    <job_chain_node.job_chain state="CCC" job_chain="job_chain.nested.C"/>
+    <job_chain_node.job_chain state="EEE" job_chain="job_chain.nested.E"/>
     
 </job_chain>

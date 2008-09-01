@@ -2,8 +2,8 @@
 
 >
     
-    <job_chain_node.job_chain state="DDD1" job_chain="job_chain.nested.scheduler.D"/>
-    <job_chain_node.job_chain state="DDD2" job_chain="job_chain.nested.scheduler.D"/>
-    <job_chain_node.job_chain state="EEE" job_chain="job_chain.nested.scheduler.E"/>
+    <job_chain_node.job_chain state="DDD1" job_chain="job_chain.nested.D"/>
+    <job_chain_node.job_chain state="DDD2" job_chain="job_chain.nested.D"/>
+    <job_chain_node.job_chain state="EEE" job_chain="job_chain.nested.E"/>
     
 </job_chain>
