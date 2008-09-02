@@ -447,6 +447,7 @@ struct Spooler : Object,
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
+    void                        self_check                  ();
     void                        report_event                ( Scheduler_event* e )              { if( _scheduler_event_manager )  _scheduler_event_manager->report_event( e ); }
 
   //void                        create_window               ();

@@ -102,6 +102,7 @@ struct Scheduler_object
 
     void                        complain_about_non_empty_attribute( const xml::Element_ptr&, const string& attribute_name );
     void                        assert_empty_attribute      ( const xml::Element_ptr&, const string& attribute_name );
+    virtual void                self_check                  ()                                      {}
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;

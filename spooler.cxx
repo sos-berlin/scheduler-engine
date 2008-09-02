@@ -1165,6 +1165,9 @@ void Spooler::set_state( State state )
 {
     assert( current_thread_id() == _thread_id );
 
+    self_check();
+
+
     if( _state == state )  return;
 
     State old_state = _state;
@@ -1213,6 +1216,13 @@ string Spooler::state_name( State state )
         case s_stopping_let_run:    return "stopping_let_run";
         default:                    return as_string( (int)state );
     }
+}
+
+//------------------------------------------------------------------------------Spooler::self_check
+
+void Spooler::self_check()
+{
+    order_subsystem()->self_check();
 }
 
 //--------------------------------------------------------------------------------Spooler::send_cmd
