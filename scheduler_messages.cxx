@@ -492,6 +492,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-705", "Substitute '$1' is valid now" },
     { "SCHEDULER-706", "Standard '$1' is valid now" },
     { "SCHEDULER-707", "Creating configuration directory '$1'" },
+    { "SCHEDULER-708", "Adding '$1" },
     {}
 };
 } //namespace sos

@@ -68,7 +68,7 @@ struct Order_id_space : Object, Scheduler_object
   private:
     friend struct               Order_id_spaces;
 
-    void                        add_job_chain               ( Job_chain*, bool check_ids = true );
+    void                        add_job_chain               ( Job_chain*, bool check_duplicate_order_ids = true );
     void                        remove_job_chain            ( Job_chain* );
     bool                        job_chain_is_included       ( Job_chain* job_chain ) const          { return _job_chain_set.find( job_chain->normalized_path() ) != _job_chain_set.end(); }
 
@@ -92,7 +92,7 @@ struct Order_id_spaces : Order_id_spaces_interface
     void                        add_order_id_space          ( Order_id_space*, Job_chain* causing_job_chain, int index = 0 );
     void                        remove_order_id_space       ( Order_id_space*, Job_chain* causing_job_chain, Do_log = do_log );
 
-    void                        build_order_id_spaces       ( Job_chain* );
+    void                        rebuild_order_id_space      ( Job_chain*, Job_chain* causing_job_chain, const String_set& original_job_chain_set );
     void                        disconnect_order_id_spaces  ( Job_chain* causing_job_chain, const Job_chain_set& disconnected_job_chains );
     int                         remove_job_chain_from_order_id_space( Job_chain* );
     void                        self_check                  ();
@@ -100,6 +100,9 @@ struct Order_id_spaces : Order_id_spaces_interface
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
   private:
+    void                        disconnect_order_id_space   ( Job_chain*, Job_chain* causing_job_chain, const String_set& original_job_chain_set, Job_chain_set* job_chains );
+
+    Fill_zero                      _zero_;
     Order_subsystem*               _order_subsystem;
     vector< ptr<Order_id_space> >  _array;                  // [0] unbenutzt, Lücken sind NULL
 };
@@ -2384,7 +2387,11 @@ void Job_chain::complete_nested_job_chains()
     }
 
     
-    subsystem()->order_id_spaces()->build_order_id_spaces( this );
+    String_set original_job_chain_set;
+    if( order_id_space() )  original_job_chain_set = order_id_space()->_job_chain_set;
+
+    subsystem()->order_id_spaces()->rebuild_order_id_space( this, this, original_job_chain_set );
+    subsystem()->order_id_spaces()->self_check();
 }
 
 //---------------------------------------------------------------------------Job_chain::on_activate
@@ -2974,6 +2981,7 @@ void Job_chain::set_state( const State& state )
 
 Order_id_spaces::Order_id_spaces( Order_subsystem* order_subsystem )
 :
+    _zero_(this+1),
     _order_subsystem(order_subsystem)
 {
     _array.push_back( NULL );    // Index 0 benutzen wir nicht
@@ -2986,23 +2994,67 @@ Spooler* Order_id_spaces::spooler()
     return _order_subsystem->spooler(); 
 }
 
-//-----------------------------------------------------------Order_id_spaces::build_order_id_spaces
+//------------------------------------------------------------Order_id_spaces::build_order_id_space
 
-void Order_id_spaces::build_order_id_spaces( Job_chain* job_chain )
+//void Order_id_spaces::build_order_id_space( Job_chain* job_chain )
+//{
+//    String_set connected_job_chains = job_chain->connected_job_chains();
+//
+//    if( !connected_job_chains.empty() )
+//    {
+//        ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( _order_subsystem ) );
+//
+//        // Order_id_space vorbereiten, aber noch nicht in den Jobketten eintragen, falls eine Auftragskennung doppelt ist
+//
+//        Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
+//        {
+//            Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
+//
+//            order_id_space->add_job_chain( connected_job_chain );        // Exception bei doppelter Auftragskennung
+//        }
+//
+//
+//        // Auftragskennungen sind eindeutig, also können die Jobketten jetzt dem Order_id_space zugeordnet werden
+//
+//        Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
+//        {
+//            Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
+//        
+//            remove_job_chain_from_order_id_space( connected_job_chain );
+//        }
+//
+//        add_order_id_space( order_id_space, job_chain );
+//        self_check();
+//    }
+//}
+
+//----------------------------------------------------------Order_id_spaces::rebuild_order_id_space
+
+void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* causing_job_chain, const String_set& original_job_chain_set )
 {
     String_set connected_job_chains = job_chain->connected_job_chains();
 
-    if( !connected_job_chains.empty() )
+    if( connected_job_chains.empty() )
     {
-        ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( _order_subsystem ) );
-
-        // Order_id_space vorbereiten, aber noch nicht in den Jobketten eintragen, falls eine Auftragskennung doppelt ist
+        remove_job_chain_from_order_id_space( job_chain );
+    }
+    else
+    if( job_chain->order_id_space()  &&  job_chain->order_id_space()->_job_chain_set == connected_job_chains )  
+    {
+        // Bestehenden Order_id_space belassen
+    }
+    else
+    {
+        ptr<Order_id_space> order_id_space       = Z_NEW( Order_id_space( _order_subsystem ) );
+        int                 order_id_space_index = 0;
 
         Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
         {
             Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
 
-            order_id_space->add_job_chain( connected_job_chain );        // Exception bei doppelter Auftragskennung
+            bool check_duplicate_order_ids = !set_includes( original_job_chain_set, connected_job_chain->normalized_path() );
+
+            order_id_space->add_job_chain( connected_job_chain, check_duplicate_order_ids );   // check_duplicate_order_ids: Exception bei doppelter Auftragskennung
         }
 
 
@@ -3012,11 +3064,11 @@ void Order_id_spaces::build_order_id_spaces( Job_chain* job_chain )
         {
             Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
         
-            remove_job_chain_from_order_id_space( connected_job_chain );
+            int freed = remove_job_chain_from_order_id_space( connected_job_chain );
+            if( freed  &&  order_id_space_index > freed )  freed = order_id_space_index;
         }
 
-        add_order_id_space( order_id_space, job_chain );
-        self_check();
+        add_order_id_space( order_id_space, causing_job_chain, order_id_space_index );
     }
 }
 
@@ -3063,54 +3115,46 @@ void Order_id_spaces::add_order_id_space( Order_id_space* order_id_space, Job_ch
 
 void Order_id_spaces::disconnect_order_id_spaces( Job_chain* causing_job_chain, const Job_chain_set& disconnected_job_chains )
 {
-    Job_chain_set job_chains = disconnected_job_chains;
-    int           freed_order_id_space_index = 0;
+    String_set original_job_chain_set;
+    if( causing_job_chain->order_id_space() )  original_job_chain_set = causing_job_chain->order_id_space()->_job_chain_set;
 
+    Job_chain_set job_chains = disconnected_job_chains;
+    
     job_chains.insert( causing_job_chain );
+    disconnect_order_id_space( causing_job_chain, causing_job_chain, original_job_chain_set, &job_chains );        // Die zuerst, dann muss vielleicht nur die Jobkette aus dem Order_id_space genommen werden
 
     while( !job_chains.empty() )
     {
-        Job_chain* job_chain            = *job_chains.begin();
-        String_set connected_job_chains = job_chain->connected_job_chains();
+        Job_chain* job_chain = *job_chains.begin();
 
-        if( connected_job_chains.empty() )
-        {
-            remove_job_chain_from_order_id_space( job_chain );
-            job_chains.erase( job_chain );
-        }
-        else
-        if( connected_job_chains == job_chain->order_id_space()->_job_chain_set )  
-        {
-            // Bestehenden Order_id_space belassen
-            job_chains.erase( job_chain );
-        }
-        else
-        {
-            ptr<Order_id_space> order_id_space       = Z_NEW( Order_id_space( _order_subsystem ) );
-            int                 order_id_space_index = 0;
-
-            Z_FOR_EACH_CONST( String_set, connected_job_chains, it2 )
-            {
-                Job_chain* jc = _order_subsystem->job_chain( Absolute_path( *it2 ) );
-
-                int freed = remove_job_chain_from_order_id_space( jc );
-                if( freed  &&  freed_order_id_space_index > freed )  freed = freed_order_id_space_index;
-
-                order_id_space->add_job_chain( jc, false );
-                //jc->set_order_id_space( order_id_space );
-
-                job_chains.erase( jc );
-            }
-
-            add_order_id_space( order_id_space, causing_job_chain, freed_order_id_space_index );
-            order_id_space_index = 0;
-        }
+        disconnect_order_id_space( job_chain, causing_job_chain, original_job_chain_set, &job_chains );
     }
 
 
     self_check();
 
     Z_FOR_EACH_CONST( Job_chain_set, disconnected_job_chains, jc )  (*jc)->check_for_replacing_or_removing(); 
+}
+
+//-------------------------------------------------------Order_id_spaces::disconnect_order_id_space
+
+void Order_id_spaces::disconnect_order_id_space( Job_chain* job_chain, Job_chain* causing_job_chain, 
+                                                 const String_set& original_job_chain_set, Job_chain_set* job_chains )
+{
+    rebuild_order_id_space( job_chain, causing_job_chain, original_job_chain_set );
+
+    if( job_chain->order_id_space() )
+    {
+        const String_set& connected_job_chains = job_chain->order_id_space()->_job_chain_set;
+    
+        Z_FOR_EACH_CONST( String_set, connected_job_chains, jc )
+        {
+            Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *jc ) );
+            job_chains->erase( connected_job_chain );
+        }
+    }
+
+    job_chains->erase( job_chain );
 }
 
 //--------------------------------------------Order_id_spaces::remove_job_chain_from_order_id_space
@@ -3351,7 +3395,7 @@ void Order_id_space::on_order_id_space_added( Job_chain* causing_job_chain )
 
 //--------------------------------------------------------------------Order_id_space::add_job_chain
 
-void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_ids )
+void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_duplicate_order_ids )
 {
     if( job_chain_is_included( job_chain ) )
     {
@@ -3359,7 +3403,9 @@ void Order_id_space::add_job_chain( Job_chain* job_chain, bool check_ids )
     }
     else
     {
-        if( check_ids )
+        log()->debug9( message_string( "SCHEDULER-708", job_chain->path(), check_duplicate_order_ids? "checking duplicate order IDs" : "" ) );
+
+        if( check_duplicate_order_ids )
         {
             check_for_unique_order_ids_of( job_chain );
         }
