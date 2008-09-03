@@ -669,12 +669,19 @@ bool Process_module_instance::begin__end()
             execvp( program_path().c_str(), args );
 
             int e = errno;
+            
             //Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
-            fprintf( stderr, "ERRNO-%d  %s, at execvp(\"%s\"", e, strerror(e), quoted_string( program_path() ).c_str() );
+            fprintf( stderr, "ERRNO-%d  %s, at execvp(%s", e, strerror(e), quoted_string( program_path() ).c_str() );
             for( int i = 0; args[i]; i++ )  fprintf( stderr, ",%s", quoted_string( args[i] ).c_str() );
             fprintf( stderr, ")\n" );
+
+            int size = 1;
+            for( char** e = environ; *e; e++ )  size += strlen( *e ) + 1;
+            fprintf( stderr, "environment (%d bytes):\n", size );
+            for( char** e = environ; *e; e++ )  fprintf( stderr, "%s\n", *e );
+
             fflush( stderr );
-            _exit( e? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
+            _exit( e > 0  &&  e < 250? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }
 
         default:
