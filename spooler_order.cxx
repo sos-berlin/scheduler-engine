@@ -2994,40 +2994,6 @@ Spooler* Order_id_spaces::spooler()
     return _order_subsystem->spooler(); 
 }
 
-//------------------------------------------------------------Order_id_spaces::build_order_id_space
-
-//void Order_id_spaces::build_order_id_space( Job_chain* job_chain )
-//{
-//    String_set connected_job_chains = job_chain->connected_job_chains();
-//
-//    if( !connected_job_chains.empty() )
-//    {
-//        ptr<Order_id_space> order_id_space = Z_NEW( Order_id_space( _order_subsystem ) );
-//
-//        // Order_id_space vorbereiten, aber noch nicht in den Jobketten eintragen, falls eine Auftragskennung doppelt ist
-//
-//        Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
-//        {
-//            Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
-//
-//            order_id_space->add_job_chain( connected_job_chain );        // Exception bei doppelter Auftragskennung
-//        }
-//
-//
-//        // Auftragskennungen sind eindeutig, also können die Jobketten jetzt dem Order_id_space zugeordnet werden
-//
-//        Z_FOR_EACH_CONST( String_set, connected_job_chains, it )
-//        {
-//            Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
-//        
-//            remove_job_chain_from_order_id_space( connected_job_chain );
-//        }
-//
-//        add_order_id_space( order_id_space, job_chain );
-//        self_check();
-//    }
-//}
-
 //----------------------------------------------------------Order_id_spaces::rebuild_order_id_space
 
 void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* causing_job_chain, const String_set& original_job_chain_set )
@@ -3072,45 +3038,6 @@ void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* c
     }
 }
 
-//--------------------------------------------------------------Order_id_spaces::add_order_id_space
-
-void Order_id_spaces::add_order_id_space( Order_id_space* order_id_space, Job_chain* causing_job_chain, int index )
-{
-    assert( order_id_space->size() >= 2 );
-    assert( order_id_space->_index == 0 );
-
-    //#ifdef Z_DEBUG
-    //    Z_FOR_EACH( String_set, order_id_space->_job_chain_set, jc )
-    //    {
-    //        assert( _order_subsystem->job_chain( Absolute_path( *jc ) )->order_id_space() == order_id_space );
-    //    }
-    //#endif
-
-    Z_FOR_EACH( String_set, order_id_space->_job_chain_set, jc )
-    {
-        Job_chain* job_chain = _order_subsystem->job_chain( Absolute_path( *jc ) );
-        job_chain->set_order_id_space( order_id_space );
-    }
-
-
-    if( index > 0 )
-    {
-        assert( index < _array.size()  &&  _array[ index ] == NULL );
-    }
-    else
-    {
-        index = 1;
-        for(; index < _array.size()  &&  _array[ index ]; index++ );
-    }
-
-    order_id_space->_index = index;
-    if( index == _array.size() )  _array.push_back( order_id_space );
-                            else  _array[ index ] = order_id_space;
-
-
-    order_id_space->on_order_id_space_added( causing_job_chain );
-}
-
 //------------------------------------------------------Order_id_spaces::disconnect_order_id_spaces
 
 void Order_id_spaces::disconnect_order_id_spaces( Job_chain* causing_job_chain, const Job_chain_set& disconnected_job_chains )
@@ -3121,12 +3048,11 @@ void Order_id_spaces::disconnect_order_id_spaces( Job_chain* causing_job_chain, 
     Job_chain_set job_chains = disconnected_job_chains;
     
     job_chains.insert( causing_job_chain );
-    disconnect_order_id_space( causing_job_chain, causing_job_chain, original_job_chain_set, &job_chains );        // Die zuerst, dann muss vielleicht nur die Jobkette aus dem Order_id_space genommen werden
+    disconnect_order_id_space( causing_job_chain, causing_job_chain, original_job_chain_set, &job_chains );    // Die zuerst, dann muss vielleicht nur die Jobkette aus dem vorhandenen Order_id_space genommen werden
 
     while( !job_chains.empty() )
     {
         Job_chain* job_chain = *job_chains.begin();
-
         disconnect_order_id_space( job_chain, causing_job_chain, original_job_chain_set, &job_chains );
     }
 
@@ -3183,6 +3109,45 @@ int Order_id_spaces::remove_job_chain_from_order_id_space( Job_chain* job_chain 
     }
 
     return result;
+}
+
+//--------------------------------------------------------------Order_id_spaces::add_order_id_space
+
+void Order_id_spaces::add_order_id_space( Order_id_space* order_id_space, Job_chain* causing_job_chain, int index )
+{
+    assert( order_id_space->size() >= 2 );
+    assert( order_id_space->_index == 0 );
+
+    //#ifdef Z_DEBUG
+    //    Z_FOR_EACH( String_set, order_id_space->_job_chain_set, jc )
+    //    {
+    //        assert( _order_subsystem->job_chain( Absolute_path( *jc ) )->order_id_space() == order_id_space );
+    //    }
+    //#endif
+
+    Z_FOR_EACH( String_set, order_id_space->_job_chain_set, jc )
+    {
+        Job_chain* job_chain = _order_subsystem->job_chain( Absolute_path( *jc ) );
+        job_chain->set_order_id_space( order_id_space );
+    }
+
+
+    if( index > 0 )
+    {
+        assert( index < _array.size()  &&  _array[ index ] == NULL );
+    }
+    else
+    {
+        index = 1;
+        for(; index < _array.size()  &&  _array[ index ]; index++ );
+    }
+
+    order_id_space->_index = index;
+    if( index == _array.size() )  _array.push_back( order_id_space );
+                            else  _array[ index ] = order_id_space;
+
+
+    order_id_space->on_order_id_space_added( causing_job_chain );
 }
 
 //-----------------------------------------------------------Order_id_spaces::remove_order_id_space
