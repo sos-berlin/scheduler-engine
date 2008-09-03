@@ -10,8 +10,28 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-09-03" version="2.0.211" subversion_revision="5872">
+    <change date="2008-09-03" version="2.0.211" subversion_revision="5873">
         <revision type="correction" title="Implementierung der verschachtelten Jobketten überarbeitet">
+        </revision>
+
+        <revision type="new" title="scheduler.log zeigt Tag des Monats in der ersten Spalte">
+        </revision>
+
+        <revision type="new" title="Diagnosemeldung beim Fehlstart eines Prozesses">
+            <description>
+                <p>
+                    Wenn ein Nicht-API-Prozess unter Unix sich nicht starten lässt (Fehler bei <code>execvp</code>),
+                    gibt der Scheduler die <code>execvp</code>-Parameterliste und die Umgebungsvariablen aus.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="script" attribute="language" value="shell"/>
+                    </li>
+                </ul>
+            </description>
         </revision>
     </change>
 
