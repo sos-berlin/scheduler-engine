@@ -1860,6 +1860,7 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href">
+                <xsl:value-of select="$base_dir"/>
                 <xsl:text>settings.xml#option_</xsl:text>
                 <xsl:value-of select="@setting | @name"/>
             </xsl:attribute>
@@ -1867,17 +1868,20 @@
             <xsl:choose>
                 <xsl:when test="ancestor::ini_entry">
                     <code>
-                        <xsl:value-of select="@name"/>=
+                        <xsl:value-of select="@name"/>
                     </code>
                 </xsl:when>
                 <xsl:when test="ancestor::command_option">
                     <code>
-                        -<xsl:value-of select="@name"/>=
+                        <xsl:text>-</xsl:text>
+                        <xsl:value-of select="@name"/>
+                        <xsl:text>=</xsl:text>
                     </code>
                 </xsl:when>
                 <xsl:otherwise>
                     <code>
-                        <xsl:value-of select="@name | @setting"/>=
+                        <xsl:value-of select="@name | @setting"/>
+                        <xsl:text>=</xsl:text>
                     </code>
                 </xsl:otherwise>
             </xsl:choose>

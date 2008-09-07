@@ -2996,7 +2996,7 @@ Spooler* Order_id_spaces::spooler()
 
 //----------------------------------------------------------Order_id_spaces::rebuild_order_id_space
 
-void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* causing_job_chain, const String_set& original_job_chain_set )
+void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* causing_job_chain, const String_set& )
 {
     String_set connected_job_chains = job_chain->connected_job_chains();
 
@@ -3018,8 +3018,7 @@ void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* c
         {
             Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
 
-            bool check_duplicate_order_ids = !set_includes( original_job_chain_set, connected_job_chain->normalized_path() );
-
+            bool check_duplicate_order_ids = true; //Nur richtig, wenn die Jobketten aus original_job_chain_set zuerst übernommen werden. Also zwei Schleifen!  !set_includes( original_job_chain_set, connected_job_chain->normalized_path() );
             order_id_space->add_job_chain( connected_job_chain, check_duplicate_order_ids );   // check_duplicate_order_ids: Exception bei doppelter Auftragskennung
         }
 
@@ -3031,7 +3030,7 @@ void Order_id_spaces::rebuild_order_id_space( Job_chain* job_chain, Job_chain* c
             Job_chain* connected_job_chain = _order_subsystem->job_chain( Absolute_path( *it ) );
         
             int freed = remove_job_chain_from_order_id_space( connected_job_chain );
-            if( freed  &&  order_id_space_index > freed )  freed = order_id_space_index;
+            if( freed  &&  order_id_space_index > freed )  order_id_space_index = freed;
         }
 
         add_order_id_space( order_id_space, causing_job_chain, order_id_space_index );
