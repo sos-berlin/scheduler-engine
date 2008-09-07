@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-09-03" version="2.0.211" subversion_revision="5873">
+    <change date="2008-09-07" version="2.0.211" subversion_revision="5876">
         <revision type="correction" title="Implementierung der verschachtelten Jobketten überarbeitet">
         </revision>
 
