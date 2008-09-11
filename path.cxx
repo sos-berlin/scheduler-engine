@@ -10,28 +10,110 @@ namespace folder {
 
 const Absolute_path             root_path                   ( "/" );
 
-//-------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------is_absolute_path
+
+static bool is_absolute_path( const string& path )
+{
+    return path.length() >= 0  &&  path[0] == folder_separator;
+}
+
+//---------------------------------------------------------------------simplified_double_slash_path
+// Das erledigt auch simplified_dot_dot_path():
+
+//static string simplified_double_slash_path( const string& path )                  
+//{ 
+//    string result;
+//    
+//    result.reserve( path.length() );
+//
+//    for( int i = 0; i < path.length(); i++ )
+//    {
+//        if( i > 0  &&  path[ i-1 ] == '/'  &&  path[ i ] == '/' )  
+//        {
+//            // Doppelten Schrägstrich unterdrücken
+//        }
+//        else
+//            result += path[i];
+//    }
+//
+//
+//    // Hier können "." und "xx/.." gekürzt werden
+//
+//    return result;
+//}
+
+//--------------------------------------------------------------------------simplified_dot_dot_path
+
+static string simplified_dot_dot_path( const string& path )
+{ 
+    string result;
+
+    bool is_absolute = is_absolute_path( path );
+
+    if( path.find( '.' ) == string::npos  &&     // Kein . oder .. ?
+        path.find( '/' ) == string::npos )
+    {
+        result = path;
+    }
+    else
+    {
+        assert( path != "" );
+
+
+        vector<string> parts     = vector_split( "/", path );
+        list<string>   part_list;
+
+        for( int i = 0; i < parts.size(); i++ )  if( parts[i] != "" )  part_list.push_back( parts[i] );
+
+        for( list<string>::iterator p = part_list.begin(); p != part_list.end(); )
+        {
+            if( *p == "." )  
+            {
+                p = part_list.erase( p );
+            }
+            else
+            if( *p == ".." )  
+            {
+                if( p == part_list.begin() )
+                {
+                    if( is_absolute )  z::throw_xc( "SCHEDULER-461", path );
+                    p++;  // Relativer Pfad darf überschüssige ".." haben. Also stehen lassen
+                }
+                else
+                {
+                    --p;
+                    if( *p == ".." )
+                    {
+                        assert( !is_absolute );
+                        p++, p++;
+                    }
+                    else
+                    {
+                        p = part_list.erase( p );
+                        p = part_list.erase( p );
+                    }
+                }
+            }
+            else 
+                p++;
+        }
+
+        if( is_absolute )  result = "/";
+        result += join( "/", part_list );
+        if( result == "" )  result = ".";
+        else
+        if( !part_list.empty()  &&  string_ends_with( path, "/" ) )  result += "/";        // path endet mit "xx/"
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------------------simplified_path
 
 static string simplified_path( const string& path )                  
 { 
-    string result;
-    
-    result.reserve( path.length() );
-
-    for( int i = 0; i < path.length(); i++ )
-    {
-        if( i > 0  &&  path[ i-1 ] == '/'  &&  path[ i ] == '/' )  
-        {
-            // Doppelten Schrägstrich unterdrücken
-        }
-        else
-            result += path[i];
-    }
-
-
-    // Hier können "." und "xx/.." gekürzt werden
-
-    return result;
+    return simplified_dot_dot_path( path );
+    //return simplified_dot_dot_path( simplified_double_slash_path( path ) );
 }
 
 //---------------------------------------------------------------------------------------Path::Path
@@ -40,23 +122,27 @@ Path::Path( const string& folder_path, const string& tail_path )
 { 
     if( int len = folder_path.length() + tail_path.length() )
     {
+        string path;
+
         if( folder_path != ""  &&  *folder_path.rbegin() != folder_separator )
         {
             reserve( len + 1 );
-            *this = simplified_path( folder_path );
-            *this += folder_separator;
+            path = folder_path; //simplified_double_slash_path( folder_path );
+            path += folder_separator;
         }
         else
         {
             reserve( len );
-            *this = simplified_path( folder_path );
+            path = folder_path; //simplified_double_slash_path( folder_path );
         }
 
         if( tail_path != "" )
         {
-            if( folder_path != ""  &&  *tail_path.begin() == folder_separator )  *this += simplified_path( tail_path.c_str() + 1 );
-                                                                           else  *this += simplified_path( tail_path );
+            if( folder_path != ""  &&  *tail_path.begin() == folder_separator )  path += /*simplified_double_slash_path*/( tail_path.c_str() + 1 );
+                                                                           else  path += /*simplified_double_slash_path*/( tail_path );
         }
+
+        set_path( path );
     }
 
     assert( to_string() == simplified_path( *this ) );
@@ -67,13 +153,16 @@ Path::Path( const string& folder_path, const string& tail_path )
 void Path::set_path( const string& path )                  
 { 
     *static_cast<string*>( this ) = simplified_path( path );
+
+    // Bei relativem Pfad könnte die Auflösung der ".." verschoben werden. Dann nur simplified_double_slash_path().
+    // Verknüpfungen im Dateisystem werden nicht berücksichtigt.
 }
 
-//---------------------------------------------------------------------------Path::is_absolute_path
+//--------------------------------------------------------------------------------Path::is_absolute
 
-bool Path::is_absolute_path() const
+bool Path::is_absolute() const
 {
-    return length() >= 0  &&  (*this)[0] == folder_separator;
+    return is_absolute_path( *this );
 }
 
 //------------------------------------------------------------------------------------Path::is_root
@@ -138,7 +227,7 @@ void Path::set_absolute( const Absolute_path& absolute_base, const Path& relativ
         }
         else
         {
-            if( relative.is_absolute_path() )
+            if( relative.is_absolute() )
             {
                 set_path( relative );
             }
@@ -209,6 +298,30 @@ string Path::to_filename() const
     return result;
 }
 
+//----------------------------------------------------------------------------------Path::self_test
+
+void Path::self_test()
+{
+    assert( Path( "a/../b" ) == "b" );
+    assert( Path( "a/../b/../c" ) == "c" );
+    assert( Path( "a/b/c/../.." ) == "a" );
+    assert( Path( "a/b/c/../../.." ) == "." );
+    assert( Path( "a/b/c/d/../../../../e" ) == "e" );
+    assert( Path( ".." ) == ".." );
+    assert( Path( "../../../a" ) == "../../../a" );
+    assert( Path( "a/b/c/../../../.." ) == ".." );
+    assert( Path( "a/b/c/../../../../d" ) == "../d" );
+    assert( Path( "//a" ) == "/a" );
+    assert( Path( "a//" ) == "a/" );
+    assert( Path( "a//b" ) == "a/b" );
+    assert( Path( "a//..//b" ) == "b" );
+
+    Z_ASSERT_XC( Path( "/.." )            , "SCHEDULER-461" );
+    Z_ASSERT_XC( Path( "/../a" )          , "SCHEDULER-461" );
+    Z_ASSERT_XC( Path( "/a/b/../../.." )  , "SCHEDULER-461" );
+    Z_ASSERT_XC( Path( "/a/b/../../../c" ), "SCHEDULER-461" );
+}
+
 //-----------------------------------------------------------------------------Absolute_path::build
 
 Absolute_path Absolute_path::build( const File_based* source_file_based, const string& path )
@@ -220,8 +333,8 @@ Absolute_path Absolute_path::build( const File_based* source_file_based, const s
 
 Absolute_path::Absolute_path( const Path& path )
 {
-    assert( path.empty()  ||  path.is_absolute_path() );
-    if( !path.empty()  &&  !path.is_absolute_path() )  assert(0), z::throw_xc( Z_FUNCTION, path );
+    assert( path.empty()  ||  path.is_absolute() );
+    if( !path.empty()  &&  !path.is_absolute() )  assert(0), z::throw_xc( Z_FUNCTION, path );
 
     set_path( path );
 }
@@ -230,7 +343,7 @@ Absolute_path::Absolute_path( const Path& path )
 
 string Absolute_path::with_slash() const
 {
-    assert( empty() || is_absolute_path() );
+    assert( empty() || is_absolute() );
     return to_string();
 }
 
@@ -254,46 +367,30 @@ string Absolute_path::without_slash() const
 void Absolute_path::set_path( const string& path )
 { 
     Path::set_path( path ); 
-    assert( empty() || is_absolute_path() );
+    assert( empty() || is_absolute() );
 }
 
-//-------------------------------------------------------Absolute_path::set_simplified_dot_dot_path
+//-----------------------------------------------------------------------Absolute_path::folder_path
 
-void Absolute_path::set_simplified_dot_dot_path( const string& path )                  
-{ 
-    // Wenn ".." überall erlaubt ist, können wir das in den Konstruktor tun
+Absolute_path Absolute_path::folder_path() const
+{
+    return Absolute_path( Path::folder_path() );
+}
 
-    if( !string_begins_with( path, "/" ) )  z::throw_xc( Z_FUNCTION, path );
+//-------------------------------------------------------------------------Absolute_path::self_test
 
-    vector<string> parts     = vector_split( "/", simplified_path( path ) );
-    list<string>   part_list;
-
-    for( int i = 1; i < parts.size(); i++ )  
-    {
-        assert( parts[i] != ""  ||  i == parts.size() - 1 );
-        part_list.push_back( parts[i] );
-    }
-
-    for( list<string>::iterator p = part_list.begin(); p != part_list.end(); )
-    {
-        if( *p == "." )  
-        {
-            p = part_list.erase( p );
-        }
-        else
-        if( *p == ".." )  
-        {
-            if( p == part_list.begin() )  z::throw_xc( "SCHEDULER-461", path );
-            p--;
-            assert( *p != ".." );
-            p = part_list.erase( p );
-            p = part_list.erase( p );
-        }
-        else 
-            p++;
-    }
-
-    set_path( "/" + join( "/", part_list ) );
+void Absolute_path::self_test()
+{
+    assert( Absolute_path( Absolute_path( "/" ), "a" ) == "/a" );
+    assert( Absolute_path( Absolute_path( "/" ), "/a" ) == "/a" );
+    assert( Absolute_path( Absolute_path( "/a" ), "b" ) == "/a/b" );
+    assert( Absolute_path( Absolute_path( "/a" ), "/b" ) == "/b" );
+    assert( Absolute_path( Absolute_path( "/a/" ), "b" ) == "/a/b" );
+    assert( Absolute_path( Absolute_path( "/a" ), "b/" ) == "/a/b/" );
+    assert( Absolute_path( Absolute_path( "/a/" ), "b/" ) == "/a/b/" );
+    Z_ASSERT_ANY_XC( Absolute_path( "x" ) );
+    Z_ASSERT_XC( Absolute_path( Absolute_path( "/" ), ".." )     , "SCHEDULER-461" );
+    Z_ASSERT_XC( Absolute_path( Absolute_path( "/a/b" ), "../x" ), "SCHEDULER-461" );
 }
 
 //-------------------------------------------------------------------------------------------------

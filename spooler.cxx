@@ -258,16 +258,19 @@ static void print_usage()
 
 //----------------------------------------------------------------------------------------self_test
 
-static void self_test( bool extra = false )
+static void self_test()
 {
-    zschimmer::file::test_file_path();
+    zschimmer::file::File_path::self_test();
 
-    if( extra )
-    {
-#       ifdef Z_DEBUG
-            zschimmer::test_truncate_to_ellipsis();
-#       endif
-    }
+//    if( extra )
+//    {
+//#       ifdef Z_DEBUG
+//            zschimmer::test_truncate_to_ellipsis();
+//#       endif
+//    }
+
+    Path::self_test();
+    Absolute_path::self_test();
 }
 
 //---------------------------------------------------------------------------------send_error_email
@@ -1483,7 +1486,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
-            if( opt.flag      ( "test"                   ) )  self_test( true );
+            if( opt.flag      ( "test"                   ) )  set_log_category( "self_test" ), set_log_category( "self_test.exception" ),  self_test();
             else
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else

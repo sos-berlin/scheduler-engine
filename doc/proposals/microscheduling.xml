@@ -115,6 +115,10 @@
         </li>
     </ul>
 
+    <p>
+        Dieser Ablauf könnte mit der Umstellung auf <code>Async_operation</code> schematisiert und stark vereinfacht werden, s.u.
+    </p>
+
 
 
     <h2>Ereignisse</h2>
@@ -460,12 +464,20 @@
 
     <h3>Beschränkung auf 63 Ereignis-Variablen durchbrechen</h3>
     <p>
-        Die Beschränkung von <code>WaitForMultipleObjects()</code> auf 63 Ereignisse sollte durchbrochen werden.
-        Socket-Events auf Callbacks umstellen (Begrenzung von WaitForMultipleObjects() umgehen) und mit Async_operation verbinden.
+        Die Beschränkung von <code>WaitForMultipleObjects()</code> auf 63 Ereignisse sollte durchbrochen werden,
+        indem zu diesem Zweck mehrere Threads genutzt werden.
+        Socket-Events sollten auf Callbacks umgestellt werden, um die Zahl der Ereignis-Variablen zu vermindern.
+        Der Callback-Mechanismus ruft <code>Async_operation::async_continue()</code> auf.
     </p>
 
 
     <h3>Unix: sigaction() und pselect() verwenden</h3>
+    <p>
+        Statt Prozessende mit <code>waitpid()</code> und
+        die Signale <code>SIGINT</code> und <code>SIGTERM</code> 
+        periodisch abzufragen,
+        sollten sie mit <code>sigaction()</code> und <code>pselect()</code> abgewartet werden.
+    </p>
 
 
     <h3>Threads</h3>

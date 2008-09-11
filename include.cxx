@@ -54,19 +54,23 @@ void Include_command::initialize()
 
             if( _source_file_based )
             {
-                Path path = _attribute_live_file.is_relative_path()? _source_file_based->path().folder_path() + "/" + _attribute_live_file 
-                                                                   : _attribute_live_file;
+                _path = Absolute_path( _attribute_live_file.is_relative_path()? _source_file_based->path().folder_path() 
+                                                                              : root_path, 
+                                       _attribute_live_file ); 
 
-                _path.set_simplified_dot_dot_path( path );
+                //Path path = _attribute_live_file.is_relative_path()? _source_file_based->path().folder_path() + "/" + _attribute_live_file 
+                //                                                   : _attribute_live_file;
+
+                //_path.set_simplified_dot_dot_path( path );
 
                 string configuration_root_directory = _source_file_based->has_base_file()? _source_file_based->configuration_root_directory() 
                                                                                          : _source_file_based->spooler()->_configuration_directories[ confdir_local ];
-                _file_path = File_path( configuration_root_directory, path );
+                _file_path = File_path( configuration_root_directory, _path );
             }
             else
             if( _spooler )
             {
-                _file_path = File_path( _spooler->_configuration_directories[ confdir_local ], _attribute_live_file );
+                _file_path = File_path( _spooler->_configuration_directories[ confdir_local ], Absolute_path( root_path, _attribute_live_file ) );
             }
             else
             {

@@ -19,6 +19,9 @@ extern const Absolute_path      root_path;
 
 struct Path : string
 {
+    static void                 self_test                   ();
+
+
                                 Path                        ()                                      {}
                                 Path                        ( const string& path )                  { set_path( path ); }
                                 Path                        ( const char* path )                    { set_path( path ); }
@@ -38,7 +41,7 @@ struct Path : string
   //void                        prepend_folder_path         ( const string& );
     const string&               to_string                   () const                                { return *static_cast<const string*>( this ); }
     void                    set_path                        ( const string& );
-    bool                     is_absolute_path               () const;
+    bool                     is_absolute                    () const;
     string                      absolute_path               () const;
     bool                     is_root                        () const;
   //int                         depth                       () const;
@@ -62,6 +65,7 @@ inline void insert_into_message( Message_string* m, int index, const Path& path 
 struct Absolute_path : Path
 {
     static Absolute_path        build                       ( const File_based* source_file_based, const string& relative );
+    static void                 self_test                   ();
 
                                 Absolute_path               ()                                      {}
                               //Absolute_path               ( const string& path )                  { set_path( path ); }
@@ -72,10 +76,10 @@ struct Absolute_path : Path
     explicit                    Absolute_path               ( const Path& );
 
     void                    set_path                        ( const string& );
-    void                    set_simplified_dot_dot_path     ( const string& );
 
     string                      with_slash                  () const;
     string                      without_slash               () const;
+    Absolute_path               folder_path                 () const;
 
   private: 
     Absolute_path&              operator =                  ( const string& path );                 // Nicht implementiert

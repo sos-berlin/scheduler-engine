@@ -34,6 +34,11 @@
                     Wenn der Zustand einen Endzustand ist, dann geben Sie dieses Attribut nicht an.
                 </p>
             </description>
+
+            <example>
+                <pre>&lt;job_chain_node state="1" job="my_job"/></pre>
+                <pre>&lt;job_chain_node state="2" job="../job_in_parent_folder"/></pre>
+            </example>
         </xml_attribute>
 
 

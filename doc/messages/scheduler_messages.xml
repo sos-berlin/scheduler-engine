@@ -2862,6 +2862,12 @@
                 <title>try_hold_lock() or try_hold_lock_non_exclusive() has failed and call_me_again_when_locks_available() has not been called</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-470">
+            <text xml:lang="en">
+                <title>Path is not absolute: <p1/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

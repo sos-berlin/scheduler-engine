@@ -3226,7 +3226,7 @@ void Order_id_spaces::self_check()
         FOR_EACH_JOB_CHAIN( job_chain )
         {
             if( !set_includes( combined_job_chains, job_chain ) )  assert( !job_chain->order_id_space() );
-            job_chain->order_id_space()->check_for_unique_order_ids_of( job_chain );
+            if( job_chain->order_id_space() )  job_chain->order_id_space()->check_for_unique_order_ids_of( job_chain );
         }
 
 
