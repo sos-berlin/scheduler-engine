@@ -40,61 +40,25 @@
 
     
     
-    <h2>Mikroscheduling</h2>
-    <ul>
-        <li>
-            Signal direkt mit ausführenden Objekt verbinden.
-            Nur das signalierte Objekt soll aufgerufen werden.
-        </li>
-        <li>
-            Feststellen, welche Signale oder Ereignisse es gibt,
-            wer sie auslöst und welche Objekte benachrichtigt werden sollen.
-            <ul>
-                <li>
-                    Prozessende -> Task oder Subprozess
-                </li>
-                <li>
-                    Wecker -> Task, Auftrag usw.
-                </li>
-                <li>
-                    Verzeichnisänderung -> Job, Konfigurationsdatei, Dateiauftrag
-                </li>
-                <li>
-                    TCP -> Kommando lesen oder Antwort fortsetzen
-                </li>
-                <li>
-                    ...
-                </li>
-            </ul>
-        </li>
-        <li>
-            Warteschlange der Signale(?) und nächsten Weckereignisse
-        </li>
-        <li>
-            Per XML Liste der von Objekten erwarteteten Ereignisse liefern.
-        </li>
-    </ul>
+    <h2>Mikro-Scheduling</h2>
+    <p>
+        Mit einem erneuertem Mikro-Scheduling 
+        wird die Ereignisbehandlung verbessert,
+        deren alte Implementierung gelegentlich zu Störungen führte 
+        (zum Beispiel Jobs, die nicht starten wollen).
+        Siehe <scheduler_a href="microscheduling.xml" quote="yes"/>.
+    </p>
 
-
-    Ziele:
-    <ul>
-        <li>
-            Klare, dokumentierte Zusammenhänge zwischen Ereignissen und behandelnden Objekten.
-        </li>
-        <li>
-            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden, 
-            weil bei einem Ereignis nicht mehr alle Objekte aufgerufen werden, sondern gleich das richtige.
-        </li>
-        <li>
-            Die Bremse <scheduler_message code="SCHEDULER-261"/> wird endlich überflüssig.
-        </li>
-        <li>
-            Vielleicht lässt sich manche Ereignisbehandlung in einem Thread parallelisieren.
-        </li>
-    </ul>
-
-
-
+    
+    <h2>Zahl der offenen Dateien verringern</h2>
+    <p>
+        Wenn das Betriebssystem nicht genügend <i>file handles</i> zur Verfügung stellt 
+        (Unix: max. 1024, begrenzt durch FD_SETSIZE),
+        sollte der Scheduler seine Zahl der offenen Dateien begrenzen.
+        Wenn er mehr offene Dateien braucht, schließt er die am längsten nicht benutzte Datei.
+        Die wird dann bei Gebrauch wieder eröffnen und korrekt positioniert.
+        (Das kann mit der Klasse <code>File</code> implementiert werden.)
+    </p>
     <h2>Jobs</h2>
     <ul>
         <li>
@@ -125,7 +89,7 @@
     <h2>Unix</h2>
     <ul>
         <li>
-            TCP-Ereignisse (<code>select()</code>) und Signale (<code>signal()</code>) zusammenbringen.
+            TCP-Ereignisse (<code>select()</code>) und Signale (<code>signal()</code>) mit <code>pselect()</code> zusammenbringen.
             Prozessende wird derzeit gepollt (1/10s).
         </li>
     </ul>

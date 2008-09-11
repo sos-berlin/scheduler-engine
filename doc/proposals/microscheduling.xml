@@ -21,11 +21,13 @@
 
     <p>
         Der Scheduler reagiert auf Ereignisse. 
-        Die "Große Schleife" des Schedulers wartet auf das nächste Ereignis,
+        Die "große Schleife" des Schedulers wartet auf das nächste Ereignis,
         um es zu behandeln.
         Dazu ruft er solange Objekte 
-        (v.a. Jobs und Tasks) auf, bis keins mehr etwas zu tun hat.
+        (v.a. Jobs und Tasks) auf, bis keins mehr etwas getan hat.
         Schließlich wartet der Scheduler auf das nächste Ereignis.
+        Dadurch werden nach einem Ereignis und nach einer Operation eines Objekts
+        die Folge-Operationen durchgeführt, solange bis bei einem Durchlauf kein Objekt etwas getan hat.
         Dieser Algorithmus stammt noch vom allerersten Scheduler, 
         der nur wenige Ereignisse und wenige Jobs kannte.
     </p>
@@ -37,7 +39,7 @@
             Es gibt keine Zuordnung zwischen Ereignis und Objekt.
             Nach einem Ereignis ruft der Scheduler alle Objekte auf,
             die dann selbst prüfen müssen, ob sie etwas zu tun haben.
-            Wenn ein Objekt fehlerhaft ein vom ihm veranlasstes Ereignis nicht erledigt,
+            Wenn auf ein Ereignis hin kein Objekt reagiert,
             kommt es zu einer Schleife,
             die der Scheduler mit <scheduler_message code="SCHEDULER-261"/> bremst.
         </li>
@@ -49,17 +51,17 @@
 
     <p>
         Wenn ein async_continue/do_something() eines Objekts true liefert ("something_done"), 
-        wiederholt der Scheduler die Schleife
-        Das muss ersetzt werden durch direkte Signalisierung: 
-        Z.B. wenn ein Auftrag weitergereicht wird, muss der nächste Job benachrichtigt werden.
-        Jobs an hinterer Stelle in einer Jobkette sollten vorrangig gestartet werden. Wie lösen wir das? Wir brauchen einen zentralen Verteiler, am besten im Jobkettensubsystem (Order_subsystem). Diese Priorisierung ist wirksam, wenn die Prozessklasse nicht genügend Tasks starten lässt. Gibt es noch weitere Bedingungen? Ist das nicht ein Problem der Prozessklassen? Wenn mehrere Jobs derselben Prozessklasse wegen Aufträgen starten sollen, aber nicht genügend Prozesse bereitgestellt sind, soll die Prozessklasse entscheiden, welcher Job startet.
+        wiederholt der Scheduler die Schleife.
+        Das soll ersetzt werden durch direkte Signalisierung: 
+        wenn zum Beispiel ein Auftrag weitergereicht wird, muss der nächste Job benachrichtigt werden.
+        Jobs an hinterer Stelle in einer Jobkette sollten vorrangig gestartet werden. 
     </p>
 
 
-    <h3>Ablauf der Großen Scheduler-Schleife</h3>
+    <h3>Ablauf der großen Scheduler-Schleife</h3>
 
     <p>
-        Die Große Schedule-Scheduler durchläuft derzeit folgende Schritte:
+        Die große Scheduler-Scheduler durchläuft derzeit folgende Schritte:
     </p>
     
     <ul>
@@ -336,7 +338,7 @@
     <h3>Große Scheduler-Schleife</h3>
     
     <p>
-        Die Große Scheduler-Schleife soll vereinfacht werden:
+        Die große Scheduler-Schleife soll vereinfacht werden:
     </p>
     <ul>
         <li>
@@ -350,8 +352,48 @@
         </li>
     </ul>
 
+    <p>
+        Dazu sind folgende Änderungen erforderlich:
+    </p>
     
-    
+    <ul>
+        <li>
+            Ein Ereignis soll direkt das betroffene Objekt aufrufen.
+        </li>
+        <li>
+            Wenn ein Objekt a etwas einem anderem Objekt b bereitstellt
+            (zum Beispiel stellt eine Jobkette einen Auftrag dem nächsten Job bereit, der dann aufgerufen werdem muss),
+            soll a b benachrichtigen, damit der Scheduler b aufruft.
+            Das ist ein <i>internes Ereignis</i> (jetzt zum Beispiel <code>Job::signal()</code>).
+        </li>
+    </ul>
+
+    <p>
+        Damit wäre im Programm festgehalten, wann ein Objekt aufgerufen werden muss.
+    </p>
+
+
+
+    <h3>Ziele</h3>
+
+    <ul>
+        <li>
+            Klare, im Programm dokumentierte Zusammenhänge zwischen Ereignissen und behandelnden Objekten.
+        </li>
+        <li>
+            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden,
+            weil bei einem Ereignis nicht mehr alle Objekte aufgerufen werden, sondern gleich das richtige.
+        </li>
+        <li>
+            Die Bremse <scheduler_message code="SCHEDULER-261"/> wird überflüssig.
+        </li>
+        <li>
+            Vielleicht lässt sich manche Ereignisbehandlung in einem Thread parallelisieren.
+        </li>
+    </ul>
+
+
+
     <h3>
         Verwendung der Klasse Async_operation.
     </h3>
@@ -390,7 +432,7 @@
                     Betriebssystem-Ereignis
                 </li>
                 <li>
-                    Internes Ereignis (?)
+                    Internes Ereignis
                 </li>
                 <li>
                     Kind-Async_operation ist fertig (für com_remote.cxx)
@@ -429,46 +471,43 @@
         </li>
     </ul>
     <p>
-        Wie lösen wir das? 
-        Brauchen wir einen Verteiler, der die Jobs aufruft?
-        Besser umgekehrt, die Jobs fragen einen Verteiler. 
-        Wir brauchen eine Warteschlange, in der die Jobs nach Jobkettenknoten-Priorität eingereiht sind.
-        Sind die Tasks betroffen? Nicht mehr, seit es Prozessklassen gibt?
+        Jobs, die starten wollen, reihen sich nach ihrer Position in der Jobkette in eine Warteschlange ein.
+        Nachrangige Jobs lassen vorrangigen, für die alle Bedingungen erfüllt sind, den Vortritt
+        (das ist etwa der Mechanismus der Prozessklassen).
     </p>
-    
-
-    Ziele:
-    <ul>
-        <li>
-            Klare, dokumentierte Zusammenhänge zwischen Ereignissen und behandelnden Objekten.
-        </li>
-        <li>
-            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden, 
-            weil bei einem Ereignis nicht mehr alle Objekte aufgerufen werden, sondern gleich das richtige.
-        </li>
-        <li>
-            Die Bremse <scheduler_message code="SCHEDULER-261"/> wird endlich überflüssig.
-        </li>
-        <li>
-            Vielleicht lässt sich manche Ereignisbehandlung in einem Thread parallelisieren.
-        </li>
-    </ul>
-
-
-
-
+    <p>
+        Sind eigentlich die Tasks betroffen? Nicht mehr, seit es Prozessklassen gibt?
+    </p>
 
 
     
     <h2>Außerdem</h2>
 
-    <h3>Beschränkung auf 63 Ereignis-Variablen durchbrechen</h3>
+    <h3>Windows: Beschränkung auf 63 Ereignis-Variablen durchbrechen</h3>
     <p>
-        Die Beschränkung von <code>WaitForMultipleObjects()</code> auf 63 Ereignisse sollte durchbrochen werden,
+        Die Beschränkung des Windows-Aufrufs <code>WaitForMultipleObjects()</code> 
+        auf 63 Ereignisse-Variablen sollte durchbrochen werden,
         indem zu diesem Zweck mehrere Threads genutzt werden.
-        Socket-Events sollten auf Callbacks umgestellt werden, um die Zahl der Ereignis-Variablen zu vermindern.
-        Der Callback-Mechanismus ruft <code>Async_operation::async_continue()</code> auf.
+        Eine Umstellung von Socket-Ereignissen auf auf Callbacks vermindet sehr die Zahl der Ereignis-Variablen.
+        Diese Callback-Mechanismus würde direkt <code>Async_operation::async_continue()</code> aufrufen.
     </p>
+    <p>
+        Ereignis-Variablen werden gebraucht für
+    </p>
+    <ul>
+        <li>
+            Sockets (bei Callback-Mechanismus nur eine)
+        </li>
+        <li>
+            Prozesse (Prozess-Ende) 
+        </li>
+        <li>
+            Verzeichnisüberwachungen
+        </li>
+        <li>
+            Interne Ereignisse aus anderen Threads
+        </li>
+    </ul>
 
 
     <h3>Unix: sigaction() und pselect() verwenden</h3>
@@ -497,6 +536,5 @@
         Dafür ist noch kein Verfahren entwickelt.
         Mehrere Objekte (Async_operation) sollten sich einen Thread teilen können.
     </p>
-
 
 </description>                                     
