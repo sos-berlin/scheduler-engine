@@ -142,8 +142,6 @@
         Die Signale <code>SIGINT</code>, <code>SIGTERM</code> und <code>SIGCCHLD</code> werden periodisch abgefragt.
     </p>
 
-    <p>&#160;</p>
-    
     <ul>
         <li>
             Prozessende (API- und Nicht-API-Tasks)
@@ -533,8 +531,12 @@
         </li>
     </ul>
     <p>
-        Dafür ist noch kein Verfahren entwickelt.
-        Mehrere Objekte (Async_operation) sollten sich einen Thread teilen können.
+        Das Verfahren könnte etwa so aussehen:
+        Eine veränderliche Anzahl Threads führt thread-fähige Objekte aus.
+        Jeder Thread wartet auf alle thread-fähigen Ereignisse, 
+        nur einer bekommt das Ereignis und behandelt es.
+        Async_operation wird besondere Methoden brauchen.
+        Das wird ein Threaded_async_operation.
     </p>
 
 </description>                                     

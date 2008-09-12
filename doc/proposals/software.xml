@@ -49,6 +49,31 @@
         Siehe <scheduler_a href="microscheduling.xml" quote="yes"/>.
     </p>
 
+
+
+    <h2>Anzeige der Fehlermeldungen verbessern</h2>
+    <p>
+        Bisher wird bei einer Exception die Information von COM gezeigt, was verwirrend und technisch aussieht.
+        Zum Beispiel:
+    </p>
+    <pre>COM-80020009  DISP_E_EXCEPTION [step] [] [Z-JAVA-105  Java exception java.lang.ArrayIndexOutOfBoundsException("48"), method=spooler_process()Z [], in</pre>
+    <p>
+        Das könnte vereinfacht werden zu
+    </p>
+    <pre>SCHEDULER-000  Job has returned an error:
+SCHEDULER-001  Java exception java.lang.ArrayIndexOutOfBoundsException("48") in my_package/My_class.java:1234</pre>
+    <p>
+        Der Scheduler ersetzt Z-JAVA-105 durch eigenen Fehlercode. 
+        Methodennamen, Dateiname und Zeilennummer werden gezeigt, 
+        vielleicht auch der ganze Aufruf-Stack
+        und bestimmt die Job_impl-Methode, hier spooler_process().
+        Ebenso für Perl und Javascript (Windows und Linux).
+    </p>
+    <p>
+        <i>Klären, ob zweizeilige Fehlermeldungen (mit <code>\n</code>) sinnvoll sind.</i>
+    </p>
+
+
     
     <h2>Zahl der offenen Dateien verringern</h2>
     <p>
@@ -59,6 +84,9 @@
         Die wird dann bei Gebrauch wieder eröffnen und korrekt positioniert.
         (Das kann mit der Klasse <code>File</code> implementiert werden.)
     </p>
+    
+    
+    
     <h2>Jobs</h2>
     <ul>
         <li>
@@ -163,7 +191,7 @@
         <li>
             Übergebene Objekte – wie bei Java – nach Methodenaufruf (z.B. <scheduler_method class="Job_impl" method="spooler_process"/>)
             freigeben, damit sie sich nicht mehr anhäufen.
-            Dass passiert jetzt bei auftragsgesteuerten Jobs.
+            Das passiert jetzt bei auftragsgesteuerten Jobs.
             Der Garbage Collector gibt die Aufträge sehr spät frei, 
             was zu hohem Speicherbedarf im Scheduler und vielen offenen Auftragsprotokollen führt.
         </li>
@@ -205,42 +233,71 @@
     <p>
     </p>
     
-    <table cellspacing="0" cellpadding="0">
+    <table class="standard" cellspacing="0" cellpadding="0">
         <thead>
-            <td>
-                Name
-            </td>
-            <td>
+            <th>
+                Subsystem
+            </th>
+            <th>
                 initialized
-            </td>
-            <td>
+            </th>
+            <th>
                 loaded
+            </th>
+            <th>
+                activated
+            </th>
+        </thead>
+
+        <tr>
+            <td>
+                Communication
             </td>
             <td>
-                activated
+                Port für UDP-, TCP- und HTTP-Verbindungen geöffnet
             </td>
-        </thead>
+        </tr>
+
         <tr>
             <td>
                 Cluster
             </td>
-        </tr>
-        <tr>
+            <td></td>
             <td>
-                Order
+                Member-ID bestimmt
             </td>
             <td>
                 
             </td>
+        </tr>
+
+        <tr>
             <td>
-                Aufträge aus der Datenbank sind geladen (nicht Betrieb mit verteilten Aufträgen)
+                Database
+            </td>
+            <td>
+                Datenbank ist geöffnet
             </td>
         </tr>
+
+        <tr>
+            <td>
+                Event
+            </td>
+        </tr>
+
         <tr>
             <td>
                 File_order
             </td>
         </tr>
+
+        <tr>
+            <td>
+                HTTP?
+            </td>
+        </tr>
+
         <tr>
             <td>
                 Job
@@ -255,11 +312,31 @@
                 Nächste Startzeit aus <scheduler_element name="run_time"/> berechnet
             </td>
         </tr>
+
         <tr>
             <td>
-                Task
+                Job_chain
+            </td>
+            <td>
+
+            </td>
+            <td>
+                Aufträge aus der Datenbank sind geladen (nicht Betrieb mit verteilten Aufträgen)
             </td>
         </tr>
+
+        <tr>
+            <td>
+                Mail
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                Module?
+            </td>
+        </tr>
+
         <tr>
             <td>
                 Scheduler_script
@@ -271,52 +348,47 @@
                 Geladen und gestartet
             </td>
         </tr>
+
+        <tr>
+            <td>
+                Supervisor
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                Supervisor_client
+            </td>
+        </tr>
+
         <tr>
             <td>
                 Time
             </td>
         </tr>
+
         <tr>
             <td>
-                Module?
+                Task
             </td>
         </tr>
+
         <tr>
             <td>
-                Communication
-            </td>
-            <td>
-                Port für TCP- und HTTP-Verbindungen geöffnet
+                Web_service
             </td>
         </tr>
+
         <tr>
             <td>
-                HTTP?
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Event
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Database
+                Schedule
             </td>
             <td>
-                Datenbank ist geöffnet
             </td>
-        </tr>
-        <tr>
             <td>
-                Mail
             </td>
         </tr>
-        <tr>
-            <td>
-                Web_service?
-            </td>
-        </tr>
+
     </table>
 
 
@@ -344,7 +416,7 @@
             Umlaute (Ä) im Register richtig einsortieren
         </li>
         <li>
-            
+
         </li>
     </ul>
     
