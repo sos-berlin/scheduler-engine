@@ -1677,10 +1677,10 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
                 try
                 {
-                    File file ( filename, "r" );
+                    Mapped_file file ( filename, "r" );
                     //struct stat s;                                                   
                     //if( fstat( file, &s ) == 0 )  http_response->set_header( "Last-Modified", http::date_string( s.st_mtime ) );
-                    response_body = string_from_fileno( file );
+                    response_body = file.as_string();
                 }
                 catch( exception& )
                 {                                                        
