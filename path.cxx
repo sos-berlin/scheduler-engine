@@ -388,9 +388,8 @@ void Absolute_path::self_test()
     assert( Absolute_path( Absolute_path( "/a/" ), "b" ) == "/a/b" );
     assert( Absolute_path( Absolute_path( "/a" ), "b/" ) == "/a/b/" );
     assert( Absolute_path( Absolute_path( "/a/" ), "b/" ) == "/a/b/" );
-    Z_ASSERT_ANY_XC( Absolute_path( "x" ) );
     Z_ASSERT_XC( Absolute_path( Absolute_path( "/" ), ".." )     , "SCHEDULER-461" );
-    Z_ASSERT_XC( Absolute_path( Absolute_path( "/a/b" ), "../x" ), "SCHEDULER-461" );
+    Z_ASSERT_XC( Absolute_path( Absolute_path( "/a/b" ), "../x/../../.." ), "SCHEDULER-461" );
 }
 
 //-------------------------------------------------------------------------------------------------
