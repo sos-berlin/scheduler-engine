@@ -801,10 +801,11 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
     if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
         _spooler->log()->warn( message_string( "SCHEDULER-288", port_name ) );
-        Z_LOG2( "scheduler", "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
+        z::Log_ptr log ( "scheduler" );
+        log << "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  ";
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-        Z_LOG2( "scheduler", "ret=" << ret );  if( ret == SOCKET_ERROR )  Z_LOG2( "scheduler", "errno=" << errno << "  "  << z_strerror(errno) );
-        Z_LOG2( "scheduler", "\n" );
+        log << "ret=" << ret;  if( ret == SOCKET_ERROR )  log << "  errno=" << errno << "  "  << z_strerror(errno);
+        log << "\n";
     }
 
     bool print_dots = isatty( fileno(stderr) ) && isatty( fileno(stdin) );
