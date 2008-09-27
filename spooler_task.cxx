@@ -426,13 +426,19 @@ void Task::cmd_end( End_mode end_mode )
 
     THREAD_LOCK_DUMMY( _lock )
     {
-        if( _end == end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-        else
-        if( _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
+        //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+        if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
         if( _end != end_kill_immediately )  _end = end_mode;
         if( !_ending_since )  _ending_since = Time::now();
-        signal( "end" );
+
+        if( end_mode == end_kill_immediately  &&  !_kill_tried )
+        {
+            //_log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+            try_kill();
+        }
+
+        if( end_mode != end_kill_immediately )  signal( "end" );
 
         if( _state == s_none )
         {
@@ -1121,11 +1127,11 @@ bool Task::do_something()
 
     _signaled = false;
 
-    if( _end == end_kill_immediately  &&  !_kill_tried )
-    {
-        _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
-        return try_kill();
-    }
+    //if( _end == end_kill_immediately  &&  !_kill_tried )
+    //{
+    //    _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+    //    return try_kill();
+    //}
 
     something_done |= check_subprocess_timeout( now );
 
