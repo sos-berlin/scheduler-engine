@@ -3673,7 +3673,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
 
 #               ifdef Z_WINDOWS
-                    kill_process_with_descendants_immediately( pid, Z_FUNCTION );
+                    windows::kill_process_with_descendants_immediately( pid, Z_FUNCTION );
 #                else
                     if( !try_kill_process_group_immediately( pid, Z_FUNCTION ) )
                         kill_process_immediately( pid, Z_FUNCTION );

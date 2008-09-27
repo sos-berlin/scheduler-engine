@@ -356,7 +356,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\_precompiled_headers.cxx"
+				RelativePath="_precompiled_headers.cxx"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
