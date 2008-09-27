@@ -1035,7 +1035,7 @@ void Task::Registered_pid::try_kill()
                   if( _is_process_group )  kill_process_group_immediately( _pid );
                   else
 #               endif
-                    kill_process_immediately( _pid );
+                    kill_process_immediately( _pid, Z_FUNCTION );
 
                 _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
             }

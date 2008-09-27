@@ -1999,7 +1999,7 @@ void Spooler::stop( const exception* )
     _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
     _order_subsystem           ->switch_subsystem_state( subsys_stopped );
 
-    if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes();   // Übriggebliebene Prozesse killen
+    if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes( kill_task_subsystem );   // Übriggebliebene Prozesse killen
 
     _job_subsystem             ->switch_subsystem_state( subsys_stopped );
     _task_subsystem            ->switch_subsystem_state( subsys_stopped );
@@ -2601,8 +2601,7 @@ bool Spooler::check_is_active( Transaction* outer_transaction )
             {
                 _assert_is_active = false;
 
-                if( _task_subsystem )  _task_subsystem->end_all_tasks( Task::end_kill_immediately );
-                kill_all_processes();
+                kill_all_processes( kill_task_subsystem );
                 
                 _log->error( message_string( _cluster_configuration._demand_exclusiveness? "SCHEDULER-367" : "SCHEDULER-362" ) );
 
@@ -2680,8 +2679,8 @@ void Spooler::run_check_ctrl_c()
                 _log->warn( m );
                 if( !_log_to_stderr && !is_daemon )  cerr << m << endl;
 
-                if( _task_subsystem )  _task_subsystem->end_all_tasks( Task::end_kill_immediately );
-                kill_all_processes();
+                kill_all_processes( kill_task_subsystem );
+
                 set_ctrl_c_handler( true );
                 ctrl_c_pressed_handled = 2;
                 break;
@@ -2911,7 +2910,7 @@ void Spooler::abort_immediately( bool restart, const string& message_text )
     { 
         if( message_text != "" )  _log->error( message_text );
 
-        kill_all_processes();
+        kill_all_processes( kill_task_subsystem );
         _log->close(); 
 
      //?_communication.finish_responses( 5.0 );
@@ -2933,7 +2932,7 @@ void Spooler::abort_now( bool restart )
     int exit_code = 99;
 
 
-    kill_all_processes();
+    kill_all_processes( kill_registered_pids_only );
 
     if( restart )
     {
@@ -2964,8 +2963,17 @@ void Spooler::abort_now( bool restart )
 
 //----------------------------------------------------------------------Spooler::kill_all_processes
 
-void Spooler::kill_all_processes()
+void Spooler::kill_all_processes( Kill_all_processs_option option )
 {
+    if( option == kill_task_subsystem  &&  _task_subsystem )  
+    {
+        _task_subsystem->end_all_tasks( Task::end_kill_immediately );
+
+        // Auf "ps -ef" warten, bevor Spooler::kill_all_processes() ausgeführt wird. Dann kann ps den Prozess und seine Nachfahren zeigen
+        sleep( 0.5 );  
+    }
+
+
     for( int i = 0; i < NO_OF( _process_handles ); i++ )  
     {
         if( _process_handles[i] )  
@@ -3656,7 +3664,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             if( kill_pid )
             {
-                kill_process_immediately( kill_pid );
+                kill_process_immediately( kill_pid, Z_FUNCTION );
                 need_call_scheduler = false;
             }
 
@@ -3665,10 +3673,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
 
 #               ifdef Z_WINDOWS
-                    kill_process_with_descendants_immediately( pid );
+                    kill_process_with_descendants_immediately( pid, Z_FUNCTION );
 #                else
-                    if( !try_kill_process_group_immediately( pid ) )
-                        kill_process_immediately( pid );
+                    if( !try_kill_process_group_immediately( pid, Z_FUNCTION ) )
+                        kill_process_immediately( pid, Z_FUNCTION );
 #               endif
 
                 need_call_scheduler = false;

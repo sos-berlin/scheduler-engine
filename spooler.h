@@ -429,7 +429,8 @@ struct Spooler : Object,
     void                        abort_immediately_after_distribution_error( const string& debug_text );
     void                        abort_immediately           ( bool restart = false, const string& message_text = "" );
     void                        abort_now                   ( bool restart = false );
-    void                        kill_all_processes          ();
+    enum Kill_all_processs_option { kill_registered_pids_only, kill_task_subsystem };
+    void                        kill_all_processes          ( Kill_all_processs_option );
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
     void                        execute_state_cmd           ();
