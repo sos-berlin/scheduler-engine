@@ -407,9 +407,6 @@ void Module::set_dom( const xml::Element_ptr& element )
     if( !element )  return;
 
     _text_with_includes.append_dom( element );
-    //_dom_element_list.push_back( element );
-
-    //_source.clear();  //clear();
 
     _recompile = element.bool_getAttribute( "recompile", true );
 
@@ -423,8 +420,6 @@ void Module::set_dom( const xml::Element_ptr& element )
         //set_checked_attribute( &_process_class_string, element, "process_class"    );
         //if( _process_class_string != "" )  _process_class_path = Absolute_path( _folder_path, _process_class_string );
     //}
-
-    bool separate_process_default = false;
 
     string use_engine = element.getAttribute     ( "use_engine" );
     

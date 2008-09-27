@@ -2988,7 +2988,7 @@ void Spooler::kill_all_processes( Kill_all_processs_option option )
         if( _pids[i]._pid )  
         {
 #           ifdef Z_UNIX
-                if( _pids[i]._is_process_group )  try_kill_process_group_immediately( _pids[i]._pid );
+                if( _pids[i]._is_process_group )  posix::try_kill_process_group_immediately( _pids[i]._pid );
                 else  
 #           endif
                 try_kill_process_immediately( _pids[i]._pid );

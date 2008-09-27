@@ -1032,10 +1032,10 @@ void Task::Registered_pid::try_kill()
             try
             {
 #               ifdef Z_UNIX
-                  if( _is_process_group )  kill_process_group_immediately( _pid );
+                    if( _is_process_group )  posix::kill_process_group_immediately( _pid, obj_name() );
                   else
 #               endif
-                    kill_process_immediately( _pid, Z_FUNCTION );
+                    kill_process_immediately( _pid, obj_name() );
 
                 _task->_log->warn( message_string( "SCHEDULER-273", _pid ) );   // "Subprozess " << _pid << " abgebrochen" 
             }
