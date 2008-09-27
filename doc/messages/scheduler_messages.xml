@@ -1563,11 +1563,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-277">
+        <!--message code="SCHEDULER-277">
             <text xml:lang="en">
                 <title>Trying to kill task after request</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-278">
             <text xml:lang="de">
@@ -1605,14 +1605,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-282">
+        <!--message code="SCHEDULER-282">
             <text xml:lang="de">
                 <title></title>
             </text>
             <text xml:lang="en">
                 <title>end(kill_immediately) called, task will be killed</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-283">
             <text xml:lang="de">
