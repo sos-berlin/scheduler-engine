@@ -91,6 +91,7 @@ sleep 11&
 sh -c "sleep 12"
 sleep 13&
 sleep 14&
+ps faxu
 sleep 15
                 ]]></script>
                 <run_time once="yes"/>

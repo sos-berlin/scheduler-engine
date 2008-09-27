@@ -724,14 +724,9 @@ bool Process_module_instance::kill()
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
 
-        #ifdef Z_WINDOWS
-            posix::try_kill_process_with_descendants_immediately( _process_handle._pid );
-            posix::try_kill_process_group_immediately( _process_handle._pid );
-         #else
-            try_kill_process_immediately( _process_handle );
-        #endif
+        posix::try_kill_process_with_descendants_immediately( _process_handle._pid, _task? _task->obj_name() : "" );
+        posix::try_kill_process_group_immediately           ( _process_handle._pid, _task? _task->obj_name() : "" );
 
-        //? _process_handle._pid = 0;
         _is_killed = true;
         return true;
     }
