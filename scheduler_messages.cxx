@@ -492,6 +492,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-706", "Standard '$1' is valid now" },
     { "SCHEDULER-707", "Creating configuration directory '$1'" },
     { "SCHEDULER-708", "Adding '$1'" },
+    { "SCHEDULER-709", "Kill descendant process $1 $2" },
     {}
 };
 } //namespace sos
