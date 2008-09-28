@@ -61,6 +61,7 @@ struct Task : Object,
         s_on_error,             // spooler_on_error
         s_exit,                 // spooler_exit
         s_release,              // Release()
+        s_killing,
         s_ended,                // 
         s_deleting_files,
         s_closed,               // close() gerufen, Object Task ist nicht mehr zu gebrauchen

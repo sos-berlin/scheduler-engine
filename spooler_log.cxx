@@ -781,8 +781,6 @@ void Prefix_log::open()
 
 void Prefix_log::close()
 {
-    //_is_finished = true;
-
     if( _file != -1 )  
     {
         finish_log();
@@ -802,6 +800,8 @@ void Prefix_log::close()
         catch( const _com_error& x ) { _spooler->log()->error(bstr_as_string(x.Description()));  _remove_after_close = false; }
         */
     }
+
+    _log = NULL;
 
     if( _remove_after_close )
     {

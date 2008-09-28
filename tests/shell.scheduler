@@ -80,7 +80,8 @@ function spooler_process_after( return_value ) {
             </job>
 
             <job name="shell" process_class="my_process_class" tasks="5">
-                <script language="shell"><![CDATA[
+                <script language="shell">
+                    <![CDATA[
                     @echo off
 echo STATE_TEXT                
 echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zschimmer.com/sos.
@@ -88,11 +89,13 @@ echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zs
 echo Hallo
 echo Zweite Zeile
 sleep 11&
-sh -c "sleep 12"
+sh -c "sleep 12&  wait"&
 sleep 13&
 sleep 14&
+sh -c "sh -c 'sleep 15&  sh -c \"sleep 16\"  wait'&  wait" &
+sh -c "sh -c 'sleep 17'&  sleep 18&  wait" &
 ps faxu
-sleep 15
+sleep 19
                 ]]></script>
                 <run_time once="yes"/>
             </job>

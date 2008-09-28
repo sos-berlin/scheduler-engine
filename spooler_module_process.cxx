@@ -12,6 +12,41 @@ namespace scheduler {
 const string                    order_params_environment_name   = "SCHEDULER_RETURN_VALUES";
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
 
+//--------------------------------------------------------------------------------------Kill_thread
+
+struct Kill_thread : Thread
+{
+    Kill_thread()
+    :
+        _zero_(this+1)
+    {
+    }
+
+
+    int thread_main()
+    {
+        try
+        {
+            posix::try_kill_process_with_descendants_immediately( _pid, _log, &_message, _process_name );
+            posix::try_kill_process_group_immediately           ( _pid,                  _process_name );
+        }
+        catch( exception& x )
+        {
+            if( _log )  _log->warn( x.what() );
+                  else  Z_LOG( Z_FUNCTION << " " << x.what() << "\n" );
+        }
+
+        return 0;
+    }
+
+
+    Fill_zero              _zero_;
+    pid_t                  _pid;
+    string                 _process_name;
+    ptr<Prefix_log>        _log;
+    Message_string         _message;
+};
+
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
 Process_module_instance::Process_module_instance( Module* module )
@@ -37,6 +72,8 @@ Process_module_instance::~Process_module_instance()
     if( _stdout_file      .is_to_be_unlinked() )  _stdout_file      .try_unlink( unlink_log );
     if( _stderr_file      .is_to_be_unlinked() )  _stderr_file      .try_unlink( unlink_log );
     if( _order_params_file.is_to_be_unlinked() )  _order_params_file.try_unlink( unlink_log );
+
+    if( _kill_thread )  _kill_thread->thread_wait_for_termination();
 }
 
 //------------------------------------------------------------Process_module_instance::close_handle
@@ -718,23 +755,31 @@ bool Process_module_instance::begin__end()
 
 bool Process_module_instance::kill()
 {
-    if( _is_killed )  return false;
+    bool result = false;
 
-    if( _process_handle._pid )
+    if( _process_handle._pid  &&  !_is_killed  &&  !_kill_thread )
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
 
         Message_string m ( "SCHEDULER-709" );
         m.set_log_level( log_warn );
 
-        posix::try_kill_process_with_descendants_immediately( _process_handle._pid, &_log, &m, _task? _task->obj_name() : "" );
-        posix::try_kill_process_group_immediately           ( _process_handle._pid,            _task? _task->obj_name() : "" );
+        ptr<Kill_thread> kill_thread = Z_NEW( Kill_thread );
+
+        kill_thread->_pid          = _process_handle._pid;
+        kill_thread->_log          = dynamic_cast<Prefix_log*>( _log.base_log() );
+        kill_thread->_message      = m;
+        kill_thread->_process_name = _task? _task->obj_name() : "";
+        kill_thread->set_thread_name( S() << "Kill_thread pid=" << _process_handle._pid );
+
+        _kill_thread = +kill_thread;
+        _kill_thread->thread_start();
 
         _is_killed = true;
-        return true;
+        result = true;
     }
 
-    return false;
+    return result;
 }
 
 #endif
@@ -886,4 +931,3 @@ list<File_path> Process_module_instance::undeleted_files()
 
 } //namespace scheduler
 } //namespace sos
-

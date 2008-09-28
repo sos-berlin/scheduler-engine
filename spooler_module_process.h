@@ -53,6 +53,7 @@ struct Process_module_instance : Module_instance
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
     bool                        try_delete_files            ( Has_log* );
     std::list<File_path>        undeleted_files             ();
+    bool                        is_kill_thread_running      ()                                      { return _kill_thread  &&  _kill_thread->thread_is_running(); }
 
   private:
     void                        close_handle                ();
@@ -76,6 +77,8 @@ struct Process_module_instance : Module_instance
         Process_event          _process_handle;
         int                    _pid_to_unregister;
 #   endif
+
+    ptr<Thread>                _kill_thread;
 };
 
 //-------------------------------------------------------------------------------------------------

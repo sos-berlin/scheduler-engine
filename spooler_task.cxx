@@ -731,6 +731,7 @@ string Task::state_name( State state )
         case s_on_error:                    return "on_error";
         case s_exit:                        return "exit";
         case s_release:                     return "release";
+        case s_killing:                     return "killing";
         case s_ended:                       return "ended";
         case s_deleting_files:              return "deleting_files";
         case s_closed:                      return "closed";
@@ -1185,7 +1186,7 @@ bool Task::do_something()
                                 _module_instance_async_error = true;
                                 //z::throw_xc( "SCHEDULER-202", x.what() );
                                 set_error( z::Xc( "SCHEDULER-202", state_name(), x.what() ) );
-                                if( _state < s_ended )  set_state( s_ended );
+                                if( _state < s_killing )  set_state( s_killing );
                             }
                         }
 
@@ -1586,12 +1587,27 @@ bool Task::do_something()
                         case s_release:
                         {
                             if( !_operation )  _operation = do_release__start();
-                                         else  operation__end(), set_state( s_ended ), loop = true;
+                                         else  operation__end(), set_state( s_killing ), loop = true;
 
                             something_done = true;
                             break;
                         }
 
+
+                        case s_killing:
+                        {
+                            if( _module_instance  &&  _module_instance->is_kill_thread_running() )
+                            {
+                                _next_time = Time::now() + 0.1;
+                            }
+                            else
+                            {
+                                set_state( s_ended );
+                                loop = true;
+                            }
+
+                            break;
+                        }
 
                         case s_ended:
                         {

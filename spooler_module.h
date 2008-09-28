@@ -315,7 +315,7 @@ struct Module_instance : Object
     virtual bool                try_delete_files            ( Has_log* )                            { return true; }
     virtual std::list<File_path> undeleted_files            ()                                      { return std::list<File_path>(); }
     virtual bool                process_has_signaled        ()                                      { return false; }       // Für Process_module_instance
-
+    virtual bool                is_kill_thread_running      ()                                      { return false; }
     virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + ":" + as_string(_task_id) + ")"; }
 
 
