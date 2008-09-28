@@ -724,8 +724,11 @@ bool Process_module_instance::kill()
     {
         _log.warn( message_string( "SCHEDULER-281" ) );   
 
-        posix::try_kill_process_with_descendants_immediately( _process_handle._pid, _task? _task->obj_name() : "" );
-        posix::try_kill_process_group_immediately           ( _process_handle._pid, _task? _task->obj_name() : "" );
+        Message_string m ( "SCHEDULER-XXX" );
+        m.set_log_level( log_warn );
+
+        posix::try_kill_process_with_descendants_immediately( _process_handle._pid, &_log, &m, _task? _task->obj_name() : "" );
+        posix::try_kill_process_group_immediately           ( _process_handle._pid,            _task? _task->obj_name() : "" );
 
         _is_killed = true;
         return true;

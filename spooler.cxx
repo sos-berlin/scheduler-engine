@@ -3675,7 +3675,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 #               ifdef Z_WINDOWS
                     windows::kill_process_with_descendants_immediately( pid, Z_FUNCTION );
 #                else
-                    if( !try_kill_process_group_immediately( pid, Z_FUNCTION ) )
+                    if( !posix::try_kill_process_group_immediately( pid, Z_FUNCTION ) )
                         kill_process_immediately( pid, Z_FUNCTION );
 #               endif
 
