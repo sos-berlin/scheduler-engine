@@ -4248,7 +4248,7 @@
 
         <message code="SCHEDULER-709" weight="info" object="Task">
             <text xml:lang="en">
-                <title>Kill descendant process <p1>pid</p1> <p2>program</p2></title>
+                <title>Killing descendant pid=<p1/> (<p2>command line</p2>)</title>
             </text>
         </message>
 

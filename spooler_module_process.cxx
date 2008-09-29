@@ -13,6 +13,7 @@ const string                    order_params_environment_name   = "SCHEDULER_RET
 const int                       max_stdout_state_text_length    = 100;                              // Für Job.state_text und Order.state_text
 
 //--------------------------------------------------------------------------------------Kill_thread
+#ifdef Z_UNIX
 
 struct Kill_thread : Thread
 {
@@ -47,6 +48,7 @@ struct Kill_thread : Thread
     Message_string         _message;
 };
 
+#endif
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
 Process_module_instance::Process_module_instance( Module* module )

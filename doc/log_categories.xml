@@ -39,6 +39,10 @@
         <log_category name="processor"      title="Factory Processor (hostole.dll)"/>
     </log_category>
 
+    <log_category name="file"           title="">
+        <log_category name="mmap"       title="mmap()"/>
+    </log_category>
+
     <log_category name="hostole"        title="Hostole-Aufrufe (außer Factory Processor)">
     </log_category>
 

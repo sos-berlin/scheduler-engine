@@ -723,6 +723,9 @@ struct Spooler : Object,
     bool                       _terminate_all_schedulers_with_restart;
     ptr<Async_operation>       _termination_async_operation;
 
+    ptr<Async_operation>       _log_categories_reset_operation;
+    Log_categories_content     _original_log_categories;
+
     string                     _directory;
     File                       _pid_file;
 

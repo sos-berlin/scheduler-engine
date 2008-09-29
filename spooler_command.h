@@ -264,6 +264,7 @@ struct Command_processor
     xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
     void                        set_log                     ( Has_log* log )                        { _log = log; }     // Optional
 
+    xml::Element_ptr            execute_scheduler_log       ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_calendar       ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, const Show_what& );

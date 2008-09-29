@@ -260,6 +260,7 @@ static void print_usage()
 
 static void self_test()
 {
+    zschimmer::Log_categories::self_test();
     zschimmer::file::File_path::self_test();
 
 //    if( extra )
@@ -443,7 +444,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
         {
             case SIGUSR1:
             {
-                z::log_categories.toggle_all();         // Das kann vom Signal-Handler aufgerufen werden.
+                z::static_log_categories.toggle_all();         // Das kann vom Signal-Handler aufgerufen werden.
                 ::signal( sig, ctrl_c_handler );        // Signal wieder zulassen.
                 break;
             }
@@ -1486,7 +1487,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
-            if( opt.flag      ( "test"                   ) )  set_log_category( "self_test" ), set_log_category( "self_test.exception" ),  self_test();
+            if( opt.flag      ( "test"                   ) )  set_log_category_default( "self_test" ), set_log_category_default( "self_test.exception" ),  self_test();
             else
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
@@ -1773,6 +1774,12 @@ void Spooler::update_console_title( int level )
 void Spooler::start()
 {
     assert( current_thread_id() == _thread_id );
+
+    static_log_categories.save_to( &_original_log_categories );
+
+    #ifdef Z_DEBUG
+        _log->warn( S() << "log_categories=" << static_log_categories.to_string() );
+    #endif
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2192,7 +2199,7 @@ void Spooler::run()
 
     while(1)  // Die große Haupt-Schleife
     {
-        bool    log_wait          = _print_time_every_second || log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
+        bool    log_wait          = _print_time_every_second || static_log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
         Time    wait_until        = Time::never;
         Object* wait_until_object = NULL;    
         Time    resume_at         = Time::never;

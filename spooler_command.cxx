@@ -47,6 +47,26 @@ using xml::Xml_writer;
 const string default_filename = "index.html";
 extern const Embedded_files embedded_files_z;   // Zschimmers HTML-Dateien (/z/index.html etc.)
 
+//-------------------------------------------------------------------Log_categories_reset_operation
+
+struct Log_categories_reset_operation : Async_operation
+{
+    Log_categories_reset_operation( Spooler* spooler ) : _spooler(spooler) {}
+
+    bool async_finished_() const { return false; }
+
+    string async_state_text_() const { return "Log_categories_reset_operation"; }
+
+    bool async_continue_( Continue_flags )
+    {
+        static_log_categories.restore_from( _spooler->_original_log_categories );
+        return true;
+    }
+
+
+    Spooler* const             _spooler;
+};
+
 //---------------------------------------------------------------Remote_task_close_command_response
 
 struct Remote_task_close_command_response : File_buffered_command_response
@@ -349,6 +369,46 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     return _spooler->root_folder()->process_class_folder()->dom_element( _answer, show );
+}
+
+//---------------------------------------------------------Command_processor::execute_scheduler_log
+
+xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_ptr& element, const Show_what& show_ )
+{
+    xml::Element_ptr result;
+
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+
+    if( element.nodeName_is( "scheduler_log.log_categories.modify" ) )
+    {
+        z::static_log_categories.set( element.getAttribute_mandatory( "category" ), element.bool_getAttribute( "value", true ) );
+        result = _answer.createElement( "ok" );
+    }
+    else
+    if( element.nodeName_is( "scheduler_log.log_categories.reset" ) )
+    {
+        if( int delay = element.int_getAttribute( "delay", 0 ) )
+        {
+            ptr<Log_categories_reset_operation> op = Z_NEW( Log_categories_reset_operation( _spooler ) );
+            op->set_async_delay( delay );
+            _spooler->_log_categories_reset_operation = +op;
+            op->set_async_manager( _spooler->_connection_manager );
+        }
+        else
+            static_log_categories.save_to( &_spooler->_original_log_categories );
+
+        result = _answer.createElement( "ok" );
+    }
+    else
+    if( element.nodeName_is( "scheduler_log.log_categories.show" ) )
+    {
+        xml::Document_ptr doc ( embedded_files.get_embedded_file( "doc/log_categories.xml" )->_content );
+        result = _answer.clone( doc.documentElement() );
+    }
+    else 
+        z::throw_xc( Z_FUNCTION, element.nodeName() );
+
+    return result;
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -1332,6 +1392,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( string_begins_with( element_name, "schedule." ) )
     {
         result = _spooler->schedule_subsystem()->execute_xml( this, element, show );
+    }
+    else
+    if( string_begins_with( element_name, "scheduler_log." ) )
+    {
+        result = execute_scheduler_log( element, show );
     }
     else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
