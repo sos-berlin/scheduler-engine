@@ -517,7 +517,7 @@ bool Communication::Connection::do_recv()
 
 bool Communication::Connection::async_continue_( Continue_flags )
 {
-    //Z_LOG2( "joacim", Z_FUNCTION << state() << "\n" );
+    //Z_LOG2( "zschimmer", Z_FUNCTION << state() << "\n" );
 
     bool something_done = false;
 

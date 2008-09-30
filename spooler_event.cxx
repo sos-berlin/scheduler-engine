@@ -140,7 +140,7 @@ xml::Document_ptr Scheduler_event::dom()
         scheduler_event_element.appendChild( _mail->dom_element( event_dom ) );
     }
 
-    //Z_LOG2( "joacim", event_dom.xml( true ) );
+    //Z_LOG2( "zschimmer", event_dom.xml( true ) );
 
     return event_dom;
 }

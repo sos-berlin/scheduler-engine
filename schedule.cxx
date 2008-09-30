@@ -1723,7 +1723,7 @@ bool Period::is_coming( const Time& time_of_day, With_single_start single_start 
     else
         result = false;
 
-    //Z_LOG2( "joacim", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
+    //Z_LOG2( "zschimmer", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
 
     return result;
 }

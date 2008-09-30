@@ -105,7 +105,7 @@ xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
     
 bool Xml_client_connection::async_continue_( Continue_flags flags )
 {
-    Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
+    Z_DEBUG_ONLY( Z_LOGI2( "zschimmer", Z_FUNCTION << "\n" ); )
 
     bool something_done = false;
 

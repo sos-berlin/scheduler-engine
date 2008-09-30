@@ -93,7 +93,7 @@ string Include_command::read_content()
     
 string Include_command::register_include_and_read_content( File_based* source_file_based )
 {
-    //Z_LOG2( "joacim", Z_FUNCTION << " " << obj_name() << "\n" );
+    //Z_LOG2( "zschimmer", Z_FUNCTION << " " << obj_name() << "\n" );
 
     initialize();
 
@@ -341,7 +341,7 @@ xml::Element_ptr Has_includes::dom_element( const xml::Document_ptr& document, c
 //        }
 //        else
 //        {
-//            Z_LOG2( "joacim", Z_FUNCTION << " <include _attribute_live_file='" << path << "'>: Datei fehlt\n" );
+//            Z_LOG2( "zschimmer", Z_FUNCTION << " <include _attribute_live_file='" << path << "'>: Datei fehlt\n" );
 //            // Wenn die inkludierte Datei gelöscht ist, lassen wir den Job in Ruhe
 //        }
 //    }

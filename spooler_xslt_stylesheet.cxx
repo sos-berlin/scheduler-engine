@@ -86,7 +86,7 @@ Xslt_stylesheet::Xslt_stylesheet( const BSTR xml_or_filename_bstr )
 
 Xslt_stylesheet::~Xslt_stylesheet() 
 {
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
 }
 
 //------------------------------------------------------------------Xslt_stylesheet::QueryInterface
@@ -121,7 +121,7 @@ STDMETHODIMP Xslt_stylesheet::Load_xml( BSTR xml_bstr, Ixslt_stylesheet** result
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
 
     try
     {
@@ -141,7 +141,7 @@ STDMETHODIMP Xslt_stylesheet::Load_file( BSTR filename_bstr, Ixslt_stylesheet** 
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
 
     try
     {
@@ -161,7 +161,7 @@ STDMETHODIMP Xslt_stylesheet::Apply_xml( BSTR xml_or_file_bstr, BSTR* result )
 {
     HRESULT hr = S_OK;
 
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
 
     try
     {

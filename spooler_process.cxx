@@ -636,7 +636,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             if( xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document() )  
             {
-                Z_LOG2( "joacim", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
+                Z_LOG2( "zschimmer", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
                 //_spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 
                 //_remote_stdout_file.open_temporary( File::open_unlink_later );

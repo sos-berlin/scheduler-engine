@@ -365,7 +365,7 @@ bool Combined_job_nodes::request_order( const Time& now, const string& cause )
 
 void Combined_job_nodes::withdraw_order_requests()
 {
-    //Z_LOGI2( "joacim", obj_name() << " " << Z_FUNCTION << "\n" );
+    //Z_LOGI2( "zschimmer", obj_name() << " " << Z_FUNCTION << "\n" );
 
     // Jetzt prüfen wir die verteilten Aufträge.
     // Die können auch von anderen Schedulern verarbeitet werden, und sind deshalb nachrangig.
@@ -1232,7 +1232,7 @@ void Job::signal( const string& signal_name )
 
     _next_time = 0;
     
-    Z_LOG2( "joacim", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
+    Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " " << signal_name << "\n" );
     _spooler->signal( signal_name ); 
 }
 
@@ -1906,13 +1906,13 @@ bool Job::check_for_changed_directory( const Time& now )
 #   ifdef Z_UNIX
         if( now < _directory_watcher_next_time )  
         { 
-            //Z_LOG2( "joacim", obj_name() << " " << Z_FUNCTION << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
+            //Z_LOG2( "zschimmer", obj_name() << " " << Z_FUNCTION << " " << now << "<" << _directory_watcher_next_time << "\n" ); 
             return false; 
         }
 #   endif
 
 
-    //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
+    //Z_LOG2( "zschimmer", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = _directory_watcher_list.size() > 0? Time( now + directory_watcher_intervall )
                                                                      : Time::never;
     calculate_next_time( now );
@@ -1931,7 +1931,7 @@ bool Job::check_for_changed_directory( const Time& now )
 
         if( directory_watcher->signaled_then_reset() )
         {
-            Z_LOG2( "joacim", Z_FUNCTION << " something_done=true\n" );
+            Z_LOG2( "zschimmer", Z_FUNCTION << " something_done=true\n" );
             something_done = true;
 
             update_changed_directories( directory_watcher );
@@ -1946,7 +1946,7 @@ bool Job::check_for_changed_directory( const Time& now )
         it++;
     }
 
-    //Z_LOG2( "joacim", obj_name() << " " << Z_FUNCTION << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
+    //Z_LOG2( "zschimmer", obj_name() << " " << Z_FUNCTION << " something_done=" << something_done << "  _changed_directories="  << _changed_directories << "\n" ); 
     return something_done;
 }
 
@@ -2283,7 +2283,7 @@ void Job::calculate_next_time( const Time& now )
     //Time old_next_time = _next_time;
     _next_time = next_time;
 
-    //Z_LOG2( "joacim", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+    //Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
     //                                                                                               _next_time > old_next_time? " > " : " = " ) 
     //                                                                << "old " << old_next_time << "\n" );
 }
@@ -2378,7 +2378,7 @@ bool Job::request_order( const Time& now, const string& cause )
 
 void Job::withdraw_order_request()
 {
-    Z_LOGI2( "joacim", obj_name() << " " << Z_FUNCTION << "\n" );
+    Z_LOGI2( "zschimmer", obj_name() << " " << Z_FUNCTION << "\n" );
 
     _combined_job_nodes->withdraw_order_requests();
 }

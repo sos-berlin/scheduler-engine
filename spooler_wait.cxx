@@ -701,10 +701,10 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get()
         if( name == ".." )  continue;
         if( !_regex || _regex->match( name ) )  break;
 
-        Z_DEBUG_ONLY( Z_LOG2( "joacim", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
+        Z_DEBUG_ONLY( Z_LOG2( "zschimmer", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
     }
 
-    //Z_DEBUG_ONLY( Z_LOG2( "joacim", Z_FUNCTION << " => " << result << "\n" ); ) 
+    //Z_DEBUG_ONLY( Z_LOG2( "zschimmer", Z_FUNCTION << " => " << result << "\n" ); ) 
 
     if( result )  result->path().set_directory( _directory_path );
     return result;
@@ -935,14 +935,14 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         // Für diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
         // Das bremst leider den Scheduler ein wenig.
 
-        Z_LOGI2( "joacim", Z_FUNCTION << "  WaitForSingleObject()\n" );
+        Z_LOGI2( "zschimmer", Z_FUNCTION << "  WaitForSingleObject()\n" );
         int ret = WaitForSingleObject( _handle, 0 );
         if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
         return ret == WAIT_OBJECT_0;
 
 #   else
 
-        Z_LOGI2( "joacim", Z_FUNCTION << "\n" );
+        Z_LOGI2( "zschimmer", Z_FUNCTION << "\n" );
 
         bool changed = false;
 

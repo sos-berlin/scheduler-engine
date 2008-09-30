@@ -533,7 +533,7 @@ bool Directory_file_order_source::request_order( const string& cause )
 
 void Directory_file_order_source::withdraw_order_request()
 {
-    Z_LOGI2( "joacim", Z_FUNCTION << " " << _path << "\n" );
+    Z_LOGI2( "zschimmer", Z_FUNCTION << " " << _path << "\n" );
 
     _expecting_request_order = true;
     set_async_next_gmtime( double_time_max );

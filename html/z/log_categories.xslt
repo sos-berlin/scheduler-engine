@@ -29,9 +29,21 @@
         
         <table cellspacing="0" cellpadding="0">
             <thead>
-                
+                <th>
+                </th>
+                <th>
+                    Used
+                </th>
+                <th>
+                    Denied
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
             </thead>
-
             <tbody>
                 <xsl:for-each select="log_category">
                     <xsl:sort select="@path"/>
@@ -64,23 +76,36 @@
                                 <xsl:value-of select="@path"/>
                             </xsl:element>
                         </td>
+                        <td style="text-align: right">
+                            <xsl:if test="@used_counter != '0'">
+                                <xsl:value-of select="@used_counter"/>
+                            </xsl:if>
+                        </td>
+                        <td style="text-align: right">
+                            <xsl:if test="@denied_counter != '0'">
+                                <xsl:value-of select="@denied_counter"/>
+                            </xsl:if>
+                        </td>
                         <td>
                             <xsl:if test="@children_too='yes'">
-                                <xsl:text> children too</xsl:text>
+                                <xsl:text>children too</xsl:text>
                             </xsl:if>
                         </td>
                         <td>
-                            <xsl:if test="@is_implicit='yes'">
-                                <xsl:text> implicit</xsl:text>
-                            </xsl:if>
+                            <xsl:choose>
+                            <xsl:when test="@mode='implicit'">
+                                <xsl:text>implicit</xsl:text>
+                            </xsl:when>
+                            <xsl:when test="@mode='explicit'">
+                                <xsl:text>explicit</xsl:text>
+                            </xsl:when>
+                            </xsl:choose>
                         </td>
                         <td>
-                            <xsl:if test="@is_explicit='yes'">
-                                <xsl:text> explicit</xsl:text>
-                            </xsl:if>
-                        </td>
-                        <td>
-                            <xsl:value-of select="@title"/>
+                            &#160;
+                            <i>
+                                <xsl:value-of select="@title"/>
+                            </i>
                         </td>
                     </tr>
                 </xsl:for-each>

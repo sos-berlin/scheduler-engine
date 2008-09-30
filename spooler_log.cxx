@@ -890,7 +890,7 @@ void Prefix_log::remove_file()
     catch( const exception&  x ) 
     { 
         #ifdef Z_DEBUG
-            if( log_category_is_set( "joacim" ) )  assert( "Prefix_log::remove_file" );
+            if( log_category_is_set( "zschimmer" ) )  assert( "Prefix_log::remove_file" );
         #endif
 
         _spooler->log()->error( message_string( "SCHEDULER-291", x ) );       // Kann bei "http://.../show_log?" passieren
@@ -1127,7 +1127,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
     if( !is_active()  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
   //if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
-        //Z_LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
+        //Z_LOG2( "zschimmer", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
         _mail = NULL;
     }
@@ -1165,7 +1165,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
                 finish_log();
-                //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
+                //Z_LOG2( "zschimmer", "Prefix_log::send_really()\n" );
                 send_really( scheduler_event );
 
                 _first_send = 0;

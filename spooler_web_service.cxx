@@ -623,7 +623,7 @@ Web_service_operation::Web_service_operation( Web_service* ws, http::Operation* 
 
 Web_service_operation::~Web_service_operation()
 {
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
     close();
 }
 

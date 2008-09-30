@@ -643,7 +643,7 @@ bool Directory_observer::async_continue_( Continue_flags )
 #       ifdef Z_WINDOWS
             for( int i = 0; i < 2; i++ )
             {
-                Z_LOG2( "joacim", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
+                Z_LOG2( "zschimmer", "FindNextChangeNotification(\"" << _directory_tree->directory_path() << "\")\n" );
                 BOOL ok = FindNextChangeNotification( _directory_event );
                 if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
 

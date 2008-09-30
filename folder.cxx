@@ -286,7 +286,7 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 bool Folder_subsystem::on_handle_directory( directory_observer::Directory_observer* )
 {
-    //Z_LOGI2( "joacim", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _local_directory_observer->directory_tree()->directory_path() << "\n" );
+    //Z_LOGI2( "zschimmer", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _local_directory_observer->directory_tree()->directory_path() << "\n" );
 
     handle_folders();
     
@@ -982,7 +982,7 @@ bool Typed_folder::adjust_with_directory( const list<const Directory_entry*>& di
 bool Typed_folder::on_base_file_changed( File_based* old_file_based, const Directory_entry* directory_entry )
 {
 //#   ifdef Z_DEBUG
-//        if( zschimmer::Log_ptr log = "joacim" )
+//        if( zschimmer::Log_ptr log = "zschimmer" )
 //        {
 //            log << Z_FUNCTION << "( ";
 //            if( old_file_based )  log << old_file_based->obj_name() << " " << Time().set_utc( old_file_based->_base_file_info._last_write_time ).as_string()

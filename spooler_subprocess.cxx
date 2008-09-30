@@ -102,7 +102,7 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
 
 Subprocess::~Subprocess() 
 {
-    //Z_LOG2( "joacim", "~Subprocess()\n" );
+    //Z_LOG2( "zschimmer", "~Subprocess()\n" );
 
     try
     {

@@ -322,7 +322,7 @@ void Transaction::commit( const string& debug_text )
 
     if( _outer_transaction ) 
     {
-        Z_LOG2( "joacim", Z_FUNCTION << "  Commit delayed because of _outer_transaction.  " << debug_text << "\n" );
+        Z_LOG2( "zschimmer", Z_FUNCTION << "  Commit delayed because of _outer_transaction.  " << debug_text << "\n" );
         //_outer_transaction->_transaction_written |= _transaction_written;
         //_outer_transaction->_transaction_read    |= _transaction_read;
     }

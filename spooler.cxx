@@ -1487,7 +1487,7 @@ void Spooler::load_arg()
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
-            if( opt.flag      ( "test"                   ) )  set_log_category_default( "self_test" ), set_log_category_default( "self_test.exception" ),  self_test();
+            if( opt.flag      ( "test"                   ) )  set_log_category( "self_test" ), set_log_category( "self_test.exception" ),  self_test();
             else
             if( opt.flag      ( "test-summertime"        ) )  time::test_summertime( ( Time::now() + 10 ).as_string() );
             else
@@ -2529,7 +2529,7 @@ bool Spooler::run_continue( const Time& now )
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
     something_done |= _connection_manager->async_continue();
-    //Z_LOG2( "joacim", Z_FUNCTION << "  something_done=" << something_done << "\n" );
+    //Z_LOG2( "zschimmer", Z_FUNCTION << "  something_done=" << something_done << "\n" );
 
     return something_done;
 }
@@ -3484,9 +3484,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     set_log_category_default ( "scheduler"           , true );
   //set_log_category_default ( "scheduler.*"         , true );
   //set_log_category_default ( "scheduler.wait"      , false );
-    set_log_category_default ( "scheduler.loop"      , false );
-    set_log_category_default ( "scheduler.call"      , true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
-    set_log_category_implicit( "scheduler.order"     );
+    set_log_category_explicit( "scheduler.loop"      );
+    set_log_category_implicit( "scheduler.call"      , true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
+    set_log_category_implicit( "scheduler.order"     , true );
   //set_log_category_default ( "scheduler.file_order", true );
   //set_log_category_default ( "scheduler.cluster"   , true );  // Vorläufig
 

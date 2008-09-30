@@ -1921,7 +1921,7 @@ bool Cluster::do_a_heart_beat()
         //}
         //else
         //{
-        //    Z_LOG2( "joacim", Z_FUNCTION << "  Rekursiver Aufruf\n" );
+        //    Z_LOG2( "zschimmer", Z_FUNCTION << "  Rekursiver Aufruf\n" );
         //    ok = true;
         //}
     }

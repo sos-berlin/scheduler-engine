@@ -398,6 +398,8 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
     if( element.nodeName_is( "scheduler_log.log_categories.show" ) )
     {
         result = _answer.createElement( "log_categories" );
+        result.setAttribute( "categories", static_log_categories.to_string() );
+        Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
 
 
         // Einstellungen aus static_log_categories übernehmen
@@ -410,11 +412,19 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
             xml::Element_ptr cat_element = _answer.createElement( "log_category" );
 
-            cat_element.setAttribute( "path" , path == ""? "all" : e->first );
-            cat_element.setAttribute( "value", e->second._value );
+            cat_element.setAttribute( "path"        , path == ""? "all" : e->first );
+            cat_element.setAttribute( "value"       , e->second._value );
 
-            if( e->second._type == Log_categories::Entry::e_implicit )  cat_element.setAttribute( "is_implicit" , "yes" );
-            if( e->second._type == Log_categories::Entry::e_explicit )  cat_element.setAttribute( "is_explicit" , "yes" );
+            if( e->second._used_counter )
+            cat_element.setAttribute( "used_counter", e->second._used_counter );
+
+            if( e->second._denied_counter )
+            cat_element.setAttribute( "denied_counter", e->second._denied_counter );
+
+            if( e->second._type == Log_categories::Entry::e_implicit )  cat_element.setAttribute( "mode", "implicit" );
+            else
+            if( e->second._type == Log_categories::Entry::e_explicit )  cat_element.setAttribute( "mode", "explicit" );
+
             if( e->second._children_too                              )  cat_element.setAttribute( "children_too", "yes" );
             
             result.appendChild( cat_element );

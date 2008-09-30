@@ -1644,7 +1644,7 @@ Job_chain::Job_chain( Scheduler* scheduler )
 
 Job_chain::~Job_chain()
 {
-    Z_LOGI2( "joacim", obj_name() << "." << Z_FUNCTION << "\n" );
+    Z_LOGI2( "zschimmer", obj_name() << "." << Z_FUNCTION << "\n" );
 
     try
     {
@@ -3855,7 +3855,7 @@ void Order_queue::update_priorities()
 
 bool Order_queue::request_order( const Time& now, const string& cause )
 {
-    // Diese Methode weniger oft aufgerufen werden.  Z_LOGI2( "joacim", _job->obj_name() << " " << Z_FUNCTION << "  " << cause << "\n" );
+    // Diese Methode weniger oft aufgerufen werden.  Z_LOGI2( "zschimmer", _job->obj_name() << " " << Z_FUNCTION << "  " << cause << "\n" );
 
     bool result = false;
 
@@ -5247,7 +5247,7 @@ void Order::open_log()
         _log->set_filename( _spooler->log_directory() + "/order." + _job_chain_path.to_filename() + "." + name + ".log" );      // Jobprotokoll
 
         //#if defined Z_DEBUG && defined Z_WINDOWS
-        //    if( log_category_is_set( "joacim" ) )
+        //    if( log_category_is_set( "zschimmer" ) )
         //    {
         //        _log->filename().try_unlink( _log );
         //        assert( ( "order log file", !_log->filename().exists() ) );

@@ -299,7 +299,7 @@ void Supervisor_client_connection::try_connect()
 
 bool Supervisor_client_connection::async_continue_( Continue_flags )
 {
-    Z_DEBUG_ONLY( Z_LOGI2( "joacim", Z_FUNCTION << "\n" ); )
+    Z_DEBUG_ONLY( Z_LOGI2( "zschimmer", Z_FUNCTION << "\n" ); )
 
     bool something_done = false;
 

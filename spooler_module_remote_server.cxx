@@ -155,7 +155,7 @@ void Com_remote_module_instance_server::Class_data::read_xml( const string& xml_
 {
     if( xml_text != "" )
     {
-        //Z_LOG2( "joacim", Z_FUNCTION << xml_text << "\n" );
+        //Z_LOG2( "zschimmer", Z_FUNCTION << xml_text << "\n" );
         
         _stdin_dom_document.load_xml( xml_text );
 
@@ -377,10 +377,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             }
         }
 
-        //Z_LOG2( "joacim", Z_FUNCTION << " java_class_path=" << java_class_path << "\n" );;
-        //Z_LOG2( "joacim", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
-        //Z_LOG2( "joacim", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
-        //Z_LOG2( "joacim", Z_FUNCTION << " javac          =" << javac << "\n" );;
+        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_class_path=" << java_class_path << "\n" );;
+        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
+        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
+        //Z_LOG2( "zschimmer", Z_FUNCTION << " javac          =" << javac << "\n" );;
 
         _server->_module->init();
 

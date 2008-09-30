@@ -38,7 +38,7 @@ void File_logger::add_file( const File_path& path, const string& prefix )
 {
     if( path != "" )  
     {
-        Z_LOG2( "joacim", Z_FUNCTION << "(\"" << path << "\",\"" << prefix << "\")\n" );
+        Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << path << "\",\"" << prefix << "\")\n" );
         _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, prefix ) ) );
     }
 }
@@ -112,7 +112,7 @@ bool File_logger::flush()
 
     if( has_files() )
     {
-        //if( log_category_is_set( "joacim" ) )
+        //if( log_category_is_set( "zschimmer" ) )
         //{
         //    fprintf( stdout, "\n{joacim}---------stdout---------%s()\n", Z_FUNCTION.c_str() );
         //    fprintf( stderr, "\n{joacim}---------stderr---------%s()\n", Z_FUNCTION.c_str() );
@@ -329,7 +329,7 @@ void File_logger::File_logger_thread::terminate()
 
 int File_logger::File_logger_thread::thread_main()
 {
-    Z_LOG2( "joacim", Z_FUNCTION << "\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "\n" );
 
     ptr<File_logger> file_logger = _file_logger;    // Halten
 
@@ -355,7 +355,7 @@ int File_logger::File_logger_thread::thread_main()
     _file_logger = NULL;
     file_logger = NULL;
 
-    Z_LOG2( "joacim", Z_FUNCTION << "  terminates\n" );
+    Z_LOG2( "zschimmer", Z_FUNCTION << "  terminates\n" );
     return 0;
 }
 
