@@ -36,6 +36,7 @@
     </log_category>
 
     <log_category name="factory"        title="DocumentFactory">
+        <log_category name="parameter" />
         <log_category name="processor"      title="Factory Processor (hostole.dll)"/>
     </log_category>
 
@@ -81,11 +82,13 @@
 
     <log_category name="scheduler"      local_default="on" title="Scheduler">
         <log_category name="call"           local_default="on"  title="Beginn und Ende des Aufrufs einer Jobmethode, z.B. spooler_process()"/>
+        <log_category name="cluster"                            title="Cluster-Betrieb"/>
         <log_category name="file_order"                         title="&lt;file_order_source>"/>
         <log_category name="http"                               title="HTTP-Server"/>
         <log_category name="log"                                title="Zugriffe auf die Protokolldateien"/>
      <!--log_category name="loop"           local_default="off" title="Mikrozyklus des Schedulers"/-->
         <log_category name="order"          local_default="on"  title="Operation auf Aufträge (zurzeit Setzen der Payload)"/>
+        <log_category name="signal"    />
         <log_category name="wait"                               title="Wenn der Scheduler in den Wartezustand geht"/>
         <log_category name="xml"                                title="XML/DOM-Operationen"/>
         <log_category name="nothing_done"                       title="Wenn ein Job im Leerlauf ist"/>
@@ -99,6 +102,8 @@
         <log_category name="send"       title="Systemaufruf send(): Daten senden"/>
         <log_category name="recv"       title="Systemaufruf send(): Daten empfangen"/>
         <log_category name="select"     title="Systemaufruf select(): TCP-Ereignis abwarten"/>
+        <log_category name="setsockopt" title="Systemaufruf setsockopt()"/>
+        <log_category name="shutdown"   title="Systemaufruf shutdown(): Verbindung beenden"/>
         <log_category name="data"       local_default="off" title="Daten von recv() und send()"/>
     </log_category>
 

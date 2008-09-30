@@ -1,20 +1,20 @@
 // $Id$
 
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------var
 
 var static_log_categories_stylesheet = null;
 var _scheduler = null;
 var static_log_categories_dom;
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------do_onload
 
 function do_onload()
 {
     show_log_categories();
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------show_log_categories
 
 function show_log_categories()
 {
@@ -28,7 +28,7 @@ function show_log_categories()
     document.getElementById( "stylesheet_output" ).innerHTML = static_log_categories_stylesheet.xml_transform( static_log_categories_dom );
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------execute_input
 
 function execute_input()
 {
@@ -64,6 +64,14 @@ function execute_input()
         _scheduler.execute( "<commands>" + commands.join( "" ) + "</commands>" );
     }
     
+    show_log_categories();
+}
+
+//-----------------------------------------------------------------------------reset_button_onclick
+
+function reset_button_onclick()
+{
+    _scheduler.execute( "<scheduler_log.log_categories.reset/>" );
     show_log_categories();
 }
 

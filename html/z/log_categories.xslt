@@ -9,13 +9,23 @@
     
     <xsl:template match="log_categories">
 
-        <h2>Log categories</h2>
+        <h2>scheduler.log: log categories</h2>
 
-        <p style="margin-bottom: 1em">
-            Reset after
-            <input type="text" size="4" id="delay_input"></input>
-            <label class="standard_size" for="delay_input">seconds</label>
-        </p>
+
+        <table cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td style="text-align: right">
+                    Reset after
+                    <input type="text" size="4" id="delay_input" value="86400"/>
+                    <label class="standard_size" for="delay_input">seconds</label>
+
+
+                    <span style="margin-left: 5ex"> </span>
+                    <button onclick="reset_button_onclick()">Reset now</button>
+                </td>
+            </tr>
+        </table>
+
         
         <table cellspacing="0" cellpadding="0">
             <thead>
@@ -55,8 +65,8 @@
                             </xsl:element>
                         </td>
                         <td>
-                            <xsl:if test="@all_children='yes'">
-                                <xsl:text> all children</xsl:text>
+                            <xsl:if test="@children_too='yes'">
+                                <xsl:text> children too</xsl:text>
                             </xsl:if>
                         </td>
                         <td>

@@ -852,6 +852,8 @@ function scheduler_menu__onclick( x, y )
     popup_builder.add_bar();
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
+    popup_builder.add_bar();
+    popup_builder.add_entry   ( "Show log categories"            , "window.open( 'log_categories.html' )" );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

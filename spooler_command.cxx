@@ -421,7 +421,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
             if( e->second._type == Log_categories::Entry::e_implicit )  cat_element.setAttribute( "is_implicit" , "yes" );
             if( e->second._type == Log_categories::Entry::e_explicit )  cat_element.setAttribute( "is_explicit" , "yes" );
-            if( e->second._all_children                              )  cat_element.setAttribute( "all_children", "yes" );
+            if( e->second._children_too                              )  cat_element.setAttribute( "children_too", "yes" );
             
             result.appendChild( cat_element );
         }
@@ -432,11 +432,26 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc/log_categories.xml" )->_content );
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
 
-        DOM_FOR_EACH_ELEMENT( doc_log_categories_element, doc_cat_element )
+        execute_scheduler_log__append( doc_log_categories_element, "", result );
+    }
+    else 
+        z::throw_xc( Z_FUNCTION, element.nodeName() );
+
+    return result;
+}
+
+//-------------------------------------------------Command_processor::execute_scheduler_log__append
+
+void Command_processor::execute_scheduler_log__append( const xml::Element_ptr& doc_log_categories_element, const string& prefix, const xml::Element_ptr& result )
+{
+    DOM_FOR_EACH_ELEMENT( doc_log_categories_element, doc_cat_element )
+    {
+        if( doc_cat_element.nodeName_is( "log_category" ) )
         {
-            if( doc_cat_element.nodeName_is( "log_category" ) )
+            string name = doc_cat_element.getAttribute_mandatory( "name" );
+            if( name != "*" )
             {
-                string path = doc_cat_element.getAttribute_mandatory( "name" );
+                string path = prefix + name;
 
                 xml::Element_ptr cat_element = result.select_node( "log_category [ @path=" + quoted_string( path ) + " ]" );
                 if( !cat_element )
@@ -448,13 +463,11 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
                 }
 
                 cat_element.setAttribute_optional( "title", doc_cat_element.getAttribute( "title" ) );
+
+                execute_scheduler_log__append( doc_cat_element, path + ".", result );
             }
         }
     }
-    else 
-        z::throw_xc( Z_FUNCTION, element.nodeName() );
-
-    return result;
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
