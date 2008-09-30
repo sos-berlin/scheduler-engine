@@ -60,6 +60,7 @@ struct Log_categories_reset_operation : Async_operation
     bool async_continue_( Continue_flags )
     {
         static_log_categories.restore_from( _spooler->_original_log_categories );
+        _spooler->log()->info( message_string( "SCHEDULER-710" ) );
         return true;
     }
 
@@ -373,13 +374,13 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 
 //---------------------------------------------------------Command_processor::execute_scheduler_log
 
-xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_ptr& element, const Show_what& show_ )
+xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_ptr& element, const Show_what& )
 {
     xml::Element_ptr result;
 
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    if( element.nodeName_is( "scheduler_log.log_categories.modify" ) )
+    if( element.nodeName_is( "scheduler_log.log_categories.set" ) )
     {
         z::static_log_categories.set( element.getAttribute_mandatory( "category" ), element.bool_getAttribute( "value", true ) );
         result = _answer.createElement( "ok" );
@@ -395,15 +396,59 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
             op->set_async_manager( _spooler->_connection_manager );
         }
         else
-            static_log_categories.save_to( &_spooler->_original_log_categories );
+            static_log_categories.restore_from( _spooler->_original_log_categories );
 
         result = _answer.createElement( "ok" );
     }
     else
     if( element.nodeName_is( "scheduler_log.log_categories.show" ) )
     {
-        xml::Document_ptr doc ( embedded_files.get_embedded_file( "doc/log_categories.xml" )->_content );
-        result = _answer.clone( doc.documentElement() );
+        result = _answer.createElement( "log_categories" );
+
+
+        // Einstellungen aus static_log_categories übernehmen
+
+        Log_categories::Map map = static_log_categories.map_copy();
+
+        Z_FOR_EACH( Log_categories::Map, map, e )
+        {
+            string name = e->first;
+
+            xml::Element_ptr cat_element = _answer.createElement( "log_category" );
+
+            cat_element.setAttribute( "path" , e->first == ""? "all" : e->first );
+            cat_element.setAttribute( "value", e->second._value );
+
+            if( e->second._type == Log_categories::Entry::e_implicit )  cat_element.setAttribute( "is_implicit" , "yes" );
+            if( e->second._type == Log_categories::Entry::e_explicit )  cat_element.setAttribute( "is_explicit" , "yes" );
+            if( e->second._all_children                              )  cat_element.setAttribute( "all_children", "yes" );
+            
+            result.appendChild( cat_element );
+        }
+
+
+        // Einstellung der Dokumentation übernehmen
+
+        xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc/log_categories.xml" )->_content );
+        xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
+
+        DOM_FOR_EACH_ELEMENT( doc_log_categories_element, doc_cat_element )
+        {
+            if( doc_cat_element.nodeName_is( "log_category" ) )
+            {
+                string name = doc_cat_element.getAttribute_mandatory( "name" );
+
+                xml::Element_ptr cat_element = result.select_node( "log_category [ @path=" + quoted_string( name ) + " ]" );
+                if( !cat_element )
+                {
+                    cat_element = _answer.createElement( "log_category" );
+                    cat_element.setAttribute( "path", name );
+                    result.appendChild( cat_element );
+                }
+
+                cat_element.setAttribute_optional( "title", doc_cat_element.getAttribute( "title" ) );
+            }
+        }
     }
     else 
         z::throw_xc( Z_FUNCTION, element.nodeName() );

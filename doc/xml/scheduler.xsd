@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 5826 2008-07-09 10:32:58Z jz $ -->
+<!-- $Id: scheduler.xsd 5902 2008-09-29 15:44:28Z jz $ -->
 
 <xsd:schema 
     xmlns:xsd          = "http://www.w3.org/2001/XMLSchema" 
@@ -9,7 +9,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 5826 2008-07-09 10:32:58Z jz $
+            $Id: scheduler.xsd 5902 2008-09-29 15:44:28Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
         </xsd:documentation>
@@ -179,7 +179,7 @@
             <xsd:element ref="remove_job_chain"/>
             <xsd:element ref="remove_order"/>
             <xsd:element name="run_time"                    type="run_time"/>
-            <xsd:element ref="scheduler_log.log_categories.modify"/>
+            <xsd:element ref="scheduler_log.log_categories.set"/>
             <xsd:element ref="scheduler_log.log_categories.reset"/>
             <xsd:element ref="scheduler_log.log_categories.show"/>
             <xsd:element ref="show_calendar"/>
@@ -1011,7 +1011,7 @@
     </xsd:element>
 
     
-    <xsd:element name="scheduler_log.log_categories.modify">
+    <xsd:element name="scheduler_log.log_categories.set">
         <xsd:complexType>
             <xsd:attribute name="category"  type="String"   use="required"/>
             <xsd:attribute name="value"     type="Yes_no"/>

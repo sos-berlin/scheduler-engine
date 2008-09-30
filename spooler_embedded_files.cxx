@@ -188,7 +188,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"remove_job_chain\"/>\n"
     "<xsd:element ref=\"remove_order\"/>\n"
     "<xsd:element name=\"run_time\"                    type=\"run_time\"/>\n"
-    "<xsd:element ref=\"scheduler_log.log_categories.modify\"/>\n"
+    "<xsd:element ref=\"scheduler_log.log_categories.set\"/>\n"
     "<xsd:element ref=\"scheduler_log.log_categories.reset\"/>\n"
     "<xsd:element ref=\"scheduler_log.log_categories.show\"/>\n"
     "<xsd:element ref=\"show_calendar\"/>\n"
@@ -1020,7 +1020,7 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"scheduler_log.log_categories.modify\">\n"
+    "<xsd:element name=\"scheduler_log.log_categories.set\">\n"
     "<xsd:complexType>\n"
     "<xsd:attribute name=\"category\"  type=\"String\"   use=\"required\"/>\n"
     "<xsd:attribute name=\"value\"     type=\"Yes_no\"/>\n"
@@ -2132,8 +2132,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1222624716 },
-    { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222693984 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1222758398 },
+    { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222703083 },
     { NULL, NULL, 0 }
 };
 

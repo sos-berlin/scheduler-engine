@@ -1777,10 +1777,6 @@ void Spooler::start()
 
     static_log_categories.save_to( &_original_log_categories );
 
-    #ifdef Z_DEBUG
-        _log->warn( S() << "log_categories=" << static_log_categories.to_string() );
-    #endif
-
     _state_cmd = sc_none;
     set_state( s_starting );
 

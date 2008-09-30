@@ -493,6 +493,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-707", "Creating configuration directory '$1'" },
     { "SCHEDULER-708", "Adding '$1'" },
     { "SCHEDULER-709", "Killing descendant pid=$1 ($2)" },
+    { "SCHEDULER-710", "Delayed command <scheduler_log.log_categories.reset> has been executed" },
     {}
 };
 } //namespace sos
