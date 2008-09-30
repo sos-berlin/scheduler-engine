@@ -15,6 +15,12 @@
 
     <description>
         <p>
+            Unter Unix wird eine Nicht-API-Task
+            (<scheduler_element name="process"/> oder <scheduler_element name="script" attribute="language" value="shell"/>)
+            mitsamt ihren Kindprozessen abgebrochen.
+            Dazu ermittelt der Scheduler mit dem Betriebssystem-Kommando "ps -ef" alle Kindprozesse und 
+            bricht sie mit dem Signal <code>SIGKILL</code> ab.
+            Außerdem wird die Prozessgruppe des Task-Prozesses abgebrochen.            
         </p>
     </description>
 
@@ -47,6 +53,10 @@
     </xml_attributes>
 
     <xml_answer element="ok"/>
+
+    <messages>
+        <message level="warn" code="SCHEDULER-709"/>
+    </messages>
 
     <example>
         <pre>&lt;kill_task job="mein_job" id="4711"/></pre>

@@ -135,6 +135,8 @@
     <file path="xml/answer/job_chains.xml"/>
     <file path="xml/answer/jobs.xml"/>
     <file path="xml/answer/log.xml"/>
+    <file path="xml/answer/log_categories.xml"/>
+    <file path="xml/answer/log_category.xml"/>
     <file path="xml/answer/lock.xml"/>
     <file path="xml/answer/lock.holder.xml"/>
     <file path="xml/answer/lock.holders.xml"/>
@@ -232,6 +234,9 @@
     <file path="xml/select_events.xml"/>
     <file path="xml/service_request.xml"/>
     <file path="xml/service_response.xml"/>
+    <file path="xml/scheduler_log.log_categories.reset.xml"/>
+    <file path="xml/scheduler_log.log_categories.show.xml"/>
+    <file path="xml/scheduler_log.log_categories.set.xml"/>
     <file path="xml/show_calendar.xml"/>
     <file path="xml/show_history.xml"/>
     <file path="xml/show_job.xml"/>

@@ -88,6 +88,9 @@
                 <scheduler_element name="run_time"/><br/>
                 <scheduler_element name="schedule"/><br/>
                 <scheduler_element name="scheduler_script"/><br/>
+                <scheduler_element name="scheduler_log.log_categories.reset"/><br/>
+                <scheduler_element name="scheduler_log.log_categories.set"/><br/>
+                <scheduler_element name="scheduler_log.log_categories.show"/><br/>
                 <scheduler_element name="schedules"/><br/>
                 <scheduler_element name="script"/><br/>
                 <scheduler_element name="service_request"/><br/>

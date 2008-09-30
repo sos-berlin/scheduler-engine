@@ -179,8 +179,8 @@
             <xsd:element ref="remove_job_chain"/>
             <xsd:element ref="remove_order"/>
             <xsd:element name="run_time"                    type="run_time"/>
-            <xsd:element ref="scheduler_log.log_categories.set"/>
             <xsd:element ref="scheduler_log.log_categories.reset"/>
+            <xsd:element ref="scheduler_log.log_categories.set"/>
             <xsd:element ref="scheduler_log.log_categories.show"/>
             <xsd:element ref="show_calendar"/>
             <xsd:element ref="show_history"/>
@@ -1011,6 +1011,13 @@
     </xsd:element>
 
     
+    <xsd:element name="scheduler_log.log_categories.reset">
+        <xsd:complexType>
+            <xsd:attribute name="delay"     type="xsd:nonNegativeInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="scheduler_log.log_categories.set">
         <xsd:complexType>
             <xsd:attribute name="category"  type="String"   use="required"/>
@@ -1018,14 +1025,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    
-    <xsd:element name="scheduler_log.log_categories.reset">
-        <xsd:complexType>
-            <xsd:attribute name="delay"     type="xsd:nonNegativeInteger"/>
-        </xsd:complexType>
-    </xsd:element>
-    
-    
+
     <xsd:element name="scheduler_log.log_categories.show"/>
 
 

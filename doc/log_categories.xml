@@ -41,13 +41,14 @@
     </log_category>
 
     <log_category name="file"           title="">
+        <log_category name="directory"/>
         <log_category name="mmap"       title="mmap()"/>
     </log_category>
 
     <log_category name="hostole"        title="Hostole-Aufrufe (außer Factory Processor)">
     </log_category>
 
-    <log_category name="ini">
+    <log_category name="ini"            title="Windows-Aufruf GetPrivateProfile()">
         <description>
             <p>
                 .ini-Datei lesen: <code>GetPrivateProfile()</code>.
@@ -61,12 +62,17 @@
     <log_category name="jdbc"           title="JDBC-Aufrufe">
     </log_category>
 
+    <log_category name="mail"           >
+    </log_category>
+    
     <log_category name="mutex"          local_default="off" title="Mutual exclusion locks, Sperren zur Serialisierung von Threads">
     </log_category>
 
     <log_category name="object_server"  title="Schnittstelle des Schedulers zu den in eigenen Prozessen laufenden Tasks">
         <log_category name="call"           title="Aufruf einer Methode"/>
+        <log_category name="continue"       />
         <log_category name="push"           title="Stack-Operation bei verschachteltem Aufruf einer Methode"/>
+        <log_category name="wait"           />
         <log_category name="Invoke"         title="COM-Operation"/>
         <log_category name="QueryInterface" title="COM-Operation"/>
     </log_category>
@@ -83,6 +89,7 @@
     <log_category name="scheduler"      local_default="on" title="Scheduler">
         <log_category name="call"           local_default="on"  title="Beginn und Ende des Aufrufs einer Jobmethode, z.B. spooler_process()"/>
         <log_category name="cluster"                            title="Cluster-Betrieb"/>
+        <log_category name="directory"                          title="Öffnen eines Dateiverzeichnisses"/>
         <log_category name="file_order"                         title="&lt;file_order_source>"/>
         <log_category name="http"                               title="HTTP-Server"/>
         <log_category name="log"                                title="Zugriffe auf die Protokolldateien"/>
@@ -116,6 +123,9 @@
         <log_category name="get_key"       title="Operation get_key()"/>
     </log_category>
 
+    <log_category name="windows"        title="Betriebssystem Microsoft Windows">
+        <log_category name="PeekMessage"   title="Aufruf PeekMessage()"/>
+    </log_category>
 
     <description>
         <p>
@@ -135,6 +145,20 @@
             Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen.
             Beispiel: <code>scheduler.*</code>.
         </p>
+        <p>
+            Siehe auch die Kommandos
+        </p>
+        <ul>
+            <li>
+                <scheduler_element name="scheduler_log.log_categories.show" />
+            </li>
+            <li>
+                <scheduler_element name="scheduler_log.log_categories.set" />
+            </li>
+            <li>
+                <scheduler_element name="scheduler_log.log_categories.reset" />
+            </li>
+        </ul>
     </description>
 
 </log_categories>

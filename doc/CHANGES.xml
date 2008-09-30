@@ -10,6 +10,38 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-09-30" version="2.0.213" subversion_revision="5907">
+        <revision type="modification" title="&lt;kill_task> auf Nicht-API-Prozessen unter Unix bricht alle Kindprozesse ab">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="kill_task" />
+                    </li>
+                </ul>
+                <p>
+                    Die Meldungen <code>SCHEDULER-277</code> und <code>SCHEDULER-282</code> werden nicht mehr ausgegeben.
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Kommandos zum Schalten der Log-Kategorien">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="scheduler_log.log_categories.show" />
+                    </li>
+                    <li>
+                        <scheduler_element name="scheduler_log.log_categories.set" />
+                    </li>
+                    <li>
+                        <scheduler_element name="scheduler_log.log_categories.reset" />
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2008-09-11" version="2.0.212" subversion_revision="5882">
         <revision type="new" title="&quot;..&quot; ist in allen Pfaden möglich">
             <description>

@@ -380,12 +380,6 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
-    if( element.nodeName_is( "scheduler_log.log_categories.set" ) )
-    {
-        z::static_log_categories.set( element.getAttribute_mandatory( "category" ), element.bool_getAttribute( "value", true ) );
-        result = _answer.createElement( "ok" );
-    }
-    else
     if( element.nodeName_is( "scheduler_log.log_categories.reset" ) )
     {
         if( int delay = element.int_getAttribute( "delay", 0 ) )
@@ -433,6 +427,12 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
 
         execute_scheduler_log__append( doc_log_categories_element, "", result );
+    }
+    else
+    if( element.nodeName_is( "scheduler_log.log_categories.set" ) )
+    {
+        z::static_log_categories.set( element.getAttribute_mandatory( "category" ), element.bool_getAttribute( "value", true ) );
+        result = _answer.createElement( "ok" );
     }
     else 
         z::throw_xc( Z_FUNCTION, element.nodeName() );
