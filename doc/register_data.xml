@@ -155,6 +155,10 @@
     <register_keyword_display><code>calling=</code></register_keyword_display>
     <register_entry register_file='xml/answer/task.xml#attribute_calling' register_title='&lt;task&gt; (Antwort)'  register_keyword='calling' type='definition'/>
 </register_keyword>
+<register_keyword keyword='category'>
+    <register_keyword_display><code>category=</code></register_keyword_display>
+    <register_entry register_file='xml/scheduler_log.log_categories.set.xml#attribute_category' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='category' type='definition'/>
+</register_keyword>
 <register_keyword keyword='cause'>
     <register_keyword_display><code>cause=</code></register_keyword_display>
     <register_entry register_file='xml/answer/history.entry.xml#attribute_cause' register_title='&lt;history.entry&gt; (Antwort)'  register_keyword='cause' type='definition'/>
@@ -432,6 +436,7 @@
     <register_entry register_file='xml/delay_after_error.xml#attribute_delay' register_title='&lt;delay_after_error&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
     <register_entry register_file='xml/delay_order_after_setback.xml#attribute_delay' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
     <register_entry register_file='xml/job_chain_node.xml#attribute_delay' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#attribute_delay' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='delay' type='definition'/>
 </register_keyword>
 <register_keyword keyword='delay_after_error'>
     <register_keyword_display><code>&lt;delay_after_error&gt;</code></register_keyword_display>
@@ -963,6 +968,10 @@
     <register_keyword_display><code>is_available=</code></register_keyword_display>
     <register_entry register_file='xml/answer/lock.use.xml#attribute_is_available' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='is_available' type='definition'/>
 </register_keyword>
+<register_keyword keyword='is_explicit'>
+    <register_keyword_display><code>is_explicit=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/log_category.xml#attribute_is_explicit' register_title='&lt;log_category&gt; (Antwort)'  register_keyword='is_explicit' type='definition'/>
+</register_keyword>
 <register_keyword keyword='is_maximum'>
     <register_keyword_display><code>is_maximum=</code></register_keyword_display>
     <register_entry register_file='xml/delay_order_after_setback.xml#attribute_is_maximum' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='is_maximum' type='definition'/>
@@ -1360,6 +1369,14 @@
     <register_entry register_file='CHANGES.xml#use_option__log-level' register_title='Änderungsprotokoll'  register_keyword='log-level'/>
     <register_entry register_file='command_line.xml#option_log-level' register_title='Kommandozeilenoptionen'  register_keyword='log-level' type='definition'/>
     <register_entry register_file='protokolle.xml#use_option__log-level' register_title='Protokolle'  register_keyword='log-level'/>
+</register_keyword>
+<register_keyword keyword='log_categories'>
+    <register_keyword_display><code>&lt;log_categories&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/answer/log_categories.xml#' register_title='&lt;log_categories&gt; (Antwort)'  register_keyword='log_categories' type='definition'/>
+</register_keyword>
+<register_keyword keyword='log_category'>
+    <register_keyword_display><code>&lt;log_category&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/answer/log_category.xml#' register_title='&lt;log_category&gt; (Antwort)'  register_keyword='log_category' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log_dir'>
     <register_keyword_display><code>log_dir=</code></register_keyword_display>
@@ -1808,6 +1825,7 @@
 </register_keyword>
 <register_keyword keyword='path'>
     <register_keyword_display><code>path=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/log_category.xml#attribute_path' register_title='&lt;log_category&gt; (Antwort)'  register_keyword='path' type='definition'/>
     <register_entry register_file='xml/http_directory.xml#attribute_path' register_title='&lt;http_directory&gt; (Konfiguration)'  register_keyword='path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='payload'>
@@ -1889,6 +1907,7 @@
     <register_entry register_file='xml/answer/task.xml#use_element__process' register_title='&lt;task&gt; (Antwort)'  register_keyword='process'/>
     <register_entry register_file='xml/copy_params.xml#use_element__process' register_title='&lt;copy_params&gt;'  register_keyword='process'/>
     <register_entry register_file='xml/job.xml#use_element__process' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='process'/>
+    <register_entry register_file='xml/kill_task.xml#use_element__process' register_title='&lt;kill_task&gt; (Kommando)'  register_keyword='process'/>
     <register_entry register_file='xml/process.xml#' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process' type='definition'/>
     <register_entry register_file='xml/script.xml#use_element__process' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='process'/>
 </register_keyword>
@@ -2200,6 +2219,27 @@
 </register_keyword>
 <register_keyword keyword='SCHEDULER_JOB_NAME'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_NAME'/>
+</register_keyword>
+<register_keyword keyword='scheduler_log.log_categories.reset'>
+    <register_keyword_display><code>&lt;scheduler_log.log_categories.reset&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__scheduler_log.log_categories.reset' register_title='Änderungsprotokoll'  register_keyword='scheduler_log.log_categories.reset'/>
+    <register_entry register_file='log_categories.xml#use_element__scheduler_log.log_categories.reset' register_title='Log-Kategorien'  register_keyword='scheduler_log.log_categories.reset'/>
+    <register_entry register_file='xml.xml#use_element__scheduler_log.log_categories.reset' register_title='Alle XML-Elemente'  register_keyword='scheduler_log.log_categories.reset'/>
+</register_keyword>
+<register_keyword keyword='scheduler_log.log_categories.set'>
+    <register_keyword_display><code>&lt;scheduler_log.log_categories.set&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__scheduler_log.log_categories.set' register_title='Änderungsprotokoll'  register_keyword='scheduler_log.log_categories.set'/>
+    <register_entry register_file='log_categories.xml#use_element__scheduler_log.log_categories.set' register_title='Log-Kategorien'  register_keyword='scheduler_log.log_categories.set'/>
+    <register_entry register_file='xml.xml#use_element__scheduler_log.log_categories.set' register_title='Alle XML-Elemente'  register_keyword='scheduler_log.log_categories.set'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.set' type='definition'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.set.xml#' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.set' type='definition'/>
+</register_keyword>
+<register_keyword keyword='scheduler_log.log_categories.show'>
+    <register_keyword_display><code>&lt;scheduler_log.log_categories.show&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__scheduler_log.log_categories.show' register_title='Änderungsprotokoll'  register_keyword='scheduler_log.log_categories.show'/>
+    <register_entry register_file='log_categories.xml#use_element__scheduler_log.log_categories.show' register_title='Log-Kategorien'  register_keyword='scheduler_log.log_categories.show'/>
+    <register_entry register_file='xml.xml#use_element__scheduler_log.log_categories.show' register_title='Alle XML-Elemente'  register_keyword='scheduler_log.log_categories.show'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.show.xml#' register_title='&lt;scheduler_log.log_categories.show&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.show' type='definition'/>
 </register_keyword>
 <register_keyword keyword='SCHEDULER_ORDER_ID'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_ORDER_ID'/>
@@ -2745,8 +2785,10 @@
 </register_keyword>
 <register_keyword keyword='value'>
     <register_keyword_display><code>value=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/log_category.xml#attribute_value' register_title='&lt;log_category&gt; (Antwort)'  register_keyword='value' type='definition'/>
     <register_entry register_file='xml/answer/param.xml#attribute_value' register_title='&lt;param&gt; (Antwort)'  register_keyword='value' type='definition'/>
     <register_entry register_file='xml/param.xml#attribute_value' register_title='&lt;param&gt;'  register_keyword='value' type='definition'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.set.xml#attribute_value' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='value' type='definition'/>
     <register_entry register_file='xml/variable.xml#attribute_value' register_title='&lt;variable&gt; (Konfiguration)'  register_keyword='value' type='definition'/>
 </register_keyword>
 <register_keyword keyword='variable'>

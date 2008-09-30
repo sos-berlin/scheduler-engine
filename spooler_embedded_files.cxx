@@ -188,8 +188,8 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"remove_job_chain\"/>\n"
     "<xsd:element ref=\"remove_order\"/>\n"
     "<xsd:element name=\"run_time\"                    type=\"run_time\"/>\n"
-    "<xsd:element ref=\"scheduler_log.log_categories.set\"/>\n"
     "<xsd:element ref=\"scheduler_log.log_categories.reset\"/>\n"
+    "<xsd:element ref=\"scheduler_log.log_categories.set\"/>\n"
     "<xsd:element ref=\"scheduler_log.log_categories.show\"/>\n"
     "<xsd:element ref=\"show_calendar\"/>\n"
     "<xsd:element ref=\"show_history\"/>\n"
@@ -1020,17 +1020,17 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"scheduler_log.log_categories.set\">\n"
+    "<xsd:element name=\"scheduler_log.log_categories.reset\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"category\"  type=\"String\"   use=\"required\"/>\n"
-    "<xsd:attribute name=\"value\"     type=\"Yes_no\"/>\n"
+    "<xsd:attribute name=\"delay\"     type=\"xsd:nonNegativeInteger\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"scheduler_log.log_categories.reset\">\n"
+    "<xsd:element name=\"scheduler_log.log_categories.set\">\n"
     "<xsd:complexType>\n"
-    "<xsd:attribute name=\"delay\"     type=\"xsd:nonNegativeInteger\"/>\n"
+    "<xsd:attribute name=\"category\"  type=\"String\"   use=\"required\"/>\n"
+    "<xsd:attribute name=\"value\"     type=\"Yes_no\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -2134,6 +2134,20 @@ const char file_doc_log_categories_xml[] =
     "Sie k\xc3" "\xb6" "nnen eine Kategorie mit all deren Unterkategorien ausw\xc3" "\xa4" "hlen, indem Sie dem Namen ein \"<code>.*</code>\" anh\xc3" "\xa4" "ngen.\n"
     "Beispiel: <code>scheduler.*</code>.\n"
     "</p>\n"
+    "<p>\n"
+    "Siehe auch die Kommandos\n"
+    "</p>\n"
+    "<ul>\n"
+    "<li>\n"
+    "<scheduler_element name=\"scheduler_log.log_categories.show\" />\n"
+    "</li>\n"
+    "<li>\n"
+    "<scheduler_element name=\"scheduler_log.log_categories.set\" />\n"
+    "</li>\n"
+    "<li>\n"
+    "<scheduler_element name=\"scheduler_log.log_categories.reset\" />\n"
+    "</li>\n"
+    "</ul>\n"
     "</description>\n"
     "\n"
     "</log_categories>\n"
@@ -2147,8 +2161,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1222763694 },
-    { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222783134 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1222785218 },
+    { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222785218 },
     { NULL, NULL, 0 }
 };
 
