@@ -10,6 +10,7 @@
 body                    { font-family: Sans-Serif; font-size: 9pt; margin-top: 5pt; cursor: default; }
 p                       { margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
 label                   { font-size: 8pt; }
+label.standard_size     { font-size: 10pt; }
 /*col                   { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }  /* wirkt nicht in Firefox */
 /*caption                 { padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }*/
 

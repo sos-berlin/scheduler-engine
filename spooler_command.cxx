@@ -412,11 +412,11 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
         Z_FOR_EACH( Log_categories::Map, map, e )
         {
-            string name = e->first;
+            string path = e->first;
 
             xml::Element_ptr cat_element = _answer.createElement( "log_category" );
 
-            cat_element.setAttribute( "path" , e->first == ""? "all" : e->first );
+            cat_element.setAttribute( "path" , path == ""? "all" : e->first );
             cat_element.setAttribute( "value", e->second._value );
 
             if( e->second._type == Log_categories::Entry::e_implicit )  cat_element.setAttribute( "is_implicit" , "yes" );
@@ -436,13 +436,14 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         {
             if( doc_cat_element.nodeName_is( "log_category" ) )
             {
-                string name = doc_cat_element.getAttribute_mandatory( "name" );
+                string path = doc_cat_element.getAttribute_mandatory( "name" );
 
-                xml::Element_ptr cat_element = result.select_node( "log_category [ @path=" + quoted_string( name ) + " ]" );
+                xml::Element_ptr cat_element = result.select_node( "log_category [ @path=" + quoted_string( path ) + " ]" );
                 if( !cat_element )
                 {
                     cat_element = _answer.createElement( "log_category" );
-                    cat_element.setAttribute( "path", name );
+                    cat_element.setAttribute( "path", path );
+                    cat_element.setAttribute( "value", static_log_categories.is_set( path ) );
                     result.appendChild( cat_element );
                 }
 
