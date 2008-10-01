@@ -650,6 +650,7 @@ Spooler::Spooler()
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
     _db_log_level( log_none ),
+    _scheduler_wait_log_category ( "scheduler.wait" ),
     _factory_ini( default_factory_ini ),
     _mail_defaults(NULL),
     _mail_on_delay_after_error  ( fl_first_and_last_only ),
@@ -2185,17 +2186,17 @@ void Spooler::end_waiting_tasks()
 
 void Spooler::run()
 {
-    int     nothing_done_count   = 0;
-    int     nichts_getan_zaehler = 0;
-    int     log_wait_id          = 0;
-    bool    log_wait_0           = false;
-    string  catched_event_string;
+    int                 nothing_done_count          = 0;
+    int                 nichts_getan_zaehler        = 0;
+    string              catched_event_string;
+    Cached_log_category scheduler_loop_log_category ( "scheduler.loop" );
+    Cached_log_category scheduler_wait_log_category ( "scheduler.wait" );
 
     //---------------------------------------------------------------------------------------------
 
     while(1)  // Die groﬂe Haupt-Schleife
     {
-        bool    log_wait          = _print_time_every_second || static_log_categories.update_flag_if_modified( "scheduler.wait", &log_wait_0, &log_wait_id );
+      //bool    log_wait          = _print_time_every_second || static_log_categories.is_set( &scheduler_wait_log_category );
         Time    wait_until        = Time::never;
         Object* wait_until_object = NULL;    
         Time    resume_at         = Time::never;
@@ -2389,9 +2390,9 @@ void Spooler::run()
                 }
             }
 
-            if( log_wait )  
+            //if( log_wait )  
             {
-                if( zschimmer::Log_ptr log = "scheduler.loop" )
+                if( zschimmer::Log_ptr log = scheduler_loop_log_category )
                 {
                     S line;
                     line << "-------------scheduler loop " << _loop_counter << "-------------> " << 
@@ -3483,7 +3484,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     set_log_category_default ( "scheduler"           , true );
   //set_log_category_default ( "scheduler.*"         , true );
-  //set_log_category_default ( "scheduler.wait"      , false );
+    set_log_category_explicit( "scheduler.wait"      );
     set_log_category_explicit( "scheduler.loop"      );
     set_log_category_implicit( "scheduler.call"      , true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_implicit( "scheduler.order"     , true );

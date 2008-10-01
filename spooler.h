@@ -548,6 +548,7 @@ struct Spooler : Object,
     string                     _log_filename;
     bool                       _log_to_stderr;              // Zusätzlich nach stdout schreiben
     Log_level                  _log_to_stderr_level;
+    Cached_log_category        _scheduler_wait_log_category;
     File_path                  _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _temp_dir;

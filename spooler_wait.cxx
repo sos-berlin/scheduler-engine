@@ -188,7 +188,7 @@ bool Wait_handles::signaled()
             if( *it  &&  (*it)->signaled() )  
             { 
                 _catched_event = *it;
-                //Z_LOG2( "scheduler.wait", **it << " signaled!\n" );  
+                //Z_LOG2( _spooler->_scheduler_wait_log_category, **it << " signaled!\n" );  
                 return true; 
             }
         }
@@ -403,7 +403,7 @@ bool Wait_handles::wait( double wait_time )
 bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
 {
 #   ifdef Z_DEBUG
-        if( z::Log_ptr log = "scheduler.wait" )
+        if( z::Log_ptr log = _spooler->_scheduler_wait_log_category )
         {
             *log << Z_FUNCTION << " ";
             *log << " until=" << until << ", ";
@@ -441,7 +441,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
             {
-                Z_LOG2( "scheduler.wait", "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
+                Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
                         << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
 
                 ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, TRUE );   // Weckt den Rechner
@@ -551,11 +551,11 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             
                 if( event )
                 {
-                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... " << event->as_text() << "\n" );
+                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
                     if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );
                 }
                 else
-                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << index << "\n" );
+                    if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
 
                 _catched_event = event;
 
@@ -595,7 +595,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         Time now = Time::now();
 
         //if( until > now )
-            Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
+            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
                 ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
