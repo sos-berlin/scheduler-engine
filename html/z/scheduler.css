@@ -26,7 +26,7 @@ hr                      { height: 1px; font-size: 1px; border: 0px; color: gray;
 /* Job-Description */
 div.description         {}
 
-th                      { font-size: 9pt; text-align: left; padding-left: 2pt; padding-right: 2pt; font-weight: normal; }
+th                      { font-size: 9pt; text-align: left; padding-left: 2pt; padding-right: 2pt; font-weight: normal; vertical-align: baseline; border-bottom: 1px solid black; }
 td                      { font-size: 9pt; text-align: left; vertical-align: baseline; padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt } 
 
 th.head1, td.head1      { padding-right: 2pt; vertical-align: bottom; border-bottom: 1px solid gray; font-size: 8pt; }

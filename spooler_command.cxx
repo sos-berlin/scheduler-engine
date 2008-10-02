@@ -426,7 +426,13 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
             if( e->second._type == Log_categories::Entry::e_explicit )  cat_element.setAttribute( "mode", "explicit" );
 
             if( e->second._children_too                              )  cat_element.setAttribute( "children_too", "yes" );
-            
+
+            #ifdef Z_DEBUG
+                if( e->second._children_too_derived                  )  cat_element.setAttribute( "children_too_derived", "yes" );
+                if( e->second._has_default                           )  cat_element.setAttribute( "has_default", "yes" );
+                cat_element.setAttribute( "default", e->second._default_value? "yes" : "no" );
+            #endif            
+
             result.appendChild( cat_element );
         }
 
@@ -467,8 +473,8 @@ void Command_processor::execute_scheduler_log__append( const xml::Element_ptr& d
                 if( !cat_element )
                 {
                     cat_element = _answer.createElement( "log_category" );
-                    cat_element.setAttribute( "path", path );
-                    cat_element.setAttribute( "value", static_log_categories.is_set( path ) );
+                    cat_element.setAttribute( "path" , path );
+                    cat_element.setAttribute( "value", static_log_categories.is_set( path, true ) );
                     result.appendChild( cat_element );
                 }
 

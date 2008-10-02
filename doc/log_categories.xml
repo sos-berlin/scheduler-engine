@@ -30,9 +30,9 @@
     </log_category>
 
     <log_category name="exception"      title="Bestimmte Fehlercodes">
-        <log_category name="*"              global_default="on" title="Alle Fehlercodes"/>
-        <log_category name="D310"           local_default="off" title="Dateiende"/>
-        <log_category name="D311"           local_default="off" title="Satz nicht gefunden"/>
+        <log_category name="*"              default="yes"   title="Alle Fehlercodes"/>
+        <log_category name="D310"           mode="explicit" title="Dateiende"/>
+        <log_category name="D311"           mode="explicit" title="Satz nicht gefunden"/>
     </log_category>
 
     <log_category name="factory"        title="DocumentFactory">
@@ -65,7 +65,7 @@
     <log_category name="mail"           >
     </log_category>
     
-    <log_category name="mutex"          local_default="off" title="Mutual exclusion locks, Sperren zur Serialisierung von Threads">
+    <log_category name="mutex"          mode="explicit" title="Mutual exclusion locks, Sperren zur Serialisierung von Threads">
     </log_category>
 
     <log_category name="object_server"  title="Schnittstelle des Schedulers zu den in eigenen Prozessen laufenden Tasks">
@@ -86,19 +86,20 @@
         <log_category name="learn"          title="Hinzugelernte (unbekannte) RTF-Codes"/>
     </log_category>
 
-    <log_category name="scheduler"      local_default="on" title="Scheduler">
-        <log_category name="call"           local_default="on"  title="Beginn und Ende des Aufrufs einer Jobmethode, z.B. spooler_process()"/>
-        <log_category name="cluster"                            title="Cluster-Betrieb"/>
-        <log_category name="directory"                          title="Öffnen eines Dateiverzeichnisses"/>
-        <log_category name="file_order"                         title="&lt;file_order_source>"/>
-        <log_category name="http"                               title="HTTP-Server"/>
-        <log_category name="log"                                title="Zugriffe auf die Protokolldateien"/>
-     <!--log_category name="loop"           local_default="off" title="Mikrozyklus des Schedulers"/-->
-        <log_category name="order"          local_default="on"  title="Operation auf Aufträge (zurzeit Setzen der Payload)"/>
+    <log_category name="scheduler"      mode="implicit" title="Scheduler">
+        <log_category name="call"           mode="implicit"  title="Beginn und Ende des Aufrufs einer Jobmethode, z.B. spooler_process()"/>
+        <log_category name="cluster"                         title="Cluster-Betrieb"/>
+        <log_category name="directory"                       title="Öffnen eines Dateiverzeichnisses"/>
+        <log_category name="file_order"                      title="&lt;file_order_source>"/>
+        <log_category name="http"                            title="HTTP-Server"/>
+        <log_category name="log"                             title="Zugriffe auf die Protokolldateien"/>
+     <!--log_category name="loop"           mode="explicit"  title="Mikrozyklus des Schedulers"/-->
+        <log_category name="order"          mode="implicit"  title="Operation auf Aufträge (zurzeit Setzen der Payload)"/>
+        <log_category name="service"        mode="implicit"  title="Windows-Dienstesteuerung"/>
         <log_category name="signal"    />
-        <log_category name="wait"                               title="Wenn der Scheduler in den Wartezustand geht"/>
-        <log_category name="xml"                                title="XML/DOM-Operationen"/>
-        <log_category name="nothing_done"                       title="Wenn ein Job im Leerlauf ist"/>
+        <log_category name="wait"                            title="Wenn der Scheduler in den Wartezustand geht"/>
+        <log_category name="xml"                             title="XML/DOM-Operationen"/>
+        <log_category name="nothing_done"                    title="Wenn ein Job im Leerlauf ist"/>
     </log_category>
 
     <log_category name="socket"         title="Socket-Operationen (Netzwerk)">
@@ -111,12 +112,12 @@
         <log_category name="select"     title="Systemaufruf select(): TCP-Ereignis abwarten"/>
         <log_category name="setsockopt" title="Systemaufruf setsockopt()"/>
         <log_category name="shutdown"   title="Systemaufruf shutdown(): Verbindung beenden"/>
-        <log_category name="data"       local_default="off" title="Daten von recv() und send()"/>
+        <log_category name="data"       mode="explicit" title="Daten von recv() und send()"/>
     </log_category>
 
     <log_category name="spidermonkey"   title="JavaScript-Implementierung Spidermonkey">
-        <log_category name="callback"       local_default="off"  title="Rückrufe von Spidermonkey"/>
-        <log_category name="idispatch"      local_default="off"  title="Verwaltung der COM-Objekte"/>
+        <log_category name="callback"       mode="explicit"  title="Rückrufe von Spidermonkey"/>
+        <log_category name="idispatch"      mode="explicit"  title="Verwaltung der COM-Objekte"/>
     </log_category>
 
     <log_category name="sossql"         title="SQL-Prozessor (Dateityp sossql)">

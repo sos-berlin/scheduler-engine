@@ -3486,10 +3486,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
   //set_log_category_default ( "scheduler.*"         , true );
     set_log_category_explicit( "scheduler.wait"      );
     set_log_category_explicit( "scheduler.loop"      );
-    set_log_category_implicit( "scheduler.call"      , true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
+    set_log_category_implicit( "scheduler.call"      , true );      // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
     set_log_category_implicit( "scheduler.order"     , true );
+    set_log_category_implicit( "scheduler.service"   , true );      // Windows-Dienstesteuerung
   //set_log_category_default ( "scheduler.file_order", true );
-  //set_log_category_default ( "scheduler.cluster"   , true );  // Vorläufig
+  //set_log_category_default ( "scheduler.cluster"   , true );      
 
 
 

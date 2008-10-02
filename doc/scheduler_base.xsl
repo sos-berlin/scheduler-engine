@@ -612,16 +612,16 @@
             </td>
 
             <td style="padding-left: 2ex; white-space: nowrap">
-                <xsl:if test="@global_default='off'">
+                <xsl:if test="@default='no'">
                     <xsl:copy-of select="$phrases/phrase [ @id='log_category.global_default.off' ]"/>
                 </xsl:if>
-                <xsl:if test="@global_default='on'">
+                <xsl:if test="@default='yes'">
                     <xsl:copy-of select="$phrases/phrase [ @id='log_category.global_default.on' ]"/>
                 </xsl:if>
-                <xsl:if test="@local_default='off'">
+                <xsl:if test="@mode='explicit'">
                     <xsl:copy-of select="$phrases/phrase [ @id='log_category.local_default.off' ]"/>
                 </xsl:if>
-                <xsl:if test="@local_default='on'">
+                <xsl:if test="@mode='implicit'">
                     <xsl:copy-of select="$phrases/phrase [ @id='log_category.local_default.on' ]"/>
                 </xsl:if>
             </td>

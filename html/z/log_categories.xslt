@@ -14,6 +14,9 @@
 
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
+                <td>
+                    <xsl:value-of select="@categories"/>
+                </td>
                 <td style="text-align: right">
                     Reset after
                     <input type="text" size="4" id="delay_input" value="86400"/>
@@ -91,6 +94,23 @@
                                 <xsl:text>children too</xsl:text>
                             </xsl:if>
                         </td>
+                        
+                        <!-- Zum Debuggen - Anfang -->
+                        <td class="small">
+                            <xsl:if test="@children_too_derived='yes'">
+                                <xsl:text>children too derived</xsl:text>
+                            </xsl:if>
+                        </td>
+                        <td class="small">
+                            <xsl:if test="@has_default='yes'">
+                                <xsl:text>has_default</xsl:text>
+                            </xsl:if>
+                        </td>
+                        <td class="small">
+                            <xsl:value-of select="@default"/>
+                        </td>
+                        <!-- Zum Debuggen - Ende -->
+                        
                         <td>
                             <xsl:choose>
                             <xsl:when test="@mode='implicit'">
@@ -111,6 +131,10 @@
                 </xsl:for-each>
             </tbody>
         </table>
+
+        <p class="small">
+            <xsl:value-of select="@debug"/>
+        </p>
 
         <!--button type="submit" onclick="submit_button_onclick()">Apply</button-->
 
