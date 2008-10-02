@@ -10,7 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-09-30" version="2.0.213" subversion_revision="5909">
+    <change date="2008-09-02" version="2.0.213" subversion_revision="5914">
+        <revision type="modification" title="$-Substitition mit \ abschaltbar">
+            <description>
+                <p>
+                    Das Zeichen »<code>\</code>« vor »<code>$</code>« liefert das Zeichen »<code>$</code>«, ohne eine Variable zu ersetzen.
+                </p>
+                <p>
+                    Siehe <scheduler_a href="variable_substitution.xml" quote="yes"/>.
+                </p>
+            </description>
+        </revision>
+
         <revision type="modification" title="&lt;kill_task> auf Nicht-API-Prozessen unter Unix bricht alle Kindprozesse ab">
             <description>
                 <ul>

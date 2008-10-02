@@ -21,6 +21,7 @@
         <p>
             Das Zeichen »<code>$</code>« bleibt stehen,
             wenn kein »<code>{</code>« oder Buchstabe folgt.
+            Ebenso, wenn ein »<code>\</code>« vorangestellt ist: »<code>\$</code>« liefert »<code>$</code>«.
         </p>
         <p>
             Es gelten die Werte der Umgebungsvariablen vom Start des Schedulers.
