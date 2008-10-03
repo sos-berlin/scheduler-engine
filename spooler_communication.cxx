@@ -800,6 +800,11 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
     {
+        // Zutun: Beachte Unterschied zwischen SO_REUSEPORT und SO_REUSEADDR (http://www.unixguide.net/network/socketfaq/4.11.shtml)
+        // und wie Windows und Unix sie auf ihre Weise behandeln.
+        // Siehe http://msdn.microsoft.com/en-us/library/ms740621(VS.85).aspx
+        // Es scheint so zu sein, dass unter Unix (Suse 9.1, HP-UX 11 Itanium) SO_REUSEADDR ungefährlich ist und diese FIN_WAIT_2-Wartezeit vermeidet.
+
         _spooler->log()->warn( message_string( "SCHEDULER-288", port_name ) );
         z::Log_ptr log ( "scheduler" );
         log << "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  ";

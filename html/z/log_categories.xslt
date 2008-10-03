@@ -50,7 +50,7 @@
             <tbody>
                 <xsl:for-each select="log_category">
                     <xsl:sort select="@path"/>
-                    
+
                     <tr>
                         <td>
                             <xsl:element name="input">
@@ -64,7 +64,7 @@
                                 </xsl:if>
                                 <xsl:attribute name="onclick">execute_input()</xsl:attribute>
                             </xsl:element>
-                            
+
                             <xsl:element name="label">
                                 <xsl:attribute name="for">
                                     <xsl:text>checkbox_log_category__</xsl:text>
@@ -94,8 +94,10 @@
                                 <xsl:text>children too</xsl:text>
                             </xsl:if>
                         </td>
-                        
-                        <!-- Zum Debuggen - Anfang -->
+
+                        <!--
+                        <xsl:if test="//log_category [ @children_derived ] or //log_category [ @has_default ] or //log_category [ @default ]">
+                        <!- - Zum Debuggen - Anfang - ->
                         <td class="small">
                             <xsl:if test="@children_too_derived='yes'">
                                 <xsl:text>children too derived</xsl:text>
@@ -109,16 +111,17 @@
                         <td class="small">
                             <xsl:value-of select="@default"/>
                         </td>
-                        <!-- Zum Debuggen - Ende -->
-                        
+                        </xsl:if>
+                        <!- - Zum Debuggen - Ende -->
+
                         <td>
                             <xsl:choose>
-                            <xsl:when test="@mode='implicit'">
-                                <xsl:text>implicit</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="@mode='explicit'">
-                                <xsl:text>explicit</xsl:text>
-                            </xsl:when>
+                                <xsl:when test="@mode='implicit'">
+                                    <xsl:text>implicit</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@mode='explicit'">
+                                    <xsl:text>explicit</xsl:text>
+                                </xsl:when>
                             </xsl:choose>
                         </td>
                         <td>

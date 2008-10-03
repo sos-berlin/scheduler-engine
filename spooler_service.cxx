@@ -510,7 +510,7 @@ static string string_from_power_event( DWORD e )
 
 static DWORD WINAPI HandlerEx( DWORD dwControl, DWORD event, void* event_data, void* )
 {
-    Z_LOGI2( "scheduler.service", "\nService HandlerEx(" << string_from_handler_control(dwControl) << "," << 
+    Z_LOGI2( "scheduler.service", "Service HandlerEx(" << string_from_handler_control(dwControl) << "," << 
              ( dwControl == SERVICE_CONTROL_POWEREVENT? string_from_power_event( event ) : as_string( event ) ) << "," <<
              event_data << ")\n" );
 
