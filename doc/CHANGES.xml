@@ -10,7 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-09-02" version="2.0.213" subversion_revision="5914">
+    <change date="2008-10-04" version="2.0.213" subversion_revision="5918">
+        <revision type="correction" title="Hauptprotokoll im Browser-Fenster bricht nicht mehr ab">
+            <description>
+                <p>
+                    Das Hauptprotokoll im Browser-Fenster bricht jetzt nicht mehr ab.
+                    Das passierte, nachdem das Hauptprotokoll wegen eines Fehler beim Scheduler-Start versendet worden ist.
+                </p>
+            </description>
+        </revision>
+    </change>
+    
+    <change date="2008-10-02" version="2.0.213" subversion_revision="5914">
         <revision type="modification" title="$-Substitition mit \ abschaltbar">
             <description>
                 <p>
