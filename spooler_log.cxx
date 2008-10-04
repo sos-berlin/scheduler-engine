@@ -824,7 +824,7 @@ void Prefix_log::finish_log()
         try {
             log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
         }
-        catch( const exception& ) {}
+        catch( const exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "()  ERROR " << x.what() << "\n" ); }
 
         close_file();
 
@@ -1164,7 +1164,7 @@ void Prefix_log::send( Scheduler_event* scheduler_event )
                 // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
-                finish_log();
+                // Datei kann offen bleiben   //finish_log();
                 //Z_LOG2( "zschimmer", "Prefix_log::send_really()\n" );
                 send_really( scheduler_event );
 
