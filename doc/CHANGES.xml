@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2008-10-07" version="2.0.213" subversion_revision="5920">
+    <change date="2008-10-07" version="2.0.213" subversion_revision="5922">
         <revision type="correction" title="Verschachtelte Jobketten mit Großbuchstaben funktionieren">
             <description>
                 <p>
