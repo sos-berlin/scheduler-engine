@@ -805,6 +805,23 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
         // Siehe http://msdn.microsoft.com/en-us/library/ms740621(VS.85).aspx
         // Es scheint so zu sein, dass unter Unix (Suse 9.1, HP-UX 11 Itanium) SO_REUSEADDR ungefährlich ist und diese FIN_WAIT_2-Wartezeit vermeidet.
 
+        // Unter Windows sollte SO_EXCLUSIVEADDRUSE gesetzt werden, damit der Port exklusiv dem Scheduler zugeordnet bleibt.
+        // Aber dann bekommen wir anscheinend das FIN_WAIT_2-Problem beim Neustart des Schedulers.
+
+        // Unter Unix (Suse 9.1) wirkt SO_REUSEADDR offenbar nur, wenn der vorherige und der neue Scheduler diese Option setzen.
+        // Gleichzeitiger Start wird dennoch abgewiesen, so dass ein SO_EXCLUSIVEADDRUSE wie unter Windows nicht gebraucht wird.
+
+        // Könnte eine Lösung des FIN_WAIT_2-Problems sein:
+        // shutdown( socket, SHUT_WR );                             // EOF senden
+        // while( 0 == recv( socket, buffer, sizeof buffer ) );     // Warten, bis Gegenstelle EOF gesendet hat
+        // close( socket );
+
+        // Vielleicht kann man SO_REUSEADDR noch setzen, wenn die recv-Schleife nicht in einer Frist endet.
+        // Der nächste Scheduler öffnet dann erst ohne SO_REUSEADDR, und wenn er den Port nicht bekommt, mit SO_REUSEADDR (mit Meldung).
+        // Das vielleicht nur fürs bind(), danach SO_REUSEADDR wieder zurücknehmen.
+        
+        // Offene http://../show_log?-Ausgaben vorher vielleicht noch ausgeben.
+
         _spooler->log()->warn( message_string( "SCHEDULER-288", port_name ) );
         z::Log_ptr log ( "scheduler" );
         log << "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  ";

@@ -10,6 +10,18 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2008-10-07" version="2.0.213" subversion_revision="5920">
+        <revision type="correction" title="Verschachtelte Jobketten mit Großbuchstaben funktionieren">
+            <description>
+                <p>
+                    Großbuchstaben im Namen der übergeordneten Jobkette konnten den Scheduler abbrechen lassen.
+                    Das ist behoben.
+                    In Jobkettennamen werden große wie kleine Buchstaben angesehen.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-10-04" version="2.0.213" subversion_revision="5918">
         <revision type="correction" title="Hauptprotokoll im Browser-Fenster bricht nicht mehr ab">
             <description>

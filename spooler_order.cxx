@@ -1766,9 +1766,9 @@ void Job_chain::get_connected_job_chains( String_set* result )
     {
         if( Nested_job_chain_node* node = Nested_job_chain_node::try_cast( *it ) )
         {
-            if( node->_nested_job_chain  &&  result->find( node->_nested_job_chain->path() ) == result->end() )  
+            if( node->_nested_job_chain  &&  result->find( node->_nested_job_chain->normalized_path() ) == result->end() )  
             {
-                result->insert( subsystem()->normalized_path( node->_nested_job_chain->path() ) );
+                result->insert( node->_nested_job_chain->normalized_path() );
                 node->_nested_job_chain->get_connected_job_chains( result );
             }
         }
@@ -1777,26 +1777,14 @@ void Job_chain::get_connected_job_chains( String_set* result )
 
     // Alle übergeordneten Jobketten aufnehmen
 
-    //FOR_EACH_JOB_CHAIN( outer_job_chain )
-    //    Z_FOR_EACH( Job_chain::Node_list, outer_job_chain->_node_list, it )                           
-    //        if( Nested_job_chain_node* nested_job_chain_node = Nested_job_chain_node::try_cast( *it ) )        
-    //        {
-    //            if( nested_job_chain_node->nested_job_chain() == this  &&
-    //                result->find( outer_job_chain->path() ) == result->end() )  
-    //            {
-    //                result->insert( subsystem()->normalized_path( outer_job_chain->path() ) );
-    //                outer_job_chain->get_connected_job_chains( result );
-    //            }
-    //        }
-
     Z_FOR_EACH( Reference_register, _reference_register, it )
     {
         Node* node      = (*it)->referer();
         Job_chain*      job_chain = node->job_chain();
 
-        if( result->find( job_chain->path() ) == result->end() )  
+        if( result->find( job_chain->normalized_path() ) == result->end() )  
         {
-            result->insert( subsystem()->normalized_path( job_chain->path() ) );
+            result->insert( job_chain->normalized_path() );
             job_chain->get_connected_job_chains( result );
         }
     }
