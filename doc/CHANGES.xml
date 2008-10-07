@@ -18,6 +18,11 @@
                     Das ist behoben.
                     In Jobkettennamen werden große wie kleine Buchstaben angesehen.
                 </p>
+                <p>
+                    In der Datenbank werden die Jobkettennamen in Großschreibung belassen.
+                    Aufträge werden nur wiedergefunden, wenn die Großschreibung sich nicht ändert. 
+                    Jobkettennamen sollten in der Datenbank normalisiert, also kleingeschrieben, gespeichert werden.
+                </p>
             </description>
         </revision>
     </change>
