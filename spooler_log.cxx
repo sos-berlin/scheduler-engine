@@ -422,7 +422,8 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
     {
         //if( log && log_ptr )  _log_line.append( text, len );
 
-        if( _file != -1 )
+        if( _file != -1  && 
+            ( !_spooler->_log_to_stderr ||  _file != fileno(stderr) ) )     // Nicht doppelt nach stderr schreiben
         {
             int ret = my_write( _spooler, _filename, _file, text, len );
             if( ret != len )  
