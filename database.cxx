@@ -466,7 +466,10 @@ Database::Database( Spooler* spooler )
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
     _lock("Database"),
-    _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names )
+    _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
+    _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),
+    _job_chains_table     ( &_database_descriptor, "scheduler_job_chains"     , "spooler_id,cluster_member_id,path" ),
+    _job_chain_nodes_table( &_database_descriptor, "scheduler_job_chain_nodes", "spooler_id,cluster_member_id,job_chain,order_state" )
 {
 }
 
@@ -563,7 +566,7 @@ void Database::open2( const string& db_name )
                 switch( _db.dbms_kind() )
                 {
                     case dbms_sybase: 
-                        _db_descr._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
                         break;
 
                     default: ;
@@ -689,6 +692,53 @@ void Database::create_tables_when_needed()
         {
             add_column( &ta, _spooler->_variables_tablename, "textwert", " add `textwert` varchar(250)" );
         }
+
+        ta.commit( Z_FUNCTION );
+    }
+
+    ////////////////////////////
+
+    {
+        Transaction ta ( this );
+
+        bool created = create_table_when_needed( &ta, _jobs_table.name(), 
+                         S() << "`spooler_id`"       " varchar(100)"  " not null,"
+                                "`cluster_member_id`"" varchar(100)"  " not null,"
+                                "`path`"             " varchar(255)"  " not null,"
+                                "`stopped`"          " boolean"       " not null  default(0),"  
+                                "`next_start_time`"  " varchar(24)"      << null << ","  
+                                "primary key ( `spooler_id`, `cluster_member_id`, `path` )" );
+
+        ta.commit( Z_FUNCTION );
+    }
+
+    ////////////////////////////
+
+    {
+        Transaction ta ( this );
+
+        bool created = create_table_when_needed( &ta, _job_chains_table.name(), 
+                         S() << "`spooler_id`"       " varchar(100)"  " not null,"
+                                "`cluster_member_id`"" varchar(100)"  " not null,"
+                                "`path`"             " varchar(255)"  " not null,"
+                                "`stopped`"          " boolean"       " not null,"  
+                                "primary key ( `spooler_id`, `cluster_member_id`, `path` )" );
+
+        ta.commit( Z_FUNCTION );
+    }
+
+    ////////////////////////////
+
+    {
+        Transaction ta ( this );
+
+        bool created = create_table_when_needed( &ta, _job_chain_nodes_table.name(),
+                         S() << "`spooler_id`"       " varchar(100)"  " not null,"
+                                "`cluster_member_id`"" varchar(100)"  " not null,"
+                                "`job_chain`"        " varchar(255)"  " not null,"
+                                "`order_state`"      " varchar(255)"     << null << ","  
+                                "`action`"           " varchar(100)"     << null << ","  
+                                "primary key ( `spooler_id`, `cluster_member_id`, `job_chain`, `order_state` )" );
 
         ta.commit( Z_FUNCTION );
     }
@@ -1799,6 +1849,14 @@ bool Transaction::try_execute_single( const string& stmt, const string& debug_te
 { 
     execute( stmt, debug_text );
     return record_count() == 1;
+}
+
+//-------------------------------------------------------------------------------Transaction::store
+
+void Transaction::store( sql::Update_stmt& update_statement, const string& debug_text )
+{
+    bool ok = try_execute_single( update_statement.make_update_stmt(), debug_text );
+    if( !ok )            execute( update_statement.make_insert_stmt(), debug_text );
 }
 
 //------------------------------------------------------------------------Transaction::create_index

@@ -1329,7 +1329,6 @@ void Spooler::load_arg()
     _spooler_param              =            read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level                   =            read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
     _tasks_tablename            = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_tasks_table"     , "SCHEDULER_TASKS"   ) );
-    _job_history_tablename      = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY" ) );
     _job_history_columns        =            read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _job_history_yes            =            read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
     _job_history_on_process     =            read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
@@ -1355,13 +1354,17 @@ void Spooler::load_arg()
     }
 
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
-    _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" ) );
-    _order_step_history_tablename=ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_step_history_table", "SCHEDULER_ORDER_STEP_HISTORY" ) );
-    _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    ) );
-    _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" ) );
-    _clusters_tablename         = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_members_table"      , "SCHEDULER_CLUSTERS" ) );
-  //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
+    _db->_jobs_table           .set_name(    read_profile_string ( _factory_ini, "spooler", "db_jobs_table"           , _db->_jobs_table           .name() ) );
+    _db->_job_chains_table     .set_name(    read_profile_string ( _factory_ini, "spooler", "db_job_chains_table"     , _db->_job_chains_table     .name() ) );
+    _db->_job_chain_nodes_table.set_name(    read_profile_string ( _factory_ini, "spooler", "db_job_chain_nodes_table", _db->_job_chain_nodes_table.name() ) );
+    // Könnte auch auf Table_descriptor umgestellt werden:
+    _job_history_tablename      = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_history_table"           , "SCHEDULER_HISTORY" ) );
+    _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table"     , "SCHEDULER_ORDER_HISTORY" ) );
+    _order_step_history_tablename=ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_step_history_table", "SCHEDULER_ORDER_STEP_HISTORY" ) );
+    _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"            , "SCHEDULER_ORDERS"    ) );
+    _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"         , "SCHEDULER_VARIABLES" ) );
+    _clusters_tablename         = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_members_table"           , "SCHEDULER_CLUSTERS" ) );
 
     _mail_on_warning = read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
@@ -1631,7 +1634,7 @@ void Spooler::load()
 
     Command_processor cp ( this, Security::seclev_all );
     _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
-                                            // spooler_history.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
+                                            // database.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
     if( _configuration_is_job_script )
@@ -2126,7 +2129,7 @@ void Spooler::execute_state_cmd()
                     {
                         //_log->info( message_string( "SCHEDULER-903", job->obj_name() ) );        // "Stopping"
                         bool end_all_tasks = true;
-                        job->stop( end_all_tasks );
+                        job->stop_simply( end_all_tasks );
                     }
                 }
 

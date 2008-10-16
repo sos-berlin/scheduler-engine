@@ -493,6 +493,8 @@ struct Node : Com_job_chain_node,
 
     static Action               action_from_string          ( const string& );
     static string               string_from_action          ( Action );
+    static string               string_from_state           ( State );
+    static State                state_from_string           ( const string& );
 
 
                                 Node                        ( Job_chain*, const Order::State& state, Type );
@@ -501,6 +503,7 @@ struct Node : Com_job_chain_node,
     string                      obj_name                    () const;
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     State                       state                       () const                                { return _state; }
+    string                      state_name                  () const                                { return string_from_state( _state ); }
 
     virtual bool                initialize                  ();
     virtual void                activate                    ();
@@ -523,6 +526,7 @@ struct Node : Com_job_chain_node,
     void                    set_delay                       ( int delay )                           { _delay = delay; }
     int                         delay                       () const                                { return _delay; }
     Action                      action                      () const                                { return _action; }
+    string                      action_name                 () const                                { return string_from_action( _action ); }
     int                         priority                    () const                                { return _priority; }
 
     virtual bool                is_type                     ( Type ) const                          { return false; }
@@ -543,6 +547,10 @@ struct Node : Com_job_chain_node,
 
     void                        set_state                   ( State state )                         { _state = state; }
 
+    void                        database_record_store       ();
+  //void                        database_record_remove      ();
+  //void                        database_record_load        ( Read_transaction* );
+
     Order::State               _order_state;                // Bezeichnung des Zustands
     Order::State               _next_state;                 // Bezeichnung des Folgezustands
     Order::State               _error_state;                // Bezeichnung des Fehlerzustands
@@ -558,6 +566,8 @@ struct Node : Com_job_chain_node,
     ptr<Node>                  _next_node;                  // Folgeknoten
     ptr<Node>                  _error_node;                 // Fehlerknoten
     ptr<Job_chain>             _job_chain;
+
+    Action                     _db_action;
 };
 
 //------------------------------------------------------------------------------job_chain::End_node
@@ -701,13 +711,12 @@ struct Job_chain : Com_job_chain,
                    file_based< Job_chain, Job_chain_folder_interface, Order_subsystem_interface >,
                    is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>
 {
-    enum State
+    enum State      // Kann wegfallen, denn file_based_state() hat dieselbe Funktion
     {
         s_under_construction,   // add_node() gesperrt, add_order() frei
         s_initialized,          
         s_loaded,               // Aus Datenbank geladen
         s_active,               // in Betrieb
-        s_stopped,              // Angehalten
         s_closed                
     };
 
@@ -735,6 +744,7 @@ struct Job_chain : Com_job_chain,
 
     File_based*                 new_base_file               ( const Base_file_info& );
 
+    void                        prepare_to_remove           ( Remove_flags );
     bool                        can_be_removed_now          ();
     zschimmer::Xc               remove_error                ();
 
@@ -745,9 +755,11 @@ struct Job_chain : Com_job_chain,
 
     Job_chain_folder_interface* job_chain_folder            () const                                { return typed_folder(); }
 
+    void                    set_stopped                     ( bool );
+    void                        notify_nodes                ();
     void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
-    static string               state_name                  ( State );
+    string                      state_name                  ();
 
     void                    set_title                       ( const string& title )                 { _title = title; }
     string                      title                       () const                                { return _title; }
@@ -826,6 +838,9 @@ struct Job_chain : Com_job_chain,
 
   private:
     void                        check_for_removing          ();
+    void                        database_record_store       ();
+    void                        database_record_remove      ();
+    void                        database_record_load        ( Read_transaction* );
     int                         load_orders_from_result_set ( Read_transaction*, Any_file* result_set );
     Order*                      add_order_from_database_record( Read_transaction*, const Record& );
 
@@ -834,11 +849,14 @@ struct Job_chain : Com_job_chain,
 
     Fill_zero                  _zero_;
     State                      _state;
+    bool                       _is_stopped;
     string                     _title;
     Order_id_space*            _order_id_space;
     Visibility                 _visible;
     bool                       _orders_are_recoverable;
     bool                       _is_distributed;                 // Aufträge können vom verteilten Scheduler ausgeführt werden
+
+    bool                       _db_stopped;
 
   public:
     typedef stdext::hash_map< string, Order* >   Order_map;

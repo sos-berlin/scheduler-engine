@@ -26,7 +26,7 @@ ptr<Com_variable_set> variable_set_from_environment()
 
 bool is_allowed_operation_while_waiting( Async_operation* op )
 {
-    // Diese Operationen werden in spooler_history.cxx fortgesetzt, wenn auf die DB gewartet wird.
+    // Diese Operationen werden in database.cxx fortgesetzt, wenn auf die DB gewartet wird.
     // Ebenso bei anderen Warte-Operationen
 
     return is_communication_operation( op ); //||

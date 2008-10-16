@@ -504,7 +504,7 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
     bool                        on_load                     (); 
     bool                        on_activate                 ();
 
-  //void                        prepare_to_remove           ();
+  //void                        prepare_to_remove           ( Remove_flags );
     bool                        can_be_removed_now          ();
   //zschimmer::Xc               remove_error                ();
 

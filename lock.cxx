@@ -294,7 +294,7 @@ bool Lock::can_be_removed_now()
 
 //--------------------------------------------------------------------------Lock::prepare_to_remove
 
-void Lock::prepare_to_remove()
+void Lock::prepare_to_remove( Remove_flags remove_flags )
 {
     if( !is_to_be_removed() )
     {
@@ -326,7 +326,7 @@ void Lock::prepare_to_remove()
         }
     }
 
-    My_file_based::prepare_to_remove();
+    My_file_based::prepare_to_remove( remove_flags );
 }
 
 //-------------------------------------------------------------------------------Lock::remove_error

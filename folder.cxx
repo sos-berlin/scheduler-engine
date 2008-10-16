@@ -833,10 +833,10 @@ bool Subfolder_folder::on_base_file_changed( File_based* file_based, const Direc
 
 //------------------------------------------------------------------------Folder::prepare_to_remove
 
-void Folder::prepare_to_remove()
+void Folder::prepare_to_remove( Remove_flags remove_flags )
 {
     //Das wird besser von adjust_with_directory() erledigt: remove_all_file_baseds();
-    My_file_based::prepare_to_remove();
+    My_file_based::prepare_to_remove( remove_flags );
 }
 
 //-----------------------------------------------------------------------Folder::can_be_removed_now
@@ -1744,7 +1744,7 @@ void File_based::set_replacement( File_based* replacement )
 
 //--------------------------------------------------------------------File_based::prepare_to_remove
 
-void File_based::prepare_to_remove()
+void File_based::prepare_to_remove( Remove_flags )
 { 
     if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
 
@@ -1784,7 +1784,7 @@ bool File_based::remove( Remove_flags remove_flag )
     }
 
 
-    prepare_to_remove();
+    prepare_to_remove( remove_flag );
 
     if( can_be_removed_now() )  
     {
@@ -1897,7 +1897,7 @@ void File_based::prepare_to_replace()
     assert( _replacement );
     ptr<File_based> replacement = _replacement;     // prepare_to_remove() entfernt _replacement
 
-    prepare_to_remove();        
+    prepare_to_remove( rm_temporary );        
 
     _replacement = replacement;
 }

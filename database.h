@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __SPOOLER_HISTORY_H
-#define __SPOOLER_HISTORY_H
+#ifndef __SCHEDULER_DATABASE_H
+#define __SCHEDULER_DATABASE_H
 
 #include "../file/anyfile.h"
 
@@ -67,7 +67,7 @@ struct Database : Object, Scheduler_object //Subsystem
     void                        open                    ( const string& db_name );
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
-    sql::Database_descriptor*   database_descriptor     ()                                          { return &_db_descr; }
+    sql::Database_descriptor*   database_descriptor     ()                                          { return &_database_descriptor; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
     int                         order_id_length_max     ()                                          { return opened()? _order_id_length_max : const_order_id_length_max; }
@@ -98,10 +98,16 @@ struct Database : Object, Scheduler_object //Subsystem
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
 
+
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
     Thread_semaphore           _error_lock;
-    z::sql::Database_descriptor _db_descr;
+    
+    sql::Database_descriptor   _database_descriptor;
+    sql::Table_descriptor      _jobs_table;
+    sql::Table_descriptor      _job_chains_table;
+    sql::Table_descriptor      _job_chain_nodes_table;
+
   private:
     friend struct Spooler;
     friend struct Job_history;
@@ -219,6 +225,7 @@ struct Transaction : Read_transaction
     void                        execute                 ( const string& sql, const string& debug_text, Execute_flags = ex_none );
     void                        execute_single          ( const string& sql, const string& debug_text );
     bool                        try_execute_single      ( const string& sql, const string& debug_text );
+    void                        store                   ( sql::Update_stmt&, const string& debug_text );
     string                      get_variable_text       ( const string& name, bool* record_exists = NULL );
     void                        set_variable            ( const string& name, const string& value );
     void                        insert_variable         ( const string& name, const string& value );
@@ -238,8 +245,6 @@ struct Transaction : Read_transaction
     Fill_zero                  _zero_;
     Transaction*               _outer_transaction;
     bool                       _suppress_heart_beat_timeout_check;
-    //bool                       _transaction_written;    // Wird nicht benutzt
-    //bool                       _transaction_read;       // Wird nicht benutzt
 };
 
 //-----------------------------------------------------------------------------------Database_retry

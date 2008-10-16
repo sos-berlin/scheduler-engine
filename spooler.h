@@ -275,7 +275,6 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_log.h"
 #include "scheduler_object.h"
 #include "subsystem.h"
-#include "register.h"
 #include "spooler_event.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
@@ -283,6 +282,7 @@ typedef stdext::hash_set<string> String_set;
 #include "directory_observer.h"
 #include "include.h"
 #include "folder.h"
+#include "register.h"
 #include "lock.h"
 #include "schedule.h"
 #include "scheduler_script.h"
@@ -294,7 +294,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_module_internal.h"
 #include "spooler_module_java.h"
 #include "spooler_module_process.h"
-#include "spooler_history.h"
+#include "database.h"
 #include "spooler_order.h"
 #include "spooler_order_file.h"
 #include "spooler_job.h"
@@ -672,7 +672,7 @@ struct Spooler : Object,
     file::File_path            _central_configuration_directory;         // Für den Supervisor zur Replikation
     bool                       _central_configuration_directory_as_option_set;
 
-    bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
+    bool                       _executing_command;          // true: database wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
 
     bool                       _subprocess_own_process_group_default;

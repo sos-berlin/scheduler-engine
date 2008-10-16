@@ -142,6 +142,14 @@ struct File_based : Scheduler_object,
 
     // Fehlerzustand: _file_based_xc und klassen-spezifische Fehler unter einem Hut bringen?
 
+    
+    enum Remove_flags 
+    { 
+        rm_standard, 
+        rm_base_file_too,
+        rm_temporary,           // Objekt wird nur vorrübergehend gelöscht, weil es ersetzt oder weil der Scheduler beendet wird.
+    };
+
 
     enum Base_file_event
     {
@@ -229,8 +237,7 @@ struct File_based : Scheduler_object,
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
   //bool                        try_switch_wished_file_based_state();
-    enum Remove_flags { rm_default, rm_base_file_too };
-    bool                        remove                      ( Remove_flags = rm_default );
+    bool                        remove                      ( Remove_flags = rm_standard );
     void                        remove_base_file            ();
 
     void                        remove_now                  ();
@@ -245,7 +252,7 @@ struct File_based : Scheduler_object,
     virtual bool                on_activate                 ()                                      = 0;
 
     virtual void                on_remove_now               ();
-    virtual void                prepare_to_remove           ();
+    virtual void                prepare_to_remove           ( Remove_flags );
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();
 
@@ -405,7 +412,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     void                        set_dom                     ( const xml::Element_ptr& )             { zschimmer::throw_xc( Z_FUNCTION ); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                        prepare_to_remove           ();
+    void                        prepare_to_remove           ( Remove_flags );
     bool                        can_be_removed_now          ();
 
 
@@ -538,7 +545,7 @@ struct file_based_subsystem : File_based_subsystem
             
             try
             {
-                file_based->remove();
+                file_based->remove( File_based::rm_temporary );
             }
             catch( exception& x ) { file_based->log()->error( x.what() ); }
         }

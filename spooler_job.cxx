@@ -456,7 +456,8 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
     _visible(visible_yes),
-    _stop_on_error(true)
+    _stop_on_error(true),
+    _db_next_start_time( Time::never )
 {
     if( name != "" )  set_name( name );
 
@@ -564,45 +565,34 @@ bool Job::on_initialize()
 
     if( _state < s_initialized )
     {
-        //try
-        //{
-            Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
+        Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
-            if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
-            
-            add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
+        if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
+        
+        add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
 
-            //_module->set_folder_path( folder_path() );
-            _module->init();
-            if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
-            if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
+        //_module->set_folder_path( folder_path() );
+        _module->init();
+        if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
+        if( _module->kind() == Module::kind_none )  z::throw_xc( "SCHEDULER-440", obj_name() );
 
-            if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
+        if( _max_tasks < _min_tasks )  z::throw_xc( "SCHEDULER-322", _min_tasks, _max_tasks );
 
-            prepare_on_exit_commands();
-            
-            if( !_schedule_use->is_defined()  &&  _schedule_use->schedule_path() == "" )            // Job ohne <run_time>?
-            {
-                _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
-            }
+        prepare_on_exit_commands();
+        
+        if( !_schedule_use->is_defined()  &&  _schedule_use->schedule_path() == "" )            // Job ohne <run_time>?
+        {
+            _schedule_use->set_dom( (File_based*)NULL, xml::Document_ptr( "<run_time/>" ).documentElement() );     // Dann ist das der Default
+        }
 
-            //_next_start_time = Time::never;
-            //_period._begin = 0;
-            //_period._end   = 0;
-            set_next_start_time( Time::never );
+        set_next_start_time( Time::never );
 
-            if( _lock_requestor )  
-            {
-                _lock_requestor->initialize();
-            }
+        if( _lock_requestor )  
+        {
+            _lock_requestor->initialize();
+        }
 
-            _state = s_initialized;
-        //}
-        //catch( exception& x )
-        //{
-        //    _log->error( message_string( "SCHEDULER-330", obj_name(), x ) );
-        //    throw;
-        //}
+        _state = s_initialized;
 
         result = true;
     }
@@ -639,10 +629,12 @@ bool Job::on_load() // Transaction* ta )
         {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
+                database_record_load( &ta );
+
                 _history.open( &ta );
                 if( _spooler->_db->opened() )  load_tasks_from_db( &ta );
             }
-            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
+            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
         }
         catch( exception& x )
         {
@@ -674,7 +666,7 @@ bool Job::on_activate()
             }
             else
             {
-                set_state( s_pending );
+                set_state( _is_permanently_stopped? s_stopped : s_pending );
                 
                 _delay_until = 0;
                 reset_scheduling();
@@ -1071,7 +1063,7 @@ void Job::on_schedule_loaded()
     if( file_based_state() == s_incomplete )  
     {
         bool ok = activate();
-        if( ok )  set_state( s_pending );
+        if( ok )  set_state( _is_permanently_stopped? s_stopped : s_pending );
     }
 
     reset_scheduling();
@@ -1094,9 +1086,9 @@ bool Job::on_schedule_to_be_removed()
 
     if( !_schedule_use->is_defined() )
     {
-        set_file_based_state( s_incomplete );
+        set_file_based_state( File_based::s_incomplete );
         end_tasks( message_string( "SCHEDULER-885", schedule_name ) );
-        stop( false );
+        stop_simply( false );  //2008-10-14 ? Nicht stoppen, sondern set_file_based_state( s_incomplete )? Task-Start verhindern!
     }
 
     reset_scheduling();
@@ -1106,11 +1098,14 @@ bool Job::on_schedule_to_be_removed()
 
 //---------------------------------------------------------------------------Job::prepare_to_remove
 
-void Job::prepare_to_remove()
+void Job::prepare_to_remove( Remove_flags remove_flags )
 { 
-    stop( true );
+    end_tasks( "" );
+    stop_simply( true );   //2008-10-14: Nicht stoppen, sondern neuer Zustand s_closed?
 
-    My_file_based::prepare_to_remove();
+    if( remove_flags != rm_temporary )  database_record_remove();
+
+    My_file_based::prepare_to_remove( remove_flags );
 }
 
 //--------------------------------------------------------------------------Job::can_be_removed_now
@@ -1272,13 +1267,11 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 //--------------------------------------------------------------------------Job::load_tasks_from_db
 
-void Job::load_tasks_from_db( Transaction* outer_transaction )
+void Job::load_tasks_from_db( Read_transaction* ta )
 {
     //_spooler->assert_has_exclusiveness( obj_name() + " " + Z_FUNCTION );
 
     Time now = Time::now();
-
-    Transaction ta ( _spooler->_db, outer_transaction );
 
     S select_sql;
     select_sql << "select `task_id`, `enqueue_time`, `start_at_time`"
@@ -1288,7 +1281,7 @@ void Job::load_tasks_from_db( Transaction* outer_transaction )
                <<    " and `job_name`=" << sql::quoted( path().without_slash() ) 
                << "  order by `task_id`";
 
-    Any_file sel = ta.open_result_set( select_sql, Z_FUNCTION );
+    Any_file sel = ta->open_result_set( select_sql, Z_FUNCTION );
     
     while( !sel.eof() )
     {
@@ -1657,24 +1650,57 @@ void Job::stop_after_task_error( const string& error_message )
 
 void Job::stop( bool end_all_tasks )
 {
+    _is_permanently_stopped = true;
+    stop_simply( end_all_tasks );
+}
+
+//---------------------------------------------------------------------------------Job::stop_simply
+
+void Job::stop_simply( bool end_all_tasks )
+{
+    // _is_permanenty_stopped wird nicht gesetzt. Muss verbessert werden!
+
     set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
 
-    if( end_all_tasks )
-    {
-        Z_FOR_EACH( Task_list, _running_tasks, t )
-        {
-            Task* task = *t;
+    if( end_all_tasks )  end_tasks( "" );
+    //{
+    //    Z_FOR_EACH( Task_list, _running_tasks, t )
+    //    {
+    //        Task* task = *t;
 
-            if( task->state() < Task::s_ending )
-            {
-                task->cmd_end();
-            }
-        }
-    }
+    //        if( task->state() < Task::s_ending )
+    //        {
+    //            task->cmd_end();
+    //        }
+    //    }
+    //}
 
     clear_when_directory_changed();
     _start_min_tasks = false;
 }
+
+//-----------------------------------------------------------------------------------Job::end_tasks
+
+void Job::end_tasks( const string& task_warning )
+{
+    Z_FOR_EACH( Task_list, _running_tasks, t )
+    {
+        Task* task = *t;
+
+        if( !task->ending() )
+        {
+            if( task_warning != "" )  task->log()->warn( task_warning );
+            task->cmd_end( Task::end_normal );
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------Job::unstop
+
+//void Job::unstop()
+//{
+//    if( _is_permanently_stopped )  set_state( s_pending );
+//}
 
 //--------------------------------------------------------------------------------------Job::reread
 
@@ -1701,7 +1727,6 @@ bool Job::execute_state_cmd()
             {
                 case sc_stop:       if( _state != s_stopping
                                      && _state != s_stopped  )    stop( true ),                something_done = true;
-                                   //&& _state != s_read_error )  stop( true ),                something_done = true;
                                     break;
 
                 case sc_unstop:     if( _state == s_stopping
@@ -1992,6 +2017,92 @@ string Job::trigger_files( Task* task )
     return result;
 }
 
+//-----------------------------------------------------------------------Job::database_record_store
+
+void Job::database_record_store()
+{
+    if( file_based_state() >= File_based::s_loaded  &&      // Vorher ist database_record_load() nicht aufgerufen worden
+        db()->opened() )
+    {
+        if( _next_start_time        != _db_next_start_time  ||
+            _is_permanently_stopped != _db_stopped            )
+        {
+            //if( is_to_be_removed()  && 
+            //    _next_start_time.is_never()  &&
+            //    !_is_permanently_stopped )
+            //{
+            //    database_record_remove();
+            //}
+            //else
+            {
+                for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+                {
+                    sql::Update_stmt update ( &db()->_jobs_table );
+                    
+                    update[ "spooler_id"        ] = _spooler->id_for_db();
+                    update[ "cluster_member_id" ] = _spooler->cluster_member_id();
+                    update[ "path"              ] = path().without_slash();
+
+                    if( _next_start_time != _db_next_start_time )  update[ "next_start_time" ] = _next_start_time.is_never()? sql::Value() : _next_start_time.as_string();
+                    if( _is_permanently_stopped != _db_stopped  )  update[ "stopped"         ] = _is_permanently_stopped;
+
+                    ta.store( update, Z_FUNCTION );
+                    ta.commit( Z_FUNCTION );
+                }
+                catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
+            }
+
+            _db_next_start_time = _next_start_time;
+            _db_stopped         = _is_permanently_stopped;
+        }
+    }
+}
+
+//----------------------------------------------------------------------Job::database_record_remove
+
+void Job::database_record_remove()
+{
+    if( db()->opened() )
+    {
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            sql::Delete_stmt delete_statement ( &db()->_jobs_table );
+            
+            delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
+            delete_statement.and_where_condition( "cluster_member_id", _spooler->cluster_member_id() );
+            delete_statement.and_where_condition( "path"              , path().without_slash()        );
+
+            ta.execute( delete_statement, Z_FUNCTION );
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
+    }
+}
+
+//------------------------------------------------------------------------Job::database_record_load
+
+void Job::database_record_load( Read_transaction* ta )
+{
+    assert( file_based_state() == File_based::s_initialized );
+
+    Any_file result_set = ta->open_result_set
+    ( 
+        S() << "select `stopped`, `next_start_time`"
+            << "  from " << db()->_jobs_table.name()
+            << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->cluster_member_id() )
+            <<    " and `path`="              << sql::quoted( path().without_slash() ), 
+        Z_FUNCTION 
+    );
+    
+    if( !result_set.eof() )  
+    {
+        Record record  = result_set.get_record();
+        _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
+        _db_next_start_time = record.null( "next_start_time" )? Time::never : Time( record.as_string( "next_start_time" ) );
+    }
+}
+
 //--------------------------------------------------------------------------------Job::schedule_use
 
 Schedule_use* Job::schedule_use() const                                
@@ -2060,7 +2171,8 @@ bool Job::is_in_period( const Time& now )
 
 void Job::set_next_start_time( const Time& now, bool repeat )
 {
-    Time next_start_time = Time::never;
+    Time next_start_time     = Time::never;
+    Time old_next_start_time = _next_start_time;
 
     select_period( now );
     _next_single_start = Time::never;
@@ -2164,6 +2276,8 @@ void Job::set_next_start_time( const Time& now, bool repeat )
 
     _next_start_time = next_start_time;
     calculate_next_time( now );
+
+    database_record_store();
 }
 
 //-----------------------------------------------------------------------------Job::next_start_time
@@ -2318,22 +2432,6 @@ void Job::signal_earlier_order( const Time& next_time, const string& order_name,
 //    end_tasks( message_string( "SCHEDULER-885", lock->obj_name() ) );
 //    //set_state( s_incomplete );
 //}
-
-//-----------------------------------------------------------------------------------Job::end_tasks
-
-void Job::end_tasks( const string& task_warning )
-{
-    Z_FOR_EACH( Task_list, _running_tasks, t )
-    {
-        Task* task = *t;
-
-        if( !task->ending() )
-        {
-            task->log()->warn( task_warning );
-            task->cmd_end( Task::end_normal );
-        }
-    }
-}
 
 //----------------------------------------------------------------------------Job::connect_job_node
 
@@ -2912,6 +3010,14 @@ void Job::set_state( State new_state )
     }
 
     if( _state == s_stopped )  check_for_replacing_or_removing();
+
+
+
+    //if( new_state == s_stopping  ||  new_state == s_stopped )  _is_permanently_stopped = true;
+    //else
+    if( new_state == s_pending  ||  new_state == s_running )  _is_permanently_stopped = false;
+
+    database_record_store();
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd

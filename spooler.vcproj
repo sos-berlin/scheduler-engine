@@ -528,7 +528,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\spooler_history.cxx"
+				RelativePath=".\database.cxx"
 				>
 			</File>
 			<File
@@ -733,7 +733,7 @@
 				>
 			</File>
 			<File
-				RelativePath="spooler_history.h"
+				RelativePath="database.h"
 				>
 			</File>
 			<File

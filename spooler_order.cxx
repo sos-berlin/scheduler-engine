@@ -1076,6 +1076,39 @@ string Node::string_from_action( Action action )
     return result;
 }
 
+//--------------------------------------------------------------------------Node::state_from_string
+
+Node::State Node::state_from_string( const string& str )
+{
+    State result;
+
+    if( str == "initialized" )  result = s_initialized;
+    else
+    if( str == "active"      )  result = s_active;
+    else
+        z::throw_xc( "SCHEDULER-391", "state", str, "initialized, active" );
+
+    return result;
+}
+
+//--------------------------------------------------------------------------Node::string_from_state
+
+string Node::string_from_state( State state )
+{
+    string result;
+
+    switch( state )
+    {
+        case s_none:        result = "none";        break;
+        case s_initialized: result = "initialized"; break;
+        case s_active:      result = "active";      break;
+        case s_closed:      result = "closed";      break;
+        default:            result = S() << "State(" << (int)state << ")";
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------------Node::activate
 
 void Node::activate()
@@ -1120,6 +1153,8 @@ void Node::set_action( const string& action_string )
     if( _action != action )
     {
         _action = action;
+
+        database_record_store();
         
         if( _job_chain->state() >= Job_chain::s_active )
         {
@@ -1144,6 +1179,65 @@ xml::Element_ptr Node::execute_xml( Command_processor* command_processor, const 
     else
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
 }
+
+//----------------------------------------------------------------------Node::database_record_store
+
+void Node::database_record_store()
+{
+    if( _state == s_active  &&  db()->opened() )
+    {
+        if( _db_action != _action )
+        {
+            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            {
+                sql::Update_stmt update ( &db()->_job_chain_nodes_table );
+                
+                update[ "spooler_id"        ] = _spooler->id_for_db();
+                update[ "cluster_member_id" ] = _spooler->cluster_member_id();
+                update[ "job_chain"         ] = _job_chain->path().without_slash();
+                update[ "order_state"       ] = _order_state.as_string();
+                update[ "action"            ] = _action == act_process? sql::Value() : action_name();
+
+                ta.store( update, Z_FUNCTION );
+                ta.commit( Z_FUNCTION );
+            }
+            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chain_nodes_table.name(), x ), Z_FUNCTION ); }
+
+            _db_action = _action;
+        }
+    }
+}
+
+//---------------------------------------------------------------------Node::database_record_remove
+
+//void Node::database_record_remove()
+//{
+//    Wird von Job_chain::database_record_remove() erledigt
+//
+//    if( db()->opened() )
+//    {
+//        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+//        {
+//            sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
+//            
+//            delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
+//            delete_statement.and_where_condition( "cluster_member_id", _spooler->cluster_member_id() );
+//            delete_statement.and_where_condition( "job_chain"        , _job_chain->path().without_slash()        );
+//            delete_statement.and_where_condition( "order_state"      , _order_state.as_string() );
+//
+//            ta.execute( delete_statement, Z_FUNCTION );
+//            ta.commit( Z_FUNCTION );
+//        }
+//        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chains_table.name(), x ), Z_FUNCTION ); }
+//    }
+//}
+
+//-----------------------------------------------------------------------Node::database_record_load
+
+//void Node::database_record_load( Read_transaction* ta )
+//{
+//    Wird von Job_chain::database_record_load() erledigt
+//}
 
 //-----------------------------------------------------------------------------------Node::obj_name
 
@@ -1790,21 +1884,6 @@ void Job_chain::get_connected_job_chains( String_set* result )
     }
 }
 
-//----------------------------------------------------------------------------Job_chain::state_name
-
-string Job_chain::state_name( State state )
-{
-    switch( state )
-    {
-        case s_under_construction:  return "under_construction";
-        case s_initialized:         return "initialized";
-        case s_loaded:              return "loaded";
-        case s_active:              return "running";   //"active";
-        case s_stopped:             return "stopped";
-        default:                    return S() << "State(" << state << ")";
-    }
-}
-
 //-------------------------------------------------------------------------------Job_chain::set_dom
 
 void Job_chain::set_dom( const xml::Element_ptr& element )
@@ -1919,14 +1998,14 @@ xml::Element_ptr Job_chain::execute_xml( Command_processor* command_processor, c
         
         if( new_state == "running" )
         {
-            if( _state == s_stopped  ||  _state == s_active )  set_state( s_active );
-            else  z::throw_xc( "SCHEDULER-405", new_state, state_name( state() ) );
+            if( _state == s_active )  set_stopped( false );
+            else  z::throw_xc( "SCHEDULER-405", new_state, state_name() );
         }
         else
         if( new_state == "stopped" )
         {
-            if( _state == s_stopped  ||  _state == s_active )  set_state( s_stopped );
-            else  z::throw_xc( "SCHEDULER-405", new_state, state_name( state() ) );
+            if( _state == s_active )  set_stopped( true );
+            else  z::throw_xc( "SCHEDULER-405", new_state, state_name() );
         }
         else
             z::throw_xc( "SCHEDULER-391", "state", new_state, "running, stopped" );
@@ -1962,7 +2041,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
-    result.setAttribute( "state" , state_name( state() ) );
+    result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
     if( _order_id_space )  result.setAttribute( "order_id_space", _order_id_space->path() );
@@ -2264,6 +2343,8 @@ bool Job_chain::on_load()
             {
                 for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
                 {
+                    database_record_load( &ta );
+
                     Any_file result_set = ta.open_result_set
                         ( 
                             S() << "select " << order_select_database_columns << ", `distributed_next_time`"
@@ -2847,18 +2928,12 @@ bool Job_chain::tip_for_new_distributed_order( const Order::State& state, const 
 
 //---------------------------------------------------------------------Job_chain::prepare_to_remove
 
-//void Job_chain::prepare_to_remove()
-//{
-//    //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-433", obj_name() );
-//  //if( !is_in_folder() )  z::throw_xc( "SCHEDULER-151" );
-//
-//    //_remove = true;
-//
-//    //if( is_referenced() )  z::throw_xc( "SCHEDULER-425", obj_name(), is_referenced_by<Nested_job_chain_node,Job_chain>::string_referenced_by() );
-//    //if( !can_be_removed_now() )  return false;
-//
-//    My_file_based::prepare_to_remove();
-//}
+void Job_chain::prepare_to_remove( Remove_flags remove_flags )
+{
+    if( remove_flags != rm_temporary )  database_record_remove();
+
+    My_file_based::prepare_to_remove( remove_flags );
+}
 
 //--------------------------------------------------------------------Job_chain::can_be_removed_now
 
@@ -2942,11 +3017,133 @@ string Job_chain::db_where_condition() const
     return order_subsystem()->job_chain_db_where_condition( path() ); 
 }
 
+//-----------------------------------------------------------------Job_chain::database_record_store
+
+void Job_chain::database_record_store()
+{
+    if( file_based_state() >= File_based::s_loaded  &&      // Vorher ist database_record_load() nicht aufgerufen worden
+        db()->opened() )
+    {
+        if( _db_stopped != _is_stopped )
+        {
+            for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+            {
+                sql::Update_stmt update ( &db()->_job_chains_table );
+                
+                update[ "spooler_id"        ] = _spooler->id_for_db();
+                update[ "cluster_member_id" ] = _spooler->cluster_member_id();
+                update[ "path"              ] = path().without_slash();
+                update[ "stopped"           ] = _is_stopped;
+
+                ta.store( update, Z_FUNCTION );
+                ta.commit( Z_FUNCTION );
+            }
+            catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chains_table.name(), x ), Z_FUNCTION ); }
+
+            _db_stopped = _is_stopped;
+        }
+    }
+}
+
+//----------------------------------------------------------------Job_chain::database_record_remove
+
+void Job_chain::database_record_remove()
+{
+    if( db()->opened() )
+    {
+        for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
+        {
+            {
+                sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
+                
+                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
+                delete_statement.and_where_condition( "cluster_member_id", _spooler->cluster_member_id() );
+                delete_statement.and_where_condition( "path"              , path().without_slash()        );
+
+                ta.execute( delete_statement, Z_FUNCTION );
+            }
+
+            {
+                sql::Delete_stmt delete_statement ( &db()->_job_chain_nodes_table );
+                
+                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
+                delete_statement.and_where_condition( "cluster_member_id", _spooler->cluster_member_id() );
+                delete_statement.and_where_condition( "job_chain"        , path().without_slash()        );
+
+                ta.execute( delete_statement, Z_FUNCTION );
+            }
+
+            ta.commit( Z_FUNCTION );
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_chains_table.name(), x ), Z_FUNCTION ); }
+    }
+}
+
+//------------------------------------------------------------------Job_chain::database_record_load
+
+void Job_chain::database_record_load( Read_transaction* ta )
+{
+    assert( file_based_state() == File_based::s_initialized );
+
+    {
+        Any_file result_set = ta->open_result_set
+        ( 
+            S() << "select `stopped`"
+                << "  from " << db()->_job_chains_table.name()
+                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->cluster_member_id() )
+                <<    " and `path`="              << sql::quoted( path().without_slash() ), 
+            Z_FUNCTION 
+        );
+        
+        if( !result_set.eof() )  
+        {
+            Record record  = result_set.get_record();
+            _db_stopped = record.as_int( "stopped" ) != 0;
+            set_stopped( _db_stopped );
+        }
+    }
+
+    {
+        Any_file result_set = ta->open_result_set
+        ( 
+            S() << "select `order_state`, `action`"
+                << "  from " << db()->_job_chain_nodes_table.name()
+                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
+                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->cluster_member_id() )
+                <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
+            Z_FUNCTION 
+        );
+        
+        while( !result_set.eof() )  
+        {
+            Record record  = result_set.get_record();
+
+            if( Node* node = node_from_state_or_null( record.as_string( "order_state" ) ) )
+            {
+                node->set_action( record.as_string( "action" ) );
+                node->_db_action = node->_action;
+            }
+        }
+    }
+}
+
 //-----------------------------------------------------------------------Job_chain::order_subsystem
 
 Order_subsystem* Job_chain::order_subsystem() const
 {
     return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
+}
+
+//---------------------------------------------------------------------------Job_chain::set_stopped
+
+void Job_chain::set_stopped( bool is_stopped )
+{
+    _is_stopped = is_stopped;
+
+    database_record_store();
+
+    notify_nodes();     // Fällige Aufträge fortsetzen
 }
 
 //-----------------------------------------------------------------------------Job_chain::set_state
@@ -2957,11 +3154,31 @@ void Job_chain::set_state( const State& state )
     {
         _state = state; 
 
-        if( _state == s_active )
-        {
-            // Fällige Aufträge fortsetzen
-            Z_FOR_EACH( Node_list, _node_list, n )  (*n)->handle_changed_processable_state();
-        }
+        notify_nodes();     // Fällige Aufträge fortsetzen
+    }
+}
+
+//--------------------------------------------------------------------------Job_chain::notify_nodes
+
+void Job_chain::notify_nodes()
+{
+    if( _state == s_active  &&  !_is_stopped ) 
+    {
+        Z_FOR_EACH( Node_list, _node_list, n )  (*n)->handle_changed_processable_state();
+    }
+}
+
+//----------------------------------------------------------------------------Job_chain::state_name
+
+string Job_chain::state_name()     // Brauchen wir eigentlich nicht mehr, ist durch file_based_state() abgedeckt
+{
+    switch( _state )
+    {
+        case s_under_construction:  return "under_construction";
+        case s_initialized:         return "initialized";
+        case s_loaded:              return "loaded";
+        case s_active:              return _is_stopped? "stopped" : "running" ;   //"active";
+        default:                    return S() << "State(" << _state << ")";
     }
 }
 
@@ -6360,8 +6577,8 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
     // Sollte mit assert_is_loaded() überflüssig geworden sein:
     if( job_chain->state() != Job_chain::s_loaded  &&  
-        job_chain->state() != Job_chain::s_active  &&
-        job_chain->state() != Job_chain::s_stopped )  z::throw_xc( "SCHEDULER-151" );
+        job_chain->state() != Job_chain::s_active  )  z::throw_xc( "SCHEDULER-151" );
+      //job_chain->state() != Job_chain::s_stopped 
 
     if( _outer_job_chain_path == ""  &&  !_end_state.is_null_or_empty_string() )  job_chain->referenced_node_from_state( _end_state );       // Prüfen
 

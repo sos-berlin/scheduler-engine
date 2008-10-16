@@ -323,7 +323,7 @@ struct Xml_operation_connection : Communication::Operation_connection
 
 inline bool is_communication_operation( Async_operation* op )
 {
-    // Diese Socket_operations werden in spooler_history.cxx fortgesetzt, wenn auf die DB gewartet wird.
+    // Diese Socket_operations werden in database.cxx fortgesetzt, wenn auf die DB gewartet wird.
 
     return dynamic_cast<Communication::Listen_socket*>( op ) ||
            dynamic_cast<Communication::Udp_socket*   >( op ) ||

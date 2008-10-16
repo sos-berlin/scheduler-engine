@@ -48,10 +48,17 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 {
     enum State
     {
+        // Mögliche Verbesserung: Alle Zustände, die auch File_based kennt, hier streichen. 
+        // Stattdessen s_inactive, ein Zustand, der sich in die File_based-Zustände aufspaltet
+        // Die übrigen Zustände gelten für s_active.
+        // s_stopped durch _is_stopped und s_pending ersetzen. Auch mit anderen Zuständen kombinierbar.
+        // s_stopping streichen? stop(false) lässt Tasks weiterlaufen. Ist das klug? Sollten ein gestoppte Job nicht immer die Tasks beenden?
+        // s_running streichen? Besagt nur, dass eine Task läuft, während bei s_pending keine Task läuft. s_pending, s_running -> s_ready?
+
         s_not_initialized,
         s_initialized,
         s_loaded,   
-        s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
+        s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped). Sollte durch _is_stopped ersetzt werden!
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
       //s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
         s_error,                // Ein Fehler ist aufgetreten (nicht vom Skript), der Job ist nicht mehr aufrufbar.
@@ -181,7 +188,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                     is_visible                     () const                                { return _visible == visible_yes; }
     bool                        temporary                   () const                                { return _temporary; }
 
-    void                        prepare_to_remove           ();
+    void                        prepare_to_remove           ( Remove_flags );
     zschimmer::Xc               remove_error                ();
 
   //void                        prepare_to_replace          ();
@@ -197,7 +204,10 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks="+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
-    void                        load_tasks_from_db          ( Transaction* );
+    void                        database_record_store       ();
+    void                        database_record_remove      ();
+    void                        database_record_load        ( Read_transaction* );
+    void                        load_tasks_from_db          ( Read_transaction* );
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
@@ -228,6 +238,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     void                        remove_running_task         ( Task* );
     void                        stop                        ( bool end_all_tasks );
+    void                        stop_simply                 ( bool end_all_tasks );
     void                        stop_after_task_error       ( const string& error_message );   // _ignore_error verhindert stop()
     bool                        stops_on_task_error         ()                                      { return _stop_on_error; }
     void                        reset_scheduling            ();
@@ -333,6 +344,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     State                      _state;
     State_cmd                  _state_cmd;
+    bool                       _is_permanently_stopped;     // s_stopped wird zum Beenden verwendet und gilt nicht dauerhaft. Das sollte vereinfacht werden!
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
@@ -403,6 +415,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
 
     ptr<lock::Requestor>       _lock_requestor;
+
+    Time                       _db_next_start_time;
+    bool                       _db_stopped;
 };
 
 //-------------------------------------------------------------------------------------Internal_job
