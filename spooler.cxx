@@ -1952,6 +1952,15 @@ string Spooler::cluster_member_id()
     return _cluster? _cluster->my_member_id() : "";
 }
 
+//--------------------------------------------------------------------Spooler::db_cluster_member_id
+
+string Spooler::db_cluster_member_id()
+{
+    string result = cluster_member_id();
+    if( result == "" )  result = "-";
+    return result;
+}
+
 //-----------------------------------------------------------------------Spooler::has_exclusiveness
 
 bool Spooler::has_exclusiveness()

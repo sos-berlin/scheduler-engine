@@ -10,6 +10,33 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    
+    <change date="2008-10-16" version="2.0.214" subversion_revision="5927">
+        <revision type="new" title="Gestoppte Jobs, Jobketten und Jobkettenknoten bleiben über Scheduler-Neustart hinweg gestoppt">
+            <description>
+                <p>
+                    Der Zustand der Jobs, Jobketten und Jobkettenknoten wird in der Datenbank gehalten.
+                    Wenn eins dieser drei Objekte gelöscht wird, wird auch der dazugehörige Datenbankeintrag gelöscht.
+                </p>
+                
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_job" attribute="cmd" value="stopped"/>.
+                        Wenn der Job wegen Herunterfahrens des Schedulers gestoppt wird, wird das nicht in der Datenbank vermerkt.
+                    </li>
+                    <li>
+                        <scheduler_element name="job_chain.modify" attribute="state" value="stopped"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job_chain_node.modify" attribute="action" value="stop"/>: 
+                        Der Wert von <code>action</code> bleibt erhalten.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2008-10-07" version="2.0.213" subversion_revision="5922">
         <revision type="correction" title="Verschachtelte Jobketten mit Großbuchstaben funktionieren">
             <description>

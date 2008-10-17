@@ -45,7 +45,7 @@ struct Lock : idispatch_implementation< Lock, spooler_com::Ilock>,
     bool                        on_load                     (); 
     bool                        on_activate                 ();
 
-    void                        prepare_to_remove           ( Remove_flags );
+    void                        on_prepare_to_remove        ();
     bool                        can_be_removed_now          ();
     zschimmer::Xc               remove_error                ();
 

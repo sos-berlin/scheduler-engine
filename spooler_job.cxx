@@ -1096,16 +1096,14 @@ bool Job::on_schedule_to_be_removed()
     return true;
 }
 
-//---------------------------------------------------------------------------Job::prepare_to_remove
+//------------------------------------------------------------------------Job::on_prepare_to_remove
 
-void Job::prepare_to_remove( Remove_flags remove_flags )
+void Job::on_prepare_to_remove()
 { 
     end_tasks( "" );
     stop_simply( true );   //2008-10-14: Nicht stoppen, sondern neuer Zustand s_closed?
 
-    if( remove_flags != rm_temporary )  database_record_remove();
-
-    My_file_based::prepare_to_remove( remove_flags );
+    My_file_based::on_prepare_to_remove();
 }
 
 //--------------------------------------------------------------------------Job::can_be_removed_now
@@ -1130,6 +1128,13 @@ bool Job::can_be_removed_now()
     }
 
     return false;
+}
+
+//-------------------------------------------------------------------------------Job::on_remove_now
+
+void Job::on_remove_now()
+{
+    if( remove_flag() != rm_temporary )  database_record_remove();
 }
 
 //--------------------------------------------------------------------------------Job::remove_error
@@ -1276,9 +1281,9 @@ void Job::load_tasks_from_db( Read_transaction* ta )
     S select_sql;
     select_sql << "select `task_id`, `enqueue_time`, `start_at_time`"
                << "  from " << _spooler->_tasks_tablename
-               << "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
+               << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
                <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() )
-               <<    " and `job_name`=" << sql::quoted( path().without_slash() ) 
+               <<    " and `job_name`="          << sql::quoted( path().without_slash() ) 
                << "  order by `task_id`";
 
     Any_file sel = ta->open_result_set( select_sql, Z_FUNCTION );
@@ -2040,11 +2045,11 @@ void Job::database_record_store()
                     sql::Update_stmt update ( &db()->_jobs_table );
                     
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _spooler->cluster_member_id();
+                    update[ "cluster_member_id" ] = _spooler->db_cluster_member_id();
                     update[ "path"              ] = path().without_slash();
 
                     if( _next_start_time != _db_next_start_time )  update[ "next_start_time" ] = _next_start_time.is_never()? sql::Value() : _next_start_time.as_string();
-                    if( _is_permanently_stopped != _db_stopped  )  update[ "stopped"         ] = _is_permanently_stopped;
+                    update[ "stopped"         ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
 
                     ta.store( update, Z_FUNCTION );
                     ta.commit( Z_FUNCTION );
@@ -2068,9 +2073,9 @@ void Job::database_record_remove()
         {
             sql::Delete_stmt delete_statement ( &db()->_jobs_table );
             
-            delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
-            delete_statement.and_where_condition( "cluster_member_id", _spooler->cluster_member_id() );
-            delete_statement.and_where_condition( "path"              , path().without_slash()        );
+            delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()            );
+            delete_statement.and_where_condition( "cluster_member_id", _spooler->db_cluster_member_id() );
+            delete_statement.and_where_condition( "path"              , path().without_slash()          );
 
             ta.execute( delete_statement, Z_FUNCTION );
             ta.commit( Z_FUNCTION );
@@ -2088,9 +2093,9 @@ void Job::database_record_load( Read_transaction* ta )
     Any_file result_set = ta->open_result_set
     ( 
         S() << "select `stopped`, `next_start_time`"
-            << "  from " << db()->_jobs_table.name()
+            << "  from " << db()->_jobs_table.sql_name()
             << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->cluster_member_id() )
+            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_cluster_member_id() )
             <<    " and `path`="              << sql::quoted( path().without_slash() ), 
         Z_FUNCTION 
     );

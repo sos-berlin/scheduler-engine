@@ -188,7 +188,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                     is_visible                     () const                                { return _visible == visible_yes; }
     bool                        temporary                   () const                                { return _temporary; }
 
-    void                        prepare_to_remove           ( Remove_flags );
+    void                        on_prepare_to_remove        ();
+    void                        on_remove_now               ();
     zschimmer::Xc               remove_error                ();
 
   //void                        prepare_to_replace          ();

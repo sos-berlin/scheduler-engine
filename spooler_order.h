@@ -230,7 +230,7 @@ struct Order : Com_order,
     void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
-    void                        remove                  ( File_based::Remove_flags );
+    void                        remove                  ( File_based::Remove_flag );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        remove_from_job_chain_stack();
     bool                        tip_own_job_for_new_distributed_order_state();
@@ -744,8 +744,9 @@ struct Job_chain : Com_job_chain,
 
     File_based*                 new_base_file               ( const Base_file_info& );
 
-    void                        prepare_to_remove           ( Remove_flags );
+    void                        on_prepare_to_remove        ();
     bool                        can_be_removed_now          ();
+    void                        on_remove_now               ();
     zschimmer::Xc               remove_error                ();
 
     void                        prepare_to_replace          ();

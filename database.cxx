@@ -705,7 +705,7 @@ void Database::create_tables_when_needed()
                          S() << "`spooler_id`"       " varchar(100)"  " not null,"
                                 "`cluster_member_id`"" varchar(100)"  " not null,"
                                 "`path`"             " varchar(255)"  " not null,"
-                                "`stopped`"          " boolean"       " not null  default(0),"  
+                                "`stopped`"          " boolean"       " not null,"  
                                 "`next_start_time`"  " varchar(24)"      << null << ","  
                                 "primary key ( `spooler_id`, `cluster_member_id`, `path` )" );
 

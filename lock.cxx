@@ -292,9 +292,9 @@ bool Lock::can_be_removed_now()
     return is_to_be_removed()  &&  _holder_map.empty();
 }
 
-//--------------------------------------------------------------------------Lock::prepare_to_remove
+//-----------------------------------------------------------------------Lock::on_prepare_to_remove
 
-void Lock::prepare_to_remove( Remove_flags remove_flags )
+void Lock::on_prepare_to_remove()
 {
     if( !is_to_be_removed() )
     {
@@ -326,7 +326,7 @@ void Lock::prepare_to_remove( Remove_flags remove_flags )
         }
     }
 
-    My_file_based::prepare_to_remove( remove_flags );
+    My_file_based::on_prepare_to_remove();
 }
 
 //-------------------------------------------------------------------------------Lock::remove_error

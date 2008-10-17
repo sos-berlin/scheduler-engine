@@ -480,6 +480,7 @@ struct Spooler : Object,
     bool                        orders_are_distributed      ();
     void                        assert_are_orders_distributed( const string& message_text );
     string                      cluster_member_id           ();
+    string                      db_cluster_member_id        ();
 
     Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }
 

@@ -143,7 +143,7 @@ struct File_based : Scheduler_object,
     // Fehlerzustand: _file_based_xc und klassen-spezifische Fehler unter einem Hut bringen?
 
     
-    enum Remove_flags 
+    enum Remove_flag 
     { 
         rm_standard, 
         rm_base_file_too,
@@ -217,8 +217,9 @@ struct File_based : Scheduler_object,
     bool                        is_loaded                   () const                                { return _state >= s_loaded  &&  _state < s_closed; }
   //void                    set_defined                     ();                                     // Für Objekte, die kein XML brauchen
 
-    void                    set_to_be_removed               ( bool );
+    void                    set_to_be_removed               ( bool, Remove_flag = rm_standard );
     bool                     is_to_be_removed               () const                                { return _is_to_be_removed; }
+    Remove_flag                 remove_flag                 () const                                { return _remove_flag; }
 
     bool                     is_active_and_not_to_be_removed() const                                { return _state == s_active  &&  !is_to_be_removed(); }
 
@@ -237,7 +238,7 @@ struct File_based : Scheduler_object,
     bool                        activate                    ();
     bool                        switch_file_based_state     ( State  );
   //bool                        try_switch_wished_file_based_state();
-    bool                        remove                      ( Remove_flags = rm_standard );
+    bool                        remove                      ( Remove_flag = rm_standard );
     void                        remove_base_file            ();
 
     void                        remove_now                  ();
@@ -247,12 +248,14 @@ struct File_based : Scheduler_object,
 
     virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
     virtual void                set_dom                     ( const xml::Element_ptr& )             = 0;
+
+    // Alle on_xxx() sollten protected sein.
     virtual bool                on_initialize               ()                                      = 0;
     virtual bool                on_load                     ()                                      = 0;
     virtual bool                on_activate                 ()                                      = 0;
 
     virtual void                on_remove_now               ();
-    virtual void                prepare_to_remove           ( Remove_flags );
+    virtual void                on_prepare_to_remove        ();
     virtual bool                can_be_removed_now          ()                                      = 0;
     virtual zschimmer::Xc       remove_error                ();
 
@@ -275,6 +278,8 @@ struct File_based : Scheduler_object,
     friend struct               Typed_folder;
     friend struct               Subfolder_folder;
 
+    void                        prepare_to_remove           ( Remove_flag );
+
     string                     _name;
     State                      _state;
     Base_file_info             _base_file_info;
@@ -285,6 +290,7 @@ struct File_based : Scheduler_object,
     int                        _duplicate_version;
     bool                       _file_is_removed;
     bool                       _is_to_be_removed;
+    Remove_flag               _remove_flag;
     Configuration_origin       _configuration_origin;        // Aus live/ oder aus cache/ ?
     ptr<File_based>            _replacement;
     Absolute_path              _folder_path;                // assert( !is_in_folder()  ||  _folder_path == folder()->path() )
@@ -412,7 +418,7 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
     void                        set_dom                     ( const xml::Element_ptr& )             { zschimmer::throw_xc( Z_FUNCTION ); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    void                        prepare_to_remove           ( Remove_flags );
+    void                        on_prepare_to_remove        ();
     bool                        can_be_removed_now          ();
 
 
