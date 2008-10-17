@@ -15,6 +15,7 @@ DEP_PRODUCTS := kram file fs zschimmer
 
 objects = \
  cluster.o\
+ database.o\
  directory_observer.o\
  file_logger.o\
  folder.o\
@@ -36,7 +37,6 @@ objects = \
  spooler_event.o\
  spooler_embedded_files.o\
  spooler_embedded_files_z.o\
- spooler_history.o\
  spooler_http.o\
  spooler_job.o\
  spooler_log.o\
