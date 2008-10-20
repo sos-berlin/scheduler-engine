@@ -658,8 +658,12 @@ bool Remote_scheduler::check_remote_configuration()
 
         if( !changed )
         {
+            int all_directory_version = 0;
+
             if( Directory* all_directory = _remote_configurations->configuration_directory_for_all_schedulers_or_null() )
-                changed = _configuration_version_all != all_directory->version();
+                all_directory_version = all_directory->version();
+
+            changed = _configuration_version_all != all_directory_version;
         }
 
         if( changed )  

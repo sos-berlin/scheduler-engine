@@ -10,6 +10,26 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+
+    <change date="2008-10-20" version="2.0.214" subversion_revision="5929">
+        <revision type="correction" title="Allgemeines zentrales Konfigurationsverzeichnis kann gelöscht werden">
+            <description>
+                <p>
+                    Wenn das zentrale allgemeine Konfigurationsverzeichnis gelöscht wird,
+                    lässt der Supervisor in allen angeschlossenen Schedulern die entsprechenden Objekte löschen.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="config" attribute="central_configuration_directory"/>.
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="supervisor"/>.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     
     <change date="2008-10-16" version="2.0.214" subversion_revision="5927">
         <revision type="new" title="Gestoppte Jobs, Jobketten und Jobkettenknoten bleiben über Scheduler-Neustart hinweg gestoppt">

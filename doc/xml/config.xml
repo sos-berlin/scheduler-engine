@@ -177,9 +177,7 @@
                 <p>
                     Der Supervisor kann für den Scheduler die Konfiguration bestimmen,
                     s. <scheduler_element name="config" attribute="central_configuration_directory"/>.
-                    Die vorhandene Konfiguration
-                    (<scheduler_element name="config" attribute="configuration_directory"/>)
-                    wird dabei überschrieben.
+                    Die übernommene Konfiguration hält der Scheduler im Verzeichnis <code>cache</code>.
                 </p>
             </description>
         </xml_attribute>
