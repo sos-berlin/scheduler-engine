@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-10-20" version="2.0.214" subversion_revision="5929">
+    <change date="2008-10-20" version="2.0.214" subversion_revision="5931">
         <revision type="correction" title="Allgemeines zentrales Konfigurationsverzeichnis kann gelöscht werden">
             <description>
                 <p>
