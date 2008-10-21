@@ -41,7 +41,7 @@
     </p>
 		<p>
 			The user interface is described in the 
-			"<a href="user_interface">Built-In User Interface</a>" 
+			"<a href="#user_interface">Built-In User Interface</a>" 
 			section of this chapter (below).
 		</p>
     
@@ -131,7 +131,7 @@
 		<scheduler_keyword keyword="Web Interface"/>
 		<scheduler_keyword keyword="User Interface"/>
 		<scheduler_keyword keyword="GUI"/>
-		<a href="user_interface"/>
+		<a name="user_interface"/>
 		<h2>Built-In Graphical User Interface</h2>
 		
 		<p>
