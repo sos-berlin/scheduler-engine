@@ -203,6 +203,7 @@
     <file path="xml/job_chains.xml"/>
     <file path="xml/jobs.xml"/>
     <file path="xml/kill_task.xml"/>
+    <file path="xml/licence.use.xml"/>
     <file path="xml/lock.xml"/>
     <file path="xml/lock.remove.xml"/>
     <file path="xml/lock.use.xml"/>

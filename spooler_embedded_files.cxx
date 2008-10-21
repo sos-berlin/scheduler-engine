@@ -173,6 +173,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"add_order\"/>\n"
     "<xsd:element name=\"check_folders\"               type=\"check_folders\"/>\n"
     "<xsd:element ref=\"kill_task\"/>\n"
+    "<xsd:element ref=\"licence.use\"/>\n"
     "<xsd:element name=\"lock\"                        type=\"lock\"/>\n"
     "<xsd:element name=\"lock.remove\"                 type=\"lock.remove\"/>\n"
     "<xsd:element ref=\"modify_job\"/>\n"
@@ -602,6 +603,13 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"job\"           type=\"Path\"         use=\"required\"/>\n"
     "<xsd:attribute name=\"id\"            type=\"Task_id\"      use=\"required\"/>\n"
     "<xsd:attribute name=\"immediately\"   type=\"Yes_no\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:element name=\"licence.use\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"key\"           type=\"String\"       use=\"required\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -2162,7 +2170,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1222785218 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1224584263 },
     { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222956957 },
     { NULL, NULL, 0 }
 };

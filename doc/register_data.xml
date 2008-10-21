@@ -436,7 +436,7 @@
     <register_entry register_file='xml/delay_after_error.xml#attribute_delay' register_title='&lt;delay_after_error&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
     <register_entry register_file='xml/delay_order_after_setback.xml#attribute_delay' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
     <register_entry register_file='xml/job_chain_node.xml#attribute_delay' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='delay' type='definition'/>
-    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#attribute_delay' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='delay' type='definition'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#attribute_delay' register_title='&lt;scheduler_log.log_categories.reset&gt; (Kommando)'  register_keyword='delay' type='definition'/>
 </register_keyword>
 <register_keyword keyword='delay_after_error'>
     <register_keyword_display><code>&lt;delay_after_error&gt;</code></register_keyword_display>
@@ -1927,6 +1927,7 @@
     <register_entry register_file='remote_execution.xml#use_element__process_class' register_title='Externe Job-Verarbeitung'  register_keyword='process_class'/>
     <register_entry register_file='xml.xml#use_element__process_class' register_title='Alle XML-Elemente'  register_keyword='process_class'/>
     <register_entry register_file='xml/answer/process_class.xml#' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='process_class' type='definition'/>
+    <register_entry register_file='xml/answer/task.xml#use_element__process_class' register_title='&lt;task&gt; (Antwort)'  register_keyword='process_class'/>
     <register_entry register_file='xml/include.xml#use_element__process_class' register_title='&lt;include&gt; (Konfiguration)'  register_keyword='process_class'/>
     <register_entry register_file='xml/process.xml#use_element__process_class' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='process_class'/>
     <register_entry register_file='xml/process_class.remove.xml#use_element__process_class' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class'/>
@@ -2225,13 +2226,13 @@
     <register_entry register_file='CHANGES.xml#use_element__scheduler_log.log_categories.reset' register_title='Änderungsprotokoll'  register_keyword='scheduler_log.log_categories.reset'/>
     <register_entry register_file='log_categories.xml#use_element__scheduler_log.log_categories.reset' register_title='Log-Kategorien'  register_keyword='scheduler_log.log_categories.reset'/>
     <register_entry register_file='xml.xml#use_element__scheduler_log.log_categories.reset' register_title='Alle XML-Elemente'  register_keyword='scheduler_log.log_categories.reset'/>
+    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#' register_title='&lt;scheduler_log.log_categories.reset&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.reset' type='definition'/>
 </register_keyword>
 <register_keyword keyword='scheduler_log.log_categories.set'>
     <register_keyword_display><code>&lt;scheduler_log.log_categories.set&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__scheduler_log.log_categories.set' register_title='Änderungsprotokoll'  register_keyword='scheduler_log.log_categories.set'/>
     <register_entry register_file='log_categories.xml#use_element__scheduler_log.log_categories.set' register_title='Log-Kategorien'  register_keyword='scheduler_log.log_categories.set'/>
     <register_entry register_file='xml.xml#use_element__scheduler_log.log_categories.set' register_title='Alle XML-Elemente'  register_keyword='scheduler_log.log_categories.set'/>
-    <register_entry register_file='xml/scheduler_log.log_categories.reset.xml#' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.set' type='definition'/>
     <register_entry register_file='xml/scheduler_log.log_categories.set.xml#' register_title='&lt;scheduler_log.log_categories.set&gt; (Kommando)'  register_keyword='scheduler_log.log_categories.set' type='definition'/>
 </register_keyword>
 <register_keyword keyword='scheduler_log.log_categories.show'>

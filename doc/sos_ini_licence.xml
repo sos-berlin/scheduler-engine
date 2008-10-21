@@ -18,6 +18,9 @@
                     Wenn Sie mehrere Lizenzschlüssel haben, können Sie weitere unter <code>key2=</code>, <code>key3=</code> usw. eintragen.
                     Achten Sie darauf, dass die Nummerierung lückenlos ist.
                 </p>
+                <p>
+                    Siehe auch <scheduler_element name="licence.use"/>.
+                </p>
             </description>
         </ini_entry>
 

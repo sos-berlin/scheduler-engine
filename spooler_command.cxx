@@ -8,6 +8,7 @@
 
 #include "spooler.h"
 #include "../file/anyfile.h"
+#include "../kram/licence.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/embedded_files.h"
 #include "../zschimmer/z_gzip.h"
@@ -30,7 +31,6 @@
 #include <sys/types.h>
 #include <sys/timeb.h>
 #include <sys/stat.h>
-
 
 namespace sos {
 namespace scheduler {
@@ -484,6 +484,20 @@ void Command_processor::execute_scheduler_log__append( const xml::Element_ptr& d
             }
         }
     }
+}
+
+//---------------------------------------------------------------Command_processor::execute_licence
+
+xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& element, const Show_what& )
+{
+    if( element.nodeName_is( "licence.use" ) )
+    {
+        sos_static_ptr()->_licence->read_key( element.getAttribute_mandatory( "key" ) );
+    }
+    else 
+        z::throw_xc( Z_FUNCTION, element.nodeName() );
+
+    return _answer.createElement( "ok" );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -1472,6 +1486,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( string_begins_with( element_name, "scheduler_log." ) )
     {
         result = execute_scheduler_log( element, show );
+    }
+    else
+    if( string_begins_with( element_name, "licence." ) )
+    {
+        result = execute_licence( element, show );
     }
     else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
