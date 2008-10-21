@@ -85,7 +85,9 @@
                     <tr>
                         <td valign="baseline" style="padding-top: 1ex"><scheduler_keyword keyword="running_remote_process"/><code>state="running_remote_process"</code></td>
                         <td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
-                            Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft unter einem entfernten Scheduler.
+                            Nur, wenn der Job mit <scheduler_element name="process"/> und 
+                            <scheduler_element name="process_class" attribute="remote_scheduler"/> definiert ist:
+                            Der Prozess läuft unter einem entfernten Scheduler.
                         </td>
                     </tr>
                     <tr>

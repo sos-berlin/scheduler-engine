@@ -35,6 +35,7 @@
         <xml_child_element name="order"/>
         <xml_child_element name="process_classes"/>
         <xml_child_element name="ok"/>
+        <xml_child_element name="log_categories"/>
         <xml_child_element name="state" title="Antwort auf &lt;show_state&gt;"/>
         <xml_child_element name="task"/>
     </xml_child_elements>

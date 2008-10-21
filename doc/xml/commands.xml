@@ -137,6 +137,9 @@ on_exit_code="SIGTERM SIGKILL"</pre>
         <xml_child_element directory="xml/" name="modify_job" multiple="yes"/>
         <xml_child_element directory="xml/" name="modify_order" multiple="yes"/>
         <xml_child_element directory="xml/" name="modify_spooler" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.reset" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.set" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.show" multiple="yes"/>
         <xml_child_element directory="xml/" name="show_history" multiple="yes"/>
         <xml_child_element directory="xml/" name="show_job" multiple="yes"/>
         <xml_child_element directory="xml/" name="show_jobs" multiple="yes"/>
