@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-10-22" version="2.0.215" subversion_revision="5936">
+    <change date="2008-10-22" version="2.0.215" subversion_revision="5937">
         <revision type="new" title="Bei besonderem Lizenzsschlüssel liefert der Scheduler das Datenbankkennwort">
             <description>
                 <p>
@@ -29,10 +29,7 @@
                 </ul>
             </description>
         </revision>
-    </change>
-
     
-    <change date="2008-10-20" version="2.0.214" subversion_revision="5931">
         <revision type="correction" title="Allgemeines zentrales Konfigurationsverzeichnis kann gelöscht werden">
             <description>
                 <p>

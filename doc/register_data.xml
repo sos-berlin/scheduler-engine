@@ -1175,6 +1175,15 @@
 <register_keyword keyword='Kategorien fürs Log'>
     <register_entry register_file='log_categories.xml' register_title='Log-Kategorien'  register_keyword='Kategorien fürs Log'/>
 </register_keyword>
+<register_keyword keyword='key'>
+    <register_keyword_display><code>key=</code></register_keyword_display>
+    <register_entry register_file='xml/licence.use.xml#attribute_key' register_title='&lt;licence.use&gt; (Kommando)'  register_keyword='key' type='definition'/>
+</register_keyword>
+<register_keyword keyword='key1'>
+    <register_keyword_display><code>key1=</code></register_keyword_display>
+    <register_ini_entry register_file='xml/answer/state.xml' register_title='&lt;state&gt; (Antwort)' file='sos.ini' section='licence' entry='key1'/>
+    <register_ini_entry register_file='xml/licence.use.xml' register_title='&lt;licence.use&gt; (Kommando)' file='sos.ini' section='licence' entry='key1'/>
+</register_keyword>
 <register_keyword keyword='kill'>
     <register_keyword_display><code>-kill=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_kill' register_title='Kommandozeilenoptionen'  register_keyword='kill' type='definition'/>
@@ -1240,6 +1249,14 @@
     <register_keyword_display><code>level=</code></register_keyword_display>
     <register_entry register_file='xml/allowed_host.xml#attribute_level' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='level' type='definition'/>
     <register_entry register_file='xml/answer/log.xml#attribute_level' register_title='&lt;log&gt; (Antwort)'  register_keyword='level' type='definition'/>
+</register_keyword>
+<register_keyword keyword='licence.use'>
+    <register_keyword_display><code>&lt;licence.use&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__licence.use' register_title='Änderungsprotokoll'  register_keyword='licence.use'/>
+    <register_entry register_file='sos_ini_licence.xml#use_element__licence.use' register_title=''  register_keyword='licence.use'/>
+    <register_entry register_file='xml.xml#use_element__licence.use' register_title='Alle XML-Elemente'  register_keyword='licence.use'/>
+    <register_entry register_file='xml/answer/state.xml#use_element__licence.use' register_title='&lt;state&gt; (Antwort)'  register_keyword='licence.use'/>
+    <register_entry register_file='xml/licence.use.xml#' register_title='&lt;licence.use&gt; (Kommando)'  register_keyword='licence.use' type='definition'/>
 </register_keyword>
 <register_keyword keyword='limit'>
     <register_keyword_display><code>limit=</code></register_keyword_display>

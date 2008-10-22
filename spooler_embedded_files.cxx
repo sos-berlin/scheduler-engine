@@ -2170,7 +2170,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1224584263 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1224624052 },
     { "doc/log_categories.xml", file_doc_log_categories_xml, sizeof file_doc_log_categories_xml - 1, 1222956957 },
     { NULL, NULL, 0 }
 };
