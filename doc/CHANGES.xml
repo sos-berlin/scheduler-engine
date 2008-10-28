@@ -11,6 +11,10 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2008-10-28" version="2.0.215" subversion_revision="5938">
+        <revision type="correction" title="Kleine Korrektur der Log-Kategorien"/>
+    </change>
+    
     <change date="2008-10-22" version="2.0.215" subversion_revision="5937">
         <revision type="new" title="Bei besonderem Lizenzsschlüssel liefert der Scheduler das Datenbankkennwort">
             <description>

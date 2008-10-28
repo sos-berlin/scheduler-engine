@@ -41,6 +41,10 @@
                     Denied
                 </th>
                 <th>
+                    Children
+                </th>
+                <th>
+                    Default
                 </th>
                 <th>
                 </th>
@@ -94,6 +98,18 @@
                                 <xsl:text>children too</xsl:text>
                             </xsl:if>
                         </td>
+                        <td>
+                            <xsl:if test="@has_default='yes'">
+                                <xsl:choose>
+                                    <xsl:when test="@default='yes'">
+                                        default=on
+                                    </xsl:when>
+                                    <xsl:when test="@default='no'">
+                                        default=off
+                                    </xsl:when>
+                                </xsl:choose>
+                            </xsl:if>
+                        </td>
 
                         <!--
                         <xsl:if test="//log_category [ @children_derived ] or //log_category [ @has_default ] or //log_category [ @default ]">
@@ -126,9 +142,7 @@
                         </td>
                         <td>
                             &#160;
-                            <i>
-                                <xsl:value-of select="@title"/>
-                            </i>
+                            <xsl:value-of select="@title"/>
                         </td>
                     </tr>
                 </xsl:for-each>
