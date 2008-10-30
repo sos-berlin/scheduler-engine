@@ -107,8 +107,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
         void                    enqueue_task                ( const ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
-        bool                    has_task_waiting_for_period ();
+      //bool                    has_task_waiting_for_period ();
         void                    move_to_new_job             ( Job* );
+        Time                    next_start_time             ();
         void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
       private:
@@ -122,6 +123,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
     typedef map< int, Time >                    Delay_order_after_setback;
+
+    static const bool           force_start_default;
+
 
                                 Job                         ( Scheduler*, const string& name = "", const ptr<Module>& = NULL );
     virtual                    ~Job                         (); 
@@ -232,8 +236,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     bool                        should_start_task_because_of_min_tasks();
     int                         not_ending_tasks_count      () const;
 
-    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = Time::never );
-    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
+    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force = force_start_default, const Time& = Time::never );
+    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time&, int id );
     ptr<Task>                   get_task_from_queue         ( const Time& now );
     void                        run_task                    ( const ptr<Task>&  );
 

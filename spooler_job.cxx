@@ -32,6 +32,7 @@ using job_chain::Job_node;
 
 const int    max_task_time_out             = 365*24*3600;
 const double directory_watcher_intervall   = 10.0;          // Nur für Unix (Windows gibt ein asynchrones Signal)
+const bool   Job::force_start_default      = true;
 
 //------------------------------------------------------------------------------------Job_subsystem
 
@@ -710,6 +711,7 @@ void Job::set_dom( const xml::Element_ptr& element )
 {
     assert_is_not_initialized();
 
+    assert( element );
     if( !element )  return;
     if( !element.nodeName_is( "job" ) )  z::throw_xc( "SCHEDULER-409", "job", element.nodeName() );
 
@@ -1238,7 +1240,7 @@ void Job::signal( const string& signal_name )
 
 //---------------------------------------------------------------------------------Job::create_task
 
-ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& start_at, int id )
+ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, bool force, const Time& start_at, int id )
 {
     assert_is_initialized();
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
@@ -1247,16 +1249,17 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
     {
       //case s_read_error:  z::throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
         case s_error:       z::throw_xc( "SCHEDULER-204", name(), _error.what() );
-        case s_stopped:     if( _spooler->state() != Spooler::s_stopping )  set_state( s_pending );  break;
+        case s_stopped:     if( force  &&  _spooler->state() != Spooler::s_stopping )  set_state( s_pending );  break;
         default:            if( _state < s_initialized )  z::throw_xc( "SCHEDULER-396", state_name( s_initialized ), Z_FUNCTION, state_name() );
     }
 
     ptr<Job_module_task> task = Z_NEW( Job_module_task( this ) );
 
-    task->_id       = id;
-    task->_obj_name = S() << "Task " << path().without_slash() << ":" << task->_id;
-    task->_name     = task_name;
-    task->_start_at = start_at; 
+    task->_id          = id;
+    task->_obj_name    = S() << "Task " << path().without_slash() << ":" << task->_id;
+    task->_name        = task_name;
+    task->_force_start = start_at? force : false;
+    task->_start_at    = start_at;     // 0: Bei nächster Periode starten
 
     if( const Com_variable_set* p = dynamic_cast<const Com_variable_set*>( +params ) )  task->merge_params( p );
 
@@ -1265,9 +1268,9 @@ ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const
 
 //---------------------------------------------------------------------------------Job::create_task
 
-ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at )
+ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, bool force, const Time& start_at )
 {
-    return create_task( params, name, start_at, _spooler->_db->get_task_id() );
+    return create_task( params, name, force, start_at, _spooler->_db->get_task_id() );
 }
 
 //--------------------------------------------------------------------------Job::load_tasks_from_db
@@ -1296,6 +1299,8 @@ void Job::load_tasks_from_db( Read_transaction* ta )
         {
             Time                    start_at;
             ptr<Com_variable_set>   parameters = new Com_variable_set;
+            xml::Document_ptr       task_dom;
+            bool                    force_start = force_start_default;
 
             start_at.set_datetime( record.as_string( "start_at_time" ) );
             _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
@@ -1306,12 +1311,19 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
 
-            ptr<Task> task = create_task( +parameters, "", start_at, task_id );
-            
             string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
                                                                                  " where \"TASK_ID\"=" + as_string( task_id ),
                                          "" );
-            if( !xml.empty() )  task->set_dom( xml::Document_ptr( xml ).documentElement() );
+
+            if( !xml.empty() )
+            {
+                task_dom = xml::Document_ptr( xml );
+                force_start = task_dom.documentElement().bool_getAttribute( "force_start", force_start );
+            }
+
+            ptr<Task> task = create_task( +parameters, "", force_start, start_at, task_id );
+            
+            if( task_dom )  task->set_dom( task_dom.documentElement() );
 
             task->_is_in_database = true;
             task->_let_run        = true;
@@ -1451,19 +1463,6 @@ bool Job::Task_queue::remove_task( int task_id, Why_remove )
     return result;
 }
 
-//-----------------------------------------------------Job::Task_queue::has_task_waiting_for_period
-
-bool Job::Task_queue::has_task_waiting_for_period()
-{
-    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
-    {
-        Task* task = *it;
-        if( !task->_start_at )  return true;
-    }
-
-    return false;
-}
-
 //---------------------------------------------------------Job::Task_queue::move_to_job_replacement
 
 void Job::Task_queue::move_to_new_job( Job* new_job )
@@ -1477,18 +1476,37 @@ void Job::Task_queue::move_to_new_job( Job* new_job )
     }
 }
 
-//--------------------------------------------------------------Job::Task_queue::next_at_start_time
+//-----------------------------------------------------------------Job::Task_queue::next_start_time
 
-//Time Job::Task_queue::next_at_start_time()
-//{
-//    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
-//    {
-//        Task* task = *it;
-//        if( task->_start_at )  return task->_start_at;
-//    }
-//
-//    return Time::never;
-//}
+Time Job::Task_queue::next_start_time()
+{
+    Time next_force     = Time::never;
+    Time next_in_period = Time::never;
+
+    Z_FOR_EACH_CONST( Queue, _queue, q )
+    {
+        Task* task = *q;
+
+        if( task->_force_start )  
+        {
+            next_force = task->_start_at;
+            break;
+        }
+    }
+
+    Z_FOR_EACH_CONST( Queue, _queue, q )
+    {
+        Task* task = *q;
+
+        if( !task->_force_start )  
+        {
+            next_in_period = task->_start_at;
+            break;
+        }
+    }
+
+    return min( next_force, next_in_period );
+}
 
 //----------------------------------------------------Job::Task_queue::append_calendar_dom_elements
 
@@ -1503,8 +1521,9 @@ void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& elem
         
         if( task->_start_at >= options->_from )
         {
+            Time             start_at = task->calculated_start_time( options->_from );
+            xml::Element_ptr e        = new_calendar_dom_element( element.ownerDocument(), start_at );
 
-            xml::Element_ptr e = new_calendar_dom_element( element.ownerDocument(), task->_start_at );
             element.appendChild( e );
             e.setAttribute( "job", _job->path().without_slash() );
             e.setAttribute( "task", task->id() );
@@ -1523,23 +1542,26 @@ ptr<Task> Job::get_task_from_queue( const Time& now )
   //if( _state == s_read_error )  return NULL;
     if( _state == s_error      )  return NULL;
 
+    if( _task_queue->empty() )     return NULL;
+
+    bool                 in_period = is_in_period(now);
+    Task_queue::iterator it        = _task_queue->begin();
+    
+    for( ; it != _task_queue->end(); it++ )
     {
-        if( _task_queue->empty() )     return NULL;
+        task = *it;
 
+        if( task->_force_start )    // Start auch außerhalb einer Periode
         {
-            bool                 in_period = is_in_period(now);
-            Task_queue::iterator it        = _task_queue->begin();
-            
-            for( ; it != _task_queue->end(); it++ )
-            {
-                task = *it;
-                if(  task->_start_at  &&  task->_start_at <= now )  break;        // Task mit Startzeitpunkt
-                if( !task->_start_at  &&  in_period              )  break;        // Task ohne Startzeitpunkt
-            }
-
-            if( it == _task_queue->end() )  return NULL;
+            if( task->_start_at <= now )  break;        // Task mit Startzeitpunkt
+        }
+        else
+        {
+            if( task->_start_at <= now  &&  in_period )  break;        // Task-Start in einer Periode
         }
     }
+
+    if( it == _task_queue->end() )  return NULL;
 
     return task;
 }
@@ -1583,7 +1605,7 @@ ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const strin
 {
     if( is_to_be_removed() )  z::throw_xc( "SCHEDULER-230", obj_name() );
     
-    ptr<Task> task = create_task( params, task_name, start_at );
+    ptr<Task> task = create_task( params, task_name, force_start_default, start_at );
     enqueue_task( task );
 
     return task;
@@ -1599,7 +1621,7 @@ void Job::enqueue_task( Task* task )
 
     if( _state > s_loaded )
     {
-        if( !task->_start_at  &&  !_schedule_use->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
+        if( !task->_force_start  &&  !_schedule_use->period_follows( now ) )   z::throw_xc( "SCHEDULER-143" );
     }
     else
     {
@@ -2029,11 +2051,14 @@ void Job::database_record_store()
     if( file_based_state() >= File_based::s_loaded  &&      // Vorher ist database_record_load() nicht aufgerufen worden
         db()->opened() )
     {
-        if( _next_start_time        != _db_next_start_time  ||
+        Time next_start_time = this->next_start_time();
+
+
+        if( next_start_time         != _db_next_start_time  ||
             _is_permanently_stopped != _db_stopped            )
         {
             //if( is_to_be_removed()  && 
-            //    _next_start_time.is_never()  &&
+            //    next_start_time.is_never()  &&
             //    !_is_permanently_stopped )
             //{
             //    database_record_remove();
@@ -2048,7 +2073,7 @@ void Job::database_record_store()
                     update[ "cluster_member_id" ] = _spooler->db_cluster_member_id();
                     update[ "path"              ] = path().without_slash();
 
-                    if( _next_start_time != _db_next_start_time )  update[ "next_start_time" ] = _next_start_time.is_never()? sql::Value() : _next_start_time.as_string();
+                    if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
                     update[ "stopped"         ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
 
                     ta.store( update, Z_FUNCTION );
@@ -2057,7 +2082,7 @@ void Job::database_record_store()
                 catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
             }
 
-            _db_next_start_time = _next_start_time;
+            _db_next_start_time = next_start_time;
             _db_stopped         = _is_permanently_stopped;
         }
     }
@@ -2104,7 +2129,7 @@ void Job::database_record_load( Read_transaction* ta )
     {
         Record record  = result_set.get_record();
         _is_permanently_stopped = _db_stopped = record.as_int( "stopped" ) != 0;
-        _db_next_start_time = record.null( "next_start_time" )? Time::never : Time( record.as_string( "next_start_time" ) );
+        _db_next_start_time = record.null( "next_start_time" )? Time::never : Time().set_datetime( record.as_string( "next_start_time" ) );
     }
 }
 
@@ -2354,21 +2379,20 @@ void Job::calculate_next_time( const Time& now )
                 }
                 else
                 {
-                    // Minimum von _start_at für _next_time berücksichtigen
-                    Task_queue::iterator it = _task_queue->begin();  
-                    if( it != _task_queue->end() )
-                    {
-                        if( !(*it)->_start_at  &&  next_time > _period.begin() )  next_time = _period.begin();  // Ohne Startzeit? In nächster Periode starten
+                    //Task_queue::iterator it = _task_queue->begin();  
+                    //if( it != _task_queue->end() )
+                    //{
+                    //    if( !(*it)->_start_at  &&  next_time > _period.begin() )  next_time = _period.begin();  // Ohne Startzeit? In nächster Periode starten
+                    //    while( it != _task_queue->end() )
+                    //    {
+                    //        if( (*it)->_start_at )  break;   // Startzeit angegeben?
+                    //        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+                    //        it++;
+                    //    }
+                    //}
+                    //if( it != _task_queue->end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
 
-                        while( it != _task_queue->end() )
-                        {
-                            if( (*it)->_start_at )  break;   // Startzeit angegeben?
-                            if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-                            it++;
-                        }
-                    }
-
-                    if( it != _task_queue->end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
+                    next_time = _task_queue->next_start_time();
 
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
                     if( next_time > _next_single_start )  next_time = _next_single_start;
@@ -3330,11 +3354,12 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
                 Task*            task                = *it;
                 xml::Element_ptr queued_task_element = document.createElement( "queued_task" );
                 
-                queued_task_element.setAttribute( "task"    , task->id() );
-                queued_task_element.setAttribute( "id"      , task->id() );                         // veraltet
-                queued_task_element.setAttribute( "enqueued", task->_enqueue_time.as_string() );
-                queued_task_element.setAttribute( "name"    , task->_name );
-                
+                queued_task_element.setAttribute( "task"       , task->id() );
+                queued_task_element.setAttribute( "id"         , task->id() );                         // veraltet
+                queued_task_element.setAttribute( "enqueued"   , task->_enqueue_time.as_string() );
+                queued_task_element.setAttribute( "name"       , task->_name );
+                queued_task_element.setAttribute( "force_start", task->_force_start? "yes" : "no" );
+
                 if( task->_start_at )
                     queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
                 

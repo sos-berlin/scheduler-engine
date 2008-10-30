@@ -53,7 +53,7 @@
             <description>
                 <p>
                     Zeitpunkt, zu dem die Task gestartet werden soll.
-                    <scheduler_element name="run_time"/> ist außer Kraft.
+                    Die Voreinstellung <code>force="yes"</code> setzt <scheduler_element name="run_time"/> ist außer Kraft.
                 </p>
                 <p>
                     Relative Zeitangaben <code>"now"</code>,
@@ -69,6 +69,42 @@
                     <code>at="period"</code> lässt den Job erst Starten, wenn die <scheduler_element name="run_time"/> dies zulässt
                     (also in der laufenden oder der nächsten Periode).
                 </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="force" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>force="no"</code>:
+                </p>
+                <ul>
+                    <li>
+                        Wenn der Job gestoppt ist, bleibt er gestoppt.
+                    </li>
+                    <li>
+                        Wenn mit <code>at=</code> eine Startzeit angegeben ist,
+                        zu dem Zeitpunkt 
+                        <scheduler_element name="run_time"/> oder <scheduler_element name="schedule"/>
+                        keine Start zulassen, 
+                        dann verschiebt der Scheduler den Start bis zur nächsten Periode.
+                    </li>
+                    <li>
+                        Daraus ergibt sich, dass <code>at="now"</code> wie <code>at="period"</code> wirkt.
+                    </li>
+                </ul>
+                <p>
+                    <code>force="yes"</code>:
+                </p>
+                <ul>
+                    <li>
+                        Der Job wird sofort entstoppt (falls er gestoppt ist)
+                    </li>
+                    <li>
+                        Eine mit <code>at=</code> angegebene Startzeit nimmt keine Rücksicht auf
+                        <scheduler_element name="run_time"/> oder <scheduler_element name="schedule"/>,
+                        die Task wird also auch zu dem Zeitpunkt gestartet, wenn keine Periode vorliegt.
+                    </li>
+                </ul>
             </description>
         </xml_attribute>
 

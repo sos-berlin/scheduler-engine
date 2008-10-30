@@ -382,6 +382,7 @@ struct Schedule_use : idispatch_implementation< Schedule_use, spooler_com::Irun_
 
     Time                        next_single_start           ( const Time& );
     Time                        next_any_start              ( const Time& );
+    Time                        next_allowed_start          ( const Time& t );                      // Liefert t oder den Beginn der nächsten Periode
 
     virtual void                on_schedule_loaded          ()                                      = 0;
     virtual void                on_schedule_modified        ()                                      = 0;

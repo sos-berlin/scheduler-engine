@@ -243,6 +243,8 @@ void Task::init()
 
 void Task::set_dom( const xml::Element_ptr& element )
 {
+    _force_start = element.bool_getAttribute( "force_start" );
+
     string web_service_name = element.getAttribute( "web_service" );
     if( web_service_name != "" )  set_web_service( web_service_name );
 
@@ -381,6 +383,8 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.appendChild( _log->dom_element( document, show ) );
     }
 
+    task_element.setAttribute( "force_start", _force_start? "yes" : "no" );
+
     if( _web_service )
     task_element.setAttribute( "web_service"     , _web_service->name() );
 
@@ -416,6 +420,25 @@ Job* Task::job()
 {
     if( !_job )  assert(0), throw_xc( "TASK-WITHOUT-JOB", obj_name() );
     return _job;
+}
+
+//----------------------------------------------------------------------Task::calculated_start_time
+
+Time Task::calculated_start_time( const Time& now )
+{
+    Time result;
+
+    if( _force_start )
+    {
+        result = _start_at;
+    }
+    else
+    if( _job->file_based_state() == Job::s_active )
+    {
+        result = _job->schedule_use()->next_allowed_start( max( _start_at, now ) );
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------------Task::cmd_end

@@ -515,6 +515,21 @@ Period Schedule_use::next_period( const Time& t, With_single_start single_start,
     return schedule()->next_period( this, t, single_start, before ); 
 }
 
+//-----------------------------------------------------------------Schedule_use::next_allowed_start
+
+Time Schedule_use::next_allowed_start( const Time& t )
+{
+    Time result = Time::never;
+
+    if( _schedule )
+    {
+        Period period = next_period( t );
+        result = max( t, period.begin() );
+    }
+
+    return result;
+}
+
 //-------------------------------------------------------Schedule_use::append_calendar_dom_elements
 
 void Schedule_use::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )

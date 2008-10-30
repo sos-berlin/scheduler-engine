@@ -1,0 +1,34 @@
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+
+        <commands>
+            <start_job job="/A">
+                <params>
+                    <param name="a" value="&lt;start_job>"/>
+                </params>
+            </start_job>
+            <start_job job="/A" at="now+15">
+                <params>
+                    <param name="a" value="&lt;start_job at='now+15'>"/>
+                </params>
+            </start_job>
+            <start_job job="/A" force="no">
+                <params>
+                    <param name="a" value="&lt;start_job force='no'>"/>
+                </params>
+            </start_job>
+            <start_job job="/A" force="no" at="now+15">
+                <params>
+                    <param name="a" value="&lt;start_job force='no' at='now+15'>"/>
+                </params>
+            </start_job>
+            
+            <show_job job="/A" what="task_queue"/>
+        </commands>
+
+    </config>
+</spooler>

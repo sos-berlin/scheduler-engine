@@ -1163,6 +1163,7 @@
             <xsd:attribute name="at"                type="Date_time_with_now_or_period"/>
             <xsd:attribute name="after"             type="xsd:nonNegativeInteger"/>
             <xsd:attribute name="web_service"       type="Name"/>
+            <xsd:attribute name="force"             type="Yes_no"/>
         </xsd:complexType>
     </xsd:element>
 

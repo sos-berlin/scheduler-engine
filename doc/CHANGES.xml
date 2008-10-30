@@ -11,8 +11,18 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-10-29" version="2.0.215" subversion_revision="5939">
-        <revision type="correction" title="Fehlermeldung Z-ASYNC-SOCKET-001 unter Windows korrigert">
+    <change date="2008-10-29" version="2.0.216" subversion_revision="5940">
+        <revision type="new" title="&lt;start_job force=&quot;no&quot;>: Task starten, ohne Job zu entstoppen">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="start_job" attribute="force" value="no"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Fehlermeldung Z-ASYNC-SOCKET-001 unter Windows korrigiert">
             <description>
                 <p>
                     Eine interne Sicherheitsprüfung, die nur für Unix vorgesehen ist,
@@ -20,6 +30,8 @@
                 </p>
             </description>
         </revision>
+
+        <revision type="correction" title="Fehler aus 2.0.214.5927 (Jobs in der Datenbank) korrigiert "/>
     </change>
 
     <change date="2008-10-28" version="2.0.215" subversion_revision="5938">

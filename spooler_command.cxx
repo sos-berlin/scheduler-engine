@@ -439,7 +439,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
 
         // Einstellung der Dokumentation übernehmen
 
-        xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc/log_categories.xml" )->_content );
+        xml::Document_ptr doc                        ( embedded_files.get_embedded_file( "doc.en/log_categories.xml" )->_content );
         xml::Element_ptr  doc_log_categories_element = doc.select_element_strict( "/log_categories" );
 
         execute_scheduler_log__append( doc_log_categories_element, "", result );
@@ -811,6 +811,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     string after_str       = element.getAttribute( "after" );
     string at_str          = element.getAttribute( "at"    );
     string web_service_name= element.getAttribute( "web_service" );
+    bool   force           = element.bool_getAttribute( "force", true ); 
 
     Time start_at;
 
@@ -832,7 +833,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     }
 
     Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) );
-    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(params), task_name, start_at );
+    ptr<Task> task = job->create_task( ptr<spooler_com::Ivariable_set>(params), task_name, force, start_at );
     task->set_web_service( web_service_name );
     if( environment )  task->merge_environment( environment );
     job->enqueue_task( task );

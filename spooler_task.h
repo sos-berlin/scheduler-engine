@@ -139,6 +139,7 @@ struct Task : Object,
     bool                        do_something                ();
 
     Job*                        job                         ();
+    Time                        calculated_start_time       ( const Time& now );
     Time                        next_time                   ();
     Task_subsystem*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return obj_name(); }
@@ -314,7 +315,8 @@ struct Task : Object,
 
 
     Time                       _enqueue_time;
-    Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
+    bool                       _force_start;                // Auch um _start_at starten, wenn gerade keine <run_time>-Periode vorliegt
+    Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten. 
     Time                       _running_since;
     Time                       _ending_since;
     Time                       _last_process_start_time;
