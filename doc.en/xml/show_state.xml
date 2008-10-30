@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: show_state.xml,v 1.8 2004/09/11 18:31:06 jz Exp $-->
+
+<!--         title    = "Status zeigen"-->
+
+<xml_element name     = "show_state" 
+             title    = "Show State"
+             category = "Command"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-08-15 15:25:15 +0200 (Fr, 15 Aug 2008) $">
+
+
+    <description>
+        <p>
+            The name of the <code>show_state</code> element may be shortened to <code>s</code>.
+         <!--Der Elementname <code>show_state</code> kann zu <code>s</code> abgekürzt werden.-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="what" type="what">
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    (Note that this description applies to all commands; 
+                    note however that some keywords will not make sense for all commands.)
+                <!--(Diese Beschreibung ist für alle Kommandos dieselbe;
+                    manche Schlüsselwörter sind nur für bestimmte Kommandos sinnvoll.)-->
+                </p>
+
+                <p>
+                    The Job Scheduler filters command replies so that they do not become unnecessarily large.
+                    The following key words may be used (if combined, then separated with a comma) 
+                    to extend command replies.
+                <!--Damit die Antwort eines Kommandos nicht unnötig groß wird,
+                    filtert der Scheduler sie.
+                    Mit einer Kombination folgender Schlüsselwörter (durch Komma getrennt)
+                    können Sie die Antwort erweitern.-->
+                </p>
+
+                <dl>
+                    <dt><code>task_queue</code></dt>
+                    <dd>
+                        (<scheduler_element name="queued_tasks" directory="xml/answer/"/>)
+                        returns the job task queue.
+                    <!--Liefert auch die Task-Warteschlange eines Jobs 
+                        (<scheduler_element name="queued_tasks" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <dt><code>job_chains</code></dt>
+                    <dd>
+                        (<scheduler_element name="job_chains" directory="xml/answer/"/>).
+                        returns the job chain.
+                    <!--Liefert auch die Jobketten
+                        (<scheduler_element name="job_chains" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <dt><code>job_chain_orders</code></dt>
+                    <dd>
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>)
+                        returns the orders in a job chain.
+                    <!--Liefert auch die Aufträge in einer Jobkette
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <dt><code>job_chain_jobs</code></dt>
+                    <dd>
+                        (<scheduler_element name="job" directory="xml/answer/"/>).
+                        returns the jobs in a job chain.
+                   <!-- Liefert auch die Jobs in einer Jobkette
+                        (<scheduler_element name="job" directory="xml/answer/"/>).-->
+                    </dd>
+
+                    <dt><code>job_params</code></dt>
+                    <dd>
+                        Returns the job <scheduler_element name="params"/>.
+                    <!--Liefert auch die <scheduler_element name="params"/> der Jobs.-->
+                    </dd>
+
+                    <dt><code>blacklist</code></dt>
+                    <dd>
+                        Returns the blacklisted orders for a job chain.
+                    <!--Liefert auch die Aufträge der Blacklist einer Jobkette.-->
+                    </dd>
+
+                    <dt><code>job_orders</code></dt>
+                    <dd>
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>) 
+                        returns the orders in an order queue outside a job chain.
+                    <!--Liefert auch die Aufträge in einer Auftragswarteschlange außerhalb einer Jobkette
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>).-->
+                    </dd>
+
+                    <dt><code>job_commands</code></dt>
+                    <dd>
+                        (<scheduler_element name="commands"/>) 
+                        returns the job configuration.
+                    <!--Liefert auch <scheduler_element name="commands"/> der Job-Konfiguration.-->
+                    </dd>
+                    
+                    <dt><code>description</code></dt>
+                    <dd>
+                        (<scheduler_element name="description" directory="xml/answer/"/>)
+                        returns the description.
+                    <!--Liefert auch die
+                        (<scheduler_element name="description" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <dt><code>log</code></dt>
+                    <dd>
+                        (<scheduler_element name="log" directory="xml/answer/"/>)
+                        returns the protocol.
+                    <!--Liefert auch Protokolle
+                        (<scheduler_element name="log" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <!--Jetzt Attribut max_order_history="20"   <dt><code>order_history</code></dt>
+                    <dd>
+                        Liefert auch die letzten zwanzig Einträge der Auftragshistorie.
+                    </dd-->
+
+                    <dt><code>payload</code></dt>
+                    <dd>
+                         returns the <scheduler_element name="payload"/> element.
+                    <!--Liefert auch das Element <scheduler_element name="payload"/>.-->
+                    </dd>
+
+                    <dt><code>schedules</code></dt>
+                    <dd>
+                        returns the <scheduler_element name="schedule"/> element specified.
+                    <!--Liefert auch die benannten <scheduler_element name="schedule"/>.-->
+                    </dd>
+
+                    <dt><code>run_time</code></dt>
+                    <dd>
+                        returns the <code><a href="answer/run_time.xml">&lt;run_time></a></code> element.
+                    <!--Liefert auch das Element <code><a href="answer/run_time.xml">&lt;run_time></a></code>.-->
+                    </dd>
+                    
+                    <dt><code>task_history</code></dt>
+                    <dd>
+                        (<scheduler_element name="history" directory="xml/answer/"/>).
+                        returns the task history
+                    <!--Liefert auch die Task-Historie
+                        (<scheduler_element name="task_history" directory="xml/answer/"/>).-->
+                    </dd>
+                    
+                    <dt><code>remote_schedulers</code></dt>
+                    <dd>
+                        (<scheduler_element name="remote_schedulers" directory="xml/answer/"/>).
+                        returns the registered Scheduler
+                    <!--Liefert auch die registrierten Scheduler
+                        (<scheduler_element name="remote_schedulers" directory="xml/answer/"/>).-->
+                    </dd>
+
+                    <dt><code>source</code></dt>
+                    <dd>
+                        returns the XML sources in a <code>&lt;source></code> element, if known.
+                    <!--Liefert die XML-Quellen in einem <code>&lt;source></code>-Element, soweit bekannt.-->
+                    </dd>
+
+                    <dt><code>standard</code></dt>
+                    <dd>
+                        same as <code>what=""</code> (no options).
+                    <!--Wie <code>what=""</code> (keine Auswahl).-->
+                    </dd>
+                    
+                    <dt><code>all</code></dt>
+                    <dd>
+                        A combination of key words, independent of the command.
+                        It is, however, better to use single key words.
+                    <!--Eine Kombination der Schlüsselwörter, abhängig vom Kommando.
+                        Besser ist, die einzelnen Schlüsselwörte zu verwenden.-->
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="max_orders" type="integer">
+    <!--<xml_attribute name="max_orders" type="integer">-->
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Limits the number of orders that can be returned.
+                <!--Begrenzt die Anzahl der Aufträge, die zurückgeliefert werden.-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+
+        <xml_attribute name="max_order_history" type="integer" initial="0">
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Limits the number of entries in the order history.
+                    <code>max_order_history="0"</code> suppresses the order history.
+                <!--Begrenzt die Anzahl der Aufträge aus der Auftragshistorie.
+                    <code>max_order_history="0"</code> unterdrückt die Auftragshistorie.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="max_task_history" type="number">
+    <!--<xml_attribute name="max_task_history" type="zahl">-->
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Limits the number of entries in <scheduler_element name="history" directory="xml/answer/"/>.
+                <!--Begrenzt die Anzahl der Einträge in <scheduler_element name="history" directory="xml/answer/"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    <xml_answer element="state"/>
+    
+
+    
+    <example>
+        <pre>
+&lt;show_state/>
+&lt;show_state what="job_chain_orders,job_orders"/>
+        </pre>
+    </example>
+</xml_element>

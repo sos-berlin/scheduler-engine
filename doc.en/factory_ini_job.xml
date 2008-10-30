@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: factory_ini_job.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<ini_section 
+    name     = "job"  
+    variable_suffix = "job_path"
+    file     = "factory.ini"
+    weight   = "30"
+    title    = ""
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2008-06-30 11:30:32 +0200 (Mo, 30 Jun 2008) $">
+
+    <ini_entries>
+        <ini_entry setting="history_file"/> 
+        <ini_entry setting="history" />
+        <ini_entry setting="history_on_process" />
+        <ini_entry setting="history_with_log" />
+        <ini_entry setting="history_columns" />
+        <ini_entry setting="history_archive" />
+        <ini_entry setting="log_level" />
+    <!--<ini_entry setting="log_collect_within" />
+        <ini_entry setting="log_collect_max" />-->
+        <ini_entry setting="mail_on_error" />
+        <ini_entry setting="mail_on_process">
+            <description>
+                <p>
+                    <code>yes</code> corresponds to 1, <code>no</code> corresponds to 0.
+                <!--<code>yes</code> entspricht 1, <code>no</code> entspricht 0.-->
+                </p>
+            </description>
+        </ini_entry>
+        <ini_entry setting="mail_on_success" />
+        <ini_entry setting="mail_on_delay_after_error" />
+        <ini_entry setting="mail_queue_dir" />
+        <ini_entry setting="log_mail_subject" />
+        <ini_entry setting="log_mail_from" />
+        <ini_entry setting="log_mail_to" />
+        <ini_entry setting="log_mail_cc" />
+        <ini_entry setting="log_mail_bcc" />
+        <ini_entry setting="smtp" />   <!-- Unsinn! -->
+    </ini_entries>
+    
+    <description>
+        <p>
+            A section can be provided in the <code>factory.ini</code> file for each job.
+            Sections made in this file override similarly named entries in the <code>[spooler]</code> section.
+        <!--Für jeden Job kann ein Abschnitt in der <code>factory.ini</code> eingerichtet werden.
+            Die Einträge hier haben Vorrang vor den gleichnamigen Einträgen im Abschnitt <code>[spooler]</code>.-->
+        </p>
+        <p>
+            Note that when specifying the job paths they must start <em>without</em> a stroke,
+            e.g. <code>[job my_job]</code> or <code>[job my_folder/my_job]</code>.
+        <!--Der Pfad des Jobs muss ohne beginnenden Schrägstrich geschrieben werden,
+            z.B. <code>[job my_job]</code> oder <code>[job my_folder/my_job]</code>.-->
+        </p>
+    </description>
+</ini_section>

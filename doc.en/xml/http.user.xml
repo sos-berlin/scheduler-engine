@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: http.user.xml 5174 2007-08-26 13:52:33Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+         <!--title    = "Benutzer zur HTTP-Authentifizierung"-->
+
+<xml_element name     = "http.user"
+             title    = "HTTP User Authentication"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-08-26 15:52:33 +0200 (So, 26 Aug 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="http.users"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="name" type="name" title="User Authentication">
+    <!--<xml_attribute name="name" type="name" title="Benutzerkennung zur Authentifizierung">-->
+        </xml_attribute>
+
+        <xml_attribute name="password_md5" type="string" title="The Password MD5 Sum">
+    <!--<xml_attribute name="password_md5" type="string" title="MD5-Summe des Kennworts">-->
+            <description>
+                <p>
+                    On Unix systems the MD5 password check-sum can generally be obtained using the <code>md5sum</code> command:
+                <!--Unter Unix kann die MD5-Summe des Kennworts gewöhnlich mit dem Kommando <code>md5sum</code> ermittelt werden:-->
+                </p>
+                <pre>echo -n '<i>password</i>' | md5sum</pre>
+                <p>
+                    The MD5 sum comprises only the hexadecimal characters 0-9, a-f and A-F and is 32 characters long.
+                <!--Die MD5-Summe besteht nur aus den Hexadezimalziffern 0-9, a-f und A-F und ist 32 Zeichen lang.-->
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    
+    <behavior_with_xml_element element="base" replace_attribute="name"/>
+
+    
+    <description>
+        <p>
+            See <scheduler_element name="http.authentication"/>.
+        <!--Siehe <scheduler_element name="http.authentication"/>.-->
+        </p>
+    </description>
+
+</xml_element>

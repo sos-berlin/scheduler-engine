@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: factory_ini.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<ini file     = "factory.ini"
+     title    = "factory.ini File"
+     base_dir = ""
+     author   = "$Author: jz $"
+     date     = "$Date: 2007-10-29 12:17:09 +0100 (Mo, 29 Okt 2007) $">
+
+    <ini_sections>
+        <ini_section name="spooler"/>
+        <ini_section name="job"/>
+        <ini_section name="java"/>
+        <ini_section name="smtp"/>
+    </ini_sections>
+    
+    <description>
+        <p>
+            The factory.ini file contains settings for the Job Scheduler.
+            Note that empty settings are ignored and do not overwrite those made in the
+            <scheduler_a href="konfiguration.xml"/>.
+        <!--In dieser Datei können Einstellungen für den Job Scheduler vorgenommen werden.
+            Hinweis: leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden und 
+            überschreiben keine Einstellung der <scheduler_a href="konfiguration.xml"/>-->
+        </p>
+        <p>
+            The location of this file can be specified when starting the Job Scheduler using the 
+            <scheduler_option name="ini"/> option.
+            For example,
+        <!--Beim Aufruf des Job Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="ini"/> angeben, z.B.:-->
+            <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -ini=C:/Programme/scheduler/config/factory.ini</pre>
+        </p>
+        <p>
+          During installation of the Job Scheduler, the factory.ini file is saved in the 
+          <pre>…<i>scheduler installation path</i>…\config</pre> directory.
+          Calls using the Job Scheduler start script then automatically set the path to this file correctly.
+      <!--Bei der Installation durch das Setup-Programm des Job Schedulers wird die Datei factory.ini im Verzeichnis
+           <pre>…<i>scheduler installation path</i>…\config</pre> abgelegt. 
+           Aufrufe über das Startskript setzen den Pfad automatisch richtig.-->
+        </p>
+        <p>
+           If the path to the factory.ini file is not specified when calling the Job Scheduler, 
+           then the Job Scheduler will attempt to find it by looking according to the following criteria:
+       <!--Falls beim Aufruf des Job Schedulers der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:-->
+        </p>
+    </description>
+
+    <scheduler_keyword keyword="factory.ini"/>
+
+</ini>

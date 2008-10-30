@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: content.xml 4069 2006-01-30 18:50:11Z jz $-->
+
+         <!--title    = "Inhalt einer Web-Dienst-Anforderung"-->
+
+
+<xml_element name     = "content"
+             title    = "Content of a Web Service Request"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-01-30 19:50:11 +0100 (Mo, 30 Jan 2006) $">
+
+    
+    <xml_parent_elements>
+        <xml_parent_element name="service_request"/>
+    </xml_parent_elements>
+    
+    
+
+    <example>
+        <pre>&lt;content>
+    &lt;my_answer>…&lt;/my_answer>
+&lt;/content></pre>
+    </example>
+
+</xml_element>

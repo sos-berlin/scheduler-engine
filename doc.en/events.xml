@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: command_line.xml 3649 2005-05-06 11:55:52Z jz $-->
+
+<events title    = "Events"
+        base_dir = ""
+        author   = "$Author: jz $"
+        date     = "$Date: 2005-05-06 13:55:52 +0200 (Fr, 06 Mai 2005) $">
+
+    <description>
+        <scheduler_keyword keyword="Events"/>
+    <!--<scheduler_keyword keyword="Ereignisse"/>-->
+        <p>
+            The Job Scheduler can send e-mails when certain events take place:
+        <!--Der Scheduler kann bei bestimmten Ereignissen eMails verschicken.-->
+        </p>
+        <p>
+
+        </p>
+    </description>
+
+
+    <event name="scheduler_started">
+        <description>
+            <p>
+                The Job Scheduler script has been executed
+                (i.e. arbitrary statements and <scheduler_method class="Job_impl" method="spooler_init" /> have been executed)
+                and returned an error mesage with the 
+                <scheduler_method class="Log" method="error" java_signature="String" />.
+            <!--Das Scheduler-Skript ist ausgeführt worden
+                (freistehende Anweisungen und <scheduler_method class="Job_impl" method="spooler_init" />)
+                und hat eine Fehlermeldung mit <scheduler_method class="Log" method="error" java_signature="String" />
+                ausgegeben.-->
+            </p>
+            <p>
+                Note that exceptions do not result in this event - but
+                rather to the ending of the Job Scheduler.
+                See the <code>scheduler_fatal_error</code> event.
+            <!--Eine Exception führt nicht zu diesem Ereignis.
+                Stattdessen führt sie zur Beendigung des Schedulers.
+                Siehe Ereignis scheduler_fatal_error.-->
+
+********************************************************************************************
+
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Contains the Scheduler script error message
+                    (see <scheduler_method class="Log" method="error" java_signature="String" />).
+                <!--Enthält die Fehlermeldung des Scheduler-Skripts
+                    (s. <scheduler_method class="Log" method="error" java_signature="String" />).-->
+                </p>
+            </description>
+        </event.error>
+
+    </event>
+
+
+    <event name="scheduler_fatal_error">
+        <description>
+            <p>
+                The Job Scheduler has been terminated because of an error such as an 
+                exception in  the Scheduler script, a database error or an internal problem.
+            <!--Der Scheduler wird wegen eines Fehlers beendet.
+                Das kann eine Exception im Scheduler-Skript, ein Datenbankfehler oder ein internes Problem sein.-->
+            </p>
+            <p>
+                Eine Exception führt nicht zu diesem Ereignis.
+                Stattdessen führt sie zur Beendigung des Schedulers.
+                Siehe Ereignis XXXXXXXXXXXXXXXX.
+            <!--Eine Exception führt nicht zu diesem Ereignis.
+                Stattdessen führt sie zur Beendigung des Schedulers.
+                Siehe Ereignis XXXXXXXXXXXXXXXX.-->
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Contains the reason for the termination.
+                <!--Enthält den Grund der Beendigung.-->
+                </p>
+            </description>
+        </event.error>
+
+    </event>
+
+
+    <event name="job_error">
+        <description>
+            <p>
+                An (internal) error has occured when starting a job.
+                The job has been stopped.
+            <!--Beim Start eines Jobs ist ein (interner) Fehler aufgetreten.
+                Der Job wird gestoppt.-->
+            </p>
+        </description>
+
+        <event.error/>
+
+    </event>
+
+
+    <event name="task_ended">
+        <description>
+            <p>
+                Eine Task hat sich beendet und der Versand einer eMail ist angefordert worden.
+            <!--Eine Task hat sich beendet und der Versand einer eMail ist angefordert worden.-->
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Wenn die Task mit einem Fehler (einer Exception) beendet worden ist,
+                    steht hier die Fehlermeldung.
+                <!--Wenn die Task mit einem Fehler (einer Exception) beendet worden ist,
+                    steht hier die Fehlermeldung.-->
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+    <event name="disk_full">
+        <description>
+            <p>
+                Eine Protokolldatei kann nicht fortgeschrieben werden,
+                weil nicht genügend Plattenplatz zur Verfügung steht.
+            <!--Eine Protokolldatei kann nicht fortgeschrieben werden,
+                weil nicht genügend Plattenplatz zur Verfügung steht.-->
+            </p>
+            <p>
+                Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.
+            <!--Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.-->
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Fehlermeldung des Betriebssystems.
+                <!--Fehlermeldung des Betriebssystems.-->
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+    <event name="database_error">
+        <description>
+            <p>
+                Die Datenbank hat einen Fehler gemeldet.
+            <!--Die Datenbank hat einen Fehler gemeldet.-->
+            </p>
+            <p>
+                Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.
+            <!--Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.-->
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Fehlermeldung der Datenbank.
+                <!--Fehlermeldung der Datenbank.-->
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+
+
+    <event name="task_start_error">
+        <description>
+            <p>
+            </p>
+            <p>
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+</events>

@@ -1,0 +1,359 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Monitor_impl.xml 4070 2006-01-31 11:42:37Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Monitor_impl"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-06-22 10:00:45 +0200 (So, 22 Jun 2008) $"
+>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="spooler" is_variable="true" access="read">
+    <com>
+        <com.result>
+            <com.type class="Spooler"/>
+        </com.result>
+    </com>
+
+
+    <title>
+        The Scheduler Object
+    <!--Das allgemeine Objekt des Schedulers-->
+    </title>
+    
+    <description>
+        <p>
+            Is the same object as <scheduler_method class="Job_impl" property="spooler"/> in the <code>Job_impl</code> class.
+        <!--Wie dasselbe Objekt in der Klasse <code>Job_impl</code>: <scheduler_method class="Job_impl" property="spooler"/>.-->
+        </p>
+    </description>
+
+
+    <example programming_language="java">
+        <pre>spooler_log.debug( "The working directory of the Scheduler is " + spooler.directory() );</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>spooler_log.debug( "The working directory of the Scheduler is " + spooler.directory );</pre>
+    </example>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="spooler_log" is_variable="true" access="read">
+    <com>
+        <com.result>
+            <com.type class="Log"/>
+        </com.result>
+    </com>
+
+    <title>
+        Writing Log Files
+    <!--Zum Protokollieren-->
+    </title>
+
+    <description>
+        <p>
+            Is the same object as <scheduler_method class="Job_impl" property="spooler_log"/> in the <code>Job_impl</code> class.
+        <!--Wie dasselbe Objekt in der Klasse <code>Job_impl</code>: <scheduler_method class="Job_impl" property="spooler_log"/>.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+        <pre>spooler_log.info( "Something has happened" );</pre>
+    </example>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="spooler_job" is_variable="true" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job"/>
+        </com.result>
+    </com>
+
+
+    <title>
+        The Job Object
+    <!--Das Objekt des Jobs-->
+    </title>
+
+    <description>
+        <p>
+            Is the same object as <scheduler_method class="Job_impl" property="spooler_job"/> in the <code>Job_impl</code> class.
+        <!--Wie dasselbe Objekt in der Klasse <code>Job_impl</code>: <scheduler_method class="Job_impl" property="spooler_job"/>.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+        <pre>spooler_log.info( "The name of this job is " + spooler_job.name() );</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>spooler_log.info( "The name of this job is " + spooler_job.name );</pre>
+    </example>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="spooler_task" is_variable="true" access="read">
+    <com>
+        <com.result>
+            <com.type class="Task"/>
+        </com.result>
+    </com>
+
+    <title>
+        The Task Object
+    <!--Das Objekt der Task-->
+    </title>
+
+    <description>
+        <p>
+            Is the same object as <scheduler_method class="Job_impl" property="spooler_task"/> in the <code>Job_impl</code> class.
+        <!--Wie dasselbe Objekt in der Klasse <code>Job_impl</code>: <scheduler_method class="Job_impl" property="spooler_task"/>.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+        <pre>spooler_log.info( "The task id is " + spooler_task.id() );</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>spooler_log.info( "The task id is " + spooler_task.id );</pre>
+    </example>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="spooler_task_before">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+            <description>
+                <code>false</code> does not allow a task to start and 
+                <scheduler_method class="Monitor_impl" method="spooler_task_after"/> will not be called.
+            <!--<code>false</code> lässt die Task nicht starten. 
+                <scheduler_method class="Monitor_impl" method="spooler_task_after"/> wird nicht gerufen.-->
+            </description>
+        </com.result>
+    </com>
+
+
+    <title>
+        Before Starting a Task
+    <!--Vor Start der Task-->
+    </title>
+
+    <description>
+        <p>
+            This method is called by the Job Scheduler before a task is loaded.
+        <!--Vor dem Laden der Task ruft der Scheduler diese Methode auf.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+<pre>public boolean spooler_task_before()  throws Exception
+{
+    spooler_log.info( "SPOOLER_TASK_BEFORE()" );
+    return true;   // Task will be started
+  //return false;  // Task will not be started
+}</pre>
+    </example>    
+    
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="spooler_task_after">
+    <com/>
+
+
+    <title>
+        After Completing a Task
+    <!--Nach dem Ende der Task-->
+    </title>
+
+    <description>
+        <p>
+            This method is called by the Job Scheduler after a task has been completed.
+        <!--Der Scheduler ruft diese Methode, nachdem die Task geendet hat.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+<pre>public void spooler_task_after()  throws Exception
+{
+    spooler_log.info( "SPOOLER_TASK_AFTER()" );
+}</pre>
+    </example>    
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="spooler_process_before">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+            <description>
+                <code>false</code> prevents further calls to <scheduler_method class="Job_impl" method="spooler_process"/>.
+                The Job Scheduler continues as though <code>false</code> had been returned by 
+                <scheduler_method class="Job_impl" method="spooler_process"/> <code>false</code>.
+            <!--<code>false</code> verhindert den folgenden Aufruf von <scheduler_method class="Job_impl" method="spooler_process"/>.
+                Der Scheduler setzt fort, als hätte <scheduler_method class="Job_impl" method="spooler_process"/> <code>false</code> geliefert.-->
+            </description>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            This method is called by the Job Scheduler before each call of 
+            <scheduler_method class="Job_impl" method="spooler_process"/>.
+        <!--Der Scheduler ruft diese Methode vor jedem <scheduler_method class="Job_impl" method="spooler_process"/> auf.-->
+        </p>
+    </description>
+
+    <title>
+        Before <code>spooler_process()</code>
+    <!--Vor <code>spooler_process()</code>-->
+    </title>
+
+    <example programming_language="java">
+<pre>public boolean spooler_process_before()  throws Exception
+{
+    spooler_log.info( "SPOOLER_PROCESS_BEFORE()" );
+    return true;   // spooler_process() will be executed
+}</pre>
+    </example>
+
+    <example programming_language="java">
+<pre>public boolean spooler_process_before()  throws Exception
+{
+    boolean continue_with_spooler_process = true;
+    
+    if( !are_needed_ressources_available() ) 
+    {
+        spooler_task.order().setback();
+        continue_with_spooler_process = false;
+    }
+
+    return continue_with_spooler_process;
+}</pre>
+    </example>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="spooler_process_after">
+    <com>
+        <com.result name="continue">
+            <com.type type="bool"/>
+            <description>
+                Replaces the return value from the <scheduler_method class="Job_impl" method="spooler_process"/> method
+                or <code>false</code>, should <code>spooler_process()</code> have ended with an error.
+            <!--Ersetzt den Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/> oder
+                <code>false</code>, wenn <code>spooler_process()</code> mit einer Exception geendet hat.-->
+            </description>
+        </com.result>
+        
+        <com.parameter name="spooler_process_result">
+            <com.type type="bool"/>
+            <description>
+                The return value from the <scheduler_method class="Job_impl" method="spooler_process"/> is set to 
+                <code>false</code>, should <code>spooler_process()</code> have ended with an exception.
+            <!--Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/>.
+                <code>false</code>, wenn <code>spooler_process()</code> mit einer Exception geendet hat.-->
+            </description>
+        </com.parameter>
+
+        <description>
+            The retzurn value from this method replaces that from <scheduler_method class="Job_impl" method="spooler_process"/>.
+        <!--Der Rückgabewert dieser Methode ersetzt den Rückgabewert von <scheduler_method class="Job_impl" method="spooler_process"/>.-->
+        </description>
+    </com>
+
+    <title>
+        After <code>spooler_process()</code>
+    <!--Nach <code>spooler_process()</code>-->
+    </title>
+
+    <description>
+        <p>
+            The Job Scheduler calls this method after 
+            <scheduler_method class="Job_impl" method="spooler_process"/> has been carried out.
+        <!--Der Scheduler ruft diese Methode nach jedem <scheduler_method class="Job_impl" method="spooler_process"/> auf.-->
+        </p>
+    </description>
+
+    <example programming_language="java">
+<pre>public boolean spooler_task_after( boolean spooler_process_result )  throws Exception
+{
+    spooler_log.info( "SPOOLER_TASK_BEFORE()" );
+    spooler_log.info( "spooler_process() didn't throw an exception and delivered " + spooler_process_result );
+    return spooler_process_result;   // Unchanged result
+}</pre>
+    </example>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>
+    Using Super Classes for Start Scripts or Jobs
+<!--Oberklasse für ein Startskript oder einen Jobs-->
+</title>
+
+
+<description>
+    <p>
+        A job can be given a monitor using <scheduler_element name="monitor"/>.
+    <!--Mit <scheduler_element name="monitor"/> können Sie einem Job einen Monitor geben.-->
+    </p>
+    <p>
+        A monitor can provide the following methods:
+    <!--Ein Monitor kann folgende Methoden bereitstellen:-->
+    </p>
+    
+    <dl>
+        <dt><scheduler_method class="Monitor_impl" method="spooler_task_before"/></dt>
+        <dd>
+            Before starting a task - can prevent a task from being started.
+        <!--Vor dem Start der Task, kann den Start verhindern.-->
+        </dd>
+
+        <dt><scheduler_method class="Monitor_impl" method="spooler_task_after"/></dt>
+        <dd>
+            After a task has been completed.
+        <!--Nach dem Ende der Task.-->
+        </dd>
+
+        <dt><scheduler_method class="Monitor_impl" method="spooler_process_before"/></dt>
+        <dd>
+            Before <scheduler_method class="Job_impl" method="spooler_process"/> -
+            this method can stop <scheduler_method class="Job_impl" method="spooler_process"/>
+            from being called.
+        <!--Vor <scheduler_method class="Job_impl" method="spooler_process"/>,
+            kann diesen Aufruf verhinden.-->
+        </dd>
+
+        <dt><scheduler_method class="Monitor_impl" method="spooler_process_after"/></dt>
+        <dd>
+            After <scheduler_method class="Job_impl" method="spooler_process"/> -
+            can be used to change its return value.
+        <!--Nach <scheduler_method class="Job_impl" method="spooler_process"/>,
+            kann dessen Rückgabewert ändern.-->
+        </dd>
+
+    </dl>
+    
+
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</api.class>

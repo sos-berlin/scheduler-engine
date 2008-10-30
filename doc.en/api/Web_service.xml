@@ -1,0 +1,92 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Web_service.xml 4070 2006-01-31 11:42:37Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Web_service"
+    object_name = "web_service"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-03-09 22:50:31 +0100 (Do, 09 Mrz 2006) $"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="name" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            The Name of the Job Scheduler Web Service
+        <!--Name des Web-Dienstes im Scheduler-->
+        </title>
+
+        <description>
+            <p>
+                See also <scheduler_element name="web_service" attribute="name"/>
+            <!--Siehe auch <scheduler_element name="web_service" attribute="name"/>-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="forward_xslt_stylesheet_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Path to the forwarding XSLT stylesheets
+        <!--Pfad des XSLT-Stylesheets fürs Forwarding-->
+        </title>
+        
+        <description>
+            <p>
+                See also <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>
+            <!--Siehe auch <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="params" access="read">
+        <com>
+            <com.result>
+                <com.type class="Variable_set"/>
+            </com.result>
+        </com>
+
+        <title>
+            Freely definable parameters
+        <!--Parameter zur freien Verwendung-->
+        </title>
+
+        <description>
+            <p>
+                The Web Services parameters can be set using the <scheduler_element name="web_service"/> element.
+            <!--Die Parameter des Web-Services können mit <scheduler_element name="web_service"/> eingestellt werden.-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+
+    <description>
+        <p>
+            See also <scheduler_element name="web_service"/>
+        <!--Siehe auch <scheduler_element name="web_service"/>-->
+        </p>
+    </description>
+
+
+</api.class>

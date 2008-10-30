@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: api.xml 3921 2005-09-20 18:30:46Z jz $ -->
+
+<?xml-stylesheet href="api-javascript.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "api"
+    base_dir    = "../"
+    title       = "Application Programming Interface (API)" 
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-09-21 11:42:42 +0200 (Do, 21 Sep 2006) $"
+>
+
+    <title>Overview<!--Übersicht--></title>
+
+    <description>
+        <p>
+            Jobs which use the Job Scheduler API may be implemented in Java, JavaScript 
+            (the Mozilla Spidermonkey implementation) and Perl
+            (Perl 5.8 is supported for Unix and an ActiveState implementation is required for Windows).
+            In addition, JScript and VBScript scripting languages are available on Microsoft Windows systems.
+        <!--Jobs, die die Programmschnittstelle des Schedulers nutzen,
+            können in den Sprachen Java, JavaScript (Mozilla) und Perl implementiert werden
+            (beachten Sie die Installationsvoraussetzungen).
+            Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.-->
+        </p>
+        <p>
+            Jobs are implemented according to the <scheduler_method class="Job_impl"/> interface.
+            Job Scheduler objects may be accessed using this interface either directly or indirectly.
+        <!--Ein Job wird gemäß der Schnittstelle <scheduler_method class="Job_impl"/> implementiert.
+            Die Objekte des Schedulers sind direkt oder indirekt über diese Schnittstelle zugreifbar.-->
+        </p>
+    </description>
+
+</api.class>

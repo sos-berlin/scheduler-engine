@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<messages 
+    xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation = "../zschimmer/messages.xsd"
+    name     = "charset_messages"
+    base_dir = "../" 
+    package  = "Charset"
+    author   = "$Author: jz $"
+    date     = "$Date: 2006-03-10 08:26:38 +0100 (Fr, 10 Mrz 2006) $"
+>
+    <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
+    <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
+
+    <!-- <title> ohne Zeilenwechsel schreiben!  Also: <title>text ...</title> -->
+
+    <cplusplus namespace="zschimmer"/>
+
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FEHLER-MELDUNGEN-->
+
+    <messages>
+        <message code="Z-CHARSET-001">
+            <text xml:lang="en">
+                <title>Unknown character encoding: <p1/></title>
+            </text>
+            <text xml:lang="de">
+                <title>Unbekannte Zeichen-Codierung: <p1/></title>
+            </text>
+        </message>
+
+        <message code="Z-CHARSET-002">
+            <text xml:lang="en">
+                <title>Missing character encoding</title>
+            </text>
+            <text xml:lang="de">
+                <title>Zeichen-Codierung ist nicht angegeben</title>
+            </text>
+        </message>
+    </messages>
+
+</messages>

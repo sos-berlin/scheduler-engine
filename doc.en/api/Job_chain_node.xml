@@ -1,0 +1,260 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Job_chain_node.xml 3941 2005-09-25 10:16:15Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Job_chain_node"
+    object_name = "node"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2007-04-09 10:41:11 +0200 (Mo, 09 Apr 2007) $"
+>
+
+
+<property name="state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        The valid state for a job chain node
+    <!--Zustand, für den dieser Jobkettenknoten gilt-->
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.info( "state=" + job_chain_node.state() );                      // "state=100"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.info( "state=" + job_chain_node.state );                        // "state=100"</pre>
+    </example>
+
+</property>
+
+
+<property name="next_node" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+    </com>
+    <title>
+        
+        Returns the next node or null if the current node is assigned the final state.
+    </title>
+</property>
+
+
+<property name="error_node" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+            <description>
+                <api.null/>, in the event of no error node being defined (the error state has not been specified)
+            <!--<api.null/>, wenn es keinen Fehler-Knoten gibt (Fehlerzustand ist nicht angegeben)-->
+            </description>
+        </com.result>
+    </com>
+
+
+    <title>
+        The next node in a job chain in the event of an error
+    <!--Nächster Knoten in der Jobkette für den Fehlerfall-->
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // "state=999"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+     spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "state=999"</pre>
+    </example>
+
+</property>
+
+
+<property name="job" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job"/>
+        </com.result>
+    </com>
+
+    <title>
+        The job allocated to a node
+    <!--Job, der dem Knoten zugeordnet ist-->
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "job=" + job_chain_node.job().name() );                   // "job=job_100"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "job=" + job_chain_node.job.name );                       // "job=job_100"</pre>
+    </example>
+
+</property>
+
+
+<property name="next_state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        The order state in a job chain after successful completion of a job
+    <!--Zustand in der Jobkette für den Erfolgsfall-->
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "next state=" + job_chain_node.next_state() );            // "state=200"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "next_state=" + job_chain_node.next_state );              // "state=200"</pre>
+    </example>
+</property>
+
+
+<property name="error_state" access="read">
+    <com>
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        State of a job chain in event of an error
+    <!--Zustand in der Jobkette für den Fehlerfall-->
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>Job_chain_node job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "error state=" + job_chain_node.error_node().state() );   // "error state=999"</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain_node = spooler.job_chain( "Jobchain" ).node( 100 );
+    <!--<pre>var job_chain_node = spooler.job_chain( "Jobkette" ).node( 100 );-->
+spooler_log.debug( "error state=" + job_chain_node.error_node.state );       // "error state=999"</pre>
+    </example>
+</property>
+
+
+    <property name="action">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>Stopping or missing out job chain nodes</title>
+    <!--<title>Jobkettenknoten stoppen oder überspringen</title>-->
+
+        <description>
+            <p>
+                This option is not possible with distributed job chains.
+            <!--Für eine verteilte Jobkette nicht möglich.-->
+            </p>
+            <p>
+                Possible settings are:
+            <!--Mögliche Angaben sind-->
+            </p>
+            
+            <dl>
+                <dt><code>action="process"</code></dt>
+                <dd>
+                    This is the default setting. Orders are carried out.
+                <!--Das ist die Voreinstellung. Aufträge werden ausgeführt.-->
+                </dd>
+                
+                <dt><code>action="stop"</code></dt>
+                <dd>
+                    Orders are not carried out, they collect in the order queue.
+                <!--Aufträge werden nicht ausgeführt, sie sammeln sich in der Auftragswarteschlange an.-->
+                </dd>
+                
+                <dt><code>action="next_state"</code></dt>
+                <dd>
+                    Orders are immediately handed over to the next node as specified with <code>next_state</code>.
+                <!--Aufträge werden sofort dem mit <code>next_state</code> bestimmten Folgeknoten übergeben.-->
+                </dd>
+            </dl>
+            <p>
+                See also <scheduler_element name="job_chain_node.modify" attribute="action"/>.
+            <!--Siehe auch <scheduler_element name="job_chain_node.modify" attribute="action"/>.-->
+            </p>
+        </description>
+
+        <description programming_language="java">
+            <p>
+                Character string constonants are defined in Java:
+            <!--In Java sind für Zeichenketten Konstanten definiert:-->
+            </p>
+            <ul>
+                <li><code>Job_chain_node.ACTION_PROCESS</code></li>
+                <li><code>Job_chain_node.ACTION_STOP</code></li>
+                <li><code>Job_chain_node.ACTION_NEXT_STATE</code></li>
+            </ul>
+        </description>
+
+        <example programming_language="java">
+            <pre>Job_chain_node job_chain_node = spooler.job_chain( "my_job_chain" ).node( 100 );
+job_chain_node.set_action( Job_chain_node.ACTION_NEXT_STATE );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>var job_chain_node = spooler.job_chain( "my_job_chain" ).node( 100 );
+job_chain_node.action = "next_state";</pre>
+        </example>
+
+        <messages>
+            <message level="error" code="SCHEDULER-384"/>
+            <message level="error" code="SCHEDULER-403"/>
+            <message level="error" code="SCHEDULER-404"/>
+        </messages>
+    </property>
+
+
+<description>
+    <p>
+        A job chain node is assigned a position in a job chain (<scheduler_method class="Job_chain"/>).
+        The following elements make up a job chain node:
+        a state, a job, a successor state and an error state.
+    <!--Ein Jobkettenknoten beschreibt eine Stelle in einer Jobkette (<scheduler_method class="Job_chain"/>).
+        Einem Jobkettenknoten sind zugeordnet:
+        ein Zustand, ein Job, ein Folgezustand und ein Fehlerzustand.-->
+    </p>
+    <p>
+        A job chain node is created either using <scheduler_method class="Job_chain" method="add_job"/>
+        or <scheduler_method class="Job_chain" method="add_end_state"/>.
+    <!--Ein Jobkettenknoten wird mit <scheduler_method class="Job_chain" method="add_job"/>
+        oder mit <scheduler_method class="Job_chain" method="add_end_state"/>
+        erzeugt.-->
+    </p>
+</description>
+
+</api.class>

@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: log_kategorien.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<description 
+    title    = "Log Categories" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2005-04-20 08:53:16 +0200 (Mi, 20 Apr 2005) $"
+>
+
+
+<scheduler_keyword keyword="Log Category Usage"/>
+<!--<scheduler_keyword keyword="Log-Kategorien"/>-->
+
+<p>
+    Almost all SOS software components including the Scheduler can protocol their internal operations.
+    This protocol is called a log. 
+    The content of log files is of particular interest to program developers.
+    However, users can also solve problems by analysing the content of log files.
+    Log files can be activated by entering <code>log=</code><i>file_name</i> in the <code>.ini</code> file.
+<!--Fast alle Komponenten (nicht nur der Scheduler) können ein Protokoll des internen Ablaufs schreiben.
+    Wir nennen es kurz Log. 
+    Der Inhalt dieses Logs ist vor allem für die Entwickler der Komponenten interessant.
+    Dem einen oder anderen Problem können Sie aber auch selbst durch einen Blick ins Log auf dem Grund gehen.
+    Sie schalten das Log ein mit dem Eintrag <code>log=</code><i>dateiname</i> in der <code>.ini</code>-Datei.-->
+</p>
+<p>
+    For Example - to record the activities of the Job Scheduler in the <code>factory.ini</code> file:<br/>
+<!--Zum Beispiel für den Scheduler in der Datei <code>factory.ini:<br/>-->
+    <br/>
+    <code>[spooler]<br/>
+    log = c:/tmp/scheduler.log</code>
+</p>
+
+
+<h2>Log Categories</h2>
+<!--<h2>Log-Kategorien</h2>-->
+<p>
+    Log categories are used to limit the size of log files, 
+    by specifing what should be entered in the log file.
+<!--Wenn das Log nicht allzu groß werden soll, können Sie Log-Kategorieren angegeben.
+    Die wählen aus, was ins Log geschrieben werden soll.-->
+</p>
+<p>
+    Example:<code><br/>
+<!--Beispiel:<code><br/>-->
+    <br/>
+    [spooler]<br/>
+    log = socket.* >c:/tmp/scheduler.log</code>
+</p>
+<p>
+    Log categories are separated by blanks and specified in front of a ">" symbol,
+    which in turn preceeds the file name.
+<!--Die Log-Kategorien werden also durch Blanks getrennt vor den Dateinamen geschrieben.
+    Vor dem Dateinamen steht dann ein ">".-->
+</p>
+
+<p>
+    <table cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            
+            </tr>
+        </tbody>
+    </table>
+</p>
+
+
+
+</description>

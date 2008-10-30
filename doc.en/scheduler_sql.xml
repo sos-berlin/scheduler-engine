@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: scheduler_sql.xml 5133 2007-07-22 06:18:07Z jz $-->
+
+<!--title               = "Vom Scheduler verwendete SQL-Anweisungen"-->
+
+<description
+    title               = "SQL Instructions Used by the Job Scheduler"
+    base_dir            = ""
+    author              = "$Author: ap $"
+    date                = "$Date: 2008-02-21 23:41:44 +0100 (Do, 21 Feb 2008) $"
+>
+
+    <scheduler_keyword keyword="Database tables"/>
+    <scheduler_keyword keyword="create table (SQL)"/>
+    <scheduler_keyword keyword="Indices (SQL)"/>
+<!--<scheduler_keyword keyword="Datenbanktabellen"/>
+    <scheduler_keyword keyword="create table (SQL)"/>
+    <scheduler_keyword keyword="Indices (SQL)"/>-->
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>SQL Instructions for Creating Database Tables</h2>
+<!--<h2>SQL-Anweisungen zum Einrichten der Tabellen</h2>-->
+
+    <p>
+        The instructions the Job Scheduler uses to create any missing database tables are listed below.
+        Note that the instructions used depend on the database software being used.
+    <!--Der Scheduler richtet beim Start fehlende Tabellen mit folgenden Anweisungen ein.
+        Die Anweisungen unterscheiden sich nach verwendeter Datenbank-Software.-->
+    </p>
+    
+    <ul>
+        <li>
+            <scheduler_a href="scheduler_sql_db2.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_microsoft_sql_server.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_mysql.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_oracle.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_postgresql.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_sybase.xml"/>
+        </li>
+    </ul>
+
+</description>

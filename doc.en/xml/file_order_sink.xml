@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<!--$Id: file_order_sink.xml 4545 2006-09-21 09:42:42Z jz $-->
+         <!--title    = "Dateiauftragssenke"-->
+
+<xml_element name     = "file_order_sink"
+             title    = "File Order Sink"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-01-30 01:54:20 +0100 (Di, 30 Jan 2007) $">
+
+    <scheduler_keyword keyword="File Order Sink"/>
+    <scheduler_keyword keyword="Order Sink"/>
+<!--<scheduler_keyword keyword="Dateiauftragssenke"/>-->
+<!--<scheduler_keyword keyword="Auftragssenke"/>-->
+
+    <xml_parent_elements>
+        <xml_parent_element name="job_chain"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="state" type="string">
+            <description>
+                <p>
+                    The state valid for a job chain node.
+                    This state is an end state.
+                <!--Zustand, für den dieser Jobkettenknoten gilt.
+                    Der Zustand ist ein Endzustand.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="remove" type="yes|no">
+            <description>
+                <p>
+                    <code>remove="yes"</code> removes the file.
+                <!--<code>remove="yes"</code> entfernt die Datei.-->
+                </p>
+            </description>
+            <messages>
+                <message level="info" code="SCHEDULER-979"/>
+            </messages>
+        </xml_attribute>
+
+        <xml_attribute name="move_to" type="directory_path" subst_env="yes">
+            <description>
+                <p>
+                    The file will be moved to the directory specified. 
+                    An already existing file of the same name will be overwritten.
+                <!--Die Datei wird in das Verzeichnis verschoben. 
+                    Eine gleichnamige vorhandene Datei wird überschrieben.-->
+                </p>
+                <p>
+                    On Unix systems the file can only be moved within the same file system.
+                <!--Unter Unix wird die Datei nur im selben Dateisystem verschoben.-->
+                </p>
+            </description>
+            <messages>
+                <message level="info" code="SCHEDULER-980"/>
+            </messages>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+
+    <description>
+
+        <p>
+            <code>&lt;file_order_sink></code> is implemented using the internal <code>scheduler_file_order_sink</code> job.
+        <!--<code>&lt;file_order_sink></code> ist mit dem internen Job <code>scheduler_file_order_sink</code> implementiert.-->
+        </p>
+        
+        <p>
+            The order is completed after the operation.
+        <!--Der Auftrag ist nach der Operation erledigt.-->
+        </p>
+        <p>
+            Should it not be possible to move or remove a file,
+            then the order will be added to the blacklist.
+            This ensures that the still existing file can result in a new order being started.
+            Blacklisted orders can still be removed using
+            <scheduler_element name="remove_order"/>.
+            Once the Job Scheduler realises that a blacklisted file has been removed, 
+            then the file will be deleted from the list.
+            The file can then be re-added to the monitored directory if required.
+        <!--Wenn die Datei nicht entfernt oder verschoben werden kann,
+            gelangt der Auftrag auf die Schwarze Liste.
+            Damit wird verhindert, dass die noch vorhandene Datei erneut zu einem Dateiauftrag wird.
+            Aufträge auf der Schwarzen Liste können mit 
+            <scheduler_element name="remove_order"/> entfernt werden.
+            Wenn der Scheduler bemerkt, dass die Datei entfernt worden ist, 
+            streicht er den Auftrag von der Schwarzen Liste.
+            Die Datei kann dann erneut ins Verzeichnis gestellt werden.-->
+        </p>
+        <p>
+            See also
+            <scheduler_a href="../file_orders.xml" quote="yes"/> and
+        <!--Siehe auch
+            <scheduler_a href="../file_orders.xml" quote="yes"/> und-->
+            <scheduler_element name="file_order_source"/>.
+        </p>
+    </description>
+</xml_element>

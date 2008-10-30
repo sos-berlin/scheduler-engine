@@ -1,0 +1,59 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: add_jobs.xml 4336 2006-06-06 18:03:24Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+          <!--title    = "Löscht eine Prozessklasse" -->
+
+<xml_element name     = "process_class.remove"
+             parent_page = "../xml_commands.xml"
+             category = "Command"
+             title    = "Removes a Process Class" 
+             base_dir = "../"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-06-06 20:03:24 +0200 (Di, 06 Jun 2006) $">
+
+
+    <description>
+        <p>
+            Removes a process class.
+        <!--Entfernt eine Prozessklasse.-->
+        </p>
+        <p>
+            See also <scheduler_element name="process_class"/>.
+        <!--Siehe auch <scheduler_element name="process_class"/>.-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="process_class" type="path" title="Name of the lock">
+    <!--<xml_attribute name="process_class" type="path" title="Name der Sperre">-->
+            <description>
+                <p>
+                    The Job Scheduler delays deletion of a process class as long as tasks are still running in it.
+                    No new tasks will be started during this time.
+                <!--Wenn noch Tasks in der Prozessklasse laufen, 
+                    verzögert der Scheduler das Löschen bis die letzte Task geendet hat.
+                    Solange werden keine neuen Tasks gestartet.-->
+                </p>
+                <p>
+                    See also <scheduler_method class="Process_class" method="remove"/>.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+
+    <xml_answer element="ok"/>
+
+    <messages>
+        <message code="SCHEDULER-861" level="info"/>
+        <message code="SCHEDULER-867" level="info"/>
+    </messages>
+
+</xml_element>
