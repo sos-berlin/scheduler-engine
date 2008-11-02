@@ -428,7 +428,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
             if( e->second._children_too                              )  cat_element.setAttribute( "children_too", "yes" );
 
             #ifdef Z_DEBUG
-                if( e->second._children_too_derived                  )  cat_element.setAttribute( "children_too_derived", "yes" );
+              //if( e->second._children_too_derived                  )  cat_element.setAttribute( "children_too_derived", "yes" );
                 if( e->second._has_default                           )  cat_element.setAttribute( "has_default", "yes" );
                 cat_element.setAttribute( "default", e->second._default_value? "yes" : "no" );
             #endif            
