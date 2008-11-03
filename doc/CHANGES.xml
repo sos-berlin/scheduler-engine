@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-11-03" version="2.0.216" subversion_revision="5946">
+    <change date="2008-11-03" version="2.0.216" subversion_revision="5947">
         <revision type="modification" title="Transaktionsisolation für Sybase geändert">
             <description>
                 <p>
@@ -19,9 +19,7 @@
                 </p>
             </description>
         </revision>
-    </change>
 
-    <change date="2008-10-29" version="2.0.216" subversion_revision="5944">
         <revision type="new" title="&lt;start_job force=&quot;no&quot;>: Task starten, ohne Job zu entstoppen">
             <description>
                 <ul>

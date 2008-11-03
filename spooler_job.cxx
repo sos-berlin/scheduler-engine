@@ -630,7 +630,10 @@ bool Job::on_load() // Transaction* ta )
         {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
-                database_record_load( &ta );
+                if( db()->opened() )
+                {
+                    database_record_load( &ta );
+                }
 
                 _history.open( &ta );
                 if( _spooler->_db->opened() )  load_tasks_from_db( &ta );
