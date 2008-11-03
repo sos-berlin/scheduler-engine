@@ -630,13 +630,9 @@ bool Job::on_load() // Transaction* ta )
         {
             for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
             {
-                if( db()->opened() )
-                {
-                    database_record_load( &ta );
-                }
-
+                if( db()->opened() )  database_record_load( &ta );
                 _history.open( &ta );
-                if( _spooler->_db->opened() )  load_tasks_from_db( &ta );
+                if( db()->opened() )  load_tasks_from_db( &ta );
             }
             catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_jobs_table.name(), x ), Z_FUNCTION ); }
         }
