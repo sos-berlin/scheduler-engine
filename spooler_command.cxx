@@ -390,7 +390,10 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
             op->set_async_manager( _spooler->_connection_manager );
         }
         else
+        {
             static_log_categories.restore_from( _spooler->_original_log_categories );
+            _spooler->_log_categories_reset_operation = NULL;
+        }
 
         result = _answer.createElement( "ok" );
     }
@@ -399,6 +402,10 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
     {
         result = _answer.createElement( "log_categories" );
         result.setAttribute( "categories", static_log_categories.to_string() );
+
+        if( _spooler->_log_categories_reset_operation )  
+            result.setAttribute( "reset_at", Time().set_utc( _spooler->_log_categories_reset_operation->async_next_gmtime() ).xml_value() );
+
         Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
 
 

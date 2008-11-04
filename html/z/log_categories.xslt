@@ -9,7 +9,16 @@
     
     <xsl:template match="log_categories">
 
-        <h2>scheduler.log: log categories</h2>
+        <table cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td>
+                    <h2>scheduler.log: log categories</h2>
+                </td>
+                <td style="text-align: right">
+                    <img alt="logo" width="45" height="45" src="job_scheduler_rabbit_circle_45x45.gif"/>
+                </td>
+            </tr>
+        </table>
 
 
         <table cellspacing="0" cellpadding="0" width="100%">
