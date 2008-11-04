@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-11-03" version="2.0.216" subversion_revision="5950">
+    <change date="2008-11-04" version="2.0.216" subversion_revision="5951">
         <revision type="modification" title="Transaktionsisolation für Sybase geändert">
             <description>
                 <p>
