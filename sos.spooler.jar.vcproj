@@ -26,6 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="cd $(IntDir)&#x0D;&#x0A;cd&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -92,6 +93,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="cd $(IntDir)&#x0D;&#x0A;cd&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

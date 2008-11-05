@@ -31,7 +31,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;cd&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="doc\register_data.xml"
 			/>
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;cd&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="doc\register_data.xml"
 			/>
@@ -251,7 +251,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;&#x0D;&#x0A;cd $(IntDir)&#x0D;&#x0A;cd&#x0D;&#x0A;echo ant -f ../javadoc.xml&#x0D;&#x0A;ant -f ../javadoc.xml&#x0D;&#x0A;"
+				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;"
 				AdditionalDependencies=""
 				Outputs="doc\register_data.xml"
 			/>

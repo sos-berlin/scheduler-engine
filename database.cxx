@@ -735,8 +735,8 @@ void Database::create_tables_when_needed()
         bool created = create_table_when_needed( &ta, _job_chain_nodes_table.name(),
                          S() << "`spooler_id`"       " varchar(100)"  " not null,"
                                 "`cluster_member_id`"" varchar(100)"  " not null,"
-                                "`job_chain`"        " varchar(255)"  " not null,"
-                                "`order_state`"      " varchar(255)"  " not null,"  
+                                "`job_chain`"        " varchar(250)"  " not null,"
+                                "`order_state`"      " varchar(100)"  " not null,"  
                                 "`action`"           " varchar(100)"     << null << ","  
                                 "primary key ( `spooler_id`, `cluster_member_id`, `job_chain`, `order_state` )" );
 

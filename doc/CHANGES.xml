@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-11-04" version="2.0.216" subversion_revision="5952">
+    <change date="2008-11-05" version="2.0.216" subversion_revision="5953">
         <revision type="modification" title="Transaktionsisolation für Sybase geändert">
             <description>
                 <p>
@@ -39,7 +39,12 @@
             </description>
         </revision>
 
-        <revision type="correction" title="Fehler aus 2.0.214.5927 (Jobs in der Datenbank) korrigiert "/>
+        <revision type="correction" title="Fehler aus 2.0.214.5927 (Jobs in der Datenbank) korrigiert">
+            <description>
+                Außerdem die Spalten der Tabelle <code>SCHEDULER_JOB_CHAIN_NODES</code> verschmälert.
+            </description>
+        </revision>
+        
     </change>
 
     <change date="2008-10-28" version="2.0.215" subversion_revision="5938">

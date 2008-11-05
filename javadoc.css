@@ -13,9 +13,9 @@ body { background-color: #FFFFFF }
 
 
 /* Font used in left-hand frame lists */
-.FrameTitleFont   { font-size: normal; font-family: normal }
-.FrameHeadingFont { font-size: normal; font-family: normal }
-.FrameItemFont    { font-size: normal; font-family: normal }
+.FrameTitleFont   { font-size: normal; font-family: sans-serif }
+.FrameHeadingFont { font-size: normal; font-family: sans-serif }
+.FrameItemFont    { font-size: normal; font-family: sans-serif }
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 span         { font-size: 10pt; }
