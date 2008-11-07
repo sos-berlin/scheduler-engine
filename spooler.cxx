@@ -866,7 +866,8 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
         THREAD_LOCK( _lock )
         {
             string db_name = _db->db_name();
-            if( !SOS_LICENCE( licence_scheduler_database_password ) )  db_name = remove_password( db_name );
+            if( !SOS_LICENCE( licence_saacke ) )  db_name = remove_password( db_name );
+          //if( !SOS_LICENCE( licence_scheduler_database_password ) )  db_name = remove_password( db_name );
             state_element.setAttribute( "db", trim( db_name ) );
 
             if( _db->is_waiting() )

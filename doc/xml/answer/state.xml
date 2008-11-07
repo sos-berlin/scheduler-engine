@@ -131,7 +131,7 @@
                 <p>
                     Verwendete Datenbank als Hostware-Dateiname.
                     Ein mit <code>-password=</code> angegebene Kennwort wird unterdrückt,
-                    außer der Lizenzschlüssel-Code 18 ist gesetzt 
+                    außer der Lizenzschlüssel-Code 15 ist gesetzt 
                     (siehe <scheduler_ini_entry file="sos.ini" section="licence" entry="key1"/> und
                     <scheduler_element name="licence.use"/>).
                 </p>
