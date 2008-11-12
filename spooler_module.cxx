@@ -907,6 +907,14 @@ void Module_instance::fill_process_environment()
 
     if( _module->kind() == Module::kind_process )
     {
+        string dir = _spooler->_configuration_directories[ confdir_local ];
+        
+        if( string_ends_with( dir, "/" ) ||
+            string_ends_with( dir, Z_DIR_SEPARATOR ) )  dir.erase( dir.length() - 1 );
+
+        _process_environment->set_var( "SCHEDULER_CONFIGURATION_DIRECTORY", dir );      // Path of the Configuration Directory with hot folders
+        _process_environment->set_var( "SCHEDULER_JOB_CONFIGURATION_DIRECTORY", 
+            _task->job()->has_base_file()? _task->job()->base_file_info()._path.directory() : File_path() );  // Directory for the job configuration file should dynamic configuration from hot folders be used
         _process_environment->set_var( "SCHEDULER_HOST"              , _spooler->_short_hostname );
         _process_environment->set_var( "SCHEDULER_TCP_PORT"          , _spooler->tcp_port()? as_string( _spooler->tcp_port() ) : "" );
         _process_environment->set_var( "SCHEDULER_UDP_PORT"          , _spooler->udp_port()? as_string( _spooler->udp_port() ) : "" );
@@ -923,6 +931,8 @@ void Module_instance::fill_process_environment()
         if( Order* order = _task->order() )
         {
             _process_environment->set_var( "SCHEDULER_JOB_CHAIN", order->job_chain_path().name() );
+            _process_environment->set_var( "SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY", 
+                order->job_chain() && order->job_chain()->has_base_file()? order->job_chain()->base_file_info()._path.directory() : File_path()  );  // Directory for the job_chain configuration file should dynamic configuration from hot folders be used (for jobs with order=yes)
             _process_environment->set_var( "SCHEDULER_ORDER_ID" , order->string_id() );
         }
     }

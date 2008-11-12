@@ -11,6 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2008-11-12" version="2.0.217" subversion_revision="5956">
+        <revision type="new" title="Neue Umgebungsvariablen für Nicht-API-Jobs">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2008-11-05" version="2.0.216" subversion_revision="5953">
         <revision type="modification" title="Transaktionsisolation für Sybase geändert">
             <description>

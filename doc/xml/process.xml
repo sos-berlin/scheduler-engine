@@ -149,6 +149,14 @@ spooler.job( "process" ).start( params );
         
         <dl>
             <dt>
+                <scheduler_keyword keyword="SCHEDULER_CONFIGURATION_DIRECTORY"/>
+                <code>SCHEDULER_CONFIGURATION_DIRECTORY</code>
+            </dt>
+            <dd>
+                Dasselbe wie <scheduler_method class="Spooler" property="configuration_directory"/>.
+            </dd>
+
+            <dt>
                 <scheduler_keyword keyword="SCHEDULER_HOST"/>
                 <code>SCHEDULER_HOST</code>
             </dt>
@@ -163,6 +171,25 @@ spooler.job( "process" ).start( params );
             <dd>
                 Bei einem auftragsgesteuerten Job (<scheduler_element name="job" attribute="order" value="yes"/>)
                 <scheduler_method class="Task" object="spooler_task" property="order"/><code>.</code><scheduler_method class="Order" object="" property="job_chain"/>.<scheduler_method class="Job_chain" object="" property="name"/>.
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY"/>
+                <code>SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY</code>
+            </dt>
+            <dd>
+                Pfad des Konfigurationsverzeichnisses der Jobkette;
+                <code>""</code>, wenn die Jobkette nicht aus einem Konfigurationsverzeichnis stammt
+                oder kein Auftrag vorliegt
+                <!--Dasselbe wie <scheduler_method class="Job_chain" property="configuration_directory"/>.-->
+            </dd>
+
+            <dt>
+                <scheduler_keyword keyword="SCHEDULER_JOB_CONFIGURATION_DIRECTORY"/>
+                <code>SCHEDULER_JOB_CONFIGURATION_DIRECTORY</code>
+            </dt>
+            <dd>
+                Dasselbe wie <scheduler_method class="Job" property="configuration_directory"/>.
             </dd>
 
             <dt>

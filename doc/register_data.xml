@@ -2228,6 +2228,9 @@
 <register_keyword keyword='scheduler.log'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='scheduler.log'/>
 </register_keyword>
+<register_keyword keyword='SCHEDULER_CONFIGURATION_DIRECTORY'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_CONFIGURATION_DIRECTORY'/>
+</register_keyword>
 <register_keyword keyword='SCHEDULER_HOST'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_HOST'/>
 </register_keyword>
@@ -2238,6 +2241,12 @@
 </register_keyword>
 <register_keyword keyword='SCHEDULER_JOB_CHAIN'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_CHAIN'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_CHAIN_CONFIGURATION_DIRECTORY'/>
+</register_keyword>
+<register_keyword keyword='SCHEDULER_JOB_CONFIGURATION_DIRECTORY'>
+    <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_CONFIGURATION_DIRECTORY'/>
 </register_keyword>
 <register_keyword keyword='SCHEDULER_JOB_NAME'>
     <register_entry register_file='xml/process.xml' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='SCHEDULER_JOB_NAME'/>
