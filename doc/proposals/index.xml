@@ -88,6 +88,16 @@
 
 
     <p>
+        &lt;script language="shell"> unter Windows mit OEM-Zeichensatz
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Unter Windows sollte der alte DOS-"OEM"-Zeichensatz verwendet werden?
+        </p>
+    </div>
+
+    
+    <p>
         &lt;command on_exit_code="..."> mit Signal-Namen 
     </p>
     <div class="indent">

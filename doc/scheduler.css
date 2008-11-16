@@ -31,7 +31,7 @@ table.standard > thead > tr > th:first-child  { padding-left: 0ex; }
 table.standard > tbody > tr > td              { padding-left: 2ex; padding-top: 0.5ex; }
 table.standard > tbody > tr > td:first-child  { padding-left: 0ex; padding-top: 0.5ex; }
 td              { font-size: 10pt; vertical-align: baseline; }
-div             { font-size: 10pt; }<th
+div             { font-size: 10pt; }
 /*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 ul              { margin-top: 0.5em; margin-left: 12pt; padding-left: 0pt; }
 ul.big          { margin-top: 0em; margin-left: 12pt; padding-left: 0pt; }

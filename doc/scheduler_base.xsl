@@ -1253,7 +1253,14 @@
                 <xsl:choose>
                     <xsl:when test="contains( @register_file, '#' )">
                         <xsl:attribute name="href">
-                            <xsl:value-of select="@register_file"/>
+                            <xsl:choose>
+                                <xsl:when test="substring( @register_file, string-length( @register_file ) ) = '#'">
+                                    <xsl:value-of select="substring( @register_file, 1, string-length( @register_file ) - 1 )"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="@register_file"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </xsl:attribute>
                     </xsl:when>
                     <xsl:otherwise>

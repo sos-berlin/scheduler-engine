@@ -12,7 +12,7 @@
 
 
     <change date="2008-11-12" version="2.0.217" subversion_revision="5956">
-        <revision type="new" title="Neue Umgebungsvariablen für Nicht-API-Jobs">
+        <revision jira="JS-316" type="new" title="Neue Umgebungsvariablen für Nicht-API-Jobs">
             <description>
                 <ul>
                     <li>
