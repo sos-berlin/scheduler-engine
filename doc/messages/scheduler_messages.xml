@@ -2868,6 +2868,12 @@
                 <title>Path is not absolute: <p1/></title>
             </text>
         </message>
+        
+        <message code="SCHEDULER-471">
+            <text xml:lang="en">
+                <title>Not supported character for encoding '<p1/>'</title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

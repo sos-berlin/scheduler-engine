@@ -39,6 +39,8 @@ const string spooler_process_after_name  = "spooler_process_after(Z)Z";
 
 const string shell_language_name         = "shell";
 
+const int encoding_code_page_none        = -1;
+
 ////-------------------------------------------------------------------------Source_part::Source_part
 //
 //Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
@@ -357,6 +359,10 @@ void Module::init0()
         _process_environment->_ignore_case = false;
 #   endif
 
+    #ifdef Z_WINDOWS        
+        _encoding_code_page = CP_OEMCP;
+    #endif
+
     _monitors = Z_NEW( Module_monitors( this ) );
 }
 
@@ -414,6 +420,27 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
+
+    if( element.hasAttribute( "encoding" ) )
+    {
+        string code_page_string = lcase( element.getAttribute( "encoding" ) );
+        
+        // Das XML-Schema scheduler.xsd schränkt die Codierungen auf die bekannten ein.
+
+        if( lcase( code_page_string ) ==          "oem"         )  _encoding_code_page = CP_OEMCP;
+        else
+        if( string_begins_with( code_page_string, "cp"        ) )  _encoding_code_page = as_int( code_page_string.substr( 2 ) );   // 437, 850 usw.
+        else
+        if( string_begins_with( code_page_string, "windows-"  ) )  _encoding_code_page = as_int( code_page_string.substr( 8 ) );   // 1252 usw.
+        else
+        if( string_begins_with( code_page_string, "iso-8859-" ) )  _encoding_code_page = 28591 - 1 + as_int( code_page_string.substr( 8 ) );   // iso-8859-1 usw.
+        else
+        if( code_page_string ==                   "latin1"      )  _encoding_code_page = 28591;     // iso-8859-1
+        else
+        if( code_page_string ==                   "none"        )  _encoding_code_page = encoding_code_page_none;
+        else
+            z::throw_xc( "SCHEDULER-441", element.nodeName(), "encoding", element.getAttribute( "encoding" ) );
+    }
 
     //if( _use_process_class )
     //{

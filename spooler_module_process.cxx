@@ -155,6 +155,8 @@ bool Process_module_instance::load()
 
     if( _module->_process_filename == "" )
     {
+        string script = _module->read_source_script();
+
         _shell_file.unlink_later();
 
 #       ifdef Z_WINDOWS
@@ -169,16 +171,29 @@ bool Process_module_instance::load()
                 if( _shell_file.last_errno() == EEXIST )  continue;
                 _shell_file.check_error( "open" );
             }
+
+            if( _module->_encoding_code_page >= 0  &&  script.length() > 0 )
+            {
+                Bstr         script_bstr                = script;
+                BOOL         default_character_was_used = false;
+                vector<char> buffer                     ( 2 * script.length() );
+
+                int cp = _module->_encoding_code_page;
+                int length = WideCharToMultiByte( cp, WC_NO_BEST_FIT_CHARS, script_bstr, script_bstr.length(), &buffer[0], buffer.size(), 
+                                                  NULL, cp == CP_UTF8 || cp == CP_UTF7? NULL : &default_character_was_used );
+                if( length <= 0 )  z::throw_mswin( GetLastError(), "WideCharToMultiByte" );
+                assert( length <= buffer.size() );
+                if( default_character_was_used )  z::throw_xc( "SCHEDULER-471", "in <script>" );     // Leider wissen wir nicht, welches Zeichen nicht umgesetzt werden kann.
+                
+                script.assign( &buffer[0], length );
+            }
 #       else
             _shell_file.open_temporary( File::open_unlink_later );
             int ret = fchmod( _shell_file, 0700 );
             if( ret )  throw_errno( errno, "fchmod", _shell_file.path().c_str() );
 #       endif
 
-        //_shell_file.create_temporary();
-        //_shell_file.open( _shell_file.filename(), "w" );
-        _shell_file.print( _module->read_source_script() );
-      //_shell_file.print( _module->_source );
+        _shell_file.print( script );
         _shell_file.close();
     }
 

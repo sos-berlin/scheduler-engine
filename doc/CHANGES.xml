@@ -11,6 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2008-11-18" version="2.0.218" subversion_revision="5957">
+        <revision type="modification" title="&lt;script language=&quot;shell&quot;>: .cmd-Datei wird in OEM-Codierung erstellt">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="script" attribute="language" value="script"/>
+                    </li>
+                </ul>
+                <p>
+                    Wenn ein Zeichen aus <scheduler_element name="script"/> nicht umgesetzt werden kann,
+                    bricht der Scheduler den Job mit der Meldung <scheduler_message code="SCHEDULER-471"/> ab.
+                    Jedoch ignoriert der Scheduler schon beim Einlesen der XML-Konfiguration Zeichen, die nicht in Latin1 sind,
+                    siehe <scheduler_a href="konfiguration.xml#encoding" quote="yes"/>.
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-471"/>
+            </description>
+        </revision>
+    </change>
+
+    
     <change date="2008-11-12" version="2.0.217" subversion_revision="5956">
         <revision jira="JS-316" type="new" title="Neue Umgebungsvariablen für Nicht-API-Jobs">
             <description>

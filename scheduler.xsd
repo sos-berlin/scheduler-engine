@@ -11,7 +11,7 @@
         <xsd:documentation xml:lang="de">
             $Id$
             Schema für die Scheduler-Konfiguration,
-            s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.
+            s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html
         </xsd:documentation>
     </xsd:annotation>
         
@@ -952,6 +952,7 @@
             <xsd:attribute name="java_class"            type="String"/>
             <xsd:attribute name="recompile"             type="Yes_no"/>
          <!--xsd:attribute name="process_class"         type="Path"    s. eMail von Püschel 2007-11-06 12:55 /-->
+            <xsd:attribute name="encoding"              type="Code_page_encoding"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1619,6 +1620,16 @@
    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->
 
+    <xsd:simpleType name="Code_page_encoding">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="oem"/>
+            <xsd:enumeration value="cp437"/>
+            <xsd:enumeration value="cp850"/>
+            <xsd:enumeration value="latin1"/>
+            <xsd:enumeration value="none"/><!-- Nur zum Test -->
+        </xsd:restriction>
+    </xsd:simpleType>
+    
     <xsd:simpleType name="Job_chain_node.Action">
         <xsd:restriction base="String">
             <xsd:enumeration value="process"/>

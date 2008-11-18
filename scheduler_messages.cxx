@@ -314,6 +314,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-468", "Using this call is not possible in this context" },
     { "SCHEDULER-469", "try_hold_lock() or try_hold_lock_non_exclusive() has failed and call_me_again_when_locks_available() has not been called" },
     { "SCHEDULER-470", "Path is not absolute: $1" },
+    { "SCHEDULER-471", "Not supported character for encoding '$1'" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

@@ -203,6 +203,10 @@ struct Module : Object
     ptr<Com_variable_set>      _process_environment;
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
 
+#ifdef Z_WINDOWS
+    int                        _encoding_code_page;
+#endif
+
     bool                       _dont_remote;
     ptr<Module_monitors>       _monitors;
 

@@ -95,6 +95,9 @@
                     <dd>
                         Die Einstellung kann nicht verwendet werden bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>.
                     </dd>
+                    <dd>
+                        Siehe auch Attribut <code>encoding=</code>.
+                    </dd>
                 </dl>
             </description>
         </xml_attribute>
@@ -105,6 +108,18 @@
                     Name einer COM-Klasse (nur Windows).
                     Die COM-Klasse kann die Methoden spooler_open(), spooler_process() etc. bereitstellen.
                 </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="encoding" type="encoding">
+            <description>
+                <p>
+                    Nur unter Windows für <code>language="shell"</code>: 
+                    Gibt die Codierung an, in der der Scheduler die temporäre <code>.cmd</code>-Datei erstellt.
+                    Voreinstellt ist <code>"oem"</code>. 
+                    Außerdem möglich: <code>"cp850"</code>, <code>"cp437"</code> und <code>"latin1"</code>.
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-471"/>
             </description>
         </xml_attribute>
 

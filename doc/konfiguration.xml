@@ -78,6 +78,7 @@
 </p>
 
 
+<a name="encoding"/>
 <h2>Codierung der XML-Konfiguration</h2>
 <p>
     <code>&lt;?xml encoding="UTF-8"?></code>&#160; und<br/>

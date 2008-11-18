@@ -20,7 +20,7 @@ const char file_scheduler_xsd[] =
     "<xsd:documentation xml:lang=\"de\">\n"
     "$Id$\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\n"
-    "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html.\n"
+    "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html\n"
     "</xsd:documentation>\n"
     "</xsd:annotation>\n"
     "\n"
@@ -961,6 +961,7 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"java_class\"            type=\"String\"/>\n"
     "<xsd:attribute name=\"recompile\"             type=\"Yes_no\"/>\n"
     "<!--xsd:attribute name=\"process_class\"         type=\"Path\"    s. eMail von P\xc3" "\xbc" "schel 2007-11-06 12:55 /-->\n"
+    "<xsd:attribute name=\"encoding\"              type=\"Code_page_encoding\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -1628,6 +1629,16 @@ const char file_scheduler_xsd[] =
     "\n"
     "<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ATTRIBUT-TYPEN-->\n"
     "\n"
+    "<xsd:simpleType name=\"Code_page_encoding\">\n"
+    "<xsd:restriction base=\"xsd:NMTOKEN\">\n"
+    "<xsd:enumeration value=\"oem\"/>\n"
+    "<xsd:enumeration value=\"cp437\"/>\n"
+    "<xsd:enumeration value=\"cp850\"/>\n"
+    "<xsd:enumeration value=\"latin1\"/>\n"
+    "<xsd:enumeration value=\"none\"/><!-- Nur zum Test -->\n"
+    "</xsd:restriction>\n"
+    "</xsd:simpleType>\n"
+    "\n"
     "<xsd:simpleType name=\"Job_chain_node.Action\">\n"
     "<xsd:restriction base=\"String\">\n"
     "<xsd:enumeration value=\"process\"/>\n"
@@ -2245,7 +2256,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1225397029 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1226940694 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1225365142 },
     { NULL, NULL, 0 }
 };
