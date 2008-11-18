@@ -519,6 +519,10 @@
 <register_keyword keyword='eMail-Versand'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='eMail-Versand'/>
 </register_keyword>
+<register_keyword keyword='encoding'>
+    <register_keyword_display><code>encoding=</code></register_keyword_display>
+    <register_entry register_file='xml/script.xml#attribute_encoding' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='encoding' type='definition'/>
+</register_keyword>
 <register_keyword keyword='end'>
     <register_keyword_display><code>end=</code></register_keyword_display>
     <register_entry register_file='xml/answer/period.xml#attribute_end' register_title='&lt;period&gt; (Antwort)'  register_keyword='end' type='definition'/>
