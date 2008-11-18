@@ -423,6 +423,7 @@ void Module::set_dom( const xml::Element_ptr& element )
 
     if( element.hasAttribute( "encoding" ) )
     {
+      #ifdef Z_WINDOWS        
         string code_page_string = lcase( element.getAttribute( "encoding" ) );
         
         // Das XML-Schema scheduler.xsd schränkt die Codierungen auf die bekannten ein.
@@ -439,6 +440,7 @@ void Module::set_dom( const xml::Element_ptr& element )
         else
         if( code_page_string ==                   "none"        )  _encoding_code_page = encoding_code_page_none;
         else
+      #endif
             z::throw_xc( "SCHEDULER-441", element.nodeName(), "encoding", element.getAttribute( "encoding" ) );
     }
 
