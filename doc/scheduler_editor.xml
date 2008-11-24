@@ -156,7 +156,28 @@
   </p>
 		
 		
-		
+		<h3>Hot Folder editieren</h3>
+		<p> 
+			Der Job Scheduler Editor kann einen ganzen hot folder öffnen und bearbeiten. Dazu wird im File Menü mit dem Befehl
+			<strong>Open Hot Folder</strong> der live folder oder einer seiner Unterordner geöffnet.			
+		</p>
+		<p>
+		  Links in der Baumansicht werden nun alle Objekte angezeigt, die in diesem Hot Folder definiert sind:<br/>
+		  <img src="images/editor_open_hot_folder.jpg" width="890" height="620" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+		  Um ein neues Objekt (z.B. einen Job) anzulegen, wählen Sie im linken Baum den Elternknoten aus(1), 
+		  drücken Sie den "new" Knopf(2),
+		  wählen das neu enstandene Objekt(3) und geben diesem einen Namen(4):<br/>
+		  <img src="images/editor_new_job1.jpg" width="890" height="620" style="margin: 20px 0px ; border:1px solid gray;"/>
+		  <br/>
+		  <img src="images/editor_new_job2.jpg" width="890" height="620" style="margin: 20px 0px ; border:1px solid gray;"/>
+		</p>
+		<p>
+		  Wenn Sie nun <strong>Save</strong> aus dem File Menü wählen, speichert der Job Scheduler Editor alle in diesem
+		  Verzeichnis geänderten oder hinzugefügten Objekte. Dateinamen müssen dabei nicht angegeben werden. Diese erzeugt der
+		  Job Scheduler Editor aus den Objektnamen selbstständig.
+		</p>
 		<h3>Remote Connection</h3>
 		
 		
