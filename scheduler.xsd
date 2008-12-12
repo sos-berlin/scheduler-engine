@@ -684,6 +684,14 @@
             <xsd:attribute name="suspended" type="Yes_no"/>
             <xsd:attribute name="at"        type="Date_time_with_now"/>
             <xsd:attribute name="end_state" type="String"/>
+
+            <xsd:attribute name="action">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:NMTOKEN">
+                        <xsd:enumeration value="reset"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 

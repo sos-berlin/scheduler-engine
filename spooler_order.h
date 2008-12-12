@@ -157,6 +157,7 @@ struct Order : Com_order,
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
     State                       initial_state           ()                                          { return _initial_state; }
+    void                        reset                   ();
 
     void                    set_end_state               ( const State& );
     State                       end_state               ()                                          { return _end_state; }
@@ -231,7 +232,7 @@ struct Order : Com_order,
     void                        place_or_replace_in_job_chain( Job_chain* );
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
     void                        remove                  ( File_based::Remove_flag );
-    void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack );
+    void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack, Transaction* = NULL );
     void                        remove_from_job_chain_stack();
     bool                        tip_own_job_for_new_distributed_order_state();
     void                        move_to_node            ( job_chain::Node* );
@@ -271,7 +272,7 @@ struct Order : Com_order,
     string                      calculate_db_distributed_next_time();
 
     enum Update_option { update_anyway, update_not_occupied, update_and_release_occupation };
-    bool                        db_update               ( Update_option u )                         { return db_update2( u, false ); }
+    bool                        db_update               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, false, outer_transaction ); }
     bool                        db_update2              ( Update_option, bool delet, Transaction* outer_transaction = NULL );
     bool                        db_delete               ( Update_option u, Transaction* outer_transaction = NULL )              { return db_update2( u, true, outer_transaction ); }
     bool                        db_handle_modified_order( Transaction* );

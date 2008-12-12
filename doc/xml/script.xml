@@ -116,7 +116,7 @@
                 <p>
                     Nur unter Windows für <code>language="shell"</code>: 
                     Gibt die Codierung an, in der der Scheduler die temporäre <code>.cmd</code>-Datei erstellt.
-                    Voreinstellt ist <code>"oem"</code>. 
+                    Windows verlangt für Batch-Dateien <code>encoding="oem"</code>, was voreingestellt ist.
                     Außerdem möglich: <code>"cp850"</code>, <code>"cp437"</code> und <code>"latin1"</code>.
                 </p>
                 <scheduler_message level="error" code="SCHEDULER-471"/>

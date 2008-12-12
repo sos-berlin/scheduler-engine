@@ -75,18 +75,6 @@ SCHEDULER-001  Java exception java.lang.ArrayIndexOutOfBoundsException("48") in 
 
 
     
-    <h2>Zahl der offenen Dateien verringern</h2>
-    <p>
-        Wenn das Betriebssystem nicht genügend <i>file handles</i> zur Verfügung stellt 
-        (Unix: max. 1024, begrenzt durch FD_SETSIZE),
-        sollte der Scheduler seine Zahl der offenen Dateien begrenzen.
-        Wenn er mehr offene Dateien braucht, schließt er die am längsten nicht benutzte Datei.
-        Die wird dann bei Gebrauch wieder eröffnen und korrekt positioniert.
-        (Das kann mit der Klasse <code>File</code> implementiert werden.)
-    </p>
-    
-    
-    
     <h2>Jobs</h2>
     <ul>
         <li>

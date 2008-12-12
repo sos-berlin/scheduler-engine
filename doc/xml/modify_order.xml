@@ -67,6 +67,23 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="action" type="action">
+            <description>
+                <p>
+                    <code>action="reset"</code> setzt den Auftrag zurück:
+                    Der Auftrag wird in seinen ursprünglichen Zustand versetzt,
+                    er ist nicht mehr suspendiert und auch setback ist zurückgenommen.
+                    Seine nächste Startzeit wird berechnet, als hätte der Auftrag die Jobkette vollständig durchlaufen.
+                </p>
+                <p>
+                    Die Operation ist nur möglich, wenn der Auftrag gerade nicht von einem Job ausgeführt wird.
+                </p>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-217"/>
+            </messages>
+        </xml_attribute>
+
         <xml_attribute name="setback" type="no">
             <description>
                 <p>
@@ -155,7 +172,11 @@
 
     <xml_answer element="ok"/>
 
-
+    <messages>
+        <message level="error" code="SCHEDULER-162"/>
+        <message level="error" code="SCHEDULER-379"/>
+    </messages>
+    
     <example>
         <pre>&lt;modify_order job_chain="meine_jobkette" order="42" priority="1"/></pre>
     </example>

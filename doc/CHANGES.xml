@@ -11,6 +11,19 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2008-11-18" version="2.0.219" subversion_revision="5963">
+        <revision jira="JS-305" type="new" title="Zurücksetzen eines Auftrags">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="action" value="reset"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2008-11-18" version="2.0.218" subversion_revision="5961">
         <revision type="modification" title="&lt;script language=&quot;shell&quot;>: .cmd-Datei wird in OEM-Codierung erstellt">
             <description>
@@ -20,6 +33,7 @@
                     </li>
                 </ul>
                 <p>
+                    Windows verlangt für Batch-Dateien die OEM-Codierung.
                     Wenn ein Zeichen aus <scheduler_element name="script"/> nicht umgesetzt werden kann,
                     bricht der Scheduler den Job mit der Meldung <scheduler_message code="SCHEDULER-471"/> ab.
                     Jedoch ignoriert der Scheduler schon beim Einlesen der XML-Konfiguration Zeichen, die nicht in Latin1 sind,

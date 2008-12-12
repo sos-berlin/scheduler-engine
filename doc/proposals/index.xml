@@ -23,6 +23,25 @@
         <scheduler_a href="siegmund_und_sieglinde.xml" quote="yes"/>
     </p>
 
+    <p>
+        Zahl der offenen Dateien verringern
+    </p>
+    <div class="indent">
+        <p>
+            Wenn das Betriebssystem nicht genügend <i>file handles</i> zur Verfügung stellt
+            (Unix: max. 1024, begrenzt durch FD_SETSIZE),
+            sollte der Scheduler seine Zahl der offenen Dateien begrenzen.
+            Wenn er mehr offene Dateien braucht, schließt er die am längsten nicht benutzte Datei.
+            Die wird dann bei Gebrauch wieder eröffnen und korrekt positioniert.
+            (Das kann mit der Klasse <code>File</code> implementiert werden.)
+        </p>
+        <p>
+            Die Job-Protokolle werden bereits jetzt für jede Zeile geöffnet und geschlossen.
+            Wenn die Datei nicht wieder geöffnet werden kann, 
+            liefert der Scheduler einen Fehler, der zum Stopp des Jobs führen kann.
+        </p>
+    </div>
+
 
     <!--p>
         <scheduler_a href="dynamic_configuration.xml" quote="yes"/>
@@ -212,6 +231,23 @@
     <div class="indent">
         <p style="margin-top: 0px">
             Mit nur zwei neuen Methoden kann die Klasse <scheduler_method class="Mail"/> für eigene Nachrichten verwendet werden.
+        </p>
+    </div>
+
+
+    <p>
+        Mit zurückkommenden eMails umgehen
+    </p>
+    <div class="indent">
+        <p style="margin-top: 0px">
+            Wenn er erste SMTP-Server die eMail annimmt, aber von einer weiteren Instanz abgewiesen wird,
+            gelangt die eMail an den Absender zurück. 
+            Der Absender ist in der factory.ini eingetragen und ist vielleicht nicht vorhanden,
+            oder niemand prüft das Postfach.
+            Kann passieren, wenn eine sehr großes Task-Protokoll (10MB) angehängt wird.
+        </p>
+        <p>
+            Außerdem: Angehängte Protokolle könnten mit Windows-zip komprimiert werden.
         </p>
     </div>
 

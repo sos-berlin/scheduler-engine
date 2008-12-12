@@ -406,11 +406,11 @@ double Time::as_double_or_never() const
 
 double Time::as_utc_double() const
 {
-    assert( !is_never() );
     //Z_DEBUG_ONLY( if( _is_utc )  Z_LOG( Z_FUNCTION << " _time=" << ::sos::as_string(_time) << " - " << current_difference_to_utc() << "\n" ) );
 
-    return _is_utc? _time 
-                  : _time + current_difference_to_utc();    
+    return is_never()? never_int :
+           _is_utc   ? _time 
+                     : _time + current_difference_to_utc();    
 }
 
 //------------------------------------------------------------------------------------Time::set_utc

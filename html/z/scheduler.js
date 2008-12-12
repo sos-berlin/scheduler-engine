@@ -975,6 +975,7 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
     popup_builder.add_command ( "suspended=no"    , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' suspended='no' />" );
     popup_builder.add_command ( "Continue now"    , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' at='now' />" );
   //popup_builder.add_command ( "setback=no"      , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' setback='no' />" );
+    popup_builder.add_command ( "Reset"           , "<modify_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' action='reset' />" );
     popup_builder.add_command ( "Remove"          , "<remove_order job_chain='" + xml_encode_attribute( job_chain_name ) + "' order='" + xml_encode_attribute( order_id ) + "' />" );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );

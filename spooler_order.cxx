@@ -761,6 +761,8 @@ ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transac
 
 ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
+    assert( !( flag & lo_lock )  ||  outer_transaction );   // lo_lock => outer_transaction
+
     ptr<Order> result;
 
     for( Retry_nested_transaction ta ( _spooler->_db, outer_transaction ); ta.enter_loop(); ta++ ) try
@@ -5105,7 +5107,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 {
     bool update_ok = false;
 
-    // outer_transaction nur für db_handle_modified_order()
+    // outer_transaction nur für db_handle_modified_order() oder vor sicherem Commit. Bei Rollback würde Order nicht mit Datenbanksatz übereinstimmen.
 
     if( update_option == update_and_release_occupation  &&  _spooler->_are_all_tasks_killed )
     {
@@ -6421,6 +6423,20 @@ void Order::set_state2( const State& order_state, bool is_error_state )
     if( !_initial_state_set )  _initial_state = order_state,  _initial_state_set = true;
 }
 
+//-------------------------------------------------------------------------------------Order::reset
+
+void Order::reset()
+{
+    // Für http://www.sos-berlin.com/jira/browse/JS-305 
+
+    assert_no_task( Z_FUNCTION );
+
+    set_suspended( false );
+    clear_setback();
+    set_state( _initial_state );
+    set_next_start_time();
+}
+
 //-------------------------------------------------------------------------Job_chain::set_end_state
 
 void Order::set_end_state( const State& end_state )                  
@@ -6516,7 +6532,7 @@ void Order::remove( File_based::Remove_flag remove_flag )
 
 //---------------------------------------------------------------------Order::remove_from_job_chain
 
-void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option )
+void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option, Transaction* outer_transaction )
 {
     ptr<Order> me = this;        // Halten
 
@@ -6530,7 +6546,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
                              : message_string( "SCHEDULER-940" ) );
         }
 
-        db_delete( update_and_release_occupation );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
+        db_delete( update_and_release_occupation, outer_transaction );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
     }
 
     assert( !_is_db_occupied );

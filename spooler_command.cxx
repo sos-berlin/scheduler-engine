@@ -1126,13 +1126,13 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
     ptr<Order>     order;
 
-    try
+    for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
     {
         order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
                                            : job_chain->order( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
-            order = _spooler->order_subsystem()->load_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem_interface::lo_lock );
+            order = _spooler->order_subsystem()->load_order_from_database( &ta, job_chain_path, id, Order_subsystem_interface::lo_lock );  // Exception, wenn von einem Scheduler belegt
 
         if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
         {
@@ -1188,23 +1188,24 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->set_title( modify_order_element.getAttribute( "title" ) );
         }
 
+        if( modify_order_element.getAttribute( "action" ) == "reset" )
+        {
+            order->reset();
+        }
+
         if( order->finished()  &&  !order->is_on_blacklist() )
         {
-            order->remove_from_job_chain();
+            order->remove_from_job_chain( Order::jc_remove_from_job_chain_stack, &ta );
             order->close();
         }
         else
         {
-            order->db_update( Order::update_anyway );
+            order->db_update( Order::update_anyway, &ta );
         }
 
-        //Das löscht den Auftrag!  order->close();
+        ta.commit( Z_FUNCTION );
     }
-    catch( exception& )
-    {
-        //Das löscht den Auftrag!  if( order )  order->close();
-        throw;
-    }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
 
     return _answer.createElement( "ok" );
 }
