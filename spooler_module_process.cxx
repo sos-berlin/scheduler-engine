@@ -571,7 +571,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
             if( WIFSIGNALED( status ) )
             {
                 _process_signaled = WTERMSIG( status );
-              //Z_LOG2( "scheduler", "signal=" << _process_exit_code << "\n" );
+                //cerr << "signal=" << _process_signaled << "\n";  //test
                 _pid = 0;
                 set_signaled();
                 return true;
@@ -580,7 +580,7 @@ bool Process_module_instance::Process_event::wait( double seconds )
             if( WIFEXITED( status ) )
             {
                 _process_exit_code = WEXITSTATUS( status );
-              //Z_LOG2( "scheduler", "exit_code=" << _process_exit_code << "\n" );
+                //cerr << "exit_code=" << _process_exit_code << "\n";  //test
                 _pid = 0;
                 set_signaled();
                 return true;
@@ -828,11 +828,11 @@ void Process_module_instance::end__end()
 
         close_handle();
 
-        /* Siehe Module_task::do_close__end(), Meldung SCHEDULER-279
         if( _process_handle._process_signaled )
         {
             _termination_signal = _process_handle._process_signaled; 
 
+            /* Siehe Module_task::do_close__end(), Meldung SCHEDULER-279
             try
             {
                 z::throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
@@ -842,8 +842,8 @@ void Process_module_instance::end__end()
                 if( !_module->_process_ignore_signal )  throw;
                 _log->warn( x.what() );
             }
+            */
         }
-        */
 
         int exit_code = _process_handle._process_exit_code;
 
