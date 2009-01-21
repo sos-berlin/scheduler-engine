@@ -11,6 +11,18 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-01-21" version="2.0.219" subversion_revision="5966">
+        <revision jira="JS-321" type="correction" title="Backup-Scheduler übernimmt wieder Job-, Task-, Jobketten- und Auftragseinstellungen">
+            <description>
+                <p>
+                    Im Betrieb mit einem Backup-Scheduler werden die Spalten cluster_member_id nicht mehr gefüllt.
+                    Die Spalten werden nur nur im Betrieb für verteilte Aufträge gefüllt, 
+                    so dass die Datensätze nur dann den Cluster-Membern fest zugeordnet sind.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-12-12" version="2.0.219" subversion_revision="5963">
         <revision jira="JS-305" type="new" title="Zurücksetzen eines Auftrags">
             <description>
