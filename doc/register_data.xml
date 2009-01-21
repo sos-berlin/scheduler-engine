@@ -19,6 +19,7 @@
 <register_keyword keyword='action'>
     <register_keyword_display><code>action=</code></register_keyword_display>
     <register_entry register_file='xml/job_chain_node.modify.xml#attribute_action' register_title='&lt;job_chain_node.modify&gt; (Kommando)'  register_keyword='action' type='definition'/>
+    <register_entry register_file='xml/modify_order.xml#attribute_action' register_title='&lt;modify_order&gt; (Kommando)'  register_keyword='action' type='definition'/>
 </register_keyword>
 <register_keyword keyword='add_jobs'>
     <register_keyword_display><code>&lt;add_jobs&gt;</code></register_keyword_display>

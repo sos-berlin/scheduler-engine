@@ -11,7 +11,7 @@
     <scheduler_keyword keyword="Change log"/>
 
 
-    <change date="2008-11-18" version="2.0.219" subversion_revision="5963">
+    <change date="2008-12-12" version="2.0.219" subversion_revision="5963">
         <revision jira="JS-305" type="new" title="Zurücksetzen eines Auftrags">
             <description>
                 <ul>

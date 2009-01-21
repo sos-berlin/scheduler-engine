@@ -1284,7 +1284,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
     select_sql << "select `task_id`, `enqueue_time`, `start_at_time`"
                << "  from " << _spooler->_tasks_tablename
                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-               <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->cluster_member_id() )
+               <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->distributed_member_id() )
                <<    " and `job_name`="          << sql::quoted( path().without_slash() ) 
                << "  order by `task_id`";
 
@@ -1366,8 +1366,8 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
                 insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
 
-                if( _spooler->is_cluster() )
-                insert             [ "cluster_member_id" ] = _spooler->cluster_member_id();
+                if( _spooler->distributed_member_id() != "" ) //if( _spooler->is_cluster() )
+                insert             [ "cluster_member_id" ] = _spooler->distributed_member_id();
 
                 insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
 
@@ -2069,7 +2069,7 @@ void Job::database_record_store()
                     sql::Update_stmt update ( &db()->_jobs_table );
                     
                     update[ "spooler_id"        ] = _spooler->id_for_db();
-                    update[ "cluster_member_id" ] = _spooler->db_cluster_member_id();
+                    update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
                     update[ "path"              ] = path().without_slash();
 
                     if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
@@ -2098,7 +2098,7 @@ void Job::database_record_remove()
             sql::Delete_stmt delete_statement ( &db()->_jobs_table );
             
             delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()            );
-            delete_statement.and_where_condition( "cluster_member_id", _spooler->db_cluster_member_id() );
+            delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
             delete_statement.and_where_condition( "path"              , path().without_slash()          );
 
             ta.execute( delete_statement, Z_FUNCTION );
@@ -2119,7 +2119,7 @@ void Job::database_record_load( Read_transaction* ta )
         S() << "select `stopped`, `next_start_time`"
             << "  from " << db()->_jobs_table.sql_name()
             << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_cluster_member_id() )
+            <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
             <<    " and `path`="              << sql::quoted( path().without_slash() ), 
         Z_FUNCTION 
     );

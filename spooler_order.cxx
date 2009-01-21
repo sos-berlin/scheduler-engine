@@ -1195,7 +1195,7 @@ void Node::database_record_store()
                 sql::Update_stmt update ( &db()->_job_chain_nodes_table );
                 
                 update[ "spooler_id"        ] = _spooler->id_for_db();
-                update[ "cluster_member_id" ] = _spooler->db_cluster_member_id();
+                update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
                 update[ "job_chain"         ] = _job_chain->path().without_slash();
                 update[ "order_state"       ] = _order_state.as_string();
                 update[ "action"            ] = _action == act_process? sql::Value() : action_name();
@@ -1223,7 +1223,7 @@ void Node::database_record_store()
 //            sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
 //            
 //            delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()         );
-//            delete_statement.and_where_condition( "cluster_member_id", _spooler->db_cluster_member_id() );
+//            delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
 //            delete_statement.and_where_condition( "job_chain"        , _job_chain->path().without_slash()        );
 //            delete_statement.and_where_condition( "order_state"      , _order_state.as_string() );
 //
@@ -3038,7 +3038,7 @@ void Job_chain::database_record_store()
                 sql::Update_stmt update ( &db()->_job_chains_table );
                 
                 update[ "spooler_id"        ] = _spooler->id_for_db();
-                update[ "cluster_member_id" ] = _spooler->db_cluster_member_id();
+                update[ "cluster_member_id" ] = _spooler->db_distributed_member_id();
                 update[ "path"              ] = path().without_slash();
                 update[ "stopped"           ] = _is_stopped;
 
@@ -3063,9 +3063,9 @@ void Job_chain::database_record_remove()
             {
                 sql::Delete_stmt delete_statement ( &db()->_job_chains_table );
                 
-                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()            );
-                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_cluster_member_id() );
-                delete_statement.and_where_condition( "path"              , path().without_slash()          );
+                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
+                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
+                delete_statement.and_where_condition( "path"              , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
             }
@@ -3073,9 +3073,9 @@ void Job_chain::database_record_remove()
             {
                 sql::Delete_stmt delete_statement ( &db()->_job_chain_nodes_table );
                 
-                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db()            );
-                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_cluster_member_id() );
-                delete_statement.and_where_condition( "job_chain"        , path().without_slash()           );
+                delete_statement.and_where_condition( "spooler_id"       , _spooler->id_for_db() );
+                delete_statement.and_where_condition( "cluster_member_id", _spooler->db_distributed_member_id() );
+                delete_statement.and_where_condition( "job_chain"        , path().without_slash() );
 
                 ta.execute( delete_statement, Z_FUNCTION );
             }
@@ -3098,7 +3098,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
             S() << "select `stopped`"
                 << "  from " << db()->_job_chains_table.sql_name()
                 << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_cluster_member_id() )
+                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
                 <<    " and `path`="              << sql::quoted( path().without_slash() ), 
             Z_FUNCTION 
         );
@@ -3117,7 +3117,7 @@ void Job_chain::database_record_load( Read_transaction* ta )
             S() << "select `order_state`, `action`"
                 << "  from " << db()->_job_chain_nodes_table.sql_name()
                 << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
-                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_cluster_member_id() )
+                <<    " and `cluster_member_id`=" << sql::quoted( _spooler->db_distributed_member_id() )
                 <<    " and `job_chain`="         << sql::quoted( path().without_slash() ), 
             Z_FUNCTION 
         );

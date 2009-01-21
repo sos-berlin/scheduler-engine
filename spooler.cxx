@@ -1964,6 +1964,31 @@ string Spooler::db_cluster_member_id()
     return result;
 }
 
+//-------------------------------------------------------------------Spooler::distributed_member_id
+// Liefert Member-ID nur für verteilten Scheduler, 
+// nicht aber im Backup-Betrieb.
+
+string Spooler::distributed_member_id()
+{
+    string result;
+
+    if( orders_are_distributed() )
+    {
+        result = cluster_member_id();
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------Spooler::db_distributed_member_id
+
+string Spooler::db_distributed_member_id()
+{
+    string result = distributed_member_id();
+    if( result == "" )  result = "-";
+    return result;
+}
+
 //-----------------------------------------------------------------------Spooler::has_exclusiveness
 
 bool Spooler::has_exclusiveness()
