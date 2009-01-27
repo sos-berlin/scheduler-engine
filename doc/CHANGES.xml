@@ -11,7 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-01-27" version="2.0.219" subversion_revision="5968">
+        <revision type="correction" title="libhostjava.so im Scheduler für HP-UX/Itanium eingebunden">
+            <description>
+                <p>
+                    Im Gegensatz zu HP-UX/PA-RISC ist jetzt für Itanium die libhosthava.so in den Scheduler eingebunden.
+                    Damit tritt das "com_construct-Problem" nicht mehr auf.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2009-01-21" version="2.0.219" subversion_revision="5966">
+        <revision type="modification" title="Unter Unix mit kill abgebrochene Task führt zum Task-Fehler">
+            <description>
+                <p>
+                    Damit ist das Verhalten unter Unix wie unter Windows.
+                </p>
+            </description>
+        </revision>
+
         <revision jira="JS-321" type="correction" title="Backup-Scheduler übernimmt wieder Job-, Task-, Jobketten- und Auftragseinstellungen">
             <description>
                 <p>
