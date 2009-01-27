@@ -9,7 +9,7 @@
 #include "../kram/sysxcept.h"
 #include "../kram/sosopt.h"
 
-#if defined Z_LINK_STATIC
+#if defined Z_LINK_STATIC || defined Z_HPUX_IA64   // HP-UX/Itantium-Java schafft es nicht, libhostjava.so nachzuladen. Also binden wir es ein.
 #   define SCHEDULER_WITH_HOSTJAVA
 #endif
 

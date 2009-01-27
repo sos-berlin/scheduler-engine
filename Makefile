@@ -4,13 +4,10 @@ PROD_DIR = $(shell cd ../.. && /bin/pwd)
 
 DEP_PRODUCTS := kram file fs zschimmer
 
-##HPUX: Hostjava einbinden
-#ifeq ($(shell uname),HP-UX)
-##ifeq ($(shell uname -m),ia64)
-##else
-#DEP_PRODUCTS += hostjava hostole
-##endif
-#endif
+ifeq ($(shell uname -s -m),HP-UX ia64)
+# Java schafft es nicht, libhostjava.so nachzuladen. Also binden wir es ein.
+DEP_PRODUCTS += hostjava hostole
+endif
 
 
 objects = \
