@@ -465,7 +465,7 @@ First_and_last read_profile_yes_no_last_both( const string& profile, const strin
                 // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
                 // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
 
-                if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
+                if( spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
                 break;
             }
 
@@ -501,6 +501,8 @@ static void set_ctrl_c_handler( bool on )
 
 static void be_daemon()
 {
+    File new_stdout ( "scheduler.out", "w" );
+
     Z_LOG2( "scheduler", "fork()\n" );
 
     switch( fork() )
@@ -510,6 +512,9 @@ static void be_daemon()
 
                  Z_LOG2( "scheduler", "setsid()\n" );
                  setsid(); 
+
+                 dup2( new_stdout.file_no(), fileno( stdout ) );
+                 dup2( new_stdout.file_no(), fileno( stderr ) );
 
                  if( isatty( fileno(stdin) ) ) 
                  {
