@@ -636,7 +636,6 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
             sql::Update_stmt update ( db()->database_descriptor(), _spooler->_orders_tablename );
             update[ "occupying_cluster_member_id" ] = fake_member_id;
             update.and_where_condition( "occupying_cluster_member_id", _member_id );
-         //?update.add_where( " and `distributed_next_time` is not null" );               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
             ta.execute( update, Z_FUNCTION );
             record_count = ta.record_count();
         }
@@ -648,7 +647,6 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
                     S() << "select `job_chain`, `id`, `state` " <<
                     "  from " << _spooler->_orders_tablename << 
                     "  where `occupying_cluster_member_id`=" << sql::quoted( fake_member_id ) <<
-                    //?" and `distributed_next_time` is not null" <<               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
                     "  order by `job_chain`, `state`, `distributed_next_time`, `ordering`",
                     Z_FUNCTION
                 );
@@ -670,7 +668,6 @@ bool Cluster_member::free_occupied_orders( Transaction* outer_transaction )
             sql::Update_stmt update ( db()->database_descriptor(), _spooler->_orders_tablename );
             update[ "occupying_cluster_member_id" ] = sql::null_value;
             update.and_where_condition( "occupying_cluster_member_id", fake_member_id );
-         //?update.add_where( " and `distributed_next_time` is not null" );               // Die Spalte ist vielleicht für schnellen Zugriff indiziert
             ta.execute( update, Z_FUNCTION );
             record_count = ta.record_count();
         }

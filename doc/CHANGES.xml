@@ -11,6 +11,25 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-02-25" version="2.0.220" subversion_revision="5970">
+        <revision type="modification" title="Scheduler als Unix-Daemon leitet stdout/stderr in Datei um">
+            <description>
+                <p>
+                    Wie es sich für einen Daemon gehört, 
+                    schließt der Scheduler stdout und stderr und leitet die Ausgaben in die Datei 
+                    <code>scheduler.out</code>. 
+                    Diese Datei muss beschreibbar sein.
+                </p>
+                <ul>
+                    <li>
+                        Siehe Option <scheduler_option name="service"/> 
+                    </li>
+                </ul>
+
+            </description>
+        </revision>
+    </change>
+
     <change date="2009-01-27" version="2.0.219" subversion_revision="5968">
         <revision type="correction" title="libhostjava.so im Scheduler für HP-UX/Itanium eingebunden">
             <description>

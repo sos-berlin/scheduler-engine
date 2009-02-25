@@ -730,7 +730,6 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
     S select_sql;
     select_sql << "select `id`  from " << _spooler->_orders_tablename
                << "  where " << _job_chain->db_where_condition();
-             //<< "  where `distributed_next_time` <= " <<  never_database_distributed_next_time 
 
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
     {

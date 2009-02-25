@@ -158,7 +158,11 @@
             <description>
                 <p>
                     Unter Unix versetzt sich der Job Scheduler in den Hintergrund und trennt sich vom Terminal.
-                    <code>stdout</code> und <code>stderr</code> sollten in eine Datei umgeleitet werden, damit Ausgaben nicht verloren gehen.
+                </p>
+                <p>
+                    Unter Unix schließt der Scheduler stdin, stdout und stderr und
+                    leitet die Ausgaben in die Datei <code>scheduler.out</code>,
+                    die beschreibbar sein muss.
                 </p>
             </description>
         </command_option>
