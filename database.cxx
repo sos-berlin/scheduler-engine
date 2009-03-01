@@ -2093,6 +2093,8 @@ Job_history::Job_history( Job* job )
 { 
     _job = job; 
     _spooler = _job->_spooler; 
+
+    read_profile_settings();
 }
 
 //-------------------------------------------------------------------------Job_history::Job_history
@@ -2106,6 +2108,30 @@ Job_history::~Job_history()
     catch( exception& x ) { _job->_log->warn( message_string( "SCHEDULER-269", x ) ); }  // "FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: "
 }
 
+//---------------------------------------------------------------Job_history::read_profile_settings
+
+void Job_history::read_profile_settings()
+{
+    string section = _job->profile_section();
+
+    _filename    = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
+    _history_yes = read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
+    _on_process  = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_job_history_on_process );
+    _with_log    = read_profile_with_log          ( _spooler->_factory_ini, section, "history_with_log"  , _spooler->_job_history_with_log );
+}
+
+//--------------------------------------------------------------------Job_history::set_dom_settings
+
+void Job_history::set_dom_settings( xml::Element_ptr settings_element )
+{
+    if( settings_element )
+    {
+        if( xml::Element_ptr e = settings_element.select_node( "history"            ) )  _history_yes = as_bool( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "history_on_process" ) )  _on_process  = make_history_on_process( e.text(), _on_process );
+        if( xml::Element_ptr e = settings_element.select_node( "history_with_log"   ) )  _with_log    = make_archive( e.text(), _with_log );
+    }
+}
+
 //--------------------------------------------------------------------------------Job_history::open
 
 void Job_history::open( Transaction* outer_transaction )
@@ -2114,9 +2140,6 @@ void Job_history::open( Transaction* outer_transaction )
 
     _job_path   = _job->path();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
-    _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
-    _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_job_history_yes );
-    _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_job_history_on_process );
 
     try
     {
@@ -2126,7 +2149,6 @@ void Job_history::open( Transaction* outer_transaction )
         {
             Transaction ta ( +_spooler->_db, outer_transaction );
             {
-                _with_log = read_profile_with_log( _spooler->_factory_ini, section, "history_with_log", _spooler->_job_history_with_log );
 
                 set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 

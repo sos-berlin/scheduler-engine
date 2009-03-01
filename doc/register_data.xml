@@ -2364,6 +2364,7 @@
 </register_keyword>
 <register_keyword keyword='service'>
     <register_keyword_display><code>-service=</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_option__service' register_title='Änderungsprotokoll'  register_keyword='service'/>
     <register_entry register_file='command_line.xml#option_service' register_title='Kommandozeilenoptionen'  register_keyword='service' type='definition'/>
     <register_entry register_file='index.xml#use_option__service' register_title='Dokumentation'  register_keyword='service'/>
 </register_keyword>

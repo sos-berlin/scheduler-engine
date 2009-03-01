@@ -309,6 +309,8 @@
     <xsd:element name="job">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="settings" type="Job.Settings" minOccurs="0"/>
+                
                 <xsd:element name="description" minOccurs="0">
                     <xsd:complexType mixed="true">
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
@@ -448,6 +450,56 @@
             <xsd:field xpath="@setback_count"/>
         </xsd:key-->
     </xsd:element>
+    
+    
+    
+    <xsd:complexType name="Job.Settings">
+        <xsd:sequence>
+            <xsd:element name="mail_on_error"               type="Yes_no"       minOccurs="0"/>
+            <xsd:element name="mail_on_warning"             type="Yes_no"       minOccurs="0"/>
+            <xsd:element name="mail_on_success"             type="Yes_no"       minOccurs="0"/>
+            
+            <xsd:element name="mail_on_process" minOccurs="0">
+                <xsd:simpleType>
+                    <xsd:union memberTypes="Yes_no xsd:positiveInteger"/>
+                </xsd:simpleType>
+            </xsd:element>
+
+            <xsd:element name="mail_on_delay_after_error" minOccurs="0">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:NMTOKEN">
+                        <xsd:enumeration value="all"/>
+                        <xsd:enumeration value="first_only"/>
+                        <xsd:enumeration value="last_only"/>
+                        <xsd:enumeration value="first_and_last_only"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            
+            <xsd:element name="log_mail_to"                 type="Non_empty_string"   minOccurs="0"/>
+            <xsd:element name="log_mail_cc"                 type="Non_empty_string"   minOccurs="0"/>
+            <xsd:element name="log_mail_bcc"                type="Non_empty_string"   minOccurs="0"/>
+            <xsd:element name="log_level"                   type="Log_level"          minOccurs="0"/>
+            <xsd:element name="history"                     type="Yes_no"             minOccurs="0"/>
+            
+            <xsd:element name="history_on_process" minOccurs="0">
+                <xsd:simpleType>
+                    <xsd:union memberTypes="Yes_no xsd:nonNegativeInteger"/>
+                </xsd:simpleType>
+            </xsd:element>
+            
+            <xsd:element name="history_with_log" minOccurs="0">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:NMTOKEN">
+                        <xsd:enumeration value="yes"/>
+                        <xsd:enumeration value="no"/>
+                        <xsd:enumeration value="gzip"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
 
 
     <xsd:element name="job_chain">
@@ -1843,6 +1895,25 @@
         </xsd:union>
     </xsd:simpleType>
 
+
+    <xsd:simpleType name="Log_level">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="error"/>
+            <xsd:enumeration value="warn"/>
+            <xsd:enumeration value="info"/>
+            <xsd:enumeration value="debug"/>
+            <xsd:enumeration value="debug1"/>
+            <xsd:enumeration value="debug2"/>
+            <xsd:enumeration value="debug3"/>
+            <xsd:enumeration value="debug4"/>
+            <xsd:enumeration value="debug5"/>
+            <xsd:enumeration value="debug6"/>
+            <xsd:enumeration value="debug7"/>
+            <xsd:enumeration value="debug8"/>
+            <xsd:enumeration value="debug9"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
     
     <xsd:simpleType name="Md5">
         <xsd:restriction base="xsd:string">
@@ -1880,6 +1951,11 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:simpleType name="Non_empty_string">
+        <xsd:restriction base="String">
+            <xsd:pattern value=".+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
     
     <xsd:simpleType name="Positive_duration">
         <xsd:restriction base="Duration">

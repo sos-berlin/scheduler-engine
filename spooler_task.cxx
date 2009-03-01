@@ -2339,17 +2339,6 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
             else
             if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
 
-//#           ifdef Z_DEBUG
-//                if( _log->_mail_on_delay_after_error == fl_all ) {
-//                    int reason = has_error() || _log->highest_level() >= log_error? -1 : _step_count;
-//                    bool old_mail_it =  reason == -1  &&  ( _log->_mail_on_error | _log->_mail_on_warning )
-//                                     || reason ==  0  &&  _log->_mail_on_success
-//                                     || reason  >  0  &&  ( _log->_mail_on_success || _log->_mail_on_process && reason >= _log->_mail_on_process )
-//                                     || _log->_mail_on_warning  &&  _log->_last.find( log_warn ) != _log->_last.end();
-//                    assert( mail_due_to_error_or_warning == old_mail_it );
-//                }
-//#           endif
-
             if( _job->_delay_after_error.size() > 0 )
             {
                 switch( _log->_mail_on_delay_after_error )
@@ -2376,15 +2365,6 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         {
             _log->send( scheduler_event );
         }
-
-        /*
-        if( !_spooler->_manual )
-        {
-            set_mail_defaults();
-            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
-        }
-        */
-        //clear_mail();
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }
@@ -2397,19 +2377,6 @@ bool Task::wait_until_terminated( double )
 {
     z::throw_xc( "SCHEDULER-125" );     // Deadlock
     return false;
-
-    //Thread_id my_thread_id = current_thread_id();
-    //if( my_thread_id == _spooler->thread_id() )  z::throw_xc( "SCHEDULER-125" );     // Deadlock
-
-    //Event event ( obj_name() + " wait_until_terminated" );
-
-    //THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.push_back( &event );
-
-    //bool result = event.wait( wait_time );
-
-    //THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.pop_back();
-
-    //return result;
 }
 
 //-------------------------------------------------------------------------Task::send_collected_log

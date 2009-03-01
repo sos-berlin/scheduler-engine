@@ -109,8 +109,6 @@ struct Com_mail : spooler_com::Imail,
     void                    set_dom                         ( const xml::Element_ptr& );
 
     void                    set_mail_defaults               ( const Mail_defaults& defaults          ) { _defaults = defaults; }
-  //void                    set_default                     ( const string& what, const string& value ) { _defaults[ what ] = value; }
-  //Defaults_map*               defaults                    ()                                      { return &_defaults; }
 
     void                    set_subject                     ( const string& );
     string                      subject                     ();

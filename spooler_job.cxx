@@ -910,6 +910,11 @@ void Job::set_dom( const xml::Element_ptr& element )
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _schedule_use->set_dom( this, e );
         }
     }
+
+    if( xml::Element_ptr settings_element = element.select_node( "settings" ) ) {
+        _history.set_dom_settings( settings_element );
+        _log->set_dom_settings( settings_element );
+    }
 }
 
 //------------------------------------------------------------------------Job::set_order_controlled

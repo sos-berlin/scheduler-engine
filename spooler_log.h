@@ -114,6 +114,7 @@ struct Prefix_log : Object, Has_log
     void                    set_task                        ( Task* task )                      { _task = task; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& );
+    void                    set_dom_settings                ( xml::Element_ptr settings_element );
     void                    set_order_log                   ( Prefix_log* log )                 { _order_log = log; }
 
     void                        add_event                   ( Event_base* );

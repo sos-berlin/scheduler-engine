@@ -349,7 +349,7 @@ log = scheduler.wait com_server.* >scheduler.log</pre>
              title   = "Historie schreiben?">
         <description>
             <p>
-                Gibt ein, ob eine Task-Historie geschrieben werden soll.
+                Gibt an, ob eine Task-Historie geschrieben werden soll.
                 Der Job Scheduler schreibt dann für jede Task einen Satz in die Datenbank, oder, wenn der Job Scheduler ohne Datenbank arbeitet,
                 in eine Datei im mit <scheduler_option name="log-dir"/> angegebenen Verzeichnis.
             </p>
@@ -645,7 +645,6 @@ db = scheduler.mdb
 
 
     <setting setting = "mail_on_delay_after_error"
-             type    = ""
              initial = "first_and_last_only"
              title   = "Unterdrückung der eMail bei &lt;delay_after_error>">
         <description>

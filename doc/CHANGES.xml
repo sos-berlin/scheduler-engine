@@ -11,6 +11,70 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-03-01" version="2.0.221" subversion_revision="5971">
+        <revision type="new" title="&lt;settings> in &lt;job>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="settings"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_error"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_warning"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_success"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_delay_after_error"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_to"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_cc"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_bcc"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_level"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history_on_process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history_with_log"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="new" title="Monitor für Shell-Jobs">
+            <description>
+                <p>
+                    Ein <scheduler_element name="monitor"/> kann jetzt auch für Nicht-API-Jobs angegeben werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="monitor"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Datenbankproblem mit der Stunde zwischen Winter- und Sommerzeit gelöst">
+        </revision>
+    </change>
+
     <change date="2009-02-25" version="2.0.220" subversion_revision="5970">
         <revision type="modification" title="Scheduler als Unix-Daemon leitet stdout/stderr in Datei um">
             <description>

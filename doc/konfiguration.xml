@@ -211,6 +211,10 @@
                 visible        = "yes"
             >
 
+                &lt;<scheduler_a href="xml/settings.xml">settings</scheduler_a>>
+                    …
+                &lt;/settings>
+                
                 &lt;<scheduler_a href="xml/description.xml">description</scheduler_a>> … &lt;/description>
 
                 &lt;<scheduler_a href="xml/lock.use.xml">lock.use</scheduler_a> lock="…" …/>

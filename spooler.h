@@ -327,9 +327,13 @@ extern Spooler*                 spooler_ptr;
 
 int                             read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt );
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
+int                             make_history_on_process  ( const string& v, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
+Archive_switch                  make_archive          ( const string& value, Archive_switch deflt );
 With_log_switch                 read_profile_with_log       ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
 First_and_last                  read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, First_and_last deflt );
+First_and_last                  make_yes_no_last_both  ( const string& setting_name, const string& value, First_and_last deflt );
+
 
 //----------------------------------------------------------------------------State_changed_handler
 

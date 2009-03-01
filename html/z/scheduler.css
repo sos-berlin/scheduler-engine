@@ -121,7 +121,7 @@ body#job_description    { background-color: #80ecff }
 
 /* Fürs Protokoll */
 body.log                { margin-left: 0; padding-left: 0 }
-pre.log                 { font-family: Lucida Console, monospace; font-size: 8.5pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
+pre.log                 { font-family: Lucida Console, monospace; font-size: 10px; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
 
 .log_error              { color: Red; }
 .log_warn               { color: tomato; }

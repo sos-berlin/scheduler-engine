@@ -58,6 +58,9 @@
                 <scheduler_element name="environment"/><br/>
                 <scheduler_element name="file_order_source"/><br/>
                 <scheduler_element name="file_order_sink"/><br/>
+                <scheduler_element name="history"/><br/>
+                <scheduler_element name="history_on_process"/><br/>
+                <scheduler_element name="history_with_log"/><br/>
                 <scheduler_element name="holiday"/><br/>
                 <scheduler_element name="holidays"/><br/>
                 <scheduler_element name="http.authentication"/><br/>
@@ -76,6 +79,15 @@
                 <scheduler_element name="locks"/><br/>
                 <scheduler_element name="lock"/><br/>
                 <scheduler_element name="lock.use"/><br/>
+                <scheduler_element name="log_level"/><br/>
+                <scheduler_element name="log_mail_bcc"/><br/>
+                <scheduler_element name="log_mail_cc"/><br/>
+                <scheduler_element name="log_mail_to"/><br/>
+                <scheduler_element name="mail_on_error"/><br/>
+                <scheduler_element name="mail_on_process"/><br/>
+                <scheduler_element name="mail_on_success"/><br/>
+                <scheduler_element name="mail_on_warning"/><br/>
+                <scheduler_element name="mail_on_delay_after_error"/><br/>
                 <scheduler_element name="monitor"/><br/>
                 <scheduler_element name="month"/><br/>
                 <scheduler_element name="monthdays"/><br/>

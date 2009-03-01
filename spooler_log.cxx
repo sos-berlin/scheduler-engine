@@ -199,12 +199,10 @@ static void io_error( Spooler* spooler, const string& filename )
     {
         spooler->_waiting_errno          = errno;
         spooler->_waiting_errno_filename = filename;
-      //spooler->_waiting_errno_continue = false;
         spooler->set_state( Spooler::s_paused );
 
         string error_code = "ERRNO-" + as_string( spooler->_waiting_errno );
         zschimmer::Xc x ( error_code.c_str(), filename.c_str() );
-      //string error_text = S() << "ERRNO-" << spooler->_waiting_errno << "  " << strerror( spooler->_waiting_errno );
 
         Z_LOGI2( "scheduler", "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
 
@@ -223,18 +221,7 @@ static void io_error( Spooler* spooler, const string& filename )
                                       "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
 
         scheduler_event.send_mail( mail_defaults );
-/*
-        spooler->send_error_email( "SCHEDULER SUSPENDED:  " + error_text,
-                                   "Job Scheduler is suspended due to disk space shortage.\n"
-                                   "\n" + 
-                                   error_text + "\n"
-                                   "File " + filename + "\n"
-                                   "\n"
-                                   "You can continue the Job Scheduler as soon as there is enough disk space.\n"
-                                   "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
-*/
 
-        //while( !spooler->_waiting_errno_continue )
         while( spooler->_state_cmd != Spooler::sc_continue )
         {
             int wait_seconds = 1;
@@ -420,8 +407,6 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
 
     if( len > 0 )
     {
-        //if( log && log_ptr )  _log_line.append( text, len );
-
         if( _file != -1  && 
             ( !_spooler->_log_to_stderr ||  _file != fileno(stderr) ) )     // Nicht doppelt nach stderr schreiben
         {
@@ -472,9 +457,6 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
 {
     if( this == NULL )  return;
 
-    //if( _file == -1 )  return;
-            
-
     if( !log_to_files )
     {
         if( !log_category_is_set( "scheduler" ) )  return;
@@ -487,8 +469,6 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
     string line = line_;
     for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
 
-    //assert( !line.empty() );
-        
     
     THREAD_LOCK( _semaphore )
     {
@@ -508,7 +488,6 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
         
         switch( level )
         {
-          //case log_fatal: strcpy ( level_buffer, " [FATAL]  " );  break;
             case log_error: strcpy ( level_buffer, " [ERROR]  " );  break;
             case log_warn : strcpy ( level_buffer, " [WARN]   " );  break;
             case log_info : strcpy ( level_buffer, " [info]   " );  break;
@@ -605,7 +584,6 @@ Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
     _file(-1),
-  //_log_level(log_unknown),
     _mail_defaults(NULL)
 {
 }
@@ -620,7 +598,6 @@ Prefix_log::Prefix_log( Scheduler_object* o )
     _log(&o->_spooler->_base_log),
     _prefix( o->obj_name() ),
     _file(-1),
-  //_log_level(log_unknown),
     _mail_defaults(NULL),
     _last_level( log_unknown )
 {
@@ -646,13 +623,11 @@ void Prefix_log::init( Scheduler_object* o, const string& prefix )
     _log     = &o->_spooler->_base_log;
     _prefix  = prefix;
 
-  //_log_level       = _spooler->_log_level;
     _mail_on_warning = _spooler->_mail_on_warning;
     _mail_on_error   = _spooler->_mail_on_error;
     _mail_on_process = _spooler->_mail_on_process;
     _mail_on_success = _spooler->_mail_on_success;
     _mail_on_delay_after_error = _spooler->_mail_on_delay_after_error;
-  //_subject         = _spooler->_log_mail_subject;
     _collect_within  = _spooler->_log_collect_within;
     _collect_max     = _spooler->_log_collect_max;
 }
@@ -679,9 +654,28 @@ void Prefix_log::set_profile_section( const string& section )
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
         _mail_on_delay_after_error = read_profile_yes_no_last_both( _spooler->_factory_ini, _section, "mail_on_delay_after_error", _mail_on_delay_after_error );
-      //_subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
         _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
         _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
+    }
+}
+
+//---------------------------------------------------------------------Prefix_log::set_dom_settings
+
+void Prefix_log::set_dom_settings( xml::Element_ptr settings_element )
+{
+    if( settings_element )
+    {
+        if( xml::Element_ptr e = settings_element.select_node( "log_level"          ) )  _log_level = make_log_level( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "mail_on_error"      ) )  _mail_on_error   = as_bool( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "mail_on_warning"    ) )  _mail_on_warning = as_bool( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "mail_on_success"    ) )  _mail_on_success = as_bool( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "mail_on_process"    ) )  _mail_on_process = as_bool( e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "mail_on_delay_after_error" ) )  _mail_on_delay_after_error = make_yes_no_last_both( "mail_on_delay_after_error", e.text(), _mail_on_delay_after_error );
+        if( xml::Element_ptr e = settings_element.select_node( "log_mail_to"        ) )  _mail_defaults.set( "to" , e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "log_mail_cc"        ) )  _mail_defaults.set( "cc" , e.text() );
+        if( xml::Element_ptr e = settings_element.select_node( "log_mail_bcc"       ) )  _mail_defaults.set( "bcc", e.text() );
+
+        if( _mail )  _mail->set_mail_defaults( _mail_defaults );
     }
 }
 
@@ -696,15 +690,8 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
     _mail_on_process = other._mail_on_process;
     _mail_on_success = other._mail_on_success;
     _mail_on_delay_after_error = other._mail_on_delay_after_error;
-  //_subject         = other._subject;
     _collect_within  = other._collect_within;
     _collect_max     = other._collect_max;
-  //_smtp_server     = other._smtp_server;
-  //_queue_dir       = other._queue_dir;
-  //_from            = other._from;
-  //_to              = other._to;
-  //_cc              = other._cc;
-  //_bcc             = other._bcc;
 
     _mail_defaults = other._mail_defaults;
     if( _mail )  _mail->set_mail_defaults( _mail_defaults );
@@ -732,9 +719,6 @@ void Prefix_log::open()
 {
     if( !is_active() )
     {
-        //2005-09-22  reset_highest_level();
-        //2005-09-22  _highest_msg = "";
-        
         _is_finished = false;
 
         if( _file != -1 )  return; //z::throw_xc( "SCHEDULER-134", _filename );
@@ -785,21 +769,6 @@ void Prefix_log::close()
     if( _file != -1 )  
     {
         finish_log();
-
-        /*
-        try
-        {
-            //if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
-            {
-                Scheduler_event::Scheduler_event_type event_code = _object->scheduler_type_code() == Scheduler_object::type_task? evt_task_ended 
-                                                                                                                      : evt_unknown;
-                Scheduler_event scheduler_event ( event_code, highest_level(), _object );
-                send_really( &scheduler_event );
-            }
-        }
-        catch( const exception&  x ) { _spooler->log()->error(x.what());                         _remove_after_close = false; }
-        catch( const _com_error& x ) { _spooler->log()->error(bstr_as_string(x.Description()));  _remove_after_close = false; }
-        */
     }
 
     _log = NULL;
@@ -833,8 +802,6 @@ void Prefix_log::finish_log()
         {
             log( log_info, message_string( "SCHEDULER-963", _new_filename ) );
             copy_file( _filename, _new_filename );
-            //int ret = rename( _filename.c_str(), _new_filename.c_str() );
-            //if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );
             _new_filename = "";
         }
 
@@ -869,8 +836,6 @@ void Prefix_log::close_file()
     {
         try
         {
-            //Z_LOG2( "scheduler", "close(" << _file << ")\n" );
-
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
         }
@@ -890,10 +855,6 @@ void Prefix_log::remove_file()
     }
     catch( const exception&  x ) 
     { 
-        #ifdef Z_DEBUG
-            if( log_category_is_set( "zschimmer" ) )  assert( "Prefix_log::remove_file" );
-        #endif
-
         _spooler->log()->error( message_string( "SCHEDULER-291", x ) );       // Kann bei "http://.../show_log?" passieren
     }
 }
@@ -960,8 +921,6 @@ void Prefix_log::set_mail_default( const string& field_name, const string& value
 
 Com_mail* Prefix_log::imail()
 {
-    //HRESULT hr;
-
     if( !_mail )
     {
         if( !_mail_defaults_set )  set_mail_defaults();
@@ -971,60 +930,14 @@ Com_mail* Prefix_log::imail()
         mail->init();
         mail->use_queue_defaults( _mail_defaults );
         mail->use_smtp_default  ( _mail_defaults );
+        mail->set_mail_defaults ( _mail_defaults );
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
-/*
-        if( _smtp_server != "-" )
-        {
-            hr = _mail->put_Smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::smtp_server", _smtp_server.c_str() );
-        }
-
-        if( _queue_dir != "-" )
-        {
-            hr = _mail->put_Queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::queue_dir", _smtp_server.c_str() );
-        }
-        if( _mail_defaults[ "queue_dir" ] != "-" )
-        {
-            hr = _mail->put_Queue_dir( Bstr(_mail_defaults[ "queue_dir" ]) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::queue_dir", _queue_dir.c_str() );
-        }
-*/
-
-        /*
-        if( _smtp_server != "-" )  _mail->set_smtp( _smtp_server );
-        if( _from        != "-" )  _mail->set_from( _from );
-                                   _mail->set_to  ( _to   );
-        if( _cc          != "-" )  _mail->set_cc  ( _cc   );
-        if( _bcc         != "-" )  _mail->set_bcc ( _bcc  );
-        */
-        //_mail->set_defaults( _mail_defaults );
-        //set_mail_header();
-
-        // Vorbesetzungen von spooler_task.cxx:
-        /*
-        if( !_from_name.empty() )  set_mail_from_name( _from_name, true ),  _from_name = "";   
-        if( !_subject  .empty() )  set_mail_subject  ( _subject         ),  _subject   = "";
-        if( !_body     .empty() )  set_mail_body     ( _body            ),  _body      = "";
-        */
-
-        //_mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), Bstr( _job_name ) );
     }
 
     return _mail;
 }
 
-//----------------------------------------------------------------------Prefix_log::set_mail_header
-/*
-void Prefix_log::set_mail_header()
-{
-    HRESULT hr = NOERROR;
-
-    if( _from != "-" )  hr = _mail->put_From( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from", _from.c_str() );
-                        hr = _mail->put_To  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::to"  , _to.c_str() );
-    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::cc"  , _cc.c_str() );
-    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::cc"  , _cc.c_str() );
-    if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::bcc" , _bcc.c_str() );
-}
-*/
 //-----------------------------------------------------------------------Prefix_log::start_new_file
 
 void Prefix_log::start_new_file()
@@ -1039,139 +952,31 @@ void Prefix_log::start_new_file()
     _log->start_new_file();
 }
 
-//-------------------------------------------------------------------Prefix_log::set_mail_from_name
-/*
-void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
-{
-    HRESULT hr;
-
-    if( _mail )
-    {
-        if( !overwrite )
-        {
-            Bstr from_bstr;
-            hr = _mail->get_From( &from_bstr._bstr );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from" );
-
-            if( SysStringLen(from_bstr) > 0 )  return;
-        }
-
-        Bstr old_from;
-        hr = _mail->get_From( &old_from._bstr );                        if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from" );
-        if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
-        {
-            string from = '"' + from_name + "\" <" + bstr_as_string(old_from) + ">";
-            Bstr from_bstr = from;
-            hr = _mail->put_From( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::from", from.c_str() );
-        }
-    }
-    else
-    {
-        if( !_from_name.empty()  &&  !overwrite )  return;
-        _from_name = from_name;
-    }
-}
-*/
-//---------------------------------------------------------------------Prefix_log::set_mail_subject
-/*
-void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
-{
-    HRESULT hr;
-
-    if( _mail )
-    {
-        if( !overwrite )
-        {
-            Bstr subject_bstr;
-            hr = _mail->get_Subject( &subject_bstr._bstr );  if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::subject" );
-
-            if( SysStringLen(subject_bstr) > 0 )  return;
-        }
-
-        hr = _mail->put_Subject( Bstr(subject) );     if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::subject", subject.c_str() );
-    }
-    else
-    {
-        if( !_subject.empty()  &&  !overwrite )  return;
-        _subject = subject;
-    }
-}
-*/
-//------------------------------------------------------------------------Prefix_log::set_mail_body
-/*
-void Prefix_log::set_mail_body( const string& body, bool overwrite )
-{
-    HRESULT hr;
-
-    if( _mail )
-    {
-        if( !overwrite )
-        {
-            Bstr body_bstr;
-            hr = _mail->get_Body( &body_bstr._bstr );   if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::body" );
-
-            if( SysStringLen(body_bstr) > 0 )  return;
-        }
-
-        hr = _mail->put_Body( Bstr(body) );             if( FAILED(hr) ) throw_ole( hr, "scheduler::Mail::body", body.c_str() );
-    }
-    else
-    {
-        if( !_body.empty()  &&  !overwrite )  return;
-        _body = body;
-    }
-}
-*/
 //---------------------------------------------------------------------------------Prefix_log::send
 
 void Prefix_log::send( Scheduler_event* scheduler_event )
 {
     if( !is_active()  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
-  //if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
-        //Z_LOG2( "zschimmer", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
         _mail = NULL;
     }
     else
     {
-        //bool mail_it =  _mail_it
-        //             || reason == -1  &&  ( _mail_on_error | _mail_on_warning )
-        //             || reason ==  0  &&  _mail_on_success
-        //             || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process )
-        //             || _mail_on_warning  &&  _last.find( log_warn ) != _last.end();
-
         Time now = Time::now();
 
-        //if( _first_send == 0  &&  !mail_it )
-        //{
-        //    finish_log();    // Protokoll nicht senden
-        //    _mail = NULL;
-        //}
-        //else
-        {
-            if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
-            if( _first_send == 0  ||  _first_send > now )  _first_send = now;
+        if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
+        if( _first_send == 0  ||  _first_send > now )  _first_send = now;
 
-            //Z_LOG2( "scheduler", "Prefix_log::send now=" << now << " _last_send+collect_within=" << Time(_last_send + _collect_within) << " _first_send+collectmax=" << Time(_first_send + _collect_max) << "\n" );
-            //Z_LOG2( "scheduler", "Prefix_log::send now=" << now << " collect_within=" << _collect_within << " collectmax=" << _collect_max << "\n" );
-            //Z_LOG2( "scheduler", "now >= _last_send + _collect_within:  " << (now >= _last_send + _collect_within) << "\n" );
-            //Z_LOG2( "scheduler", "now >= _first_send + _collect_max  :  " << (now >= _first_send + _collect_max) << "\n" );
 
-          //if( reason == -1  &&  _mail_on_error                 // Fehler?
-          // || now >= _last_send  + _collect_within - 0.001     // Nicht mehr sammeln?  (ohne -0.001 liefert der Ausdruck manchmal false).
-          // || now >= _first_send + _collect_max    - 0.001 )   // Lange genug gesammelt?
-            {
-                // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
-                // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
-                // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
+        // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
+        // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
+        // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
-                // Datei kann offen bleiben   //finish_log();
-                //Z_LOG2( "zschimmer", "Prefix_log::send_really()\n" );
-                send_really( scheduler_event );
+        // Datei kann offen bleiben   //finish_log();
+        send_really( scheduler_event );
 
-                _first_send = 0;
-            }
-        }
+        _first_send = 0;
     }
  
     _last_send = Time::now();

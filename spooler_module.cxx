@@ -569,7 +569,7 @@ ptr<Module_instance> Module::create_instance()
 
     if( !_monitors->is_empty() )
     {
-        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
+        //if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
         if( !_use_process_class )  
@@ -598,7 +598,7 @@ ptr<Module_instance> Module::create_instance_impl()
     Kind kind = _kind;
     
     if( _use_process_class  &&
-        ( _kind != kind_process  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
+        ( _kind != kind_process  ||  !_monitors->is_empty()  ||  process_class()->is_remote_host() ) )     // Nicht-API-Tasks (einfache Prozesse) nicht über Prozessklasse abwickeln
     {
         kind = kind_remote;                 
     }

@@ -100,6 +100,11 @@
             <phrase id="setting_references.api_property_has_priority=true.prefix">Die Eigenschaft</phrase>
             <phrase id="setting_references.api_property_has_priority=true.suffix">hat Vorrang</phrase>
 
+            <phrase id="setting_references.xml_element_has_priority=false.prefix">Das XML-Element</phrase>
+            <phrase id="setting_references.xml_element_has_priority=false.suffix">wird damit überschrieben</phrase>
+            <phrase id="setting_references.xml_element_has_priority=true.prefix">Das XML-Element</phrase>
+            <phrase id="setting_references.xml_element_has_priority=true.suffix">hat Vorrang</phrase>
+
             <phrase id="setting_references.option_has_priority=false.prefix">Die Option</phrase>
             <phrase id="setting_references.option_has_priority=false.suffix">wird damit überschrieben</phrase>
             <phrase id="setting_references.option_has_priority=true.prefix">Die Option</phrase>

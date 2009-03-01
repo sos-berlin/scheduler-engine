@@ -310,6 +310,8 @@ struct Job_history
                                 Job_history             ( Job* );
                                ~Job_history             ();
 
+    void                        read_profile_settings   ();
+    void                        set_dom_settings        ( xml::Element_ptr settings_element );
     void                        open                    (  Transaction* );
     void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }

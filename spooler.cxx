@@ -256,6 +256,22 @@ static void print_usage()
             "\n";
 }
 
+//----------------------------------------------------------------------------------test_read_value
+
+static void test_read_value()
+{
+    assert( make_history_on_process( "1", 0 ) == 1 );
+    assert( make_history_on_process( "yes", 1 ) == 1 );
+    assert( make_history_on_process( "no", 1 ) == 0 );
+    assert( make_history_on_process( "", 1 ) == 1 );
+    assert( make_history_on_process( "", 0 ) == 0 );
+
+    assert( make_archive( "yes" , arc_yes ) == arc_yes );
+    assert( make_archive( "no"  , arc_yes ) == arc_no );
+    assert( make_archive( "gzip", arc_yes ) == arc_gzip );
+    assert( make_archive( ""    , arc_no  ) == false );
+}
+
 //----------------------------------------------------------------------------------------self_test
 
 static void self_test()
@@ -272,6 +288,7 @@ static void self_test()
 
     Path::self_test();
     Absolute_path::self_test();
+    test_read_value();
 }
 
 //---------------------------------------------------------------------------------send_error_email
@@ -359,14 +376,23 @@ int read_profile_history_on_process( const string& profile, const string& sectio
     string result;
     string v = read_profile_string( profile, section, entry );
 
-    if( v == "" )  return deflt;
-
     try
     {
-        if( isdigit( (unsigned char)v[0] ) )  return as_int(v);
-                                        else  return as_bool(v)? 1 : 0;
+        return make_history_on_process( v, deflt );
     }
     catch( exception& x ) { z::throw_xc( "SCHEDULER-335", profile + " [" + section + "] " + entry, v, x ); }
+}
+
+//--------------------------------------------------------------------make_history_on_process
+
+int make_history_on_process( const string& v, int deflt )
+{
+    string result;
+
+    if( v == "" )  return deflt;
+
+    if( isdigit( (unsigned char)v[0] ) )  return as_int(v);
+                                    else  return as_bool(v)? 1 : 0;
 }
 
 //-----------------------------------------------------------------------------read_profile_archive
@@ -381,6 +407,16 @@ Archive_switch read_profile_archive( const string& profile, const string& sectio
     return read_profile_bool( profile, section, entry, false )? arc_yes : arc_no;
 }
 
+//-------------------------------------------------------------------------------make_archive
+
+Archive_switch make_archive( const string& value, Archive_switch deflt )
+{
+    if( value == "" )  return deflt;
+    if( lcase(value) == "gzip" )  return arc_gzip;
+
+    return as_bool( value )? arc_yes : arc_no;
+}
+
 //----------------------------------------------------------------------------read_profile_with_log
 
 With_log_switch read_profile_with_log( const string& profile, const string& section, const string& entry, With_log_switch deflt )
@@ -392,21 +428,26 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
 First_and_last read_profile_yes_no_last_both( const string& profile, const string& section, const string& entry, First_and_last deflt )
 {
+    return make_yes_no_last_both( entry, read_profile_string( profile, section, entry ), deflt );
+}
+
+//----------------------------------------------------------------------make_yes_no_last_both
+
+First_and_last make_yes_no_last_both( const string& setting_name, const string& value, First_and_last deflt )
+{
     First_and_last result;
 
-    string s = read_profile_string( profile, section, entry );
-
-    if( s == ""                    )  result = deflt;
+    if( value == ""                    )  result = deflt;
     else
-    if( s == "all"                 )  result = fl_all;
+    if( value == "all"                 )  result = fl_all;
     else
-    if( s == "first_only"          )  result = fl_first_only;
+    if( value == "first_only"          )  result = fl_first_only;
     else
-    if( s == "last_only"           )  result = fl_last_only;
+    if( value == "last_only"           )  result = fl_last_only;
     else
-    if( s == "first_and_last_only" )  result = fl_first_and_last_only;
+    if( value == "first_and_last_only" )  result = fl_first_and_last_only;
     else
-        z::throw_xc( "SCHEDULER-391", entry, s, "all, first_only, last_only, first_and_last_only" );
+        z::throw_xc( "SCHEDULER-391", setting_name, value, "all, first_only, last_only, first_and_last_only" );
 
     return result;
 }

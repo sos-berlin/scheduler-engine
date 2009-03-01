@@ -15,10 +15,46 @@
 
 
             <job name="javascript">
-
                 <script language="JavaScript">
                     <![CDATA[
 
+spooler_log.info( "from=" + spooler_log.mail.from );
+spooler_log.info( "to  =" + spooler_log.mail.to );
+spooler_log.info( "cc  =" + spooler_log.mail.cc );
+spooler_log.info( "bcc =" + spooler_log.mail.bcc );
+spooler_log.info( "subject=" + spooler_log.mail.body );
+spooler_log.info( "body=" + spooler_log.mail.body );
+spooler_log.info( "smtp=" + spooler_log.mail.smtp );
+spooler_log.info( "queue_dir=" + spooler_log.mail.queue_dir );
+
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+
+
+            <job name="settings">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_warning>yes</mail_on_warning>
+                    <mail_on_success>yes</mail_on_success>
+                    <mail_on_process>yes</mail_on_process>
+                    <mail_on_delay_after_error>first_only</mail_on_delay_after_error>
+                    <log_mail_to>test@example.com</log_mail_to>
+                    <log_mail_cc>test@example.com</log_mail_cc>
+                    <log_mail_bcc>test@example.com</log_mail_bcc>
+                    <log_level>debug4</log_level>
+                    <history>yes</history>
+                    <history_on_process>yes</history_on_process>
+                    <history_with_log>yes</history_with_log>
+                </settings>
+                
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.debug4( "DEBUG4" );
+spooler_log.debug5( "DEBUG5 soll nicht sichtbar sein" );
 spooler_log.info( "from=" + spooler_log.mail.from );
 spooler_log.info( "to  =" + spooler_log.mail.to );
 spooler_log.info( "cc  =" + spooler_log.mail.cc );
@@ -55,6 +91,10 @@ public class My_job  extends sos.spooler.Job_impl
 
 
             <job name="mail_on_error_1">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 
 spooler_log.error( "Fehlerzeile" );
@@ -66,6 +106,10 @@ spooler_log.error( "Fehlerzeile" );
 
             
             <job name="mail_on_error_2">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 spooler_log.unbekannte_methode();
                 ]]></script>
@@ -74,6 +118,10 @@ spooler_log.unbekannte_methode();
 
 
             <job name="mail_on_success">
+                <settings>
+                    <mail_on_success>yes</mail_on_success>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 function spooler_process()
 {
@@ -101,6 +149,10 @@ function spooler_process()
             
             
             <job name="mail_on_process">
+                <settings>
+                    <mail_on_process>yes</mail_on_process>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 n = 3;
 
@@ -115,6 +167,11 @@ function spooler_process()
 
             
             <job name="mail_on_delay_after_error_all_5_MAILS">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_delay_after_error>all</mail_on_delay_after_error>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 function spooler_process()
 {
@@ -128,6 +185,11 @@ function spooler_process()
 
             
             <job name="mail_on_delay_after_error_first_only_1_MAIL">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_delay_after_error>first_only</mail_on_delay_after_error>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 function spooler_process()
 {
@@ -141,6 +203,11 @@ function spooler_process()
 
             
             <job name="mail_on_delay_after_error_last_only_1_MAIL">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_delay_after_error>last_only</mail_on_delay_after_error>
+                </settings>
+
                 <script language="JavaScript"><![CDATA[
 function spooler_process()
 {
@@ -154,6 +221,11 @@ function spooler_process()
 
             
             <job name="mail_on_delay_after_error_first_and_last_only_2_MAILS">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_delay_after_error>first_and_last_only</mail_on_delay_after_error>
+                </settings>
+
                 <script language="JavaScript">
                     <![CDATA[
 FEHLER();
@@ -165,6 +237,11 @@ FEHLER();
 
 
             <job name="mail_on_delay_after_error_first_and_last_only_1_MAIL">
+                <settings>
+                    <mail_on_error>yes</mail_on_error>
+                    <mail_on_delay_after_error>first_and_last_only</mail_on_delay_after_error>
+                </settings>
+                
                 <script language="JavaScript">
                     <![CDATA[
 function spooler_process()
