@@ -566,10 +566,9 @@ ptr<Module_instance> Module::create_instance()
 {
     ptr<Module_instance> result = create_instance_impl();
 
-
     if( !_monitors->is_empty() )
     {
-        //if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
+        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
         if( !_use_process_class )  

@@ -753,8 +753,10 @@
 </register_keyword>
 <register_keyword keyword='history'>
     <register_keyword_display><code>&lt;history&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__history' register_title='Änderungsprotokoll'  register_keyword='history'/>
     <register_entry register_file='xml.xml#use_element__history' register_title='Alle XML-Elemente'  register_keyword='history'/>
     <register_entry register_file='xml/answer/history.xml#' register_title='&lt;history&gt; (Antwort)'  register_keyword='history' type='definition'/>
+    <register_entry register_file='xml/history.xml#' register_title='&lt;history&gt; (Konfiguration)'  register_keyword='history' type='definition'/>
     <register_entry register_file='xml/show_state.xml#use_element__history' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='history'/>
 </register_keyword>
 <register_keyword keyword='history'>
@@ -783,9 +785,21 @@
     <register_entry register_file='xml/show_order.xml#attribute_history_id' register_title='&lt;show_order&gt; (Kommando)'  register_keyword='history_id' type='definition'/>
 </register_keyword>
 <register_keyword keyword='history_on_process'>
+    <register_keyword_display><code>&lt;history_on_process&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__history_on_process' register_title='Änderungsprotokoll'  register_keyword='history_on_process'/>
+    <register_entry register_file='xml.xml#use_element__history_on_process' register_title='Alle XML-Elemente'  register_keyword='history_on_process'/>
+    <register_entry register_file='xml/history_on_process.xml#' register_title='&lt;history_on_process&gt; (Konfiguration)'  register_keyword='history_on_process' type='definition'/>
+</register_keyword>
+<register_keyword keyword='history_on_process'>
     <register_keyword_display><code>history_on_process=</code></register_keyword_display>
     <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='job' entry='history_on_process'/>
     <register_ini_entry register_file='datenbank.xml' register_title='Datenbank' file='factory.ini' section='spooler' entry='history_on_process'/>
+</register_keyword>
+<register_keyword keyword='history_with_log'>
+    <register_keyword_display><code>&lt;history_with_log&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__history_with_log' register_title='Änderungsprotokoll'  register_keyword='history_with_log'/>
+    <register_entry register_file='xml.xml#use_element__history_with_log' register_title='Alle XML-Elemente'  register_keyword='history_with_log'/>
+    <register_entry register_file='xml/history_with_log.xml#' register_title='&lt;history_with_log&gt; (Konfiguration)'  register_keyword='history_with_log' type='definition'/>
 </register_keyword>
 <register_keyword keyword='history_with_log'>
     <register_keyword_display><code>history_with_log=</code></register_keyword_display>
@@ -1416,11 +1430,29 @@
     <register_entry register_file='xml/answer/task.xml#attribute_log_file' register_title='&lt;task&gt; (Antwort)'  register_keyword='log_file' type='definition'/>
     <register_entry register_file='xml/process.xml#attribute_log_file' register_title='&lt;process&gt; (Konfiguration)'  register_keyword='log_file' type='definition'/>
 </register_keyword>
+<register_keyword keyword='log_level'>
+    <register_keyword_display><code>&lt;log_level&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__log_level' register_title='Änderungsprotokoll'  register_keyword='log_level'/>
+    <register_entry register_file='xml.xml#use_element__log_level' register_title='Alle XML-Elemente'  register_keyword='log_level'/>
+    <register_entry register_file='xml/log_level.xml#' register_title='&lt;log_level&gt; (Konfiguration)'  register_keyword='log_level' type='definition'/>
+</register_keyword>
+<register_keyword keyword='log_mail_bcc'>
+    <register_keyword_display><code>&lt;log_mail_bcc&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__log_mail_bcc' register_title='Änderungsprotokoll'  register_keyword='log_mail_bcc'/>
+    <register_entry register_file='xml.xml#use_element__log_mail_bcc' register_title='Alle XML-Elemente'  register_keyword='log_mail_bcc'/>
+    <register_entry register_file='xml/log_mail_bcc.xml#' register_title='&lt;log_mail_bcc&gt; (Konfiguration)'  register_keyword='log_mail_bcc' type='definition'/>
+</register_keyword>
 <register_keyword keyword='log_mail_bcc'>
     <register_keyword_display><code>log_mail_bcc=</code></register_keyword_display>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='job' entry='log_mail_bcc'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='spooler' entry='log_mail_bcc'/>
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='log_mail_bcc'/>
+</register_keyword>
+<register_keyword keyword='log_mail_cc'>
+    <register_keyword_display><code>&lt;log_mail_cc&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__log_mail_cc' register_title='Änderungsprotokoll'  register_keyword='log_mail_cc'/>
+    <register_entry register_file='xml.xml#use_element__log_mail_cc' register_title='Alle XML-Elemente'  register_keyword='log_mail_cc'/>
+    <register_entry register_file='xml/log_mail_cc.xml#' register_title='&lt;log_mail_cc&gt; (Konfiguration)'  register_keyword='log_mail_cc' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log_mail_cc'>
     <register_keyword_display><code>log_mail_cc=</code></register_keyword_display>
@@ -1439,6 +1471,12 @@
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='job' entry='log_mail_subject'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='spooler' entry='log_mail_subject'/>
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='log_mail_subject'/>
+</register_keyword>
+<register_keyword keyword='log_mail_to'>
+    <register_keyword_display><code>&lt;log_mail_to&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__log_mail_to' register_title='Änderungsprotokoll'  register_keyword='log_mail_to'/>
+    <register_entry register_file='xml.xml#use_element__log_mail_to' register_title='Alle XML-Elemente'  register_keyword='log_mail_to'/>
+    <register_entry register_file='xml/log_mail_to.xml#' register_title='&lt;log_mail_to&gt; (Konfiguration)'  register_keyword='log_mail_to' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log_mail_to'>
     <register_keyword_display><code>log_mail_to=</code></register_keyword_display>
@@ -1469,9 +1507,21 @@
     <register_entry register_file='xml/answer/log.xml#attribute_mail_from' register_title='&lt;log&gt; (Antwort)'  register_keyword='mail_from' type='definition'/>
 </register_keyword>
 <register_keyword keyword='mail_on_delay_after_error'>
+    <register_keyword_display><code>&lt;mail_on_delay_after_error&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__mail_on_delay_after_error' register_title='Änderungsprotokoll'  register_keyword='mail_on_delay_after_error'/>
+    <register_entry register_file='xml.xml#use_element__mail_on_delay_after_error' register_title='Alle XML-Elemente'  register_keyword='mail_on_delay_after_error'/>
+    <register_entry register_file='xml/mail_on_delay_after_error.xml#' register_title='&lt;mail_on_delay_after_error&gt; (Konfiguration)'  register_keyword='mail_on_delay_after_error' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail_on_delay_after_error'>
     <register_keyword_display><code>mail_on_delay_after_error=</code></register_keyword_display>
     <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='job' entry='mail_on_delay_after_error'/>
     <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='factory.ini' section='spooler' entry='mail_on_delay_after_error'/>
+</register_keyword>
+<register_keyword keyword='mail_on_error'>
+    <register_keyword_display><code>&lt;mail_on_error&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__mail_on_error' register_title='Änderungsprotokoll'  register_keyword='mail_on_error'/>
+    <register_entry register_file='xml.xml#use_element__mail_on_error' register_title='Alle XML-Elemente'  register_keyword='mail_on_error'/>
+    <register_entry register_file='xml/mail_on_error.xml#' register_title='&lt;mail_on_error&gt; (Konfiguration)'  register_keyword='mail_on_error' type='definition'/>
 </register_keyword>
 <register_keyword keyword='mail_on_error'>
     <register_keyword_display><code>mail_on_error=</code></register_keyword_display>
@@ -1481,6 +1531,12 @@
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='mail_on_error'/>
 </register_keyword>
 <register_keyword keyword='mail_on_process'>
+    <register_keyword_display><code>&lt;mail_on_process&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__mail_on_process' register_title='Änderungsprotokoll'  register_keyword='mail_on_process'/>
+    <register_entry register_file='xml.xml#use_element__mail_on_process' register_title='Alle XML-Elemente'  register_keyword='mail_on_process'/>
+    <register_entry register_file='xml/mail_on_process.xml#' register_title='&lt;mail_on_process&gt; (Konfiguration)'  register_keyword='mail_on_process' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail_on_process'>
     <register_keyword_display><code>mail_on_process=</code></register_keyword_display>
     <register_entry register_file='xml/answer/log.xml#attribute_mail_on_process' register_title='&lt;log&gt; (Antwort)'  register_keyword='mail_on_process' type='definition'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='job' entry='mail_on_process'/>
@@ -1488,11 +1544,23 @@
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='mail_on_process'/>
 </register_keyword>
 <register_keyword keyword='mail_on_success'>
+    <register_keyword_display><code>&lt;mail_on_success&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__mail_on_success' register_title='Änderungsprotokoll'  register_keyword='mail_on_success'/>
+    <register_entry register_file='xml.xml#use_element__mail_on_success' register_title='Alle XML-Elemente'  register_keyword='mail_on_success'/>
+    <register_entry register_file='xml/mail_on_success.xml#' register_title='&lt;mail_on_success&gt; (Konfiguration)'  register_keyword='mail_on_success' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail_on_success'>
     <register_keyword_display><code>mail_on_success=</code></register_keyword_display>
     <register_entry register_file='xml/answer/log.xml#attribute_mail_on_success' register_title='&lt;log&gt; (Antwort)'  register_keyword='mail_on_success' type='definition'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='job' entry='mail_on_success'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='factory.ini' section='spooler' entry='mail_on_success'/>
     <register_ini_entry register_file='xml/answer/log.xml' register_title='&lt;log&gt; (Antwort)' file='factory.ini' section='spooler' entry='mail_on_success'/>
+</register_keyword>
+<register_keyword keyword='mail_on_warning'>
+    <register_keyword_display><code>&lt;mail_on_warning&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__mail_on_warning' register_title='Änderungsprotokoll'  register_keyword='mail_on_warning'/>
+    <register_entry register_file='xml.xml#use_element__mail_on_warning' register_title='Alle XML-Elemente'  register_keyword='mail_on_warning'/>
+    <register_entry register_file='xml/mail_on_warning.xml#' register_title='&lt;mail_on_warning&gt; (Konfiguration)'  register_keyword='mail_on_warning' type='definition'/>
 </register_keyword>
 <register_keyword keyword='mail_on_warning'>
     <register_keyword_display><code>mail_on_warning=</code></register_keyword_display>
@@ -2400,6 +2468,11 @@
 <register_keyword keyword='setback_count'>
     <register_keyword_display><code>setback_count=</code></register_keyword_display>
     <register_entry register_file='xml/delay_order_after_setback.xml#attribute_setback_count' register_title='&lt;delay_order_after_setback&gt; (Konfiguration)'  register_keyword='setback_count' type='definition'/>
+</register_keyword>
+<register_keyword keyword='settings'>
+    <register_keyword_display><code>&lt;settings&gt;</code></register_keyword_display>
+    <register_entry register_file='CHANGES.xml#use_element__settings' register_title='Änderungsprotokoll'  register_keyword='settings'/>
+    <register_entry register_file='xml/settings.xml#' register_title='&lt;settings&gt; (Konfiguration)'  register_keyword='settings' type='definition'/>
 </register_keyword>
 <register_keyword keyword='show-xml-schema'>
     <register_keyword_display><code>-show-xml-schema=</code></register_keyword_display>

@@ -10,8 +10,29 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <!--
+    <change date="2009-03-02" version="2.0.221" subversion_revision="5972">
+        <revision type="new" title="Monitor für Shell-Jobs">
+            <description>
+                <p>
+                    Ein <scheduler_element name="monitor"/> kann jetzt auch für Nicht-API-Jobs angegeben werden.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="monitor"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
 
-    <change date="2009-03-01" version="2.0.221" subversion_revision="5971">
+        <revision type="modification" title="Datenbankproblem mit der Stunde zwischen Winter- und Sommerzeit gelöst">
+        </revision>
+    </change>
+    -->
+
+    <change date="2009-03-02" version="2.0.220" subversion_revision="5972">
+        <revision type="correction" title="Nach kill -9 wird Dauerauftrag nicht mehr sofort beim nächsten Scheduler-Lauf gestartet"/>
+        
         <revision type="new" title="&lt;settings> in &lt;job>">
             <description>
                 <ul>
@@ -56,22 +77,6 @@
                     </li>
                 </ul>
             </description>
-        </revision>
-
-        <revision type="new" title="Monitor für Shell-Jobs">
-            <description>
-                <p>
-                    Ein <scheduler_element name="monitor"/> kann jetzt auch für Nicht-API-Jobs angegeben werden.
-                </p>
-                <ul>
-                    <li>
-                        <scheduler_element name="monitor"/>
-                    </li>
-                </ul>
-            </description>
-        </revision>
-
-        <revision type="modification" title="Datenbankproblem mit der Stunde zwischen Winter- und Sommerzeit gelöst">
         </revision>
     </change>
 

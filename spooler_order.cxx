@@ -6712,8 +6712,10 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
         if( ptr<Order> other_order = job_chain->_order_id_space? job_chain->_order_id_space->order_or_null( string_id() )
                                                                : job_chain->order_or_null( id() ) )  // Nicht aus der Datenbank gelesen
         {
-            other_order->remove_from_job_chain();
-            place_in_job_chain( job_chain );
+            if( other_order != this ) {
+                other_order->remove_from_job_chain();
+                place_in_job_chain( job_chain );
+            }
 
             if( other_order->_task )
             {
