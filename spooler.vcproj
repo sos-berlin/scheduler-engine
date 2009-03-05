@@ -416,6 +416,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Module_monitor_instances.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\path.cxx"
 				>
 			</File>
@@ -686,6 +690,10 @@
 			</File>
 			<File
 				RelativePath=".\lock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Module_monitor_instances.h"
 				>
 			</File>
 			<File

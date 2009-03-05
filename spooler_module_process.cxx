@@ -153,6 +153,10 @@ bool Process_module_instance::load()
     bool ok = Module_instance::load();
     if( !ok )  return ok;
 
+    ok = check_result( _monitor_instances.spooler_process_before() );
+    if( !ok )  return ok;
+    _spooler_process_before_called = true;
+
     if( _module->_process_filename == "" )
     {
         string script = _module->read_source_script();
@@ -265,6 +269,9 @@ void Process_module_instance::close__end()
         _stdout_logged = true;
     }
     */
+
+    if( _spooler_process_before_called )
+        _monitor_instances.spooler_process_after( false );
 
     Module_instance::close__end();
 }

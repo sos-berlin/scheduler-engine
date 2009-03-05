@@ -4,6 +4,7 @@
 #define __SPOOLER_MODULE_H
 
 #include <jni.h>
+#include "Module_monitor_instances.h"
 
 namespace sos {
 namespace scheduler {
@@ -354,8 +355,7 @@ struct Module_instance : Object
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
 
-    typedef std::list< ptr<Module_monitor_instance> >  Module_monitor_instance_list;
-    Module_monitor_instance_list  _monitor_instance_list;
+    Module_monitor_instances   _monitor_instances;
 
     Fill_end                   _end_;
 };
@@ -413,23 +413,6 @@ struct Module_monitor_instance : Object
     ptr<Module_instance>       _module_instance;
     string                     _obj_name;
 };
-
-////-------------------------------------------------------------------------Module_monitor_instances 
-//
-//struct Module_monitor_instances : Object
-//{
-//                                Module_monitor_instances    ( Module_monitors* monitors )           : _zero_(this+1), _monitors(monitors) {}
-//    void                        close                       ();
-//    void                        create_instances            ();
-//
-//    Fill_zero                  _zero_;
-//    //typedef stdext::hash_map< string, ptr<Module_monitor_instance> > Monitor_instance_map;
-//    //Monitor_instance_map       _monitor_instance_map;
-//    Module_instance_list       _module_instance_list;
-//
-//  private:
-//    Module_monitors*           _monitors;
-//};
 
 //-------------------------------------------------------------------------------------------------
 

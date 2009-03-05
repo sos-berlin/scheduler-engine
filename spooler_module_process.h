@@ -79,6 +79,7 @@ struct Process_module_instance : Module_instance
 #   endif
 
     ptr<Thread>                _kill_thread;
+    bool                       _spooler_process_before_called;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -31,96 +31,9 @@ extern const string spooler_on_success_name     = "spooler_on_success()V";
 extern const string spooler_api_version_name    = "spooler_api_version()Ljava.lang.String;";
 const string        default_monitor_name        = "scheduler";
 
-// Monitor-Methoden:
-const string spooler_task_before_name    = "spooler_task_before()Z";       
-const string spooler_task_after_name     = "spooler_task_after()V";
-const string spooler_process_before_name = "spooler_process_before()Z";    
-const string spooler_process_after_name  = "spooler_process_after(Z)Z";    
-
 const string shell_language_name         = "shell";
 
 const int encoding_code_page_none        = -1;
-
-////-------------------------------------------------------------------------Source_part::Source_part
-//
-//Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
-//: 
-//    _linenr(linenr), 
-//    _text(text), 
-//    _modification_time(mod_time) 
-//{
-//}
-//
-////-------------------------------------------------------------------------Source_part::dom_element
-//    
-//xml::Element_ptr Source_part::dom_element( const xml::Document_ptr& doc ) const
-//{
-//    xml::Element_ptr part_element = doc.createElement( "part_element" );
-//
-//    part_element.setAttribute( "linenr", as_string( _linenr ) );
-//    part_element.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
-//    part_element.appendChild( doc.createTextNode( _text ) );
-//
-//    return part_element;
-//}
-//
-////-------------------------------------------------------------------Source_with_parts::dom_element
-//
-//xml::Element_ptr Source_with_parts::dom_element( const xml::Document_ptr& doc ) const
-//{
-//    xml::Element_ptr source_element = doc.createElement( "source" );
-//
-//    Z_FOR_EACH_CONST( Parts, _parts, part )
-//    {
-//        xml::Element_ptr part_element = part->dom_element(doc);
-//        source_element.appendChild( part_element );
-//    }
-//
-//    return source_element;
-//}
-//
-////------------------------------------------------------------------Source_with_parts::dom_document
-//
-//xml::Document_ptr Source_with_parts::dom_document() const
-//{
-//    xml::Document_ptr doc;
-//
-//    doc.create();
-//    doc.appendChild( dom_element(doc) );
-//
-//    return doc;
-//}
-//
-////--------------------------------------------------------------------Source_with_parts::assign_dom
-//// Für spooler_module_remote_server.cxx
-//
-//void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
-//{
-//    clear();
-//
-//    if( !source_element.nodeName_is( "source" ) )  throw_xc( Z_FUNCTION );
-//
-//    DOM_FOR_EACH_ELEMENT( source_element, part )
-//    {
-//        Sos_optional_date_time dt = part.getAttribute( "modtime" );
-//        add( part.int_getAttribute( "linenr", 1 ), part.getTextContent(), dt.time_as_double() );
-//    }
-//}
-//
-////---------------------------------------------------------------------------Source_with_parts::add
-//
-//void Source_with_parts::add( int linenr, const string& text, const Time& mod_time )
-//{
-//    // text ist nicht leer?
-//    int i;
-//    for( i = 0; i < text.length(); i++ )  if( !isspace( (unsigned char)text[i] ) )  break;
-//    if( i < text.length() )
-//    {
-//        _parts.push_back( Source_part( linenr, text, mod_time ) );
-//    }
-//
-//    if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
-//}
 
 //-----------------------------------------------------------Text_with_includes::Text_with_includes
 
@@ -568,19 +481,11 @@ ptr<Module_instance> Module::create_instance()
 
     if( !_monitors->is_empty() )
     {
-        if( _kind == kind_process  )  z::throw_xc( "SCHEDULER-315" );
         if( _kind == kind_internal )  z::throw_xc( "SCHEDULER-315", "Internal job" );
         
         if( !_use_process_class )  
         {
-            vector<Module_monitor*> ordered_monitors = _monitors->ordered_monitors();
-
-            Z_FOR_EACH( vector<Module_monitor*>, ordered_monitors, m )
-            {
-                Module_monitor* monitor = *m;
-
-                result->_monitor_instance_list.push_back( Z_NEW( Module_monitor_instance( monitor, monitor->_module->create_instance() ) ) );
-            }
+            result->_monitor_instances.create_instances();
         }
     }
 
@@ -751,7 +656,8 @@ Module_instance::Module_instance( Module* module )
     _zero_(_end_), 
     _spooler(module->_spooler),
     _module(module),
-    _log(module?module->_log:NULL)
+    _log(module?module->_log:NULL),
+    _monitor_instances( &_log, _module->_monitors )
 {
     _com_task    = new Com_task;
     _com_log     = new Com_log;
@@ -785,14 +691,7 @@ void Module_instance::init()
 
     if( !_module->set() )  z::throw_xc( "SCHEDULER-146" );
 
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            (*m)->_module_instance->init();
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.init();
 }
 
 //---------------------------------------------------------------------------Module_instance::clear
@@ -800,15 +699,7 @@ void Module_instance::init()
 void Module_instance::clear()
 { 
     _object_list.clear(); 
-
-    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            (*m)->_module_instance->clear();
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.clear_instances();
 }
 
 //--------------------------------------------------------------------Module_instance::set_job_name
@@ -816,15 +707,7 @@ void Module_instance::clear()
 void Module_instance::set_job_name( const string& job_name )
 {
     _job_name = job_name; 
-
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            (*m)->_module_instance->set_job_name( job_name );
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.set_job_name( job_name );
 }
 
 //---------------------------------------------------------------------Module_instance::set_task_id
@@ -832,15 +715,7 @@ void Module_instance::set_job_name( const string& job_name )
 void Module_instance::set_task_id( int id )
 { 
     _task_id = id; 
-
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            (*m)->_module_instance->set_task_id( id );
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.set_task_id( id );
 }
 
 //-------------------------------------------------------------------------Module_instance::set_log
@@ -857,15 +732,7 @@ void Module_instance::set_log( Prefix_log* log )
 void Module_instance::set_log( Has_log* log )
 { 
     _log = log; 
-
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )
-    {
-        try
-        {
-            (*m)->_module_instance->set_log( log );
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.set_log( log );
 }
 
 //--------------------------------------------------------------------------------Task::set_in_call
@@ -891,16 +758,7 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
     _task_id = task->id();
     //_title = task->obj_name();          // Titel für Prozess
-
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )
-    {
-        try
-        {
-            (*m)->_module_instance->attach_task( task, log );
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
-
+    _monitor_instances.attach_task( task, log );
 
     _has_order = task->order() != NULL;      // Rückgabe von Auftragsparametern über Datei ermöglichen
 
@@ -978,29 +836,14 @@ void Module_instance::detach_task()
     _task = NULL;
     _task_id = 0;
     //_title = "";
-
-    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )
-    {
-        try
-        {
-            (*m)->_module_instance->detach_task();
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.detach_task();
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj
 
 void Module_instance::add_obj( IDispatch* object, const string& name )
 {
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            (*m)->_module_instance->add_obj( object, name );
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
+    _monitor_instances.add_obj( object, name );
 }
 
 //--------------------------------------------------------------------------Module_instance::object
@@ -1028,30 +871,8 @@ IDispatch* Module_instance::object( const string& name, IDispatch* deflt )
 
 bool Module_instance::load()
 {
-    bool ok = true;
-
-    Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        try
-        {
-            Module_monitor_instance* monitor_instance = *m;
-
-            if( !monitor_instance->_module_instance->_load_called )  
-            {
-                ok = monitor_instance->_module_instance->implicit_load_and_start();
-                if( !ok )  return false;
-
-                Variant result = monitor_instance->_module_instance->call_if_exists( spooler_task_before_name );
-                if( !result.is_missing() )  ok = check_result( result );
-
-                if( !ok )  break;
-            }
-        }
-        catch( exception& x ) { z::throw_xc( "SCHEDULER-447", (*m)->obj_name(), x ); }
-    }
-
+    bool ok = _monitor_instances.load();
     _load_called = true;
-
     return ok;
 }
 
@@ -1150,30 +971,8 @@ void Module_instance::detach_process()
 
 void Module_instance::close_monitor()
 {
-    Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
-    {
-        Module_monitor_instance* monitor_instance = *m;
-
-        try
-        {
-            monitor_instance->_module_instance->call_if_exists( spooler_task_after_name );
-        }
-        catch( exception& x )
-        {
-            _log.error( monitor_instance->obj_name() + " " + spooler_task_after_name + ": " + x.what() );
-        }
-
-        try
-        {
-            monitor_instance->_module_instance->close();
-        }
-        catch( exception& x )
-        {
-            _log.error( monitor_instance->obj_name() + " " + x.what() );
-        }
-    }
-
-    _monitor_instance_list.clear();
+    _monitor_instances.close_instances();
+    _monitor_instances.clear_instances();
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
@@ -1256,19 +1055,13 @@ Variant Module_instance::step__end()
 {
     Variant result;
 
-    if( _monitor_instance_list.empty() )
+    if( _monitor_instances.is_empty() )
     {
         result = call_if_exists( spooler_process_name );
     }
     else
     {
-        Z_FOR_EACH( Module_monitor_instance_list, _monitor_instance_list, m )  
-        {
-            Module_monitor_instance* monitor_instance = *m;
-
-            result = monitor_instance->_module_instance->call_if_exists( spooler_process_before_name );
-            if( !check_result( result ) )  break;
-        }
+        result = _monitor_instances.spooler_process_before();
 
         if( check_result( result ) )
         {
@@ -1292,13 +1085,7 @@ Variant Module_instance::step__end()
                 result = false;
             }
 
-            Z_FOR_EACH_REVERSE( Module_monitor_instance_list, _monitor_instance_list, m )  
-            {
-                Module_monitor_instance* monitor_instance = *m;
-
-                Variant call_result = monitor_instance->_module_instance->call_if_exists( spooler_process_after_name, check_result( result ) );
-                if( result.vt != VT_ERROR  &&  V_ERROR( &result ) != DISP_E_UNKNOWNNAME )  result = call_result;
-            }
+            result = _monitor_instances.spooler_process_after( result );
         }
     }
 

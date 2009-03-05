@@ -1908,11 +1908,11 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-315">
+        <!--<message code="SCHEDULER-315">
             <text xml:lang="en">
                 <title>&lt;monitor&gt; cannot be used with &lt;process&gt; or language="shell"</title>
             </text>
-        </message>
+        </message>-->
 
         <message code="SCHEDULER-316">
             <text xml:lang="en">

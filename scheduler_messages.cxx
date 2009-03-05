@@ -179,7 +179,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-312", "Variable \"$1\" (vt=$2) cannot be converted to Text: $3" },
     { "SCHEDULER-313", "Cannot store order in database: $1" },
     { "SCHEDULER-314", "Cannot open database. Scheduler is aborting immediately because of need_db=$1" },
-    { "SCHEDULER-315", "<monitor> cannot be used with <process> or language=\"shell\"" },
     { "SCHEDULER-316", "<web_service name=\"$1\"/>: attributes job_chain=/timeout= and request/response/forward_xslt_stylesheet= cannot be combined" },
     { "SCHEDULER-318", "Option -env=NAME=VALUE: missing '=' between name and value: -env=\"$1\"" },
     { "SCHEDULER-319", "XML-Element <$1> is not possible here" },

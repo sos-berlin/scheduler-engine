@@ -179,7 +179,9 @@ public class My_monitor  extends sos.spooler.Monitor_impl
 
     public void spooler_task_after()  throws Exception
     {
+        System.err.println( "eins" );
         spooler_log.info( "JAVA SPOOLER_TASK_AFTER" );
+        System.err.println( "zwei" );
     }
 
     public boolean spooler_process_before()  throws Exception
