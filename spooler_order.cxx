@@ -422,7 +422,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
     S select_sql_begin;
     select_sql_begin << "select ";
     if( database_orders_read_ahead_count < INT_MAX )  select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
-    select_sql_begin << "%texttimestamp( `distributed_next_time` ) as distributed_next_time, `job_chain`, `state`"
+    select_sql_begin << "%texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time, `job_chain`, `state`"
                       "  from " << _spooler->_orders_tablename <<
                       "  where `distributed_next_time` is not null"
                          " and `occupying_cluster_member_id` is null";
@@ -2349,7 +2349,7 @@ bool Job_chain::on_load()
 
                     Any_file result_set = ta.open_result_set
                         ( 
-                            S() << "select " << order_select_database_columns << ", %texttimestamp( `distributed_next_time` ) as distributed_next_time"
+                            S() << "select " << order_select_database_columns << ", %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time"
                             "  from " << _spooler->_orders_tablename <<
                             "  where " << db_where_condition() <<
                                " and `state` in ( " << join( ", ", state_sql_list ) << " )"
@@ -4326,7 +4326,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     string w = db_where_expression();
 
-    select_sql << "select %limit(1)  `job_chain`, %texttimestamp( `distributed_next_time` ) as distributed_next_time, " << order_select_database_columns <<
+    select_sql << "select %limit(1)  `job_chain`, %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time, " << order_select_database_columns <<
                 "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
                 "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( Time::without_ms ) ) <<
                    " and `occupying_cluster_member_id` is null" << 
@@ -5013,7 +5013,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
                 Any_file result_set = ta.open_result_set
                     ( 
-                        S() << "select %texttimestamp( `distributed_next_time` ) as distributed_next_time" 
+                        S() << "select %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time" 
                                " from " << _spooler->_orders_tablename << 
                                db_where_clause().where_string(), 
                         Z_FUNCTION 
