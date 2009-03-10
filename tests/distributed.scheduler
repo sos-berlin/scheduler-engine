@@ -43,7 +43,7 @@ function add_order( id )
 {
     var order = spooler.create_order();
     order.id    = id;
-  //order.at    = new Date( new Date().getTime() + 80 * 1000 );
+    order.at    = new Date( new Date().getTime() + 300 * 1000 );
     order.title = "____ .... Wir haben einen Auftrag!";
     var params = spooler.create_variable_set();
     params.value( "a" ) = "Die Umlaute: äöüßÄÖÜ";
