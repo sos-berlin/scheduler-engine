@@ -62,7 +62,8 @@ objects = \
  supervisor.o\
  supervisor_client.o\
  version.o\
- xml_client_connection.o
+ xml_client_connection.o\
+ Module_monitor_instances.o
 
 
 java_classes=\
