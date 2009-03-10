@@ -250,6 +250,17 @@ static void split_standing_order_name( const string& name, string* job_chain_nam
     *order_id = name.substr( pos );
 }
 
+//--------------------------------------------------------------------db_text_distributed_next_time
+// Für SqlServer: distributed_next_time kann zwischen Sommer- und Winterzeit liegen.
+// Bei einem Vergleich konvertiert SqlServer in einen echten Zeitstempel und stößt auf einen Fehler,
+// weil es die Stunde zwischen 2 und 3 nicht gibt.
+// Das Problem umgehen wir, wenn wir nach Text (ISO-Format) konvertierem.
+
+static string db_text_distributed_next_time()
+{
+    return "%texttimestamp(SCHEDULER_ORDERS.`distributed_next_time`)";
+}
+
 //-----------------------------------------------Standing_order_subsystem::Standing_order_subsystem
     
 Standing_order_subsystem::Standing_order_subsystem( Scheduler* scheduler )
@@ -422,7 +433,7 @@ bool Database_order_detector::async_continue_( Continue_flags )
     S select_sql_begin;
     select_sql_begin << "select ";
     if( database_orders_read_ahead_count < INT_MAX )  select_sql_begin << " %limit(" << database_orders_read_ahead_count << ") ";
-    select_sql_begin << "%texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time, `job_chain`, `state`"
+    select_sql_begin << db_text_distributed_next_time() << " as distributed_next_time, `job_chain`, `state`"
                       "  from " << _spooler->_orders_tablename <<
                       "  where `distributed_next_time` is not null"
                          " and `occupying_cluster_member_id` is null";
@@ -516,9 +527,9 @@ string Database_order_detector::make_where_expression_for_distributed_orders_at_
     Time t = order_queue->next_announced_distributed_order_time();
     assert( t );
 
-    result << " and `distributed_next_time` < " 
-           << db()->database_descriptor()->timestamp_string( t < Time::never? t.as_string( Time::without_ms ) 
-                                                                            : never_database_distributed_next_time );
+    string before = t < Time::never? t.as_string( Time::without_ms ) 
+                                   : never_database_distributed_next_time;
+    result << " and " << db_text_distributed_next_time() << " < " << sql::quoted( before );
 
     return result;
 }
@@ -706,8 +717,8 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
                    << order_select_database_columns << ", `job_chain`"
                       "  from " << _spooler->_orders_tablename <<
                     "  where `spooler_id`=" << sql::quoted(_spooler->id_for_db());
-        if(  options->_from              )  select_sql << " and `distributed_next_time` >= " << db()->database_descriptor()->timestamp_string( options->_from  .as_string(Time::without_ms) );
-        if( !options->_before.is_never() )  select_sql << " and `distributed_next_time` < "  << db()->database_descriptor()->timestamp_string( options->_before.as_string(Time::without_ms) );
+        if(  options->_from              )  select_sql << " and " << db_text_distributed_next_time() << " >= " << sql::quoted( options->_from  .as_string(Time::without_ms) );
+        if( !options->_before.is_never() )  select_sql << " and " << db_text_distributed_next_time() << " < "  << sql::quoted( options->_before.as_string(Time::without_ms) );
         else
         if( !options->_from              )  select_sql << " and `distributed_next_time` is not null ";
         
@@ -2349,7 +2360,8 @@ bool Job_chain::on_load()
 
                     Any_file result_set = ta.open_result_set
                         ( 
-                            S() << "select " << order_select_database_columns << ", %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time"
+                            S() << "select " << order_select_database_columns << ", " <<
+                                                db_text_distributed_next_time() << " as distributed_next_time"
                             "  from " << _spooler->_orders_tablename <<
                             "  where " << db_where_condition() <<
                                " and `state` in ( " << join( ", ", state_sql_list ) << " )"
@@ -4326,7 +4338,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
 
     string w = db_where_expression();
 
-    select_sql << "select %limit(1)  `job_chain`, %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time, " << order_select_database_columns <<
+    select_sql << "select %limit(1)  `job_chain`, " << db_text_distributed_next_time() << " as distributed_next_time, " << order_select_database_columns <<
                 "  from " << _spooler->_orders_tablename <<  //" %update_lock"  Oracle kann nicht "for update", limit(1) und "order by" kombinieren
                 "  where `distributed_next_time` <= " << db()->database_descriptor()->timestamp_string( now.as_string( Time::without_ms ) ) <<
                    " and `occupying_cluster_member_id` is null" << 
@@ -4859,7 +4871,8 @@ bool Order::db_occupy_for_processing()
 
     update.and_where_condition( "state"                      , state().as_string() );
     update.and_where_condition( "occupying_cluster_member_id", sql::null_value );
-    update.and_where_condition( "distributed_next_time"      , calculate_db_distributed_next_time() );
+    update.add_where( S() << " and " << db_text_distributed_next_time() << "=" + sql::quoted( calculate_db_distributed_next_time() ) );
+    //update.and_where_condition( "distributed_next_time"      , calculate_db_distributed_next_time() );
 
     bool update_ok = false;
 
@@ -5013,7 +5026,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
 
                 Any_file result_set = ta.open_result_set
                     ( 
-                        S() << "select %texttimestamp( SCHEDULER_ORDERS.`distributed_next_time` ) as distributed_next_time" 
+                        S() << "select " << db_text_distributed_next_time() << " as distributed_next_time" 
                                " from " << _spooler->_orders_tablename << 
                                db_where_clause().where_string(), 
                         Z_FUNCTION 
