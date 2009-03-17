@@ -769,22 +769,11 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
 
 void Module_instance::fill_process_environment()
 {
-    if( _module->kind() == Module::kind_process )
-    {
-        // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
-
-        Z_FOR_EACH_CONST( Com_variable_set::Map, _task->params()->_map, v )  
-            _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-
-        if( Order* order = _task->order() )
-        {
-            if( Com_variable_set* order_params = order->params_or_null() )
-                Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
-                    _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-        }
-
-        // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
-    }
+    //if( _module->kind() == Module::kind_process )
+    //{
+    //    fill_process_environment_with_params();
+    //    // JS-147: <environment> kommt nach <params>, deshalb Rest von attach_task() erst jetzt ausführen.
+    //}
 
 
     // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)

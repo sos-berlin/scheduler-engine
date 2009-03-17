@@ -281,8 +281,10 @@ struct Itask : IDispatch
     virtual HRESULT     get_Exit_code                   ( int* )                                = 0;
     virtual HRESULT     get_Trigger_files               ( BSTR* )                               = 0;
     virtual HRESULT         Try_hold_lock               ( BSTR, VARIANT_BOOL* )                 = 0;
-    virtual HRESULT         Try_hold_lock_non_exclusive      ( BSTR, VARIANT_BOOL* )                 = 0;
-    virtual HRESULT         Call_me_again_when_locks_available  ()                                           = 0;
+    virtual HRESULT         Try_hold_lock_non_exclusive ( BSTR, VARIANT_BOOL* )                 = 0;
+    virtual HRESULT         Call_me_again_when_locks_available()                                = 0;
+    virtual HRESULT     get_Params_xml                  ( BSTR* )                               = 0;
+    virtual HRESULT     get_Order_params_xml            ( BSTR* )                               = 0;
     //virtual HRESULT         Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* )               = 0;
     //virtual HRESULT         Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* ) = 0;
 };

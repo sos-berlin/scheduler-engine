@@ -115,35 +115,6 @@ void Process_module_instance::init()
     }
 }
 
-//-------------------------------------------------------------Process_module_instance::attach_task
-
-//void Process_module_instance::attach_task( Task* task, Prefix_log* log )
-//{
-//    // Environment, eigentlich nur bei einem Prozess nötig, also nicht bei <process_classes ignore="yes"> und <monitor>)
-//
-//    Z_FOR_EACH_CONST( Com_variable_set::Map, task->params()->_map, v )  
-//        _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-//
-//    if( Order* order = task->order() )
-//        if( Com_variable_set* order_params = order->params_or_null() )
-//            Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
-//                _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
-//
-//
-//    // JS-147: <environment> kommt nach <params>, deshalb attach_task() erst jetzt rufen.
-//    Module_instance::attach_task( task, log );
-//    
-//
-//    _process_environment->set_var( "SCHEDULER_TASK_TRIGGER_FILES", task->trigger_files() );
-//
-//    if( task->order() )
-//    {
-//        _order_params_file.open_temporary( File::open_unlink_later );
-//        _order_params_file.close();
-//        _process_environment->set_var( order_params_environment_name, _order_params_file.path() );
-//    }
-//}
-
 //--------------------------------------------------------------------Process_module_instance::load
 
 bool Process_module_instance::load()
@@ -251,6 +222,18 @@ string Process_module_instance::program_path()
 
 void Process_module_instance::close__end()
 {
+    close_process();
+
+    if( _spooler_process_before_called )
+        _monitor_instances.spooler_process_after( false );
+
+    Module_instance::close__end();
+}
+
+//-----------------------------------------------------------Process_module_instance::close_process
+
+void Process_module_instance::close_process()
+{
 #ifdef Z_WINDOWS
     if( _process_handle )
 #endif
@@ -269,11 +252,6 @@ void Process_module_instance::close__end()
         _stdout_logged = true;
     }
     */
-
-    if( _spooler_process_before_called )
-        _monitor_instances.spooler_process_after( false );
-
-    Module_instance::close__end();
 }
 
 //------------------------------------------------------------Process_module_instance::begin__start
@@ -302,6 +280,8 @@ bool Process_module_instance::begin__end()
         bool ok = implicit_load_and_start();
         if( !ok )  return false;
     }
+
+    fill_process_environment_with_params();
 
 
     PROCESS_INFORMATION process_info;
@@ -439,7 +419,7 @@ Variant Process_module_instance::step__end()
     _process_handle.wait();
     assert( process_has_signaled() );
     end__end();
-    close__end();
+    close_process();
 
 
     io::String_writer string_writer;
@@ -629,6 +609,8 @@ bool Process_module_instance::begin__end()
         bool ok = implicit_load_and_start();
         if( !ok )  return false;
     }
+
+    fill_process_environment_with_params();
 
 
     vector<string> string_args;
@@ -886,6 +868,46 @@ void Process_module_instance::end__end()
 //        return _process_handle._process_signaled; 
 //#   endif
 //}
+
+//------------------------------------Process_module_instance::fill_process_environment_with_params
+
+void Process_module_instance::fill_process_environment_with_params()
+{
+    ptr<Com_variable_set> task_params;
+    ptr<Com_variable_set> order_params;
+
+    if( _task ) {
+        task_params = _task->params();
+        if( _task->order() )  order_params = _task->order()->params();
+    } else {
+        Variant xml;
+
+        IDispatch* task = object( "spooler_task" );
+
+        vector<Variant> parameters;
+        xml = com_invoke( DISPATCH_PROPERTYGET, task, "Params_xml", &parameters );
+        task_params = new Com_variable_set();
+Z_LOG2( "zschimmer", "Params_xml=" << xml.as_string() << "\n" );
+        task_params->set_xml( xml.as_string() );
+
+        xml = com_invoke( DISPATCH_PROPERTYGET, task, "Order_params_xml", &parameters );
+Z_LOG2( "zschimmer", "Order_params_xml=" << xml.as_string() << "\n" );
+        if( !xml.is_empty() ) {
+            order_params = new Com_variable_set();
+            order_params->set_xml( xml.as_string() );
+        }
+    }
+
+    Z_FOR_EACH_CONST( Com_variable_set::Map, task_params->_map, v )  
+        _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+
+    if( order_params )
+    {
+        Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
+            _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
+    }
+}
+
 
 //-------------------------------------------Process_module_instance::fetch_parameters_from_process
 

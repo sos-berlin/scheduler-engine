@@ -502,6 +502,12 @@ library Spooler
         [id(34)]
         HRESULT                 Call_me_again_when_locks_available();
 
+        [id(35),propget]
+        HRESULT                 Params_xml                  ( [out,retval] BSTR* );
+
+        [id(36),propget]
+        HRESULT                 Order_params_xml            ( [out,retval] BSTR* );
+
         //[id(35)]
         //HRESULT                 Try_lock_else_call_me_again ( [in] BSTR, [out,retval] VARIANT_BOOL* );
 

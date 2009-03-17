@@ -36,6 +36,7 @@ struct Process_module_instance : Module_instance
     bool                        load                        ();
     void                        start                       ();
     void                        close__end                  ();
+    void                        close_process               ();
     Async_operation*            begin__start                ();
     bool                        begin__end                  ();
     void                        end__end                    ();
@@ -48,6 +49,7 @@ struct Process_module_instance : Module_instance
     bool                        kill                        ();
     bool                        process_has_signaled        ();
     string                      get_first_line_as_state_text();
+    void                        fill_process_environment_with_params();
     void                        fetch_parameters_from_process( Com_variable_set* );
     File_path                   stdout_path                 ()                                      { return _stdout_file.path(); }
     File_path                   stderr_path                 ()                                      { return _stderr_file.path(); }
