@@ -2432,6 +2432,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 34, "Call_me_again_when_locks_available"       , (Com_method_ptr)&Com_task::Call_me_again_when_locks_available       , VT_EMPTY },
     { DISPATCH_PROPERTYGET, 35, "Params_xml"                , (Com_method_ptr)&Com_task::get_Params_xml         , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Params_xml         , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Params_xml         , VT_EMPTY      , VT_BSTR },
     //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
     //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
@@ -3297,6 +3298,25 @@ STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
 
         *result = NULL;
         if( Order* order = _task->order() )  order->params()->get_Xml( result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_task::put_Order_params_xml
+// Für Process_module_instance::fill_process_environment_with_params()
+
+STDMETHODIMP Com_task::put_Order_params_xml( BSTR xml_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  return E_POINTER;
+
+        if( Order* order = _task->order() )  order->params()->put_Xml( xml_bstr );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 

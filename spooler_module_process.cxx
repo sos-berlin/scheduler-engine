@@ -223,10 +223,6 @@ string Process_module_instance::program_path()
 void Process_module_instance::close__end()
 {
     close_process();
-
-    if( _spooler_process_before_called )
-        _monitor_instances.spooler_process_after( false );
-
     Module_instance::close__end();
 }
 
@@ -414,14 +410,24 @@ Variant Process_module_instance::step__end()
     Z_LOG2( "scheduler", Z_FUNCTION << "\n" );
     assert( !_spooler );    // Soll nur über Com_remote_module_instance_server gerufen werden
 
-    Variant result;
-
     _process_handle.wait();
     assert( process_has_signaled() );
     end__end();
     close_process();
 
+    if( _order_params_file.path() != "" )
+        transfer_back_order_params();       // Vor spooler_process_after(), damit da die geänderten Auftragsparameter verfügbar sind.
 
+    if( _spooler_process_before_called )
+        _spooler_process_result = check_result( _monitor_instances.spooler_process_after( _spooler_process_result ) );
+
+    return step_result();
+}
+
+//-------------------------------------------------------------Process_module_instance::step_result
+
+string Process_module_instance::step_result()
+{
     io::String_writer string_writer;
     xml::Xml_writer   xml_writer   ( &string_writer );
 
@@ -430,42 +436,17 @@ Variant Process_module_instance::step__end()
 
     xml_writer.begin_element( "process.result" );
     {
+        xml_writer.set_attribute( "spooler_process_result", _spooler_process_result? "true" : "false" );
         xml_writer.set_attribute( "exit_code", exit_code() );
         if( int s = termination_signal() )  xml_writer.set_attribute( "signal", s );
 
         xml_writer.set_attribute_optional( "state_text", xml::non_xml_latin1_characters_substituted( get_first_line_as_state_text() ) );
-
-        //Wird über log()->log_file() ausgegeben;
-        //xml_writer.begin_element( "log_file" );
-        //    xml_writer->begin_element( "content" );
-        //    xml_writer->set_attribute( "encoding", "base64" );
-
-        //        string content;
-
-        //        try
-        //        {
-        //            content = string_from_file( _process_log_filename );
-        //        }
-        //        catch( exception &x ) { content = x.what(); }
-
-        //        xml_writer->write( base64_encoded( content ) );
-
-        //    xml_writer->end_element( "content" );
-        //xml_writer.end_element( "log_file" );
-
-        ptr<Com_variable_set> order_parameters = new Com_variable_set();
-        fetch_parameters_from_process( order_parameters );
-
-        if( !order_parameters->is_empty() )
-            xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
     }
 
     xml_writer.end_element( "process.result" );
     xml_writer.flush();
 
-    result = string_writer.to_string();
-
-    return result;
+    return string_writer.to_string();
 }
 
 //--------------------------------------------Process_module_instance::get_first_line_as_state_text
@@ -839,6 +820,7 @@ void Process_module_instance::end__end()
 #   endif
 
     _exit_code = (int)exit_code;
+    _spooler_process_result = _exit_code == 0  &&  _termination_signal == 0;;
 
     _log.log_file( _module->_process_log_filename );
 
@@ -887,11 +869,9 @@ void Process_module_instance::fill_process_environment_with_params()
         vector<Variant> parameters;
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Params_xml", &parameters );
         task_params = new Com_variable_set();
-Z_LOG2( "zschimmer", "Params_xml=" << xml.as_string() << "\n" );
         task_params->set_xml( xml.as_string() );
 
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Order_params_xml", &parameters );
-Z_LOG2( "zschimmer", "Order_params_xml=" << xml.as_string() << "\n" );
         if( !xml.is_empty() ) {
             order_params = new Com_variable_set();
             order_params->set_xml( xml.as_string() );
@@ -909,38 +889,55 @@ Z_LOG2( "zschimmer", "Order_params_xml=" << xml.as_string() << "\n" );
 }
 
 
+//----------------------------------------------Process_module_instance::transfer_back_order_params
+
+void Process_module_instance::transfer_back_order_params()
+{
+    ptr<Com_variable_set> order_parameters = new Com_variable_set();
+    fetch_parameters_from_process( order_parameters );
+
+    if( !order_parameters->is_empty() )
+    {
+        IDispatch* task = object( "spooler_task" );
+        vector<Variant> parameters;
+        Bstr xml_bstr;
+        order_parameters->get_Xml( &xml_bstr );
+        parameters.push_back( xml_bstr );
+        com_invoke( DISPATCH_PROPERTYPUT, task, "Order_params_xml", &parameters );
+
+        //xml_writer.write_element( order_parameters->dom( "order.params", "param" ).documentElement() );
+    }
+}
+
 //-------------------------------------------Process_module_instance::fetch_parameters_from_process
 
 void Process_module_instance::fetch_parameters_from_process( Com_variable_set* params )
 {
-    if( _order_params_file.path() != "" )
+    _order_params_file.open( _order_params_file.path(), "rS" );
+
+    if( _order_params_file.length() > max_memory_file_size )  z::throw_xc( "SCHEDULER-448", _order_params_file.path(), max_memory_file_size / 1024 / 1024, order_params_environment_name );
+    
+    const char* p     = (const char*)_order_params_file.map();
+    const char* p_end = p + _order_params_file.map_length();
+
+    while( p < p_end )
     {
-        _order_params_file.open( _order_params_file.path(), "rS" );
+        const char* b = p;
+        while( p < p_end  &&  *p != '='  &&  *p != '\n' )  p++;
+        if( p >= p_end  ||  *p != '=' )  z::throw_xc( "SCHEDULER-449", order_params_environment_name );
+        string name ( b, p++ - b );
 
-        if( _order_params_file.length() > max_memory_file_size )  z::throw_xc( "SCHEDULER-448", _order_params_file.path(), max_memory_file_size / 1024 / 1024, order_params_environment_name );
-        
-        const char* p     = (const char*)_order_params_file.map();
-        const char* p_end = p + _order_params_file.map_length();
+        b = p;
+        while( p < p_end  &&  *p != '\n' )  p++;
+        string value ( b, ( p[-1] == '\r'? p - 1 : p ) - b );
+        p++;
 
-        while( p < p_end )
-        {
-            const char* b = p;
-            while( p < p_end  &&  *p != '='  &&  *p != '\n' )  p++;
-            if( p >= p_end  ||  *p != '=' )  z::throw_xc( "SCHEDULER-449", order_params_environment_name );
-            string name ( b, p++ - b );
+        params->set_var( trim( name ), trim( value ) );
 
-            b = p;
-            while( p < p_end  &&  *p != '\n' )  p++;
-            string value ( b, ( p[-1] == '\r'? p - 1 : p ) - b );
-            p++;
-
-            params->set_var( trim( name ), trim( value ) );
-
-            // Wenn letztes '\n' fehlt, ist p == p_end + 1
-        }
-
-        _order_params_file.close();
+        // Wenn letztes '\n' fehlt, ist p == p_end + 1
     }
+
+    _order_params_file.close();
 }
 
 //--------------------------------------------------------Process_module_instance::try_delete_files

@@ -508,6 +508,9 @@ library Spooler
         [id(36),propget]
         HRESULT                 Order_params_xml            ( [out,retval] BSTR* );
 
+        [id(36),propput]
+        HRESULT                 Order_params_xml            ( [in] BSTR );
+
         //[id(35)]
         //HRESULT                 Try_lock_else_call_me_again ( [in] BSTR, [out,retval] VARIANT_BOOL* );
 

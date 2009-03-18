@@ -1657,11 +1657,10 @@ bool Task::do_something()
 
                                     if( _order )
                                     {
-
                                         if( !has_error() )
                                         {
-                                            postprocess_order( _exit_code == 0? Order::post_success 
-                                                                              : Order::post_error   );       
+                                            postprocess_order( _module_instance->spooler_process_result()? Order::post_success 
+                                                                                                         : Order::post_error   );       
                                         }
                                         else {}     // remove_order_after_error() wird sich drum kümmern.
                                     }                                                               
@@ -1966,6 +1965,7 @@ string Task::remote_process_step__end()
         xml::Document_ptr dom_document           ( result );
         xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/" "process.result" );
 
+        _module_instance->set_spooler_process_result( process_result_element.bool_getAttribute( "spooler_process_result" ) );
         _module_instance->set_exit_code         ( process_result_element.int_getAttribute( "exit_code", 0 ) );
         _module_instance->set_termination_signal( process_result_element.int_getAttribute( "signal"   , 0 ) );
 
@@ -2498,7 +2498,8 @@ void Module_task::do_close__end()
             else  
                 _log->warn( x.what() );
 
-            if( _module_instance->_module->kind() == Module::kind_process )  _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
+            if( _module_instance->_module->kind() == Module::kind_process )
+                _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
         if( int termination_signal = _module_instance->termination_signal() )

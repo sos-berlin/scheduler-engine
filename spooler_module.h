@@ -311,6 +311,8 @@ struct Module_instance : Object
     virtual void                release__end                ();
 
     virtual void                check_connection_error      ()                                      {}
+    void                    set_spooler_process_result      ( bool b )                              { _spooler_process_result = b; }
+    int                         spooler_process_result      () const                                { return _spooler_process_result; }
     int                         exit_code                   ()                                      { return _exit_code; }
     void                    set_exit_code                   ( int exit_code )                       { _exit_code = exit_code; }
     int                         termination_signal          ()                                      { return _termination_signal; }
@@ -351,6 +353,7 @@ struct Module_instance : Object
     bool                       _spooler_close_called;
     In_call*                   _in_call;
     string                     _call_method;                // Für Module_instance::call__start()
+    bool                       _spooler_process_result;     // Bisher nur für Process_module / Process_module_instance
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
