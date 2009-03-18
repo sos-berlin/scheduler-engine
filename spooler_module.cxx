@@ -1207,7 +1207,6 @@ void Module_monitors::initialize()
     Z_FOR_EACH( vector<Module_monitor*>, ordered_monitors, m )
     {
         Module_monitor* monitor = *m;
-
         monitor->_module->init();
     }
 }

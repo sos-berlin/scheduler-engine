@@ -883,11 +883,10 @@ void Process_module_instance::fill_process_environment_with_params()
 
     if( order_params )
     {
-        Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )  
+        Z_FOR_EACH_CONST( Com_variable_set::Map, order_params->_map, v )
             _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
     }
 }
-
 
 //----------------------------------------------Process_module_instance::transfer_back_order_params
 

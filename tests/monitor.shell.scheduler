@@ -21,9 +21,12 @@
                 <script language="shell">
                     <![CDATA[
 @echo off                
-echo Auftragspameter=%SCHEDULER_PARAM_AUFTRAGSPARAMETER%
+echo Auftragspameter=%SCHEDULER_PARAM_AUFTRAGSPARAMETER% 
+echo Auftragspameter=$SCHEDULER_PARAM_AUFTRAGSPARAMETER
 echo javascript=%SCHEDULER_PARAM_JAVASCRIPT%
+echo javascript=$SCHEDULER_PARAM_JAVASCRIPT
 echo java=%SCHEDULER_PARAM_JAVA%
+echo java=$SCHEDULER_PARAM_JAVA
 
 echo shell_param=aus dem Shell-Job >>%SCHEDULER_RETURN_VALUES%
         
@@ -101,6 +104,7 @@ public class My_monitor  extends sos.spooler.Monitor_impl
                 ]]>
                     </script>
                 </monitor> 
+
             </job>
 
             <job name="zwei" order="yes">
