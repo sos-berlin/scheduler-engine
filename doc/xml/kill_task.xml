@@ -15,12 +15,12 @@
 
     <description>
         <p>
-            Unter Unix wird eine Nicht-API-Task
+            Eine Nicht-API-Task
             (<scheduler_element name="process"/> oder <scheduler_element name="script" attribute="language" value="shell"/>)
-            mitsamt ihren Kindprozessen abgebrochen.
-            Dazu ermittelt der Scheduler mit dem Betriebssystem-Kommando "ps -ef" alle Kindprozesse und 
-            bricht sie mit dem Signal <code>SIGKILL</code> ab.
-            Außerdem wird die Prozessgruppe des Task-Prozesses abgebrochen.            
+            wird mitsamt ihren Kindprozessen abgebrochen.
+            Dazu ermittelt der Scheduler alle Kindprozesse und 
+            bricht sie ab.
+            Unter Unix wird außerdem wird die Prozessgruppe des Task-Prozesses abgebrochen.            
         </p>
     </description>
 

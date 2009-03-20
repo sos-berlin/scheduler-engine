@@ -384,9 +384,9 @@ bool Process_module_instance::kill()
 
     _log.warn( message_string( "SCHEDULER-281" ) );   
 
-    Z_LOG2( "scheduler", "TerminateProcess(" <<  _process_handle << ",255)\n" );
-    BOOL ok = TerminateProcess( _process_handle, 255 );
-    if( !ok )  throw_mswin_error( "TerminateProcess" );
+    Message_string m ( "SCHEDULER-709" );
+    m.set_log_level( log_warn );
+    windows::try_kill_process_with_descendants_immediately( _pid, _log.base_log(), &m, Z_FUNCTION );
 
     _is_killed = true;
 

@@ -10,7 +10,19 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-    
+
+    <change date="2009-03-20" version="2.0.221" subversion_revision="5985">
+        <revision type="modification" title="Windows: kill bricht alle Kindprozesse ab">
+            <description>
+                <p>
+                    Ein <scheduler_element name="kill_task"/> auf einen Shell-Job bricht auch alle Kind- und Kindeskind-Prozesse ab,
+                    wie bereits unter Unix.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2009-03-10" version="2.0.221" subversion_revision="5980">
         <revision type="new" title="Monitor für Shell-Jobs">
             <description>
