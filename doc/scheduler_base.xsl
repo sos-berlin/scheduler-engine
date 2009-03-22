@@ -3562,7 +3562,7 @@
 
         <p style="font-size: 8pt; margin-top: 0px; padding-top: 0px">
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
-                Scheduler &#160; &#160;
+                Job Scheduler &#160; &#160;
 
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
