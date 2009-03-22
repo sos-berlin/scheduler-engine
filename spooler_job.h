@@ -163,6 +163,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
 
     void                    set_dom                         ( const xml::Element_ptr& );
+    Time                        get_step_duration_or_percentage( const string& value, const Time& deflt );
+    Time                        average_step_duration       ( const Time& deflt );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
 
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
@@ -423,6 +425,13 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     Time                       _db_next_start_time;
     bool                       _db_stopped;
+
+    string                     _warn_if_shorter_than_string;
+    string                     _warn_if_longer_than_string;
+    enum { average_step_duration_valid, average_step_duration_read, average_step_duration_not_available }    _average_step_duration_state;
+    Time                       _average_step_duration;
+    Time                       _warn_if_longer_than;
+    Time                       _warn_if_shorter_than;
 };
 
 //-------------------------------------------------------------------------------------Internal_job

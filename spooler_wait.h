@@ -16,7 +16,6 @@ namespace scheduler {
 
 
 #ifdef Z_WINDOWS
-    void windows_message_step();
     bool wait_for_event( HANDLE handle, double wait_time );
 #endif
 

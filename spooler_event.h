@@ -19,6 +19,8 @@ enum Scheduler_event_type
     evt_scheduler_kills,
     evt_job_error,
     evt_task_ended,
+    evt_task_step_too_short,
+    evt_task_step_too_long,
     evt_disk_full,
     evt_database_error,
     evt_database_error_switch_to_file,

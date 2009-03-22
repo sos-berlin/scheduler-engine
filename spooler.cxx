@@ -3175,66 +3175,62 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 #   endif
 
 
-    //do
+    if( _state_cmd != sc_load_config )  load();
+
+    if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
+
+    load_config( _config_element_to_load, _config_source_filename );
+
+    //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
+    //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
+
+    // Nachdem argv und profile gelesen sind und config geladen ist:
+
+    _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
+    _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
+
+
+    if( _send_cmd != "" )  
+    { 
+        send_cmd();  
+        stop(); 
+        return 0; 
+    }
+
+
+    update_console_title();
+    start();
+
+    if( !_shutdown_cmd )
     {
-        if( _state_cmd != sc_load_config )  load();
-
-        if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
-
-        load_config( _config_element_to_load, _config_source_filename );
-
-        //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
-        //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
-
-        // Nachdem argv und profile gelesen sind und config geladen ist:
-
-        _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
-        _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
-
-
-        if( _send_cmd != "" )  
-        { 
-            send_cmd();  
-            stop(); 
-            return 0; 
-        }
-
-
-        update_console_title();
-        start();
-
-        if( !_shutdown_cmd )
+        try
         {
+            run();
+        }
+        catch( exception& x )
+        {
+            set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+
             try
             {
-                run();
+                _log->error( "" );
+                _log->error( x.what() );
+                _log->error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
             }
-            catch( exception& x )
-            {
-                set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+            catch( exception& ) {}
 
-                try
-                {
-                    _log->error( "" );
-                    _log->error( x.what() );
-                    _log->error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
-                }
-                catch( exception& ) {}
+            try 
+            { 
+                log_show_state( _log );
+                stop( &x ); 
+            } 
+            catch( exception& x ) { _log->error( x.what() ); }
 
-                try 
-                { 
-                    log_show_state( _log );
-                    stop( &x ); 
-                } 
-                catch( exception& x ) { _log->error( x.what() ); }
-
-                throw;
-            }
+            throw;
         }
+    }
 
-        stop();
-
-    }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
+    stop();
 
 
     close();

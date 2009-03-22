@@ -458,7 +458,9 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _history(this),
     _visible(visible_yes),
     _stop_on_error(true),
-    _db_next_start_time( Time::never )
+    _db_next_start_time( Time::never ),
+    _average_step_duration_state( average_step_duration_valid ),
+    _warn_if_longer_than( Time::never )
 {
     if( name != "" )  set_name( name );
 
@@ -569,7 +571,7 @@ bool Job::on_initialize()
         Z_LOGI2( "scheduler", obj_name() << ".initialize()\n" );
 
         if( !_module )  z::throw_xc( "SCHEDULER-440", obj_name() );
-        
+
         add_requisite( Requisite_path( spooler()->process_class_subsystem(), _module->_process_class_path ) );
 
         //_module->set_folder_path( folder_path() );
@@ -623,6 +625,9 @@ bool Job::on_load() // Transaction* ta )
 
         _log->open();
 
+        _warn_if_shorter_than = get_step_duration_or_percentage( _warn_if_shorter_than_string, Time(0) );
+        _warn_if_longer_than  = get_step_duration_or_percentage( _warn_if_longer_than_string , Time::never );
+        
         if( _lock_requestor )  _lock_requestor->load();       // Verbindet mit bekannten Sperren
 
 
@@ -782,6 +787,9 @@ void Job::set_dom( const xml::Element_ptr& element )
 
         set_mail_xslt_stylesheet_path( element.getAttribute( "mail_xslt_stylesheet" ) );
 
+        _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
+        _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
+
         if( order )  set_order_controlled();
 
 
@@ -915,6 +923,67 @@ void Job::set_dom( const xml::Element_ptr& element )
         _history.set_dom_settings( settings_element );
         _log->set_dom_settings( settings_element );
     }
+}
+
+//-------------------------------------------------------------Job::get_step_duration_or_percentage
+
+Time Job::get_step_duration_or_percentage( const string& value, const Time& deflt )
+{
+    Time result = deflt;
+
+    if( value != "" )
+    {
+        if( value.find( ':' ) != string::npos ) 
+        {
+            Sos_optional_date_time dt;
+            dt.set_time( value );
+            result = dt.time_as_double();
+        }
+        else
+        if( string_ends_with( value, "%" ) ) 
+        {
+            int percentage = as_int( value.substr( 0, value.length() - 1 ) );
+            Time avg = average_step_duration( deflt );
+            result = avg.is_never()? Time::never 
+                                   : (double)percentage/100 * avg;
+        }
+        else
+        {
+            result = as_double( value );
+        }
+    }
+
+    return result.rounded_to_next_second();
+}
+
+//-----------------------------------------------------------------------Job::average_step_duration
+
+Time Job::average_step_duration( const Time& deflt )
+{
+    if( _spooler->_db->opened()  &&  _average_step_duration_state == average_step_duration_valid )
+    {
+        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
+        {
+            S select_sql;
+            select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
+                          "  from " << _spooler->_job_history_tablename
+                       << "  where `steps` > 0 "
+                           " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
+                       <<  " and `job_name`=" << sql::quoted( path().without_slash() );
+
+            Record record = ta.read_single_record( select_sql, Z_FUNCTION );
+            if( record.null(0) || record.as_string(0) == "" ) {
+                _average_step_duration_state = average_step_duration_not_available;
+            } else {
+                _average_step_duration_state = average_step_duration_valid;
+                _average_step_duration = record.as_double( 0 );
+            }
+        }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_job_history_tablename, x ), Z_FUNCTION ); }
+    }
+
+    return _average_step_duration_state == average_step_duration_valid? _average_step_duration
+                                                                      : deflt;
 }
 
 //------------------------------------------------------------------------Job::set_order_controlled
@@ -3295,6 +3364,12 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( is_order_controlled() )
         result.setAttribute( "job_chain_priority", _job_chain_priority );
+
+        if( _warn_if_shorter_than )
+            result.setAttribute( "warn_if_shorer_than", _warn_if_shorter_than.as_string( Time::without_ms ) );
+
+        if( !_warn_if_longer_than.is_never() )
+            result.setAttribute( "warn_if_longer_than", _warn_if_longer_than.as_string( Time::without_ms ) );
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 
