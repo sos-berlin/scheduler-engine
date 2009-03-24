@@ -37,7 +37,6 @@ struct Remote_client_connection : Async_operation, Subsystem
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return _state == s_not_connected  
                                                                                                           || _state == s_registered; }
-  //bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:
     Fill_zero                  _zero_;

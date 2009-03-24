@@ -245,7 +245,8 @@ bool Communication::Listen_socket::async_continue_( Continue_flags )
                 _communication->_connection_list.push_back( new_connection );
 
                 new_connection->add_to_socket_manager( _spooler->_connection_manager );
-                new_connection->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
+                new_connection->socket_expect_signals( Old_socket_operation::sig_read | Old_socket_operation::sig_write | Old_socket_operation::sig_except );
+                new_connection->async_continue();
             }
 
             something_done = true;
@@ -450,65 +451,62 @@ bool Communication::Connection::do_recv()
 {
     bool something_done = false;
 
-    char buffer [ 4096 ];
+    string data = recv_data();
 
-    int len = call_recv( buffer, sizeof buffer );
-    if( len == 0 )  
-    {
-        something_done = _eof;
+    if( data.empty()  &&  !_eof )  {
+        recv__continue();
+        data = recv_data();
     }
-    else
+
+    if( !data.empty() )
     {
         something_done = true;
 
-        const char* p = buffer;
-
         if( _connection_state == s_ready )   // Das sind die ersten empfangen Bytes der Anforderung
         {
-            if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
-
-            if( len == 1  &&  buffer[0] == '\n'   
-             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )     // Leere Eingabe, zum Debuggen:
+            if( data.length() == 1  &&  data[0] == '\x04' )  {      // Einzelnes Ctrl-D beendet Sitzung
+                _eof = true; 
+                data = "";
+                something_done = true;
+            }      
+            else
+            if( data.length() == 1  &&  data[0] == '\n'   
+             || data.length() == 2  &&  data[0] == '\r'  &&  data[1] == '\n' )     // Leere Eingabe, zum Debuggen:
             { 
                 if( _spooler->_supervisor_client )  _spooler->_supervisor_client->try_connect();
                 if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )  _spooler->folder_subsystem()->handle_folders( 1 ); 
                 _spooler->signal( "do_something!" );  
                 _spooler->_last_time_enter_pressed = Time::now().as_time_t(); 
-                return true; 
+                data = "";
+                something_done = true;
             }
-
-            //_receive_at_start = false;
-            _connection_state = s_receiving;
-
-            if( !_operation_connection )
+            else
             {
-                //if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
-                //{
-                //    _operation_connection = Z_NEW( Object_server_processor_connection( this ) );
-                //}
-                //else
-                //if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
-                if( isupper( (unsigned char)buffer[ 0 ] ) )  // CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, TRACE 
+                _connection_state = s_receiving;
+
+                if( !_operation_connection )
                 {
-                    _operation_connection = Z_NEW( http::Operation_connection( this ) );
+                    if( isupper( (unsigned char)data[ 0 ] ) )  // CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, TRACE 
+                    {
+                        _operation_connection = Z_NEW( http::Operation_connection( this ) );
+                    }
+                    else
+                    {
+                        _operation_connection = Z_NEW( Xml_operation_connection( this ) );
+                    }
                 }
-                else
-                {
-                    _operation_connection = Z_NEW( Xml_operation_connection( this ) );
-                }
+
+                _operation = _operation_connection->new_operation();
+                _operation->set_async_manager( _spooler->_connection_manager );     // Für set_async_next_gmtime()
             }
-
-            _operation = _operation_connection->new_operation();
-            _operation->set_async_manager( _spooler->_connection_manager );     // Für set_async_next_gmtime()
         }
 
-        //if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
-
-        if( len > 0 )
-        {
-            _operation->put_request_part( p, len );
-        }
+        if( !data.empty() )  _operation->put_request_part( data.data(), data.length() );
+        recv_clear();
     }
+    else
+    if( _eof )  
+        something_done = true;
 
     return something_done;
 }
@@ -568,6 +566,7 @@ bool Communication::Connection::async_continue_( Continue_flags )
 
                 remove_operation();
                 _connection_state = s_ready;
+                do_recv();
             }
         }
 
@@ -914,7 +913,7 @@ void Communication::bind()
         }
 
         _udp_socket.add_to_socket_manager( _spooler->_connection_manager );
-        _udp_socket.socket_expect_signals( Socket_operation::sig_read );
+        _udp_socket.socket_expect_signals( Old_socket_operation::sig_read );
     }
 
 
@@ -963,7 +962,7 @@ void Communication::bind()
         }
 
         _listen_socket.add_to_socket_manager( _spooler->_connection_manager );
-        _listen_socket.socket_expect_signals( Socket_operation::sig_read );
+        _listen_socket.socket_expect_signals( Old_socket_operation::sig_read );
     }
 
 
@@ -978,7 +977,7 @@ void Communication::bind()
 
             new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
             new_connection->add_to_socket_manager( _spooler->_connection_manager );
-            new_connection->socket_expect_signals( Socket_operation::sig_read );
+            new_connection->socket_expect_signals( Old_socket_operation::sig_read );
 
             new_connection->set_event_name( "stdin" );
             new_connection->_connection_state = Connection::s_ready;

@@ -15,11 +15,6 @@ namespace sos {
 namespace scheduler {
 
 
-#ifdef Z_WINDOWS
-    bool wait_for_event( HANDLE handle, double wait_time );
-#endif
-
-
 struct Wait_handles;
 
 #ifdef Z_WINDOWS

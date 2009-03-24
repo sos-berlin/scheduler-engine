@@ -55,8 +55,6 @@ struct Communication
         bool                    do_recv                     ();
         bool                    do_send                     ();
 
-        void                    recv_clear                  ();
-
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
         virtual string          async_state_text_           () const                                { return "connection " + zschimmer::Buffered_socket_operation::async_state_text_(); }
@@ -76,26 +74,26 @@ struct Communication
     };
 
 
-    struct Listen_socket : Socket_operation
+    struct Listen_socket : Old_socket_operation
     {
                                 Listen_socket               ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "TCP listen " + Socket_operation::async_state_text_();  }
+        virtual string          async_state_text_           () const                                { return "TCP listen " + Old_socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;
         Communication*         _communication;
     };
 
 
-    struct Udp_socket : Socket_operation
+    struct Udp_socket : Old_socket_operation
     {
                                 Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "UDP " + Socket_operation::async_state_text_();  }
+        virtual string          async_state_text_           () const                                { return "UDP " + Old_socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;
         Communication*         _communication;

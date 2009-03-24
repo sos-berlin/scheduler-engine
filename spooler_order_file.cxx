@@ -411,7 +411,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
             close_notification();
         }
 
-        _notification_event.set_handle( h );
+        _notification_event.set_handle_noninheritable( h );
         _notification_event.set_name( "FindFirstChangeNotification " + _path );
         
         add_to_event_manager( _spooler->_connection_manager );
@@ -436,7 +436,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
 
         if( h == INVALID_HANDLE_VALUE )  z::throw_mswin( "FindFirstChangeNotification", _path.path() );
 
-        _notification_event.set_handle( h );
+        _notification_event.set_handle_noninheritable( h );
         _notification_event.set_name( "FindFirstChangeNotification " + _path );
 
         add_to_event_manager( _spooler->_connection_manager );

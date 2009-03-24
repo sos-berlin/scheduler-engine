@@ -317,7 +317,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         }
 
 #       ifdef Z_DEBUG
-            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
+            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjectsEx " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
 #       endif
 
         handles = new HANDLE [ _handles.size()+1 ];
@@ -333,7 +333,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 double remaining = until - Time::now();
                 if( remaining < 0.7 )  break;
 
-                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
+                ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT, MWMO_ALERTABLE ); 
                 if( ret != WAIT_TIMEOUT )  break;
 
                 step = 1.0;
@@ -368,19 +368,19 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( ret == WAIT_TIMEOUT )
             {
                 if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
-                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, max( 0, t ), QS_ALLINPUT ); 
+                ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, max( 0, t ), QS_ALLINPUT, MWMO_ALERTABLE ); 
             }
 
             if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
         }
         else
         {
-            ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
+            ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, t, QS_ALLINPUT, MWMO_ALERTABLE ); 
         }
         
         delete [] handles;  handles = NULL;
 
-        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );
+        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
@@ -390,7 +390,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( event )
             {
                 if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );
+                if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjectsEx" );
             }
             else
                 if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
@@ -406,12 +406,18 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             windows::windows_message_step();
         }
         else
+        if( ret == WAIT_IO_COMPLETION )     // WSASend(), WSARecv()
+        {
+            result = true;
+            break;
+        }
+        else
         if( ret == WAIT_TIMEOUT )  
         {
             again = true;
         }
         else
-            throw_mswin_error( "MsgWaitForMultipleObjects" );
+            throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
 
 
         now = Time::now();

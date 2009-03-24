@@ -360,7 +360,7 @@ bool Process_module_instance::begin__end()
     CloseHandle( process_info.hThread );
 
     _pid = process_info.dwProcessId;
-    _process_handle.set_handle( process_info.hProcess );
+    _process_handle.set_handle_noninheritable( process_info.hProcess );
     _process_handle.set_name( "Process " + program_path() );
     
     if( _spooler )  

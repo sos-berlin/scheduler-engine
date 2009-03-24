@@ -1715,7 +1715,7 @@ void Spooler::load()
 #   ifdef Z_WINDOWS
         if( _zschimmer_mode )
         {
-            _waitable_timer.set_handle( CreateWaitableTimer( NULL, FALSE, NULL ) );
+            _waitable_timer.set_handle_noninheritable( CreateWaitableTimer( NULL, FALSE, NULL ) );
             if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
 
             _waitable_timer.add_to( &_wait_handles );

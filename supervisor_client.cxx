@@ -57,7 +57,6 @@ struct Supervisor_client_connection : Async_operation, Scheduler_object
     bool                        async_continue_             ( Continue_flags );
     bool                        async_finished_             () const                                { return _state == s_not_connected  
                                                                                                           || _state == s_registered; }
-  //bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
     void                        write_directory_structure   ( xml::Xml_writer*, const Absolute_path& );
     void                        update_directory_structure  ( const Absolute_path&, const xml::Element_ptr& );

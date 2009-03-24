@@ -230,7 +230,7 @@ struct Task : Object,
 
     bool                        check_timeout               ( const Time& now );
     void                        check_if_shorter_than       ( const Time& now );
-    void                        check_if_longer_than        ( const Time& now );
+    bool                        check_if_longer_than        ( const Time& now );
     bool                        try_kill                    ();
     
     bool                        wait_until_terminated       ( double wait_time = Time::never );
