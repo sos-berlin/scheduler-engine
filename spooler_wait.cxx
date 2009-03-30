@@ -445,7 +445,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
                 ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
-        ptr<Socket_wait> wait = _spooler->_async_manager->create_wait();
+        ptr<Socket_wait> wait = _spooler->_socket_manager->create_wait();
 
         for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
 
@@ -454,36 +454,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         int ret = wait->wait( (double)( until - now ) );
         return ret > 0;
-      //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-
-
-/*
-
-        // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihum abfragen.
-        //Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
-
-        while(1)
-        {
-            for( int i = _events.size() - 1; i >= 0; i-- )
-            {
-                Event* e = dynamic_cast<Event*>( _events[i] );
-
-                if( typeid( *e ) == typeid (Directory_watcher) )
-                {
-                    if( ((Directory_watcher*)e)->has_changed() )  return i;
-                }
-                else
-                {
-                    bool signaled = e->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-                    if( signaled )  return i;  // Leider auch bei EINTR (EINTR soll ja unterbrechen, aber return i stimmt dann nicht)
-                }
-            }
-
-            //rotating_bar();
-
-            if( Time::now() >= until )  return -1;
-        }
-*/
     }
 
 #endif

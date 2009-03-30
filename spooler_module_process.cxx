@@ -49,6 +49,27 @@ struct Kill_thread : Thread
 };
 
 #endif
+//----------------------------------------------------------------Process_module_instance_operation
+
+struct Process_module_instance_operation : Event_operation
+{
+    Process_module_instance_operation ( Process_module_instance* pmi ) : _process_module_instance(pmi) {}
+
+    string async_state_text_() const { return "Process_module_instance_operation"; }
+
+    Socket_event* async_event() { return &_process_module_instance->_process_handle; }
+
+    bool async_continue_( Continue_flags )
+    {
+        // Hier sollte die Task benachrichtigt werden. 
+        // Das ist aber noch nicht implementiert, stattdessen werden bei einem Ereignis alle Tasks durchlaufen, Task::do_something().
+        return true;
+    }
+
+  private:
+    Process_module_instance* const _process_module_instance;
+};
+
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
 Process_module_instance::Process_module_instance( Module* module )
@@ -365,7 +386,9 @@ bool Process_module_instance::begin__end()
     
     if( _spooler )  
     {
-        _process_handle.add_to( &_spooler->_wait_handles );
+        _operation = Z_NEW( Process_module_instance_operation( this ) );
+        _operation->add_to_event_manager( _spooler->_event_manager );
+        //_process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle );
     }
 
@@ -725,7 +748,9 @@ bool Process_module_instance::begin__end()
 
     if( _spooler )
     {
-        _process_handle.add_to( &_spooler->_wait_handles );
+        _operation = Z_NEW( Process_module_instance_operation( this ) );
+        _operation->add_to_event_manager( _spooler->_event_manager );
+        //_process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;
     }

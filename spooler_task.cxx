@@ -1836,7 +1836,11 @@ bool Task::do_something()
                     }
 
 
-                    if( !_operation )
+                    if( _operation )
+                    {
+                        loop |= _operation->async_finished();   // Falls Sync_operation
+                    }
+                    else
                     {
                         if( !ok || has_error() )
                         {

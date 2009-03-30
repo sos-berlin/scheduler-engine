@@ -2450,7 +2450,7 @@ void Spooler::run()
             // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
 
             vector<System_event*> events;
-            _event_manager->get_events( &events );
+            //_event_manager->get_events( &events );
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
 
