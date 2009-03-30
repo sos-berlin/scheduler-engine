@@ -225,7 +225,7 @@ static void io_error( Spooler* spooler, const string& filename )
         while( spooler->_state_cmd != Spooler::sc_continue )
         {
             int wait_seconds = 1;
-            spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, wait_seconds );   // Kann ins scheduler.log schreiben!
+            spooler->_async_manager->async_continue_selected( is_allowed_operation_while_waiting, wait_seconds );   // Kann ins scheduler.log schreiben!
         }
 
         spooler->_waiting_errno = 0;
@@ -544,10 +544,10 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
         
         if( log_to_files )  
         {
-            if( extra_log )  extra_log->signal_events();
-            if( order_log )  order_log->signal_events();
+            if( extra_log )  extra_log->wake_async_operations();
+            if( order_log )  order_log->wake_async_operations();
 
-            if( this == &_spooler->_base_log )  _spooler->log()->signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
+            if( this == &_spooler->_base_log )  _spooler->log()->wake_async_operations();   // Nicht schön, aber es gibt sowieso nur ein Log.
         }
     }
 }
@@ -779,8 +779,8 @@ void Prefix_log::close()
         remove_file();
     }
 
-    //signal_events();
-    _events.clear();
+    //wake_async_operations();
+    _wake_async_operations.clear();
 }
 
 //---------------------------------------------------------------------------Prefix_log::finish_log
@@ -805,7 +805,7 @@ void Prefix_log::finish_log()
             _new_filename = "";
         }
 
-        signal_events();
+        wake_async_operations();
     }                   
 }
 
@@ -1068,12 +1068,9 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
         if( _highest_level < level )  _highest_level = level, _highest_msg = line;
-        //if( level < log_level() )  return;
 
         _last_level = level;
         _last[ level ] = line;
-
-      //if( level >= log_debug9  &&  level <= log_fatal )  _counter[ level - log_debug9 ]++;
 
         bool log_to_files = level >= log_level();
 
@@ -1087,28 +1084,28 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 
 //----------------------------------------------------------------------------Prefix_log::add_event
 
-void Prefix_log::add_event( Event_base* event )
+void Prefix_log::add_wake_async_operation( Async_operation* op )
 { 
-    _events.push_back( event ); 
+    _wake_async_operations.push_back( op ); 
 }
 
 //-------------------------------------------------------------------------Prefix_log::remove_event
 
-void Prefix_log::remove_event( Event_base* event )
+void Prefix_log::remove_wake_async_operation( Async_operation* op )
 {
-    Z_FOR_EACH( list<Event_base*>, _events, e )
+    Z_FOR_EACH( list<Async_operation*>, _wake_async_operations, a )
     {
-        if( *e == event )  { _events.erase( e );  return; }
+        if( *a == op )  { _wake_async_operations.erase( a );  return; }
     }
 }
 
-//------------------------------------------------------------------------Prefix_log::signal_events
+//------------------------------------------------------------------------Prefix_log::wake_async_operations
 
-void Prefix_log::signal_events()
+void Prefix_log::wake_async_operations()
 {
-    Z_FOR_EACH( list<Event_base*>, _events, e )
+    Z_FOR_EACH( list<Async_operation*>, _wake_async_operations, a )
     {
-        (*e)->signal( "Log" );
+        (*a)->async_wake();
     }
 }
 

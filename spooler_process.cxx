@@ -87,7 +87,7 @@ bool Process::continue_close_operation( Process::Close_operation* op )
             if( !op->_close_session_operation->async_finished() )
             {
                 op->_close_session_operation->set_async_parent( op );
-                op->_close_session_operation->set_async_manager( _spooler->_connection_manager );
+                op->_close_session_operation->set_async_manager( _spooler->_async_manager );
             }
 
             something_done = true;
@@ -328,7 +328,7 @@ void Process::close_async()
 Async_operation* Process::close__start( bool run_independently )
 {
     _close_operation = Z_NEW( Close_operation( this, run_independently ) );
-    _close_operation->set_async_manager( _spooler->_connection_manager );
+    _close_operation->set_async_manager( _spooler->_async_manager );
     _close_operation->async_continue();
 
     return _close_operation;
@@ -420,7 +420,7 @@ void Process::start()
 
 void Process::start_local_process()
 {
-    ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connection_manager->new_connection_to_own_server_process();
+    ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connections->new_connection_to_own_server_process();
     object_server::Parameters                            parameters;
 
     if( !_spooler->_sos_ini.empty() )
@@ -465,7 +465,7 @@ void Process::start_local_process()
 
 void Process::start_local_thread()
 {
-    ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
+    ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connections->new_connection_to_own_server_thread();
    
     fill_connection( connection );
 
@@ -527,7 +527,7 @@ void Process::fill_connection( object_server::Connection* connection )
 
 void Process::async_remote_start()
 {
-    ptr<object_server::Connection> c = _spooler->_connection_manager->new_connection();
+    ptr<object_server::Connection> c = _spooler->_connections->new_connection();
 
     assert( _process_class );
     c->set_remote_host( _remote_scheduler._host );
@@ -538,7 +538,7 @@ void Process::async_remote_start()
 
     _async_remote_operation = Z_NEW( Async_remote_operation( this ) );
     _async_remote_operation->async_wake();
-    _async_remote_operation->set_async_manager( _spooler->_connection_manager );
+    _async_remote_operation->set_async_manager( _spooler->_async_manager );
 }
 
 //------------------------------------------------------------------------------Process::is_started
@@ -583,7 +583,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
 
             _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _remote_scheduler ) );
             _xml_client_connection->set_async_parent( _async_remote_operation );
-            _xml_client_connection->set_async_manager( _spooler->_connection_manager );
+            _xml_client_connection->set_async_manager( _spooler->_async_manager );
             _xml_client_connection->set_wait_for_connection( connection_retry_time );
             _xml_client_connection->connect();
 

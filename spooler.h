@@ -665,7 +665,9 @@ struct Spooler : Object,
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
     Rotating_bar               _wait_rotating_bar;
 
-    ptr<object_server::Connection_manager>  _connection_manager;
+    ptr<Async_manager>         _async_manager;
+    ptr<Event_manager>         _event_manager;
+    ptr<object_server::Connections>  _connections;
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     file::File_path            _configuration_file_path;            // -config=

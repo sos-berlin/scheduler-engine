@@ -1519,7 +1519,7 @@ void Database::try_reopen_after_error( const exception& callers_exception, const
                     }
 
                     _spooler->log()->warn( message_string( "SCHEDULER-958", seconds_before_reopen ) );   // "Eine Minute warten bevor Datenbank erneut geöffnet wird ..."
-                    _spooler->_connection_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
+                    _spooler->_async_manager->async_continue_selected( is_allowed_operation_while_waiting, seconds_before_reopen );
                 }
             }
         }

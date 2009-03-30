@@ -817,7 +817,7 @@ void Operation::begin()
     }
 
 
-    _response->set_event( &_connection->_socket_event );
+    _response->set_wake_async_operation( _connection );
     _response->recommend_block_size( 32768 );
 
     //_parser  = NULL;
@@ -1453,15 +1453,15 @@ Log_chunk_reader::Log_chunk_reader( Prefix_log* log )
 
 Log_chunk_reader::~Log_chunk_reader()
 {
-    if( _event )  _log->remove_event( _event );
+    if( _wake_async_operation )  _log->remove_wake_async_operation( _wake_async_operation );
 }
 
-//----------------------------------------------------------------------Log_chunk_reader::set_event
+//----------------------------------------------------------------------Log_chunk_reader::set_wake_async_operation
 
-void Log_chunk_reader::set_event( Event_base* event )
+void Log_chunk_reader::set_wake_async_operation( Async_operation* op  )
 {
-    _event = event;
-    _log->add_event( _event );
+    _wake_async_operation = op;
+    _log->add_wake_async_operation( _wake_async_operation );
 }
 
 //-----------------------------------------------------------Log_chunk_reader::next_chunk_is_ready

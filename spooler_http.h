@@ -46,7 +46,7 @@ struct Chunk_reader : Object
 
     virtual void                recommend_block_size        ( int size )                            { _recommended_block_size = size; }
     int                         recommended_block_size      () const                                { return _recommended_block_size; }
-    virtual void            set_event                       ( Event_base* )                         {}
+    virtual void            set_wake_async_operation        ( Async_operation* )                    {}
 
 
     virtual bool                next_chunk_is_ready         ()                                      = 0;
@@ -120,7 +120,7 @@ struct Log_chunk_reader : Chunk_reader
                                 Log_chunk_reader            ( Prefix_log* );
                                ~Log_chunk_reader            ();
 
-    void                    set_event                       ( Event_base* );
+    void                    set_wake_async_operation        ( Async_operation* );
 
 
   protected:
@@ -132,7 +132,7 @@ struct Log_chunk_reader : Chunk_reader
 
     Fill_zero                  _zero_;
     ptr<Prefix_log>            _log;
-    Event_base*                _event;
+    Async_operation*           _wake_async_operation;
 
     enum State { s_initial, s_reading_string, s_reading_file, s_finished };
     State                      _state;
@@ -149,7 +149,7 @@ struct Chunk_reader_filter : Chunk_reader
 {
                                 Chunk_reader_filter         ( Chunk_reader* r, const string& content_type ) : Chunk_reader( content_type ), _chunk_reader(r) {}
 
-    void                        set_event                   ( Event_base* event )                   { _chunk_reader->set_event( event ); }
+    void                        set_wake_async_operation    ( Async_operation* op )                     { _chunk_reader->set_wake_async_operation( op ); }
 
     ptr<Chunk_reader>          _chunk_reader;
 };
@@ -355,7 +355,7 @@ struct Response : Object
 
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }
 
-    void                    set_event                       ( Event_base* event )                   { if( _chunk_reader )  _chunk_reader->set_event( event ); }
+    void                    set_wake_async_operation        ( Async_operation* op )                 { if( _chunk_reader )  _chunk_reader->set_wake_async_operation( op ); }
 
   //string                      content_type                ()                                      { return _content_type; }
   //void                    set_content_type                ( const string& value )                 { set_header( "Content-Type", value ); }

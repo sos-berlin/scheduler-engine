@@ -117,9 +117,9 @@ struct Prefix_log : Object, Has_log
     void                    set_dom_settings                ( xml::Element_ptr settings_element );
     void                    set_order_log                   ( Prefix_log* log )                 { _order_log = log; }
 
-    void                        add_event                   ( Event_base* );
-    void                        remove_event                ( Event_base* );
-    void                        signal_events               ();
+    void                        add_wake_async_operation    ( Async_operation* );
+    void                        remove_wake_async_operation ( Async_operation* );
+    void                        wake_async_operations       ();
 
   //void                        operator()                  ( const string& line )              { info( line ); }
   //void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -247,7 +247,7 @@ struct Prefix_log : Object, Has_log
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
 
     bool                       _remove_after_close;
-    list<Event_base*>          _events;
+    list<Async_operation*>     _wake_async_operations;
 };
 
 //-------------------------------------------------------------------------------------------------

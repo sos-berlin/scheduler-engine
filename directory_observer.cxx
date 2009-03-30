@@ -560,6 +560,7 @@ Directory_observer::~Directory_observer()
 
 void Directory_observer::close()
 {
+    set_async_manager( NULL );
     remove_from_event_manager();
 
     #ifdef Z_WINDOWS
@@ -613,7 +614,8 @@ bool Directory_observer::activate()
         }
 #       endif
 
-        add_to_event_manager( _spooler->_connection_manager );
+        set_async_manager( _spooler->_async_manager );
+        add_to_event_manager( _spooler->_event_manager );
         
         //set_async_delay( folder::directory_watch_interval_min );
         //async_wake();

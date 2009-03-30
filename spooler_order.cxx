@@ -663,7 +663,7 @@ bool Order_subsystem::subsystem_activate()
     if( orders_are_distributed() )
     {
         _database_order_detector = Z_NEW( Database_order_detector( _spooler ) );
-        _database_order_detector->set_async_manager( _spooler->_connection_manager );
+        _database_order_detector->set_async_manager( _spooler->_async_manager );
         _database_order_detector->async_wake();
     }
 

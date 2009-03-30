@@ -183,7 +183,7 @@ bool Supervisor_client::subsystem_initialize()
 
     _spooler->folder_subsystem()->initialize_cache_directory();
 
-    _client_connection->set_async_manager( _spooler->_connection_manager );
+    _client_connection->set_async_manager( _spooler->_async_manager );
     _client_connection->connect();
 
     return true;
@@ -265,7 +265,7 @@ Supervisor_client_connection::~Supervisor_client_connection()
 void Supervisor_client_connection::connect()
 {
     _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _host_and_port ) );
-    _xml_client_connection->set_async_manager( _spooler->_connection_manager );
+    _xml_client_connection->set_async_manager( _spooler->_async_manager );
     _xml_client_connection->set_async_parent( this );
     _xml_client_connection->connect();
     _state = s_connecting;

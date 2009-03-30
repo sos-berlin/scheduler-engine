@@ -15,7 +15,7 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
 {
     _log->set_prefix( S() << "Xml_client_connection " << _host_and_port.as_string() );
 
-    //set_async_manager( _spooler->_connection_manager );
+    //set_async_manager( _spooler->_async_manager );
 }
 
 //----------------------------------------------------Xml_client_connection::~Xml_client_connection
@@ -139,7 +139,7 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
                 _socket_operation = Z_NEW( Buffered_socket_operation );
 
-                _socket_operation->add_to_socket_manager( _spooler->_connection_manager );
+                _socket_operation->add_to_socket_manager( _spooler->_connections );
                 _socket_operation->set_async_parent( this );
 
                 _socket_operation->connect__start( _host_and_port );

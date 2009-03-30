@@ -306,7 +306,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         double wait_time         = max( 0.0, until - now );
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
-        DWORD  ret               = WAIT_TIMEOUT;
+        //DWORD  ret               = WAIT_TIMEOUT;
 
 
         if( t <= 0 )  if( again )  break;
@@ -316,111 +316,115 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
         }
 
-#       ifdef Z_DEBUG
-            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjectsEx " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
-#       endif
+//#       ifdef Z_DEBUG
+//            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjectsEx " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
+//#       endif
 
-        handles = new HANDLE [ _handles.size()+1 ];
-        for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
+        bool ok = _spooler->_event_manager->wait_for_event( t / 1000.0 );
+        if( ok )  break;
 
-        if( _spooler  &&  _spooler->_print_time_every_second )
-        {
-            int     console_line_length = 0;
-            double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
-            
-            while(1)
-            {
-                double remaining = until - Time::now();
-                if( remaining < 0.7 )  break;
+        //handles = new HANDLE [ _handles.size()+1 ];
+        //for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
-                ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT, MWMO_ALERTABLE ); 
-                if( ret != WAIT_TIMEOUT )  break;
+        //if( _spooler  &&  _spooler->_print_time_every_second )
+        //{
+        //    int     console_line_length = 0;
+        //    double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
+        //    
+        //    while(1)
+        //    {
+        //        double remaining = until - Time::now();
+        //        if( remaining < 0.7 )  break;
 
-                step = 1.0;
+        //        ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT, MWMO_ALERTABLE ); 
+        //        if( ret != WAIT_TIMEOUT )  break;
 
-                Time now = Time::now();
-                Time rest = until - now;
-                t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
+        //        step = 1.0;
 
-                S console_line;
-                console_line << Time::now().as_string( Time::without_ms );
-                
-                if( until < Time::never  ||  wait_for_object )
-                {
-                    console_line << " (";
-                    if( until < Time::never ) 
-                    {
-                        int days = rest.day_nr();
-                        if( days > 0 )  console_line << days << "d+";
-                        console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
-                        if( days > 0 )  console_line << " until " << Time( until ).as_string();
-                    }
-                    if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
-                    console_line << ")";
-                }
+        //        Time now = Time::now();
+        //        Time rest = until - now;
+        //        t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
 
-                string l = console_line.to_string().substr( 0, console_width() - 1 );
-                console_line_length = l.length();
-                l += '\r';
-                cerr << l << flush;
-            }
+        //        S console_line;
+        //        console_line << Time::now().as_string( Time::without_ms );
+        //        
+        //        if( until < Time::never  ||  wait_for_object )
+        //        {
+        //            console_line << " (";
+        //            if( until < Time::never ) 
+        //            {
+        //                int days = rest.day_nr();
+        //                if( days > 0 )  console_line << days << "d+";
+        //                console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
+        //                if( days > 0 )  console_line << " until " << Time( until ).as_string();
+        //            }
+        //            if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
+        //            console_line << ")";
+        //        }
 
-            if( ret == WAIT_TIMEOUT )
-            {
-                if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
-                ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, max( 0, t ), QS_ALLINPUT, MWMO_ALERTABLE ); 
-            }
+        //        string l = console_line.to_string().substr( 0, console_width() - 1 );
+        //        console_line_length = l.length();
+        //        l += '\r';
+        //        cerr << l << flush;
+        //    }
 
-            if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
-        }
-        else
-        {
-            ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, t, QS_ALLINPUT, MWMO_ALERTABLE ); 
-        }
+        //    if( ret == WAIT_TIMEOUT )
+        //    {
+        //        if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
+        //        ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, max( 0, t ), QS_ALLINPUT, MWMO_ALERTABLE ); 
+        //    }
+
+        //    if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
+        //}
+        //else
+        //{
+        //    ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, t, QS_ALLINPUT, MWMO_ALERTABLE ); 
+        //}
         
-        delete [] handles;  handles = NULL;
+        //delete [] handles;  handles = NULL;
 
-        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
+        //if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
 
-        if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
-        {
-            int            index = ret - WAIT_OBJECT_0;
-            z::Event_base* event = _events[ index ];
-        
-            if( event )
-            {
-                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjectsEx" );
-            }
-            else
-                if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
+        //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
+        //{
+        //    int            index = ret - WAIT_OBJECT_0;
+        //    z::Event_base* event = _events[ index ];
+        //
+        //    if( event )
+        //    {
+        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
+        //        if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjectsEx" );
+        //    }
+        //    else
+        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
 
-            _catched_event = event;
+        //    _catched_event = event;
 
-            if( event != &_spooler->_waitable_timer )  result = true;
-            break;
-        }
-        else
-        if( ret == WAIT_OBJECT_0 + _handles.size() )
-        {
-            windows::windows_message_step();
-        }
-        else
-        if( ret == WAIT_IO_COMPLETION )     // WSASend(), WSARecv()
-        {
-            result = true;
-            break;
-        }
-        else
-        if( ret == WAIT_TIMEOUT )  
-        {
-            again = true;
-        }
-        else
-            throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
+        //    if( event != &_spooler->_waitable_timer )  result = true;
+        //    break;
+        //}
+        //else
+        //if( ret == WAIT_OBJECT_0 + _handles.size() )
+        //{
+        //    windows::windows_message_step();
+        //}
+        //else
+        //if( ret == WAIT_IO_COMPLETION )     // WSASend(), WSARecv()
+        //{
+        //    result = true;
+        //    break;
+        //}
+        //else
+        //if( ret == WAIT_TIMEOUT )  
+        //{
+        //    again = true;
+        //}
+        //else
+        //    throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
 
 
         now = Time::now();
+        if( until >= now )  break;
     }
 
 
@@ -441,7 +445,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
                 ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
 
-        ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
+        ptr<Socket_wait> wait = _spooler->_async_manager->create_wait();
 
         for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
 

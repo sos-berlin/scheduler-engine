@@ -1342,7 +1342,7 @@ bool Task::do_something()
 
                                 if( _file_logger->has_files() )
                                 {
-                                    _file_logger->set_async_manager( _spooler->_connection_manager );
+                                    _file_logger->set_async_manager( _spooler->_async_manager );
                                     _file_logger->start();
                                 }
 

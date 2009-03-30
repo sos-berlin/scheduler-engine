@@ -431,7 +431,7 @@ AGAIN:
             //_remote_scheduler_server->send__start( "<remote_scheduler.start_task tcp_port='" << tcp_port << "'/>" );
 
             ptr<Async_operation> connection_operation = _session->connect_server__start();
-            connection_operation->set_async_manager( _spooler->_connection_manager );
+            connection_operation->set_async_manager( _spooler->_async_manager );
             operation->set_async_child( connection_operation );
 
             operation->_call_state = c_connect;

@@ -36,7 +36,7 @@ Remote_client_connection::~Remote_client_connection()
 void Remote_client_connection::connect()
 {
     _xml_client_connection = Z_NEW( Xml_client_connection( _spooler, _host_and_port ) );
-    _xml_client_connection->set_async_manager( _spooler->_connection_manager );
+    _xml_client_connection->set_async_manager( _spooler->_async_manager );
     _xml_client_connection->set_async_parent( this );
     _xml_client_connection->connect();
     _state = s_connecting;

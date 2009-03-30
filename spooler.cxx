@@ -752,7 +752,17 @@ Spooler::Spooler()
 
     set_ctrl_c_handler( true );
 
-    _connection_manager = Z_NEW( object_server::Connection_manager );
+    _event_manager = Z_NEW( Event_manager() );
+    _connections   = Z_NEW( object_server::Connections );
+    _connections->add_to_event_manager( _event_manager );
+
+    _async_manager = Z_NEW( Async_manager() );
+
+    #ifdef Z_WINDOWS
+        _async_manager->set_wait_handler( _event_manager );
+    #else
+        _async_manager->set_wait_handler( _socket_manager );
+    #endif
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -1013,7 +1023,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
     if( show_what.is_set( show_operations ) )
     {
-        state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+        state_element.append_new_cdata_or_text_element( "operations", "\n" + _async_manager->string_from_operations( "\n" ) + "\n" );
     }
 
     return state_element;
@@ -1842,7 +1852,7 @@ void Spooler::start()
 
     sos::scheduler::time::Time::set_current_difference_to_utc( ::time(NULL) );
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
-    _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
+    _daylight_saving_time_transition_detector->set_async_manager( _async_manager );
 
 
     _job_subsystem             ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
@@ -2165,7 +2175,7 @@ void Spooler::nichts_getan( int anzahl, const string& str )
         _log->log( anzahl <= 1? log_debug9 :
                    anzahl <= 2? log_info
                               : log_warn,
-                  message_string( "SCHEDULER-261", str, _connection_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
+                  message_string( "SCHEDULER-261", str, _async_manager->string_from_operations(), tasks, jobs ) );  // "Nichts getan, state=$1, _wait_handles=$2"
 
         // Wenn's ein System-Ereignis ist, das, jedenfalls unter Windows, immer wieder signalisiert wird,
         // dann kommen die anderen Ereignisse, insbesondere der TCP-Verbindungen, nicht zum Zuge.
@@ -2223,7 +2233,7 @@ void Spooler::execute_state_cmd()
 
                 if( _termination_async_operation )
                 {
-                    _connection_manager->remove_operation( _termination_async_operation );
+                    _async_manager->remove_operation( _termination_async_operation );
                     _termination_async_operation = NULL;
                 }
 
@@ -2235,8 +2245,8 @@ void Spooler::execute_state_cmd()
                     if( _task_subsystem )
                     {
                         _termination_async_operation = Z_NEW( Termination_async_operation( this, _termination_gmtimeout_at ) );
-                        _termination_async_operation->set_async_manager( _connection_manager );
-                        _connection_manager->add_operation( _termination_async_operation );
+                        _termination_async_operation->set_async_manager( _async_manager );
+                        _async_manager->add_operation( _termination_async_operation );
                     }
                 }
 
@@ -2440,7 +2450,7 @@ void Spooler::run()
             // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
 
             vector<System_event*> events;
-            _connection_manager->get_events( &events );
+            _event_manager->get_events( &events );
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
 
@@ -2507,16 +2517,6 @@ void Spooler::wait()
     wait_handles.clear();
 }
 
-//------------------------------------------------------------------------Spooler::simple_wait_step
-
-//void Spooler::simple_wait_step()
-//{
-//    wait();
-//    _connection_manager->async_continue();
-//    run_check_ctrl_c();
-//    //execute_state_cmd();    // Damit cmd_terminate() zu _shutdown_cmd führt
-//}
-
 //------------------------------------------------------------------------------------Spooler::wait
 
 void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object* wait_until_object, const Time& resume_at, Object* resume_at_object )
@@ -2533,7 +2533,7 @@ void Spooler::wait( Wait_handles* wait_handles, const Time& wait_until_, Object*
 
     if( wait_until > 0 )
     {
-        if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
+        if( ptr<Async_operation> operation = _async_manager->async_next_operation() )
         {
             Time next_time;
             next_time.set_utc( operation->async_next_gmtime() );
@@ -2615,7 +2615,7 @@ bool Spooler::run_continue( const Time& now )
 
 
     // TCP- UND UDP-VERBINDUNGEN IN SPOOLER_COMMUNICATION.CXX FORTSETZEN
-    something_done |= _connection_manager->async_continue();
+    something_done |= _async_manager->async_continue();
     //Z_LOG2( "zschimmer", Z_FUNCTION << "  something_done=" << something_done << "\n" );
 
     return something_done;

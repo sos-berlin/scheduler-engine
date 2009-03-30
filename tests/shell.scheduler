@@ -29,6 +29,9 @@ order.id = 1;
 
         <jobs>
             <job name="test" order="yes" title="Aufruf von /tmp/test.cmd">
+                <params>
+                    <param name="jobparam" value="***job***"/>
+                </params>
                 <process file="/tmp/test.cmd" param="Mein Parameter">
                     <environment>
                         <variable name="var1" value="111"/>

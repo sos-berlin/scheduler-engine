@@ -1773,13 +1773,13 @@ void Cluster::start_operations()
     if( !_cluster_operation )
     {
         _cluster_operation = Z_NEW( Cluster_operation( this ) );
-        _cluster_operation->set_async_manager( _spooler->_connection_manager );
+        _cluster_operation->set_async_manager( _spooler->_async_manager );
     }
 
     if( !_heart_beat )
     {
         _heart_beat = Z_NEW( Heart_beat( this ) );
-        _heart_beat->set_async_manager( _spooler->_connection_manager );
+        _heart_beat->set_async_manager( _spooler->_async_manager );
     }
 
     if( _demand_exclusiveness  &&  !has_exclusiveness() )
@@ -1789,7 +1789,7 @@ void Cluster::start_operations()
         if( !_exclusive_scheduler_watchdog )
         {
             _exclusive_scheduler_watchdog = Z_NEW( Exclusive_scheduler_watchdog( this ) );
-            _exclusive_scheduler_watchdog->set_async_manager( _spooler->_connection_manager );
+            _exclusive_scheduler_watchdog->set_async_manager( _spooler->_async_manager );
         }
     }
     
@@ -1800,7 +1800,7 @@ void Cluster::start_operations()
         //-------------------------------------------------------------------------------------------------
         
         _active_schedulers_watchdog = Z_NEW( Active_schedulers_watchdog( this ) );
-        _active_schedulers_watchdog ->set_async_manager( _spooler->_connection_manager );
+        _active_schedulers_watchdog ->set_async_manager( _spooler->_async_manager );
     }
 }
 

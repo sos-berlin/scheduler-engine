@@ -278,7 +278,7 @@ Directory_file_order_source::Directory_file_order_source( Job_chain* job_chain, 
     
 Directory_file_order_source::~Directory_file_order_source()
 {
-    //if( _spooler->_connection_manager )  _spooler->_connection_manager->remove_operation( this );
+    //if( _spooler->_async_manager )  _spooler->_async_manager->remove_operation( this );
 
     close();
 }
@@ -414,7 +414,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
         _notification_event.set_handle_noninheritable( h );
         _notification_event.set_name( "FindFirstChangeNotification " + _path );
         
-        add_to_event_manager( _spooler->_connection_manager );
+        add_to_event_manager( _spooler->_event_manager );
 
         _notification_event_time = now;
     }
@@ -439,7 +439,8 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
         _notification_event.set_handle_noninheritable( h );
         _notification_event.set_name( "FindFirstChangeNotification " + _path );
 
-        add_to_event_manager( _spooler->_connection_manager );
+        set_async_manager( _spooler->_async_manager );
+        add_to_event_manager( _spooler->_async_manager );
     }
     else
     {
@@ -462,7 +463,7 @@ void Directory_file_order_source::close_notification()
         if( _notification_event.handle() )
         {
             remove_from_event_manager();
-            set_async_manager( _spooler->_connection_manager );   // remove_from_event_manager() für set_async_next_gmtime() rückgängig machen
+            //set_async_manager( _spooler->_async_manager );   // remove_from_event_manager() für set_async_next_gmtime() rückgängig machen
 
             Z_LOG2( "scheduler.file_order", "FindCloseChangeNotification(\"" << _path << "\")\n" );
             FindCloseChangeNotification( _notification_event.handle() );
@@ -497,7 +498,7 @@ void Directory_file_order_source::activate()
     set_async_next_gmtime( double_time_max );
     //set_async_next_gmtime( (time_t)0 );     // Am Start das Verzeichnis auslesen
 
-    set_async_manager( _spooler->_connection_manager );
+    set_async_manager( _spooler->_async_manager );
 
 
     if( next_job  &&  next_job->state() > Job::s_not_initialized )  next_job->calculate_next_time( Time::now() );     // Der Job bestellt den nächsten Auftrag (falls in einer Periode)

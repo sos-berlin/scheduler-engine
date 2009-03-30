@@ -218,7 +218,7 @@ void Xml_response::signal_new_data()
     {
         if( _connection->state() == zschimmer::Buffered_socket_operation::s_ready )
         {
-            _connection->_socket_event.signal( Z_FUNCTION ); 
+            _connection->async_wake(); //_socket_event.signal( Z_FUNCTION ); 
         }
     }
 }
@@ -229,28 +229,26 @@ bool Communication::Listen_socket::async_continue_( Continue_flags )
 {
     bool something_done = false;
 
-    //if( socket_read_signaled() )
+    ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
+
+    bool ok = new_connection->do_accept( _read_socket );
+    if( ok )
     {
-        ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
-
-        bool ok = new_connection->do_accept( _read_socket );
-        if( ok )
+        if( _communication->_connection_list.size() >= max_communication_connections )
         {
-            if( _communication->_connection_list.size() >= max_communication_connections )
-            {
-                _spooler->log()->error( message_string( "SCHEDULER-286", max_communication_connections ) );
-            }
-            else
-            {
-                _communication->_connection_list.push_back( new_connection );
-
-                new_connection->add_to_socket_manager( _spooler->_connection_manager );
-                new_connection->socket_expect_signals( Old_socket_operation::sig_read | Old_socket_operation::sig_write | Old_socket_operation::sig_except );
-                new_connection->async_continue();
-            }
-
-            something_done = true;
+            _spooler->log()->error( message_string( "SCHEDULER-286", max_communication_connections ) );
         }
+        else
+        {
+            _communication->_connection_list.push_back( new_connection );
+
+            new_connection->add_to_socket_manager( _spooler->_connections );
+            //new_connection->socket_expect_signals( Old_socket_operation::sig_read | Old_socket_operation::sig_write | Old_socket_operation::sig_except );
+            new_connection->set_async_manager( _spooler->_async_manager );
+            new_connection->async_continue();
+        }
+
+        something_done = true;
     }
 
     async_clear_signaled();
@@ -376,37 +374,43 @@ void Communication::Connection::terminate()
 
 bool Communication::Connection::do_accept( SOCKET listen_socket )
 {
+    bool ok;
+
     try
     {
-        bool ok = this->accept( listen_socket );
-        if( !ok )  return false;        // EWOULDBLOCK
-
-        //_read_socket.set_linger( true, 0 );
-        call_ioctl( FIONBIO, 1 );
-
-        set_buffer_size();
-
-        _security_level = _spooler->security_level( peer_host() );
-
-        _log.set_prefix( "TCP connection to " + _peer_host_and_port.as_string() );
-
-
-        if( _security_level <= Security::seclev_signal )
+        ok = this->accept( listen_socket );
+        if( ok )  //Nicht EWOULDBLOCK
         {
-            _log.warn( message_string( "SCHEDULER-287" ) );
-            do_close();
-            return false;
+            //_read_socket.set_linger( true, 0 );
+            call_ioctl( FIONBIO, 1 );
+
+            set_buffer_size();
+
+            _security_level = _spooler->security_level( peer_host() );
+
+            _log.set_prefix( "TCP connection to " + _peer_host_and_port.as_string() );
+
+
+            if( _security_level <= Security::seclev_signal )
+            {
+                _log.warn( message_string( "SCHEDULER-287" ) );
+                do_close();
+                return false;
+            }
+
+            //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
+
+            _log.info( message_string( "SCHEDULER-933" ) );
+            _connection_state = s_ready;
         }
-
-        //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
-
-        _log.info( message_string( "SCHEDULER-933" ) );
-        _connection_state = s_ready;
-
     }
-    catch( const exception& x ) { _log.error(x.what()); return false; }
+    catch( const exception& x ) 
+    { 
+        _log.error(x.what()); 
+        ok = false; 
+    }
 
-    return true;
+    return ok;
 }
 
 //--------------------------------------------------------------Communication::Connection::do_close
@@ -497,7 +501,7 @@ bool Communication::Connection::do_recv()
                 }
 
                 _operation = _operation_connection->new_operation();
-                _operation->set_async_manager( _spooler->_connection_manager );     // Für set_async_next_gmtime()
+                _operation->set_async_manager( _spooler->_async_manager );     // Für set_async_next_gmtime()
             }
         }
 
@@ -902,7 +906,7 @@ void Communication::bind()
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
 
-                _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
+                //_udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
                 {
                     Message_string m ( "SCHEDULER-956", "UDP", _udp_port );     // "Scheduler erwartet Kommandos über $1-Port " 
@@ -912,8 +916,9 @@ void Communication::bind()
             }
         }
 
-        _udp_socket.add_to_socket_manager( _spooler->_connection_manager );
+        _udp_socket.add_to_socket_manager( _spooler->_connections );
         _udp_socket.socket_expect_signals( Old_socket_operation::sig_read );
+        _udp_socket.set_async_manager( _spooler->_async_manager );
     }
 
 
@@ -928,7 +933,7 @@ void Communication::bind()
 
             if( _spooler->tcp_port() != 0 )
             {
-                _listen_socket.set_event_name( S() << "TCP listen(" << _spooler->tcp_port() << ")" );
+                //_listen_socket.set_event_name( S() << "TCP listen(" << _spooler->tcp_port() << ")" );
 
                 _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
                 if( _listen_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
@@ -961,8 +966,10 @@ void Communication::bind()
             }
         }
 
-        _listen_socket.add_to_socket_manager( _spooler->_connection_manager );
-        _listen_socket.socket_expect_signals( Old_socket_operation::sig_read );
+        _listen_socket.add_to_socket_manager( _spooler->_connections );
+        _listen_socket.set_async_manager( _spooler->_async_manager );
+        _listen_socket.socket_expect_accept();
+        _listen_socket.async_continue();       // Einmal accept() aufrufen
     }
 
 
@@ -976,7 +983,7 @@ void Communication::bind()
             new_connection->_socket_send_buffer_size = 1024;
 
             new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
-            new_connection->add_to_socket_manager( _spooler->_connection_manager );
+            new_connection->add_to_socket_manager( _spooler->_async_manager );
             new_connection->socket_expect_signals( Old_socket_operation::sig_read );
 
             new_connection->set_event_name( "stdin" );
