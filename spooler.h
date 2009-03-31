@@ -492,7 +492,8 @@ struct Spooler : Object,
     Process_id                  get_next_process_id         ()                                  { return _next_process_id++; }
 
     void                        wait                        ();
-    void                        wait                        ( Wait_handles*, const Time& wait_until, Object* wait_until_object, const Time& resume_at, Object* resume_at_object );
+    void                        wait                        ( const Time& until, const Object* wait_for_object, const Time& resume_at, const Object* resume_at_object );
+    bool                        wait_until                  ( const Time& until, const Object* wait_for_object, const Time& resume_at, const Object* resume_at_object );
 
     void                        signal                      ( const string& signal_name );
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
@@ -659,8 +660,6 @@ struct Spooler : Object,
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;
     ptr<lock::Lock_subsystem>        _lock_subsystem;
-
-    Wait_handles               _wait_handles;
 
     Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
     ptr<Empty_event_operation> _event_operation;

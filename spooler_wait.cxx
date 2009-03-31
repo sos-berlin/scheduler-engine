@@ -87,355 +87,355 @@ static int console_width()
 //}
 
 //------------------------------------------------------------------------ait_handles::Wait_handles
-
-Wait_handles::Wait_handles( Spooler* spooler )
-: 
-    _zero_(this+1),
-    _spooler(spooler),
-    _log( spooler->log() ),
-    _lock("Wait_handles") 
-{
-}
-
-//-----------------------------------------------------------------------Wait_handles::Wait_handles
-
-Wait_handles::Wait_handles( const Wait_handles& o )
-: 
-    _zero_(this+1),
-    _spooler ( o._spooler ),
-    _log     ( o._log ),
-    _lock    ( "Wait_handles" ),
-    _events  ( o._events )
-#ifdef Z_WINDOWS
-   ,_handles ( o._handles )
-#endif
-{
-}
-
-//----------------------------------------------------------------------Wait_handles::~Wait_handles
-
-Wait_handles::~Wait_handles()
-{
-    close();
-}
-
-//------------------------------------------------------------------------------Wait_handles::close
-
-void Wait_handles::close()
-{
-    //THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Event_vector, _events, it )  
-        {
-            if( *it )  
-            {
-                _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
-                Z_WINDOWS_ONLY( Z_DEBUG_ONLY( assert( !"Closing Wait_handles before ..." ) ) );
-            }
-        }
-    }
-}
-
-//------------------------------------------------------------------------------Wait_handles::clear
-
-void Wait_handles::clear()
-{
-    //THREAD_LOCK( _lock )
-    {
-        _events.clear();
-
-#       ifdef Z_WINDOWS
-            _handles.clear();
-#       endif
-    }
-}
-
-//---------------------------------------------------------------------------Wait_handles::signaled
-
-bool Wait_handles::signaled()
-{
-    //THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Event_vector, _events, it )  
-        {
-            if( *it  &&  (*it)->signaled() )  
-            { 
-                _catched_event = *it;
-                //Z_LOG2( _spooler->_scheduler_wait_log_category, **it << " signaled!\n" );  
-                return true; 
-            }
-        }
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------Wait_handles::operator += 
-
-Wait_handles& Wait_handles::operator += ( Wait_handles& o )
-{
-    //THREAD_LOCK( _lock )
-    //THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
-    {
-        Event_vector::iterator   e = o._events.begin();
-        Z_WINDOWS_ONLY( vector<HANDLE>::iterator h = o._handles.begin(); )
-
-        while( e != o._events.end() )
-        {
-            Event_vector::iterator e2 = _events.begin();
-            while( e2 != _events.end()  &&  *e2 != *e )  e2++;
-            if( e2 == _events.end() )
-            {
-                _events.push_back( *e );                             // Nur verschiedene hinzufügen
-                Z_WINDOWS_ONLY( _handles.push_back( *h ) );
-            }
-
-            e++;
-            Z_WINDOWS_ONLY( h++ );
-        }
-    }
-
-    return *this;
-}
-
-//--------------------------------------------------------------------------------Wait_handles::add
-
-void Wait_handles::add( System_event* event )
-{
-    //THREAD_LOCK( _lock )
-    {
-#       ifdef Z_WINDOWS
-            assert( event->handle() );
-            _handles.push_back( event->handle() );
-#       endif
-
-        _events.push_back( event );
-    }
-}
-
-//-----------------------------------------------------------------------------Wait_handles::remove
-
-void Wait_handles::remove( System_event* event )
-{
-    if( !event )  return;
-
-
-    Event_vector::iterator it = _events.begin();
-
-    while( it != _events.end() )
-    {
-        if( *it == event )  break;
-        it++;
-    }
-
-    if( it == _events.end() ) {
-        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
-        return;
-    }
-
-    Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
-    _events.erase( it );
-}
-
-//-------------------------------------------------------------------------Wait_handles::wait_until
-// Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
-
-bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
-{
-#   ifdef Z_DEBUG
-        if( z::Log_ptr log = _spooler->_scheduler_wait_log_category )
-        {
-            *log << Z_FUNCTION << " ";
-            *log << " until=" << until << ", ";
-            if( wait_for_object )  *log << "  for " << wait_for_object->obj_name() << ", ";
-            *log << *this << "\n";
-        }
-#   endif
-
-
-    // until kann 0 sein
-    _catched_event = NULL;
-
-    //2006-06-18: Nicht gut bei "nichts_getan": Wir brauchen auch neue Ereignisse, v.a. TCP.    if( signaled() )  return true;
-
-#ifdef Z_WINDOWS
-
-    bool    result    = false;
-    bool    again     = false;
-    HANDLE* handles   = NULL;
-    //bool    waitable_timer_set = false;
-    BOOL    ok;
-    Time    now       = Time::now();
-
-
-    if( now < until  &&  _spooler->_waitable_timer )
-    {
-        if( resume_until < Time::never )
-        {
-            LARGE_INTEGER gmtime;
-
-            //FILETIME      local_time = resume_until.filetime();
-            //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
-            //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
-
-            gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
-            if( gmtime.QuadPart < 0 )
-            {
-                Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
-                        << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
-
-                ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, TRUE );   // Weckt den Rechner
-                if( !ok )  z::throw_mswin( "SetWaitableTimer" );
-
-                _spooler->_is_waitable_timer_set = true;
-            }
-        }
-        else
-        if( _spooler->_is_waitable_timer_set )
-        {
-            ok = CancelWaitableTimer( _spooler->_waitable_timer );
-            if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
-
-            _spooler->_is_waitable_timer_set = false;
-        }
-    }
-
-
-    while(1)
-    {
-        double wait_time         = max( 0.0, until - now );
-        int    max_sleep_time_ms = INT_MAX-1;
-        int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
-        //DWORD  ret               = WAIT_TIMEOUT;
-
-
-        if( t <= 0 )  if( again )  break;
-                             else  t = 0;  //break;
-        
-        if( again ) {
-            if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
-        }
-
-
-        bool ok = _spooler->_event_manager->wait_for_event( t / 1000.0, wait_for_object );
-        if( ok )  break;
-
-        //handles = new HANDLE [ _handles.size()+1 ];
-        //for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
-
-        
-        //delete [] handles;  handles = NULL;
-
-        //if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
-
-        //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
-        //{
-        //    int            index = ret - WAIT_OBJECT_0;
-        //    z::Event_base* event = _events[ index ];
-        //
-        //    if( event )
-        //    {
-        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-        //        if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjectsEx" );
-        //    }
-        //    else
-        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
-
-        //    _catched_event = event;
-
-        //    if( event != &_spooler->_waitable_timer )  result = true;
-        //    break;
-        //}
-        //else
-        //if( ret == WAIT_OBJECT_0 + _handles.size() )
-        //{
-        //    windows::windows_message_step();
-        //}
-        //else
-        //if( ret == WAIT_IO_COMPLETION )     // WSASend(), WSARecv()
-        //{
-        //    result = true;
-        //    break;
-        //}
-        //else
-        //if( ret == WAIT_TIMEOUT )  
-        //{
-        //    again = true;
-        //}
-        //else
-        //    throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
-
-
-        now = Time::now();
-        if( until >= now )  break;
-    }
-
-
-    //if( waitable_timer_set )
-    //{
-    //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
-    //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
-    //}
-
-    return result;
-
-#else
-
-    {
-        Time now = Time::now();
-
-        //if( until > now )
-            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
-                ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
-
-        ptr<Socket_wait> wait = _spooler->_socket_manager->create_wait();
-
-        for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
-
-        wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
-                                                                                               : 1.0 );
-
-        int ret = wait->wait( (double)( until - now ) );
-        return ret > 0;
-    }
-
-#endif
-}
-
-//--------------------------------------------------------------------------Wait_handles::as_string
-
-string Wait_handles::as_string() 
-{
-    string result;
-
-    //THREAD_LOCK( _lock )
-    {
-        if( _events.empty() )
-        {
-            result = "nichts";
-        }
-        else
-        {
-            result = "{";
-
-            for( int i = 0; i < _events.size(); i++ )
-            {
-                if( i > 0 )  result += ", ";
-
-#               ifdef Z_WINDOWS
-                    result += as_hex_string( (int)_handles[i] );
-                    result += ' ';
-#               endif
-
-                if( _events[i] )  result += _events[i]->as_text(); 
-            }
-
-            result += "}";
-        }
-    }
-
-    return result;
-}
+//
+//Wait_handles::Wait_handles( Spooler* spooler )
+//: 
+//    _zero_(this+1),
+//    _spooler(spooler),
+//    _log( spooler->log() ),
+//    _lock("Wait_handles") 
+//{
+//}
+//
+////-----------------------------------------------------------------------Wait_handles::Wait_handles
+//
+//Wait_handles::Wait_handles( const Wait_handles& o )
+//: 
+//    _zero_(this+1),
+//    _spooler ( o._spooler ),
+//    _log     ( o._log ),
+//    _lock    ( "Wait_handles" ),
+//    _events  ( o._events )
+//#ifdef Z_WINDOWS
+//   ,_handles ( o._handles )
+//#endif
+//{
+//}
+//
+////----------------------------------------------------------------------Wait_handles::~Wait_handles
+//
+//Wait_handles::~Wait_handles()
+//{
+//    close();
+//}
+//
+////------------------------------------------------------------------------------Wait_handles::close
+//
+//void Wait_handles::close()
+//{
+//    //THREAD_LOCK( _lock )
+//    {
+//        FOR_EACH( Event_vector, _events, it )  
+//        {
+//            if( *it )  
+//            {
+//                _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
+//                Z_WINDOWS_ONLY( Z_DEBUG_ONLY( assert( !"Closing Wait_handles before ..." ) ) );
+//            }
+//        }
+//    }
+//}
+//
+////------------------------------------------------------------------------------Wait_handles::clear
+//
+//void Wait_handles::clear()
+//{
+//    //THREAD_LOCK( _lock )
+//    {
+//        _events.clear();
+//
+//#       ifdef Z_WINDOWS
+//            _handles.clear();
+//#       endif
+//    }
+//}
+//
+////---------------------------------------------------------------------------Wait_handles::signaled
+//
+//bool Wait_handles::signaled()
+//{
+//    //THREAD_LOCK( _lock )
+//    {
+//        FOR_EACH( Event_vector, _events, it )  
+//        {
+//            if( *it  &&  (*it)->signaled() )  
+//            { 
+//                _catched_event = *it;
+//                //Z_LOG2( _spooler->_scheduler_wait_log_category, **it << " signaled!\n" );  
+//                return true; 
+//            }
+//        }
+//    }
+//
+//    return false;
+//}
+//
+////------------------------------------------------------------------------Wait_handles::operator += 
+//
+//Wait_handles& Wait_handles::operator += ( Wait_handles& o )
+//{
+//    //THREAD_LOCK( _lock )
+//    //THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
+//    {
+//        Event_vector::iterator   e = o._events.begin();
+//        Z_WINDOWS_ONLY( vector<HANDLE>::iterator h = o._handles.begin(); )
+//
+//        while( e != o._events.end() )
+//        {
+//            Event_vector::iterator e2 = _events.begin();
+//            while( e2 != _events.end()  &&  *e2 != *e )  e2++;
+//            if( e2 == _events.end() )
+//            {
+//                _events.push_back( *e );                             // Nur verschiedene hinzufügen
+//                Z_WINDOWS_ONLY( _handles.push_back( *h ) );
+//            }
+//
+//            e++;
+//            Z_WINDOWS_ONLY( h++ );
+//        }
+//    }
+//
+//    return *this;
+//}
+//
+////--------------------------------------------------------------------------------Wait_handles::add
+//
+//void Wait_handles::add( System_event* event )
+//{
+//    //THREAD_LOCK( _lock )
+//    {
+//#       ifdef Z_WINDOWS
+//            assert( event->handle() );
+//            _handles.push_back( event->handle() );
+//#       endif
+//
+//        _events.push_back( event );
+//    }
+//}
+//
+////-----------------------------------------------------------------------------Wait_handles::remove
+//
+//void Wait_handles::remove( System_event* event )
+//{
+//    if( !event )  return;
+//
+//
+//    Event_vector::iterator it = _events.begin();
+//
+//    while( it != _events.end() )
+//    {
+//        if( *it == event )  break;
+//        it++;
+//    }
+//
+//    if( it == _events.end() ) {
+//        _log->error( "Wait_handles::remove(" + event->as_text() + "): Unknown event" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+//        return;
+//    }
+//
+//    Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
+//    _events.erase( it );
+//}
+//
+////-------------------------------------------------------------------------Wait_handles::wait_until
+//// Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
+//
+//bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
+//{
+//#   ifdef Z_DEBUG
+//        if( z::Log_ptr log = _spooler->_scheduler_wait_log_category )
+//        {
+//            *log << Z_FUNCTION << " ";
+//            *log << " until=" << until << ", ";
+//            if( wait_for_object )  *log << "  for " << wait_for_object->obj_name() << ", ";
+//            *log << *this << "\n";
+//        }
+//#   endif
+//
+//
+//    // until kann 0 sein
+//    _catched_event = NULL;
+//
+//    //2006-06-18: Nicht gut bei "nichts_getan": Wir brauchen auch neue Ereignisse, v.a. TCP.    if( signaled() )  return true;
+//
+//#ifdef Z_WINDOWS
+//
+//    bool    result    = false;
+//    bool    again     = false;
+//    HANDLE* handles   = NULL;
+//    //bool    waitable_timer_set = false;
+//    BOOL    ok;
+//    Time    now       = Time::now();
+//
+//
+//    if( now < until  &&  _spooler->_waitable_timer )
+//    {
+//        if( resume_until < Time::never )
+//        {
+//            LARGE_INTEGER gmtime;
+//
+//            //FILETIME      local_time = resume_until.filetime();
+//            //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
+//            //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
+//
+//            gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
+//            if( gmtime.QuadPart < 0 )
+//            {
+//                Z_LOG2( _spooler->_scheduler_wait_log_category, "SetWaitableTimer(" << ( gmtime.QuadPart / 10000000.0 ) << "s: " << resume_until.as_string() << ")"  
+//                        << ( resume_object? " for " + resume_object->obj_name() : "" ) << "\n" );
+//
+//                ok = SetWaitableTimer( _spooler->_waitable_timer, &gmtime, 0, NULL, NULL, TRUE );   // Weckt den Rechner
+//                if( !ok )  z::throw_mswin( "SetWaitableTimer" );
+//
+//                _spooler->_is_waitable_timer_set = true;
+//            }
+//        }
+//        else
+//        if( _spooler->_is_waitable_timer_set )
+//        {
+//            ok = CancelWaitableTimer( _spooler->_waitable_timer );
+//            if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+//
+//            _spooler->_is_waitable_timer_set = false;
+//        }
+//    }
+//
+//
+//    while(1)
+//    {
+//        double wait_time         = max( 0.0, until - now );
+//        int    max_sleep_time_ms = INT_MAX-1;
+//        int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
+//        //DWORD  ret               = WAIT_TIMEOUT;
+//
+//
+//        if( t <= 0 )  if( again )  break;
+//                             else  t = 0;  //break;
+//        
+//        if( again ) {
+//            if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
+//        }
+//
+//
+//        bool ok = _spooler->_event_manager->wait_for_event( t / 1000.0, wait_for_object );
+//        if( ok )  break;
+//
+//        //handles = new HANDLE [ _handles.size()+1 ];
+//        //for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
+//
+//        
+//        //delete [] handles;  handles = NULL;
+//
+//        //if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
+//
+//        //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
+//        //{
+//        //    int            index = ret - WAIT_OBJECT_0;
+//        //    z::Event_base* event = _events[ index ];
+//        //
+//        //    if( event )
+//        //    {
+//        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
+//        //        if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjectsEx" );
+//        //    }
+//        //    else
+//        //        if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
+//
+//        //    _catched_event = event;
+//
+//        //    if( event != &_spooler->_waitable_timer )  result = true;
+//        //    break;
+//        //}
+//        //else
+//        //if( ret == WAIT_OBJECT_0 + _handles.size() )
+//        //{
+//        //    windows::windows_message_step();
+//        //}
+//        //else
+//        //if( ret == WAIT_IO_COMPLETION )     // WSASend(), WSARecv()
+//        //{
+//        //    result = true;
+//        //    break;
+//        //}
+//        //else
+//        //if( ret == WAIT_TIMEOUT )  
+//        //{
+//        //    again = true;
+//        //}
+//        //else
+//        //    throw_mswin_error( "MsgWaitForMultipleObjectsEx" );
+//
+//
+//        now = Time::now();
+//        if( until >= now )  break;
+//    }
+//
+//
+//    //if( waitable_timer_set )
+//    //{
+//    //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
+//    //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
+//    //}
+//
+//    return result;
+//
+//#else
+//
+//    {
+//        Time now = Time::now();
+//
+//        //if( until > now )
+//            Z_LOG2( _spooler->_scheduler_wait_log_category, "wait_until " << until.as_string() << " (" << (double)( until - now ) << "s)" <<
+//                ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << " " << as_string() << "\n" );
+//
+//        ptr<Socket_wait> wait = _spooler->_socket_manager->create_wait();
+//
+//        for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
+//
+//        wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
+//                                                                                               : 1.0 );
+//
+//        int ret = wait->wait( (double)( until - now ) );
+//        return ret > 0;
+//    }
+//
+//#endif
+//}
+//
+////--------------------------------------------------------------------------Wait_handles::as_string
+//
+//string Wait_handles::as_string() 
+//{
+//    string result;
+//
+//    //THREAD_LOCK( _lock )
+//    {
+//        if( _events.empty() )
+//        {
+//            result = "nichts";
+//        }
+//        else
+//        {
+//            result = "{";
+//
+//            for( int i = 0; i < _events.size(); i++ )
+//            {
+//                if( i > 0 )  result += ", ";
+//
+//#               ifdef Z_WINDOWS
+//                    result += as_hex_string( (int)_handles[i] );
+//                    result += ' ';
+//#               endif
+//
+//                if( _events[i] )  result += _events[i]->as_text(); 
+//            }
+//
+//            result += "}";
+//        }
+//    }
+//
+//    return result;
+//}
 
 //--------------------------------------------------------------Directory_reader::~Directory_reader
     

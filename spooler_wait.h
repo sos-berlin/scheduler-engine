@@ -45,59 +45,59 @@ struct Event : System_event
 
 //-------------------------------------------------------------------------------------Wait_handles
 
-struct Wait_handles : Non_cloneable
-{
-    Fill_zero _zero_;
-
-                                Wait_handles                ( Spooler* );
-                                Wait_handles                ( const Wait_handles& );
-                               ~Wait_handles                ();
-
-
-    Wait_handles&               operator +=                 ( Wait_handles& );
-
-    void                        clear                       ();
-    void                        close                       ();
-  //void                        clear                       ()                                      { _handles.clear(); _events.clear(); }
-
-    void                        add                         ( System_event* );
-    void                        remove                      ( System_event* );
-
-#ifdef Z_WINDOWS
-  //void                        add_handle                  ( HANDLE ); //, System_event* = NULL );
-    HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
-#endif
-
-    bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
-                                                              const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
-    bool                        wait_until_2                ( const Time& t, const Object& o )  { return wait_until_2( t, &o, t, &o); }
-    bool                        wait_until_2                ( const Time&  , const Object* debug_wait_for_object, const Time& resume_until, const Object* );
-  //bool                        wait                        ( double time );
-
-    bool                        signaled                    ();
-    int                         length                      ()                                      { return _events.size(); }
-    bool                        empty                       () const                                { return _events.empty(); }
-
-    string                      as_string                   ();
-    friend ostream&             operator <<                 ( ostream& s, Wait_handles& w )         { return s << w.as_string(); }
-
-
-    z::Event_base*             _catched_event;              // Ereignis, das wait_until() beendete. Nur unmittelbar nach wait_until() oder signaled() gültig.
-
-  protected:
-    Spooler*                   _spooler;
-    Prefix_log*                _log;
-
-#ifdef Z_WINDOWS
-    vector<HANDLE>             _handles;
-#endif
-
-    typedef vector<z::Event_base*>   Event_vector;
-    Event_vector               _events;
-
-  public:
-    Thread_semaphore           _lock;
-};
+//struct Wait_handles : Non_cloneable
+//{
+//    Fill_zero _zero_;
+//
+//                                Wait_handles                ( Spooler* );
+//                                Wait_handles                ( const Wait_handles& );
+//                               ~Wait_handles                ();
+//
+//
+//    Wait_handles&               operator +=                 ( Wait_handles& );
+//
+//    void                        clear                       ();
+//    void                        close                       ();
+//  //void                        clear                       ()                                      { _handles.clear(); _events.clear(); }
+//
+//    void                        add                         ( System_event* );
+//    void                        remove                      ( System_event* );
+//
+//#ifdef Z_WINDOWS
+//  //void                        add_handle                  ( HANDLE ); //, System_event* = NULL );
+//    HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
+//#endif
+//
+//    bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
+//                                                              const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
+//    bool                        wait_until_2                ( const Time& t, const Object& o )  { return wait_until_2( t, &o, t, &o); }
+//    bool                        wait_until_2                ( const Time&  , const Object* debug_wait_for_object, const Time& resume_until, const Object* );
+//  //bool                        wait                        ( double time );
+//
+//    bool                        signaled                    ();
+//    int                         length                      ()                                      { return _events.size(); }
+//    bool                        empty                       () const                                { return _events.empty(); }
+//
+//    string                      as_string                   ();
+//    friend ostream&             operator <<                 ( ostream& s, Wait_handles& w )         { return s << w.as_string(); }
+//
+//
+//    z::Event_base*             _catched_event;              // Ereignis, das wait_until() beendete. Nur unmittelbar nach wait_until() oder signaled() gültig.
+//
+//  protected:
+//    Spooler*                   _spooler;
+//    Prefix_log*                _log;
+//
+//#ifdef Z_WINDOWS
+//    vector<HANDLE>             _handles;
+//#endif
+//
+//    typedef vector<z::Event_base*>   Event_vector;
+//    Event_vector               _events;
+//
+//  public:
+//    Thread_semaphore           _lock;
+//};
 
 //--------------------------------------------------------------------------------Directory_watcher
 
