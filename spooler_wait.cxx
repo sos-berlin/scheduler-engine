@@ -316,70 +316,13 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
         }
 
-//#       ifdef Z_DEBUG
-//            Z_LOG2( t > 0? "scheduler.wait" : "scheduler.loop", "MsgWaitForMultipleObjectsEx " << sos::as_string(t/1000.0) << "s (" << wait_time << "s, bis " << until << ( wait_for_object? " auf " + wait_for_object->obj_name() : "" ) << ")  " << as_string() << "\n" );
-//#       endif
 
-        bool ok = _spooler->_event_manager->wait_for_event( t / 1000.0 );
+        bool ok = _spooler->_event_manager->wait_for_event( t / 1000.0, wait_for_object );
         if( ok )  break;
 
         //handles = new HANDLE [ _handles.size()+1 ];
         //for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
-        //if( _spooler  &&  _spooler->_print_time_every_second )
-        //{
-        //    int     console_line_length = 0;
-        //    double  step                = 0.05;  // Der erste Schritt 1/20s, dann 1s
-        //    
-        //    while(1)
-        //    {
-        //        double remaining = until - Time::now();
-        //        if( remaining < 0.7 )  break;
-
-        //        ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT, MWMO_ALERTABLE ); 
-        //        if( ret != WAIT_TIMEOUT )  break;
-
-        //        step = 1.0;
-
-        //        Time now = Time::now();
-        //        Time rest = until - now;
-        //        t = (int)ceil( min( (double)max_sleep_time_ms, rest * 1000.0 ) );
-
-        //        S console_line;
-        //        console_line << Time::now().as_string( Time::without_ms );
-        //        
-        //        if( until < Time::never  ||  wait_for_object )
-        //        {
-        //            console_line << " (";
-        //            if( until < Time::never ) 
-        //            {
-        //                int days = rest.day_nr();
-        //                if( days > 0 )  console_line << days << "d+";
-        //                console_line << rest.time_of_day().as_string( Time::without_ms ) << "s";
-        //                if( days > 0 )  console_line << " until " << Time( until ).as_string();
-        //            }
-        //            if( wait_for_object )  console_line << " for " << wait_for_object->obj_name();
-        //            console_line << ")";
-        //        }
-
-        //        string l = console_line.to_string().substr( 0, console_width() - 1 );
-        //        console_line_length = l.length();
-        //        l += '\r';
-        //        cerr << l << flush;
-        //    }
-
-        //    if( ret == WAIT_TIMEOUT )
-        //    {
-        //        if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
-        //        ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, max( 0, t ), QS_ALLINPUT, MWMO_ALERTABLE ); 
-        //    }
-
-        //    if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
-        //}
-        //else
-        //{
-        //    ret = MsgWaitForMultipleObjectsEx( _handles.size(), handles, t, QS_ALLINPUT, MWMO_ALERTABLE ); 
-        //}
         
         //delete [] handles;  handles = NULL;
 

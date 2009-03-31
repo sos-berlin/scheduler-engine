@@ -613,6 +613,10 @@ struct Spooler : Object,
     string                     _short_hostname;             // Ohne Netzwerk
     string                     _complete_hostname;          // Mit Netzwerk
 
+    ptr<Async_manager>         _async_manager;
+    ptr<Event_manager>         _event_manager;
+    ptr<object_server::Connections>  _connections;
+
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
@@ -665,9 +669,6 @@ struct Spooler : Object,
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
     Rotating_bar               _wait_rotating_bar;
 
-    ptr<Async_manager>         _async_manager;
-    ptr<Event_manager>         _event_manager;
-    ptr<object_server::Connections>  _connections;
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     file::File_path            _configuration_file_path;            // -config=

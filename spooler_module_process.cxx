@@ -55,7 +55,7 @@ struct Process_module_instance_operation : Event_operation
 {
     Process_module_instance_operation ( Process_module_instance* pmi ) : _process_module_instance(pmi) {}
 
-    string async_state_text_() const { return "Process_module_instance_operation"; }
+    string async_state_text_() const { return _process_module_instance->obj_name(); }
 
     Socket_event* async_event() { return &_process_module_instance->_process_handle; }
 
@@ -388,7 +388,6 @@ bool Process_module_instance::begin__end()
     {
         _operation = Z_NEW( Process_module_instance_operation( this ) );
         _operation->add_to_event_manager( _spooler->_event_manager );
-        //_process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle );
     }
 
@@ -750,7 +749,6 @@ bool Process_module_instance::begin__end()
     {
         _operation = Z_NEW( Process_module_instance_operation( this ) );
         _operation->add_to_event_manager( _spooler->_event_manager );
-        //_process_handle.add_to( &_spooler->_wait_handles );
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;
     }

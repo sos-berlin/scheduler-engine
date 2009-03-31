@@ -763,6 +763,11 @@ Spooler::Spooler()
     #else
         _async_manager->set_wait_handler( _socket_manager );
     #endif
+
+    _event.set_name( "Scheduler" );
+    _event.set_waiting_thread_id( current_thread_id() );
+    _event.create();
+    _event.add_to( &_wait_handles );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -3162,11 +3167,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     tzset();
 
     _thread_id = current_thread_id();
-
-    _event.set_name( "Scheduler" );
-    _event.set_waiting_thread_id( current_thread_id() );
-    _event.create();
-    _event.add_to( &_wait_handles );
 
     _communication.init();  // Für Windows
 

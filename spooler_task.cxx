@@ -1848,7 +1848,6 @@ bool Task::do_something()
                         }
 
                         if( _killed  &&  _state < s_ending )  set_state( s_ending ), loop = true;
-                        //if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;  Fängt den Exitcode nicht ein (JS-211)
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
