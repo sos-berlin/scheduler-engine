@@ -1962,7 +1962,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
     new_dw->watch_directory( directory_name, filename_pattern );
     new_dw->set_name( "job(\"" + name() + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
-    new_dw->add_to( &_spooler->_wait_handles );
+    new_dw->add_to_event_manager( _spooler->_event_manager );
 
     if( it == _directory_watcher_list.end() )  // neu?
     {

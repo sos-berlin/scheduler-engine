@@ -663,6 +663,7 @@ struct Spooler : Object,
     Wait_handles               _wait_handles;
 
     Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
+    ptr<Empty_event_operation> _event_operation;
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()

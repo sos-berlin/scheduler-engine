@@ -30,16 +30,17 @@ struct Event : System_event
     typedef System_event        Base_class;
 
 
-                                Event                       ( const string& name = "" )             : Base_class( dont_create, name ), _zero_(this+1) {}
-                               ~Event                       ()                                      { close(); }
+                                  Event                       ( const string& name = "" )             : Base_class( dont_create, name ), _zero_(this+1) {}
+  //                             ~Event                       ()                                      { close(); }
 
-    virtual void                close                       ();
-    void                        add_to                      ( Wait_handles* );
-    void                        remove_from                 ( Wait_handles* );
+  //  virtual void                close                       ();
+
+  //  //void                        add_to                      ( Wait_handles* );
+  //  //void                        remove_from                 ( Wait_handles* );
 
   private:
     Fill_zero                  _zero_;
-    vector<Wait_handles*>      _wait_handles;
+  //  //vector<Wait_handles*>      _wait_handles;
 };
 
 //-------------------------------------------------------------------------------------Wait_handles
@@ -163,6 +164,7 @@ struct Directory_watcher : Event  //, Async_operation
     string                     _directory;
     string                     _filename_pattern;
     z::Regex                   _filename_regex;
+    ptr<Empty_event_operation> _event_operation;
 
 #   ifndef Z_WINDOWS
         typedef list<string>    Filenames;

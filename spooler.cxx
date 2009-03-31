@@ -753,21 +753,23 @@ Spooler::Spooler()
     set_ctrl_c_handler( true );
 
     _event_manager = Z_NEW( Event_manager() );
+
+    _async_manager = Z_NEW( Async_manager() );
+    _async_manager->set_wait_handler( _event_manager );
+
     _connections   = Z_NEW( object_server::Connections );
     _connections->add_to_event_manager( _event_manager );
 
-    _async_manager = Z_NEW( Async_manager() );
-
-    #ifdef Z_WINDOWS
-        _async_manager->set_wait_handler( _event_manager );
-    #else
-        _async_manager->set_wait_handler( _socket_manager );
+    #ifndef Z_WINDOWS
+        _event_manager->set_socket_manager( _connections );
     #endif
 
     _event.set_name( "Scheduler" );
     _event.set_waiting_thread_id( current_thread_id() );
     _event.create();
-    _event.add_to( &_wait_handles );
+    //_event.add_to( &_wait_handles );
+    _event_operation = Z_NEW( Empty_event_operation( &_event ) );
+    _event_operation->add_to_event_manager( _event_manager );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -1733,7 +1735,8 @@ void Spooler::load()
             _waitable_timer.set_handle_noninheritable( CreateWaitableTimer( NULL, FALSE, NULL ) );
             if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
 
-            _waitable_timer.add_to( &_wait_handles );
+            //_waitable_time_operation->add_to( &_event_manager );
+            //_waitable_timer.add_to( &_wait_handles );
         }
 #   endif
 }
@@ -2454,9 +2457,9 @@ void Spooler::run()
 
             // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
 
-            vector<System_event*> events;
+            //vector<System_event*> events;
             //_event_manager->get_events( &events );
-            FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
+            //FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
 
             //-------------------------------------------------------------------------------WARTEN
@@ -2515,12 +2518,12 @@ void Spooler::run()
 
 //------------------------------------------------------------------------------------Spooler::wait
 
-void Spooler::wait()
-{
-    Wait_handles wait_handles = _wait_handles;
-    wait( &wait_handles, Time::never, NULL, Time::never, NULL );
-    wait_handles.clear();
-}
+//void Spooler::wait()
+//{
+//    Wait_handles wait_handles = _wait_handles;
+//    wait( &wait_handles, Time::never, NULL, Time::never, NULL );
+//    wait_handles.clear();
+//}
 
 //------------------------------------------------------------------------------------Spooler::wait
 

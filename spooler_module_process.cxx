@@ -63,6 +63,7 @@ struct Process_module_instance_operation : Event_operation
     {
         // Hier sollte die Task benachrichtigt werden. 
         // Das ist aber noch nicht implementiert, stattdessen werden bei einem Ereignis alle Tasks durchlaufen, Task::do_something().
+        // Vielleicht so: if( _process_module_instance->_task )  _process_module_instance->_task->set_next_time( 0 );
         return true;
     }
 

@@ -48,43 +48,43 @@ static int console_width()
 #endif
 //-------------------------------------------------------------------------------------Event::close
 
-void Event::close()
-{
-    FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
-    _wait_handles.clear();
-
-#   ifdef Z_WINDOWS
-        close_handle();     //Warum ruft das Event::close()?:  Base_class::close();
-#   else
-        Base_class::close();
-#   endif
-}
+//void Event::close()
+//{
+//    FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
+//    _wait_handles.clear();
+//
+//#   ifdef Z_WINDOWS
+//        close_handle();     //Warum ruft das Event::close()?:  Base_class::close();
+//#   else
+//        Base_class::close();
+//#   endif
+//}
 
 //------------------------------------------------------------------------------------Event::add_to
 
-void Event::add_to( Wait_handles* w )                 
-{ 
-    Z_MUTEX( _mutex )
-    {
-        _wait_handles.push_back(w); 
-        w->add( this );
-    }
-}
-
-//-------------------------------------------------------------------------------Event::remove_from
-
-void Event::remove_from( Wait_handles* w )
-{
-    Z_MUTEX( _mutex )
-    {
-        FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
-        {
-            if( *it == w )  _wait_handles.erase( it );
-        }
-
-        w->remove( this );
-    }
-}
+//void Event::add_to( Wait_handles* w )                 
+//{ 
+//    Z_MUTEX( _mutex )
+//    {
+//        _wait_handles.push_back(w); 
+//        w->add( this );
+//    }
+//}
+//
+////-------------------------------------------------------------------------------Event::remove_from
+//
+//void Event::remove_from( Wait_handles* w )
+//{
+//    Z_MUTEX( _mutex )
+//    {
+//        FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
+//        {
+//            if( *it == w )  _wait_handles.erase( it );
+//        }
+//
+//        w->remove( this );
+//    }
+//}
 
 //------------------------------------------------------------------------ait_handles::Wait_handles
 
