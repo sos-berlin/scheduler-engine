@@ -2298,7 +2298,7 @@ void Spooler::run()
 
     while(1)  // Die große Haupt-Schleife
     {
-      //bool    log_wait          = _print_time_every_second || static_log_categories.is_set( &scheduler_wait_log_category );
+        Time    now               = Time::now();
         Time    wait_until        = Time::never;
         Object* wait_until_object = NULL;    
         Time    resume_at         = Time::never;
@@ -2308,22 +2308,7 @@ void Spooler::run()
 
         //-----------------------------------------------------------------------------------------
 
-        if( !_is_activated )
-        {
-            if( cluster_is_active()  &&  
-                ( !_supervisor_client  ||  _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() )  &&
-                ( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() ) )
-            {
-                _is_activated = true;
-                activate();
-                _assert_is_active = true;
-            }
-            else
-            if( _state == s_starting )
-            {
-                set_state( s_waiting_for_activation );
-            }
-        }
+        if( !_is_activated )  check_activation();
 
         //---------------------------------------------------------------------------------CONTINUE
         // Hier werden die asynchronen Operationen fortgesetzt, die eigentliche Scheduler-Arbeit
@@ -2333,7 +2318,6 @@ void Spooler::run()
         execute_state_cmd();
         if( _shutdown_cmd )  if( !_task_subsystem  ||  !_task_subsystem->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
-        Time now = Time::now();
         bool something_done = run_continue( now );
         
         if( _cluster )  check_cluster();
@@ -2506,14 +2490,26 @@ void Spooler::run()
     }
 }
 
-//------------------------------------------------------------------------------------Spooler::wait
+//------------------------------------------------------------------------Spooler::check_activation
 
-//void Spooler::wait()
-//{
-//    Wait_handles wait_handles = _wait_handles;
-//    wait( &wait_handles, Time::never, NULL, Time::never, NULL );
-//    wait_handles.clear();
-//}
+void Spooler::check_activation()
+{
+    {
+        if( cluster_is_active()  &&  
+            ( !_supervisor_client  ||  _supervisor_client->is_ready()  ||  _supervisor_client->connection_failed() )  &&
+            ( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() ) )
+        {
+            _is_activated = true;
+            activate();
+            _assert_is_active = true;
+        }
+        else
+        if( _state == s_starting )
+        {
+            set_state( s_waiting_for_activation );
+        }
+    }
+}
 
 //------------------------------------------------------------------------------------Spooler::wait
 

@@ -57,7 +57,7 @@ struct Communication
 
         virtual bool            async_continue_             ( Continue_flags );
         virtual bool            async_finished_             () const                                { return false; }
-        virtual string          async_state_text_           () const                                { return "connection " + zschimmer::Buffered_socket_operation::async_state_text_(); }
+        virtual string          async_state_text_           () const                                { return "Connection " + zschimmer::Buffered_socket_operation::async_state_text_(); }
 
 
         Fill_zero              _zero_;
@@ -79,7 +79,6 @@ struct Communication
                                 Listen_socket               ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
-        virtual bool            async_finished_             () const                                { return false; }
         virtual string          async_state_text_           () const                                { return "TCP listen " + Old_socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;
@@ -92,7 +91,6 @@ struct Communication
                                 Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
 
         virtual bool            async_continue_             ( Continue_flags );
-        virtual bool            async_finished_             () const                                { return false; }
         virtual string          async_state_text_           () const                                { return "UDP " + Old_socket_operation::async_state_text_();  }
 
         Spooler*               _spooler;

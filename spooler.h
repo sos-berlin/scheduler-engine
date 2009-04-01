@@ -466,7 +466,9 @@ struct Spooler : Object,
     void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
+    void                        check_activation            ();
     bool                        run_continue                ( const Time& now );
+
 
     bool                        name_is_valid               ( const string& name );
     void                        check_name                  ( const string& name );
