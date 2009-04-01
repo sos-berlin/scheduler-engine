@@ -983,10 +983,10 @@ void Communication::bind()
             new_connection->_socket_send_buffer_size = 1024;
 
             new_connection->call_ioctl( FIONBIO, on );   // In Windows nicht möglich
-            new_connection->add_to_socket_manager( _spooler->_async_manager );
+            new_connection->add_to_socket_manager( _spooler->_connections );
             new_connection->socket_expect_signals( Old_socket_operation::sig_read );
 
-            new_connection->set_event_name( "stdin" );
+          //new_connection->set_event_name( "stdin" );
             new_connection->_connection_state = Connection::s_ready;
             new_connection->_security_level = Security::seclev_all;
 

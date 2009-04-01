@@ -810,7 +810,7 @@ void Directory_watcher::set_signaled()
 
 void Directory_watcher::reset()
 {
-    Z_MUTEX( _mutex )
+    //Z_MUTEX( _mutex )
     {
         _signaled = false;
         _signal_name = "";

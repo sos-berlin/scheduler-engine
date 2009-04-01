@@ -757,9 +757,10 @@ Spooler::Spooler()
     _async_manager->set_wait_handler( _event_manager );
 
     _connections   = Z_NEW( object_server::Connections );
-    _connections->add_to_event_manager( _event_manager );
 
-    #ifndef Z_WINDOWS
+    #ifdef Z_WINDOWS
+        _connections->add_to_event_manager( _event_manager );
+     #else
         _event_manager->set_socket_manager( _connections );
     #endif
 
@@ -2600,9 +2601,11 @@ bool Spooler::wait_until( const Time& until, const Object* wait_for_object, cons
     bool signaled = false;
     Time now      = Time::now();
 
-    if( now < until  &&  _spooler->_waitable_timer ) {
-        set_waitable_timer( resume_until, resume_object, now );
-    }
+    #ifdef Z_WINDOWS
+        if( now < until  &&  _spooler->_waitable_timer ) {
+            set_waitable_timer( resume_until, resume_object, now );
+        }
+    #endif
 
     while(1)
     {

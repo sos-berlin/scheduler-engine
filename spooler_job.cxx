@@ -945,7 +945,7 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
             int percentage = as_int( value.substr( 0, value.length() - 1 ) );
             Time avg = average_step_duration( deflt );
             result = avg.is_never()? Time::never 
-                                   : (double)percentage/100 * avg;
+                                   : Time( percentage/100.0 * avg );
         }
         else
         {
