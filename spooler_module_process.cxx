@@ -51,25 +51,25 @@ struct Kill_thread : Thread
 #endif
 //----------------------------------------------------------------Process_module_instance_operation
 
-struct Process_module_instance_operation : Event_operation
-{
-    Process_module_instance_operation ( Process_module_instance* pmi ) : _process_module_instance(pmi) {}
-
-    string async_state_text_() const { return _process_module_instance->obj_name(); }
-
-    Socket_event* async_event() { return &_process_module_instance->_process_handle; }
-
-    bool async_continue_( Continue_flags )
-    {
-        // Hier sollte die Task benachrichtigt werden. 
-        // Das ist aber noch nicht implementiert, stattdessen werden bei einem Ereignis alle Tasks durchlaufen, Task::do_something().
-        // Vielleicht so: if( _process_module_instance->_task )  _process_module_instance->_task->set_next_time( 0 );
-        return true;
-    }
-
-  private:
-    Process_module_instance* const _process_module_instance;
-};
+//struct Process_module_instance_operation : Event_operation
+//{
+//    Process_module_instance_operation ( Process_module_instance* pmi ) : _process_module_instance(pmi) {}
+//
+//    string async_state_text_() const { return _process_module_instance->obj_name(); }
+//
+//    Socket_event* async_event() { return &_process_module_instance->_process_handle; }
+//
+//    bool async_continue_( Continue_flags )
+//    {
+//        // Hier sollte die Task benachrichtigt werden. 
+//        // Das ist aber noch nicht implementiert, stattdessen werden bei einem Ereignis alle Tasks durchlaufen, Task::do_something().
+//        // Vielleicht so: if( _process_module_instance->_task )  _process_module_instance->_task->set_next_time( 0 );
+//        return true;
+//    }
+//
+//  private:
+//    Process_module_instance* const _process_module_instance;
+//};
 
 //-------------------------------------------------Process_module_instance::Process_module_instance
 
@@ -387,8 +387,9 @@ bool Process_module_instance::begin__end()
     
     if( _spooler )  
     {
-        _operation = Z_NEW( Process_module_instance_operation( this ) );
-        _operation->add_to_event_manager( _spooler->_event_manager );
+        //_operation = Z_NEW( Process_module_instance_operation( this ) );
+        //_operation->add_to_event_manager( _spooler->_event_manager );
+        _process_handle.add_to_event_manager( _spooler->_event_manager );
         _spooler->register_process_handle( _process_handle );
     }
 
@@ -748,8 +749,9 @@ bool Process_module_instance::begin__end()
 
     if( _spooler )
     {
-        _operation = Z_NEW( Process_module_instance_operation( this ) );
-        _operation->add_to_event_manager( _spooler->_event_manager );
+        //_operation = Z_NEW( Process_module_instance_operation( this ) );
+        //_operation->add_to_event_manager( _spooler->_event_manager );
+        _process_handle.add_to_event_manager( _spooler->_event_manager );
         _spooler->register_process_handle( _process_handle._pid );
         _pid_to_unregister = _process_handle._pid;
     }

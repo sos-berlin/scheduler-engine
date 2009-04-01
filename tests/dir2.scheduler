@@ -5,7 +5,6 @@
     xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
 >
     <config 
-        main_scheduler="lillerud.zschimmer:6310"
         tcp_port="6360"
     >
 

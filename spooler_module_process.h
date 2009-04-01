@@ -62,8 +62,6 @@ struct Process_module_instance : Module_instance
     bool                        is_kill_thread_running      ()                                      { return _kill_thread  &&  _kill_thread->thread_is_running(); }
 
   private:
-    friend struct               Process_module_instance_operation;
-
     void                        close_handle                ();
     string                      program_path                ();
 
@@ -88,7 +86,9 @@ struct Process_module_instance : Module_instance
 
     ptr<Thread>                _kill_thread;
     bool                       _spooler_process_before_called;
-    ptr<Process_module_instance_operation> _operation;
+
+    //friend struct               Process_module_instance_operation;
+    //ptr<Process_module_instance_operation> _operation;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -542,6 +542,7 @@ struct Spooler : Object,
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
+    void                        set_waitable_timer          ( const Time& resume_until, const Object*, const Time& now );
 
   private:
     Fill_zero                  _zero_;

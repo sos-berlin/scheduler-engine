@@ -452,8 +452,8 @@ void Process::start_local_process()
 
     connection->set_priority( _priority );
     connection->start_process( parameters );
-
     _connection = +connection;
+    //?_connection->process_event()->add_to_event_manager( _spooler->_event_manager );
 
     _process_handle_copy = _connection->process_handle();
     _spooler->register_process_handle( _process_handle_copy );
