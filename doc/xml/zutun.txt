@@ -1,9 +1,0 @@
-$Id$
-
-Perl für Unix beschreiben. libsosperl.so, perl 5.8, libperl.so threading.
-
-
-<base> für monthdays usw. klären!
-
-
-java_class_path und java_options für <base> berücksichtigen (in spooler.cxx!).
