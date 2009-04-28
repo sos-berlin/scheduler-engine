@@ -207,7 +207,7 @@
                         <col/>
                         <col/>
 
-                        <xsl:apply-templates select="xml_attributes/xml_attribute">
+                        <xsl:apply-templates mode="syntax" select="xml_attributes/xml_attribute">
                             <xsl:sort select="@name"/>
                         </xsl:apply-templates>
                     </table>
@@ -345,7 +345,7 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_element_attribute-->
 
-    <xsl:template match="xml_attributes/xml_attribute">
+    <xsl:template mode="syntax" match="xml_attributes/xml_attribute">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 
@@ -526,7 +526,8 @@
             <code>
                 <b>
                     <xsl:value-of select="@name | @setting"/>
-                </b>="
+                </b>
+                <xsl:text>="</xsl:text>
             </code>
             <span class="type">
                 <xsl:value-of select="@type | $setting/@type"/>
@@ -3561,7 +3562,7 @@
 
         <p style="font-size: 8pt; margin-top: 0px; padding-top: 0px">
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
-                Scheduler &#160; &#160;
+                Job Scheduler &#160; &#160;
 
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>

@@ -360,7 +360,7 @@ bool Process_module_instance::begin__end()
     CloseHandle( process_info.hThread );
 
     _pid = process_info.dwProcessId;
-    _process_handle.set_handle( process_info.hProcess );
+    _process_handle.set_handle_noninheritable( process_info.hProcess );
     _process_handle.set_name( "Process " + program_path() );
     
     if( _spooler )  
@@ -872,7 +872,7 @@ void Process_module_instance::fill_process_environment_with_params()
         task_params->set_xml( xml.as_string() );
 
         xml = com_invoke( DISPATCH_PROPERTYGET, task, "Order_params_xml", &parameters );
-        if( !xml.is_empty() ) {
+        if( !xml.is_null_or_empty_string() ) {
             order_params = new Com_variable_set();
             order_params->set_xml( xml.as_string() );
         }

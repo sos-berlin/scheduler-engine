@@ -911,9 +911,17 @@ Time Task::next_time()
     else
     if( _operation )
     {
-        result = _operation->async_finished()? Time(0) :                                    // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
-                 _timeout == Time::never     ? Time::never
-                                             : Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groß sein
+        if( _operation->async_finished() ) {
+            result = 0;   // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess läuft)
+        } else {
+            Time t = _timeout;
+            if( _state == s_running ||
+                _state == s_running_process ||
+                _state == s_running_remote_process )  t = min( t, _job->_warn_if_longer_than );
+
+            result = t.is_never()? Time::never 
+                                 : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
+        }                 
     }
     else
     if( _state == s_running_process  &&  !_timeout.is_never() )
@@ -942,6 +950,64 @@ bool Task::check_timeout( const Time& now )
     }
 
     return false;
+}
+
+//----------------------------------------------------------------------Task::check_if_shorter_than
+
+void Task::check_if_shorter_than( const Time& now )
+{
+    if( _job->_warn_if_shorter_than ) 
+    {
+        Time step_time = now - _last_operation_time;
+
+        if( step_time < _job->_warn_if_shorter_than ) 
+        {
+            string msg = message_string( "SCHEDULER-711", _job->_warn_if_shorter_than.as_string( Time::without_ms ), step_time.as_string( Time::without_ms ) );
+            _log->warn( msg );
+
+            Scheduler_event scheduler_event ( evt_task_step_too_short, log_error, _spooler );
+            Mail_defaults mail_defaults( _spooler );
+            mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
+            mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
+                                          "Step time: " << step_time << "\n" <<
+                                          "warn_if_shorter_than=" << _job->_warn_if_shorter_than.as_string( Time::without_ms ) );
+            scheduler_event.send_mail( mail_defaults );
+        }
+    }
+}
+
+//-----------------------------------------------------------------------Task::check_if_longer_than
+
+bool Task::check_if_longer_than( const Time& now )
+{
+    bool something_done = false;
+
+    if( !_job->_warn_if_longer_than.is_never() ) 
+    {
+        double step_time = now - _last_operation_time;
+
+        if( step_time > _job->_warn_if_longer_than )
+        {
+            something_done = true;
+            if( _last_warn_if_longer_operation_time != _last_operation_time ) 
+            {
+                _last_warn_if_longer_operation_time = _last_operation_time;
+
+                string msg = message_string( "SCHEDULER-712", _job->_warn_if_longer_than.as_string( Time::without_ms ) );
+                _log->warn( msg );
+
+                Scheduler_event scheduler_event ( evt_task_step_too_long, log_error, _spooler );
+                Mail_defaults mail_defaults( _spooler );
+                mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
+                mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
+                                              "Step time: " << step_time << "\n" <<
+                                              "warn_if_longer_than=" << _job->_warn_if_longer_than.as_string( Time::without_ms ) );
+                scheduler_event.send_mail( mail_defaults );
+            }
+        }
+    }
+
+    return something_done;
 }
 
 //------------------------------------------------------------------------------------Task::add_pid
@@ -1341,6 +1407,8 @@ bool Task::do_something()
                             {
                                 _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
+                                check_if_shorter_than( now );
+                                something_done |= check_if_longer_than( now );
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -1366,7 +1434,8 @@ bool Task::do_something()
                             else
                             {
                                 string result = remote_process_step__end();
-
+                                check_if_shorter_than( now );
+                                something_done |= check_if_longer_than( now );
                                 set_state( s_release );
                                 loop = true;
                             }
@@ -1438,6 +1507,9 @@ bool Task::do_something()
                                     }
                                 }
                                 assert( !_delay_until_locks_available );
+
+                                check_if_shorter_than( now );
+                                something_done |= check_if_longer_than( now );
 
                                 if( !ok || has_error() )  set_state( s_ending ), loop = true;
 
@@ -1764,7 +1836,11 @@ bool Task::do_something()
                     }
 
 
-                    if( !_operation )
+                    if( _operation )
+                    {
+                        loop |= _operation->async_finished();   // Falls Sync_operation
+                    }
+                    else
                     {
                         if( !ok || has_error() )
                         {
@@ -1772,7 +1848,6 @@ bool Task::do_something()
                         }
 
                         if( _killed  &&  _state < s_ending )  set_state( s_ending ), loop = true;
-                        //if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;  Fängt den Exitcode nicht ein (JS-211)
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
@@ -1864,6 +1939,7 @@ bool Task::do_something2()
 {
 }
 */
+
 //---------------------------------------------------------------------------------------Task::load
 
 bool Task::load()

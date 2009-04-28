@@ -345,7 +345,7 @@ static void set_service_status( int spooler_error, int state = 0 )
             if( !pending_watchdog_signal )
             {
                 Thread_id thread_id;
-                pending_watchdog_signal = CreateEvent( NULL, FALSE, FALSE, "" );
+                pending_watchdog_signal = convert_to_noninheritable_handle( CreateEvent( NULL, FALSE, FALSE, "" ) );
                 _beginthreadex( NULL, 0, pending_watchdog_thread, NULL, 0, &thread_id );   // Uhr aufziehen
             }
         }
@@ -717,7 +717,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
             Z_LOG2( "scheduler.service", "CreateThread\n" );
-            thread_handle.set_handle( (HANDLE)_beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id ) );
+            thread_handle.set_handle_noninheritable( (HANDLE)_beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id ) );
             if( !thread_handle )  throw_mswin_error( "CreateThread" );
 
             while(1)

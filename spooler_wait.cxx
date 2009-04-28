@@ -30,33 +30,6 @@ namespace scheduler {
 //    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
 //#endif
 
-//-----------------------------------------------------------------------------windows_message_step
-#ifdef Z_WINDOWS
-
-void windows_message_step()
-{
-    MSG msg;
-
-    while(1)
-    {
-        msg.message = WM_NULL;
-
-        int ret = PeekMessage( &msg, NULL, 0, 0, PM_REMOVE );
-        if( !ret )  break;
-        if( msg.message == WM_NULL )  break;
-
-        Z_LOG2( "windows.PeekMessage", "message=" << hex_from_int( msg.message ) <<
-                                      " wParam=" << hex_from_int16( msg.wParam )  <<
-                                      " lParam=" << hex_from_int( msg.lParam ) << "\n" );
-
-
-        //TranslateMessage( &msg ); 
-        DispatchMessage( &msg ); 
-    }
-}
-
-#endif
-
 //------------------------------------------------------------------------------------console_width
 #ifdef Z_WINDOWS
 
@@ -566,7 +539,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
         {
-            windows_message_step();
+            windows::windows_message_step();
         }
         else
         if( ret == WAIT_TIMEOUT )  

@@ -229,6 +229,8 @@ struct Task : Object,
 
 
     bool                        check_timeout               ( const Time& now );
+    void                        check_if_shorter_than       ( const Time& now );
+    bool                        check_if_longer_than        ( const Time& now );
     bool                        try_kill                    ();
     
     bool                        wait_until_terminated       ( double wait_time = Time::never );
@@ -324,6 +326,7 @@ struct Task : Object,
     Time                       _next_spooler_process;
     Time                       _next_time;
     Time                       _timeout;                    // Frist für eine Operation (oder INT_MAX)
+    Time                       _last_warn_if_longer_operation_time;
     Time                       _idle_since;
     Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;

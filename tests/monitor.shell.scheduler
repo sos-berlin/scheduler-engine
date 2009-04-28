@@ -29,6 +29,7 @@ echo java=%SCHEDULER_PARAM_JAVA%
 echo java=$SCHEDULER_PARAM_JAVA
 
 echo shell_param=aus dem Shell-Job >>%SCHEDULER_RETURN_VALUES%
+exit 3
         
                 ]]></script>
 
@@ -47,6 +48,7 @@ function spooler_task_before()
 function spooler_task_after() 
 {
     spooler_log.info( "SPOOLER_TASK_AFTER" );
+    spooler_log.info( "exit_code=" + spooler_task.exit_code );
 }
 
 function spooler_process_before() 
@@ -59,6 +61,7 @@ function spooler_process_before()
 function spooler_process_after( return_value ) 
 {
     spooler_log.info( "SPOOLER_PROCESS_AFTER( " + return_value + " ) shell_param=" + spooler_task.order.params.value( "shell_param" ) );
+    spooler_log.info( "exit_code=" + spooler_task.exit_code );
     return !return_value;
 }
 

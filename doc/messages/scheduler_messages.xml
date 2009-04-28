@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
  
 <messages 
@@ -4261,6 +4261,18 @@
         <message code="SCHEDULER-710" weight="info" object="Spooler">
             <text xml:lang="en">
                 <title>Delayed command &lt;scheduler_log.log_categories.reset> has been executed</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-711" weight="info" object="Task">
+            <text xml:lang="en">
+                <title>Step has runned <p2/>s, which is shorter than the expected duration of <p1/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-712" weight="info" object="Task">
+            <text xml:lang="en">
+                <title>Step runs longer than the expected duration of <p1/></title>
             </text>
         </message>
 

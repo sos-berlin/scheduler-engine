@@ -23,6 +23,8 @@ string Scheduler_event::name_of_event_code( Scheduler_event_type event_code )
         case evt_scheduler_kills:               return "scheduler_kills";
         case evt_job_error:                     return "job_error";
         case evt_task_ended:                    return "task_ended";
+        case evt_task_step_too_short:           return "task_step_too_short";
+        case evt_task_step_too_long:            return "task_step_too_long";
         case evt_disk_full:                     return "disk_full";
         case evt_database_error:                return "database_error";
         case evt_database_error_switch_to_file: return "database_error_switch_to_file";
