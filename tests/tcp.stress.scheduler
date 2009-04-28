@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="stdout">
+                <script language="javascript"><![CDATA[
+
+var stdout = new ActiveXObject( "hostware.file" );
+stdout.open( "-out *stdout" );
+for( var i = 0; i < 100000; i++ )  stdout.put_line( "**********************************************************************************************************" );
+    
+function spooler_process()
+{
+    spooler_task.stdout_text;
+    return true;
+}
+                
+                ]]></script>
+                
+                <run_time once="yes"/>
+            </job>
+
+            <job name="stress" tasks="10">
+                <script language="javascript">
+                    <![CDATA[
+
+function spooler_process()
+{
+    return true;
+}
+                
+                ]]>
+                </script>
+            </job>
+        </jobs>
+
+        <commands>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stress"/>
+            <start_job job="stdout" at="now+2"/>
+        </commands>
+    </config>
+</spooler>

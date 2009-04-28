@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: check_folders.xml 5364 2007-10-28 18:38:49Z jz $-->
+
+<xml_element name     = "check_folders"
+             title    = "Check hot folders for configuration files"
+             category = "Command"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: ap $"
+             date     = "$Date: 2007-10-30 19:20:26 +0100 (Di, 30 Okt 2007) $">
+
+
+    <description>
+        <p>
+            Checks the configuration directories for changes and updates the respective objects
+            in the Job Scheduler. On Windows operating systems changes to a directory are 
+            noticed immediately, on Unix systems this could take up to 60 seconds.
+        <!--Prüft die Konfigurationsverzeichnisse auf Änderung und aktualisiert die Objekte im Job Scheduler.
+            Unter Windows werden Änderungen in Konfigurationsverzeichnissen sofort
+            erkannt, unter Unix wird dies innerhalb von max. 60s erkannt.-->
+        </p>
+        <p>
+            The command is available in the built-in HTML interface and is used. for example,
+            when developing jobs for Unix in order to shorten the waiting time until
+            changes to the configuration are noticed by the  Job Scheduler.
+        <!--Das Kommando ist in der HTML-Oberfläche
+            des Job Schedulers verfügbar und wird bspw. eingesetzt, um während der Entwicklung von Jobs unter Unix
+            die Wartezeit zu verkürzen bis eine Änderung im Konfigurationsverzeichnis wirkt.-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes/>
+
+    <xml_answer element="ok"/>
+
+
+    <example>
+        <pre>&lt;check_folders/></pre>
+    </example>
+</xml_element>

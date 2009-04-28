@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+         <!--title         = "Noch nicht vollzogender Austausch eines Objekts"-->
+
+<!--$Id: replacement.xml 5237 2007-09-20 08:54:15Z jz $-->
+
+<xml_element name          = "replacement"
+             title         = "The incomplete exchange of an object"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-09-20 10:54:15 +0200 (Do, 20 Sep 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="process_class"/>
+        <xml_parent_element name="lock"/>
+        <xml_parent_element name="job"/>
+        <xml_parent_element name="job_chain"/>
+        <xml_parent_element name="order"/>
+    </xml_parent_elements>
+
+
+    <xml_child_elements>
+        <xml_child_element name="process_class"/>
+        <xml_child_element name="lock"/>
+        <xml_child_element name="job"/>
+        <xml_child_element name="job_chain"/>
+        <xml_child_element name="order"/>
+    </xml_child_elements>
+    
+    
+    <description>
+        <p>
+            The child element has the same name as the parent element.
+            In the case of the replacement of a job, the nesting appears as 
+            <scheduler_element directory="xml/answer/" name="job"/><scheduler_element directory="xml/answer/" name="replacement"/><scheduler_element directory="xml/answer/" name="job"/>.
+            The child element contains the new object, 
+            with which the Job Scheduler is not able to replace the current object.
+            The Job Scheduler replaces the object to be replaced (i.e. the current object) as soon as it is "free".
+        <!--Das Kind-Element hat denselben Namen wie das Eltern-Element.
+            Bei einem Job zum Beispiel ist die Verschachtelung 
+            <scheduler_element directory="xml/answer/" name="job"/><scheduler_element directory="xml/answer/" name="replacement"/><scheduler_element directory="xml/answer/" name="job"/>.
+            Das Kind-Element enthält das neue Objekt, 
+            das vorhandene noch nicht ersetzen kann.
+            Sobald das zu ersetzende Objekt bereit ist, nimmt der Scheduler die Ersetzung vor.-->
+        </p>
+    </description>
+
+</xml_element>

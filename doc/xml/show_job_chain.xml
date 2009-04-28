@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: show_jobs.xml 4336 2006-06-06 18:03:24Z jz $-->
+<!-- Joacim Zschimmer, Zschimmer GmbH, www.zschimmer.com -->
+
+<xml_element name     = "show_job_chain"
+             title    = ""
+             category = "Kommando"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-06-06 20:03:24 +0200 (Di, 06 Jun 2006) $">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="job_chain" title="Name der Jobkette"/>
+        <xml_attribute name="max_orders"        same_as_element="show_state"/>
+        <xml_attribute name="max_order_history" same_as_element="show_state"/>
+        <xml_attribute name="what"              same_as_element="show_state"/>
+    </xml_attributes>
+
+    <xml_answer element="job_chain"/>
+
+
+    <example>
+        <pre>&lt;show_job_chains/></pre>
+    </example>
+    
+    
+    <description>
+        <p>
+            Zeigt die Jobketten
+        </p>
+    </description>
+</xml_element>

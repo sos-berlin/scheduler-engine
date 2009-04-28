@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+         <!--title         = "Noch nicht abgeschlossenes Löschen eines Objekts"-->
+
+<!--$Id: removed.xml 5237 2007-09-20 08:54:15Z jz $-->
+
+<xml_element name          = "removed"
+             title         = "The incomplete removal of an object"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-09-20 10:54:15 +0200 (Do, 20 Sep 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="file_based"/>
+    </xml_parent_elements>
+
+
+    <xml_child_elements>
+        <xml_child_element name="ERROR" title="Reason for the delay">
+    <!--<xml_child_element name="ERROR" title="Begründung für die Verzögerung">-->
+            <description>
+                <p>
+                    This element is used to describe the reason for the delay.
+                <!--Das Element enthält die Begründung für die Verzögerung.-->
+                </p>
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+
+
+    <description>
+    </description>
+
+</xml_element>

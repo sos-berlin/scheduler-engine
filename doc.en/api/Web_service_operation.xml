@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!-- $Id: Web_service_operation.xml 4126 2006-03-01 11:01:29Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Web_service_operation"
+    object_name = "web_service_operation"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-09-11 14:08:03 +0200 (Mo, 11 Sep 2006) $"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="request" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service_request"/>
+            </com.result>
+        </com>
+
+        <title>
+            Requests
+        <!--Anforderung-->
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="response" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service_response"/>
+            </com.result>
+        </com>
+
+        <title>
+            Answers
+        <!--Antwort-->
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="peer_ip" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Peer (Remote) IP Address
+        <!--IP-Adresse der Gegenstelle-->
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="peer_hostname" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <code>""</code>, should it not be possible to determine the name.
+                <!--<code>""</code>, wenn der Name nicht ermittelt werden kann.-->
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Peer (Remote) Host Name
+        <!--Hostname der Gegenstelle -->
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            See also <scheduler_element name="web_service"/>
+        <!--Siehe auch <scheduler_element name="web_service"/>-->
+        </p>
+    </description>
+
+</api.class>

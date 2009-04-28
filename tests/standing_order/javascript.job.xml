@@ -1,0 +1,24 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+
+     idle_timeout="never" 
+     order="yes"
+>
+
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{               
+    var order = spooler_task.order;
+    spooler_log.info( "ORDER-ID=" + order.id );
+
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 7 );
+
+    return true;
+}
+
+                ]]>
+    </script>
+
+</job>

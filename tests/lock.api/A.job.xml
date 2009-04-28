@@ -1,0 +1,49 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+
+>
+    <lock.use lock="Georgien"/>
+
+    <script language="JavaScript">
+        <![CDATA[
+
+var hostware = new ActiveXObject( "hostware.global" );
+var count = 2;
+
+
+function spooler_open() 
+{
+    if( spooler_task.try_hold_lock( "Venezuela" )  )
+    {
+        hostware.sleep( 20 );
+    }
+    else
+    {
+        spooler_task.call_me_again_when_locks_available();
+    }
+
+    return true;
+}
+
+
+function spooler_process() 
+{
+    if( spooler_task.try_hold_lock( "Georgien" )  &&
+        spooler_task.try_hold_lock( "Venezuela" )    )
+    {
+        hostware.sleep( 30 );
+        --count;
+    }
+    else
+    {
+        spooler_task.call_me_again_when_locks_available();
+    }
+    
+    return count > 0;
+}
+
+    ]]>
+    </script>
+
+    <run_time once="yes"/>
+
+</job>

@@ -1,0 +1,542 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Erneuertes Mikro-Scheduling"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "work_in_progress"
+>
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Der bisherige Algorithmus</h2>
+
+    <p>
+        Der Scheduler reagiert auf Ereignisse. 
+        Die "große Schleife" des Schedulers wartet auf das nächste Ereignis,
+        um es zu behandeln.
+        Dazu ruft er solange Objekte 
+        (v.a. Jobs und Tasks) auf, bis keins mehr etwas getan hat.
+        Schließlich wartet der Scheduler auf das nächste Ereignis.
+        Dadurch werden nach einem Ereignis und nach einer Operation eines Objekts
+        die Folge-Operationen durchgeführt, solange bis bei einem Durchlauf kein Objekt etwas getan hat.
+        Dieser Algorithmus stammt noch vom allerersten Scheduler, 
+        der nur wenige Ereignisse und wenige Jobs kannte.
+    </p>
+    <p>
+        Dieser einfache Algorithmus hat zwei Nachteile:
+    </p>
+    <ul>
+        <li>
+            Es gibt keine Zuordnung zwischen Ereignis und Objekt.
+            Nach einem Ereignis ruft der Scheduler alle Objekte auf,
+            die dann selbst prüfen müssen, ob sie etwas zu tun haben.
+            Wenn auf ein Ereignis hin kein Objekt reagiert,
+            kommt es zu einer Schleife,
+            die der Scheduler mit <scheduler_message code="SCHEDULER-261"/> bremst.
+        </li>
+        <li>
+            Es ist überflüssig, nach jedem kleinen Ereignis alle Jobs und Tasks zu durchlaufen.
+            Der Scheduler wird durch einen neuen Algorithmus sparsamer mit CPU-Zeit umgehen.
+        </li>
+    </ul>
+
+    <p>
+        Wenn ein async_continue/do_something() eines Objekts true liefert ("something_done"), 
+        wiederholt der Scheduler die Schleife.
+        Das soll ersetzt werden durch direkte Signalisierung: 
+        wenn zum Beispiel ein Auftrag weitergereicht wird, muss der nächste Job benachrichtigt werden.
+        Jobs an hinterer Stelle in einer Jobkette sollten vorrangig gestartet werden. 
+    </p>
+
+
+    <h3>Ablauf der großen Scheduler-Schleife</h3>
+
+    <p>
+        Die große Scheduler-Scheduler durchläuft derzeit folgende Schritte:
+    </p>
+    
+    <ul>
+        <li>
+            Auf Ctrl-C und kill-Signal prüfen
+        </li>
+        <li>
+            Scheduler aktivieren (wenn backup-Scheduler wartet)
+        </li>
+        <li>
+            <scheduler_element name="modify_spooler"/>, 
+            <scheduler_element name="terminate"/>
+            usw. ausführen
+        </li>
+        <li>
+            Task-Prozesse fortsetzen, z.B. nach API-Aufruf (com_remote.cxx)
+        </li>
+        <li>
+            Task_subsystem::process()
+        </li>
+        <li>
+            Job_subsystem::remove_temporary_jobs()
+        </li>
+        <li>
+            Nicht-auftragsgesteuerte Jobs: do_something()
+        </li>
+        <li>
+            Auftragsgesteuerte Jobs: do_something(), nach Position in der Jobkette
+        </li>
+        <li>
+            Auftragsgesteuerte Tasks: do_something(), nach Position in der Jobkette
+        </li>
+        <li>
+            Nicht-auftragsgesteuerte Tasks: do_something()
+        </li>
+        <li>
+            remove_ended_tasks()
+        </li>
+        <li>
+            Connection_manager::async_continue()
+        </li>
+        <li>
+            Cluster::check()
+        </li>
+        <li>
+            Order_subsystem::check_exception(), Database_order_detector::async_check_exception()
+        </li>
+        <li>
+            Prüfen, ob Scheduler beendet werden kann (alle Tasks beendet?)
+        </li>
+        <li>
+            Auf Ereignis oder Zeitablauf warten ...
+        </li>
+    </ul>
+
+    <p>
+        Dieser Ablauf könnte mit der Umstellung auf <code>Async_operation</code> schematisiert und stark vereinfacht werden, s.u.
+    </p>
+
+
+
+    <h2>Ereignisse</h2>
+
+    <p>
+        Die folgenden Listen sind unvollständig. 
+        Sie sollen nur einen Überblick geben.
+    </p>
+    
+    
+    <h3>Ereignisse des Betriebssystems</h3>
+
+    <p>
+        Unter Windows werden die Ereignisse mit
+        <code>MsgWaitForMultipleObjects()</code> behandelt. 
+    </p>
+    <p>
+        Unter Linux werden die Ereignisse mit <code>select()</code> behandelt. 
+        Die Signale <code>SIGINT</code>, <code>SIGTERM</code> und <code>SIGCCHLD</code> werden periodisch abgefragt.
+    </p>
+
+    <ul>
+        <li>
+            Prozessende (API- und Nicht-API-Tasks)
+        </li>
+        <li>
+            <scheduler_element name="start_when_directory_changed"/>: Periodisches Prüfen
+        </li>
+        <li>
+            Überwachung der Konfigurationsverzeichnisse
+        </li>
+        <li>
+            Sockets für XML und HTTP (Verbindungsauf- und -abbau, Datenempfang, Daten versendbar)
+        </li>
+        <li>
+            Sockets zur Kommunikation mit einem Task-Prozess
+        </li>
+        <li>
+            Waitable Timer
+        </li>
+        <li>
+            Nachricht eines Threads (Clusters-Watchdog, Windows-Dienst)
+        </li>
+    </ul>
+
+    
+    
+    <h3>Ereignisse für einen Job</h3>
+    <ul>
+        <li>
+            <scheduler_element name="run_time"/>
+            für Job und Auftrag: repeat, absolute_repeat, single_start
+        </li>
+        <li>
+            <scheduler_element name="start_when_directory_changed"/>: Periodisches Prüfen
+        </li>
+        <li>
+            <scheduler_element name="start_when_directory_changed"/>: Ereignis des Überwachung durchs Betriebssystems
+        </li>
+        <li>
+            Neue Task in Task-Warteschlange
+        </li>
+        <li>
+            Prozessklasse (<scheduler_element name="process_class"/>) lässt neuen Prozess zu.
+        </li>
+        <li>
+            Sperre (<scheduler_element name="lock"/>) wird verfügbar
+        </li>
+        <li>
+            <scheduler_element name="delay_after_error"/>
+        </li>
+        <li>
+            Neuer Auftrag im Jobkettenknoten
+        </li>
+        <li>
+            ...
+        </li>
+    </ul>
+
+    
+    
+    <h3>Ereignisse für eine Task</h3>
+    <ul>
+        <li>
+            Task mit Startzeit: <scheduler_element name="start_job" attribute="at"/>
+        </li>
+        <li>
+            Frist für Verbindung vom Task-Prozess (eine Minute)
+        </li>
+        <li>
+            Verbindung zum Task-Prozess unterbrochen
+        </li>
+        <li>
+            Task-Prozess beendet
+        </li>
+        <li>
+            Verbindungsaufbau vom Task-Prozess nach dessen Start
+        </li>
+        <li>
+            <scheduler_method class="Task" property="delay_spooler_process"/>
+        </li>
+        <li>
+            Methode des Task-Prozesses beendet (z.B. <scheduler_method class="Job_impl" method="spooler_process"/>).
+            Dazu gehören auch interne Methoden,
+            z.B. Übergabe und Freigabe der Objekte (<scheduler_method class="Job_impl" property="spooler_task"/> usw.).
+        </li>
+        <li>
+            Verzögertes Löschen der stdout- und stderr-Dateien.
+        </li>
+        <li>
+            ...
+        </li>
+    </ul>
+
+    
+
+    <h3>Ereignisse für einen Auftrag</h3>
+    <ul>
+        <li>
+            <scheduler_element name="run_time"/>
+            für Job und Auftrag: repeat, absolute_repeat, single_start
+        </li>
+        <li>
+            Auftrag mit Startzeit: <scheduler_method class="Order" property="at"/>.
+        </li>
+        <li>
+            ...
+        </li>
+    </ul>
+
+    
+    
+    <h3>Ereignisse der TCP- und UDP-Verbindungen</h3>
+    <ul>
+        <li>
+            Socket-Ereignisse (Verbindungsauf- und -abbau, Datenempfang und -versand)
+        </li>
+        <li>
+            HTTP: Fortsetzung der Protokollausgabe
+        </li>
+    </ul>
+    
+    
+    
+    <h3>Ereignisse für die Verbindung zu einem anderen Scheduler</h3>
+    <p>
+        Der andere Scheduler kann 
+        ein Supervisor (<scheduler_element name="config" attribute="supervisor"/>)
+        ein Remote Scheduler (<scheduler_element name="process_class" attribute="remote_scheduler"/>) sein.
+    </p>
+    <ul>
+        <li>
+            Wiederholung des Verbindungsversuch zum Supervisor
+        </li>
+        <li>
+            Kommando versendet
+        </li>
+        <li>
+            Antwort empfangen
+        </li>
+        <li>
+            ...
+        </li>
+    </ul>
+
+
+    
+    <h3>Ereignisse für den Cluster-Betrieb</h3>
+    <ul>
+        <li>
+            Periodische Aktualisierung des eigenen Datensatzes
+        </li>
+        <li>
+            Periodische Prüfung der Datensätze der anderen Scheduler
+        </li>
+        <li>
+            Nachricht des Watchdog-Threads (zur Selbstüberwachung der Reaktionsfähigkeit des Schedulers)
+        </li>
+    </ul>
+    
+    
+    
+    <h3>Weitere Ereignisse</h3>
+    <ul>
+        <li>
+            Sommerzeitumschaltung:
+            Der Scheduler arbeitet mit lokaler Zeit, weshalb seine Uhr umgestellt werden muss.
+            Die <scheduler_element name="run_time"/> müssen neu berechnet werden.
+        </li>
+        <li>
+            Ctrl-C oder Kill-Signal des Betriebssystems.
+        </li>
+        <li>
+            <scheduler_element name="modify_spooler"/>,
+            <scheduler_element name="terminate"/> usw.:
+            Anweisungen an den Scheduler, die nicht sofort ausgeführt werden.
+        </li>
+        <li>
+            Anweisung der Windows-Dienstesteuerung
+        </li>
+        <li>
+            Scheduler-Ereignis (Spooler::_event)
+        </li>
+        <li>
+            ...
+        </li>
+    </ul>
+
+
+
+    <h2>Neuer Algorithmus</h2>
+
+    <h3>Große Scheduler-Schleife</h3>
+    
+    <p>
+        Die große Scheduler-Schleife soll vereinfacht werden:
+    </p>
+    <ul>
+        <li>
+            Auf Beendigung des Schleife (also des Schedulers) prüfen
+        </li>
+        <li>
+            Ausführen der Objekte, für die ein Ereignis eingetroffen ist
+        </li>
+        <li>
+            Aufs nächste Betriebssystem- oder Zeitereignis warten
+        </li>
+    </ul>
+
+    <p>
+        Dazu sind folgende Änderungen erforderlich:
+    </p>
+    
+    <ul>
+        <li>
+            Ein Ereignis soll direkt das betroffene Objekt aufrufen.
+        </li>
+        <li>
+            Wenn ein Objekt a etwas einem anderem Objekt b bereitstellt
+            (zum Beispiel stellt eine Jobkette einen Auftrag dem nächsten Job bereit, der dann aufgerufen werdem muss),
+            soll a b benachrichtigen, damit der Scheduler b aufruft.
+            Das ist ein <i>internes Ereignis</i> (jetzt zum Beispiel <code>Job::signal()</code>).
+        </li>
+    </ul>
+
+    <p>
+        Damit wäre im Programm festgehalten, wann ein Objekt aufgerufen werden muss.
+    </p>
+
+
+
+    <h3>Ziele</h3>
+
+    <ul>
+        <li>
+            Klare, im Programm dokumentierte Zusammenhänge zwischen Ereignissen und behandelnden Objekten.
+        </li>
+        <li>
+            CPU-Verbrauch bei vielen Jobs und Tasks sollte deutlich kleiner werden,
+            weil bei einem Ereignis nicht mehr alle Objekte aufgerufen werden, sondern gleich das richtige.
+        </li>
+        <li>
+            Die Bremse <scheduler_message code="SCHEDULER-261"/> wird überflüssig.
+        </li>
+        <li>
+            Vielleicht lässt sich manche Ereignisbehandlung in einem Thread parallelisieren.
+        </li>
+    </ul>
+
+
+
+    <h3>
+        Verwendung der Klasse Async_operation.
+    </h3>
+    <p>
+        Die Klasse wird bereits für einige Objekte verwendet.
+        Die Funktionalität der Klasse sollte geklärt werden, insbesondere die verschachtelbare Ausführung.
+        Vielleicht lässt sich etwas vereinfachen.
+    </p>
+    <p>
+        Async_operation hat zwei Funktionalitäten (eine alte für com_remote.cxx und eine neue).
+        Die sollten geklärt, vielleicht in zwei Klassen aufgespalten und vereinfacht werden.
+    </p>
+    
+    
+    <p>Eigenschaften von Async_operation:</p>
+    <ul>
+        <li>
+            Wecker: Das Objekt wird zu einem Zeitpunkt (lokale Zeit oder UTC) aktiviert.
+            Bei lokaler Zeit muss die Wartezeit beim Sommerzeitwechsel umgerechnet werden.
+            Bislang ist nur UTC implementiert.
+        </li>
+        <li>
+            Verbindung mit einem Betriebssystem-Ereignis (Windows: Event-Handle, Unix: File-Handle und Signal),
+            so dass bei einem Eintreffen des Ereignisses direkt das betroffene Objekt aktiviert wird
+            (Aufruf von <code>async_continue()</code>).
+            <i>Wie?</i>
+        </li>
+        <li>
+            Das Objekt muss auf das Ereignis reagieren, sonst ist es ein Fehler.
+            Es gibt drei Anlässe für <code>async_continue()</code>:
+            <ul>
+                <li>
+                    Zeitablauf
+                </li>
+                <li>
+                    Betriebssystem-Ereignis
+                </li>
+                <li>
+                    Internes Ereignis
+                </li>
+                <li>
+                    Kind-Async_operation ist fertig (für com_remote.cxx)
+                </li>
+            </ul>
+        </li>
+        <li>
+            XML-Element zeigt Stand der Objekte an (für <scheduler_element name="show_state"/>).
+        </li>
+    </ul>
+
+
+
+    <h3>Priorisierung der am Ende einer Jobkette stehenden Jobs</h3>
+    <p>
+        Derzeit werden Jobs und Tasks, die weiter hinten in einer Jobkette stehen, zuerst aufgerufen.
+        Bei einer Umstellung auf Async_operation ist das nicht mehr möglich.
+    </p>
+    <p>
+        Wann ist diese Priorisierung von Bedeutung?
+        Ein weiter hinten in einer Jobkette stehende Job wird bevorzugt, 
+        wenn nicht alle Jobs gestartet werden können, weil
+    </p>
+    <ul>
+        <li>
+            die Prozessklasse nicht genügend Prozesse bereitstellt,
+        </li>
+        <li>
+            unter Windows die alte Beschränkung der Zahl der Prozesse noch gilt (ist das derzeit implementiert?),
+        </li>
+        <li>
+            zwei Jobs dieselbe Sperre nutzen,    
+        </li>
+        <li>
+            ...?
+        </li>
+    </ul>
+    <p>
+        Jobs, die starten wollen, reihen sich nach ihrer Position in der Jobkette in eine Warteschlange ein.
+        Nachrangige Jobs lassen vorrangigen, für die alle Bedingungen erfüllt sind, den Vortritt
+        (das ist etwa der Mechanismus der Prozessklassen).
+    </p>
+    <p>
+        Sind eigentlich die Tasks betroffen? Nicht mehr, seit es Prozessklassen gibt?
+    </p>
+
+
+    
+    <h2>Außerdem</h2>
+
+    <h3>Windows: Beschränkung auf 63 Ereignis-Variablen durchbrechen</h3>
+    <p>
+        Die Beschränkung des Windows-Aufrufs <code>WaitForMultipleObjects()</code> 
+        auf 63 Ereignisse-Variablen sollte durchbrochen werden,
+        indem zu diesem Zweck mehrere Threads genutzt werden.
+        Eine Umstellung von Socket-Ereignissen auf auf Callbacks vermindet sehr die Zahl der Ereignis-Variablen.
+        Diese Callback-Mechanismus würde direkt <code>Async_operation::async_continue()</code> aufrufen.
+    </p>
+    <p>
+        Ereignis-Variablen werden gebraucht für
+    </p>
+    <ul>
+        <li>
+            Sockets (bei Callback-Mechanismus nur eine)
+        </li>
+        <li>
+            Prozesse (Prozess-Ende) 
+        </li>
+        <li>
+            Verzeichnisüberwachungen
+        </li>
+        <li>
+            Interne Ereignisse aus anderen Threads
+        </li>
+    </ul>
+
+
+    <h3>Unix: sigaction() und pselect() verwenden</h3>
+    <p>
+        Statt Prozessende mit <code>waitpid()</code> und
+        die Signale <code>SIGINT</code> und <code>SIGTERM</code> 
+        periodisch abzufragen,
+        sollten sie mit <code>sigaction()</code> und <code>pselect()</code> abgewartet werden.
+    </p>
+
+
+    <h3>Threads</h3>
+    <p>
+        Manches kann in Threads ausgelagert werden,
+        was die Reaktion des Schedulers beschleunigen würde, z.B.:
+    </p>
+    <ul>
+        <li>
+            TCP-Versand (besonders für HTTP); fortlaufender Versand der Protokolldatei
+        </li>
+        <li>
+            Auflösung der Hostnamen in IP-Nummern (Blockade möglich)
+        </li>
+    </ul>
+    <p>
+        Das Verfahren könnte etwa so aussehen:
+        Eine veränderliche Anzahl Threads führt thread-fähige Objekte aus.
+        Jeder Thread wartet auf alle thread-fähigen Ereignisse, 
+        nur einer bekommt das Ereignis und behandelt es.
+        Async_operation wird besondere Methoden brauchen.
+        Das wird ein Threaded_async_operation.
+    </p>
+
+</description>                                     

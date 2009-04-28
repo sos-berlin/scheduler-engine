@@ -1,0 +1,53 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+
+>
+    <script java_class="spooler_job.Java">
+        <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class Java extends Job_impl
+{
+    int count = 2;
+
+
+    public boolean spooler_open() throws Exception
+    {
+        if( spooler_task.try_hold_lock( "Venezuela" )  )
+        {
+            Thread.sleep( 20*1000 );
+        }
+        else
+        {
+            spooler_task.call_me_again_when_locks_available();
+        }
+
+        return true;
+    }
+
+
+    public boolean spooler_process() throws Exception
+    {
+        if( spooler_task.try_hold_lock( "Georgien" )  &&
+            spooler_task.try_hold_lock_non_exclusive( "Venezuela" )    )
+        {
+            Thread.sleep( 30*1000 );
+            --count;
+        }
+        else
+        {
+            spooler_task.call_me_again_when_locks_available();
+        }
+        
+        return count > 0;
+    }
+}
+
+    ]]>
+    </script>
+
+    <run_time once="yes"/>
+
+</job>

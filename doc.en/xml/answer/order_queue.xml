@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: order_queue.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
+
+<!--         title         = "Auftragswarteschlange"-->
+
+<xml_element name          = "order_queue" 
+             title         = "Order Queue"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="length" type="number" title="Number of orders in the order queue">
+    <!--<xml_attribute name="length" type="zahl" title="Anzahl der Aufträge in der Auftragswarteschlange">-->
+            <description>
+                The number of <code>&lt;order></code> elements can be zero or limited by the value
+                that is given with the <code>max_orders=</code> or the <code>what=""</code> attributes.
+            <!--Die Anzahl der <code>&lt;order></code>-Elemente kann geringer oder null sein, 
+                wenn sie mit den Attributen <code>max_orders=</code> oder <code>what=""</code> begrenzt worden ist.-->
+            </description>
+        </xml_attribute>
+    
+        <xml_attribute name="next_start_time" type="date" title="Starting time for the next order">
+    <!--<xml_attribute name="next_start_time" type="date" title="Startzeit des nächsten Auftrags">-->
+        </xml_attribute>
+    </xml_attributes>
+    
+    
+    <xml_child_elements>
+        <xml_child_element name="order" multiple="yes"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+</xml_element>

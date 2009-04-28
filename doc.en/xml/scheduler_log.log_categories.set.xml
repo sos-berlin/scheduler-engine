@@ -1,0 +1,52 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: scheduler_log.log_categories.set.xml 5907 2008-09-30 14:33:31Z jz $-->
+
+         <!--title    = "Setzt eine Log-Kategorien fürs interne scheduler.log"-->
+
+<xml_element name     = "scheduler_log.log_categories.set"
+             title    = "Sets a Log Category for the Internal scheduler.log"
+             category = "Command"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-09-30 16:33:31 +0200 (Di, 30 Sep 2008) $">
+
+
+    <description>
+        <p>
+            See also <scheduler_a href="../log_categories.xml" quote="yes"/>
+        <!--Siehe auch <scheduler_a href="../log_categories.xml" quote="yes"/>-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="category" type="name" title="Category Name"/>
+    <!--<xml_attribute name="category" type="name" title="Name der Kategorie"/>-->
+
+        <xml_attribute name="value" type="0|1">
+            <description>
+                <p>
+                    <code>1</code> activates the category,
+                    <code>0</code> deactivates it.
+                <!--<code>1</code> schaltet die Kategorie an,
+                    <code>0</code> schaltet sie ab.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <xml_answer element="log_categories"/>
+
+    <example>
+        <pre>&lt;scheduler_log.log_categories.set category="scheduler" value="1"/></pre>
+    </example>
+</xml_element>

@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: show_state.xml 4838 2007-02-06 09:49:58Z jz $-->
+
+<xml_element name     = "show_calendar"
+             title    = "Startzeiten der Jobs und Aufträge zeigen"
+             category = "Kommando"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-02-06 10:49:58 +0100 (Di, 06 Feb 2007) $">
+
+
+    <description>
+        <p>
+            Das Kommando liefert die Startzeiten der Jobs und Aufträge.
+            Das Ergebnis ist nicht geordnet.
+
+        </p>
+        <p>
+            Das Attribut <code>limit=""</code> ist auf <code>limit="100"</code> voreingestellt
+            und begrenzt die Ergebnismenge.
+            Das Limit sollte groß genug gewählt werden, um nicht einen löchrigen Kalendar zu bekommen.
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="what" type="what">
+            <description>
+                <p>
+                    <code>what="orders"</code> liefert auch die Startzeiten der Aufträge.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="limit" type="zahl" initial="100">
+            <description>
+                <p>
+                    Begrenzt zum Schutz vor einem zu großen Ergebnis die Anzahl der Kalendereinträge, 
+                    die zurückgeliefert werden.
+                    Weil die Kalendereinträge nicht nach Zeit, sondern nach Objekten geordnet sind, 
+                    liefert das Kommando auch nicht die nächsten 100 Einträge, sondern irgendwelche.
+                </p>
+                <p>
+                    Das Limit sollte also groß genug eingestellt werden,
+                    dass kein Eintrag verloren geht.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="from" type="yyyy-mm-ddThh:mm:ss">
+            <description>
+                <p>
+                    Liefert nur Kalendereinträge ab dem Zeitpunkt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="before" type="yyyy-mm-ddThh:mm:ss">
+            <description>
+                <p>
+                    Liefert nur Kalendereinträge vor dem Zeitpunkt.
+                    Voreinstellung ist eine Woche nach <code>from=</code> oder eine Woche nach <code>from</code>.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+
+    <xml_answer element="calendar"/>
+
+
+
+    <example>
+        <pre>&lt;show_calendar/>
+&lt;show_calendar limit="1000" what="orders" from="2007-04-03T00:00:00" before="2007-05-01T00:00:00"/></pre>
+    </example>
+</xml_element>

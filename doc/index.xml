@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+
+
+
+
+<!--  *************************************************************
+      Um diese Dokumentation zu lesen, benötigen Sie einen Browser,
+      der die ersten beiden Zeilen interpretieren,
+      also XSLT-Stylesheets ausführen kann,
+      z.B. Firefox oder Microsoft Internet Explorer.
+      
+      Möglicherweise steht auch die Seite index.xml.html bereit.
+      *************************************************************  -->
+
+
+
+
+
+
+
+<!--$Id$-->
+
+<description
+    head_title          = "Dokumentation"
+    base_dir            = ""
+    suppress_browse_bar = "yes"
+  xxsuppress_logo       = "yes" 
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <scheduler_ignore>
+        <p style="font-size: 20pt"><b>Sorry, you need a browser which can process XML files with XSLT stylesheet. </b></p>
+        <p>&#160;</p>
+    </scheduler_ignore>
+
+    <description.style type="text/css">
+        /* Zschimmers Orange: #e06000, Orange des Logos: 234,121,15 #ea790f */
+        h2              { color: #e06000; font-size: 10pt; font-weight: bold; margin-top: 0em; border: none; padding-top: 0em; } /*margin-top: 2em; border-top: 0px solid #fff8ee; padding-top: 1.0em; }*/
+        dt              { margin-top: 1.5em; font-weight: bold; margin-bottom: 0.25em; }
+        dd              { margin-left: 0ex; margin-top: 0.25em; }
+    </description.style>
+
+
+    <!--div style="float: right; width: 133px; margin-left: 3em; margin-right: 0em;">
+        <img alt="logo" width="133" height="93" src="images/logo/job_scheduler_rabbit_circle_typo_colour_web_133x93.jpg"/>
+    </div-->
+    <!--verschmuddelt div style="float: right; width: 165px; height: 114px; position: relative; top: -5px; margin-left: 3em; margin-right: 1em;">
+        <img alt="logo" width="165" height="114" src="images/logo/job_scheduler_rabbit_circle_typo_colour_165x114.jpg"/>
+    </div-->
+
+    <h1 style="text-align: left; font-size: 18pt; margin-bottom: 2ex">Der Job Scheduler</h1>
+
+    <p style="max-width: none">
+        Der Job Scheduler startet Jobs und überwacht sie.
+        Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
+        Der Job Scheduler kennt Aufträge, die durch Job-Ketten geschleust werden.
+        Er wird unter Windows, Linux, Solaris, HP-UX und AIX betrieben.
+    </p>
+    <!--table cellspacing="0" cellpadding="0" style="width: 100%">
+        <tr>
+            <td>
+            </td>
+            <td style="width: 30ex; vertical-align: top; padding-left: 1em;" align="right">
+            </td>
+        </tr>
+    </table-->
+
+
+
+    <table cellpadding="0" cellspacing="0">
+        <tr>
+            <td class="first_page">
+                <div class="box">
+                    <h2>Start</h2>
+
+                    <dl>
+                        <dt>
+                            <scheduler_a href="configuration.xml"/>
+                        </dt>
+                        <dd>
+                            <p>
+                                Der Job Scheduler wird mit <scheduler_a href="konfiguration.xml">XML-Dateien</scheduler_a> und .ini-Dateien konfiguriert
+                                und kennt <scheduler_a href="command_line.xml">Kommandozeilenoptionen</scheduler_a>. Jobs und Job-Ketten etc. können
+                                aus <em>Hot Folders</em> <scheduler_a href="dynamic_configuration.xml"> dynamisch konfiguriert</scheduler_a> werden.<br/><br/>
+                                Jobs und Job-Ketten etc. können bei einem <em>Supervisor</em> Job Scheduler <scheduler_a href="central_configuration.xml"> zentral konfiguriert</scheduler_a> 
+                                und an andere Instanzen repliziert werden.
+                            </p>
+                        </dd>
+
+                        <dt>
+                            <scheduler_a href="scheduler_editor.xml"/>
+                        </dt>
+                        <dd>
+                            GUI für Konfiguration und Dokumentation
+                        </dd>                                                                        
+                        
+
+                        <dt>
+                            <scheduler_a href="datenbank.xml">Datenbank und Historie</scheduler_a>
+                        </dt>
+                        <dd>
+                            <p>
+                                Der Job Scheduler kann seine Task- und Auftragswarteschlangen in einer
+                                <scheduler_a href="datenbank.xml">Datenbank</scheduler_a>
+                                halten.
+                                Und er führt darin eine <scheduler_a href="history.xml">Historie</scheduler_a>,
+                                die die einzelnen
+                                <scheduler_a href="protokolle.xml">Protokolle</scheduler_a>
+                                enthält.
+                            </p>
+                        </dd>
+
+                        
+                        <dt>
+                            <scheduler_a href="service.xml">Dienst</scheduler_a>
+                        </dt>
+                        <dd>
+                            <p>
+                                Der Job Scheduler wird unter Windows als <scheduler_a href="service.xml">Dienst</scheduler_a>
+                                installiert
+                                und unter Unix als 
+                                <scheduler_option name="service">Daemon</scheduler_option> gestartet.
+                            </p>
+                        </dd>
+                        
+                        <dt>
+                            <scheduler_a href="backupscheduler.xml"/>
+                        </dt>
+                        <dd>
+                            Ausfallsicherer Betrieb mit automatischem fail-over
+                        </dd>
+                    </dl>
+                </div>
+
+
+                <div class="box">
+                    <h2>Jobs</h2>
+                    <dl>
+                        <dt>
+                            <scheduler_a href="job.xml">Was ist ein Job?</scheduler_a>
+                        </dt>
+                        <dd>
+                            Ein Job besteht aus einer Konfiguration, die das 
+                            aufzurufende Programm, die Laufzeit, das Verhalten im Fehlerfall
+                            und weitere optionale Komponenten beinhaltet, z.B. Vor- und Nachverarbeitung.
+                        </dd>
+
+                        <dt>
+                            <scheduler_a href="api/api.xml">Programmschnittstelle (API)</scheduler_a>
+                        </dt>
+                        <dd>
+                            Die Klassen und Methoden des Job Schedulers, die Jobs in
+                            <scheduler_a href="api/api-java.xml">Java</scheduler_a>,
+                            <scheduler_a href="api/api-javascript.xml">JavaScript</scheduler_a>,
+                            <scheduler_a href="api/api-vbscript.xml">VBScript</scheduler_a> und
+                            <scheduler_a href="api/api-perl.xml">Perl</scheduler_a>
+                            nutzen können.
+                        </dd>
+                        
+                        <dt>
+                            <scheduler_a href="lock.xml"/>
+                        </dt>
+                        <dd>
+                            Mit Sperren lässt sich der Zugriff mehrerer Jobs auf dieselben Ressourcen regeln.
+                        </dd>
+                        
+                        
+                        <dt>
+                            <scheduler_a href="remote_execution.xml"/>
+                        </dt>
+                        <dd>
+                            Jobs lassen sich auf fernen Job Schedulern ausführen.
+                        </dd>
+                    </dl>
+                </div>
+
+
+                <table style="margin-top: 1em">
+                    <tr>
+                        <td style="font-size: 8pt">
+                            &#x2192;<scheduler_link_to_change_log/>
+                            <!--scheduler_a href="CHANGES.xml"/-->
+                        </td>
+                        <td style="padding-left: 2em; font-size: 8pt">
+                            <!-- Die Vorschläge können nicht in die Auslieferung übernommen werden,
+                                 da sie teils bereits realisiert sind, teils nicht realisiert werden
+                                 bzw. keine Entscheidung über ihre Realisierung vorliegt.
+                                 ap, 2008-08-04
+                            -->
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+            
+            <td style="padding-left: 1.5em"> </td>
+            
+            <td class="first_page">
+                <div class="box">
+                    <h2>Auftragssteuerung und Dateiverarbeitung</h2>
+                    <dl>
+                        <dt>
+                            <scheduler_a href="order.xml">Aufträge und Job-Ketten</scheduler_a>
+                        </dt>
+                        <dd>
+                            Der Job Scheduler kann Aufträge durch Job-Ketten schleusen.
+                            Job-Ketten definieren die Reihenfolge, in der Jobs ausgeführt werden,
+                            und sind wiederanlauffähig.
+                        </dd>
+
+                        <dt>
+                            <scheduler_a href="file_orders.xml"/>
+                        </dt>
+                        <dd>
+                            Einem Verzeichnis hinzugefügte Dateien führen zu Aufträgen,
+                            die von einer Job-Kette ausgeführt werden.
+                        </dd>
+
+                        <dt>
+                            <scheduler_a href="directory_watch.xml">Einfache Verzeichnisüberwachung</scheduler_a>
+                        </dt>
+                        <dd>
+                            Der Job Scheduler startet einen Job, wenn eine Datei einem Verzeichnis hinzugefügt wird.
+                        </dd>
+                        <dt>
+                            <scheduler_a href="distributed_orders.xml">Verteilte Aufträge</scheduler_a>
+                        </dt>
+                        <dd>
+                            Aufträge werden von einem Cluster bestehend aus mehreren Job Scheduler auf unterschiedlichen Servern verarbeitet.
+                        </dd>
+
+                    </dl>
+                </div>
+
+                <div class="box">
+                    <h2>Protokolle und eMail-Versand</h2>
+                    <dl>
+                        <dt>
+                            <scheduler_a href="protokolle.xml"/>
+                        </dt>
+                        <dd>
+                            Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.
+                        </dd>
+
+                        <dt>
+                            <scheduler_a href="email.xml"/>
+                        </dt>
+                        <dd>
+                            Task-Protokolle und besondere Meldungen kann der Job Scheduler per E-Mail verschicken.
+                        </dd>
+                    </dl>
+                </div>
+
+
+
+                <div class="box">
+                    <h2>Kommunikation und Bedienung</h2>
+
+                    <dl>
+
+                        <dt>
+                            <scheduler_a href="http.xml"/>
+                        </dt>
+                        <dd>
+                            <p>
+                                Der Job Scheduler verfügt über einen
+                                <scheduler_a href="http.xml">HTTP-Server</scheduler_a>
+                                und stellt HTML-Seiten zu seiner Bedienung bereit.
+                            </p>
+                        </dd>
+
+
+                        <dt>Telnet und TCP</dt>
+                        <dd>
+                            <p>
+                                Die XML-Kommandos können über einen telnet-Client oder eine TCP-Verbindung übergeben werden.
+                                Aufruf: <code>telnet localhost 4444</code>. Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
+                            </p>
+                        </dd>
+
+
+
+                        <dt>
+                            <scheduler_a href="xml_commands.xml"/>
+                        </dt>
+                        <dd>
+                            Über 
+                            <scheduler_a href="http.xml">HTTP</scheduler_a>, 
+                            <scheduler_element name="config" attribute="tcp_port">TCP</scheduler_element> und
+                            <scheduler_element name="config" attribute="tcp_port">UDP</scheduler_element>
+                            nimmt der Job Scheduler
+                            <scheduler_a href="xml_commands.xml">Kommandos in XML</scheduler_a> entgegen.
+                        </dd>
+                    </dl>
+                </div>
+
+            </td>
+        </tr>
+    </table>
+
+
+
+</description>

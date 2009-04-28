@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config port="6360">
+    
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        
+        <process_classes/>
+
+        <holidays>
+            <weekdays>
+                <day day="saturday sunday"/>
+            </weekdays>
+            <holiday date="2008-08-01"/>
+        </holidays>
+    
+        <jobs>
+
+            <job name="test">
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( "hallo" );
+
+                ]]>
+                </script>
+
+                <run_time begin="07:00" repeat="60" when_holiday="next_non_holiday">
+                    <weekdays>
+                        <day day="sunday">
+                            <period single_start="00:55"/>
+                        </day>
+                    </weekdays>
+                    
+                    <month month="march">
+                        <period begin="02:00" end="02:01" absolute_repeat="60"/>
+                        <period begin="02:02" end="02:03" absolute_repeat="60"/>
+                        <weekdays>
+                            <day day="monday"/>
+                            <day day="tuesday friday">
+                                <period single_start="02:05"/>
+                            </day>
+                            <day day="tuesday sunday">
+                                <period single_start="02:07"/>
+                            </day>
+                        </weekdays>
+                        <monthdays>
+                            <day day="12 13">
+                                <period single_start="12:13"/>
+                            </day>
+                            <day day="12">
+                                <period single_start="12:00"/>
+                            </day>
+                        </monthdays>
+                        <ultimos>
+                            <day day="10">
+                                <period single_start="10:10"/>
+                            </day>
+                            <day day="10 9">
+                                <period single_start="10:09"/>
+                            </day>
+                            <day day="10 8">
+                                <period single_start="10:08"/>
+                            </day>
+                        </ultimos>
+                    </month>
+
+                    <!--month month="march">
+                        <ultimos>
+                            <day day="0">
+                                <period single_start="12:00"/>
+                            </day>
+                        </ultimos>
+                    </month-->
+
+                    <month month="april">
+                        <monthdays>
+                            <day day="4">
+                                <period single_start="04:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                    <month month="may">
+                        <weekdays>
+                            <day day="monday">
+                                <period single_start="05:00"/>
+                            </day>
+                            <day day="monday">
+                                <period single_start="05:55"/>
+                            </day>
+                        </weekdays>
+                    </month>
+
+                    <month month="june">
+                        <ultimos>
+                            <day day="0 2 4">
+                                <period single_start="06:00"/>
+                            </day>
+                        </ultimos>
+                    </month>
+
+                    <month month="august">
+                        <monthdays>
+                            <day day="1 2 3 4 5 6 7">
+                                <period single_start="08:11" when_holiday="suppress"/>
+                            </day>
+                            <day day="10">
+                                <period single_start="08:10" when_holiday="ignore_holiday"/>
+                            </day>
+                            <day day="17">
+                                <period single_start="08:17" when_holiday="previous_non_holiday"/>
+                            </day>
+                            <day day="3 24">
+                                <period single_start="08:03:24" when_holiday="next_non_holiday"/>
+                            </day>
+                        </monthdays>
+                        <weekdays>
+                            <day day="sunday">
+                                <period single_start="08:01"/>
+                            </day>
+                            <day day="monday">
+                                <period single_start="08:02"/>
+                            </day>
+                        </weekdays>
+                    </month>
+
+                    <month month="september">
+                        <monthdays>
+                            <day day="9">
+                                <period single_start="09:00"/>
+                            </day>
+                        </monthdays>
+                    </month>
+
+                </run_time>
+            </job>
+
+            
+            <!--job name="set_run_time_1">
+        
+                <script language="JavaScript"><![CDATA[
+
+
+spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
+                                         "<run_time once='yes'>" +
+                                            "<date date='2005-05-06'>" +
+                                                "<period begin='14:54:10' end='14:54:30' />" +
+                                                "<period begin='14:54:40' end='14:54:50' />" +
+                                            "</date>" +             
+                                         "</run_time>" + 
+                                       "</modify_job>" ) );
+
+                ]]></script>
+
+                <run_time>
+                    <period begin="07:00" end="08:00" repeat="60"/>
+                    <period begin="09:00" end="10:00" repeat="60"/>
+                </run_time>
+
+            </job>
+        
+        
+            <job name="set_run_time_2">
+        
+                <script language="JavaScript"><![CDATA[
+
+
+spooler_log.info( spooler.execute_xml( "<modify_job job='job_b'>" +
+                                         "<run_time><period begin='00:00' end='00:00'/></run_time>" + 
+                                       "</modify_job>" ) );
+
+                ]]></script>
+
+                <run_time/>
+
+            </job-->
+
+
+            <!--job name="repeat">
+                <script language="JavaScript">
+                    <![CDATA[
+    
+var hostware = new ActiveXObject( "hostware.global" );
+               
+function spooler_process() 
+{               
+    spooler_log.info( "*** REPEAT" );
+    hostware.sleep( 2 );
+    
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time>
+                    <period repeat="5"/>
+                </run_time>
+
+            </job-->
+
+            
+        </jobs>
+
+        <commands>
+            <!--show_calendar before="2008-10-06T00:00:00" limit="1000"/-->
+        </commands>
+    </config>
+</spooler>

@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="remote" />
+        </process_classes>
+
+        <script java_class="spooler_job.Scheduler_script">
+            <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class Scheduler_script  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_init()  throws Exception
+    {
+        spooler_log.info( "+++++++++++++ SPOOLER_INIT" );
+        return true;
+    }
+
+    public String my_start_time_function( String time, String what )  throws Exception
+    {
+        spooler_log.info( "+++++++++++++ my_start_time_function " + time + " " + what );
+        return "2007-03-30 08:14";
+    }
+}
+                ]]>
+        </script>
+
+
+        <jobs>
+
+
+            <job name="java">
+
+                <script java_class="spooler_job.test.My_job">
+                    <![CDATA[
+
+package spooler_job.test;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Thread.sleep( 15*1000 );
+        spooler_log.info( "HALLO 2" );
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <!--run_time once="yes" start_time_function="my_start_time_function"/-->
+                <run_time once="yes"/>
+            </job>
+
+        </jobs>
+    </config>
+</spooler>

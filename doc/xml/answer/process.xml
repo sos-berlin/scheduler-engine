@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name          = "process"
+             title         = "Prozess"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author$"
+             date          = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="processes"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystem"/>
+        <xml_attribute name="job" type="name" title="Job, der von dem Prozess ausgeführt wird"/>
+        <xml_attribute name="task" type="zahl" title="Id der Task, die der Prozess ausgeführt"/>
+    </xml_attributes>
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+
+</xml_element>

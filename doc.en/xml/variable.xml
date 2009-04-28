@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: variable.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name     = "variable" 
+             title    = "A Variable"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-03-28 18:47:48 +0200 (Di, 28 Mrz 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="environment"/>
+        <xml_parent_element name="sos.spooler.variable_set"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="name">
+            <description>
+                <p>
+                    The name of the environment variable.
+                    The use of upper / lower case is not significant on Windows machines.
+                <!--Der Name der Umgebungsvariablen.
+                    Unter Windows ist die Großschreibung nicht relevant.-->
+                </p>
+                <p>
+                    The same name can be used repeatedly, should it be desirable to extend the value (see the example with <code>PATH</code>).
+                <!--Derselbe Name kann mehrmals verwendet werden, wenn der Wert erweitert werden soll (s. Beispiel mit <code>PATH</code>).-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="value">
+            <description>
+                <p>
+                    The value of an environment variable which has previously been set using 
+                    <code>&lt;variable></code> can be returned using '$'.
+                <!--Mit '$' kann der Wert einer Umgebungsvariablen abgerufen werden,
+                    die auch eine vorher mit <code>&lt;variable></code> gesetzte sein kann.-->
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+        
+    
+    <behavior_with_xml_element element="base" complete_attribute="name"/>
+    
+    <example><pre>
+&lt;environment>
+    &lt;variable name="LD_LIBRARY_PATH" value="$HOME/lib">
+    &lt;variable name="PATH" value="$PATH:$HOME/bin">
+    &lt;variable name="PATH" value="$PATH:$JAVAHOME/bin">
+&lt;/environment></pre>
+        
+    </example>
+    
+</xml_element>

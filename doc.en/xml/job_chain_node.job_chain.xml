@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+<!--$Id: job_chain_node.xml 4840 2007-02-08 08:43:17Z jz $-->
+<!--         title    = "Jobkettenknoten"-->
+
+<xml_element name     = "job_chain_node.job_chain"
+             title    = "Job Chain Nodes"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-09-03 10:29:47 +0200 (Mi, 03 Sep 2008) $">
+
+    <scheduler_keyword keyword="Job Chain Node"/>
+<!--<scheduler_keyword keyword="Jobkettenknoten"/>-->
+
+    <xml_parent_elements>
+        <xml_parent_element name="job_chain"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="state" type="string">
+            <description>
+                <p>
+                    The state valid for this job chain node.
+                <!--Zustand, für den dieser Jobkettenknoten gilt.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="job_chain" type="job_chain_name">
+            <description>
+                <p>
+                    The job chain to which the order is to be handed over when it reaches this state.
+                <!--Jobkette, der der Auftrag übergeben werden soll, wenn er den Zustand erreicht.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="next_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> with <code>return true</code> 
+                    from the last completed job, sets an order in this state.
+                <!--<scheduler_method class="Job_impl" method="spooler_process"/> mit <code>return true</code> des zuletzt durchlaufenden Jobs 
+                    versetzt einen Auftrag in diesen Folgezustand.-->
+                </p>
+                <p>
+                    The default value is the value of the <code>state=</code> attribute of the next job chain node.
+                <!--Voreingestellt ist der Wert des Attributes <code>state=</code> des folgenden Jobkettenknotens.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="error_state" type="string">
+            <description>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_process"/> with <code>return false</code> 
+                    from the last completed job, sets an order in this error state..
+                <!--<scheduler_method class="Job_impl" method="spooler_process"/> mit <code>return false</code> des zuletzt durchlaufenden Jobs
+                    versetzt einen Auftrag in diesen Fehlerzustand.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <messages>
+        <message level="error" code="SCHEDULER-412"/>
+        <message level="error" code="SCHEDULER-415"/>
+        <message level="error" code="SCHEDULER-426"/>
+        <message level="debug9" code="SCHEDULER-708"/>
+        <message level="info"  code="SCHEDULER-862"/>
+        <message level="info"  code="SCHEDULER-863"/>
+        <message level="info"  code="SCHEDULER-872"/>
+        <message level="info"  code="SCHEDULER-873"/>
+        <message level="info"  code="SCHEDULER-874"/>
+        <message level="info"  code="SCHEDULER-875"/>
+    </messages>
+    
+
+    <description>
+        <scheduler_keyword keyword="Order_id_space"/>
+        <scheduler_keyword keyword="Nested job chains"/> 
+    <!--<scheduler_keyword keyword="Verschachtelte Jobketten"/>-->
+        <scheduler_keyword keyword="ID"/>
+        <scheduler_keyword keyword="Order ID"/> 
+    <!--<scheduler_keyword keyword="Auftragskennung"/>-->
+
+        <p>
+            Adds a new job chain node to a chain of job chains - i.e. in nested job chains.
+        <!--Fügt einer Kette von Jobketten einen neuen Jobkettenknoten hinzu, der eine verschachtelte Jobkette bezeichnet.-->
+        </p>
+        <p> 
+            Job chains which contain nested job chains cannot be nested in other job chains.
+        <!-- Jobketten, die verschachtelte Jobketten enthalten, können selbst nicht in anderen Jobketten als verschachtelte
+            Jobketten verwendet werden. -->
+        </p>
+        <p>
+            Job chains grouped together through nesting build a common <i>Order_id_space</i>,
+            in which the uniqueness of an order identifier is tested when the order is submitted.
+        <!--Miteinander durch Verschachtelung verbundene Jobkettenn bilden einen gemeinsamen <i>Order_id_space</i>,
+            um beim Einfügen eines Auftrags die Eindeutigkeit der Auftragskennung sicherstellen zu können.-->
+        </p>
+        <p>
+            The Job Scheduler does not accept the submission of an order in a job chain,
+            when the order ID has already been allocated in that Order_id_space.
+        <!--Der Scheduler lehnt das Einfügen eines Auftrags in eine Jobkette ab,
+            wenn die Auftragskennung im Order_id_space bereits vergeben ist.-->
+        </p>
+        <p>
+            When an order within an Order_id_space is replaced in one job chain in the ID space,
+            then to will also be replaced in other job chains in the same Order_id_space.
+        <!--Beim Ersetzen eines Auftrags wird auch ein Auftrag in einer anderen Jobkette,
+            die demselben Order_id_space angehört,
+            ersetzt.-->
+        </p>
+    </description>
+</xml_element>

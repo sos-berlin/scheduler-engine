@@ -1,0 +1,301 @@
+<!-- $Id$ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+    <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+
+    <style type="text/css">
+        @import "scheduler.css";
+    </style>
+
+    <title>Scheduler</title>
+
+</head>
+
+<body>
+
+<table cellspacing="0" cellpadding="0" width="100%" style="margin-bottom: 1ex">
+    <tr>
+        <td class="small" style="text-align:right">
+            <span 
+                  style="cursor: pointer; text-decoration: underline" 
+                  onmouseover="this.className='hover'"
+                  onmouseout="this.className=''"
+                  onclick="hide__onclick()">
+                Hide
+            </span>
+        </td>
+    </tr>
+</table>
+
+
+
+<p id="error_message" class="small" style="margin-top: 0px; color: #e00000; font-weight: bold;"></p>
+
+<span id="stylesheet_output"></span>
+
+<script defer="true" type="text/javascript" src="scheduler.js"></script>
+<script defer="true" type="text/javascript" src="browser_dependencies.js"></script>
+<script defer="true" type="text/javascript" src="popup_menu.js"></script>
+
+<!-- script type="text/javascript" for="window" event="onload"> do_onload(); </script-->
+
+<script defer="true" language="javascript"><!--
+//-------------------------------------------------------------------------------------------------
+
+var _scheduler;
+var _stylesheet;
+var _timer;
+var _job_element;
+var _job_path;
+var _job_chain_path;
+var _task_id;
+var _job_chain_element;
+var _description_popup;
+var _hidden;
+var _saved_frameset_cols;
+var _show_card = "";
+
+//---------------------------------------------------------------------------------------------init
+
+function init()
+{
+    _job_element       = undefined;
+    _job_path          = undefined;
+    _task_id           = undefined;
+    _job_chain_element = undefined;
+    _job_chain_path    = "";
+
+    if( !_scheduler )
+    {
+        _scheduler = window.parent.left_frame._scheduler;
+        _stylesheet = new Stylesheet( "scheduler.xslt" );
+        
+        scheduler_init();
+    }
+}
+
+//---------------------------------------------------------------------------------------------hide
+
+function hide__onclick()
+{
+    hide();
+}
+
+//--------------------------------------------------------------------------------------------clear
+
+function clear()
+{
+    init();
+    
+    _job_element = undefined;
+    _job_path    = undefined;
+    _task_id     = undefined;
+}
+
+//---------------------------------------------------------------------------------------------hide
+
+function hide()
+{
+    if( !_hidden )
+    {
+        _hidden = true;
+        
+        _saved_frameset_cols = window.parent.document.getElementById( "left_and_right_frameset" ).cols; 
+        window.parent.document.getElementById( "left_and_right_frameset" ).cols = "100%, 0%";
+    }
+}
+
+//---------------------------------------------------------------------------------------------show
+
+function show()
+{
+    var ok = update( true );
+
+    if( ok )
+    {
+        if( _hidden )
+        {
+            window.parent.document.getElementById( "left_and_right_frameset" ).cols = _saved_frameset_cols;
+            _saved_frameset_cols = undefined;
+            _hidden = false;
+        }
+    }
+//    else
+//        hide();
+}
+
+//--------------------------------------------------------------------------------show_task_details
+
+function show_task_details( job_element, task_element )
+{
+    init();
+    
+    var job_title = job_element.getAttribute( "title" );
+    
+    _job_element = job_element;
+    _job_path    = job_element.getAttribute( "job" )
+    _task_id     = task_element.getAttribute( "id" );
+
+    //document.all.job_name.innerText = "Job " + _job_name;
+    //document.all.job_title.innerText = job_title? job_title : "";
+
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( task_element );
+    show();
+}
+
+//---------------------------------------------------------------------------------show_job_details
+
+function show_job_details( job_element, job_chain_path )
+{
+    init();
+    
+    _job_element    = job_element;   
+    _job_path       = job_element.getAttribute( "path" )
+    _job_chain_path = job_chain_path? job_chain_path : "";
+    
+    _show_card = job_element.getAttribute( "order" ) == "yes"? "order_queue" : "task_queue";
+    
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_element );
+    show();
+}
+
+//---------------------------------------------------------------------------show_job_chain_details
+
+function show_job_chain_details( job_chain_element )
+{
+    init();
+ 
+    _job_chain_element = job_chain_element
+    
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_chain_element );
+    show();
+}
+
+//-----------------------------------------------------------------------------show_job_description
+
+function show_job_description()
+{
+    var job_element =  _job_element;
+                      
+    var url         = document.location.href.replace( /\/[^\/]*$/, "/" ) + "job_description?job=" + job_element.getAttribute( "job" );
+    var window_name = "scheduler_job_description";
+    var features    = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+    
+    open_url( url, window_name, features, true );
+    //var description_window = window.open( url, window_name, features, true );
+    //description_window.focus();
+    
+    //if( _scheduler )  _scheduler._dependend_windows[ window_name ] = description_window;
+
+    /* Nur ie: Text als Popup im rechten Frame zeigen (scheduler.css wirkt hier leider nicht)
+    if( _description_popup )  _description_popup.hide();
+    
+    _description_popup = window.createPopup();
+    _description_popup.document.body.innerHTML = job_element.selectSingleNode( "description" ).text;
+
+    //_description_popup.show( 0, 0, 0, 0 );
+    var width  = document.body.clientWidth;
+    var height = document.body.clientHeight;
+    _description_popup.hide();
+    _description_popup.document.body.className = "job";
+    _description_popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
+    */
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update( force )
+{
+    return call_error_checked( update2, force );
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update2( force )
+{
+    var ok = false;
+    
+    var e = document.getElementById( "error_message" );
+    if( e )  e.innerHTML = "";
+    
+    if( force == undefined )  force = false;
+    if( ( _hidden || _description_popup ) &&  !force )  return false;
+    if( !_scheduler )  return false;
+
+
+    if( _task_id != undefined )
+    {
+        var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+        
+        var task_element = response.selectSingleNode( "spooler/answer/task" );
+        
+        document.getElementById( "stylesheet_output" ).innerHTML = task_element? _stylesheet.xml_transform( task_element ) : "";
+
+        ok = true;
+    }
+    else
+    if( _job_path != undefined )
+    {
+        var what = _show_card == "task_queue"  ? "task_queue"     :
+                   _show_card == "task_history"? "task_history" :
+                   _show_card == "order_queue" ? "orders" 
+                                               : "";
+        
+        var response = _scheduler.execute( "<show_job job='" + _job_path + "' job_chain='" + _job_chain_path + "' what='" + what + "' max_task_history='10'/>" );
+        
+        _job_element = response.selectSingleNode( "spooler/answer/job" );
+
+        _job_element.setAttribute( "my_show_card", _show_card );
+        window.parent.left_frame.modify_response( response );
+
+        document.getElementById( "stylesheet_output" ).innerHTML = _job_element? _stylesheet.xml_transform( _job_element ) : "";
+
+        ok = true;
+    }
+    else
+    if( _job_chain_element != undefined )
+    {
+        //var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        //window.parent.left_frame.modify_response( response );
+        
+        var response       = window.parent.left_frame._response;
+        var job_chain_path = _job_chain_element.getAttribute( "path" );
+        
+        var checkbox = document.getElementById( "show_order_history_checkbox" );
+        if( checkbox  &&  checkbox.checked )
+        {
+            var what = "orders,order_history";
+            response = _scheduler.execute( "<show_job_chain job_chain='" + job_chain_path + "' what='" + what + "' />" );
+            
+            modify_response( response );
+        }
+        
+        _job_chain_element = response.selectSingleNode( "//job_chain[ @path='" + job_chain_path + "' ]" );
+        document.getElementById( "stylesheet_output" ).innerHTML = _job_chain_element? _stylesheet.xml_transform( _job_chain_element ) : "";
+
+        ok = true;
+    }
+
+    if( _scheduler != undefined )  _scheduler._time_log.log( "details.innerHTML" );
+
+    return ok;
+}
+
+//----------------------------------------------------------------------------------------show_card
+
+function show_card( what )
+{
+    _show_card = what;
+    update();
+}
+
+//-------------------------------------------------------------------------------------------------
+--></script>
+
+</body>
+
+</html>

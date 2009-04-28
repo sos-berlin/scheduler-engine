@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
+
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+<!--$Id: job.xml 4950 2007-04-12 06:39:59Z fs $-->
+
+<!--					title			="Externe Jobverarbeitung" -->
+
+<description	title			="External Job Processing" 
+							base_dir	=""
+							author		="$Author: fs,ur $"
+							date			="$Date: 2007-04-20 16:39:59 +0200 (Fr, 20 Apr 2007) $">
+
+    <scheduler_keyword keyword="Remote Execution"/>
+    <scheduler_keyword keyword="Remote"/>
+    <scheduler_keyword keyword="remote_scheduler"/>
+
+		<p>
+			Jobs may be processed by a Job Scheduler running on a remote computer. 
+	<!--API-Jobs können auf einem entfernten Job Scheduler ausgeführt werden. -->
+		</p>
+		
+		<p>
+			
+			Remotely processed jobs behave, with respect to the Job Scheduler which is processing them, 
+			just the same as locally processed jobs.
+			The only difference is that the processing load is transferred from the initiating to the processing Job Scheduler.
+	<!--Entfernt ausgeführte Jobs verhalten sich gegenüber den aufrufenden Job Scheduler so wie lokal ausgeführte Jobs. 
+			Lediglich die Rechenlast wird auf einen anderen Job Scheduler übertragen.-->
+		</p>
+		
+		<p>
+			This also means, for example, that all API calls refer to the local Job Scheduler object.
+	<!--Das bedeutet z.B. auch, dass alle API-Aufrufe sich auf das lokale Job Scheduler Objekt beziehen.-->
+		</p>
+		
+		<p>
+			The job log information, its end state and any possible error information will be forwarded to the 
+			initiating Job Scheduler.
+	<!--Die Protokollausgaben des Jobs, sowie der Endzustand und eventuelle Fehler werden an den 
+			aufrufenden Job Scheduler geleitet.-->
+		</p>
+		
+		
+		
+		<h2>Application</h2>
+<!--<h2>Verwendung</h2>-->
+		
+		<p>
+			In most cases a Job Scheduler processing remote jobs will be installed on a different computer to 
+			the one on which the initiating Job Scheduler is installed.
+	<!--Überwiegend werden Job Scheduler mit der Ausführung von Jobs beauftrag, 
+			die auf einem anderen physikalischen Rechner installiert sind.-->
+    </p>
+    <p>
+			Example uses:
+	<!--Beispiele für die Verwendung:-->
+			
+			<ol>
+				<li>
+					Using remote processing to balance load.
+			<!--Das Verfahren dient dem Load Balancing.-->
+				</li>
+				<li>
+					Software installations can be used which are not available on the computer 
+					on which the initiating Job Scheduler is installed.
+			<!--Es können Software-Installationen verwendet werden, die sich nicht auf dem lokalen Rechner befinden.-->
+				</li>
+				<li>
+					Hardware components such as printers can be used which are only available on a different computer to the one 
+					on which the initiating Job Scheduler is installed.
+			<!--Es können Hardware-Komponenten verwendet werden, die nur von einem anderen Rechner erreichbar sind (z.B. Drucker)-->
+				</li>
+			</ol>
+		</p>
+		
+		
+		
+		<h2>Requirements for External Job Processing</h2>
+<!--<h2>Voraussetzungen</h2>-->
+		
+		<ol>
+			<li>Firewall Settings
+	<!--<li>Einstellungen in der Firewall-->
+				<p>
+					The initiating Job Scheduler must be able to communicate with the remote one. 
+					All the firewall security settings must be set accordingly. 
+					So that communication to the remote Job Scheduler can take place, 
+					the port of the remote Job Scheduler must be opened in the firewall. 
+			<!--Der lokale Job Scheduler muss den entfernten Job Scheduler erreichen können. 
+					Alle Sicherheitseinstellungen in den Firewalls müssen das berücksichtigen. 
+					Für die Kommunikation in Richtung entfernter Job Scheduler muss der Port des entfernten 
+					Rechners in der Firewall freigeschaltet sein. -->
+					In the opposite direction, task(s) must be able to communicate with the initiating Job Scheduler 
+					using the port(s) &lt; 5999 counting downwards pro task being processed.
+					The number of firewall ports which are opened must correspond with the maximum number of tasks expected.
+			<!--In der entgegengesetzten Richtung verbindet sich die Task mit dem aufrufenden Job Scheduler über 
+					einen Port &lt;5999 abwärts zählend pro laufende Task.
+					Entsprechend der erwarteten Anzahl Tasks müssen diese Ports in der Firewall freigeschaltet sein.-->
+				</p>
+			</li>
+			<li>
+				Security Settings in the Job Scheduler Configuration
+		<!--Security-Einstellungen in der Job Scheduler-Konfiguration-->
+				<p>
+					The remote Job Scheduler must obtain authorization from the initiating Job Scheduler's security element. 
+			<!--Der entfernte Scheduler muss im Security Element den aufrufenden Job Scheduler legitimieren. -->
+					<br/><br/>
+					Example:
+			<!--Beispiel-->
+					<pre>
+&lt;security ignore_unknown_hosts="no"&gt;
+    &lt;allowed_host host="123.456.89.1" level="all"/&gt;
+&lt;/security&gt;
+					</pre>
+				</p>
+			</li>
+			<li>
+				Both Job Schedulers must be started.
+		<!--Beide Job Scheduler müssen gestartet sein.-->
+			</li>
+		</ol>
+		
+		
+		
+		<h2>Configuration</h2>
+<!--<h2>Konfiguration</h2>-->
+		
+		<p>
+			The job definition is saved in the configuration file of the initiating Job Scheduler.<br/>
+			In order to be able to have a job processed on another Job Scheduler, 
+			the following configuration is required:
+	<!--Die Job-Definition steht in der Konfigurationsdatei des lokalen, aufrufenden Job Scheduler.<br/>
+			Um einen Job auf einem anderen Job Scheduler ausführen zu lassen, sind beim lokalen, 
+			aufrufenden Job Scheduler folgende Konfigurationen nötig:-->
+		</p>
+		<p>
+			<ul>
+				<li>
+					A process class must be created and the 
+					<scheduler_element name="process_class" attribute="remote_scheduler" value=""/>
+					attribute set in this class.
+					This causes all the jobs which are allocated to this process class, to be carried out remotely.
+			<!--Es muss eine Prozessklasse angelegt werden,
+					und in ihr das Attribut <scheduler_element name="process_class" attribute="remote_scheduler" value=""/>
+					gesetzt sein.
+					Dadurch werden alle Jobs, die dieser Prozessklasse zugeordnet sind extern ausgeführt.-->
+					<br/><br/>
+					Example:
+			<!--Beispiel-->
+					<pre>
+&lt;process_classes&gt;
+    &lt;process_class name="remote"
+                   max_processes="3"
+                   remote_scheduler="remoteHost:4445"/&gt;
+&lt;/process_classes&gt;
+					</pre>
+				</li>
+			</ul>
+			<ul>
+				<li>
+					The job must be allocated to the process class,<br/>
+					see <scheduler_element name="job" attribute="process_class"/>
+			<!--Der Job muss der Prozessklasse zugeordnet werden,<br/>
+					siehe <scheduler_element name="job" attribute="process_class"/>-->
+				</li>
+			</ul>
+		</p>
+		
+		
+		
+		<h2>Monitor Scripts</h2>
+<!--<h2>Monitor-Script</h2>-->
+		
+		<p>
+			Any monitor scripts belonging to a job will be processed on the remote Job Scheduler. 
+			For example, this test script returns the name of the remote computer:
+	<!--Die zu einem Job gehörenden Monitor-Scripte werden ebenfalls am entfernten Job Scheduler ausgeführt. 
+			So gibt z.B. dieses Testscript den Rechnernamen des entfernten Rechners aus.-->
+			<pre>
+	function spooler_process_before(){
+     spooler_log.info("host:tcp_port:" + spooler.tcp_port);
+     var  localhost = new java.net.InetAddress.getLocalHost();
+     hostname = localhost.getHostName();
+     ip = localhost.getHostAddress();
+     spooler_log.info("==>" + hostname + ":::"+ ip);
+     return true;
+  }
+			</pre>
+		</p>
+		
+		
+		
+		<h2>The Context of API Calls</h2>
+<!--<h2>Kontext der API-Aufrufe</h2>-->
+		
+		<p>
+			All API calls relate to the initiating Job Scheduler. 
+			
+			However some methods return values relating to the remote Job Scheduler and not 
+			to the initiating Job Scheduler.
+		</p>
+    <ul>
+        <li>
+            <scheduler_method class="Spooler" property="directory"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="log_dir"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="ini_path"/>
+        </li>
+        <li>
+            <scheduler_method class="Spooler" property="include_path"/>
+        </li>
+    </ul>
+		
+		
+		
+		<h2>Configuration Files</h2>
+<!--<h2>Konfigurations-Dateien</h2>-->
+	
+		<p>
+			All settings are read by the initiating Job Scheduler.
+	<!--Alle Einstellungen werden beim lokalen, aufrufenden Job Scheduler gelesen.-->
+		</p>
+		
+		<p>
+			However, some settings are taken over from the remote, processing Job Scheduler and not from the initiating:
+	<!--Einige Einstellungen werden vom entfernten statt vom lokalen, aufrufenden Scheduler übernommen:-->
+		</p>
+		<ul> 
+			<li> sos.ini (Section [java], entry javac=…)</li>
+			<li> factory.ini (Section [spooler], entry tmp=…)</li>
+	<!--<li> sos.ini (Abschnitt [java], Eintrag javac=…)</li>
+			<li> factory.ini (Abschnitt [spooler], Eintrag tmp=…)</li>-->
+			<li> &lt;config java_options="…"&gt;</li>
+			<li> &lt;config java_class_path="…"&gt;</li>
+			<li> &lt;config include_path="…"&gt;</li>
+		</ul>
+		
+		
+		
+		<h2>Log Files</h2>
+<!--<h2>Protokolldateien</h2>-->
+		
+		<p>
+			Log files are saved in the files of the initiating Job Scheduler. 
+			This applies to the order log as well as the task log.
+			Output to <code>stdout</code> and <code>stderr</code> is written into the log files of the initiating Job Scheduler. 
+			Other log output, which the Job Scheduler writes, 
+			is written to the log output of the remote, processing Job Scheduler
+	<!--Protokollausgaben werden in die Dateien des lokalen, aufrufenden Job Schedulers geschrieben. 
+			Das betrifft sowohl das Auftragsprotokoll als auch das Task-Protokoll.
+			Ausgaben nach <code>stdout</code> und <code>stderr</code> werden in die Protokolldateien des lokalen, 
+			aufrufenden Job Schedulers übernommen. 
+			Andere Protokollausgaben, die der Scheduler protokolliert, 
+			werden in die Protokolldatei des entfernten Job Schedulers geschrieben.-->
+		</p>
+		
+		
+		<!--
+		<h2>Executing Shell Scripts on a Remote Computer</h2>
+		
+		<p>
+			Shell scripts can be remotely processed using jobs, 
+			when the standard job implementation <i>sos.scheduler.process.JobSchedulerProcessSubprocessJob</i> 
+			is used (see the class documentation). 
+			Output produced by the shell scripts and sent to <code>Stdout</code> 
+			is written to the log output of the initiating Job Scheduler. 
+			A <scheduler_element name="job" attribute="timeout"/> setting in a job will be ignored - 
+			this means that the task will not be stopped after the time specified in the timeout has elapsed.
+		</p>
+		-->
+</description>

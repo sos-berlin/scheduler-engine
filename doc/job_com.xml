@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title    = "Spooler-Skripte als COM-Klassen implementieren"
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$"
+>
+    <scheduler_keyword keyword="COM"/>
+
+
+<div align="left">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="right">
+&#160;1. Juli 2002
+</td>
+</tr>
+</table>
+</div>
+
+<p>&#160;</p>
+
+<p>Bisher wird ein Skript im Spooler mit einer Scripting Engine realisiert. Das Skript in einer Skriptsprache
+(VBScript, JScript, PerlScript) wird direkt im Element <font class="mono">&lt;script&gt;</font> angegeben.</p>
+
+<p>Ein Spooler-Skript lässt sich auch als <span style="font-variant: small-caps">com</span>-Klasse
+implementieren. Die <span style="font-variant: small-caps">com</span>-Klasse
+kann in jeder Sprache, die <span style="font-variant: small-caps">com</span>
+unterstützt, implementiert werden, u.a. C++, Delphi und VisualBasic. Mit Hilfe
+von &quot;Windows
+Script Component&quot; lässt sich die <span style="font-variant: small-caps">com</span>-Klasse
+auch mit VBScript, JScript und PerlScript realisieren.</p>
+
+<p>Die Klasse stellt die Methoden eines Jobs, Thread-Skripts oder
+Spooler-Skripts bereit, also:</p>
+
+<p class="indent"><font class="mono">spooler_init()<br/>
+spooler_exit()<br/>
+spooler_open()<br/>
+spooler_close()<br/>
+spooler_process()<br/>
+spooler_on_success()<br/>
+spooler_on_error()</font></p>
+
+<p>Jede Methode ist optional. Ist sie nicht implementiert, wird wie bei den
+bisherigen Spooler-Skripten verfahren.</p>
+
+<p>Die Klasse sollte außerdem eine Methode bereitstellen, mit der der
+Spooler-Kontext übergeben wird:</p>
+
+<p class="indent"><font class="mono">spooler_set_context(context)</font></p>
+
+<p>Dieser Kontext ist ein <span style="font-variant: small-caps">com</span>-Objekt
+(<font class="mono">IDispatch</font>) mit folgenden Eigenschaften:</p>
+
+<p class="indent"><font class="mono">log<br/>
+spooler<br/>
+thread<br/>
+job<br/>
+task</font></p>
+
+<p>Diese Eigenschaften liefern die aus dem Spooler-Skripten bekannten Objekte <font class="mono">spooler_log</font>,
+<font class="mono">spooler_task</font>, <font class="mono">spooler_job</font>, <font class="mono">spooler_thread</font>
+und <font class="mono">spooler</font>.</p>
+
+<p class="zwischentitel">Gemeinsamkeiten von Skript in Scripting Engine und <span style="font-variant: small-caps">com</span>-Klasse</p>
+
+<ul>
+<li>Attribut <font class="mono"> use_engine=&quot;task&quot;</font>
+und <font class="mono">use_engine =&quot;job&quot;</font> möglich.</li>
+<li>Als Job-Skript, Thread-Skript und Spooler-Skript (bzw. -Klasse) verwendbar</li>
+<li>Aufrufe (<font class="mono">spooler_init()</font>, <font class="mono">spooler_open()</font>
+etc.) sind gleich</li>
+<li>Die Aufrufe sind optional</li>
+</ul>
+
+<p class="zwischentitel">Unterschiede zwischen Skript in Scripting Engine und <span style="font-variant: small-caps">com</span>-Klasse</p>
+
+<p>&#160;</p>
+
+<div align="left">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td width="48%" valign="top" align="left"><p><u>Skript mit Scripting Engine</u></p></td>
+<td width="4%" valign="top" align="left"></td>
+<td width="48%" valign="top" align="left"><p><u>COM-Klasse</u></p></td>
+</tr>
+<tr>
+<td width="48%" valign="top" align="left"><p>Quellcode wird in der Konfiguration angegeben (oder extern mit <font class="mono">&lt;include&gt;</font>).</p></td>
+<td width="4%" valign="top" align="left"></td>
+<td width="48%" valign="top" align="left"><p>Implementierung ist unabhänging vom Spooler.
+Jede Sprache, die COM-Klassen mit später Bindung (<font class="mono">IDispatch</font>)
+generiert, kann verwendet werden.</p></td>
+</tr>
+<tr>
+<td width="48%" valign="top" align="left"><p>Der Kontext steht dem Skript mit den vordefinierten Variablen <font class="mono">spooler_log</font>,
+<font class="mono">spooler</font>, <font class="mono">spooler_thread</font>, <font class="mono">spooler_job</font>
+und <font class="mono">spooler_task</font> zur Verfügung.&#160;</p></td>
+<td width="4%" valign="top" align="left"></td>
+<td width="48%" valign="top" align="left"><p>Der Spooler übergibt den Kontext dem <span style="font-variant: small-caps">com</span>-Objekt
+mit dessen Methode <font class="mono">spooler_set_context()</font>.</p></td>
+</tr>
+<tr>
+<td width="48%" valign="top" align="left"><p>Dasselbe Skript kann, wenn es in einer eigenen Datei vorliegt,
+mit <font class="mono">&lt;include&gt;</font> an mehreren Stellen verwendet
+werden.</p></td>
+<td width="4%" valign="top" align="left"></td>
+<td width="48%" valign="top" align="left"><p>Die Klasse kann an mehreren Stellen verwendet werden. Es werden
+getrennte Objekte der Klasse angelegt.</p></td>
+</tr>
+<tr>
+<td width="48%" valign="top" align="left"><p>Attribut <font class="mono"> use_engine=&quot;task&quot;</font>
+und <font class="mono"> =&quot;job&quot;</font> möglich</p></td>
+<td width="4%" valign="top" align="left"></td>
+<td width="48%" valign="top" align="left"><p>Attribut <font class="mono"> use_engine=&quot;task&quot;</font>
+und <font class="mono"> =&quot;job&quot;</font> möglich</p></td>
+</tr>
+</table>
+</div>
+
+<p>&#160;</p>
+
+<p class="zwischentitel">Deklaration in der Spooler-Konfiguration&#160;</p>
+
+<p><br/>
+Der als <span style="font-variant: small-caps">com</span>-Klasse registrierte
+Job kann über seinen Klassennamen angegeben werden:</p>
+
+<p class="indent"><font class="mono">&lt;job name=&quot;delphijob&quot;&gt;<br/>
+&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;meine_spooler_job_klasse&quot;/&gt;<br/>
+&lt;/job&gt;</font></p>
+
+<p><br/>
+<br/>
+Statt des Klassennamens kann auch die eindeutige <span style="font-variant: small-caps">clSID</span>
+angegeben werden:</p>
+
+<p class="indent"><font class="mono">&lt;job name=&quot;delphijob&quot;&gt;<br/>
+&#160;&#160;&#160; &lt;script <b>com_class=</b>&quot;{F44FF458-D4DE-4cef-AA1A-CCC507346581}&quot;/&gt;<br/>
+&lt;/job&gt;</font></p>
+
+<p class="zwischentitel">Attribut use_engine</p>
+
+<p>Das Attribut <font class="mono">use_engine</font> kann auch für ein
+COM-Objekt verwendet werden. Bei <font class="mono">use_engine=&quot;job&quot;</font>
+wird das Objekt für mehrere Tasks beibehalten. Wie bisher wird <font class="mono">spooler_init()</font>
+nur einmal, <font class="mono">spooler_open()</font> aber für jede Task (jeden
+Jobstart) aufgerufen.&#160;Die Bedeutung ist dieselbe wie bisher.</p>
+
+<p class="zwischentitel">
+Direkte Angabe der DLL</p>
+
+<p><i><font color="#FF0000">Wenn die DLL eine weitere DLL braucht, die nicht
+geladen werden kann, hält Windows den Spooler mit einer Messagebox an. Erst wenn
+der OK-Knopf gedrückt wird, setzt der Spooler fort. Die Angabe der DLL ist also
+nicht für den unbeaufsichtigten Betrieb geeignet.</font></i></p>
+
+<p>
+Wenn die <span style="font-variant: small-caps">com</span>-Klasse nicht
+registiert werden soll, kann auch die DLL direkt angegeben werden. Die Klasse wird dann als hexadezimale <span style="font-variant: small-caps">CLSID</span>
+angegeben.</p>
+
+<p class="indent"><font class="mono">&lt;job name=&quot;delphijob&quot;&gt;<br/>
+&#160;&#160;&#160; &lt;script com_class=&quot;{xxxx-xx-...}&quot; filename=&quot;meine_delphi.dll&quot;/&gt;<br/>
+&lt;/job&gt;</font></p>
+
+<p class="zwischentitel">Beispiel</p>
+
+<p>Die <span style="font-variant: small-caps">com</span>-Klasse wird mit &quot;Windows
+Script Component&quot; realisiert. Die Quelle ist:</p>
+
+<p class="indent"><font class="mono">&lt;?XML version="1.0"?><br/>
+&lt;component><br/>
+&#160;&#160;&#160; &lt;registration<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; progid&#160;&#160;&#160;&#160;&#160; = "Joacim.Component"<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; classid&#160;&#160;&#160;&#160; = "{F44FF458-D4DE-4cef-AA1A-CCC507346581}"<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; description = "Joacims Script Component"<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; version&#160;&#160;&#160;&#160; = "1"<br/>
+&#160;&#160;&#160; /><br/>
+<br/>
+&#160;&#160;&#160; &lt;public><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_set_context"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_init"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_exit"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_open"/><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; &lt;method name="spooler_process"/><br/>
+&#160;&#160;&#160; &lt;/public><br/>
+<br/>
+&#160;&#160;&#160; &lt;script language="VBScript"><br/>
+&#160;&#160;&#160; &lt;![CDATA[<br/>
+<br/>
+dim spooler_log<br/>
+dim spooler_task<br/>
+dim i<br/>
+<br/>
+function spooler_set_context(c)<br/>
+&#160;&#160;&#160; set spooler_log&#160; = c.log<br/>
+&#160;&#160;&#160; set spooler_task = c.task<br/>
+&#160;&#160;&#160; spooler_log "Script component spooler_set_context"<br/>
+end function<br/>
+<br/>
+function spooler_init<br/>
+&#160;&#160;&#160; spooler_log "Script component spooler_init"<br/>
+end function<br/>
+<br/>
+function spooler_exit<br/>
+&#160;&#160;&#160; spooler_log "Script component spooler_exit"<br/>
+end function<br/>
+<br/>
+function spooler_open<br/>
+&#160;&#160;&#160; spooler_log "Script component spooler_open"<br/>
+&#160;&#160;&#160; i = 3<br/>
+end function<br/>
+<br/>
+function spooler_process<br/>
+&#160;&#160;&#160; spooler_log "Script component spooler_process i=" &amp; i<br/>
+&#160;&#160;&#160; i = i - 1<br/>
+&#160;&#160;&#160; spooler_process = i > 0<br/>
+end function<br/>
+<br/>
+&#160;&#160;&#160; ]]&gt;<br/>
+&#160;&#160;&#160; &lt;/script><br/>
+&lt;/component></font></p>
+
+<p><br/>
+Diese Quelle wird in die Datei <font class="mono">job.wsc</font> geschrieben und
+mit folgendem Kommando als COM-Server registriert.</p>
+
+<p class="indent"><font class="mono">regsvr32 job.wsc&#160;</font></p>
+
+<p><br/>
+In der Spooler-Konfiguration kann der Server mit seinem Klassennamen angegeben
+werden:</p>
+
+<p class="indent"><font class="mono">                &lt;job name="component"><br/>
+&#160;&#160;&#160;                    &lt;script com_class=&quot;Joacim.Component&quot;/&gt;<br/>
+&#160;&#160;&#160;                    &lt;run_time once="yes"/&gt;<br/>
+                &lt;/job></font></p>
+
+<p><br/>
+Oder mit seiner eindeutigen CLSID:</p>
+
+<p class="indent"><font class="mono">                &lt;job name="component"><br/>
+&#160;&#160;&#160;                    &lt;script com_class="{F44FF458-D4DE-4cef-AA1A-CCC507346581}"/&gt;<br/>
+&#160;&#160;&#160;                    &lt;run_time once="yes"/&gt;<br/>
+                &lt;/job></font></p>
+
+<p class="zwischentitel">Unix</p>
+
+<p>Die Portierung auf Unix ist trotz <span style="font-variant: small-caps">com</span>
+prinzipiell möglich. Statt der späten Bindung über die Schnittstelle
+IDispatch wird die frühe Bindung verwendet. Das heißt:</p>
+
+<ul>
+<li>Bindung zur Compile-Zeit über Header-Dateien statt Verwendung von <font class="mono">IDispatch</font>.</li>
+<li>Die <span style="font-variant: small-caps">com</span>-Klasse erbt von der
+Klasse Spooler.Job</li>
+<li>Sie implementiert alle Aufrufe. Die Aufrufe sind nicht mehr optional
+(Fehlercode <font class="mono">E_NOTIMPL</font> kann zurückgegeben werden)</li>
+<li>Die <span style="font-variant: small-caps">com</span>-Unterstützung von
+Delphi kann möglichweise nicht verwendet werden, wenn sie zuviel voraussetzt.
+Stattdessen werden die <span style="font-variant: small-caps">com</span>-Aufrufe
+direkt verwendet. Für die Job-Implementierung heißt das, dass die Rückgabe
+einer Fehlermeldung mit dem Aufruf <font class="mono">SetErrorInfo()</font>
+codiert wird.</li>
+<li>Das Modul (shared object) wird nicht registriert, sondern direkt mit <font class="mono">&lt;script
+filename=&quot;</font>...<font class="mono">&quot;/&gt;</font> angegeben</li>
+<li>Die für Unix geänderte Implementierung des Jobs wird auch in Windows
+ablauffähig sein. Ein <font class="mono">#ifdef</font> wird wahrscheinlich
+nicht gebraucht. Der Job wird wegen der frühen Bindung sogar schneller laufen.</li>
+</ul>
+
+</description>

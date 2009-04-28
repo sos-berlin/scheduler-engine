@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "add_order"
+             parent_page = "../xml_commands.xml"
+             category = "Kommando"
+             title    = "Auftrag hinzufügen"
+             base_dir = "../"
+             author   = "$Author$"
+             date     = "$Date$">
+
+
+    <description>
+        <p>
+            Fügt einen neuen Auftrag hinzu.
+        </p>
+        <p>
+            Wenn Sie das Element <code>&lt;params></code> angegeben,
+            erstellt der Scheduler ein <scheduler_method class="Variable_set"/>
+            und stellt es dem Job in <scheduler_method class="Order" method="payload"/> zur Verfügung.
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="job_chain" type="name">
+            <description>
+                <p>
+                    Die Jobkette, in die der Auftrag eingetragen werden soll.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="id" type="id">
+            <description>
+                <p>
+                    Die Kennung des Auftrags (alphanumerisch).
+                    <!--scheduler_comment>(<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)</scheduler_comment-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="replace" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>replace="no"</code>: <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order" />
+                    wird gerufen.
+                    <br/>
+                    <code>replace="yes"</code>: <scheduler_method class="Job_chain" method="add_or_replace_order" java_signature="sos.spooler.Order" />
+                    wird gerufen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="priority" type="zahl">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="title" type="text">
+            <description>
+                <p>
+                    Der Titel des Auftrags.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+
+        <xml_attribute name="state" type="text">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <!--xml_attribute name="job" type="name">
+            <description>
+                <p>
+                    Der Auftrag wird direkt in die Auftragswarteschlange des Jobs eingereiht,
+                    ohne in eine Jobkette aufgenommen zu werden
+                    (nicht empfohlen).
+                </p>
+            </description>
+        </xml_attribute-->
+
+
+        <xml_attribute name="web_service" type="name">
+            <description>
+                <p>
+                    Wenn der Auftrag ausgeführt worden ist (das Ende der Jobkette erreicht hat),
+                    wird er mit einem Stylesheet transformiert und einem Web-Dienst übergeben.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="web_service"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="at" type="timestamp" initial="now" title="Startzeit des Auftrags">
+            <description>
+                <p>
+                    <code>"now"</code>,
+                    <code>"yyyy-mm-dd HH:MM</code>[<code>:SS</code>]<code>"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code> 
+                    sind möglich.
+                </p>
+                <p>
+                    Siehe auch <scheduler_method class="Order" property="at"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="end_state" type="text" title="Zustand, vor dessen erfolgreichen Verlassen der Auftrag enden soll">
+            <description>
+                <p>
+                    Wie <scheduler_method class="Order" property="end_state"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="params">
+            <description>
+                <h3 style="margin-top: 1em">Verwendung von &lt;copy_params></h3>
+                <p>
+                    Wenn <code>&lt;add_order></code> in <scheduler_element name="job" child="commands"/> steht,
+                    können hier
+                </p>
+                <ul>
+                    <li>
+                        die Parameter der beendeten Task mit <scheduler_element name="copy_params" attribute="from" value="task"/>
+                    </li>
+                    <li>
+                        die Parameter des ausgeführten Auftrags mit
+                        <scheduler_element name="copy_params" attribute="from" value="order"/>
+                    </li>
+                </ul>
+                <p>
+                    übernommen werden.
+                </p>
+            </description>
+
+            <example>
+                <pre>&lt;<a href="job.xml">job</a> name="…">
+    …      
+    &lt;<a href="commands.xml">commands</a> on_exit_code="…">
+        &lt;add_order job_chain="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;<a href="copy_params.xml">copy_params</a> from="task"/>
+            &lt;/params>
+        &lt;add_prder/>
+    &lt;commands>
+&lt;job></pre>
+            </example>
+        </xml_child_element>
+
+        <xml_child_element name="run_time"/>
+
+
+            <xml_child_element name="xml_payload"/>
+    </xml_child_elements>
+
+    <xml_answer element="ok" element2="order">
+        <description>
+            <p>
+                Im Element <scheduler_element name="order" directory="xml/answer/"/> wird nur die Auftragskennung zurück geliefert.
+            </p>
+        </description>
+    </xml_answer>
+
+    <example>
+        <pre>&lt;add_order job_chain="jobkette" id="1234" title="Mein erster Auftrag" state="100" at="now+3:00">
+    &lt;params>
+        &lt;param name="ein_parameter" value="ein Wert"/>
+    &lt;/params>
+&lt;/add_order></pre>
+    </example>
+</xml_element>

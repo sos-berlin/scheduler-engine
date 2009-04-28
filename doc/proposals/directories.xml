@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Organisation der Scheduler-Objekte in einer Verzeichnisstruktur"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "proposal"
+>
+
+    <p>
+        Siehe auch
+    </p>
+    <ul>
+        <li>
+            <scheduler_a href="dynamic_configuration_commands.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="dynamic_configuration.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="dynamic_configuration_with_supervisor.xml"/>
+        </li>
+    </ul>
+
+    <p>
+        Objekte in diesem Text sind
+        Jobs, Jobketten, Daueraufträge, Prozessklassen und Sperren.
+    </p>
+    <p>
+        Jedes dieser Objekte kann in einem Verzeichnis angeordnet sein.
+        Das ist nur möglich bei <scheduler_a href="dynamic_configuration.xml">dateibasierter Konfiguration</scheduler_a>
+    </p>
+
+    <p>
+        ...
+    </p>
+
+    <h2>Rekursive Verzeichnisüberwachung</h2>
+    <p>
+        Die Verzeichnisüberwachung wird Unterverzeichnisse überwachen können.
+        Die Implementierung ist für Windows und Unix unterschiedlich.
+    </p>
+    <ul>
+        <li>
+            Unix: Symbolische Links werden nicht verfolgt.
+        </li>
+    </ul>
+
+    <h2>Windows: Zahl der Ergeignisse, auf die gewartet kann, ist auf 63 begrenzt</h2>
+    <p>
+        Hier muss ein anderer Algorithmus gefunden werden.
+    </p>
+    
+   
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+
+</description>

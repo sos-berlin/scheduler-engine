@@ -1,0 +1,677 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: history.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<description 
+    title               = "History" 
+    base_dir            = ""
+    author              = "$Author: aa $"
+    date                = "$Date: 2007-10-09 12:58:31 +0200 (Di, 09 Okt 2007) $"
+>
+
+		<scheduler_keyword keyword="History"/>
+<!--<scheduler_keyword keyword="Historie"/>-->
+
+		<table width="100%">
+		    <tr>
+		        <td align="right">9th October 2007</td>
+		    </tr>
+		</table>
+		
+		<h2>1.&#160; Purpose of the History</h2>
+<!--<h2>1.&#160; Gegenstand der Historie</h2>-->
+		
+		<p>
+			The progress of each job should be recorded and stored as follows:
+	<!--Jeder Job-Lauf soll verzeichnet werden. Festgehalten werden-->
+		</p>
+		
+		<ul>
+			<li>The record identifier is the ID of the task started for a job and is unique for each task.</li>
+	<!--<li>Satzkennung: ID der für einen Job gestarteten Task, eindeutig für den Task</li>-->
+			<li>Scheduler Id</li>
+	<!--<li>Scheduler-Id</li>-->
+			<li>Jobname</li>
+			<li>Start time</li>
+	<!--<li>Startzeit</li>-->
+			<li>End time (if reached)</li>
+	<!--<li>Endzeit (falls erreicht)</li>-->
+			<li>
+				The start event (should there be more than one start event, 
+				the Job Scheduler will attempt to define the most important event)
+			</li>
+	<!--<li>Anlass des Starts (falls es mehrere Start-Anlässe gibt, wird der möglicherweise wichtigste Anlass genommen)</li>-->
+			<li>Parameter (in XML)</li>
+			<li>The number of job steps (the number of the spooler_process calls)</li>
+	<!--<li>Anzahl Job-Schritte (Anzahl der spooler_process-Aufrufe)</li>-->
+			<li>Error flag</li>
+	<!--<li>Fehler-Flag</li>-->
+			<li>Error code and error text</li>
+	<!--<li>Fehler-Code und Fehlertext</li>-->
+			<li>The job protocol (only when the protocol is recorded in a database)</li>
+	<!--<li>Job-Protokoll (nur, wenn Protokoll in eine Datenbank geschrieben wird)</li>-->
+			<li>Extra Fields</li>
+	<!--<li>Extra Felder</li>-->
+		</ul>
+		
+		<p>
+			Excerpts from the history can be read via the TCP interface.
+	<!--An der TCP-Schnittstelle sind Auszüge der Historie lesbar.-->
+		</p>
+		
+		
+		
+		<p class="zwischentitel">
+			The History Table Columns
+	<!--Spalten der Historie-->
+		</p>
+		
+		<p>&#160;
+		</p>
+		
+		<table border="0" width="100%" cellspacing="0">
+			<tr>
+				<td width="13%">id</td>
+				<td width="87%">The Unique Task Identifier (the primary table key)</td>
+		<!--<td width="87%">Eindeutige Kennung des Tasks (Tabellenschlüssel)</td>-->
+			</tr>
+			<tr>
+				<td width="13%">spooler_id</td>
+				<td width="87%">Scheduler Id</td>
+			</tr>
+			<tr>
+				<td width="13%">job_name</td>
+				<td width="87%">Job name</td>
+		<!--<td width="87%">Job-Name</td>-->
+			</tr>
+			<tr>
+				<td width="13%">start_time</td>
+				<td width="87%">Start time (yyyy-mm-dd HH:MM:SS)</td>
+		<!--<td width="87%">Startzeit (yyyy-mm-dd HH:MM:SS)</td>-->
+			</tr>
+			<tr>
+				<td width="13%">end_time</td>
+				<td width="87%">End time (yyyy-mm-dd HH:MM:SS)</td>
+		<!--<td width="87%">Endezeit (yyyy-mm-dd HH:MM:SS)</td>-->
+			</tr>
+			<tr>
+				<td width="13%">steps</td>
+				<td width="87%">Number of spooler_process() steps</td>
+		<!--<td width="87%">Anzahl Aufgerufener spooler_process()</td>-->
+			</tr>
+			<tr>
+				<td width="13%">cause</td>
+				<td width="87%">Cause of start</td>
+		<!--<td width="87%">Anlass des Starts</td>-->
+			</tr>
+			<tr>
+				<td width="13%">error</td>
+				<td width="87%">0: No error; 1: Error</td>
+		<!--<td width="87%">0: Kein Fehler; 1: Fehler</td>-->
+			</tr>
+			<tr>
+				<td width="13%">error_code</td>
+				<td width="87%">Error code</td>
+		<!--<td width="87%">Fehlercode</td>-->
+			</tr>
+			<tr>
+				<td width="13%">error_text</td>
+				<td width="87%">Error text</td>
+		<!--<td width="87%">Fehlertext</td>-->
+			</tr>
+			<tr>
+				<td width="13%">parameters</td>
+				<td width="87%">Job parameters (if available) as XML document (Clob)</td>
+		<!--<td width="87%">Parameter des Jobs (wenn vorhanden) als XML-Dokument (Clob)</td>-->
+			</tr>
+			<tr>
+				<td width="13%">log</td>
+				<td width="87%">Job protocol (not in the tab-separated file when operating without a database)</td>
+		<!--<td width="87%">Job-Protokoll (nicht in der tabulierten Datei bei Verwendung ohne Datenbank)</td>-->
+			</tr>
+		</table>
+		
+		
+		
+		<h2>2.&#160; History File</h2>
+<!--<h2>2.&#160; Historiendatei</h2>-->
+		
+		<p>
+			The history can either be written in a simple file or recorded in a database.
+	<!--Die Historie kann in einfache Dateien oder in eine Datenbank geschrieben werden.-->
+		</p>
+		
+		
+		
+		<h3>2.1&#160; Simple File (tabular data)</h3>
+<!--<h3>2.1&#160; Einfache Dateien (tabulierte Dateien)</h3>-->
+		
+		<p>
+			A record file in the protocol file folder (Option <font class="mono">-log-dir=</font>) is created for every job.
+			Fields in this file are separated by tabulator characters.
+			An entry is made at the start of a job, which is then overwritten with the complete data after the job has ended.
+	<!--Für jeden Job wird im Verzeichnis der Protokolldateien (Option <font class="mono">-log-dir=</font>)
+			eine Datei fortgeschrieben. Die Datenfelder werden durch Tabulator getrennt.
+			Beim Start eines Jobs wird ein Satz geschrieben, der beim Ende mit den
+			vollständigen Daten überschrieben wird.-->
+		</p>
+		
+		<p>
+			The file name is: 
+			<i> log_dir</i><font class="mono">/history.</font>
+			<i>scheduler_id</i><font class="mono">.job.</font>
+			<i>jobname</i><font class="mono">.txt</font>
+	<!--Dateiname ist 
+			<i> log_dir</i><font class="mono">/history.</font>
+			<i>scheduler_id</i><font class="mono">.job.</font>
+			<i>jobname</i><font class="mono">.txt</font>-->
+		</p>
+		
+		<p>
+			The file is rewritten each time the Job Scheduler is started.
+			A previously existing file can be renamed and/or compressed before a Job Scheduler start.
+	<!--Die Datei wird beim Job Scheduler Start neu angelegt. 
+			Eine bereits vorhandene Datei kann zurvor umbenannt und komprimiert werden.-->
+		</p>
+		
+		<p>
+			The Job Scheduler writes column names in the first row of the file.
+	<!--Der Job Scheduler schreibt in die erste Zeile die Spaltennamen.-->
+		</p>
+		
+		<p>
+			Tab characters in the file (resulting from error messages) are suppressed.
+	<!--Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrückt.-->
+		</p>
+		
+		<p>
+			Every field has a maximum length of 1024 characters. Longer entries are cut off.
+	<!--Jedes Feld hat für 1024 Zeichen Platz. Längere Einträge werden abschnitten.-->
+		</p>
+		
+		
+		
+		<p class="zwischentitel">Archiving</p>
+<!--<p class="zwischentitel">Archivierung</p>-->
+		
+		<p>
+			Existing history files are overwritten when the Job Scheduler is started.
+			However, these files can be archived using the <code>history_archive</code> entry in the
+			<a href="factory_ini.xml"><code>factory.ini</code></a>:
+	<!--Beim Start des Job Schedulers werden die Historien der Jobs überschrieben. 
+			Die vorhandenen Historien können mit dem Eintrag <code>history_archive</code> in der Konfigurationsdatei
+			<a href="factory_ini.xml"><code>factory.ini</code></a> archiviert werden:-->
+		</p>
+		
+		<pre>[spooler]
+history_archive = yes|<u>no</u>|gzip
+
+[Job <i>jobname</i>]
+history_archive = yes|no|gzip</pre>
+		
+		<p>
+			<font class="mono">history_archive=yes</font>&#160; renames a history file.
+			Note that this command causes the file name to be extended with an (exact to the second) time stamp.
+	<!--<font class="mono">history_archive=yes</font>&#160; benennt die Datei um.
+			Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergänzt.-->
+		</p>
+		
+		<p>
+			<font class="mono">history_archive=gzip&#160;</font> compresses the file using 
+			<code>zlib</code> (<code>gzip</code>) from Jean-loup Gailly (http://www.gzip.org/zlib/).
+			The file name ending is thereby extended with <font class="mono">.gz</font>. 
+			The resulting file can be decompressed using <code>gzip</code>. 
+			It is however also readable using Hostware with 
+			&quot;<font class="mono">nl | gzip | history.gz</font>&quot;.
+	<!--<font class="mono">history_archive=gzip&#160;</font> komprimiert die Datei
+			mit <code>zlib</code> (<code>gzip</code>) von Jean-loup Gailly (http://www.gzip.org/zlib/).
+			Der Dateiname wird neben dem Zeitstempel um die Endung <font class="mono">.gz</font> ergänzt. 
+			Die Datei kann mit <code>gzip</code> dekomprimiert werden. Sie lässt sich auch mit
+			der Hostware mit &quot;<font class="mono">nl | gzip | history.gz</font>&quot; lesen.-->
+		</p>
+		
+		
+		
+		<h3>2.2&#160; Database</h3>
+<!--<h3>2.2&#160; Datenbank</h3>-->
+		
+		<p>
+			All data is written in a database table. 
+			The task protocol is written in a blob.&#160;
+	<!--Alle Daten werden in eine Tabelle geschrieben. Das Taskprotokoll wird in ein Blob geschrieben.&#160;-->
+		</p>
+		
+		<p>
+			The table name is <font class="mono">spooler_history</font>. 
+			If this file does not exist, then a database with the same name is created. 
+			If the database table <font class="mono">spooler_history</font> 
+			does not exist, then it will be created (only for MS Access databases).
+	<!--Die Tabellename ist <font class="mono">SCHEDULER_HISTORY</font>. 
+			Wenn die Datei nicht vorhanden ist, wird sie als Datenbank angelegt. 
+			Wenn die Tabelle <font class="mono">SCHEDULER_HISTORY</font>nicht vorhanden ist, 
+			wird sie angelegt (das gilt nur für Microsoft-Access-Datenbanken).-->
+		</p>
+		
+		<p>
+			The table names can be set in the <a href="factory_ini.xml"><code>factory.ini</code></a> configuration file:
+	<!--Die Tabellennamen können in der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> eingestellt werden:-->
+		</p>
+		
+		<pre>[spooler]
+		db_history_table   = <i>tabellenname</i> | <u>SCHEDULER_HISTORY</u>
+		db_variables_table = <i>tabellenname</i> | <u>SCHEDULER_VARIABLES</u>
+		</pre>
+		
+		<p>
+			The next free job number is held in an entry in the <font class="mono">SCHEDULER_VARIABLES</font> table.
+	<!--In der Tabelle <font class="mono">SCHEDULER_VARIABLES</font> wird in einem Eintrag die nächste freie Job-Nummer gehalten.-->
+		</p>
+		
+<!--p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt, aber db gesetzt ist.&#160;</p-->
+		
+		<!--pre>[spooler]
+db = spooler.mdb                 <i>(the same as the next line)</i>
+db = spooler.mdb                 <i>(dasselbe wie nächste Zeile)</i>
+db = odbc -create spooler.mdb</pre>
+
+		<pre>[spooler]
+db = odbc -db=scheduler</pre>
+
+		<p class="zwischentitel">need_db</p-->
+		
+		<p>
+			The <font class="mono">need_db=no</font> entry is used to allow the Job Scheduler to start
+			when the history database cannot be opened.
+			The default setting here is <font class="mono">need_db=yes</font>.&#160;
+	<!--Mit dem Eintrag <font class="mono">need_db=no</font> kann eingestellt werden,
+			dass der Job Scheduler auch anlaufen soll, wenn die Datenbank sich nicht öffnen
+			lässt. Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;-->
+		</p>
+		
+		<pre>[spooler]
+db = odbc -db=schedul er
+need_db = no</pre>
+
+		<p>
+		When only a database file name is specified with <font class="mono">db=</font> and
+			<font class="mono">log_dir=*stderr</font> is set, 
+			then the database cannot be opened because of the missing directory. 
+			In this case the Job Scheduler does not start if <font class="mono">need_db=yes</font> is set.
+	<!--Wenn mit <font class="mono">db=</font> nur ein Datenbankdateiname und<font class="mono">
+			log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
+			nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
+			der Job Scheduler nicht.-->
+		</p>
+		
+		<p class="zwischentitel">
+			Automatic Creation of a MS Access Database
+	<!--Access-Datenbank wird automatisch angelegt-->
+		</p>
+		
+		<p>
+			Should only a simple file name be specified with <font class="mono">db=</font>, 
+			then the Job Scheduler can automatically create a Microsoft MS Access database when 
+			&#160; &quot;<font class="mono">odbc -create</font>&quot; is set 
+			(see ODBC file type).
+	<!--Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
+			ist, stellt der Job Scheduler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
+			voran.&#160;Damit wird eine Microsoft MS-Access-Datenbank automatisch angelegt 
+			(s. Dateityp ODBC).-->
+		</p>
+		
+		<p>
+			The <font class="mono">SCHEDULER_HISTORY</font> and 
+			<font class="mono">SCHEDULER_VARIABLES</font> tables are used in the database. 
+			These tables are created as necessary using the Microsoft Access SQL syntax.
+	<!--In der Datenbank werden die Tabellen <font class="mono">SCHEDULER_HISTORY</font>
+			und <font class="mono">SCHEDULER_VARIABLES</font> verwendet. 
+			Sie werden bei Bedarf eingerichtet, wobei die SQL-Syntax von MS-Access verwendet wird.-->
+		</p>
+		
+<!--<pre>[spooler]
+db_history_table   = <i>tablenname</i> | <u>spooler_history</u>
+db_variables_table = <i>tablenname</i> | <u>spooler_variables</u></pre>-->
+<!--db_history_table   = <i>tabellenname</i> | <u>spooler_history</u>
+db_variables_table = <i>tabellenname</i> | <u>spooler_variables</u></pre>-->
+		
+		
+		
+		<p class="zwischentitel">
+			Job Scheduler Start Entry
+	<!--Satz für Job Scheduler Start-->
+		</p>
+		
+		<p>
+			The Job Scheduler makes an entry in the history with its own ID on starting. 
+			On ending, the Job Scheduler writes the time in this entry, so that both start and end times are noted. 
+			The job name is &quot;<font class="mono">(Spooler)</font>&quot;.&#160;
+	<!--Der Job Scheduler schreibt beim Start einen Satz mit einer eigenen ID in die
+			Historie. Beim Beenden trägt er in diesen Satz die Zeit ein, so dass ein Satz
+			mit Start- und Endezeit des Job Schedulers vorliegt. 
+			Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;-->
+		</p>
+		
+		
+		
+		<h3>2.3&#160; Configuration of the factory.ini File</h3>
+<!--<h3>2.3&#160; Konfiguration in der Datei factory.ini</h3>-->
+		
+		<p>
+			The following parameters can be set in the <font class="mono"> factory.ini</font> configuration file:
+	<!--In der Konfigurationsdatei <a href="factory_ini.xml"><code>factory.ini</code></a> lassen sich einstellen:-->
+		</p>
+		
+		<pre>[spooler]
+db                 = <i>database</i>
+<!--db                 = <i>datenbank</i>-->
+db_history_table   = SCHEDULER_HISTORY
+db_variables_table = SCHEDULER_VARIABLES
+history            = no|<u>yes</u>
+history_columns    = <i>field1</i>,<i> field2</i>,<i> </i>...
+<!--history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>...-->
+history_on_process = yes|1|2
+history_with_log   = <u>no</u>|yes|gzip
+history_archive    = <u>no</u>|yes|gzip
+
+[Job <i>jobname</i>]
+history            = no|yes
+history_file       = <i>filename</i>
+<!--history_file       = <i>dateiname</i>-->
+history_columns    = <i>field1</i>,<i> field2</i>,<i> </i>...
+<!--history_columns    = <i>feld1</i>,<i> feld2</i>,<i> </i>...-->
+history_on_process = yes|1|2
+history_with_log   = no|yes|gzip
+history_archive    = no|yes|gzip</pre>
+
+		<p>
+			Settings made in <font class="mono">[Job </font><i>jobname</i><font class="mono">]</font>
+			have priority over those made in <font class="mono">[spooler]</font>.
+	<!--Die Einstellungen unter <font class="mono">[Job </font><i>jobname</i><font class="mono">]</font>
+			haben Vorrang vor <font class="mono">[spooler]</font>.-->
+		</p>
+		
+		<p>
+			<font class="mono">history=no</font> suppresses the history. 
+			Should a database be specified, however, the entry for the start of the Job Scheduler will still be made.
+	<!--<font class="mono">history=no</font> unterdrückt die Historie. Wenn eine
+			Datenbank angegeben ist, wird dennoch der Satz für den Job Scheduler Start
+			geschrieben.-->
+		</p>
+		
+		<p>
+			<font class="mono">history_on_process</font> sets the number of requests of 
+			<font class="mono">spooler_process()</font> which can be made before an entry is made in the history.
+			Should <font class="mono">spooler_open</font> return false, then an entry will not be made
+			when <font class="mono">history_on_process</font> is set to 1.
+	<!--<font class="mono">history_on_process</font> gibt die Anzahl der Aufrufe von <font class="mono">spooler_process()</font>
+			an, ab der ein Eintrag in die Historie geschrieben werden soll. Bei 1 wird ein
+			Satz nicht geschrieben, wenn <font class="mono">spooler_open</font> false
+			liefert.-->
+		</p>
+		
+		<p>
+			<font class="mono">history_with_log</font> 
+			allows the task protocol to be recorded in the database as well. 
+			The protocol may be compressed if desired. 
+	<!--<font class="mono">history_with_log</font> lässt das Taskprotokoll in die
+			Datenbank mit aufnehmen. Wahlweise komprimiert.-->
+		</p>
+		
+		
+		
+		<h3>2.4&#160; Start Events (Cause)</h3>
+<!--<h3>2.4&#160; Startanlässe (cause)</h3>-->
+		
+		<p>
+			The <code>cause</code> of a job start is noted in a row in the history:
+	<!--In der Historie enthält die Spalte <code>cause</code> den Anlass des Job-Laufs:-->
+		</p>
+		
+		<p>&#160;</p>
+		
+		<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<th width="18%">Event Code</th>
+		<!--<th width="18%">Code des Anlasses</th>-->
+				<th width="82%">Meaning</th>
+		<!--<th width="82%">Bedeutung</th>-->
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">none</font>&#160;&#160;</td>
+				<td width="82%">The task has not started (this is not noted in the history)&#160;</td>
+		<!--<td width="82%">Task ist nicht gestartet (das kommt in der Historie nicht vor)&#160;</td>-->
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_once</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time once=&quot;yes&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_single</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time single_start=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">period_repeat</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;run_time repeat=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">job_repeat</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.repeat=</font>...&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">queue</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.start()</font> oder <font class="mono">&lt;start_job&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">queue_at</font>&#160;&#160;</td>
+				<td width="82%">
+					as <font class="mono">queue</font>, with specified start time (Option <font class="mono">at</font>)
+				</td>
+		<!--<td width="82%">
+					wie <font class="mono">queue</font>, aber mit bestimmter Zeitangabe (Option <font class="mono">at</font>)
+				</td>-->
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">directory</font>&#160;&#160;</td>
+				<td width="82%">
+					Directory monitoring (<font class="mono">start_when_directory_changed</font>) has started the job
+				</td>
+		<!--<td width="82%">
+					eine Verzeichnisüberwachung (<font class="mono">start_when_directory_changed</font>) lässt den Job starten
+				</td>-->
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">signal</font>&#160;&#160;</td>
+				<td width="82%"><font class="mono">&lt;signal_object&gt;</font>&#160;</td>
+			</tr>
+			<tr>
+				<td width="18%"><font class="mono">delay_after_error</font>&#160;&#160;&#160;&#160;</td>
+				<td width="82%"><font class="mono">spooler_job.delay_after_error</font>&#160;&#160;</td>
+			</tr>
+		</table>
+		
+		
+		
+		<h2>3.&#160; Task Recognition and Extra Fields</h2>
+<!--<h2>3.&#160; Task-Kennung und extra Felder</h2>-->
+		
+		<p>
+			Every task has an identifier.
+			When a database is used, the Job Scheduler obtains this identifier from the 
+			<font class="mono">SCHEDULER_VARIABLES</font> table. 
+			This identifier is then unique to all Job Schedulers which use this database table.
+			Otherwise consecutive numbers are given.
+			The first task is given the number 1.
+	<!--Jeder Task erhält eine Kennung. Wenn eine Datenbank verwendet wird, ermittelt
+			der Job Scheduler sie aus der Tabelle <font class="mono">SCHEDULER_VARIABLES</font>. Die
+			Kennung ist dann für alle Job Scheduler eindeutig, die diese Datenbanktabelle nutzen.
+			Andernfalls wird eine fortlaufende Nummer vergeben. Der erste Task hat die Nummer 1.-->
+		</p>
+		
+		<p>
+			The identifier can then be recalled in scripts, which use the Job Scheduler API, with the <code>id</code> property:
+	<!--Die Kennung kann im Skripten, die das Job Scheduler API verwenden, mit der Eigenschaft <code>id</code> abgefragt werden:-->
+		</p>
+		
+		<pre>meine_id = spooler_task.id</pre>
+<!--<pre>meine_id = spooler_task.id</pre>-->
+		
+		<p>
+			The history can accept further fields which the job can fill:
+	<!--<p>Die Historie kann weitere beliebige Felder aufnehmen, die der Job füllen kann:-->
+		</p>
+		
+		<pre>spooler_task.history_field( &quot;<i>fieldname</i>&quot; ) = <i>value</i></pre>
+<!--<pre>spooler_task.history_field( &quot;<i>feldname</i>&quot; ) = <i>wert</i></pre>-->
+		
+		<p>
+			The <i>fieldname</i> must be declared as a row in the tabular file or in the history table. 
+			The case used here is irrelevant.
+	<!--Das Feld <i>feldname</i> muss als Spalte in der tabulierten Datei oder in der
+			Historientabelle bekannt sein. Die Groß-/Kleinschreibung spielt keine Rolle.-->
+		</p>
+		
+		<p>
+			When the history is recorded in a database, 
+			then it may be significant which type a <i>value</i> is, 
+			in particular if it is a number or a character string.
+	<!--Wenn die Historie in einer Datenbank geführt wird, kann es eine Rolle
+			spielen, von welchem Typ <i>wert</i> ist, insbesondere ob Zahl oder Zeichenkette.-->
+		</p>
+		
+		
+		
+		<h3>3.1&#160; Extra Fields in a Tabular File</h3>
+<!--<h3>3.1&#160; Extra Felder in der tabulierten Datei</h3>-->
+		
+		<p>
+			Extra fields must be declared in the <font class="mono">factory.ini</font> configuration file&#160;
+	<!--Die zusätzlichen Spalten werden in der Konfigurationsdatei <font class="mono"> factory.ini</font> bekannt gemacht&#160;-->
+		</p>
+		
+		<pre>[spooler]
+history_columns = <i>columnlist</i>
+<!--history_columns = <i>spalteniste</i>-->
+
+[Job jobname]
+history_columns = <i>columnlist</i></pre>
+<!--history_columns = <i>spaltenliste</i></pre>-->
+
+		<p>
+			The <i>columnlist</i> is a list of column names, separated by columns 
+			and which is included in the tabular file.
+	<!--Die <i>spaltenliste</i> ist eine durch Komma getrennte Liste von
+			Spaltennamen, die der tabulierten Datei hinzugefügt werden sollen.-->
+		</p>
+		
+		
+		
+		<h3>3.2&#160; Extra Fields in a Database</h3>
+<!--<h3>3.2&#160; Extra Felder in der Datenbank</h3>-->
+		
+		<p>
+			Extra rows in the history table are automatically recognized.&#160;
+	<!--<p>Die zusätzlichen Spalten in der Historientabelle werden automatisch erkannt.&#160;-->
+		</p>
+		
+		<p>When the Job Scheduler creates the <font class="mono">SCHEDULER_HISTORY</font> table, 
+		it also creates the necessary rows as defined in <font class="mono">history_columns</font>.
+		These rows are defined as <font class="mono">char(250)</font> type.</p>
+<!--<p>Wenn der Job Scheduler die Tabelle <font class="mono">SCHEDULER_HISTORY</font>
+		anlegt, richtet er auch die extra Spalten ein, die in <font class="mono">history_columns</font>
+		aufgeführt sind. Als Typ wird <font class="mono">char(250)</font> verwendet.</p>-->
+		
+		
+		
+		<h2>4.&#160; Reading the History via the TCP Interface</h2>
+<!--<h2>4.&#160; Lesen der Historie über die TCP-Schnittstelle</h2>-->
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; prev=&quot;<i>number</i>|all &quot;what=&quot;all&quot;/&gt;</pre>
+<!--<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; prev=&quot;<i>anzahl</i>|all &quot;what=&quot;all&quot;/&gt;</pre>-->
+		
+		<p>
+			Returns,  for the current job <i>jobname</i>, the last <i>number</i>&#160;
+			of entries in the history, sorted in reverse order. 
+			The default value for <i>number</i> is 10. 
+			All entries are read when <font class="mono">tail=&quot;all&quot;</font> is set. 
+			Note that this function requires a lot of memory. This is because the history is compiled 
+			as an XML document with the DOM in the main memory.
+			A maximum of 1000 entries will be returned.
+	<!--liefert rückwärts geordnet die letzten <i>anzahl</i>&#160;Einträge der Historie des angegeben
+			Jobs <i>jobname</i>. Voreinstellung für <i>anzahl</i> ist 10. 
+			Alle Einträge werden mit <font class="mono">tail=&quot;all&quot;</font> gelesen. 
+			Die Funktion benötigt viel Speicherplatz, denn die Historie wird als XML-Dokument mit DOM im Speicher aufgebaut. 
+			Max. 1000 Einträge werden geliefert.-->
+		</p>
+		
+		<p>
+			<font class="mono">what=&quot;all&quot;</font> returns the job protocol as well.
+	<!--<font class="mono">what=&quot;all&quot;</font> liefert auch die Job-Protokolle.-->
+		</p>
+		
+		<p>
+			Extracts out of the history can be read using the following
+			(note that the <code>what</code> attribute can always be used here):
+	<!--Mit folgenden Varianten lassen sich Ausschnitte der Historie lesen. 
+			Das Attribut <code>what</code> kann immer angegeben werden.-->
+		</p>
+		
+		<p>
+			to obtain the <i>number</i> of entries before the <i>ID</i>:
+	<!--Um <i>anzahl</i> Einträge vor der <i>id</i> zu erhalten:-->
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>number</i>&quot;/&gt;</pre>
+<!--<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>anzahl</i>&quot;/&gt;</pre>-->
+		
+		<p><br/>
+			to obtain the <i>number</i> of entries after the <i>ID</i>:
+	<!--Um <i>anzahl</i> Einträge nach der <i>id</i> zu bekommen:-->
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; next=&quot;<i>number</i>&quot;/&gt;</pre>
+<!--<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; next=&quot;<i>anzahl</i>&quot;/&gt;</pre>-->
+		
+		<p><br/>
+			to obtain only the <i>id</i> entry: 
+			it is recommended that the job protocol for a particular task is read with <font class="mono">what=&quot;all&quot;</font>.
+	<!--Um nur den Eintrag der <i>id</i> zu bekommen. Gut, wenn mit <font class="mono">what=&quot;all&quot;</font>
+			das Jobprotokoll einer bestimmten Task gelesen werden soll.-->
+		</p>
+		
+		<pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot;/&gt;</pre>
+		
+		<p><br/>
+			The result looks like:
+	<!--Das Ergebnis sind dann so aus:-->
+		</p>
+		
+		<pre>&lt;history&gt;
+    &lt;history.entry id=&quot;<i>identifier</i>&quot; job=&quot;<i>jobname</i>&quot; start_time=&quot;<i>starttime</i>&quot; end_time=&quot;<i>end time</i>&quot; ...&gt;
+<!--&lt;history.entry id=&quot;<i>kennung</i>&quot; job=&quot;<i>jobname</i>&quot; start_time=&quot;<i>startzeit</i>&quot; end_time=&quot;<i>endezeit</i>&quot; ...&gt;-->
+        &lt;variableset&gt;
+            &lt;variable name=&quot;<i>name1</i>&quot; value=&quot;<i>value1</i>&quot;/&gt;
+            &lt;variable name=&quot;<i>name2</i>&quot; value=&quot;<i>value2</i>&quot;/&gt;
+<!--        &lt;variable name=&quot;<i>name1</i>&quot; value=&quot;<i>wert1</i>&quot;/&gt;
+            &lt;variable name=&quot;<i>name2</i>&quot; value=&quot;<i>wert2</i>&quot;/&gt;-->
+        &lt;/variableset&gt;
+        &lt;log&gt;<i>Jobprotocol</i>&lt;/log&gt;
+<!--    &lt;log&gt;<i>Jobprotokoll</i>&lt;/log&gt;-->
+    &lt;/history.entry&gt;
+    &lt;history.entry ...&gt;
+        ...
+    &lt;/history.entry&gt;
+    ...
+&lt;/history&gt;</pre>
+		
+		
+		
+		<h2>5.&#160; Error Handling</h2>
+<!--<h2>5.&#160; Fehlerbehandlung</h2>-->
+		
+		<p>
+			Errors on opening or writing the history are noted in the Job Scheduler protocol and otherwise ignored.
+	<!--Fehler beim Öffnen oder Schreiben der Historie werden ins Job Scheduler Protokoll geschrieben und ignoriert.-->
+		</p>
+		
+		</description>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: log_categories.xml 5907 2008-09-30 14:33:31Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+         <!--title         = "Log-Kategorien"-->
+
+<xml_element name          = "log_categories"
+             title         = "Log Categories"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2008-09-30 16:33:31 +0200 (Di, 30 Sep 2008) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="answer"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+    </xml_attributes>
+
+    <xml_child_elements>
+        <xml_child_element name="log_category"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+            See also <scheduler_a href="../../log_categories.xml" quote="yes"/>
+        <!--Siehe auch <scheduler_a href="../../log_categories.xml" quote="yes"/>-->
+        </p>
+    </description>
+
+</xml_element>

@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+    
+        <script language="javascript"><![CDATA[
+
+if( spooler.job_chain( "order_at.scheduler" ).order_count == 0 )
+{
+    // Auftrag soll mit at="" in der Datenbank gehalten werden und bei Scheduler-Neustart berücksichtigt werden
+    //var x = spooler.execute_xml( '<add_order id="xml" job_chain="order_at.scheduler" at="now+60" title="Auftrag per XML"/>' );
+    //spooler_log.info( x );
+  
+    var order = spooler.create_order();
+    order.id    = "javascript";
+    order.title = "Order aus JavaScript";
+    order.at    = "now+65";
+    //order.params = spooler.create_variable_set();
+    order.params.value("my_var") = "my_value";
+    //spooler.job_chain( "order_at.scheduler" ).add_order( order );
+
+    try
+    {
+      //spooler.job( "perl" ).start();
+      //spooler.job( "java" ).start();
+
+        if( spooler.db_name == "" )  spooler_log.warn( "Der Test funktioniert nur mit Datenbank" );
+        //else x = spooler.execute_xml( '<modify_spooler cmd="terminate_and_restart"/>' );
+    }
+    catch( x ) { spooler_log.error( x.message ); }
+}
+else
+{
+}
+    spooler_log.info( "---------------------------------------------------------------------------" );
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="perl">
+                <script language="perl">
+                    <include file="$SCHEDULER_TEST/expect.pl"/>
+                    <![CDATA[
+package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);
+use strict;
+use warnings FATAL => "all";
+
+my $order = $spooler->create_order();
+$order->LetProperty( 'id'   , "perl" );
+$order->LetProperty( 'title', "Order aus Perl" );
+$order->LetProperty( 'at'   , "now+70" );
+$spooler->job_chain( "order_at.scheduler" )->add_order( $order );
+
+                    ]]>
+                </script>
+            </job>
+
+
+            <job name="java">
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.util.Date;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Order order = spooler.create_order();
+        order.set_id   ( "java string" );
+        order.set_title( "Order aus Java, String" );
+        order.set_at   ( "now+75" );
+        spooler.job_chain( "order_at.scheduler" ).add_order( order );
+
+        order = spooler.create_order();
+        order.set_id   ( "java date" );
+        order.set_title( "Order aus Java, Date" );
+        order.set_at   ( new Date( new Date().getTime() + 80 * 1000 ) );
+        spooler.job_chain( "order_at.scheduler" ).add_order( order );
+
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <commands on_exit_code="9">
+                    <show_state/>
+                </commands>
+            </job>
+
+
+            <job name="javascript" order="yes" idle_timeout="0">
+        
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{   
+    var order = spooler_task.order;
+    order.log.warn( "EINE WARNUNG NUR IM ORDER-LOG" );
+    
+    spooler_log.info( "order.xml=" + order.xml );
+    
+    
+    var new_order = spooler.create_order();
+    new_order.at = "now+30";
+    new_order.title = "Vom Job " + spooler_job.name + " kopiert";
+    new_order.id = order.id;
+    order.job_chain.add_or_replace_order( new_order );
+    
+    spooler_log.info( "order.log.filename=" + order.log.filename );
+    
+    return true;
+}
+
+                ]]></script>
+
+                <run_time let_run="no"/>
+            </job>
+        
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="order_at.scheduler" distributed="yes">
+                <job_chain_node state="first" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order_at.scheduler" id="commands" replace="yes">
+                <run_time>
+                    <period start_once="no"/>
+                </run_time>
+            </add_order>
+            <add_order job_chain='order_at.scheduler' id="commands2" replace="yes" at='2007-05-09 09:28'>
+                <run_time>
+                    <period single_start='23:00'/>
+                </run_time>
+            </add_order>
+        </commands>
+    </config>
+</spooler>

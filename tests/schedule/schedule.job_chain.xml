@@ -1,0 +1,10 @@
+<job_chain
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+    
+    orders_recoverable="no"
+>
+    <job_chain_node state="a" job="A.java"/>
+    <job_chain_node state="b" job="B"/>
+    <job_chain_node state="c" job="C"/>
+</job_chain>

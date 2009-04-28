@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "script"
+             title    = "Programm-Code"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="config">
+            <description>
+                <p>
+                    Siehe unten <scheduler_element name="scheduler_script"/> in <scheduler_element name="config"/>.
+                </p>
+            </description>    
+        </xml_parent_element>
+        
+        <xml_parent_element name="scheduler_script">
+            <description>
+                <scheduler_keyword keyword="Scheduler-Skript"/>
+                <p>
+                    Das Skript ist das Scheduler-Skript.
+                    Dem Skript stehen die Variablen <code>spooler</code> und <code>spooler_log</code> zur Verfügung.
+                </p>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_init"/> wird beim Start des Schedulers (vor dem Start der Jobs) aufgerufen.
+                </p>
+                <p>
+                    <scheduler_method class="Job_impl" method="spooler_exit"/> wird bei Beendigung des Schedulers (nach Beendigung aller Jobs) aufgerufen.
+                </p>
+            </description>
+        </xml_parent_element>
+
+        <xml_parent_element name="job">
+            <description>
+                <p>
+                    Das Skript ist ein Job-Skript.
+                </p>
+            </description>
+        </xml_parent_element>
+
+        <xml_parent_element name="monitor"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="language" type="language">
+            <description>
+                <p>
+                    Sprache des Programm-Codes.
+                    Wird nicht zusammen mit dem Attribute <code>com_class</code> verwendet.
+                    Die Großschreibung spielt keine Rolle.
+                </p>
+
+                <dl>
+                    <dt><code>language="java"</code></dt>
+                    <dd>
+                        Den Name der Klasse geben Sie mit dem Attribut <code>java_class</code> an.
+                        Sie können den Programm-Code der Java-Klasse als Text in <code>&lt;script></code> angegeben.
+                        Der Scheduler kompiliert den Code mit <code>javac</code>.
+                    </dd>
+
+                    <dt><code>language="JavaScript"</code></dt>
+                    <dd>
+                        <a href="../script_language_javascript.xml">JavaScript</a> liegt in der Implementierung von Mozilla Spidermonkey vor und wird mit dem Scheduler ausgeliefert.
+                    </dd>
+
+                    <dt><code>language="JScript"</code> oder <code>"VBScript"</code></dt>
+                    <dd>
+                        <a href="../script_language_javascript.xml">JScript</a> und VBScript sind in Windows vorhandene Sprachen (Scripting engines).
+                    </dd>
+
+                    <dt><code>language="PerlScript"</code></dt>
+                    <dd>
+                        In Windows wird PerlScript verwendet, wenn es installiert ist.
+                        In Unix wird Perl direkt verwendet.
+                    </dd>
+
+                    <dt><code>language="shell"</code></dt>
+                    <dd>
+                        Unter Windows übergibt der Scheduler das Skript <code>cmd.exe</code>
+                        (das Skript wird in einer temporären Datei mit der Namensendung <code>.cmd</code> gespeichert).
+                    </dd>
+                    <dd>
+                        Unter Unix wird das Skript aufgerufen wie ein <i>executable</i>.
+                    </dd>
+                    <dd>
+                        Das Verhalten ist dasselbe wie von <scheduler_element name="process"/>.
+                    </dd>
+                    <dd>
+                        Die Einstellung kann nicht verwendet werden bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>.
+                    </dd>
+                    <dd>
+                        Siehe auch Attribut <code>encoding=</code>.
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="com_class" type="com_class_name">
+            <description>
+                <p>
+                    Name einer COM-Klasse (nur Windows).
+                    Die COM-Klasse kann die Methoden spooler_open(), spooler_process() etc. bereitstellen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="encoding" type="encoding">
+            <description>
+                <p>
+                    Nur unter Windows für <code>language="shell"</code>: 
+                    Gibt die Codierung an, in der der Scheduler die temporäre <code>.cmd</code>-Datei erstellt.
+                    Windows verlangt für Batch-Dateien <code>encoding="oem"</code>, was voreingestellt ist.
+                    Außerdem möglich: <code>"cp850"</code>, <code>"cp437"</code> und <code>"latin1"</code>.
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-471"/>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="filename" type="filename">
+            <description>
+                <p>
+                    Zusammen mit dem Attribut <code>com_class</code> können Sie hier den Namen der DLL angeben,
+                    die die COM-Klasse implementiert, falls diese nicht registriert ist.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="java_class" type="java_class_name">
+            <description>
+                <p>
+                    Wenn der Job als Java-Klasse realisiert ist, dann geben Sie mit diesem Attribut deren Namen an.
+                </p>
+                <p>
+                    Ein in einer Basiskonfiguration angegebener Name kann überschrieben werden.
+                    Die nächste Task (die in einem eigenen Prozess läuft) verwendet die neue Klasse.
+                </p>
+            </description>
+
+            <messages>
+                <!--message level="error" code="SCHEDULER-398"/-->
+            </messages>
+        </xml_attribute>
+
+<!--
+        <xml_attribute name="recompile" type="yes_no" initial="yes">
+            <description>
+                <p>
+                    Wenn die Java-Klasse als Quell-Code im Element <code>&lt;script</code> enthalten ist, kann mit recompile="
+                </p>
+            </description>
+        </xml_attribute>
+-->
+<!--
+        <xml_attribute name="process_class" type="prozessklasse">
+            <description>
+                Gibt den Namen der Prozessklasse an, in der der Programm-Code laufen soll. Siehe <scheduler_element name="process_classes"/>.
+            </description>
+        </xml_attribute>
+-->
+<!--
+        <xml_attribute name="separate_process" type="yes_no">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+-->
+
+        <!--xml_attribute name="use_engine" type="scope" initial="task">
+            <description>
+                <p>
+                    Nur <code>use_engine="task"</code> ist möglich.
+                </p>
+            </description>
+        </xml_attribute-->
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="include"/>
+    </xml_child_elements>
+
+
+    <description>
+        <p>
+            Hier wird der auszuführende Programm-Code angegeben, entweder direkt als Text oder indirekt als Verweis auf Binär-Code.
+        </p>
+        <p>
+            <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;![CDATA[</code>&#160; und&#160; <code>]]&gt;</code>
+            eingeschlossen sein.
+        </p>
+    </description>
+
+    <messages>
+        <!--message level="error" code="SCHEDULER-400"/-->
+    </messages>
+
+    <behavior_with_xml_element element="base">
+        <description>
+            <p>
+                Das Skript wird dem in einer Basiskonfiguration definierten Skript angehängt.
+            </p>
+        </description>
+    </behavior_with_xml_element>
+    
+</xml_element>

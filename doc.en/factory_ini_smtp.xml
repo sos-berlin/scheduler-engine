@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: factory_ini_smtp.xml 5366 2007-10-29 11:17:09Z jz $-->
+
+<!--title    = "Datei factory.ini, Abschnitt [smtp]"-->
+
+<ini_section
+    name     = "smtp"
+    file     = "factory.ini"
+    weight   = "20"
+    title    = "factory.ini file, section [smtp]"
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2007-10-29 12:17:09 +0100 (Mo, 29 Okt 2007) $">
+
+    <ini_entries>
+        <ini_entry name="mail.smtp.user" type="name" title="Name for Authentification on an SMTP Server">
+    <!--<ini_entry name="mail.smtp.user" type="name" title="Name für Authentifizierung am SMTP-Server">-->
+        </ini_entry>
+
+        <ini_entry name="mail.smtp.password" type="password" title="Password for Authentification on an SMTP Server">
+    <!--<ini_entry name="mail.smtp.password" type="password" title="Kennwort für Authentifizierung am SMTP-Server">-->
+            <description>
+                <p>
+                    The password is sent together with the <code>mail.smtp.user</code> entry
+                    when registering on an SMTP server in order to be able to send e-mails.
+                <!--Das Kennwort wird zusammen mit dem Eintrag <code>mail.smtp.user</code> 
+                    beim eMail-Versand dem SMTP-Server zur Anmeldung übergeben.-->
+                </p>
+            </description>
+        </ini_entry>
+    </ini_entries>
+
+    <description>
+        <p>
+            The <i>Properties</i> of the JavaMail module can be set here.
+            The <code>mail.smtp.user</code> and <code>mail.smtp.password</code> settings are handled as described in 
+            <code>mail.smtp.host</code> is set in <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/>.
+        <!--Hier können die <i>Properties</i> des JavaMail-Moduls eingestellt werden.
+            Die Einstellungen <code>mail.smtp.user</code> und <code>mail.smtp.password</code> sind keine Properties und werden wie beschrieben behandelt.
+            <code>mail.smtp.host</code> wird in <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/> eingestellt.-->
+        </p>
+    </description>
+</ini_section>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: http.users.xml 5174 2007-08-26 13:52:33Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+         <!--title    = "Benutzer zur HTTP-Authentifizierung"-->
+
+<xml_element name     = "http.users"
+             title    = "HTTP User Authentication"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-08-26 15:52:33 +0200 (So, 26 Aug 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="http.authentication"/>
+    </xml_parent_elements>
+
+
+    <xml_child_elements>
+        <xml_child_element name="http.user" multiple="yes"/>
+    </xml_child_elements>
+
+    
+    <behavior_with_xml_element element="base" complete="yes"/>
+
+    
+    <description>
+        <p>
+            See <scheduler_element name="http.authentication"/>.
+        <!--Siehe <scheduler_element name="http.authentication"/>.-->
+        </p>
+    </description>
+</xml_element>

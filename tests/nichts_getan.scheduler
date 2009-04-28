@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="javascript">
+                <script language="javascript">
+                    <![CDATA[ 
+                    
+function spooler_open()
+{
+    //new ActiveXObject( "hostware.global" ).sleep( 15 );
+    spooler_job.start();
+}
+                    
+                    
+                ]]>
+                </script >
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>

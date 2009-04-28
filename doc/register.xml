@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENENIERT VON scheduler_keyword_to_xml.pl -->
+
+<register
+    title  = "Register" 
+    author = "$Author: scheduler_keyword_to_xml.pl $"
+    date   = "$Date: 2006/10/5 12:10:43 $"
+>
+
+    <description>
+        <p>
+            Weitere Übersichten:
+        </p>
+
+        <table cellspacing="0" cellpadding="0">
+            <tr>
+                <td>
+                    <ul>
+                        <li>
+                            <scheduler_a href="xml.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="konfiguration.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="api/api.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="command_line.xml"/>
+                        </li>
+                    </ul>
+                </td>
+                <td style="padding-left: 4em">
+                    <ul>
+                        <li>
+                            <scheduler_a href="factory_ini.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="sos_ini.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="variable_substitution.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="protokolle.xml"/>
+                        </li>
+                    </ul>
+                </td>
+                <td style="padding-left: 4em">
+                    <ul>
+                        <li>
+                            <scheduler_a href="messages/index.xml"/>
+                        </li>
+                        <li>
+                            <scheduler_a href="scheduler_sql.xml"/>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </description>
+    
+</register>

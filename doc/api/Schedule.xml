@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Schedule"
+    object_name = "schedule"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                XML-Dokument als String
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        <code>&lt;schedule></code>
+    </title>
+
+    <description>
+        <p>
+            Verwirft die bisherige Einstellung und setzt <code>Schedule</code> neu.
+        </p>
+    </description>
+
+    <!--messages>
+        <message level="error" code="SCHEDULER-352"/>
+    </messages-->
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>Laufzeit</title>
+
+<description>
+    <p>
+        Siehe <scheduler_element name="schedule"/>,
+        <scheduler_element name="run_time"/>,
+        <scheduler_method class="Spooler" object="spooler" property="schedule"/>,
+        <scheduler_method class="Run_time"/>.
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<example programming_language="javascript">
+    <pre>spooler.schedule( "my_schedule" ).xml = "&lt;schedule>&lt;period single_start='15:00'/>&lt;/schedule>";</pre>
+</example>
+
+</api.class>

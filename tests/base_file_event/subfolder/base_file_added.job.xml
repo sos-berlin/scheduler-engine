@@ -1,0 +1,17 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    
+    <script language="javascript">
+        <![CDATA[
+        
+spooler_log.info( "scheduler_live_event=" + spooler_task.params.value( "scheduler_live_event" ) );
+spooler_log.info( "scheduler_live_filepath=" + spooler_task.params.value( "scheduler_live_filepath" ) );
+spooler_log.info( "scheduler_live_filebase=" + spooler_task.params.value( "scheduler_live_filebase" ) );
+
+        ]]>
+    </script>
+
+    <run_time>
+    </run_time>
+    
+</job>

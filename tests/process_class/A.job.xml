@@ -1,0 +1,4 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+     
+     process_class="Istanbul"
+/>

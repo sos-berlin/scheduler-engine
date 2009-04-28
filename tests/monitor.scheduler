@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <!--process_classes ignore="yes"/-->
+        
+        <script language="javascript"><![CDATA[
+        
+//        
+        
+        ]]></script>
+
+        
+        <jobs>
+            <job name="javascript">
+                <script language="javascript"><![CDATA[
+i = 2;
+
+function spooler_process()
+{
+    spooler_log.info( "spooler_process()" );
+    return --i > 0;
+}
+        
+                ]]></script>
+                
+                <monitor ordering="3">
+                    <script language="javascript">
+                            <![CDATA[ 
+
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                        
+function spooler_task_before() 
+{
+    spooler_log.info( "SPOOLER_TASK_BEFORE" );   
+    return true;
+}
+
+function spooler_task_after() 
+{
+    spooler_log.info( "SPOOLER_TASK_AFTER" );
+}
+
+function spooler_process_before() 
+{
+    spooler_log.info( "SPOOLER_PROCESS_BEFORE" );
+    return true;
+}
+
+function spooler_process_after( return_value ) 
+{
+    spooler_log.info( "SPOOLER_PROCESS_AFTER( " + return_value + " ) " );
+    return !return_value;
+}
+
+
+                    ]]></script>
+                </monitor>
+
+                <monitor name="java" ordering="2">
+                    <script java_class="spooler_job.My_monitor">
+                        <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_monitor  extends sos.spooler.Monitor_impl
+{   
+    public boolean spooler_task_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_TASK_BEFORE" );
+        return true;
+    }
+
+    public void spooler_task_after()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_TASK_AFTER" );
+    }
+
+    public boolean spooler_process_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_BEFORE" );
+        return true;
+    }
+
+    public boolean spooler_process_after( boolean return_value )  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_AFTER( " + return_value + " )" );
+        return !return_value;
+    }
+}
+                ]]>
+                    </script>
+                </monitor>
+
+                <run_time once="no"/>
+            </job>
+
+            
+            <job name="java">
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    int i = 2;
+    
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS" );
+        return --i > 0;
+    }
+
+}
+                    ]]>
+                </script>
+
+                <monitor ordering="3">
+                    <script language="javascript">
+                        <![CDATA[ 
+
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                        
+function spooler_task_before() 
+{
+    spooler_log.info( "SPOOLER_TASK_BEFORE" );   
+    return true;
+}
+
+function spooler_task_after() 
+{
+    spooler_log.info( "SPOOLER_TASK_AFTER" );
+}
+
+function spooler_process_before() 
+{
+    spooler_log.info( "SPOOLER_PROCESS_BEFORE" );
+    return true;
+}
+
+function spooler_process_after( return_value ) 
+{
+    spooler_log.info( "SPOOLER_PROCESS_AFTER( " + return_value + " ) " );
+    var order = spooler.create_order();
+    order.id = "XXX";
+    spooler_log.info( "order.id=" + order.id );
+    return !return_value;
+}
+
+
+                    ]]>
+                    </script>
+                </monitor>
+
+                <monitor name="java" ordering="2">
+                    <script java_class="spooler_job.My_monitor">
+                        <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_monitor  extends sos.spooler.Monitor_impl
+{   
+    public boolean spooler_task_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_TASK_BEFORE" );
+        return true;
+    }
+
+    public void spooler_task_after()  throws Exception
+    {
+        System.err.println( "eins" );
+        spooler_log.info( "JAVA SPOOLER_TASK_AFTER" );
+        System.err.println( "zwei" );
+    }
+
+    public boolean spooler_process_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_BEFORE" );
+        return true;
+    }
+
+    public boolean spooler_process_after( boolean return_value )  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_AFTER( " + return_value + " )" );
+        return !return_value;
+    }
+}
+                ]]>
+                    </script>
+                </monitor>
+
+                <run_time once="yes"/>
+
+            </job>
+        </jobs>
+    </config>
+</spooler>

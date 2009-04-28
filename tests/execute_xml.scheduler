@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="javascript">
+            <![CDATA[
+
+spooler_log.info( spooler.execute_xml( "<commands/>" ) );
+spooler_log.info( spooler.execute_xml( "<job name='commands' temporary='yes'><script language='javascript'>spooler_log.info('HALLO');</script><run_time once='yes'/></job>" ) );
+
+
+        ]]></script>
+
+        <jobs>
+        </jobs>
+
+        <commands>
+            <add_jobs>
+                <job name='added_job' temporary='yes'>
+                    <script language='javascript'>spooler_log.info('ADDED_JOB');</script>
+                    <run_time once='yes'/>
+                </job>
+            </add_jobs>
+        </commands>
+    </config>
+</spooler>

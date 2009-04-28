@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes/>
+        
+        <script language="javascript">
+        <![CDATA[
+
+var order = spooler.create_order();
+//order.payload = "PAYLOAD";
+//order.params();
+
+order.id = "A";
+order.params("Edno") = "ett";
+order.params("dwa" ) = "två";
+spooler_log.info( order.payload_is_type( "spooler.variable_set" ) );
+spooler_log.info( order.payload_is_type( "hostware.record" ) );
+spooler.job_chain( "order_params.scheduler" ).add_or_replace_order( order );
+        
+        ]]></script>
+
+
+        <jobs>
+
+            <job name="javascript" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "HALLO" );
+    var order = spooler_task.order;
+    spooler_log.info( "order.payload=" + order.payload );
+    spooler_log.info( "edno=" + order.params( "edno" ) );
+    spooler_log.info( "dwa=" + order.params( "dwa" ) );
+    return true;
+}
+
+                ]]>
+                </script>
+            </job>
+
+        </jobs>
+        
+            
+        <job_chains>
+            <job_chain name="order_params.scheduler" orders_recoverable="yes">
+                <job_chain_node state="first" job="javascript"/>
+                <job_chain_node state="second" job="javascript"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order_params.scheduler" id="1" replace="yes"/>
+        </commands>
+
+    </config>
+</spooler>

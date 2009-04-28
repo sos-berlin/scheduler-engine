@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: holiday.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name     = "holiday" 
+             title    = "Holidays on Which a Job Should not Run"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+<!--         title    = "Feiertag, an dem ein Job nicht laufen soll"-->
+
+	<xml_parent_elements>
+		<xml_parent_element name="holidays">
+        </xml_parent_element>
+	</xml_parent_elements>
+	<xml_attributes>
+		<xml_attribute name="date" type="yyyy-mm-dd">
+			<description>
+                The date of the holiday.
+            <!--Das Datum des Feiertags.-->
+			</description>
+		</xml_attribute>
+	</xml_attributes>
+	<description>
+		<p>
+            Defines a holiday - a day on which the Job Scheduler should not run a job.
+        <!--Setzt einen Feiertag fest, an dem der Scheduler einen Job nicht laufen lassen soll.-->
+		</p>
+	</description>
+	<behavior_with_xml_element element="base" replace_attribute="date"/>
+	<example>
+		<pre>
+&lt;holiday date="2004-12-24"/>
+        </pre>
+	</example>
+</xml_element>

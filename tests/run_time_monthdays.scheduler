@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+        
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes/>
+
+        <script language="javascript">
+            <![CDATA[
+
+var next_start_time = new Date( new Date().getTime() + 30*1000 );
+
+function my_start_time_function( beginning_time, job )
+{
+    var result;
+    if( beginning_time < next_start_time )  result = next_start_time;
+                                      else  result = "2007-01-26 23:23:00";
+    return result;
+}
+
+
+function my_start_time_function_for_order( beginning_time, job )
+{
+    var result;
+    if( beginning_time < next_start_time )  result = next_start_time;
+                                      else  result = "2007-01-26 23:23:00";
+    return result;
+}
+
+        
+            ]]>
+        </script>
+
+        <!--script language="vbscript">
+            <![CDATA[
+
+next_start_time = new cdat( Date( new Date().getTime() + 30*1000 );
+
+function my_start_time_function( beginning_time, job )
+{
+    var result;
+    if( beginning_time < next_start_time )  result = next_start_time;
+                                      else  result = "2007-01-26 23:23:00";
+    return result;
+}
+        
+            ]]>
+        </script-->
+
+        
+        <!--script language="perl">
+            <![CDATA[
+
+sub my_start_time_function()
+{
+    my $beginning_time = shift;
+    my $object         = shift;
+    
+    spooler_log.info( $object->{name} . " " . $beginning_time );
+   
+    my $result = "2007-01-26 23:23:00";
+    return $result;
+}
+        
+            ]]>
+        </script-->
+
+        <jobs>
+
+            <job name="test">
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( "hallo" );
+
+                ]]></script>
+
+                <run_time start_time_function="my_start_time_function">
+                    <monthdays>
+                        <weekday day="monday" which="3">
+                            <period single_start="02:00"/>
+                        </weekday>
+                        <weekday day="friday" which="-1">
+                            <period single_start="01:00"/>
+                        </weekday>
+                    </monthdays>
+                </run_time>
+            </job>
+        </jobs>
+    </config>
+</spooler>

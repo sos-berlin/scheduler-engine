@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="my_process_class" max_processes="3"/>
+        </process_classes>
+        
+        <script language="javascript"><![CDATA[
+        
+var job_chain = spooler.create_job_chain();
+job_chain.name = "Kette";
+job_chain.add_job( "test", 1, 2, 2 );
+job_chain.add_job( "test2", 2, 100, 100 );
+job_chain.add_end_state( 100 );
+spooler.add_job_chain( job_chain );
+
+var order = spooler.create_order();
+order.id = 1;
+//job_chain.add_or_replace_order( order );
+        
+        
+        ]]></script>
+
+        <jobs>
+            <job name="test" order="yes" title="Aufruf von /tmp/test.cmd">
+                <process file="/tmp/test.cmd" param="Mein Parameter">
+                    <environment>
+                        <variable name="var1" value="111"/>
+                        <variable name="PATH" value="$PATH;***"/>
+                        <variable name="PATH" value="$PATH;222"/>
+                    </environment>
+                </process>
+                <!--monitor>
+                    <script language="javascript">
+                        <![CDATA[ 
+                        
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                        
+function spooler_process_after( return_value ) {
+
+  var remote_host = "localhost";
+  var remote_port = 4445;
+
+  spooler_log.info( "SPOOLER_PROCESS_AFTER" );
+  try {
+    if (return_value && !spooler_task.error().is_error()) {
+      spooler_log.info("sending signal to remote job scheduler on " + remote_host + ":" + remote_port);
+      command = new sos.scheduler.command.SOSSchedulerCommand();
+      command.connect(remote_host, remote_port);
+      command.sendRequest("<add_order state=\"0\" replace=\"yes\" title=\"create cube\"><params/></add_order>");
+    }
+  } catch (e) {
+    spooler_log.warn("could not send signal to remote scheduler: " + String(e));
+  }
+
+  return return_value;
+}
+
+
+]]>
+                    </script>
+                </monitor-->
+
+                <run_time once="no"/>
+            </job>
+
+            <job name="test2" order="yes" title="Aufruf von /tmp/test.cmd">
+                <process file="/tmp/test.cmd" param="Mein Parameter">
+                    <environment>
+                        <variable name="var1" value="222"/>
+                    </environment>
+                </process>
+                <run_time/>
+            </job>
+
+            <job name="unix_shell" process_class="my_process_class" tasks="5">
+                <script language="shell">
+                    <![CDATA[
+echo STATE_TEXT                
+echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zschimmer.com/sos.
+echo Hallo
+echo Zweite Zeile
+sleep 11&
+sh -c "sleep 12&  wait"&
+sleep 13
+sleep 14
+sh -c "sh -c 'sleep 15&  sh -c \"sleep 16\"  wait'&  wait" &
+sh -c "sh -c 'sleep 17'&  sleep 18&  wait" &
+ps faxu
+sleep 19
+                ]]>
+                </script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="windows_shell" process_class="my_process_class" tasks="5">
+                <script language="shell">
+                    <![CDATA[
+                    @echo off
+echo STATE_TEXT                
+echo Fuer state_text: http://www.zschimmer.com/, http://taz.de und http://www.zschimmer.com/sos.
+#! /bin/bash -v
+echo Hallo
+echo Zweite Zeile
+start sleep 11
+start cmd /c "sleep 12"
+start sleep 13
+start sleep 14
+start cmd /c "start sleep 15'"
+start cmd /c "start sleep 17; start sleep 18"
+ps faxu
+sleep 19
+                ]]>
+                </script>
+                <run_time once="no"/>
+            </job>
+        </jobs>
+
+        <commands>
+        </commands>
+    </config>
+</spooler>

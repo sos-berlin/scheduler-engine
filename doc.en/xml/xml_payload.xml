@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: xml_payload.xml 4127 2006-03-01 11:03:12Z jz $-->
+
+<xml_element name          = "xml_payload"
+             title         = "XML Payload"
+             base_dir      = "../"
+             parent_page   = "../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-02-22 13:45:31 +0100 (Do, 22 Feb 2007) $">
+
+          <!--title         = "XML-Nutzlast"-->
+
+    <xml_parent_elements>
+        <xml_parent_element directory="xml/answer/" name="order"/>
+        <xml_parent_element directory="xml/" name="add_order"/>
+        <xml_parent_element name="modify_order"/>
+    </xml_parent_elements>
+
+
+    <description>
+        <p>
+            The <code>&lt;xml_payload></code> contains a single XML element (with unlimited child elements).
+            The <scheduler_method class="Order" property="xml_payload"/> 
+            property contains this element as XML text.
+        <!--<code>&lt;xml_payload></code> enthält genau ein XML-Element (mit beliebig vielen Kind-Elementen).
+            Die Eigenschaft <scheduler_method class="Order" property="xml_payload"/> enthält dieses Element als XML-Text.-->
+        </p>
+    </description>
+
+</xml_element>

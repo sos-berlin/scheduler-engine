@@ -1,0 +1,255 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Web_service_response.xml 4131 2006-03-02 09:37:33Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "../scheduler_doc.xsd"
+
+    name        = "Web_service_response"
+    object_name = "web_service_response"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-08-21 09:27:19 +0200 (Mo, 21 Aug 2006) $"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="status_code" access="write">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            HTTP Status Code
+        <!--HTTP-Status-Code-->
+        </title>
+
+        <description>
+            <p>
+                The default setting is 200 (OK).
+            <!--Voreingestellt ist 200 (OK).-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="header">
+        <com>
+            <com.result name="value">
+                <com.type type="BSTR" />
+                <description>
+                    <code>""</code> is used for unknown entries.
+                <!--Für einen umbekannten Eintrag wird <code>""</code> verwendet-->
+                </description>
+            </com.result>
+
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+                <description>
+                    The case in which entries are written is not relevant here.
+                <!--Die Großschreibung spielt keine Rolle.-->
+                </description>
+            </com.parameter>
+        </com>
+
+        <title>
+            Header Entries
+        <!--Eintrag im Kopf-->
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.info( "Content-Type: " + spooler_task.order.web_service_operation.header( "Content-Type" ) );</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="content_type" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Content-Type (without parameters)
+        <!--Content-Type (ohne Parameter)-->
+        </title>
+
+        <description>
+            <p>
+                Reads the <code>Content-Type:</code> header 
+                without any of the other associated parameters such as <code>charset=</code>.
+            <!--Zugriff auf den Kopfeintrag <code>Content-Type:</code> 
+                ohne dazugehörige Parameter (z.B. <code>charset=</code>).-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="charset_name" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Character set
+        <!--Zeichencodierung-->
+        </title>
+
+        <description>
+            <p>
+                Reads the <code>charset=</code> parameter from the <code>Content-Type:</code> header entry.
+            <!--Zugriff auf den Parameter <code>charset=</code> aus dem Kopfeintrag <code>Content-Type:</code>.-->
+            </p>
+        </description>
+        
+        <example programming_language="javascript">
+            <pre>var request = spooler_task.order.web_service_operation.request;
+
+spooler_log.info( request.header( "Content-Type" ) );   // ==> text/xml; charset=utf-8
+spooler_log.info( request.content_type );               // ==> text/xml
+spooler_log.info( request.charset_name );               // ==> utf-8</pre>
+        </example>
+
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="string_content" access="write">
+        <com>
+            <com.result name="text">
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Text payloads
+        <!--Nutzdaten als Text-->
+        </title>
+
+        <description>
+            <p>
+                The <code>header( "Content-Type" )</code> must first of all contain a <code>charset</code> parameter
+                such as:
+            <!--Zuvor muss <code>header( "Content-Type" )</code> mit dem Parameter <code>charset</code> gesetzt sein,
+                zum Beispiel-->
+            </p>
+            <pre>header( "Content-Type" ) = "text/plain; charset=iso-8859-1";</pre>
+            <p>
+                Text is coded as specified  in the <code>charset</code> parameter.
+                ISO-8859-1 will be used as the default value, should this parameter not be specified.
+            <!--Der Text wird nach dem Parameter <code>charset</code> codiert.
+                Fehlt der Parameter, wird ISO-8859-1 angenommen.-->
+            </p>
+            <p>
+                See <scheduler_method class="Web_service_request" property="string_content"/>
+                for the character sets which are allowed.
+            <!--Zu den hier zulässigen Zeichen-Codierungen (Charset) siehe <scheduler_method class="Web_service_request" property="string_content"/>-->
+            </p>
+            <p>
+                See <scheduler_method class="Web_service_response" property="charset_name"/>.
+            <!--Siehe <scheduler_method class="Web_service_response" property="charset_name"/>.-->
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>var response = spooler_task.order.web_service_operation.response;
+response.content_type = "text/plain";
+response.charset_name = "iso-8859-1";
+response.string_content = "This is the answer";
+response.send();</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="binary_content" access="write">
+        <com/>
+        
+        <java>
+            <java.result>
+                <java.type type="byte[]"/>
+            </java.result>
+        </java>
+
+        <title>
+            Byte Array Payloads (Java only)
+        <!--Nutzdaten als Byte-Array (nur Java)-->
+        </title>
+
+        <description>
+            <p>
+                This property is only available under Java.
+            <!--Die Eigenschaft steht nur unter Java zur Verfügung.-->
+            </p>
+            <p>
+                <code>headers( "Content-Type" )</code> is used to set the type of binary content 
+                (see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>)
+            <!--Der Typ des binären Inhalts sollte mit <code>headers( "Content-Type" )</code> festgelegt werden
+                (siehe <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17">HTTP/1.1 14.17 Content-Type</a>)-->
+            </p>
+        </description>
+
+        <example programming_language="java">
+            <pre>String               text         = "This is my response";
+String               charset_name = "ISO-8859-1";
+Web_service_response response     = spooler_task.order().web_service_operation().response();
+
+response.set_header( "Content-Type", "text/plain; charset=" + charset_name );
+
+ByteArrayOutputStream byos = new ByteArrayOutputStream();
+Writer writer = new OutputStreamWriter( byos, charset_name );
+writer.write( text );
+writer.close();
+
+response.set_binary_content( byos.toByteArray() );
+response.send();</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="send">
+        <com/>
+        
+        <title>
+            Sends a Reply
+        <!--Antwort senden-->
+        </title>
+
+        <description>
+            <p>
+                
+            </p>
+        </description>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Note that the <code>binary_content</code> property is only available under Java.
+        <!--Die Eigenschaft <code>binary_content</code> steht nur unter Java zur Verfügung.-->
+        </p>
+        <p>
+            See also <scheduler_element name="web_service"/>
+        <!--Siehe auch <scheduler_element name="web_service"/>-->
+        </p>
+    </description>
+
+</api.class>

@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: sos_ini_java.xml 3303 2005-01-11 23:22:22Z jz $-->
+
+<ini_section 
+    file     = "sos.ini"
+    name     = "java"
+    title    = ""
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2006-12-07 18:51:23 +0100 (Do, 07 Dez 2006) $">
+
+    <ini_entries>
+        <ini_entry name="vm" type="file_name" title="Java Virtual Machine File Name">
+    <!--<ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">-->
+            <scheduler_keyword keyword="Java Runtime Environment"/>
+            <description>
+                <p>
+                    The default settings are <code>jvm.dll</code> for Windows, <code>jvm.sl</code> for 
+                    HP-UX and <code>jvm.so</code> for all other UNIX variants.
+                <!--Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> 
+                    und für andere Unix-Varianten <code>jvm.so</code>.-->
+                </p>
+                <p>
+                    The Windows preset value is read out of the registry.
+                    The <code>CurrentVersion</code> entry, which contains the current version number
+                    (such as "<code>1.5</code>"), is read from the
+                <!--Die Voreinstellung für Windows wird aus der Registrierung gelesen.
+                    Aus dem Schlüssel-->
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment</pre>
+                <p>
+                    key.
+                    The version key - e.g.:
+                <!--wird der Eintrag <code>CurrentVersion</code> gelesen, der die aktuelle Versionsnummer enthält,
+                    z.B. "<code>1.5</code>".
+                    Anschließend wird der Schlüssel der Version gelesen, z.B.-->
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment\1.5</pre>
+                <p>
+                    
+                    is then read
+                    and the path to the <code>jvm.dll</code> file taken from the 
+                     <code>RuntimeLib</code> entry.
+                <!--und dem dortigen Eintrag <code>RuntimeLib</code> der Pfad der <code>jvm.dll</code> entnommen.-->
+                </p>
+            <!--<p>
+                    The full path for the module can be entered here, should the directory not be specified in the 
+                    <code>PATH</code> option. -->
+                <!--Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist, 
+                    können Sie hier den vollständigen Pfad angeben.-->
+            <!--</p>-->
+            </description>
+        </ini_entry>
+
+        <ini_entry name="class_path" setting="java_class_path"/>
+
+        <ini_entry name="options" type="text" setting="java_options"/>
+
+        <ini_entry name="debug" type="yes_no">
+            <description>
+                <p>
+                    <code>debug=yes</code> causes the Java call to be entered in the <code>scheduler.log</code> file.
+                    This setting also sets Java in the debug mode, 
+                    whereby, for example, an exception causes the call stack to be written to
+                    stdout (or stderr).
+                 <!--<code>debug=yes</code> lässt die Aufruf an Java ins <code>scheduler.log</code> protokollieren
+                    Außerdem versetzt die Einstellung Java in den Debug-Modus, 
+                    wodurch z.B. bei einer Exception der Aufruf-Stack nach stdout (oder stderr) geschrieben wird.-->
+                </p>
+            </description>
+        </ini_entry>
+
+        <ini_entry name="javac" type="path" initial="javac" title="Path to the Java compiler">
+    <!--<ini_entry name="javac" type="path" initial="javac" title="Pfad zum Java-Compiler">-->
+            <description>
+                <p>
+                    This setting is used to specify the path to the Java compiler.
+                    The Job Scheduler uses this compiler when quell code is directly written in the 
+                    <scheduler_element name="script"/> element, 
+                    for example, when developing Java jobs
+                <!--Wenn zum Entwickeln von Java-Jobs der Quell-Code direkt in <scheduler_element name="script"/> notiert wird,
+                    übersetzt der Scheduler mit dem hier eingestellten Java-Compiler.-->
+                </p>
+            </description>
+        </ini_entry>
+ 
+    <!--<ini_entry name="class_path" type="directory" title="Class Path">-->
+    <!--<ini_entry name="class_path" type="verzeichnisse" title="classpath">-->
+        <!--<description>
+                <p>
+                    This is the Java <code>class_path</code>.
+                    Directories or Paths of Jar files are entered here.
+                    The names are separated with "<code>;</code>"on Windows and 
+                    with "<code>:</code>" on all other operating systems.-->
+                <!--Das ist der <code>class_path</code> für Java.
+                    Sie geben hier Verzeichnisse oder Pfade von Jar-Dateien an.
+                    Die Namen trennen sie in Windows mit "<code>;</code>", sonst mit "<code>:</code>".-->
+            <!--</p>
+            </description>
+            <example>
+                <pre>
+class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar
+                </pre>
+            </example>
+        </ini_entry>-->
+
+    <!--<ini_entry name="options" type="text" title="Options for Java">-->
+    <!--<ini_entry name="options" type="text" title="Optionen für Java">-->
+        <!--<description>
+                <p>
+                    The directory in which Hostjava is installed in can, for example, be specified here using the 
+                    <code>-Djava.library.path=</code> parameter.-->
+                <!--Hier können Sie z.B. mit <code>-Djava.library.path=</code> das Verzeichnis angeben,
+                    in dem Hostjava installiert ist.-->
+            <!--</p>
+            </description>-->
+
+        <!--<example>
+                <pre>options = -Xdebug -Djava.library.path=s:/prod/bind-->
+<!--options = -Xdebug -Djava.library.path=s:/prod/bind--><!--</pre>
+            </example>
+        </ini_entry>-->
+
+    </ini_entries>
+    
+    <description>
+        <p>
+            The settings for Java are described here.
+        <!--Hier werden Einstellungen für Java vorgenommen.-->
+        </p>
+    </description>
+</ini_section>

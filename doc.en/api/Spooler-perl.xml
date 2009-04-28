@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id: Spooler-perl.xml 3920 2005-09-20 13:57:40Z jz $ -->
+
+<?xml-stylesheet href="api-perl.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Spooler"
+    base_dir             = "../"
+/>

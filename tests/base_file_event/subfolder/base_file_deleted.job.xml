@@ -1,0 +1,19 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+
+    <script language="shell">
+        <![CDATA[
+        
+echo SCHEDULER_LIVE_EVENT=$SCHEDULER_LIVE_EVENT
+echo SCHEDULER_LIVE_FILEPATH=$SCHEDULER_LIVE_FILEPATH
+echo SCHEDULER_LIVE_FILEBASE=$SCHEDULER_LIVE_FILEBASE
+
+echo SCHEDULER_LIVE_EVENT=%SCHEDULER_LIVE_EVENT%
+echo SCHEDULER_LIVE_FILEPATH=%SCHEDULER_LIVE_FILEPATH%
+echo SCHEDULER_LIVE_FILEBASE=%SCHEDULER_LIVE_FILEBASE%
+
+        ]]>
+    </script>
+    
+</job>
+

@@ -1,0 +1,477 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: dynamic_configuration.xml 5272 2007-09-30 16:47:01Z ap $-->
+
+<!--title               = "Konfiguration aus Hot Folders"-->
+
+<description
+    title               = "Configuration Using Hot Folders"
+    base_dir            = ""
+    parent_page         = "index.xml"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-08-14 10:22:14 +0200 (Do, 14 Aug 2008) $"
+>
+    <p>
+        Jobs, job chains, permanent orders, process classes and locks (referred to as objects in the following section)
+        can be stored in individual files, which the Job Scheduler then automatically processes after any changes are 
+        made to these objects.
+        <em>Hot Folders</em> are directories which are monitored by the Job Scheduler.
+        It creates, modifies and deletes jobs, job chains and other objects from files which are 
+        added to, modified in or deleted from these directories.
+    <!--Jobs, Job-Ketten, Daueraufträge, Prozessklassen und Sperren (im folgenden Objekte genannt)
+        können in einzelnen Dateien gehalten werden, die der Job Scheduler automatisch nach Änderung übernimmt.
+        Der Job Scheduler überwacht Verzeichnisse (<em>Hot Folders</em>), für die hinzugefügte,
+        geänderte und gelöschte Dateien als entsprechende Operationen zum Hinzufügen, Ändern
+        und Entfernen von Jobs, Job-Ketten etc. ausgeführt werden.-->
+    </p>
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Configuration Directory</h2>
+<!--<h2>Konfigurationsverzeichnis</h2>-->
+    
+    <p>
+        The Job Scheduler reads the objects described above from the configuration directory and its sub-directories.
+        The configuration directory can be set using:
+    <!--Die Dateien liest der Job Scheduler aus dem Konfigurationsvereichnis und dessen Unterverzeichnissen.
+        Das Konfigurationsverzeichnis kann eingestellt werden mit-->
+    </p>
+    <ul>
+        <li>
+            <scheduler_element name="config" attribute="configuration_directory"/>,
+            the default setting is the <code>.config/live</code> directory specified in the configuration file.
+        <!--<scheduler_element name="config" attribute="configuration_directory"/>,
+            voreingestellt ist das Verzeichnis <code>.config/live</code> im Verzeichnis der Konfigurationsdatei.-->
+        </li>
+        <li>
+            <scheduler_option name="config"/>. 
+            in which case the Job Scheduler expects to find the configuration file in the configuration directory under the 
+            name <code>scheduler.xml</code>. (The default setting is <code>./config</code>)
+        <!--<scheduler_option name="config"/>. 
+            Die Konfigurationsdatei erwartet der Scheduler dann im Konfigurationsverzeichnis (Voreinstellung <code>./config</code>)
+            unter dem Namen <code>scheduler.xml</code>.-->
+        </li>
+    </ul>
+    
+    <p>
+        The Job Scheduler monitors the configuration directory and its sub-directories and 
+        automatically reads out files which have been added and changed.
+        Deletion of a file leads to the corresponding object in the Job Scheduler being deleted.
+    <!--Der Job Scheduler überwacht das Konfigurationsverzeichnis und seine Unterverzeichnisse
+        und übernimmt hinzugefügte und geänderte Dateien.
+        Löschen einer Datei führt zum Löschen des entsprechenden Objekts im Job Scheduler.-->
+    </p>
+
+    <p>
+        On Windows systems, the Job Scheduler uses the operating system directory monitoring and 
+        therefore notices changes immediately.
+        Furthermore, it checks the directories at minute intervals.
+    <!--Unter Windows verwendet der Job Scheduler die Verzeichnisüberwachung des Betriebsystems, 
+        bemerkt Änderungen also sofort.
+        Außerdem prüft er die Verzeichnisse im Minutenabstand.-->
+    </p>
+    <p>
+        On Unix systems, the Job Scheduler monitors the directories at intervals of between 5 and 60 seconds.
+        Should no change occur in a directory, the interval is 60 seconds.
+        After a change occurs, the Job Scheduler reduces the monitoring interval to five seconds - 
+        should no further change occur, the interval is increased in steps back up to sixty seconds.
+    <!--Unter Unix überwacht der Job Scheduler die Verzeichnisse im Abstand von zwischen 5 und 60 Sekunden.
+        Nach einer Änderung verkürzt er den Abstand auf fünf Sekunden und 
+        verlängert ihn, wenn keine Änderung vorliegt, bis auf 60 Sekunden.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <a name="files"/>
+    <h2>Files for Process Classes, Locks, Jobs, Job Chains and Permanent Orders</h2>
+<!--<h2>Dateien für Prozessklassen, Sperren, Jobs, Job-Ketten und Daueraufträge</h2>-->
+
+    <p style="margin-bottom: 1em;">
+        These files contain the XML elements defining objects as follows and are
+        processed according to the following naming convention:
+    <!--Die Dateien enthalten die XML-Elemente für die Definition des Objektsund werden
+        aufgrund folgender Namenskonventionen verarbeitet::-->
+    </p>
+    <table cellspacing="0" cellpadding="0">
+        <tr>
+            <th style="padding-right: 2ex">
+                Object
+            <!--Objekt-->
+            </th>
+            <th style="padding-right: 2ex">
+                File name
+            <!--Dateiname-->
+            </th>
+            <th style="padding-right: 2ex">
+                XML element
+            <!--XML-Element-->
+            </th>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                Process class
+            <!--Prozessklasse-->
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.process_class.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="process_class"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                Lock
+            <!--Sperre-->
+            </td>
+            <td>
+                <code><i>name</i>.lock.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="lock"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                Job
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.job.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="job"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                Job chain
+            <!--Job-Kette-->
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>name</i>.job_chain.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+                <scheduler_element name="job_chain"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 2ex">
+                Permanent order
+            <!--Dauerauftrag-->
+            </td>
+            <td style="padding-right: 2ex">
+                <code><i>jobchainname</i>,<i>orderid</i>.order.xml</code>
+            </td>
+            <td style="padding-right: 2ex">
+               <scheduler_element name="order"/>
+            </td>
+        </tr>
+    </table>
+
+    <p>
+        The <code>name=</code> attribute
+    <!--Das Attribut <code>name=</code> -->
+        <!--(oder <code>job_chain=</code> und <code>id=</code> bei Aufträgen)-->
+        should not be specified here.
+        Should it be necessary to define it here, then it must correspond with the file name.
+    <!--sollte nicht angegeben werden.
+        Wird es angegeben, muss es dem Dateinamen entsprechen.-->
+    </p>
+    <p>
+        The <code>replace=</code> and <code>spooler_id=</code> attributes are not valid here.
+    <!--Die Attribute <code>replace=</code> und <code>spooler_id=</code> sind nicht zulässsig.-->
+    </p>
+
+    <br/><br/>
+
+    <br/><u>Example of an Order Controlled Jobs: File <code>hello_world.job.xml</code>:</u><br/>
+<!--<br/><u>Beispiel eines Jobs (auftragsgesteuert): Datei <code>hello_world.job.xml</code>:</u><br/>-->
+    <pre>&lt;job order="yes"&gt;
+    &lt;script language="shell"&gt;&lt;![CDATA[
+      echo hello world
+    ]]&gt;&lt;/script&gt;
+&lt;/job&gt;</pre>
+
+    <br/><u>Example of a Job Chain : File <code>echo_hello.job_chain.xml</code>:</u><br/>
+<!--<br/><u>Beispiel einer Job-Kette: Datei <code>echo_hello.job_chain.xml</code>:</u><br/>-->
+    <pre>&lt;job_chain&gt;
+    &lt;job_chain_node  state="<i>start</i>" job="<i>hello_world</i>" next_state="<i>success</i>" error_state="<i>error</i>"/>
+    &lt;job_chain_node  state="<i>success</i>"/>
+    &lt;job_chain_node  state="<i>error</i>"/>
+&lt;/job_chain&gt;</pre>
+
+    <br/><u>Example of an Order: File <code>echo_hello,echo_trigger.order.xml</code>:</u><br/>
+<!--<br/><u>Beispiel eines Auftrags: Datei <code>echo_hello,echo_trigger.order.xml</code>:</u><br/>-->
+    <pre>&lt;order&gt;
+    &lt;run_time&gt;
+      &lt;period repeat="3600"/&gt;
+    &lt;/run_time&gt;
+&lt;/order&gt;</pre>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>Directory Mirroring with the Job Scheduler</h2>
+<!--<h2>Spiegelung des Verzeichnisses im Job Scheduler</h2>-->
+
+    <p>
+        The Job Scheduler creates an object corresponding to each file possessing a recognised file name ending or extension 
+        (<code>.job</code> etc.) and links it with the file.
+        The Job Scheduler then monitors the time stamp of each file and in the event of a change occurring proceeds as follows:
+    <!--Der Job Scheduler legt für jede Datei mit bekannter Dateinamensendung (<code>.job</code> usw.)
+        ein entsprechendes Objekt im Job Scheduler an und verbindet es mit der Datei.
+        Der Job Scheduler überwacht den Zeitstempel der Datei und geht bei Änderung wie folgt vor.-->
+    </p>
+    
+    <ul class="big">
+        <li>
+            A file name added to the directory causes the Job Scheduler to create a new, empty object,
+            which is linked to the file.
+            The object can be inspected using <scheduler_element name="show_state"/>.
+            For example, a <code>xxx.job.xml</code> file is mirrored in the Job Scheduler with the 
+            <scheduler_element name="job" attribute="name" value="xxx"/> object,
+            even when the file may not be readable or empty.
+        <!--Ein hinzugefügter Dateiname führt zur Anlage eines neuen, noch leeren Objekts im Job Scheduler,
+            das mit der Datei verbunden ist.
+            Das Objekt ist mit <scheduler_element name="show_state"/> sichtbar.
+            Z.B. wird eine Datei <code>xxx.job.xml</code> im Job Scheduler gespiegelt als ein Job
+            <scheduler_element name="job" attribute="name" value="xxx"/>,
+            auch wenn die Datei nicht lesbar ist.-->
+        </li>
+        <li>
+            A deleted file causes the mirrored object to be deleted from the Job Scheduler.
+            Note that deletion is generally delayed, 
+            because, for example, a job must wait for the end of a task.
+        <!--Eine gelöschte Datei führt zum Löschen des Objekts.
+            Das Löschen wird in der Regel verzögert, 
+            weil z.B. bei einem Job das Ende der Tasks abgewartet werden muss.-->
+        </li>
+        <li>
+            Should a file be re-added to the directory before the deletion process has been completed,
+            then the Job Scheduler will proceed as if a change had been made to the file.
+        <!--Wenn während des Löschens die Datei wieder angelegt wird,
+            geht der Job Scheduler wie bei einer geänderten Datei vor.-->
+        </li>
+        <li>
+            After a change has been made to a file - i.e. a change has occurred in its timestamp - 
+            then the Job Scheduler will read the file.
+            If the file can be loaded, then the Job Scheduler changes process classes and locks immediately,
+            whereas jobs, job classes and permanent orders are changed after a delay.
+            This allows operations to be completed which are currently being carried out using the object which is to be changed. 
+            A more detailed description of this follows below.
+        <!--Nach einer Änderung einer Datei (der Zeitstempel hat sich geändert) liest der Job Scheduler die Datei.
+            Kann die Datei geladen werden, 
+            dann tauscht er Prozessklassen und Sperren direkt,
+            während er Jobs, Job-Klassen und Daueraufträge verzögert tauscht,
+            weil noch die laufenden Operationen des zu ersetzenden Objekts abgewartet werden müssen (Details unten).-->
+        </li>
+        <li>
+            An error occurring whilst a file is being read does not affect a corresponding and already existing object.
+            The Job Scheduler notes the error in the object and sends an e-mail.
+            <scheduler_element name="show_state"/> shows the error.
+        <!--Ein Fehler beim Lesen einer Datei beeinflusst nicht ein bereits vorhandenes Objekt.
+            Der Job Scheduler vermerkt den Fehler im Objekt und verschickt eine eMail.
+            <scheduler_element name="show_state"/> zeigt den Fehler.-->
+        </li>
+        <li>
+            Objects with the same (file) names can be present in different directories.
+            The Job Scheduler differentiates between these objects through their paths.
+            When it is necessary to link to objects from other directories - 
+            e.g. 
+            <pre>&lt;job  process_class="<i>/my_project/multi.process_class.xml</i>"/&gt;</pre>
+            <pre>&lt;job_chain_node  job="<i>/other_project/hello_world</i>"/&gt;</pre>
+            then the paths must be specfiied - either relatively or absolutely.
+        <!--Objekte mit denselben (Datei)Namen können mehrfach in unterschiedlichen Verzeichnissen
+            vorhanden sein. Der Job Scheduler unterscheidet diese Objekte anhand ihres Pfads.
+            Wenn auf Objekte aus anderen Verzeichnissen verwiesen wird, z.B.
+            <pre>&lt;job  process_class="<i>/my_project/multi.process_class.xml</i>"/&gt;</pre>
+            <pre>&lt;job_chain_node  job="<i>/other_project/hello_world</i>"/&gt;</pre>
+            dann müssen absolute oder relative Pfade angegeben werden.-->
+        </li>
+    </ul>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Effects of the Change and Delete Commands</h2>
+<!--<h2>Wirkung der Kommandos zum Ändern und Löschen</h2>-->
+
+    <p>
+        Commands causing changes to be made to objects do not cause the same changes to be made to the corresponding files.
+    <!--Kommandos zum Ändern von Objekten ändern nicht die Dateien.-->
+    </p>
+    <p>
+        Commands causing objects to be deleted cause the corresponding files to be deleted.
+    <!--Kommandos zum Löschen von Objekten löschen die zugrundliegende Datei.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>Behaviour of Individual Object Types</h2>
+<!--<h2>Verhalten der einzelnen Objekttypen</h2>-->
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Process classes</h3>
+<!--<h3>Prozessklassen</h3>-->
+
+    <p>
+        Changes made to a process class file are immediately taken over by the Job Scheduler.
+    <!--Änderungen an einer Prozessklasse übernimmt der Job Scheduler sofort.-->
+    </p>
+    <p>
+        To delete a process class, the Job Scheduler first stops all the related tasks.
+        The process class is only deleted when all the tasks have been ended.
+        Until this takes place, the Job Scheduler behaves as if the process class has been exhausted.
+    <!--Beim Löschen einer Prozessklasse beendet der Job Scheduler alle zugehörigen Tasks.
+        Erst wenn keine Task mehr läuft, löscht er die Prozessklasse.
+        Bis dahin startet der Job Scheduler keine weiteren Tasks, uns verhält sich als ob die Prozessklasse erschöpft wäre.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Locks</h3>
+<!--<h3>Sperren</h3>-->
+
+    <p>
+        The Job Scheduler immediately takes over changes made to a lock.
+    <!--Änderungen an einer Sperre übernimmt der Job Scheduler sofort.-->
+    </p>
+    <p>
+        To delete a lock, the Job Scheduler first stops all related tasks.
+        The lock is only then deleted, when all the tasks have been ended.
+        Until then, the Job Scheduler does not start any further jobs and does not allow any other task access to the lock.
+    <!--Beim Löschen einer Sperre beendet der Job Scheduler alle zugehörigen Tasks.
+        Erst wenn keine Task mehr läuft, löscht er die Sperre.
+        Bis dahin startet der Job Scheduler keine weiteren Tasks, und verhält sich als ob die Sperre belegt wäre.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Jobs</h3>
+
+    <p>
+        The Job Scheduler only takes on a change to a job after all associated tasks have been completed.
+    <!--Einen geänderten Job übernimmt der Job Scheduler, nachdem er alle Tasks beendet hat.-->
+    </p>
+    <p>
+        The Job Scheduler behaves in the same way when deleting a job object.
+        No new tasks will be started.
+    <!--Beim Löschen verfährt der Job Scheduler ebenso.
+        Keine neue Tasks werden gestartet.-->
+    </p>
+    <p>
+        Should a process class or a lock for a job be missing, 
+        then the Job Scheduler behaves as if the process class were exhausted or the lock unavailable.
+    <!--Fehlt dem Job die Prozessklasse oder eine Sperre, wirkt das so, 
+        als ob die Prozessklasse erschöpft oder die Sperre nicht verfügbar wäre.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Job chains</h3>
+<!--<h3>Job-Ketten</h3>-->
+
+    <p>
+        The Job Scheduler only processes changes to a job chain after all the orders in the chain have completed their jobs.
+        This stops further job steps being initiated.
+    <!--Eine geänderte Job-Kette übernimmt der Job Scheduler, nachdem alle Aufträge ihren Job-Schritt beendet haben.
+        Weitere Job-Schritte werden solange verhindert.-->
+    </p>
+    <p>
+        Orders in job chain nodes with the same order state are carried over by the Job Scheduler into the changed job chain.
+    <!--Aufträge in Job-Kettenknoten mit gleichem Auftragszustand übernimmt der Job Scheduler in die geänderte Job-Kette.-->
+    </p>
+    <p>
+        The Job Scheduler proceeds in the same manner when deleting job chains.
+    <!--Beim Löschen verfährt der Job Scheduler ebenso.-->
+    </p>
+    <p>
+        Should a job chain be missing a job, then orders will collect in the job chain nodes,
+        in the same way as if the job was not ready for execution.
+    <!--Fehlt der Job-Kette ein Job, dann sammeln sich die Aufträge im Job-Kettenknoten,
+        als wäre der Job nicht zur Auftragsausführung bereit.-->
+    </p>
+
+    <h3>Nested Job Chains</h3>
+<!--<h3>Verschachtelte Job-Ketten</h3>-->
+    <p>
+        Should a job chain be missing a nested job chain <scheduler_element name="job_chain_node.job_chain"/>,
+        then the complete (parent) job chain will remain unavailable.
+        All subordinate (child) job chains must be available before the Job Scheduler can determine 
+        whether or not the order identifiers are unique.
+    <!--Fehlt der Job-Kette eine verschachtelte Job-Kette <scheduler_element name="job_chain_node.job_chain"/>,
+        dann ist die gesamte Job-Kette nicht bereit.
+        Alle untergeordneten Job-Ketten müssen bekannt sein, 
+        damit der Job Scheduler die Eindeutigkeit der Auftragskennungen sicherstellen kann.-->
+    </p>
+    <p>
+        In the same way, a subordinate job chain will only be deleted
+        once the superordinate (parent) job chains have been deleted.
+    <!--Ebenso wird eine untergeordnete Job-Kette erst gelöscht,
+        wenn auch die übergeordnete Job-Kette gelöscht ist.-->
+    </p>
+    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h3>Permanent Orders</h3>
+<!--<h3>Daueraufträge</h3>-->
+    <p>
+        Permanent orders are handled differently to all the other objects.
+        On the one hand, the names of permanent orders have two parts 
+        (<code>job_chain=</code> and <code>id=</code> instead of <code>name=</code>)
+        and on the other, the Job Scheduler does not always take account of changes made to permanent order files.
+        The Job Scheduler only takes account of deleted or changed permanent order files, when:
+    <!--Daueraufträge werden anders behandelt als die anderen Objekte.
+        Zum einen haben sie einen zusammengesetzten Namen (<code>job_chain=</code> und <code>id=</code> statt <code>name=</code>),
+        zum anderen werden Dateiänderungen nicht jederzeit beachtet.
+        Eine gelöschte oder geänderte Auftragsdatei wird nur beachtet,
+        wenn -->
+    </p>
+    <ul>
+        <li>
+            the order is not recognised;
+        <!--der Auftrag nicht bekannt,-->
+        </li>
+        <li>
+            the order has not been started or
+        <!--der Auftrag noch nicht gestartet worden oder-->
+        </li>
+        <li>
+            the order is to be repeated by way of <scheduler_element name="run_time"/>
+            but has not yet been started.
+        <!--der Auftrag wegen <scheduler_element name="run_time"/> wiederholt, aber noch nicht gestartet worden ist.-->
+        </li>
+    </ul>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <h2>The &lt;show_state> Command</h2>
+<!--<h2>Kommando &lt;show_state></h2>-->
+
+    <p>
+        This command returns an
+        <scheduler_element directory="xml/answer/" name="file_based"/> 
+        answer for every file-based object.
+    <!--Das Kommando liefert zu jedem dateibasiertem Objekt ein
+        <scheduler_element directory="xml/answer/" name="file_based"/> mit Angaben zur Datei.-->
+    </p>
+    <p>
+        The <scheduler_element directory="xml/answer/" name="replacement"/> answer indicates 
+        when the Job Scheduler is in the process of replacing 
+        objects from hot folders (jobs, job chains, orders, locks and process classes). 
+    <!--Wenn eine Ersetzung im Gang ist, zeigt <scheduler_element directory="xml/answer/" name="replacement"/> dies an.-->
+    </p>
+    <p>
+        <scheduler_element directory="xml/answer/" name="removed"/> indicates that a file has been deleted
+        but the object associated with the file has not yet been deleted.
+    <!--Wenn eine Datei gelöscht ist, aber das dazugehörige Objekt noch nicht,
+        wird <scheduler_element directory="xml/answer/" name="removed"/> geliefert.-->
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</description>

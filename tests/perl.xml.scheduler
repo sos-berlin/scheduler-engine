@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="remote" remote_scheduler="localhost:6360"/>
+        </process_classes>
+
+        <jobs>
+            <job name="start">
+                <script language="perl">
+                    <include file="${SCHEDULER_TEST}/expect.pl"/>
+                    <![CDATA[
+                    
+BEGIN 
+{ 
+    ######### DAS IST BESTIMMT GEFÄHRLICH, ZWEI PERL-VERSIONEN ZU MISCHEN ##############
+    push( @INC, '/usr/lib/perl5/site_perl/5.8.7/i586-linux-thread-multi' ); 
+    push( @INC, '/usr/lib/perl5/site_perl/5.8.7' );
+    ######### DAS IST BESTIMMT GEFÄHRLICH, ZWEI PERL-VERSIONEN ZU MISCHEN ##############
+}
+
+#use XML::LibXSLT;
+use XML::LibXML;
+
+use strict;
+
+    my $parser = XML::LibXML->new();
+#   my $xslt   = XML::LibXSLT->new();
+    $parser->validation(0);
+
+    my $source     = $parser->parse_file( '/tmp/1.xml' );
+
+
+                    ]]></script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="fehler" process_class="remote">
+                <script language="perl">
+    <![CDATA[
+    
+for( $i = 1; $i < 100; $i++ )
+{
+    print( "$i. PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL PERL\n" );
+}
+
+print ( "PERL PERL ohne Zeilenende" );
+#fehler1();
+#die;
+                    ]]>
+                    <include file="${SCHEDULER_TEST}/expect.pl"
+
+ />
+
+<!-- 
+
+-->
+#FEHLER2();
+
+                    <![CDATA[
+
+use strict;
+
+#die();
+#FEHLER3();
+                    ]]></script>
+                <run_time once="yes"/>
+            </job>
+
+        </jobs>
+    </config>
+</spooler>
