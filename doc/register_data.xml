@@ -2955,6 +2955,14 @@
     <register_keyword_display><code>waits=</code></register_keyword_display>
     <register_entry register_file='xml/answer/state.xml#attribute_waits' register_title='&lt;state&gt; (Antwort)'  register_keyword='waits' type='definition'/>
 </register_keyword>
+<register_keyword keyword='warn_if_longer_than'>
+    <register_keyword_display><code>warn_if_longer_than=</code></register_keyword_display>
+    <register_entry register_file='xml/job.xml#attribute_warn_if_longer_than' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='warn_if_longer_than' type='definition'/>
+</register_keyword>
+<register_keyword keyword='warn_if_shorter_than'>
+    <register_keyword_display><code>warn_if_shorter_than=</code></register_keyword_display>
+    <register_entry register_file='xml/job.xml#attribute_warn_if_shorter_than' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='warn_if_shorter_than' type='definition'/>
+</register_keyword>
 <register_keyword keyword='Web Interface'>
     <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='Web Interface'/>
 </register_keyword>

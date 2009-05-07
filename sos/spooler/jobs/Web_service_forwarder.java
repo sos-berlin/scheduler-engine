@@ -38,7 +38,7 @@ public class Web_service_forwarder  extends sos.spooler.Job_impl
     //---------------------------------------------------------------------------------------------
     /** Führt zu order.setback() */
     
-    class Order_exception  extends Exception
+    static class Order_exception  extends Exception
     {
         Order_exception( String message ) 
         {
