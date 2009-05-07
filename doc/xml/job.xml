@@ -409,6 +409,36 @@
             </messages>
         </xml_attribute>
 
+        <xml_attribute name="warn_if_shorter_than" type="HH:MM:SS|seconds|percentage%">
+            <description>
+                <p>
+                    Wenn ein Jobschritt vor der angegebenen Zeit beendet wird,
+                    gibt der Scheduler die Warnung <scheduler_message code="SCHEDULER-711"/> aus.
+                </p>
+                <p>
+                    Die Zeit kann im den Formaten <code>HH:MM</code>, <code>HH:MM:SS</code>,
+                    als Sekundenzahl oder als Prozentangabe angegeben werden.
+                    Dabei sind 100% die durchschnittliche Laufzeit der bisherigen Jobschritte,
+                    ermittelt aus der Datenbanktabelle <code>SCHEDULER_HISTORY</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="warn_if_longer_than" type="HH:MM:SS|seconds|percentage%">
+            <description>
+                <p>
+                    Wenn ein Jobschritt länger als die angegebenen Zeit dauert,
+                    gibt der Scheduler die Warnung <scheduler_message code="SCHEDULER-711"/> aus.
+                </p>
+                <p>
+                    Die Zeit kann im den Formaten <code>HH:MM</code>, <code>HH:MM:SS</code>,
+                    als Sekundenzahl oder als Prozentangabe angegeben werden.
+                    Dabei sind 100% die durchschnittliche Laufzeit der bisherigen Jobschritte,
+                    ermittelt aus der Datenbanktabelle <code>SCHEDULER_HISTORY</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
     <xml_child_elements>

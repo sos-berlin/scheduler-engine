@@ -458,9 +458,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _history(this),
     _visible(visible_yes),
     _stop_on_error(true),
-    _db_next_start_time( Time::never ),
-    _average_step_duration_state( average_step_duration_valid ),
-    _warn_if_longer_than( Time::never )
+    _db_next_start_time( Time::never )
 {
     if( name != "" )  set_name( name );
 
@@ -625,9 +623,6 @@ bool Job::on_load() // Transaction* ta )
 
         _log->open();
 
-        _warn_if_shorter_than = get_step_duration_or_percentage( _warn_if_shorter_than_string, Time(0) );
-        _warn_if_longer_than  = get_step_duration_or_percentage( _warn_if_longer_than_string , Time::never );
-        
         if( _lock_requestor )  _lock_requestor->load();       // Verbindet mit bekannten Sperren
 
 
@@ -960,30 +955,30 @@ Time Job::get_step_duration_or_percentage( const string& value, const Time& defl
 
 Time Job::average_step_duration( const Time& deflt )
 {
-    if( _spooler->_db->opened()  &&  _average_step_duration_state == average_step_duration_valid )
+    Time result = deflt;
+
+    if( _spooler->_db->opened() )
     {
+        Record record;
+        S select_sql;
+        select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
+                      "  from " << _spooler->_job_history_tablename
+                   << "  where `steps` > 0 "
+                       " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
+                   <<  " and `job_name`=" << sql::quoted( path().without_slash() );
+
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
         {
-            S select_sql;
-            select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
-                          "  from " << _spooler->_job_history_tablename
-                       << "  where `steps` > 0 "
-                           " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
-                       <<  " and `job_name`=" << sql::quoted( path().without_slash() );
-
-            Record record = ta.read_single_record( select_sql, Z_FUNCTION );
-            if( record.null(0) || record.as_string(0) == "" ) {
-                _average_step_duration_state = average_step_duration_not_available;
-            } else {
-                _average_step_duration_state = average_step_duration_valid;
-                _average_step_duration = record.as_double( 0 );
-            }
+            record = ta.read_single_record( select_sql, Z_FUNCTION );
         }
         catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_job_history_tablename, x ), Z_FUNCTION ); }
+
+        if( !record.null(0) && record.as_string(0) != "" ) {
+            result = floor( record.as_double( 0 ) );
+        }
     }
 
-    return _average_step_duration_state == average_step_duration_valid? _average_step_duration
-                                                                      : deflt;
+    return result;
 }
 
 //------------------------------------------------------------------------Job::set_order_controlled
@@ -3365,11 +3360,11 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( is_order_controlled() )
         result.setAttribute( "job_chain_priority", _job_chain_priority );
 
-        if( _warn_if_shorter_than )
-            result.setAttribute( "warn_if_shorer_than", _warn_if_shorter_than.as_string( Time::without_ms ) );
+        if( _warn_if_shorter_than_string != "" )
+            result.setAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
 
-        if( !_warn_if_longer_than.is_never() )
-            result.setAttribute( "warn_if_longer_than", _warn_if_longer_than.as_string( Time::without_ms ) );
+        if( _warn_if_longer_than_string != "" )
+            result.setAttribute( "warn_if_longer_than", _warn_if_longer_than_string );
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 

@@ -428,10 +428,6 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
 
     string                     _warn_if_shorter_than_string;
     string                     _warn_if_longer_than_string;
-    enum { average_step_duration_valid, average_step_duration_read, average_step_duration_not_available }    _average_step_duration_state;
-    Time                       _average_step_duration;
-    Time                       _warn_if_longer_than;
-    Time                       _warn_if_shorter_than;
 };
 
 //-------------------------------------------------------------------------------------Internal_job

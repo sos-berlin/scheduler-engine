@@ -211,6 +211,7 @@ struct Task : Object,
   //void                        end__end                    ();
   //void                        step__start                 ();
     bool                        step__end                   ();
+    void                        count_step                  ();
     string                      remote_process_step__end    ();
     bool                        operation__end              ();
 
@@ -330,6 +331,8 @@ struct Task : Object,
     Time                       _idle_since;
     Time                       _idle_timeout_at;
     Time                       _subprocess_timeout;
+    Time                       _warn_if_longer_than;
+    Time                       _warn_if_shorter_than;
     Time                       _trying_deleting_files_until;
 
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)

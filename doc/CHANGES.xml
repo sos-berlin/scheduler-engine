@@ -11,6 +11,26 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-05-07" version="2.0.222" subversion_revision="6007">
+        <revision type="new" title="&lt;job warn_if_shorter_than und warn_if_longer_than>">
+            <description>
+                <p>
+                    Wenn die Dauer eines Jobschritts von einer Vorgabe abweicht, 
+                    gibt der Scheduler eine Warnung aus.
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="warn_if_shorter_than"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job" attribute="warn_if_longer_than"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2009-03-20" version="2.0.221" subversion_revision="5985">
         <revision type="modification" title="Windows: kill bricht alle Kindprozesse ab">
             <description>

@@ -98,8 +98,8 @@ Task::Task( Job* job )
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
     _lock("Task"),
-    _lock_requestors( 1+lock_level__max )
-  //_success(true)
+    _lock_requestors( 1+lock_level__max ),
+    _warn_if_longer_than( Time::never )
 {
     _log = Z_NEW( Prefix_log( this ) );
 
@@ -113,6 +113,8 @@ Task::Task( Job* job )
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
+    _warn_if_shorter_than = _job->get_step_duration_or_percentage( _job->_warn_if_shorter_than_string, Time(0) );
+    _warn_if_longer_than  = _job->get_step_duration_or_percentage( _job->_warn_if_longer_than_string , Time::never );
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
 
@@ -917,7 +919,7 @@ Time Task::next_time()
             Time t = _timeout;
             if( _state == s_running ||
                 _state == s_running_process ||
-                _state == s_running_remote_process )  t = min( t, _job->_warn_if_longer_than );
+                _state == s_running_remote_process )  t = min( t, _warn_if_longer_than );
 
             result = t.is_never()? Time::never 
                                  : _last_operation_time + t;     // _timeout sollte nicht zu groß sein
@@ -956,13 +958,13 @@ bool Task::check_timeout( const Time& now )
 
 void Task::check_if_shorter_than( const Time& now )
 {
-    if( _job->_warn_if_shorter_than ) 
+    if( _warn_if_shorter_than ) 
     {
         Time step_time = now - _last_operation_time;
 
-        if( step_time < _job->_warn_if_shorter_than ) 
+        if( step_time < _warn_if_shorter_than ) 
         {
-            string msg = message_string( "SCHEDULER-711", _job->_warn_if_shorter_than.as_string( Time::without_ms ), step_time.as_string( Time::without_ms ) );
+            string msg = message_string( "SCHEDULER-711", _warn_if_shorter_than.as_string( Time::without_ms ), step_time.as_string( Time::without_ms ) );
             _log->warn( msg );
 
             Scheduler_event scheduler_event ( evt_task_step_too_short, log_error, _spooler );
@@ -970,7 +972,7 @@ void Task::check_if_shorter_than( const Time& now )
             mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
             mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                           "Step time: " << step_time << "\n" <<
-                                          "warn_if_shorter_than=" << _job->_warn_if_shorter_than.as_string( Time::without_ms ) );
+                                          "warn_if_shorter_than=" << _warn_if_shorter_than.as_string( Time::without_ms ) );
             scheduler_event.send_mail( mail_defaults );
         }
     }
@@ -982,18 +984,18 @@ bool Task::check_if_longer_than( const Time& now )
 {
     bool something_done = false;
 
-    if( !_job->_warn_if_longer_than.is_never() ) 
+    if( !_warn_if_longer_than.is_never() ) 
     {
         double step_time = now - _last_operation_time;
 
-        if( step_time > _job->_warn_if_longer_than )
+        if( step_time > _warn_if_longer_than )
         {
             something_done = true;
             if( _last_warn_if_longer_operation_time != _last_operation_time ) 
             {
                 _last_warn_if_longer_operation_time = _last_operation_time;
 
-                string msg = message_string( "SCHEDULER-712", _job->_warn_if_longer_than.as_string( Time::without_ms ) );
+                string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( Time::without_ms ) );
                 _log->warn( msg );
 
                 Scheduler_event scheduler_event ( evt_task_step_too_long, log_error, _spooler );
@@ -1001,7 +1003,7 @@ bool Task::check_if_longer_than( const Time& now )
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                               "Step time: " << step_time << "\n" <<
-                                              "warn_if_longer_than=" << _job->_warn_if_longer_than.as_string( Time::without_ms ) );
+                                              "warn_if_longer_than=" << _warn_if_longer_than.as_string( Time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
             }
         }
@@ -1409,6 +1411,7 @@ bool Task::do_something()
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 check_if_shorter_than( now );
                                 something_done |= check_if_longer_than( now );
+                                count_step();
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -1999,12 +2002,7 @@ bool Task::step__end()
 
         if( _job->is_order_controlled() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
 
-        if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
-        {
-            _spooler->_task_subsystem->count_step();        // Siehe auch remote_process_step__end()
-            _job->count_step();
-            _step_count++;
-        }
+        count_step();
 
         if( _order )  
         {
@@ -2023,6 +2021,18 @@ bool Task::step__end()
     }
 
     return continue_task;
+}
+
+//---------------------------------------------------------------------------------Task::count_step
+
+void Task::count_step()
+{
+    if( has_step_count()  ||  _step_count == 0 )        // Bei kind_process nur einen Schritt zählen
+    {
+        _spooler->_task_subsystem->count_step();        // Siehe auch remote_process_step__end()
+        _job->count_step();
+        _step_count++;
+    }
 }
 
 //-------------------------------------------------------------------Task::remote_process_step__end
