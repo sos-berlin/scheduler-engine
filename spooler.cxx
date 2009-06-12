@@ -542,11 +542,6 @@ static void set_ctrl_c_handler( bool on )
 
 static void be_daemon()
 {
-    Path stdout_path = "scheduler.out";
-    if( !string_starts_with( _log_directory, "*" ) )  stdout_path = Path( _log_directory, stdout_path );
-
-    File new_stdout ( "scheduler.out", "w" );
-
     Z_LOG2( "scheduler", "fork()\n" );
 
     switch( fork() )
@@ -556,9 +551,6 @@ static void be_daemon()
 
                  Z_LOG2( "scheduler", "setsid()\n" );
                  setsid(); 
-
-                 dup2( new_stdout.file_no(), fileno( stdout ) );
-                 dup2( new_stdout.file_no(), fileno( stderr ) );
 
                  if( isatty( fileno(stdin) ) ) 
                  {
@@ -3186,6 +3178,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         load_config( _config_element_to_load, _config_source_filename );
 
+        assign_stdout();
         //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
         //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
 
@@ -3252,6 +3245,23 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     //spooler_is_running = false;
     return rc;
+}
+
+//---------------------------------------------------------------------------Spooler::assign_stdout
+
+void Spooler::assign_stdout()
+{
+    #ifdef Z_UNIX
+        if( is_daemon ) {
+            Path stdout_path = "scheduler.out";
+            if( !string_begins_with( _log_directory, "*" ) )  stdout_path = Path( _log_directory, stdout_path );
+
+            File new_stdout ( stdout_path, "w" );
+
+            dup2( new_stdout.file_no(), fileno( stdout ) );
+            dup2( new_stdout.file_no(), fileno( stderr ) );
+        }
+    #endif
 }
 
 //------------------------------------------------------------------------------------start_process
