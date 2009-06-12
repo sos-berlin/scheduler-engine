@@ -1950,6 +1950,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "Process_class"                 , (Com_method_ptr)&Com_job::get_Process_class           , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 20, "Folder_path"                   , (Com_method_ptr)&Com_job::get_Folder_path             , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 21, "Configuration_directory"       , (Com_method_ptr)&Com_job::get_Configuration_directory , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 22, "Setback_max"                   , (Com_method_ptr)&Com_job::get_Setback_max             , VT_INT        },
     {}
 };
 
@@ -2381,6 +2382,25 @@ STDMETHODIMP Com_job::get_Configuration_directory( BSTR* result )
         hr = String_to_bstr( _job->has_base_file()? _job->base_file_info()._path.directory() : File_path(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_job::get_Setback_max
+
+STDMETHODIMP Com_job::get_Setback_max( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  return E_POINTER;
+
+        *result = _job->max_order_setbacks();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
 }
@@ -5155,6 +5175,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 26, "Log"                       , (Com_method_ptr)&Com_order::get_Log               , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 27, "End_state"                 , (Com_method_ptr)&Com_order::put_End_state         , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
     { DISPATCH_PROPERTYGET, 27, "End_state"                 , (Com_method_ptr)&Com_order::get_End_state         , VT_VARIANT    },
+    { DISPATCH_PROPERTYGET, 28, "Setback_count"             , (Com_method_ptr)&Com_order::get_Setback_count     , VT_INT        },
   //{ DISPATCH_METHOD     , 26, "Start_now"                 , (Com_method_ptr)&Com_order::Start_now             , VT_EMPTY      },
     {}
 };
@@ -5969,6 +5990,25 @@ STDMETHODIMP Com_order::get_End_state( VARIANT* result )
         if( !_order )  return E_POINTER;
 
         return _order->end_state().CopyTo( result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_order::get_Setback_count
+
+STDMETHODIMP Com_order::get_Setback_count( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->setback_count();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }

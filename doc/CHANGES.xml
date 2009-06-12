@@ -11,6 +11,22 @@
     <scheduler_keyword keyword="Change log"/>
 
 
+    <change date="2009-06-12" version="2.0.223" subversion_revision="6008">
+        <revision type="new" title="Neue API-Aufrufe Order.setback_count und Job.setback_max">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="setback_count"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job" property="setback_max"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
     <change date="2009-05-07" version="2.0.222" subversion_revision="6007">
         <revision type="new" title="&lt;job warn_if_shorter_than und warn_if_longer_than>">
             <description>

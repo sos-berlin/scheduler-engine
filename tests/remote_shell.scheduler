@@ -11,7 +11,7 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="localhost" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="1.1.1.1" max_processes="50"/>
         </process_classes>
 
 

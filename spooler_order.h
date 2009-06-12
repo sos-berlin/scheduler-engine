@@ -215,6 +215,7 @@ struct Order : Com_order,
     bool                        setback_called          () const                                    { return _setback_called; }
     void                        clear_setback           ( bool keep_setback_count = false );
     bool                     is_setback                 ()                                          { return _setback_count > 0; }
+    int                         setback_count           ()                                          { return _setback_count; }
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
     void                    set_replacement             ( Order* replaced_order );

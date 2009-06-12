@@ -315,4 +315,6 @@ public class Job extends Idispatch
     public String           folder_path         ()                                  { return (String)     com_call( "<folder_path"                  ); }
 
     public String           configuration_directory()                               { return (String)     com_call( "<configuration_directory"      ); }
+
+    public int              setback_max         ()                                  { return ((Integer) com_call( "<setback_max"     )).intValue(); }
 }

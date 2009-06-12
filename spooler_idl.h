@@ -233,6 +233,7 @@ struct Ijob : IDispatch
     virtual HRESULT     get_Process_class               ( Iprocess_class** )                    = 0;
     virtual HRESULT     get_Folder_path                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Configuration_directory     ( BSTR* )                               = 0;
+    virtual HRESULT     get_Setback_max                 ( int* )                                = 0;
 };
 
 //--------------------------------------------------------------------------------------------Itask
@@ -677,6 +678,8 @@ struct Iorder : IDispatch
 
     virtual HRESULT     put_End_state               ( VARIANT* value )                              = 0;
     virtual HRESULT     get_End_state               ( VARIANT* result )                             = 0;
+
+    virtual HRESULT     get_Setback_count           ( int* )                                        = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

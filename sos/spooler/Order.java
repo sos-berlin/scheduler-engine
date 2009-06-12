@@ -234,4 +234,6 @@ public class Order extends Idispatch
 
     public void         set_end_state           ( String value )                    {                   com_call( ">end_state", value  ); }
     public String           end_state           ()                                  { return (String)   com_call( "<end_state"         ); }
+
+    public int              setback_count       ()                                  { return ((Integer) com_call( "<setback_count"     )).intValue(); }
 }

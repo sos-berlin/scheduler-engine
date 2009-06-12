@@ -714,6 +714,26 @@ spooler_job.max_order_setbacks = 5;                      // Die 5. Rückstellung
         </description>
     </property>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="setback_max">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Wie oft kann ein Auftrag zurückgestellt werden?
+        </title>
+
+        <description>
+            <p>
+                Siehe <scheduler_element name="delay_order_after_setback" attribute="is_maximum" value="yes"/>.
+            </p>
+        </description>
+    </property>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
     <description>

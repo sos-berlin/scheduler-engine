@@ -445,7 +445,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
     STDMETHODIMP            get_Folder_path                 ( BSTR* );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
-
+    STDMETHODIMP            get_Setback_max             ( int* );
 
   private:
     Thread_semaphore           _lock;
@@ -894,6 +894,8 @@ struct Com_order : spooler_com::Iorder,
     
     STDMETHODIMP            put_End_state               ( VARIANT* );
     STDMETHODIMP            get_End_state               ( VARIANT* );
+
+    STDMETHODIMP            get_Setback_count           ( int* );
 
   private:
     Fill_zero                  _zero_;

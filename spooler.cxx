@@ -542,6 +542,9 @@ static void set_ctrl_c_handler( bool on )
 
 static void be_daemon()
 {
+    Path stdout_path = "scheduler.out";
+    if( !string_starts_with( _log_directory, "*" ) )  stdout_path = Path( _log_directory, stdout_path );
+
     File new_stdout ( "scheduler.out", "w" );
 
     Z_LOG2( "scheduler", "fork()\n" );
