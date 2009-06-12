@@ -110,6 +110,7 @@ Task::Task( Job* job )
     _log->inherit_settings( *_job->_log );
     _log->set_mail_defaults();
 
+    _last_operation_time = Time::now();
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
@@ -945,7 +946,7 @@ Time Task::next_time()
 
 bool Task::check_timeout( const Time& now )
 {
-    if( _timeout < Time::never  &&  _last_operation_time  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
+    if( _timeout < Time::never  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
         _log->error( message_string( "SCHEDULER-272", _timeout.as_time_t() ) );   // "Task wird nach nach Zeitablauf abgebrochen"
         return try_kill();
