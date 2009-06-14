@@ -4387,7 +4387,7 @@ Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* 
                 }
                 catch( exception& x ) 
                 { 
-                    Z_LOG( "scheduler", Z_FUNCTION << " " << x.what() );
+                    Z_LOG2( "scheduler", Z_FUNCTION << " " << x.what() );
                     ok = false;      // Jemand hat wohl den Datensatz gelöscht.  
                                      // Wenn nicht, dann gibt's eine Schleife! Auftrag ungültig machen?
                 }
