@@ -895,7 +895,8 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
 
     ptr<Remote_task_close_command_response> response = Z_NEW( Remote_task_close_command_response( process, _communication_operation->_connection ) );
     response->set_async_manager( _spooler->_connection_manager );
-    response->async_wake();
+    response->async_continue();
+    //response->async_wake();
     _response = response;
 
     return NULL;
