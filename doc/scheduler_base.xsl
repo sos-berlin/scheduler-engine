@@ -518,7 +518,8 @@
 
         <xsl:element name="a">
             <xsl:attribute name="name">
-                attribute_<xsl:value-of select="@name | @setting"/>
+                <xsl:text>attribute_</xsl:text>
+                <xsl:value-of select="@name | @setting"/>
             </xsl:attribute>
         </xsl:element>
 
@@ -534,7 +535,7 @@
             </span>
             <code>"</code>
 
-            &#160;
+            <xsl:text>&#160;</xsl:text>
             <xsl:apply-templates select="." mode="setting_header_rest"/>
         </p>
 
