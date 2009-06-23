@@ -32,7 +32,7 @@ int main( int argc, char** argv )
 
 
     // Effektive User-Id und Group-Id zurücksetzen, damit wir Zugriff aufs Verzeichnis von setuid haben.
-#   if defined sparc || defined _AIX
+#   if (defined __SVR4 && defined __sun) || defined _AIX
         seteuid( getuid() );
         setegid( getgid() );
 #   else
