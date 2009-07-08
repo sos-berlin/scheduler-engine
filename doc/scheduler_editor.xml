@@ -1,7 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
-<description title="Job Scheduler Editor" base_dir="" author="$Author: ts $" date="$Date: 2007-03-29 11:45:00 +0200 (Do, 05 Okt 2006) $">
+<description 
+		title								= "Job Scheduler Editor" 
+		base_dir						= "" 
+		author							= "$Author: ts $" 
+		date								= "$Date: 2007-03-29 11:45:00 +0200 (Do, 05 Okt 2006) $"
+>
+	
   <h2>GUI für Konfiguration und Dokumentation</h2>
+  
   <p>
 			Der Job Scheduler liest seine Konfiguration aus XML-Dateien, die mit einem Text-Editor erstellt und bearbeitet werden können.
 		</p>
@@ -23,7 +30,10 @@
 			Der Scheduler Editor gehört zur Standard-Auslieferung des Job Schedulers. Das Installationsverzeichnis des Schedulers enthält die Datei <em>bin/jobeditor.cmd</em> zum Aufruf des Editors. 
 			In dieser Datei ist für INSTALL_PATH das Scheduler-Installationsverzeichnis einzutragen.
 		</p>
+  
+  
   <h3>Scheduler Konfiguration erstellen </h3>
+  
   <p>
 			Um eine neue Konfiguration zu erstellen, wählen Sie den Menüpunkt <em>File/New/Configuration</em>:
 			<br/>
@@ -38,6 +48,7 @@
 			Für alle Formularfelder und Steuerelemente sind Tooltips verfügbar. Mit der Taste <strong>F1</strong> wird als Hilfe die XML-Dokumentation des 
 			Schedulers angezeigt, die Hilfe ist auf den Kontext bezogen und steuert das XML-Element an, das gerade im Formular bearbeitet wird.
 		</p>
+  
   <p>
 			Ein Beispiel:
 		</p>
@@ -50,7 +61,10 @@
 			<br/>
     <img src="images/editor_help_job.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
+  
   <h3>Vorhandene Konfigurationsdatei öffnen</h3>
+  
   <p>
 			Existierende Konfigurationsdateien öffnen Sie mit dem Menüpunkt <em>File/Open</em>:
 			<br/>
@@ -61,7 +75,10 @@
 			<br/>
     <img src="images/editor_menu_file_open_scheduler_xml.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
+  
   <h3>Empfohlene Vorgehensweise</h3>
+  
   <p>
     <ul>
       <li>
@@ -106,7 +123,10 @@
       </li>
     </ul>
   </p>
+  
+  
   <h3>Job Wizard</h3>
+  
   <p> 
 			Mit dem Job Wizard kann ein neuer Job auf Basis eines bereits dokumentierten Standards-Jobs erstellt werden.
 		</p>
@@ -129,7 +149,10 @@
 			<br/>
     <img src="images/editor_job_wizard_overview.jpg" width="413" height="128" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
+  
   <h3>Scheduler Job Dokumentation erstellen </h3>
+  
   <p>
 			Für jeden Scheduler-Job kann eine Dokumentation in einem festgelegten XML-Format erstellt werden. 
 		</p>
@@ -154,7 +177,10 @@
 			<br/>
     <img src="images/editor_help_documentation.jpg" width="937" height="529" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
+  
   <h3>Hot Folder editieren</h3>
+  
   <p> 
 			Der Job Scheduler Editor kann einen ganzen hot folder öffnen und bearbeiten. Dazu wird im File Menü mit dem Befehl
 			<strong>Open Hot Folder</strong> der live folder oder einer seiner Unterordner geöffnet.			
@@ -176,7 +202,10 @@
 		  Verzeichnis geänderten oder hinzugefügten Objekte. Dateinamen müssen dabei nicht angegeben werden. Diese erzeugt der
 		  Job Scheduler Editor aus den Objektnamen selbstständig.
 		</p>
+  
+  
   <h3>Remote Connection</h3>
+  
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    FTP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <h4>FTP/SFTP</h4>
   <p>
@@ -197,7 +226,9 @@
   <p>
     <img src="images/editor_ftp_dialog.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
   <h5>Die Bedienelemente</h5>
+  
   <h6>FTP Zugang auswählen</h6>
   <p>
 			In diesem Auswahllisten können Sie einen bereits konfigurierten FTP Zugang auswählen
@@ -212,14 +243,17 @@
 			indem Sie im Textfeld einen neuen Verzeichnisnamen angeben 
 			und auf den Button "Change Directory" klicken.
 		</p>
+  
   <h5>Refresh</h5>
   <p>
 			Aktualistert alle Verzeichnis- und Dateiinformationen vom FTP Server
 		</p>
+  
   <h5>New Folder</h5>
   <p>
 			Legt ein neues Verzeichnis auf dem FTP Server an.
 		</p>
+  
   <h5>Remove</h5>
   <p>
 			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem FTP Server gelöscht.
@@ -236,6 +270,7 @@
 			Beim Auswählen eines Verzeichnisses werden vom FTP Server alle 
 			Dateien dieses Hot Folders heruntergeladen und im Editor geöffnet.
 		</p>
+  
   <h5>Close</h5>
   <p>
 			Schliesst den FTP Dialog
@@ -245,6 +280,7 @@
 			Zeigt den Protokolldialog. Hier können Sie alle Befehle, die an den FTP Server geschickt wurden, 
 			und die Antworten vom FTP Server sehen.
 		</p>
+  
   <h5>Profiles</h5>
   <p>
 			Hier sehen Sie alle konfigurierten FTP Zugänge. Sie haben die Möglichkeit 
@@ -284,6 +320,7 @@
 <br/>auth_file=
 			</em>
   </p>
+  
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   WEBDAV ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <h4>WebDAV</h4>
   <p>
@@ -327,7 +364,9 @@
   <p>
     <img src="images/editor_dialog_webdav.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
   </p>
+  
   <h5>Die Bedienelemente</h5>
+  
   <h6>WebDAV Zugang auswählen</h6>
   <p>
 			In diesen Auswahllisten können Sie einen bereits konfigurierten WebDAV Zugang auswählen
@@ -340,6 +379,7 @@
 			Sie haben aber auch die Möglichkeit jederzeit eine neue URL anzugeben, 
 			in dem Sie im Textfeld eine neue URL angeben und auf den Button "Change Directory" klicken.
 		</p>
+  
   <h5>Refresh</h5>
   <p>
 			Aktualistert alle Verzeichnis- und Dateinformationen vom WebDAV Server
@@ -348,10 +388,12 @@
   <p>
 			Legt einen neuen Verzeichnis auf dem WebDAV Server an.
 		</p>
+  
   <h5>Remove</h5>
   <p>
 			Eine ausgewählte Datei bzw. ein Verzeichnis in der Dateiliste wird auf dem WebDAV Server gelöscht.
 		</p>
+  
   <h5>Open</h5>
   <p>
 			Wurde der WebDAV Dialog unter dem Menüpunkt "Open by WebDAV" ausgewählt, 
@@ -364,15 +406,18 @@
 			Beim Auswählen eines Verzeichnisses werden vom WebDAV Server alle Dateien des Hot Folders heruntergeladen 
 			und im Editor geöffnet.
 		</p>
+  
   <h5>Close</h5>
   <p>
 			Schließt den WebDAV Dialog
 		</p>
+  
   <h5>Log</h5>
   <p>
 			Zeigt den Protokolldialog. Hier können Sie alle Befehle, 
 			die an den WebDAV Server geschickt wurden, und die Antworten vom WebDAV Server sehen.
 		</p>
+  
   <h5>Profiles</h5>
   <p>
 			Hier sehen Sie alle konfigurierte WebDAV Zugänge. 
