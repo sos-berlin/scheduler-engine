@@ -4266,7 +4266,7 @@
 
         <message code="SCHEDULER-711" weight="info" object="Task">
             <text xml:lang="en">
-                <title>Step has runned <p2/>s, which is shorter than the expected duration of <p1/></title>
+                <title>Step has run for <p2/>s, which is shorter than the expected duration of <p1/></title>
             </text>
         </message>
 
