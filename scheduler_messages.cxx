@@ -494,7 +494,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-708", "Adding '$1'" },
     { "SCHEDULER-709", "Killing descendant pid=$1 ($2)" },
     { "SCHEDULER-710", "Delayed command <scheduler_log.log_categories.reset> has been executed" },
-    { "SCHEDULER-711", "Step has runned $2s, which is shorter than the expected duration of $1" },
+    { "SCHEDULER-711", "Step has run for $2s, which is shorter than the expected duration of $1" },
     { "SCHEDULER-712", "Step runs longer than the expected duration of $1" },
     {}
 };

@@ -5,7 +5,6 @@
 >
     <config tcp_port="6360">
 
-        <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
         <security>
             <allowed_host host="0.0.0.0" level="all"/>
         </security>
@@ -14,39 +13,26 @@
             <process_class name="remote" remote_scheduler="localhost" max_processes="50"/>
         </process_classes>
 
-
         <jobs>
-
-            <job name="remote_shell" process_class="remote">
+            <job name="remote_shell" process_class="" stop_on_error="no">
                 <script language="shell">
                     <![CDATA[
 echo Hallo!                
-env
-sleep 10
+sleep 1
 echo Fertig.
-exit 27
                 ]]>
                 </script>
 
                 <!--monitor>
-                    <script language="javascript">
-                        <![CDATA[ 
-                        
+                    <script language="javascript"><![CDATA[ 
 spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
-                       
-
-]]>
-                    </script>
+                    ]]></script>
                 </monitor-->
-                <run_time once="yes"/>
+                
+                <run_time>
+                    <period repeat="1"/>
+                </run_time>
             </job>
-
-            <job name="remote_process" process_class="remote">
-                <process file="/tmp/test.cmd" log_file="/tmp/logfile"/>
-                <run_time once="yes"/>
-            </job>
-
         </jobs>
-
     </config>
 </spooler>
