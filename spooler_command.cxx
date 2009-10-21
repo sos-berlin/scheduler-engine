@@ -85,7 +85,7 @@ struct Remote_task_close_command_response : File_buffered_command_response
   private:
     void                        write_file                  ( const string& what, const File_path& );
 
-    enum State { s_initial, s_waiting, s_deleting_files, s_finished };
+    enum State { s_initial, s_waiting, s_deleting_files, s_responding, s_finished };
 
     Fill_zero                  _zero_;
     Process_id                 _process_id;
@@ -115,7 +115,7 @@ void Remote_task_close_command_response::close()
 
 //----------------------------------------------Remote_task_close_command_response::async_continue_
 
-bool Remote_task_close_command_response::async_continue_( Continue_flags )
+bool Remote_task_close_command_response::async_continue_( Continue_flags continue_flags )
 {
     Z_DEBUG_ONLY( if( _operation )  assert( _operation->async_finished() ) );
 
@@ -133,33 +133,15 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
 
         case s_waiting:
         {
-            if( _operation->async_finished() )
-            {
+            if( _operation->async_finished() ) {
                 _operation  = NULL;
                 _process->close__end();
 
-
-                // XML-Anwort 
-
-                begin_standard_response();
-
-                _xml_writer.begin_element( "ok" );
-                //int KEIN_STDOUT;
-                //write_file( "stdout", _process->stdout_path() );
-                //write_file( "stderr", _process->stderr_path() );
-                _xml_writer.end_element( "ok" );
-
-                _xml_writer.flush();
-
-                end_standard_response();
-
-                _state = s_deleting_files;    
-
-                if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _process_id );
-
+                _state = s_deleting_files;
                 something_done = true;
             }
         }
+
         if( _state != s_deleting_files )  break;
 
         case s_deleting_files:
@@ -178,12 +160,12 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                     if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
                 }
 
-                if( _trying_deleting_files_until  &&  now >= _trying_deleting_files_until )   // Nach Fristablauf geben wir auf
+                if( _trying_deleting_files_until  &&  _trying_deleting_files_until < now )   // Nach Fristablauf geben wir auf
                 {
                     string paths = join( ", ", _process->undeleted_files() );
                     if( _process->log() )  _process->log()->info( message_string( "SCHEDULER-878", paths ) );
                     //_job->log()->warn( message_string( "SCHEDULER-878", paths ) );
-                    _state = s_finished;
+                    ok = true;
                 }
                 else
                 {
@@ -191,15 +173,38 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags )
                     set_async_next_gmtime( min( now + delete_temporary_files_retry, _trying_deleting_files_until ) );
                 }
             }
-            else
-            {
-                _process    = NULL;
-                _connection = NULL;
-                _state      = s_finished;
-            }
+            
+            if( ok )
+                _state = s_responding;
 
             something_done = true;
-            break;
+        }
+
+        if( _state != s_responding )  break;
+
+        case s_responding: {    // XML-Anwort 
+            begin_standard_response();
+
+            _xml_writer.begin_element( "ok" );
+            //int KEIN_STDOUT;
+            //write_file( "stdout", _process->stdout_path() );
+            //write_file( "stderr", _process->stderr_path() );
+            _xml_writer.end_element( "ok" );
+
+            _xml_writer.flush();
+
+            end_standard_response();
+
+            if( _connection->_operation_connection )  _connection->_operation_connection->unregister_task_process( _process_id );
+
+            _state = s_finished;
+            if( continue_flags )
+                _connection->async_wake();
+
+            _process    = NULL;
+            _connection = NULL;
+
+            something_done = true;
         }
 
         default: ;
@@ -896,7 +901,6 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( 
     ptr<Remote_task_close_command_response> response = Z_NEW( Remote_task_close_command_response( process, _communication_operation->_connection ) );
     response->set_async_manager( _spooler->_connection_manager );
     response->async_continue();
-    //response->async_wake();
     _response = response;
 
     return NULL;
