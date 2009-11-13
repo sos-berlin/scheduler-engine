@@ -1965,8 +1965,9 @@ bool Task::load()
     _job->count_task();
     _spooler->_task_subsystem->count_task();
     //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
-    _running_since = Time::now();
 
+    Time now = Time::now();
+    _running_since = now;
     _last_operation_time = now;
     _timeout = _job->_task_timeout;
 
