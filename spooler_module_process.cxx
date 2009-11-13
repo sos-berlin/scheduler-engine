@@ -161,6 +161,7 @@ bool Process_module_instance::load()
                 if( default_character_was_used )  z::throw_xc( "SCHEDULER-471", "in <script>" );     // Leider wissen wir nicht, welches Zeichen nicht umgesetzt werden kann.
                 
                 script.assign( &buffer[0], length );
+                script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
             }
 #       else
             _shell_file.open_temporary( File::open_unlink_later );
@@ -594,17 +595,14 @@ bool Process_module_instance::begin__end()
     fill_process_environment_with_params();
 
 
-    vector<string> string_args;
+    string shell_argument = quoted_unix_command_parameter( program_path() );
 
     if( _process_param != "" )
     {
-        string_args = posix::argv_from_command_line( _process_param );
-        string_args.insert( string_args.begin(), program_path() );   // argv[0]
+        shell_argument += " " + quoted_unix_command_parameter( _process_param );
     }
     else
     {
-        string_args.push_back( program_path() );   // argv[0]
-
         if( _process_environment )
         {
             for( int i = 1;; i++ )
@@ -618,14 +616,14 @@ bool Process_module_instance::begin__end()
 
                 if( vt.vt == VT_EMPTY )  break;
 
-                string_args.push_back( string_from_variant( vt ) );
+                shell_argument += " " + quoted_unix_command_parameter( string_from_variant( vt ) );
             }
         }
     }
 
     Message_string m ( "SCHEDULER-987" );
     m.set_max_insertion_length( INT_MAX );
-    m.insert( 1, posix::shell_command_line_from_argv( string_args ) );
+    m.insert( 1, shell_argument );
     _log.info( m );
 
     Z_LOG2( "scheduler", "signal(SIGCHLD,SIG_DFL)\n" );
@@ -669,11 +667,11 @@ bool Process_module_instance::begin__end()
 
             // Arguments
 
-            char** args = new char* [ string_args.size() + 1 ];
-            int    i;
-
-            for( i = 0; i < string_args.size(); i++ )  args[i] = (char*)string_args[i].c_str();
-            args[i] = NULL;
+            char** args = new char* [ 3+1 ];
+            args[ 0 ] = "/bin/sh";
+            args[ 1 ] = "-c";
+            args[ 2 ] = (char*)shell_argument.c_str();
+            args[ 3 ] = NULL;
 
 
             // Environment
@@ -692,12 +690,12 @@ bool Process_module_instance::begin__end()
 
 
             //Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
-            execvp( program_path().c_str(), args );
+            execvp( args[0], args );
 
             int e = errno;
             
             //Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
-            fprintf( stderr, "ERRNO-%d  %s, at execvp(%s", e, strerror(e), quoted_string( program_path() ).c_str() );
+            fprintf( stderr, "ERRNO-%d  %s, at execvp(%s", e, strerror(e), args[0] );
             for( int i = 0; args[i]; i++ )  fprintf( stderr, ",%s", quoted_string( args[i] ).c_str() );
             fprintf( stderr, ")\n" );
 
