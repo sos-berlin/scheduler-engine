@@ -96,7 +96,7 @@ Task::Task( Job* job )
     _zero_(this+1),
     _job(job),
     _history(&job->_history,this),
-    _timeout(job->_task_timeout),
+    _timeout(Time::never),
     _lock("Task"),
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Time::never )
@@ -110,7 +110,6 @@ Task::Task( Job* job )
     _log->inherit_settings( *_job->_log );
     _log->set_mail_defaults();
 
-    _last_operation_time = Time::now();
     _idle_timeout_at = Time::never;
 
     set_subprocess_timeout();
@@ -1967,6 +1966,9 @@ bool Task::load()
     _spooler->_task_subsystem->count_task();
     //(nur für altes use_engine="job", löscht Fehlermeldung von Job::do_somethin() init_start_when_directory_changed: reset_error();
     _running_since = Time::now();
+
+    _last_operation_time = now;
+    _timeout = _job->_task_timeout;
 
     if( _job->is_machine_resumable() )  _spooler->begin_dont_suspend_machine();
 
