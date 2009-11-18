@@ -161,12 +161,13 @@ bool Process_module_instance::load()
                 if( default_character_was_used )  z::throw_xc( "SCHEDULER-471", "in <script>" );     // Leider wissen wir nicht, welches Zeichen nicht umgesetzt werden kann.
                 
                 script.assign( &buffer[0], length );
-                script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
             }
 #       else
             _shell_file.open_temporary( File::open_unlink_later );
             int ret = fchmod( _shell_file, 0700 );
             if( ret )  throw_errno( errno, "fchmod", _shell_file.path().c_str() );
+
+            script = trim( script );    // Damit Unix-"#!" am Anfang steht. Das ändert die Zeilennummerierung.
 #       endif
 
         _shell_file.print( script );
@@ -594,36 +595,12 @@ bool Process_module_instance::begin__end()
 
     fill_process_environment_with_params();
 
+    vector<string> string_args = get_string_args();
 
-    string shell_argument = quoted_unix_command_parameter( program_path() );
-
-    if( _process_param != "" )
-    {
-        shell_argument += " " + quoted_unix_command_parameter( _process_param );
-    }
-    else
-    {
-        if( _process_environment )
-        {
-            for( int i = 1;; i++ )
-            {
-                string nr = as_string(i);
-                Variant vt;
-                HRESULT hr;
-
-                hr = _process_environment->get_Var( Bstr(nr), &vt );
-                if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
-
-                if( vt.vt == VT_EMPTY )  break;
-
-                shell_argument += " " + quoted_unix_command_parameter( string_from_variant( vt ) );
-            }
-        }
-    }
 
     Message_string m ( "SCHEDULER-987" );
     m.set_max_insertion_length( INT_MAX );
-    m.insert( 1, shell_argument );
+    m.insert( 1, posix::shell_command_line_from_argv( string_args ) );
     _log.info( m );
 
     Z_LOG2( "scheduler", "signal(SIGCHLD,SIG_DFL)\n" );
@@ -667,12 +644,10 @@ bool Process_module_instance::begin__end()
 
             // Arguments
 
-            char** args = new char* [ 3+1 ];
-            args[ 0 ] = "/bin/sh";
-            args[ 1 ] = "-c";
-            args[ 2 ] = (char*)shell_argument.c_str();
-            args[ 3 ] = NULL;
-
+            char** args = new char* [ string_args.size() + 1 ];
+            int    i;
+            for( i = 0; i < string_args.size(); i++ )  args[i] = (char*)string_args[i].c_str();
+            args[i] = NULL;
 
             // Environment
 
@@ -734,6 +709,77 @@ bool Process_module_instance::begin__end()
     //_operation = &dummy_sync_operation;
 
     return true;
+}
+
+//---------------------------------------------------------Process_module_instance::get_string_args
+
+vector<string> Process_module_instance::get_string_args()
+{
+    vector<string> string_args;
+
+    if( _shell_file.path() != "" )  // <script language="shell">?
+    {
+        string shell_argument = quoted_unix_command_parameter( program_path() );
+
+        //if( _process_param != "" )    // <shell> kennt nicht param=
+        //{
+        //    shell_argument += " " + _process_param;
+        //}
+        //else
+        //{
+        //    if( _process_environment )
+        //    {
+        //        for( int i = 1;; i++ )
+        //        {
+        //            string nr = as_string(i);
+        //            Variant vt;
+        //            HRESULT hr;
+
+        //            hr = _process_environment->get_Var( Bstr(nr), &vt );
+        //            if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
+
+        //            if( vt.vt == VT_EMPTY )  break;
+
+        //            shell_argument += " " + quoted_unix_command_parameter( string_from_variant( vt ) );
+        //        }
+        //    }
+        //}
+
+        string_args.push_back( "/bin/sh" );
+        string_args.push_back( "-c" );
+        string_args.push_back( shell_argument );
+    }
+    else 
+    {
+        if( _process_param != "" )
+        {
+            string_args = posix::argv_from_command_line( _process_param );
+            string_args.insert( string_args.begin(), program_path() );   // argv[0]
+        }
+        else
+        {
+            string_args.push_back( program_path() );   // argv[0]
+
+            if( _process_environment )
+            {
+                for( int i = 1;; i++ )
+                {
+                    string nr = as_string(i);
+                    Variant vt;
+                    HRESULT hr;
+
+                    hr = _process_environment->get_Var( Bstr(nr), &vt );
+                    if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
+
+                    if( vt.vt == VT_EMPTY )  break;
+
+                    string_args.push_back( string_from_variant( vt ) );
+                }
+            }
+        }
+    }
+
+    return string_args;
 }
 
 //--------------------------------------------------------------------Process_module_instance::kill

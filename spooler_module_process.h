@@ -62,6 +62,7 @@ struct Process_module_instance : Module_instance
   private:
     void                        close_handle                ();
     string                      program_path                ();
+    std::vector<string>         get_string_args             ();
 
 
     Fill_zero                  _zero_;
