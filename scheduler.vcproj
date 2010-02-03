@@ -161,6 +161,7 @@
 				Optimization="4"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="C:\Programme\Java\jdk1.6.0_18\include;C:\Programme\Java\jdk1.6.0_18\include\win32"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				StringPooling="true"
 				MinimalRebuild="true"
