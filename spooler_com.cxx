@@ -2406,7 +2406,7 @@ STDMETHODIMP Com_job::get_Setback_max( int* result )
 }
 
 //-------------------------------------------------------------------------------Com_task::_methods
-#ifdef Z_COM
+#ifdef Z_COM  // JS-421 Com unter Unix
 
 const Com_method Com_task::_methods[] =
 { 
@@ -2452,7 +2452,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 34, "Call_me_again_when_locks_available"       , (Com_method_ptr)&Com_task::Call_me_again_when_locks_available       , VT_EMPTY },
     { DISPATCH_PROPERTYGET, 35, "Params_xml"                , (Com_method_ptr)&Com_task::get_Params_xml         , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Order_params_xml   , VT_BSTR       },
-    { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Order_params_xml   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::put_Order_params_xml   , VT_EMPTY      , { VT_BSTR } }, /* JS-421 get => put */
     //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
     //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
