@@ -10,7 +10,7 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
-  <change date="2010-03-23" version="2.1.0" subversion_revision="6066">
+  <change date="2010-03-23" version="2.1.0" subversion_revision="6070">
     <revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES bei Verwendung von Monitoren unter UNIX möglich">
     </revision>
   </change>
