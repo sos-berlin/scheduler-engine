@@ -10,8 +10,12 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+  <change date="2010-03-23" version="2.1.0" subversion_revision="6066">
+    <revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES bei Verwendung von Monitoren unter UNIX möglich">
+    </revision>
+  </change>
 
-    <change date="2009-06-12" version="2.0.223" subversion_revision="6010">
+  <change date="2009-06-12" version="2.0.223" subversion_revision="6010">
         <revision type="new" title="Neue API-Aufrufe Order.setback_count und Job.setback_max">
             <description>
                 <ul>
