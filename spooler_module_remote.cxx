@@ -510,10 +510,35 @@ AGAIN:
                     params_array[ nr++ ] = "monitor.filename="        + monitor->_module->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + monitor->_module->_java_class_name;
                     params_array[ nr++ ] = "monitor.recompile="       + as_string( monitor->_module->_recompile && !monitor->_module->_compiled );
-                    params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.xml();    // Muss der letzte Parameter sein!
+
+					/**
+					* \change 2.0.224 - JS-444: include with attribute live_file does not work
+					* \detail
+					* Auch für Monitore werden includes in der laufenden scheduler-Instanz aufgelöst und an den monitor-Prozess übergeben.
+					*
+					* Diese Lösung führt dazu, dass sowohl das Attribute \i file als auch das Attribute \i live_file Dateien benennen, die 
+					* lokal in der Instanz des scheduler servers zur Verfügung stehen müssen. Remote-Includes sind damit nicht möglich.
+					* 
+					* Diese Änderung wurde in Abstimmung mit UR und AL gemacht.
+					*
+					* \todo
+					* Anpassen der Dokumentation - Dort steht:
+					* Bei Ausführung auf einem entfernten Rechner mit <process_class remote_scheduler="…"> wird die Datei auf dem entfernten Rechner gelesen.
+					* (Seite 35 der techn. Beschreibung).
+					*
+					* ... sollte ersatzlos gestrichen werden.
+					*
+					* \oldcode
+                      params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.xml();    // Muss der letzte Parameter sein!
+					  \oldcodeend
+					* \newcode */
+                      params_array[ nr++ ] = "monitor.script="          + monitor->_module->_text_with_includes.includes_resolved().xml();    // Muss der letzte Parameter sein!
+					/* \newcodeend */
+
                 }
             }
 
+			// vgl. spooler_module_remote_server
             operation->set_async_child( _remote_instance->call__start( "construct", params ) );
 
             operation->_call_state = c_construct;

@@ -655,21 +655,21 @@ bool Process_module_instance::begin__end()
             {
 #               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr( m->second->_name ) + "=" + m->second->_value.as_string();
-                    //Z_LOG2( "env", "putenv(\"" << e << "\")\n" );
+                    Z_LOG2( "env", "putenv(\"" << e << "\")\n" );
                     putenv( strdup( e.c_str() ) );
 #                else
-                    //Z_LOG2( "env", "setenv(\"" << m->second->_name << "\",\"" << m->second->_value.as_string() << "\")\n" );
+                    Z_LOG2( "env", "setenv(\"" << m->second->_name << "\",\"" << m->second->_value.as_string() << "\")\n" );
                     setenv( string_from_bstr( m->second->_name ).c_str(), m->second->_value.as_string().c_str(), true );
 #               endif
             }
 
 
-            //Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
+            Z_LOG2( "scheduler", "execvp(\"" << program_path() << "\")\n" );
             execvp( args[0], args );
 
             int e = errno;
             
-            //Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
+            Z_LOG2( "scheduler", "execvp()  errno-" << e << "  " << z_strerror(e) << "\n" );
             fprintf( stderr, "ERRNO-%d  %s, at execvp(%s", e, strerror(e), args[0] );
             for( int i = 0; args[i]; i++ )  fprintf( stderr, ",%s", quoted_string( args[i] ).c_str() );
             fprintf( stderr, ")\n" );
@@ -903,6 +903,7 @@ void Process_module_instance::fill_process_environment_with_params()
     ptr<Com_variable_set> order_params;
 
     if( _task ) {
+		Z_LOG2( "scheduler", "fill_process_environment_with_params(), _task" << "\n" );
         task_params = _task->params();
         if( _task->order() )  order_params = _task->order()->params();
     } else {

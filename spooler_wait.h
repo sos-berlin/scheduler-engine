@@ -74,6 +74,20 @@ struct Wait_handles : Non_cloneable
 
     bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
                                                               const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
+	
+/**
+ * \change  JS-471 - Methodendeklaration für eigenes Prozesshandling
+ * \version 1.3.8
+ * \author  Stefan Schädlich
+ * \date    2010-04-01
+ * \detail
+ * siehe auch MsgWaitForMultipleObjects in windows.h
+ *
+ * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
+ */
+	 DWORD						     sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout);
+    DWORD                       sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout );
+
     bool                        wait_until_2                ( const Time& t, const Object& o )  { return wait_until_2( t, &o, t, &o); }
     bool                        wait_until_2                ( const Time&  , const Object* debug_wait_for_object, const Time& resume_until, const Object* );
   //bool                        wait                        ( double time );

@@ -892,7 +892,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description=""
-							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 							AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"
 						/>

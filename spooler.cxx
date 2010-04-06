@@ -2394,7 +2394,24 @@ void Spooler::run()
       //if( !something_done  &&  wait_until > 0  &&  _state_cmd == sc_none  &&  wait_until > Time::now() )   Immer wait() rufen, damit Event.signaled() gesetzt wird!
         {
             Wait_handles wait_handles ( this );
-            
+
+            /**
+             * \change  JS-471 - TCP und UDP-Verbindungen am Anfang der Handles
+             * \version 1.3.8
+             * \author  Stefan Schädlich
+             * \date    2010-04-01
+             *
+             * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
+             *
+             * \b newcode from 2010-04-01
+             * \code */
+            // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
+            vector<System_event*> events;
+            _connection_manager->get_events( &events );
+            FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
+            /* \endcode */
+
+
             if( _state != Spooler::s_paused )
             {
                 // PROCESS-HANDLES EINSAMMELN
@@ -2431,12 +2448,24 @@ void Spooler::run()
                 }
             }
 
-
-            // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
-
+/**
+ * \change  JS-471 - TCP und UDP-Verbindungen am Anfang der Handles
+ * \version 1.3.8
+ * \author  Stefan Schädlich
+ * \date    2010-04-01
+ * \detail
+ * TCP und UDP-Verbindungen am Anfang des Handles-Array, weil der erste Block (die ersten 63 handles) bevorzugt behandelt wird.
+ *
+ * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
+ *
+ * \b oldcode from 2010-04-01
+ * \code
+   // TCP- und UDP-HANDLES EINSAMMELN, für spooler_communication.cxx
             vector<System_event*> events;
             _connection_manager->get_events( &events );
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
+   \endcode
+ */
 
 
             //-------------------------------------------------------------------------------WARTEN

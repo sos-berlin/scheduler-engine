@@ -1752,6 +1752,8 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                             throw http::Http_exception( http::status_404_bad_request, "No order log" );
                         }
                     }
+
+					// Aufruf ohne Parameter, d.h. show_log?
                     else
                     {
                         log = _spooler->_log;  // Hauptprotokoll

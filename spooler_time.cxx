@@ -1,3 +1,14 @@
+/**
+ * \file spooler_time.h
+ * \brief Funktionalitäten für das Arbeiten mit Zeitangaben
+ * \detail
+ *
+ * \author JZ
+ * <div class="sos_branding">
+ *    <p>© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
+ * </div>
+ */
+
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
@@ -32,6 +43,18 @@
 
 namespace sos {
 namespace scheduler {
+
+//-------------------------------------------------------------------------------------------------
+/*!
+ * \brief Funktionalitäten für das Arbeiten mit Zeitangaben
+ * \detail
+ *
+ * \author dev-team
+ * <div class="sos_branding">
+ *    <p>© 2010 SOS GmbH - Berlin (<a style="color:silver" href="http://www.sos-berlin.com">http://www.sos-berlin.com</a>)</p>
+ * </div>
+ */
+//-------------------------------------------------------------------------------------------------
 namespace time {
 
 //-------------------------------------------------------------------------------------------static
@@ -257,10 +280,22 @@ Time Time::operator - ( double t )
 
 //------------------------------------------------------------------------------Time::time_with_now
 
+/*!
+* \brief Jobstartzeit ermitteln
+* \details
+* Folgende Angaben für den Start eines Jobs sind zugelassen:
+* - yyyy-mm-dd HH:MM[:SS]
+* - now+SS
+* - now+MM:SS
+* - now+HH:MM:SS
+* \version 2.0.224
+* \return Time-Objekt
+*/
 Time Time::time_with_now( const string& time_string )
 {
     Time result;
 
+	// Startzeit mit "now+HH:MM:SS" oder "now+MM:SS" oder "now+SS" vorgegeben
     if( Regex_submatches matches = Regex( "^ *now *(\\+ *([^ ].*))?$" ).match_subresults( time_string ) )    // " now + HH:MM"
     {
         result = now();
@@ -274,7 +309,16 @@ Time Time::time_with_now( const string& time_string )
             if( time.find( ':' ) != string::npos )
             {
                 Time t ( time );
-                if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
+
+				/*! \change JS-409
+				inaktiv seit Version 2.0.224: siehe http://www.sos-berlin.com/jira/browse/JS-409 
+
+				Der folgende Code kommt nicht mehr zur Ausführung
+				\code
+                  if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
+			    \endcode
+				*/
+                // if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
                 result += t;
             }
             else
@@ -288,6 +332,7 @@ Time Time::time_with_now( const string& time_string )
         }
     }
     else
+	// nimmt eine Datumsangabe im ISO-Format entgegen
     {
         result.set_datetime( time_string );
     }

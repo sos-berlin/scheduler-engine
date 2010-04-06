@@ -1,6 +1,6 @@
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-#ifndef __SPOOLER_H
+#ifndef __SPOOLER_H 
 #define __SPOOLER_H
 
 #include "../zschimmer/zschimmer.h"
@@ -102,8 +102,20 @@ extern const double             delete_temporary_files_delay;
 extern const double             delete_temporary_files_retry;
 
 #ifdef Z_WINDOWS
-    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+/**
+ * \change  JS-471 - Mit der Einführung von sosMsgWaitForMultipleObjects können diese Begrenzungen jetzt aufgehoben werden.
+ * \version 1.3.8
+ * \author  Stefan Schädlich
+ * \date    2010-04-01
+ * \detail
+ * Aus Kompatibilitätsgründen mit Unix werden die gleichen Werte jetzt auch für Windows verwendet.
+ *
+ * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
+ */
+//    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+//    const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+    const int                   max_processes                 =    200;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_connections =    800;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
                                                                           // 2007-09-11  Neues Handle für Folder_subsystem
                                                                           // 2007-12-27  Neues Handle für supervisor::Configuration_observer
                                                                           // 2008-02-06  Neues Handle für Remote_configuration_observer
