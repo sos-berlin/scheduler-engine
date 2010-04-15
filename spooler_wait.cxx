@@ -26,9 +26,12 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-//#ifndef Z_WINDOWS
+#ifndef Z_WINDOWS
 //    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
-//#endif
+#else
+const DWORD SOS_WAIT_TIMEOUT = -2;                         // WAIT_TIMEOUT ist WAIT_OBJECT_0 + 256 und kann damit mit einem
+                                                           // lfd. Prozess (No. 256) kollidieren.
+#endif
 
 //------------------------------------------------------------------------------------console_width
 #ifdef Z_WINDOWS
@@ -130,7 +133,7 @@ void Wait_handles::close()
             if( *it )  
             {
                 _log->warn( "Closing Wait_handles before " + (*it)->as_text() );
-                Z_WINDOWS_ONLY( Z_DEBUG_ONLY( assert( !"Closing Wait_handles before ..." ) ) );
+//                Z_WINDOWS_ONLY( Z_DEBUG_ONLY( assert( !"Closing Wait_handles before ..." ) ) );
             }
         }
     }
@@ -439,7 +442,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         double wait_time         = max( 0.0, until - now );
         int    max_sleep_time_ms = INT_MAX-1;
         int    t                 = (int)ceil( min( (double)max_sleep_time_ms, wait_time * 1000.0 ) );
-        DWORD  ret               = WAIT_TIMEOUT;
+        DWORD  ret               = SOS_WAIT_TIMEOUT;
 
 
         if( t <= 0 )  if( again )  break;
@@ -468,8 +471,15 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 double remaining = until - Time::now();
                 if( remaining < 0.7 )  break;
 
-                ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
-                if( ret != WAIT_TIMEOUT )  break;
+                /**
+                 * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
+                 * \b oldcode from 2010-04-01
+                 * \code
+                    ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, (int)( ceil( min( step, remaining ) * 1000 ) ), QS_ALLINPUT ); 
+                   \endcode
+                 */
+                ret = sosMsgWaitForMultipleObjects( _handles.size(), handles, (int)( ceil( min( step, remaining ) * 1000 ) ) ); 
+                if( ret != SOS_WAIT_TIMEOUT )  break;
 
                 step = 1.0;
 
@@ -500,7 +510,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
                 cerr << l << flush;
             }
 
-            if( ret == WAIT_TIMEOUT )
+            if( ret == SOS_WAIT_TIMEOUT )
             {
                 if( t > 0  &&  console_line_length == 0 )  cerr << _spooler->_wait_counter << '\r', console_line_length = 20;//_spooler->_wait_rotating_bar();
                 /**
@@ -558,12 +568,12 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             windows::windows_message_step();
         }
         else
-        if( ret == WAIT_TIMEOUT )  
+        if( ret == SOS_WAIT_TIMEOUT )  
         {
             again = true;
         }
         else
-            throw_mswin_error( "MsgWaitForMultipleObjects" );
+            throw_mswin_error( "MsgWaitForMultipleObjects", z::as_string(ret) );
 
 
         now = Time::now();
@@ -640,7 +650,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 * an MsgWaitForMultipleObjects übergeben.
 *
 * \version 1.3.8
-* \since 2010-04-01 13:07
+* \since 2010-04-01 13:07 JS-471
 * \author ss
 *
 * \param nCount - Anzahl der Handles
@@ -651,13 +661,18 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 */
 DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout)
 {
-   DWORD  ret = WAIT_TIMEOUT;
+   DWORD  ret;
 
-	Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
 	if (nCount < MAXIMUM_WAIT_OBJECTS)
+   {
 		ret = MsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );	// wie bisher
-	else
+      if (ret == WAIT_TIMEOUT) ret = SOS_WAIT_TIMEOUT;
+   } else {
+#ifdef Z_DEBUG
+    Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
+#endif
 		ret = sosMsgWaitForMultipleObjects64( nCount, pHandles, dTimeout );   // polling ...
+   }
    return ret;
 }
 
@@ -667,7 +682,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 * Laufen mehr als 63 Prozesse parallel werden alle Prozesse in Blöcken zu jeweils 63 regelmässig abgefragt.
 *
 * \version 1.3.8
-* \since 2010-04-01 13:15
+* \since 2010-04-01 13:15 JS-471
 * \author Stefan Schädlich
 *
 * \param nCount - Anzahl der Handles
@@ -678,57 +693,72 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 */
 DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout )
 {
-    int     stepTimeout         = 1000;
+    int     result              = SOS_WAIT_TIMEOUT;
     int     max_handles         = MAXIMUM_WAIT_OBJECTS - 1;
     Time    now                 = Time::now();
 
     int     max_sleep_time_ms   = INT_MAX-1;		                                                        // max. Wartezeit in Millisekunden
-    int     t                   = (int)ceil( min( (double)max_sleep_time_ms, (double)dTimeout) );       // timeout in Millisekunden
-    Time    until               = now + (int)(dTimeout/1000);
+    Time    until               = now + (dTimeout/1000.0);
+    bool    isWaiting           = true;
+    int     timeoutCounter      = 0;
 
-    while (1)
+    while (isWaiting)
 	 {
     
+        timeoutCounter++;
+        int stepTimeout = calculateStepTimeout(timeoutCounter);                                                                        // 1 Millisekunde
+
+        isWaiting = false;
         int blockCount = ( nCount + max_handles - 1 ) / max_handles;
-        int hCount = nCount;
+        int remainingCount = nCount;
 #       ifdef Z_DEBUG
-            Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << " blocks until " << until << " is reached.\n" );
-            Z_LOG2( "scheduler.wait", "the current time is " << now << ".\n" );
+            Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << " blocks until " << until << " is reached (steptimeout=" << stepTimeout << ").\n" );
 #       endif
 
         for (int i=0; i < blockCount; i++ ) {			                                                  // MAXIMUM_WAIT_OBJECTS handles pro block
 
-            int c = min( max_handles, hCount);                                                          // c kann beim letzten Block unter MAXIMUM_WAIT_OBJECTS fallen
-            hCount =- max_handles;
-            int timeout = (i == 0) ? stepTimeout : 0;                                                   // wartet 1s für den ersten Block, sonst nur Abfrage der Handles
-
+            int c = min( max_handles, remainingCount);                                                       // c kann beim letzten Block unter MAXIMUM_WAIT_OBJECTS fallen
+            assert(c > 0);
+            remainingCount -= c;
+            int remainingMillis = (int)((until - now).as_double() * 1000);
+            int timeout = (i == 0) ? min(stepTimeout, remainingMillis ) : 0;                                                   // wartet 1s für den ersten Block, sonst nur Abfrage der Handles
+            assert(timeout >= 0);           //ist diese Bedingung NICHT erfüllt, bricht die Ausführung ab (nur im Windows debug-Modus)
 
 #           ifdef Z_DEBUG
-                Z_LOG2( "scheduler.wait", "block " << (i+1) << ": " << c << " items, " << timeout << "ms.\n" );
+                Z_LOG2( "scheduler.wait", "block " << (i+1) << ": " << c << " items, " << timeout << "ms, remaining millis=" << remainingMillis << ".\n" );
 #           endif
-            int ret = MsgWaitForMultipleObjects( hCount, pHandles + (i * max_handles), FALSE, timeout, QS_ALLINPUT );
 
-            if( ret == WAIT_FAILED ) return ret;
-            else
+            int ret = MsgWaitForMultipleObjects( c, pHandles + (i * max_handles), FALSE, timeout, QS_ALLINPUT );
+            if( ret != WAIT_TIMEOUT ) {
                 if( ret >= WAIT_OBJECT_0 && ret < WAIT_OBJECT_0 + c )
-                    return i * max_handles + c;
+                    result = i * max_handles + ret;
                 else
-                    if( ret == WAIT_OBJECT_0 + MAXIMUM_WAIT_OBJECTS )
-                        Z_LOG2( "scheduler.wait", "windowsMessageHandling()\n" );
-//                        windowsMessageHandling();
-                    else
-                        if( ret == WAIT_TIMEOUT ) {
-                            if( now >= until )
-                                return WAIT_TIMEOUT;
-                            else
-                                throw_xc( "WAIT_TIMEOUT raised from MsgWaitForMultipleObjects" );
-                        }
+                    result = ret;
+                break;
+            }
+
+        }
+
+        if( result == SOS_WAIT_TIMEOUT ) {
+            now = Time::now();
+            if( now < until )
+                isWaiting = true;
         }
 
     }
 
+#       ifdef Z_DEBUG
+            Z_LOG2( "scheduler.wait", "result=" << result << "\n" );
+#       endif
+    return result;
+
 }
 //--------------------------------------------------------------------------Wait_handles::as_string
+
+int Wait_handles::calculateStepTimeout(int timeoutCounter)
+{
+    return max (min(timeoutCounter / 10, 1000), 1);
+}
 
 string Wait_handles::as_string() 
 {

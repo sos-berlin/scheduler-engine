@@ -1030,7 +1030,8 @@ void Spooler::register_process_handle( Process_handle p )
 #   ifdef _DEBUG
         for( int i = 0; i < NO_OF( _process_handles ); i++ )
         {
-            if( _process_handles[i] == p )  z::throw_xc( "register_process_handle" );              // Bereits registriert
+//            if( _process_handles[i] == p )  z::throw_xc( "register_process_handle" );              // Bereits registriert
+            if( _process_handles[i] == p ) _log->warn( message_string("SCHEDULER-713", hex_from_int((int)p) ) );         // JS-471: process-handle bereits registriert
         }
 #   endif
 

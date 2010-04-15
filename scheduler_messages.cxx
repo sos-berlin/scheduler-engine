@@ -496,6 +496,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-710", "Delayed command <scheduler_log.log_categories.reset> has been executed" },
     { "SCHEDULER-711", "Step has run for $2s, which is shorter than the expected duration of $1" },
     { "SCHEDULER-712", "Step runs longer than the expected duration of $1" },
+    { "SCHEDULER-713", "Process handle $1 is already registered" },
     {}
 };
 } //namespace sos

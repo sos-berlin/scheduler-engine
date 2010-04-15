@@ -10,6 +10,37 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+		<change date="2010-04-13" version="2.1.0" subversion_revision="6065">
+        <revision jira="JS-421" type="correction" title="Umgebungsvariable zwischen Scripten werden jetzt richtig übergeben.">
+            <description>
+	            Shell-Scripte können Umgebungsvariablen, die von vorhergehenden Scripten gesetzt worden sind, jetzt korrekt auslesen.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+        <revision jira="JS-409" type="modification" title="Startzeitpunkt eines Jobs kann jetzt beliebig festgelegt werden.">
+            <description>
+	            Der Startzeitpunkt eines Jobs kann jetzt um mehr als 24 Stunden in die Zukunft gelegt werrden.
+            </description>
+        </revision>
+    </change>
+		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+        <revision jira="JS-444" type="correction" title="Auch für Monitore werden includes in der laufenden scheduler-Instanz aufgelöst und an den monitor-Prozess übergeben.">
+            <description>
+	            Die mit dem Attribute live_file bezeichnete Datei wird jetzt bei Änderung nachgeladen, dazu muß die Datei LOKAL abgelegt sein.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+        <revision jira="JS-457" type="correction" title="Zeitstempel des Jobs jetzt komplett in UTC">
+            <description>
+	            Der Zeitstempel des Jobs wird jetzt in UTC-Zeit geliefert.
+            </description>
+        </revision>
+    </change>
+
   <change date="2010-03-23" version="2.1.0" subversion_revision="6070">
     <revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES bei Verwendung von Monitoren unter UNIX möglich">
     </revision>

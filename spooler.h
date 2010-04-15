@@ -114,8 +114,11 @@ extern const double             delete_temporary_files_retry;
  */
 //    const int                   max_processes                 =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
 //    const int                   max_communication_connections =    25;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
-    const int                   max_processes                 =    200;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_connections =    800;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
+
+// Diese Grenzen sind zunächst für Testzwecke und sollten kurzfristig auf die UNIX-Grenzen angeglichen werden.
+// Darüber hinaus gehende Grenzen sollten extra beauftragt werden.
+    const int                   max_processes                 =    1000;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_connections =   10000;   // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten, inkl. udp und listen()
                                                                           // 2007-09-11  Neues Handle für Folder_subsystem
                                                                           // 2007-12-27  Neues Handle für supervisor::Configuration_observer
                                                                           // 2008-02-06  Neues Handle für Remote_configuration_observer

@@ -1,354 +1,903 @@
 <?xml version="1.0" encoding="Windows-1252"?>
-<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Stefan Schädlich (Schering AG) -->
-<VisualStudioProject ProjectType="Visual C++" Version="9,00" Name="scheduler" ProjectGUID="{0819E974-DE97-42C2-BA44-210E476C11F1}" RootNamespace="scheduler" TargetFrameworkVersion="131072">
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9,00"
+	Name="scheduler"
+	ProjectGUID="{0819E974-DE97-42C2-BA44-210E476C11F1}"
+	RootNamespace="scheduler"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
-		<Platform Name="Win32"/>
+		<Platform
+			Name="Win32"
+		/>
 	</Platforms>
 	<ToolFiles>
 	</ToolFiles>
 	<Configurations>
-		<Configuration Name="Release|Win32" OutputDirectory="../bin" IntermediateDirectory="Release" ConfigurationType="1" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops" UseOfMFC="0" ATLMinimizesCRunTimeLibraryUsage="false" CharacterSet="2">
-			<Tool Name="VCPreBuildEventTool" CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"/>
-			<Tool Name="VCCustomBuildTool" CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;" AdditionalDependencies="" Outputs="doc\register_data.xml"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool" TypeLibraryName=".\Release/spooler.tlb" HeaderFileName=""/>
-			<Tool Name="VCCLCompilerTool" AdditionalOptions="/Zm130" Optimization="2" AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32" PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE" StringPooling="true" RuntimeLibrary="0" BufferSecurityCheck="true" ForceConformanceInForLoopScope="true" RuntimeTypeInfo="true" UsePrecompiledHeader="2" PrecompiledHeaderThrough="spooler.h" PrecompiledHeaderFile=".\Release/spooler.pch" AssemblerOutput="2" AssemblerListingLocation="$(IntDir)/" ObjectFile="$(IntDir)/" ProgramDataBaseFileName="$(IntDir)/vc70.pdb" BrowseInformation="1" WarningLevel="3" SuppressStartupBanner="true" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="1031"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLinkerTool" AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib" OutputFile="$(OutDir)/scheduler.exe" LinkIncremental="1" SuppressStartupBanner="true" GenerateManifest="false" DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetPath).pdb" GenerateMapFile="true" MapFileName="$(TargetPath).map" MapExports="true" SubSystem="1" OptimizeReferences="2" LinkTimeCodeGeneration="0" RandomizedBaseAddress="1" DataExecutionPrevention="0" ImportLibrary="$(OutDir)/scheduler.lib" TargetMachine="1"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCManifestTool" EmbedManifest="false"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool" OutputFile="$(IntDir)/$(ProjectName).bsc"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCAppVerifierTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="../bin"
+			IntermediateDirectory="Release"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;"
+				AdditionalDependencies=""
+				Outputs="doc\register_data.xml"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/spooler.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zm130"
+				Optimization="2"
+				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="spooler.h"
+				PrecompiledHeaderFile=".\Release/spooler.pch"
+				AssemblerOutput="2"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
+				BrowseInformation="1"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1031"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
+				OutputFile="$(OutDir)/scheduler.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				GenerateManifest="false"
+				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetPath).pdb"
+				GenerateMapFile="true"
+				MapFileName="$(TargetPath).map"
+				MapExports="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				LinkTimeCodeGeneration="0"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				ImportLibrary="$(OutDir)/scheduler.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+				EmbedManifest="false"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
-		<Configuration Name="Debug|Win32" OutputDirectory="../bind" IntermediateDirectory="Debug" ConfigurationType="2" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops" UseOfMFC="0" ATLMinimizesCRunTimeLibraryUsage="false" CharacterSet="2">
-			<Tool Name="VCPreBuildEventTool" CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"/>
-			<Tool Name="VCCustomBuildTool" CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;" AdditionalDependencies="" Outputs="doc\register_data.xml"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool" TypeLibraryName=".\Debug/spooler.tlb" HeaderFileName=""/>
-			<Tool Name="VCCLCompilerTool" AdditionalOptions="/Zm200" Optimization="4" InlineFunctionExpansion="1" EnableIntrinsicFunctions="true" AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32" PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE" StringPooling="true" MinimalRebuild="true" BasicRuntimeChecks="3" SmallerTypeCheck="false" RuntimeLibrary="1" BufferSecurityCheck="true" EnableFunctionLevelLinking="true" ForceConformanceInForLoopScope="true" RuntimeTypeInfo="true" UsePrecompiledHeader="2" PrecompiledHeaderThrough="spooler.h" PrecompiledHeaderFile=".\Debug/spooler.pch" AssemblerListingLocation="$(IntDir)/" ObjectFile="$(IntDir)/" ProgramDataBaseFileName="$(IntDir)/vc70.pdb" BrowseInformation="0" WarningLevel="3" SuppressStartupBanner="true" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="1031"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLinkerTool" AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib" OutputFile="$(OutDir)\scheduler.dll" LinkIncremental="2" SuppressStartupBanner="true" GenerateManifest="false" DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetPath).pdb" GenerateMapFile="true" MapFileName="$(TargetPath).map" SubSystem="1" RandomizedBaseAddress="1" DataExecutionPrevention="0" ImportLibrary="scheduler.lib" TargetMachine="1"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCManifestTool" EmbedManifest="false"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool" OutputFile="$(IntDir)/$(ProjectName).bsc"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCAppVerifierTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="../bind"
+			IntermediateDirectory="Debug"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx&#x0D;&#x0A;&#x0D;&#x0A;echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx&#x0D;&#x0A;perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="cd $(ProjectDir)&#x0D;&#x0A;copy scheduler.xsd doc\xml\&#x0D;&#x0A;&#x0D;&#x0A;cd $(ProjectDir)\doc&#x0D;&#x0A;cd&#x0D;&#x0A;echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&#x0D;&#x0A;bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml&quot;&#x0D;&#x0A;"
+				AdditionalDependencies=""
+				Outputs="doc\register_data.xml"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug/spooler.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zm200"
+				Optimization="4"
+				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				StringPooling="true"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="false"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="true"
+				EnableFunctionLevelLinking="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="spooler.h"
+				PrecompiledHeaderFile=".\Debug/spooler.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1031"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
+				OutputFile="$(OutDir)\scheduler.dll"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				GenerateManifest="false"
+				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetPath).pdb"
+				GenerateMapFile="true"
+				MapFileName="$(TargetPath).map"
+				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				ImportLibrary="scheduler.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+				EmbedManifest="false"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter Name="Quellcodedateien" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File RelativePath="_precompiled_headers.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="1"/>
+		<Filter
+			Name="Quellcodedateien"
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
+			<File
+				RelativePath="_precompiled_headers.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="1"/>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-			</File>
-			<File RelativePath=".\cluster.cxx">
-			</File>
-			<File RelativePath=".\database.cxx">
-			</File>
-			<File RelativePath=".\directory_observer.cxx">
-			</File>
-			<File RelativePath=".\file_logger.cxx">
-			</File>
-			<File RelativePath=".\folder.cxx">
-			</File>
-			<File RelativePath=".\include.cxx">
-			</File>
-			<File RelativePath=".\java_subsystem.cxx">
-			</File>
-			<File RelativePath=".\lock.cxx">
-			</File>
-			<File RelativePath=".\Module_monitor_instances.cxx">
-			</File>
-			<File RelativePath=".\path.cxx">
-			</File>
-			<File RelativePath=".\register.cxx">
-			</File>
-			<File RelativePath=".\schedule.cxx">
-			</File>
-			<File RelativePath=".\scheduler_client.cxx">
-			</File>
-			<File RelativePath=".\scheduler_object.cxx">
-			</File>
-			<File RelativePath=".\scheduler_script.cxx">
-			</File>
-			<File RelativePath=".\spooler.cxx">
-			</File>
-			<File RelativePath=".\spooler_com.cxx">
-			</File>
-			<File RelativePath=".\spooler_command.cxx">
-			</File>
-			<File RelativePath=".\spooler_common.cxx">
-			</File>
-			<File RelativePath=".\spooler_communication.cxx">
-			</File>
-			<File RelativePath=".\spooler_config.cxx">
-			</File>
-			<File RelativePath=".\spooler_dll.cxx">
-			</File>
-			<File RelativePath=".\spooler_dll_java.cxx">
-			</File>
-			<File RelativePath=".\spooler_embedded_files.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath=".\spooler_embedded_files_z.cxx">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+			<File
+				RelativePath=".\cluster.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\database.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\directory_observer.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\file_logger.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\folder.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\include.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\java_subsystem.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\lock.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\Module_monitor_instances.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\path.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\register.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\schedule.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\scheduler_client.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\scheduler_object.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\scheduler_script.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_com.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_command.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_common.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_communication.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_config.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_dll.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_dll_java.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_embedded_files.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath=".\spooler_event.cxx">
+			<File
+				RelativePath=".\spooler_embedded_files_z.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
-			<File RelativePath=".\spooler_http.cxx">
+			<File
+				RelativePath=".\spooler_event.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_job.cxx">
+			<File
+				RelativePath=".\spooler_http.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_log.cxx">
+			<File
+				RelativePath=".\spooler_job.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_mail.cxx">
+			<File
+				RelativePath=".\spooler_log.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module.cxx">
+			<File
+				RelativePath=".\spooler_mail.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_com.cxx">
+			<File
+				RelativePath=".\spooler_module.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_internal.cxx">
+			<File
+				RelativePath=".\spooler_module_com.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_java.cxx">
+			<File
+				RelativePath=".\spooler_module_internal.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_process.cxx">
+			<File
+				RelativePath=".\spooler_module_java.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_remote.cxx">
+			<File
+				RelativePath=".\spooler_module_process.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_remote_server.cxx">
+			<File
+				RelativePath=".\spooler_module_remote.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_order.cxx">
+			<File
+				RelativePath=".\spooler_module_remote_server.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_order_file.cxx">
+			<File
+				RelativePath=".\spooler_order.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_process.cxx">
+			<File
+				RelativePath=".\spooler_order_file.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_security.cxx">
+			<File
+				RelativePath=".\spooler_process.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_service.cxx">
+			<File
+				RelativePath=".\spooler_security.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_subprocess.cxx">
+			<File
+				RelativePath=".\spooler_service.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_task.cxx">
+			<File
+				RelativePath=".\spooler_subprocess.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_thread.cxx">
+			<File
+				RelativePath=".\spooler_task.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_time.cxx">
+			<File
+				RelativePath=".\spooler_thread.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_wait.cxx">
+			<File
+				RelativePath=".\spooler_time.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_web_service.cxx">
+			<File
+				RelativePath=".\spooler_wait.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_xslt_stylesheet.cxx">
+			<File
+				RelativePath=".\spooler_web_service.cxx"
+				>
 			</File>
-			<File RelativePath=".\spooler_xslt_stylesheet.h">
+			<File
+				RelativePath=".\spooler_xslt_stylesheet.cxx"
+				>
 			</File>
-			<File RelativePath=".\standing_order.cxx">
+			<File
+				RelativePath=".\spooler_xslt_stylesheet.h"
+				>
 			</File>
-			<File RelativePath=".\subsystem.cxx">
+			<File
+				RelativePath=".\standing_order.cxx"
+				>
 			</File>
-			<File RelativePath=".\supervisor.cxx">
+			<File
+				RelativePath=".\subsystem.cxx"
+				>
 			</File>
-			<File RelativePath=".\supervisor_client.cxx">
+			<File
+				RelativePath=".\supervisor.cxx"
+				>
 			</File>
-			<File RelativePath=".\version.cxx">
+			<File
+				RelativePath=".\supervisor_client.cxx"
+				>
 			</File>
-			<File RelativePath=".\xml_client_connection.cxx">
+			<File
+				RelativePath=".\version.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\xml_client_connection.cxx"
+				>
 			</File>
 		</Filter>
-		<Filter Name="Header-Dateien" Filter="h;hpp;hxx;hm;inl">
-			<File RelativePath=".\cluster.h">
+		<Filter
+			Name="Header-Dateien"
+			Filter="h;hpp;hxx;hm;inl"
+			>
+			<File
+				RelativePath=".\cluster.h"
+				>
 			</File>
-			<File RelativePath="database.h">
+			<File
+				RelativePath="database.h"
+				>
 			</File>
-			<File RelativePath=".\directory_observer.h">
+			<File
+				RelativePath=".\directory_observer.h"
+				>
 			</File>
-			<File RelativePath=".\file_logger.h">
+			<File
+				RelativePath=".\file_logger.h"
+				>
 			</File>
-			<File RelativePath=".\folder.h">
+			<File
+				RelativePath=".\folder.h"
+				>
 			</File>
-			<File RelativePath=".\include.h">
+			<File
+				RelativePath=".\include.h"
+				>
 			</File>
-			<File RelativePath=".\java_subsystem.h">
+			<File
+				RelativePath=".\java_subsystem.h"
+				>
 			</File>
-			<File RelativePath=".\lock.h">
+			<File
+				RelativePath=".\lock.h"
+				>
 			</File>
-			<File RelativePath=".\Module_monitor_instances.h">
+			<File
+				RelativePath=".\Module_monitor_instances.h"
+				>
 			</File>
-			<File RelativePath=".\path.h">
+			<File
+				RelativePath=".\path.h"
+				>
 			</File>
-			<File RelativePath=".\register.h">
+			<File
+				RelativePath=".\register.h"
+				>
 			</File>
-			<File RelativePath=".\schedule.h">
+			<File
+				RelativePath=".\schedule.h"
+				>
 			</File>
-			<File RelativePath=".\scheduler_object.h">
+			<File
+				RelativePath=".\scheduler_object.h"
+				>
 			</File>
-			<File RelativePath=".\scheduler_script.h">
+			<File
+				RelativePath=".\scheduler_script.h"
+				>
 			</File>
-			<File RelativePath="spooler.h">
+			<File
+				RelativePath="spooler.h"
+				>
 			</File>
-			<File RelativePath="spooler.odl">
+			<File
+				RelativePath="spooler.odl"
+				>
 			</File>
-			<File RelativePath="spooler_com.h">
+			<File
+				RelativePath="spooler_com.h"
+				>
 			</File>
-			<File RelativePath="spooler_command.h">
+			<File
+				RelativePath="spooler_command.h"
+				>
 			</File>
-			<File RelativePath="spooler_common.h">
+			<File
+				RelativePath="spooler_common.h"
+				>
 			</File>
-			<File RelativePath="spooler_communication.h">
+			<File
+				RelativePath="spooler_communication.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_event.h">
+			<File
+				RelativePath=".\spooler_event.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_http.h">
+			<File
+				RelativePath=".\spooler_http.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_job.h">
+			<File
+				RelativePath=".\spooler_job.h"
+				>
 			</File>
-			<File RelativePath="spooler_log.h">
+			<File
+				RelativePath="spooler_log.h"
+				>
 			</File>
-			<File RelativePath="spooler_mail.h">
+			<File
+				RelativePath="spooler_mail.h"
+				>
 			</File>
-			<File RelativePath="spooler_module.h">
+			<File
+				RelativePath="spooler_module.h"
+				>
 			</File>
-			<File RelativePath="spooler_module_com.h">
+			<File
+				RelativePath="spooler_module_com.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_internal.h">
+			<File
+				RelativePath=".\spooler_module_internal.h"
+				>
 			</File>
-			<File RelativePath="spooler_module_java.h">
+			<File
+				RelativePath="spooler_module_java.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_module_process.h">
+			<File
+				RelativePath=".\spooler_module_process.h"
+				>
 			</File>
-			<File RelativePath="spooler_module_remote.h">
+			<File
+				RelativePath="spooler_module_remote.h"
+				>
 			</File>
-			<File RelativePath="spooler_module_remote_server.h">
+			<File
+				RelativePath="spooler_module_remote_server.h"
+				>
 			</File>
-			<File RelativePath="spooler_order.h">
+			<File
+				RelativePath="spooler_order.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_order_file.h">
+			<File
+				RelativePath=".\spooler_order_file.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_process.h">
+			<File
+				RelativePath=".\spooler_process.h"
+				>
 			</File>
-			<File RelativePath="spooler_security.h">
+			<File
+				RelativePath="spooler_security.h"
+				>
 			</File>
-			<File RelativePath="spooler_service.h">
+			<File
+				RelativePath="spooler_service.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_subprocess.h">
+			<File
+				RelativePath=".\spooler_subprocess.h"
+				>
 			</File>
-			<File RelativePath="spooler_task.h">
+			<File
+				RelativePath="spooler_task.h"
+				>
 			</File>
-			<File RelativePath="spooler_thread.h">
+			<File
+				RelativePath="spooler_thread.h"
+				>
 			</File>
-			<File RelativePath="spooler_time.h">
+			<File
+				RelativePath="spooler_time.h"
+				>
 			</File>
-			<File RelativePath="spooler_version.h">
+			<File
+				RelativePath="spooler_version.h"
+				>
 			</File>
-			<File RelativePath="spooler_wait.h">
+			<File
+				RelativePath="spooler_wait.h"
+				>
 			</File>
-			<File RelativePath=".\spooler_web_service.h">
+			<File
+				RelativePath=".\spooler_web_service.h"
+				>
 			</File>
-			<File RelativePath=".\standing_order.h">
+			<File
+				RelativePath=".\standing_order.h"
+				>
 			</File>
-			<File RelativePath=".\subsystem.h">
+			<File
+				RelativePath=".\subsystem.h"
+				>
 			</File>
-			<File RelativePath=".\supervisor.h">
+			<File
+				RelativePath=".\supervisor.h"
+				>
 			</File>
-			<File RelativePath=".\supervisor_client.h">
+			<File
+				RelativePath=".\supervisor_client.h"
+				>
 			</File>
-			<File RelativePath=".\xml_client_connection.h">
+			<File
+				RelativePath=".\xml_client_connection.h"
+				>
 			</File>
 		</Filter>
-		<Filter Name="Ressourcendateien" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
-			<File RelativePath="spooler.rc">
-				<FileConfiguration Name="Release|Win32">
-					<Tool Name="VCResourceCompilerTool" PreprocessorDefinitions="" AdditionalIncludeDirectories="$(OUTDIR)"/>
+		<Filter
+			Name="Ressourcendateien"
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
+			<File
+				RelativePath="spooler.rc"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions=""
+						AdditionalIncludeDirectories="$(OUTDIR)"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Debug|Win32">
-					<Tool Name="VCResourceCompilerTool" PreprocessorDefinitions="/D_DEBUG" AdditionalIncludeDirectories="$(OUTDIR)"/>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="/D_DEBUG"
+						AdditionalIncludeDirectories="$(OUTDIR)"
+					/>
 				</FileConfiguration>
-				<FileConfiguration Name="Release-DLL|Win32">
-					<Tool Name="VCResourceCompilerTool" PreprocessorDefinitions="" AdditionalIncludeDirectories="$(OUTDIR)"/>
+				<FileConfiguration
+					Name="Release-DLL|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions=""
+						AdditionalIncludeDirectories="$(OUTDIR)"
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>
-		<Filter Name="html">
-			<File RelativePath=".\html\jz\browser_dependencies.js">
+		<Filter
+			Name="html"
+			>
+			<File
+				RelativePath=".\html\jz\browser_dependencies.js"
+				>
 			</File>
-			<File RelativePath=".\html\jz\details_frame.html">
+			<File
+				RelativePath=".\html\jz\details_frame.html"
+				>
 			</File>
-			<File RelativePath=".\html\jz\index.html">
+			<File
+				RelativePath=".\html\jz\index.html"
+				>
 			</File>
-			<File RelativePath=".\html\jz\left_frame.html">
+			<File
+				RelativePath=".\html\jz\left_frame.html"
+				>
 			</File>
-			<File RelativePath=".\html\jz\popup_menu.js">
+			<File
+				RelativePath=".\html\jz\popup_menu.js"
+				>
 			</File>
-			<File RelativePath=".\html\jz\scheduler.css">
+			<File
+				RelativePath=".\html\jz\scheduler.css"
+				>
 			</File>
-			<File RelativePath=".\html\jz\scheduler.js">
+			<File
+				RelativePath=".\html\jz\scheduler.js"
+				>
 			</File>
-			<File RelativePath=".\html\jz\scheduler.xslt">
+			<File
+				RelativePath=".\html\jz\scheduler.xslt"
+				>
 			</File>
-			<File RelativePath=".\html\jz\show_log.js">
+			<File
+				RelativePath=".\html\jz\show_log.js"
+				>
 			</File>
-			<File RelativePath=".\html\jz\translation_de.js">
+			<File
+				RelativePath=".\html\jz\translation_de.js"
+				>
 			</File>
 		</Filter>
-		<File RelativePath=".\scheduler_messages.cxx">
+		<File
+			RelativePath=".\scheduler_messages.cxx"
+			>
 		</File>
-		<File RelativePath=".\doc\messages\scheduler_messages.xml">
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VCCustomBuildTool" Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx" CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;" AdditionalDependencies="..\zschimmer\messages_to_c++.xslt" Outputs="$(InputDir)message.cxx"/>
+		<File
+			RelativePath=".\doc\messages\scheduler_messages.xml"
+			>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx"
+					CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;"
+					AdditionalDependencies="..\zschimmer\messages_to_c++.xslt"
+					Outputs="$(InputDir)message.cxx"
+				/>
 			</FileConfiguration>
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VCCustomBuildTool" Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx" CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;" AdditionalDependencies="..\zschimmer\messages_to_c++.xslt" Outputs="$(InputDir)message.cxx"/>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx"
+					CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;"
+					AdditionalDependencies="..\zschimmer\messages_to_c++.xslt"
+					Outputs="$(InputDir)message.cxx"
+				/>
 			</FileConfiguration>
-			<FileConfiguration Name="Release-DLL|Win32">
-				<Tool Name="VCCustomBuildTool" Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx" CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;" AdditionalDependencies="..\zschimmer\messages_to_c++.xslt" Outputs="$(InputDir)message.cxx"/>
+			<FileConfiguration
+				Name="Release-DLL|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx"
+					CommandLine="xsltproc ..\zschimmer\messages_to_c++.xslt $(InputPath) &gt;$(InputName).cxx&#x0D;&#x0A;"
+					AdditionalDependencies="..\zschimmer\messages_to_c++.xslt"
+					Outputs="$(InputDir)message.cxx"
+				/>
 			</FileConfiguration>
 		</File>
-		<File RelativePath="..\kram\sosmain.cxx">
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+		<File
+			RelativePath="..\kram\sosmain.cxx"
+			>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
 			</FileConfiguration>
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VCCLCompilerTool" Optimization="0" PreprocessorDefinitions="" BasicRuntimeChecks="3" UsePrecompiledHeader="0" BrowseInformation="1"/>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					PreprocessorDefinitions=""
+					BasicRuntimeChecks="3"
+					UsePrecompiledHeader="0"
+					BrowseInformation="1"
+				/>
 			</FileConfiguration>
-			<FileConfiguration Name="Release-DLL|Win32">
-				<Tool Name="VCCLCompilerTool" UsePrecompiledHeader="0"/>
+			<FileConfiguration
+				Name="Release-DLL|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
 			</FileConfiguration>
 		</File>
 	</Files>
