@@ -127,6 +127,12 @@ const string                    variable_set_name_for_substitution  = "$";      
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
 extern const char               _author_[]                          = "\n\n" "Scheduler, 2000-2007 Joacim Zschimmer, Zschimer GmbH, http://www.zschimmer.com\n\n";
 
+/**
+* \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden
+* \detail
+*/
+Embedded_and_dynamic_files embedded_and_dynamic_files = { embedded_files, new vector<Dynamic_file*> };
+
 //-----------------------------------------------------------------------------------Error_settings
 
 struct Error_settings
@@ -719,8 +725,17 @@ Spooler::Spooler()
     _com_spooler  = new Com_spooler( this );
     _variables    = new Com_variable_set();
 
-    if( _validate_xml )  _schema.read( xml::Document_ptr( embedded_files.string_from_embedded_file( xml_schema_path ) ) );
+    if( _validate_xml )  _schema.read( xml::Document_ptr( 
 
+		/**
+		* \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
+		* \detail
+		*/
+//		embedded_files.string_from_embedded_file( xml_schema_path ) 
+		sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
+		) );
+
+	// nicht die Reihenfolge ändern !!!!!!
     _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
     _folder_subsystem           = new_folder_subsystem( this );
     _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
@@ -774,6 +789,7 @@ void Spooler::close()
     set_ctrl_c_handler( false );
 
     // In der Reihenfolder der Abhängigkeiten löschen:
+	// nicht die Reihenfolge ändern !!!!!!
     _standing_order_subsystem   = NULL;
     _order_subsystem            = NULL;
     _task_subsystem             = NULL;
@@ -1024,7 +1040,7 @@ void Spooler::print_xml_child_elements_for_event( String_stream* s, Scheduler_ev
 }
 
 //-----------------------------------------------------------------Spooler::register_process_handle
-
+// registrierung aller Kindprozesse (wird beim beenden benötigt)
 void Spooler::register_process_handle( Process_handle p )
 {
 #   ifdef _DEBUG
@@ -1550,6 +1566,11 @@ void Spooler::load_arg()
 #           ifdef Z_WINDOWS
                 else if( opt.flag( "debug-break"        ) )  ;   // Bereits von spooler_main() verarbeitet
 #           endif
+			else
+			//! \newoption Neue Option 'use-xml-schema' auf Gültigkeit prüfen
+            if( opt.with_value( "use-xml-schema"        ) )  ;   // wird in sos::spooler_main vearbeitet
+			else
+            if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
             else
                 throw_sos_option_error( opt );
         }
@@ -2276,7 +2297,7 @@ void Spooler::run()
 
     //---------------------------------------------------------------------------------------------
 
-    while(1)  // Die große Haupt-Schleife
+    while(1)  // Die große Hauptschleife
     {
       //bool    log_wait          = _print_time_every_second || static_log_categories.is_set( &scheduler_wait_log_category );
         Time    wait_until        = Time::never;
@@ -3533,7 +3554,7 @@ void __cdecl delete_new_spooler( void* )
 }
 
 #endif
-//-------------------------------------------------------------------------------------spooler_main
+//------------------------------------------------------------------------------------- sos::spooler_main
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
@@ -3646,6 +3667,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         bool    do_remove_service   = false;
         bool    is_service_set      = false;
         bool    is_backup           = false;
+		/**
+		* \newoption lokale Variabel zur Aufnahme der neuen Option 'use-xml-schema'
+		* \code */
+		string	use_external_schema = "";
+		/**
+		  \endcode
+		*/
         string  id;
         string  service_name, service_display;
         string  service_description = "Job scheduler for process automation";
@@ -3676,7 +3704,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
           //else
             if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
-            if( opt.flag      ( "show-xml-schema"  ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() ); }
+            if( opt.flag      ( "show-xml-schema"  ) )  {
+				if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", 
+//				scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() 
+				sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path).c_str()
+					); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
@@ -3746,6 +3778,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 }
                 else
                 if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
+				else
+				//! \newoption Optionswert in lokaler Variable für spätere Auswertung merken
+				if( opt.with_value( "use-xml-schema" ) )
+				{
+					use_external_schema = opt.value();
+					/*\\< Dynamisches XSD sofort einlesen und statisches "ersetzen". Wenn das erst nach verarbeiten aller
+					Optionen gemacht wird, dann steht das dynamische XSD noch nicht für die Option -show-xml-schema zur Verfügung 
+					*/
+					sos::scheduler::embedded_and_dynamic_files.set_dynamic_file(use_external_schema, sos::scheduler::xml_schema_path);
+				}				
                 else
                     call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
@@ -3784,6 +3826,22 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " << scheduler::version_string << "\n" );
 
+		/**
+		* \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
+		* \detail
+		* Der scheduler arbeitet derzeit mit einem festen, in einem c++-Modul gespeicherten (einkompilierten) Schema. Mit
+		* der geannnten Option kann ein variables Schema verwendet werden, welches über den Standard hinaus
+		* gehende Namensbereiche enthalten kann.
+		* \newoption Auswertung des übergebenen Optionswertes
+		*/
+        if( use_external_schema != "" ) 
+		{
+			Z_LOG2( "scheduler", "using dynamic schema: " << use_external_schema << "\n" );
+			//zschimmer::embedded_and_dynamic_files
+			string xsd_schema_content = sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path);
+			// xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
+			Z_LOG2( "scheduler", xsd_schema_content << "\n" );
+		}
 
         if( is_scheduler_client )
         {
