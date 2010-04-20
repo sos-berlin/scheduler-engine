@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../scheduler.xsd"
+     title="job-js-471-for-remote-execution"
+     order="no"
+     tasks="100"
+     process_class="js471remote8of9">
+    <params/>
+    <script language="javascript">
+        <![CDATA[
+function spooler_process() 
+{
+  // var max = 200000000;
+     var max =   1000000;
+  spooler_log.info("Hallo Welt vor der loop, max=" + max);
+	for(var i=1;i<=max;i++)
+	{
+		Math.sin(3)*Math.sin(3); 
+	}
+	spooler_log.info("Hallo Welt nach der loop");
+	
+	return false; /* order=no und return true => Job-Scheduler ruft spooler_process immer wieder auf. */
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>
