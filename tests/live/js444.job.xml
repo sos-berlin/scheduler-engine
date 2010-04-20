@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Test Monitor js-444"
+     process_class="8of9">
+    <script language="javascript">
+        <include file="config/live/js444.js"/>
+    </script>
+    <monitor name="monitor0"
+             ordering="0">
+        <script language="shell">
+            <![CDATA[
+dir
+            ]]>
+        </script>
+    </monitor>
+    <run_time/>
+</job>

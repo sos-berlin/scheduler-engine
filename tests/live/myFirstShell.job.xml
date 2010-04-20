@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Mein erster Testjob (shellcommand)">
+    <script language="shell">
+        <![CDATA[
+echo "Hallo Welt"
+        ]]>
+    </script>
+    <run_time begin="15:00"
+              end="16:00"
+              once="yes">
+        <holidays>
+            <include file="C:\Program Files\scheduler\config\live\myHolidays.xml"/>
+        </holidays>
+    </run_time>
+</job>

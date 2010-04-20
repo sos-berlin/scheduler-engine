@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Test Monitor js-444"
+     process_class="8of9">
+    <script language="javascript">
+        <![CDATA[
+var cnt = 0;
+
+// spooler_init() wird einmal nach dem Laden des Skripts gerufen.
+function spooler_open() {
+   spooler_log.info( "spooler_init wurde gerufen" );
+
+   // Bei Rückgabe von false wird spooler_exit aufgerufen
+   // return false;
+}
+
+// Wird zu Beginn einer Task gerufen.
+function spooler_open() {
+   spooler_log.info( "spooler_open wurde gerufen" );
+   // return=false bewirkt den Aufruf von spooler_close();
+   // sonst geht es mit spooler_process weiter
+   // return false;
+
+   // Auslösen eines Fehlers
+   // j = unknwon.dummy;
+
+}
+
+// spooler_process wird so lange gerufen, bis false zurück gegeben wird
+function spooler_process() {
+   if (cnt < 50000) {
+      cnt++;
+      spooler_log.info( "spooler_process wurde gerufen (" + cnt + ")" );
+      return true;
+   }
+   return false;
+}
+
+function spooler_close() {
+   spooler_log.info( "spooler_close wurde gerufen" );
+}
+
+// Wird nach spooler_close() gerufen, wenn kein Fehler vorliegt.
+function spooler_on_success() {
+   spooler_log.info( "spooler_on_success wurde gerufen" );
+}
+
+// Wird unmittelbar vor dem Schließen des Skripts gerufen.
+function spooler_exit() {
+   spooler_log.info( "spooler_exit wurde gerufen" );
+}
+
+function spooler_on_error() {
+	spooler_log.error( "es ist ein Fehler aufgetreten: " + spooler_task.error );
+}
+        ]]>
+    </script>
+    <run_time begin="16:15"
+              once="yes"/>
+</job>
