@@ -4282,7 +4282,13 @@
             </text>
         </message>
 
-      <!--message code="SCHEDULER-704">
+        <message code="SCHEDULER-714" weight="warn" object="Supervisor">
+            <text xml:lang="en">
+                <title>Scheduler <p1/> is already registered via connection <p2/>. This connection will be closed now. New connection is <p3/></title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-704">
             <text xml:lang="en">
                 <title>Database table <p1/> is being rebuild</title>
             </text>

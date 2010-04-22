@@ -305,7 +305,7 @@ struct Xml_operation : Communication::Operation
 struct Xml_operation_connection : Communication::Operation_connection
 {
                                 Xml_operation_connection    ( Communication::Connection* );
-
+                               ~Xml_operation_connection    ();
 
     ptr<Communication::Operation> new_operation             ()                                      { ptr<Xml_operation> result = Z_NEW( Xml_operation( this ) ); 
                                                                                                       return +result; }

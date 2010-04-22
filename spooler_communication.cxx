@@ -91,6 +91,17 @@ Xml_operation_connection::Xml_operation_connection( Communication::Connection* c
     _indent_string = connection->_read_socket == STDIN_FILENO? "  " : "";
 }
 
+//----------------------------------------------Xml_operation_connection::~Xml_operation_connection
+
+Xml_operation_connection::~Xml_operation_connection() 
+{ 
+    try {
+        if( _remote_scheduler )  
+            _remote_scheduler->connection_lost_event( (exception*)NULL ); 
+    }
+    catch( exception& x ) { Z_LOG2( "scheduler", "ERROR " << Z_FUNCTION << x.what() << "\n" ); }
+}
+
 //--------------------------------------------------Xml_operation_connection::connection_lost_event
 
 void Xml_operation_connection::connection_lost_event( const exception* x )

@@ -60,6 +60,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
 {
                                 Remote_scheduler            ( Supervisor* supervisor );
 
+    void                        register_me                 ( const xml::Element_ptr&, Communication::Operation*, const Host_and_port& ); 
     void                        connection_lost_event       ( const exception* );
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show );
@@ -90,6 +91,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     Time                       _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
+    Xml_operation_connection*  _connection_operation;
     bool                       _repeated_reading;
     Xc_copy                    _error;
     string                     _configuration_directory_name;
@@ -280,31 +282,12 @@ ptr<Command_response> Supervisor::execute_xml( const xml::Element_ptr& element, 
 
 void Supervisor::execute_register_remote_scheduler( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation )
 {
-    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
-    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
- 
     Host_and_port host_and_port ( communication_operation->_connection->peer_host(), register_remote_scheduler_element.int_getAttribute( "tcp_port" ) );
 
     ptr<Remote_scheduler> remote_scheduler = _remote_scheduler_register.get_or_null( host_and_port );
     if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler( this ) );
     
-    if ( remote_scheduler->_is_connected ) {
-        Z_LOG2("scheduler","remote scheduler ist bereits eine Verbindung zugeordnet: " << *remote_scheduler << "\n" );
-    }
-    
-    if ( Remote_scheduler_interface* r = xml_processor->_operation_connection->_remote_scheduler ) {
-        if ( r != remote_scheduler )
-            Z_LOG2("scheduler",*remote_scheduler << ": Der Verbindung ist bereits ein ANDERER remote scheduler zugeordnet: " << *r << " <-- " << *xml_processor->_operation_connection << "\n" );
-        else
-            Z_LOG2("scheduler","Der Verbindung ist bereits der SELBE remote scheduler zugeordnet: " << *r << " <-- " << *xml_processor->_operation_connection << "\n" );
-    }
-
-    remote_scheduler->_host_and_port = host_and_port;
-    remote_scheduler->_host_and_port._host.resolve_name();
-    remote_scheduler->set_dom( register_remote_scheduler_element );
-    remote_scheduler->_udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
-
-    xml_processor->_operation_connection->_remote_scheduler = +remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    remote_scheduler->register_me( register_remote_scheduler_element, communication_operation, host_and_port );
     _remote_scheduler_register.add( remote_scheduler );
 }
 
@@ -374,6 +357,41 @@ Remote_scheduler::Remote_scheduler( Supervisor* supervisor )
     _remote_configurations(supervisor->remote_configurations())
 {
     assert( _remote_configurations );
+}
+
+//--------------------------------------------------------------------Remote_scheduler::register_me
+
+void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_scheduler_element, Communication::Operation* communication_operation, 
+    const Host_and_port& host_and_port  ) 
+{
+    Xml_operation* xml_processor = dynamic_cast<Xml_operation*>( communication_operation );
+    if( !xml_processor )  z::throw_xc( "SCHEDULER-222", register_remote_scheduler_element.nodeName() );
+
+    Xml_operation_connection* connection_operation = xml_processor->_operation_connection;
+ 
+
+    if ( Remote_scheduler_interface* r = connection_operation->_remote_scheduler ) {
+        if ( r != this )
+            Z_LOG2("scheduler",*this << ": Der Verbindung ist bereits ein ANDERER remote scheduler zugeordnet: " << *r << " <-- " << *connection_operation << "\n" );
+        else
+            Z_LOG2("scheduler","Der Verbindung ist bereits der SELBE remote scheduler zugeordnet: " << *r << " <-- " << *connection_operation << "\n" );
+    }
+
+    if( _connection_operation  &&  _connection_operation != connection_operation ) {
+        _log->warn( message_string( "SCHEDULER-714", host_and_port.as_string(), _connection_operation->_connection->obj_name(), connection_operation->_connection->obj_name() ) );
+        _connection_operation->_connection->close();
+        _connection_operation = NULL;
+        _is_connected = false;
+    }
+
+
+    _connection_operation = connection_operation;
+    _host_and_port = host_and_port;
+    _host_and_port._host.resolve_name();
+    set_dom( register_remote_scheduler_element );
+    _udp_port = register_remote_scheduler_element.int_getAttribute( "udp_port", 0 );
+
+    connection_operation->_remote_scheduler = this;        // Remote_scheduler mit TCP-Verbindung verknüpfen
 }
 
 //--------------------------------------------------------Remote_scheduler::configuration_directory
@@ -769,8 +787,13 @@ string Remote_scheduler::obj_name() const
   
 void Remote_scheduler::connection_lost_event( const exception* x )
 {
+    // x kann NULL sein
+
+    Z_LOG2( "scheduler", Z_FUNCTION << " " << *this << "\n" );
+
     _disconnected_at = Time::now();
     _is_connected = false;
+    _connection_operation = NULL;
 
     Z_LOG2("scheduler",Z_FUNCTION << ": " << *this << "\n" );
     if( _logged_on )  _error = x;
