@@ -362,7 +362,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
             case s_registered:
             {
                 // Wird nach Verbindungsverlust nochmal durchlaufen
-
+                Z_DEBUG_ONLY( z::throw_xc("TESTEXCEPTION") );
                 if( _xml_client_connection->state() != Xml_client_connection::s_connected )  break;
 
 
@@ -428,6 +428,7 @@ bool Supervisor_client_connection::async_continue_( Continue_flags )
         if( _xml_client_connection ) 
         {
             _xml_client_connection->set_async_manager( NULL );
+            Z_DEBUG_ONLY(_xml_client_connection.copy());
             _xml_client_connection = NULL;
         }
 
