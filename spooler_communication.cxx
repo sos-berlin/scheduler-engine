@@ -93,7 +93,8 @@ Xml_operation_connection::Xml_operation_connection( Communication::Connection* c
 
 //----------------------------------------------Xml_operation_connection::~Xml_operation_connection
 
-Xml_operation_connection::~Xml_operation_connection() 
+/*! \change JS-481 TCP-Connection zu dem Workload-Scheduler schliessen */
+Xml_operation_connection::~Xml_operation_connection() 				
 { 
     try {
         if( _remote_scheduler )  
