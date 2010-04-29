@@ -115,10 +115,12 @@
             um Quell-Code, der in anderen Dateien steht, einzuziehen.
         </p>
 
+				<!-- 2010-04-27-SS-JS-444
         <p>
             Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
             wird die Datei auf dem entfernten Rechner gelesen.
         </p>
+        -->
 
         <p>
             Wenn der Scheduler die einzuziehende Datei nicht lesen kann:

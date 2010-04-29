@@ -357,6 +357,7 @@
         </command_option>
 
 
+				<!-- 2010-04-27-SS-JS-462 - siehe Option config
         <command_option name="configuraton-directory" title="Konfigurationsverzeichnis">
             <description>
                 <p>
@@ -369,6 +370,7 @@
                 </p>
             </description>
         </command_option>
+        -->
 
         <example>
             <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>

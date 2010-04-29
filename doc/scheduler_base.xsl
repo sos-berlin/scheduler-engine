@@ -2710,9 +2710,7 @@
 
         <p class="command_option">
             <xsl:element name="a">
-                <xsl:attribute name="name">
-                    option_<xsl:value-of select="@name"/>
-                </xsl:attribute>
+                <xsl:attribute name="name">#option_<xsl:value-of select="@name"/></xsl:attribute>
             </xsl:element>
 
             <b>
