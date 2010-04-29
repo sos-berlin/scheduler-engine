@@ -227,14 +227,14 @@ void Task::close()
 
     if( _lock_holder )  _lock_holder->release_locks(),  _lock_holder = NULL;
 
-    set_state( s_closed );
+    set_state_direct( s_closed );
 }
 
 //---------------------------------------------------------------------------------------Task::init
 
 void Task::init()
 {
-    set_state( s_loading );
+    set_state_direct( s_loading );
 
     _file_logger = Z_NEW( File_logger( _log ) );
     _file_logger->set_object_name( obj_name() );
@@ -274,6 +274,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"            , _id );
         task_element.setAttribute( "state"           , state_name() );
+
+        if( _enqueued_state )
+        task_element.setAttribute( "enqueued_state"  , state_name( _enqueued_state ) );
 
         if( _delayed_after_error_task_id )
         task_element.setAttribute( "delayed_after_error_task", _delayed_after_error_task_id );
@@ -328,6 +331,9 @@ xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Sho
                 }
             }
         }
+
+        if( _operation ) 
+            task_element.setAttribute( "operation", _operation->async_state_text() );
 
       //if( _lock_holder )  task_element.appendChild( _lock_holder->dom_element( document, show ) );
 
@@ -631,100 +637,127 @@ int Task::exit_code()
 
 void Task::set_state( State new_state )
 {
-    THREAD_LOCK_DUMMY( _lock )
+    _enqueued_state = new_state;
+
+    if( _operation ) {
+        // Verzögern bis Operation fertig ist. Siehe Aufruf von set_enqueued_state()
+    }
+    else {
+        set_enqueued_state();
+        assert( !_enqueued_state );
+    }
+}
+
+//-------------------------------------------------------------------------Task::set_enqueued_state
+
+void Task::set_enqueued_state()
+{
+    if( _enqueued_state ) {
+        set_state_direct( _enqueued_state );
+        _enqueued_state = s_none;
+    }
+}
+
+//---------------------------------------------------------------------------Task::set_state_direct
+
+void Task::set_state_direct( State new_state )
+{
+    if( _enqueued_state ) {
+        Z_LOG2( "scheduler", *this << " _enqueued_state=" + state_name( _enqueued_state ) + " verworfen" );
+        _enqueued_state = s_none;
+    }
+
+    if( new_state != s_running_waiting_for_order )  _idle_since = 0;
+
+    if( new_state != _state )
     {
-        if( new_state != s_running_waiting_for_order )  _idle_since = 0;
-
-        if( new_state != _state )
+        switch( _state )
         {
-            switch( _state )
-            {
-                case s_running:
-                    if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )  
-                    {
-                        _lock_holder->release_locks( lock_requestor );
-                        lock_requestor->dequeue_lock_requests();
-                    }
-
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        switch( new_state )
-        {
-            case s_waiting_for_process:
-                _next_time = Time::never;
-                break;
-
-            case s_opening_waiting_for_locks:
-                _next_time = Time::never;
-                break;
-
-            case s_running_process:
-                _next_time = Time::never;
-                break;
-
-            case s_running_delayed:
-                _next_time = _next_spooler_process;
-                break;
-
-            case s_running_waiting_for_locks:
-                _next_time = Time::never;
-                break;
-
-            case s_running_waiting_for_order:
-            {
-                _next_time  = _job->combined_job_nodes()->next_time();
-
-                if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
-
-                if( _idle_timeout_at != Time::never )
+            case s_running:
+                if( lock::Requestor* lock_requestor = _lock_requestors[ lock_level_process_api ] )  
                 {
-                    _next_time = min( _next_time, _idle_timeout_at );
+                    _lock_holder->release_locks( lock_requestor );
+                    lock_requestor->dequeue_lock_requests();
                 }
 
                 break;
-            }
 
             default:
-                _next_time = 0;
+                break;
+        }
+    }
+
+    switch( new_state )
+    {
+        case s_waiting_for_process:
+            _next_time = Time::never;
+            break;
+
+        case s_opening_waiting_for_locks:
+            _next_time = Time::never;
+            break;
+
+        case s_running_process:
+            _next_time = Time::never;
+            break;
+
+        case s_running_delayed:
+            _next_time = _next_spooler_process;
+            break;
+
+        case s_running_waiting_for_locks:
+            _next_time = Time::never;
+            break;
+
+        case s_running_waiting_for_order:
+        {
+            _next_time  = _job->combined_job_nodes()->next_time();
+
+            if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
+
+            if( _idle_timeout_at != Time::never )
+            {
+                _next_time = min( _next_time, _idle_timeout_at );
+            }
+
+            break;
         }
 
+        default:
+            _next_time = 0;
+    }
 
-        if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
-        if( _end )  _next_time = 0;   // Falls vor set_state() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
+    if( _next_time && !_let_run && _job )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
-        if( new_state != _state )
+    if( _end )  _next_time = 0;   // Falls vor set_state_direct() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
+
+    if( new_state != _state )
+    {
+        if( _job  &&  _spooler->_task_subsystem )
         {
-            if( _job  &&  _spooler->_task_subsystem )
-            {
-                if( new_state == s_starting ||  new_state == s_opening  ||  new_state == s_running )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
-                if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
-            }
+            if( new_state == s_starting ||  new_state == s_opening  ||  new_state == s_running )  _job->increment_running_tasks(),  _spooler->_task_subsystem->increment_running_tasks();
+            if( _state    == s_starting ||  _state    == s_opening  ||  _state    == s_running )  _job->decrement_running_tasks(),  _spooler->_task_subsystem->decrement_running_tasks();
+        }
 
-            if( new_state != s_running_delayed )  _next_spooler_process = 0;
+        if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
-            State old_state = _state;
-            _state = new_state;
+        State old_state = _state;
+        _state = new_state;
 
-            if( is_idle()  &&  _job )
-                if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
+        if( is_idle()  &&  _job )
+            if( Process_class* process_class = _job->_module->process_class_or_null() )  process_class->notify_a_process_is_idle();
 
 
-            Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
-            if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
-            {
-                S details;
-                if( _next_time )  details << " (" << _next_time << ")";
-                if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
-                if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
+        Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
+        if( ( log_level >= log_info || _spooler->_debug )  &&  ( _state != s_closed || old_state != s_none ) )
+        {
+            S details;
+            if( _next_time )  details << " (" << _next_time << ")";
+            if( new_state == s_starting  &&  _start_at )  details << " (at=" << _start_at << ")";
+            if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
-                _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
-            }
+            _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
         }
     }
 }
@@ -882,8 +915,8 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 
     switch( _state )
     {
-        case s_opening_waiting_for_locks:   set_state( s_opening );  break;
-        case s_running_waiting_for_locks:   set_state( s_running );  break;
+        case s_opening_waiting_for_locks:   set_state_direct( s_opening );  break;
+        case s_running_waiting_for_locks:   set_state_direct( s_running );  break;
         default:                            z::throw_xc( Z_FUNCTION );
     }
     
@@ -1246,7 +1279,7 @@ bool Task::do_something()
                 if( !let_run )
                 {
                     _log->info( message_string( "SCHEDULER-278" ) );   // "Laufzeitperiode ist abgelaufen, Task wird beendet"
-                    cmd_end();// set_state( s_ending );
+                    cmd_end();
                 }
             }
         }
@@ -1277,7 +1310,7 @@ bool Task::do_something()
                                 _module_instance_async_error = true;
                                 //z::throw_xc( "SCHEDULER-202", x.what() );
                                 set_error( z::Xc( "SCHEDULER-202", state_name(), x.what() ) );
-                                if( _state < s_killing )  set_state( s_killing );
+                                if( _state < s_killing )  set_state_direct( s_killing );
                             }
                         }
 
@@ -1292,11 +1325,11 @@ bool Task::do_something()
                                 }
                             }
                             else
-                            if( !loaded() )         set_state( s_ended );
+                            if( !loaded() )         set_state_direct( s_ended );
                             else
-                            if( !_begin_called )    set_state( s_release );
+                            if( !_begin_called )    set_state_direct( s_release );
                             else
-                                                    set_state( s_ending );
+                                                    set_state_direct( s_ending );
                         }
                     }
 
@@ -1306,8 +1339,8 @@ bool Task::do_something()
                         case s_loading:
                         {
                             bool ok = load();
-                            if( ok )  set_state( s_waiting_for_process );
-                                else  set_state( s_release );
+                            if( ok )  set_state_direct( s_waiting_for_process );
+                                else  set_state_direct( s_release );
                             
                             something_done = true;
                             loop = true;
@@ -1318,8 +1351,8 @@ bool Task::do_something()
                         case s_waiting_for_process:
                         {
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
-                            if( ok )  set_state( s_starting ), something_done = true, loop = true;
-                                else  set_state( s_waiting_for_process );
+                            if( ok )  set_state_direct( s_starting ), something_done = true, loop = true;
+                                else  set_state_direct( s_waiting_for_process );
                             
                             break;
                         }
@@ -1348,7 +1381,7 @@ bool Task::do_something()
                                     _file_logger->start();
                                 }
 
-                                set_state( !ok? s_ending :
+                                set_state_direct( !ok? s_ending :
                                            _module_instance->_module->kind() == Module::kind_process?
                                                 _module_instance->kind() == Module::kind_remote? s_running_remote_process 
                                                                                                : s_running_process
@@ -1382,12 +1415,12 @@ bool Task::do_something()
                                 {
                                     _delay_until_locks_available = false;
                                     _lock_requestors[ lock_level_task_api ]->enqueue_lock_requests( _lock_holder );
-                                    set_state( s_opening_waiting_for_locks );
+                                    set_state_direct( s_opening_waiting_for_locks );
                                     ok = true;
                                 }
                                 else
                                 {
-                                    set_state( ok? s_running : s_ending );
+                                    set_state_direct( ok? s_running : s_ending );
                                 }
 
                                 loop = true;
@@ -1412,7 +1445,7 @@ bool Task::do_something()
                                 check_if_shorter_than( now );
                                 something_done |= check_if_longer_than( now );
                                 count_step();
-                                set_state( s_ending );
+                                set_state_direct( s_ending );
                                 loop = true;
                             }
                             else
@@ -1439,7 +1472,7 @@ bool Task::do_something()
                                 string result = remote_process_step__end();
                                 check_if_shorter_than( now );
                                 something_done |= check_if_longer_than( now );
-                                set_state( s_release );
+                                set_state_direct( s_release );
                                 loop = true;
                             }
 
@@ -1452,7 +1485,7 @@ bool Task::do_something()
                             {
                                 if( _next_spooler_process )
                                 {
-                                    set_state( s_running_delayed );
+                                    set_state_direct( s_running_delayed );
                                     something_done = true;
                                 }
                                 else
@@ -1462,7 +1495,7 @@ bool Task::do_something()
                                         if( !fetch_and_occupy_order( now, state_name() ) )
                                         {
                                             _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
-                                            set_state( s_running_waiting_for_order );
+                                            set_state_direct( s_running_waiting_for_order );
                                             break;
                                         }
                                     }
@@ -1499,7 +1532,7 @@ bool Task::do_something()
                                     if( _delay_until_locks_available )
                                     {
                                         _delay_until_locks_available = false;
-                                        set_state( s_running_waiting_for_locks );
+                                        set_state_direct( s_running_waiting_for_locks );
                                         lock_requestor->enqueue_lock_requests( _lock_holder );
                                         ok = true;
                                     }
@@ -1514,7 +1547,7 @@ bool Task::do_something()
                                 check_if_shorter_than( now );
                                 something_done |= check_if_longer_than( now );
 
-                                if( !ok || has_error() )  set_state( s_ending ), loop = true;
+                                if( !ok || has_error() )  set_state_direct( s_ending ), loop = true;
 
                                 if( _state != s_ending  &&  !_end )  _order_for_task_end = NULL;
 
@@ -1529,7 +1562,7 @@ bool Task::do_something()
                         {
                             if( fetch_and_occupy_order( now, state_name() ) )
                             {
-                                set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                set_state_direct( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                 loop = true;                // _order wird in step__end() wieder abgeräumt
                             }
                             else
@@ -1544,7 +1577,7 @@ bool Task::do_something()
                                 else
                                 {
                                     _idle_timeout_at = _job->_idle_timeout == Time::never? Time::never : now + _job->_idle_timeout;
-                                    set_state( s_running_waiting_for_order );   // _next_time neu setzen
+                                    set_state_direct( s_running_waiting_for_order );   // _next_time neu setzen
                                     Z_LOG2( "scheduler", obj_name() << ": idle_timeout ist abgelaufen, aber force_idle_timeout=\"no\" und nicht mehr als min_tasks Tasks laufen  now=" << now << ", _next_time=" << _next_time << "\n" );
                                     //_log->debug9( message_string( "SCHEDULER-916" ) );   // "idle_timeout ist abgelaufen, Task beendet sich" 
                                     something_done = true;
@@ -1562,7 +1595,7 @@ bool Task::do_something()
                             if( now >= _next_spooler_process )
                             {
                                 _next_spooler_process = 0;
-                                set_state( s_running ), loop = true;
+                                set_state_direct( s_running ), loop = true;
                             }
 
                             _running_state_reached = true;
@@ -1588,7 +1621,7 @@ bool Task::do_something()
                                 }
                                 else
                                 {
-                                    set_state( s_exit );
+                                    set_state_direct( s_exit );
                                     loop = true;
                                 }
                             }
@@ -1596,8 +1629,8 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                set_state( loaded()? s_ending_waiting_for_subprocesses
-                                                   : s_release );
+                                set_state_direct( loaded()? s_ending_waiting_for_subprocesses
+                                                          : s_release );
                                 loop = true;
                             }
 
@@ -1634,8 +1667,8 @@ bool Task::do_something()
 
                             if( !_operation )
                             {
-                                set_state( has_error()? s_on_error
-                                                      : s_on_success );
+                                set_state_direct( has_error()? s_on_error
+                                                             : s_on_success );
                                 loop = true;
                             }
 
@@ -1647,7 +1680,7 @@ bool Task::do_something()
                         case s_on_success:
                         {
                             if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                         else  operation__end(), set_state( s_exit ), loop = true;
+                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
 
                             something_done = true;
                             break;
@@ -1657,7 +1690,7 @@ bool Task::do_something()
                         case s_on_error:
                         {
                             if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                         else  operation__end(), set_state( s_exit ), loop = true;
+                                         else  operation__end(), set_state_direct( s_exit ), loop = true;
 
                             something_done = true;
                             break;
@@ -1669,11 +1702,11 @@ bool Task::do_something()
                             if( _job->_module->_reuse == Module::reuse_task )
                             {
                                 if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                             else  operation__end(), set_state( s_release ), loop = true;
+                                             else  operation__end(), set_state_direct( s_release ), loop = true;
                             }
                             else
                             {
-                                set_state( s_release );
+                                set_state_direct( s_release );
                                 loop = true;
                             }
 
@@ -1685,7 +1718,7 @@ bool Task::do_something()
                         case s_release:
                         {
                             if( !_operation )  _operation = do_release__start();
-                                         else  operation__end(), set_state( s_killing ), loop = true;
+                                         else  operation__end(), set_state_direct( s_killing ), loop = true;
 
                             something_done = true;
                             break;
@@ -1700,7 +1733,7 @@ bool Task::do_something()
                             }
                             else
                             {
-                                set_state( s_ended );
+                                set_state_direct( s_ended );
                                 loop = true;
                             }
 
@@ -1745,8 +1778,8 @@ bool Task::do_something()
                                 //Time log_time = _log->collect_end();
                                 //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
-                                set_state( s_deleting_files );
-                                //set_state( s_closed );
+                                set_state_direct( s_deleting_files );
+                                //set_state_direct( s_closed );
 				
                                 loop = true;
                             }
@@ -1818,7 +1851,7 @@ bool Task::do_something()
                                 if( _module_instance )  _module_instance->detach_process();
                                 _module_instance = NULL;
                                 finish();
-                                set_state( s_closed );
+                                set_state_direct( s_closed );
                                 something_done = true;
                                 loop = true;
                             }
@@ -1845,12 +1878,14 @@ bool Task::do_something()
                     }
                     else
                     {
+                        set_enqueued_state();   // Wegen _operation verzögerten Zustand setzen
+
                         if( !ok || has_error() )
                         {
-                            if( _state < s_ending )  set_state( s_ending ), loop = true;
+                            if( _state < s_ending )  set_state_direct( s_ending ), loop = true;
                         }
 
-                        if( _killed  &&  _state < s_ending )  set_state( s_ending ), loop = true;
+                        if( _killed  &&  _state < s_ending )  set_state_direct( s_ending ), loop = true;
                     }
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
@@ -1888,7 +1923,7 @@ bool Task::do_something()
                     }
                     catch( exception& x ) { _log->error( "Job->stop_after_task_error(): " + string( x.what() ) ); }
 
-                    set_state( s_closed );
+                    set_state_direct( s_closed );
                 }
                 else
                     throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
@@ -1908,7 +1943,7 @@ bool Task::do_something()
             // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
             // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
 
-            set_state( state() );  // _next_time neu setzen
+            set_state_direct( state() );  // _next_time neu setzen
 
             if( _next_time <= now )
             {
@@ -2004,7 +2039,7 @@ bool Task::step__end()
             continue_task = result = check_result( spooler_process_result );
         }
 
-        if( _job->is_order_controlled() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
+        if( _job->is_order_controlled() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state_direct(), §1495 )
 
         count_step();
 

@@ -288,11 +288,17 @@ struct Task : Object,
 */
     virtual bool                has_step_count              ()                                      { return true; }
 
+ private:
+    void                        set_enqueued_state          ();
+    void                        set_state_direct            ( State );
+
+ protected:
     Fill_zero                  _zero_;
 
     Z_DEBUG_ONLY( string       _job_name; )
     int                        _id;
     State                      _state;
+    State                      _enqueued_state;
     string                     _obj_name;
 
     Job*                       _job;
