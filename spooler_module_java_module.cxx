@@ -1,11 +1,4 @@
 // $Id$
-/*
-    Hier sind implementiert
-
-    Java_vm
-    Module::java_method_id
-    Java_module_instance
-*/
 
 #include "spooler.h"
 #include "../file/stdfile.h"    // make_path
@@ -14,35 +7,12 @@
 #include "../zschimmer/java.h"
 #include "../zschimmer/system_command.h"
 
-//#ifdef _DEBUG
-//#   include "Debug/sos/spooler/Idispatch.h"
-//#else
-//#   include "Release/sos/spooler/Idispatch.h"
-//#endif
-
-#include <sys/stat.h>
-
-#ifdef Z_WINDOWS
-#   include <sys/utime.h>
-#else
-#   include <utime.h>
-#endif
-
 #ifndef JNI_VERSION_1_2
 #   error "Der Scheduler braucht jni.h Version 1.2"
 #endif
 
-#ifdef SCHEDULER_WITH_HOSTJAVA
-#   include "../hostjava/hostjava.h"
-#endif
-
 using namespace std;
 using namespace zschimmer::java;
-
-extern "C"
-//JNIEXPORT
-jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv*, jclass, jlong jidispatch, jstring, jobjectArray );
-
 
 namespace sos {
 namespace scheduler {
@@ -104,58 +74,6 @@ jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, 
 Java_idispatch_stack_frame::~Java_idispatch_stack_frame()
 { 
     thread_data->_idispatch_container.release_objects(); 
-}
-
-//--------------------------------------------------------------------------Module::make_java_class
-// Quellcode compilieren
-
-bool Module::make_java_class( bool )
-{
-    if( _java_vm->work_dir().empty() )  z::throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
-
-    File_path filepath       = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
-    File_path java_filepath  = filepath + ".java";
-    File_path class_filepath = filepath + ".class";
-    string    source;
-        if( source.empty() )  source = read_source_script();
-
-        make_path( java_filepath.directory() );
-
-
-        // Windows: Falls die Großschreibung des Klassennamens geändert worden ist, müssen die alten Dateinamen gelöscht werden (Jira JS-181)
-        bool ok = java_filepath.try_unlink();
-        if( !ok  &&  java_filepath.exists() )  z::throw_xc( "SCHEDULER-450", java_filepath ); 
-
-        ok = class_filepath.try_unlink();
-        if( !ok  &&  class_filepath.exists() )  z::throw_xc( "SCHEDULER-450", class_filepath ); 
-
-
-        File source_file ( java_filepath, "wb" );
-        source_file.print( source );
-        source_file.close();
-
-        set_environment_variable( "CLASSPATH", _java_vm->class_path() );  // Auf Wunsch von Püschel, Jira JS-180
-
-        
-        S cmd;
-        cmd << '"' << _java_vm->javac_filename() << "\" -g "
-                                                  //"-classpath " << quoted_string( _java_vm->class_path(), '"', cmd_escape ) << ' ' 
-                                                 //<< quoted_string( java_filepath, '"', cmd_escape );     // + " -verbose"
-                                                 << java_filepath;     // + " -verbose"
-        _log.info( message_string( "SCHEDULER-934", cmd ) );
-        
-        System_command c;
-        c.set_throw( false );
-        c.execute( cmd );
-
-        //Löscht nicht. set_environment_variable( "CLASSPATH", old_classpath );
-
-        if( c.stderr_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stderr_text() ),  _log.info( "" );
-        if( c.stdout_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stdout_text() ),  _log.info( "" );
-
-        if( c.xc() )  throw *c.xc();
-
-    return true;
 }
 
 //---------------------------------------------------------------Java_module_instance::init_java_vm
@@ -326,13 +244,34 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
     ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( object, true, java_class_name.c_str() ) );
 
     _added_jobjects.push_back( java_idispatch );
-                         
-    env->SetObjectField( _jobject, field_id, java_idispatch->get_jobject() );
-    if( env->ExceptionCheck() )  env.throw_java( "SetObjectField", name );
+                       
+    Class javaModuleInstance;
+    Local_jobject javaModuleInstance = javaModuleInstanceClass.new_object( "()V" );
+
+    javaModuleInstance.call_void_method( "addObject", "(Lsos/spooler/IDispatch;Ljava/lang/String;)V",
+        java_idispatch->get_jobject(), (jstring)Local_jstring( name ) );
 
 
     Module_instance::add_obj( object, name );
 }
+
+/* Java:
+
+    interface ModuleInstance {
+    }
+
+    class ModuleInstanceImpl implements ModuleInstance {
+        sos.spooler.Log spooler_log;
+
+        public addObject( sos.spooler.IDispatch idispatch, String name ) {
+            if( name.equals( "spooler_log" ) ) 
+                spooler_log = (sos.spooler.Log)idispatch;
+        }
+
+        if( log != null )
+            log.info( "Hallo Welt" );
+    }
+*/
 
 //-----------------------------------------------------------------------Java_module_instance::load
 

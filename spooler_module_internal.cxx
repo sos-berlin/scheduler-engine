@@ -24,20 +24,6 @@ Internal_module_instance::Internal_module_instance( Module* module )
 {
 }
 
-//-------------------------------------------------------------------------------------------------
-/*
-void Internal_module_instance::init()
-{
-    Module_instance::init();
-}
-
-//-------------------------------------------------------------------Internal_module_instance::load
-
-bool Internal_module_instance::load()
-{
-    return Module_instance::load();
-}
-*/
 //----------------------------------------------------------------Internal_module_instance::add_obj
     
 void Internal_module_instance::add_obj( IDispatch* idispatch, const string& name )
@@ -55,20 +41,6 @@ void Internal_module_instance::add_obj( IDispatch* idispatch, const string& name
     }
 }
 
-//------------------------------------------------------------------Internal_module_instance::start
-/*
-void Internal_module_instance::start()
-{
-    Module_instance::start();
-}
-
-//-------------------------------------------------------------Internal_module_instance::close__end
-
-void Internal_module_instance::close__end()
-{
-    Internal_module_instance::close__end();
-}
-*/
 //-------------------------------------------------------------------Internal_module_instance::call
 
 Variant Internal_module_instance::call( const string& name )
