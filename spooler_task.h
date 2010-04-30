@@ -288,6 +288,13 @@ struct Task : Object,
 */
     virtual bool                has_step_count              ()                                      { return true; }
 
+/**
+ * \change 2.1.1 - JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
+ * \detail
+ * Mit der Funktion set_enqueued_state() wird der zu setzende Status zwischengespeichert, wenn eine Operation aktiv ist
+ * (z.B. spooler.process). Erst wenn spooler.process beendet ist, wird der Status über set_state() gesetzt.
+ * set_state_direct() ist die alte Methode set_state(), die einen Status für eine Task sofort übernimmt.
+ */
  private:
     void                        set_enqueued_state          ();
     void                        set_state_direct            ( State );

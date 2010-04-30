@@ -650,6 +650,17 @@ void Task::set_state( State new_state )
 
 //-------------------------------------------------------------------------Task::set_enqueued_state
 
+/**
+ * \brief Status zum Setzen vormerken
+ * \detail 
+ * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
+ * Merkt bei laufender Operation einen Status zum Setzen vor. Läuft keine Operation (z.B. spooler.process)
+ * wird der Status via set_state_direct() sofort gesetzt.
+ * \version 2.1.1 - 2010-04-29
+ *
+ * \param name - description
+ * \return type of returnvalue
+ */
 void Task::set_enqueued_state()
 {
     if( _enqueued_state ) {

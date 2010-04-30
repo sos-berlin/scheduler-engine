@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="js-380 Job1"
-     order="no">
+     order="no"
+     tasks="5">
     <script language="javascript">
         <![CDATA[
-        var i;
+	var hostware = new ActiveXObject("hostware.global");
+	var i = 0;
 
-function spooler_process() 
-{
-i = 5;
-spooler_log.info("Hallo Welt");
-return true; /* order=no und return true => Job-Scheduler ruft spooler_process immer wieder auf. */
-}
+	function spooler_process() 
+	{
+	  i++;
+		spooler_log.info("process startet");
+	  hostware.sleep(60)
+		spooler_log.info("process ended");
+		if (i > 5) return false
+		return true; /* order=no und return true => Job-Scheduler ruft spooler_process immer wieder auf. */
+	}
     ]]></script>
 
     <run_time/>
