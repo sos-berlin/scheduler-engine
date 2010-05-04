@@ -635,6 +635,17 @@ int Task::exit_code()
 */
 //----------------------------------------------------------------------------------Task::set_state
 
+/**
+ * \brief Status zum Setzen vormerken
+ * \detail 
+ * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
+ * Merkt bei laufender Operation einen Status zum Setzen vor. Läuft keine Operation (z.B. spooler.process)
+ * wird der Status via set_state_direct() sofort gesetzt.
+ * \version 2.1.1 - 2010-04-29
+ *
+ * \param name - description
+ * \return type of returnvalue
+ */
 void Task::set_state( State new_state )
 {
     _enqueued_state = new_state;
@@ -654,8 +665,8 @@ void Task::set_state( State new_state )
  * \brief Status zum Setzen vormerken
  * \detail 
  * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
- * Merkt bei laufender Operation einen Status zum Setzen vor. Läuft keine Operation (z.B. spooler.process)
- * wird der Status via set_state_direct() sofort gesetzt.
+ * Setzt einen bereits vorgemerketer Status für eine Task endgültig. Ist kein Status zum Setzen vorgemerkt, bleibt der 
+ * Aufruf ohne Wirkung.
  * \version 2.1.1 - 2010-04-29
  *
  * \param name - description
@@ -671,6 +682,15 @@ void Task::set_enqueued_state()
 
 //---------------------------------------------------------------------------Task::set_state_direct
 
+/**
+ * \brief Status setzen (ehemals set_state)
+ * \detail 
+ * JS-380: Job Scheduler freeze after <modify_job ... cmd=suspend/>
+ * Setzt einen Status unmittelbar. Ein evtl. vorgemerkter Status (_enqueued_state) wird verworfen. 
+ * \version 2.1.1 - 2010-04-29
+ *
+ * \param new_state - Status auf den die task gesetzt wird
+ */
 void Task::set_state_direct( State new_state )
 {
     if( _enqueued_state ) {
