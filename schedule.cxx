@@ -494,7 +494,7 @@ Time Schedule_use::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
     
-    return !period.absolute_repeat().is_never()? period.next_repeated( time )
+    return !period.absolute_repeat().is_never()? period.next_absolute_repeated( time, 0 )
                                                : period.begin();
 }
 
