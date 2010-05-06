@@ -245,7 +245,7 @@ bool Communication::Listen_socket::async_continue_( Continue_flags )
     {
         ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
 
-        bool ok = new_connection->do_accept( _read_socket );
+        bool ok = new_connection->do_accept( _read_socket );  // JS-486
         if( ok )
         {
             if( _communication->_connection_list.size() >= max_communication_connections )
@@ -402,9 +402,11 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
         _log.set_prefix( "TCP connection to " + _peer_host_and_port.as_string() );
 
 
-        if( _security_level <= Security::seclev_signal )
+        if( _security_level <= Security::seclev_signal 
+			&& 1 == 0  // JS-486 Keine Prüfung mehr
+			)
         {
-            _log.warn( message_string( "SCHEDULER-287" ) );
+            _log.warn( message_string( "SCHEDULER-287" ) );  // JS-486 Bei Zugriff via telnet und über Browser!
             do_close();
             return false;
         }
@@ -516,7 +518,7 @@ bool Communication::Connection::do_recv()
 
         //if( _read_socket != STDIN_FILENO )  _operation->set_host( &_peer_host_and_port._host );
 
-        if( len > 0 )
+        if( len > 0 ) // Ist überflüssig?
         {
             _operation->put_request_part( p, len );
         }

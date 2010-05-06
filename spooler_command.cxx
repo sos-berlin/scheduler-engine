@@ -516,7 +516,7 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
 
 xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" ); // JS-486
 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
@@ -1510,7 +1510,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else
     if( element.nodeName_is( "show_state"       ) 
-     || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
+     || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );  // JS-486
     else
     if( element.nodeName_is( "show_calendar"    ) )  result = execute_show_calendar( element, show );
     else
@@ -1623,7 +1623,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
     try
     {
-        if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+        // if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prüfung mehr
 
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
         if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );
@@ -1642,7 +1642,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                 http_response->set_header( "Cache-Control", "no-cache" );
                 //if( _log )  _log->info( message_string( "SCHEDULER-932", _request ) );
 
-                response_body = execute( xml, "  " );
+                response_body = execute( xml, "  " );  // JS-486, hier wird der Security Level auch geprüft mit ordentlicher Fehlermeldung
 
                 response_content_type = "text/xml";
             }
@@ -1911,7 +1911,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
     {
         _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->_http_cmd + " " + path, x ) );
 
-        throw http::Http_exception( http::status_404_bad_request, x.what() );
+        throw http::Http_exception( http::status_404_bad_request, x.what() );  // JS-486
     }
 
     http_response->set_chunk_reader( Z_NEW( http::String_chunk_reader( response_body, response_content_type ) ) );
@@ -1959,7 +1959,7 @@ xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_d
     try 
     {
         _error = NULL;
-        execute_2( command_document );
+        execute_2( command_document ); // JS-486
     }
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
@@ -2070,7 +2070,7 @@ void Command_processor::execute_2( const xml::Element_ptr& element )
         }
         else
         {
-            xml::Element_ptr response_element = execute_command( e );
+            xml::Element_ptr response_element = execute_command( e );  // JS-486
             
             if( !response_element  &&  !_response )  z::throw_xc( "SCHEDULER-353", e.nodeName() );
         }
