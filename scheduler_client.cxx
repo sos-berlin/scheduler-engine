@@ -117,6 +117,7 @@ struct Client
         while(1)
         {
             string text = _socket_stream.read_bytes();
+            if( text == "" )  break;
             response += text;
             if( *text.rbegin() == '\0' )  break;
         }
