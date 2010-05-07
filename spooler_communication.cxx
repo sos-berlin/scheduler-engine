@@ -245,7 +245,7 @@ bool Communication::Listen_socket::async_continue_( Continue_flags )
     {
         ptr<Connection> new_connection = Z_NEW( Connection( _communication ) );
 
-        bool ok = new_connection->do_accept( _read_socket );  // JS-486
+        bool ok = new_connection->do_accept( _read_socket );  
         if( ok )
         {
             if( _communication->_connection_list.size() >= max_communication_connections )
@@ -403,7 +403,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 
         if( _security_level <= Security::seclev_signal 
-			&& 1 == 0  // JS-486 Keine Prüfung mehr
+			&& 1 == 1  // JS-486 Keine Prüfung mehr
 			)
         {
             _log.warn( message_string( "SCHEDULER-287" ) );  // JS-486 Bei Zugriff via telnet und über Browser!
