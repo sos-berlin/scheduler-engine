@@ -493,7 +493,20 @@ void Schedule_use::log_changed_active_schedule( const Time& now )
 Time Schedule_use::next_single_start( const Time& time )
 { 
     Period period = next_period( time, wss_next_single_start );
-    
+
+/**
+ * \change 2.1.1 - //TODO JS-343 hier wird die Startzeit berechnet
+ *
+ * \detail
+ * Mit dem bisherigen Aufruf von period.next_repeated( time ) wurde in der Folge ebenfalls
+ * period.next_absolute_repeated aufgerufen, allerings mit next = 1 (2. Parameter), was 
+ * bewirkt hat, das der erste Startzeitpunkt einer Periode "ausgelassen" worden ist.
+ *
+ * Code gültig bis Version 2.1.0
+ * \code
+    return !period.absolute_repeat().is_never()? period.next_repeated( time )
+   \endcode
+ */
     return !period.absolute_repeat().is_never()? period.next_absolute_repeated( time, 0 )
                                                : period.begin();
 }
@@ -1783,6 +1796,7 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     return result;  
 }
 //-------------------------------------------------------------------Period::next_absolute_repeated
+
 
 Time Period::next_absolute_repeated( const Time& tim, int next ) const
 {

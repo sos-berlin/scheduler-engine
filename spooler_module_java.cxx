@@ -382,7 +382,7 @@ Variant Java_module_instance::call( const string& name_par )
     {
         In_call in_call ( this, name );
         env->CallVoidMethod( _jobject, method_id );
-    }                 <
+    }
 
     if( env->ExceptionCheck() )  env.throw_java( name );
 
