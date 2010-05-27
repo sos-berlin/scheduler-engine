@@ -120,6 +120,18 @@ bool Subsystem::subsystem_activate()
     z::throw_xc( Z_FUNCTION, obj_name(), "not implemented" );
 }
 
+//---------------------------------------------------------------------------Subsystem::dom_element
+
+xml::Element_ptr Subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
+{
+    xml::Element_ptr result = dom_document.createElement( "subsystem" );
+    result.setAttribute( "name", name() );
+    result.setAttribute( "state", string_from_subsystem_state( subsystem_state() ) );
+
+    return result;
+}
+
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

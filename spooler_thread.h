@@ -19,6 +19,7 @@ struct Task_subsystem: Object, Subsystem
 
     virtual void                close                       ();
 
+    string                      name                        () const                                { return "task"; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     
     bool                        has_tasks                   ()                                      { return !_task_list.empty(); }

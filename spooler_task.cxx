@@ -88,6 +88,13 @@ string start_cause_name( Start_cause cause )
     }
 }
 
+//----------------------------------------------------------------------Task_subsystem::dom_element
+
+xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
+{
+    return Subsystem::dom_element( dom_document, show_what );
+}
+
 //---------------------------------------------------------------------------------------Task::Task
 
 Task::Task( Job* job )

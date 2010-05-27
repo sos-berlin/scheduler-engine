@@ -16,6 +16,7 @@ struct Java_subsystem : Java_subsystem_interface
 
     // Subsystem:
     void                        close                       ();
+    string                      name                        () const                                { return "java"; }
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();

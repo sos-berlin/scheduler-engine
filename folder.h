@@ -496,7 +496,7 @@ struct File_based_subsystem : Subsystem
     enum                        Handle_attributes           { dont_remove_attributes, remove_attributes };
     string                      name_from_xml_attributes    ( const xml::Element_ptr&, Handle_attributes = dont_remove_attributes ) const;    // Aus name= oder, bei Auftrag, job_chain= und id=
 
-
+    string                      name                        () const                                { return lcase( object_type_name() ); }
     virtual void                check_file_based_element    ( const xml::Element_ptr& );
     virtual string              object_type_name            () const                                = 0;
     virtual string              filename_extension          () const                                = 0;

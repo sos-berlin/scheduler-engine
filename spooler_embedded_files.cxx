@@ -140,6 +140,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"show_task\"/>\n"
     "<xsd:element ref=\"service_request\"/>\n"
     "<xsd:element ref=\"start_job\"/>\n"
+    "<xsd:element ref=\"subsystem.show\"/>\n"
     "<!--xsd:element ref=\"signal_object\"/-->\n"
     "<xsd:element ref=\"terminate\"/>\n"
     "\n"
@@ -205,6 +206,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"show_task\"/>\n"
     "<xsd:element ref=\"service_request\"/>\n"
     "<xsd:element ref=\"start_job\"/>\n"
+    "<xsd:element ref=\"subsystem.show\"/>\n"
     "<xsd:element ref=\"remote_scheduler.start_remote_task\"/>\n"
     "<xsd:element ref=\"remote_scheduler.remote_task.close\"/>\n"
     "<!--xsd:element ref=\"signal_object\"/-->\n"
@@ -1206,6 +1208,9 @@ const char file_scheduler_xsd[] =
     "<xsd:element name=\"show_state\" type=\"Show_state\"/>\n"
     "\n"
     "\n"
+    "<xsd:element name=\"subsystem.show\" type=\"Subsystem.show\"/>\n"
+    "\n"
+    "\n"
     "<xsd:complexType name=\"Show_state\">\n"
     "<xsd:attribute name=\"what\"                  type=\"String\"/>\n"
     "<xsd:attribute name=\"max_orders\"            type=\"xsd:nonNegativeInteger\"/>\n"
@@ -1221,6 +1226,11 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"what\"  type=\"What\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
+    "\n"
+    "\n"
+    "<xsd:complexType name=\"Subsystem.show\">\n"
+    "<xsd:attribute name=\"what\"                  type=\"String\"/>\n"
+    "</xsd:complexType>\n"
     "\n"
     "\n"
     "<xsd:element name=\"start_job\">\n"
@@ -2388,8 +2398,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1269341747 },
-    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1269341744 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1274954839 },
+    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1225365142 },
     { NULL, NULL, 0 }
 };
 

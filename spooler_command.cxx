@@ -512,6 +512,27 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
     return _answer.createElement( "ok" );
 }
 
+//-------------------------------------------------------------Command_processor::execute_subsystem
+
+xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& element, const Show_what& show_what )
+{
+    //TODO In eigene Klasse auslagern, z.B. Subsystem_subsystem. Oder Meta_subsystem.
+    //Meta_subsystem::dom_element()
+    //Meta_subsystem::register
+
+    if( element.nodeName_is( "subsystem.show" ) )
+    {
+        xml::Element_ptr result = _answer.createElement( "subsystems" );
+        //TODO Subsysteme aus einem Register lesen
+        result.appendChild_if( _spooler->job_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->task_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->order_subsystem()->dom_element( _answer, show_what ) );
+        return result;
+    }
+    else 
+        z::throw_xc( Z_FUNCTION, element.nodeName() );
+}
+
 //------------------------------------------------------------Command_processor::execute_show_state
 
 xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
@@ -1441,6 +1462,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "no_subfolders"    ) )  show |= show_no_subfolders;
         else
         if( string_equals_prefix_then_skip( &p, "source"           ) )  show |= show_source;
+        else
+        if( string_equals_prefix_then_skip( &p, "statistics"       ) )  show |= show_statistics;
         //else
         //if( string_equals_prefix_then_skip( &p, "subfolders"       ) )  show |= show_subfolders;
         else
@@ -1505,6 +1528,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( string_begins_with( element_name, "licence." ) )
     {
         result = execute_licence( element, show );
+    }
+    else
+    if( string_begins_with( element_name, "subsystem." ) )
+    {
+        result = execute_subsystem( element, show );
     }
     else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );

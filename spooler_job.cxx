@@ -61,6 +61,7 @@ struct Job_subsystem : Job_subsystem_interface
 
     // File_based_subsystem:
 
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
     string                      xml_element_name            () const                                { return "job"; }
     string                      xml_elements_name           () const                                { return "jobs"; }
     void                        assert_xml_elements_name    ( const xml::Element_ptr& ) const;
@@ -68,6 +69,13 @@ struct Job_subsystem : Job_subsystem_interface
     string                      filename_extension          () const                                { return ".job.xml"; }
     string                      normalized_name             ( const string& name ) const            { return lcase( name ); }
     ptr<Job>                    new_file_based              ();
+
+
+private:
+    xml::Element_ptr            state_job_statistic_element ( const xml::Document_ptr&, Job::State ) const;
+    xml::Element_ptr            job_statistic_element       ( const xml::Document_ptr&, const string& attribute_name, const string& attribute_value, int count ) const;
+    int                         count_jobs_with_state       ( Job::State ) const;
+
 
     ptr<Schedule>              _default_schedule;
 };
@@ -261,6 +269,57 @@ bool Job_subsystem::is_any_task_queued()
 void Job_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
 { 
     if( !e.nodeName_is( "add_jobs" ) )  File_based_subsystem::assert_xml_elements_name( e );
+}
+
+//-----------------------------------------------------------------------Job_subsystem::dom_element
+
+xml::Element_ptr Job_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
+{
+    xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+    xml::Element_ptr job_subsystem_element = dom_document.createElement( "job_subsystem" );
+    
+    if( show_what.is_set( show_statistics ) ) {
+        xml::Element_ptr statistics_element = job_subsystem_element.append_new_element( "job_subsystem.statistics" );
+        xml::Element_ptr job_statistics_element = statistics_element.append_new_element( "job.statistics" );
+
+        job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_pending ) );
+        job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_running ) );
+        job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_stopped ) );
+        //job_statistics_element.appendChild( waiting_for_process_job_statistic_element( dom_document, Job::s_stopped ) );
+    }
+
+    result.appendChild( job_subsystem_element );
+    return result;
+}
+
+//-------------------------------------------------------Job_subsystem::state_job_statistic_element
+
+xml::Element_ptr Job_subsystem::state_job_statistic_element( const xml::Document_ptr& dom_document, Job::State state ) const
+{
+    return job_statistic_element( dom_document, "job_state", Job::state_name( state ), count_jobs_with_state( state ) );
+}
+
+//-------------------------------------------------------Job_subsystem::state_job_statistic_element
+
+xml::Element_ptr Job_subsystem::job_statistic_element( const xml::Document_ptr& dom_document, 
+    const string& attribute_name, const string& attribute_value, int count ) const
+{
+    xml::Element_ptr result = dom_document.createElement( "job.statistic" );
+    result.setAttribute( attribute_name, attribute_value );
+    result.setAttribute( "count", count );
+    return result;
+}
+
+//-------------------------------------------------------------Job_subsystem::count_jobs_with_state
+
+int Job_subsystem::count_jobs_with_state( Job::State state ) const
+{
+    int result = 0;
+
+    FOR_EACH_JOB( job )
+        if( job->state() == state )  result++;
+
+    return result;
 }
 
 //-------------------------------------------------------Job_folder_interface::Job_folder_interface

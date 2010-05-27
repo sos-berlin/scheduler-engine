@@ -30,7 +30,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-  //show_order_history      = 0x80,
+    show_statistics         = 0x80,
     show_remote_schedulers  = 0x100,
     show_schedule           = 0x200,
     show_job_chains         = 0x400,
@@ -267,6 +267,7 @@ struct Command_processor
     xml::Element_ptr            execute_scheduler_log       ( const xml::Element_ptr&, const Show_what& );
     void                        execute_scheduler_log__append( const xml::Element_ptr&, const string&, const xml::Element_ptr& );
     xml::Element_ptr            execute_licence             ( const xml::Element_ptr& element, const Show_what& );
+    xml::Element_ptr            execute_subsystem           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_calendar       ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, const Show_what& );

@@ -131,7 +131,8 @@
                 <xsd:element ref="show_task"/>
                 <xsd:element ref="service_request"/>
                 <xsd:element ref="start_job"/>
-             <!--xsd:element ref="signal_object"/-->
+                <xsd:element ref="subsystem.show"/>
+                <!--xsd:element ref="signal_object"/-->
                 <xsd:element ref="terminate"/>
 
 
@@ -196,6 +197,7 @@
             <xsd:element ref="show_task"/>
             <xsd:element ref="service_request"/>
             <xsd:element ref="start_job"/>
+            <xsd:element ref="subsystem.show"/>
             <xsd:element ref="remote_scheduler.start_remote_task"/>
             <xsd:element ref="remote_scheduler.remote_task.close"/>
             <!--xsd:element ref="signal_object"/-->
@@ -1196,6 +1198,9 @@
 
     <xsd:element name="show_state" type="Show_state"/>
 
+    
+    <xsd:element name="subsystem.show" type="Subsystem.show"/>
+
 
     <xsd:complexType name="Show_state">
         <xsd:attribute name="what"                  type="String"/>
@@ -1213,7 +1218,12 @@
         </xsd:complexType>
     </xsd:element>
 
-    
+
+    <xsd:complexType name="Subsystem.show">
+        <xsd:attribute name="what"                  type="String"/>
+    </xsd:complexType>
+
+
     <xsd:element name="start_job">
         <xsd:complexType>
             <xsd:sequence>

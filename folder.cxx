@@ -728,7 +728,7 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
             //else
             if( show_what.is_set( show_no_subfolders )  &&  typed_folder->subsystem() == spooler()->folder_subsystem() )
             {
-                // nix
+                result.appendChild( typed_folder->new_dom_element( dom_document, Show_what() ) );    // "<folders>"
             }
             else
                 result.appendChild( typed_folder->dom_element( dom_document, show_what ) );

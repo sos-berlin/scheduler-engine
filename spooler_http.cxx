@@ -103,6 +103,7 @@ struct Http_server : Http_server_interface
     bool                        subsystem_initialize        ();
   //bool                        subsystem_load              ();
   //bool                        subsystem_activate          ();
+    string                      name                        () const                                { return "http_server"; }
 
     // Http_server_interface
   //void                        set_dom                     ( const xml::Element_ptr& );

@@ -83,6 +83,7 @@ struct Supervisor_client : Supervisor_client_interface
 
     // Subsystem
     void                        close                       ();
+    string                      name                        () const                                { return "supervisor_client"; }
     bool                        subsystem_initialize        ();
                                 Subsystem::obj_name;
 

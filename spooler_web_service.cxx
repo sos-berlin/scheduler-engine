@@ -74,6 +74,7 @@ struct Web_services : Web_services_interface
                                 Web_services                ( Spooler* sp )                         : Web_services_interface( sp, type_web_services ), _zero_(this+1) {}
 
     void                        close                       ()                                      {}
+    string                      name                        () const                                { return "web_service"; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 

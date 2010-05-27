@@ -64,6 +64,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
+    string                      name                        () const                                { return "cluster"; }
     string                      obj_name                    () const;
 
 

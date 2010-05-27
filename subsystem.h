@@ -28,9 +28,11 @@ struct Subsystem : Scheduler_object, Non_cloneable
               Scheduler_object::obj_name;
 
     virtual void                close                       ()                                      = 0;
+    virtual string              name                        () const                                = 0;
     virtual bool                switch_subsystem_state      ( Subsystem_state );
     
     Subsystem_state             subsystem_state             () const                                { return _subsystem_state; }
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
   protected:
     virtual bool                subsystem_initialize        ();
