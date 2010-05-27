@@ -424,6 +424,8 @@ struct Folder : file_based< Folder, Subfolder_folder, Folder_subsystem >,
 
   //void                        remove_all_file_baseds      ();
     bool                        is_root                     () const;
+
+
     file::File_path             directory                   () const;
     Absolute_path               make_path                   ( const string& name );                 // Hängt den Ordernamen voran
     bool                        is_valid_extension          ( const string& extension );

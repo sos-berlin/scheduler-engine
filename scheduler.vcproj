@@ -470,6 +470,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\spooler_module_script.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\spooler_order.cxx"
 				>
 			</File>
@@ -676,6 +680,10 @@
 			</File>
 			<File
 				RelativePath="spooler_module_remote_server.h"
+				>
+			</File>
+			<File
+				RelativePath=".\spooler_module_script.h"
 				>
 			</File>
 			<File

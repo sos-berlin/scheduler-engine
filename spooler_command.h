@@ -30,7 +30,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-    show_statistics         = 0x80,
+    show_no_subfolders_flag = 0x80,             // internees Flag für das weitere Auflössen von Unterordnern 
     show_remote_schedulers  = 0x100,
     show_schedule           = 0x200,
     show_job_chains         = 0x400,
@@ -38,7 +38,7 @@ enum Show_what_enum
     show_jobs               = 0x1000,   // <jobs>
     show_tasks              = 0x2000,   // <tasks>
     show_payload            = 0x4000,
-  //show_id_only            = 0x10000,
+    show_statistics         = 0x10000,
     show_job_commands       = 0x20000,
     show_blacklist          = 0x40000,
     show_order_source_files = 0x80000,

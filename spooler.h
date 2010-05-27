@@ -309,6 +309,7 @@ typedef stdext::hash_set<string> String_set;
 #include "spooler_module.h"
 #include "spooler_module_com.h"
 #include "spooler_module_internal.h"
+#include "spooler_module_script.h"                     // JS-498
 #include "spooler_module_java.h"
 #include "spooler_module_process.h"
 #include "database.h"

@@ -15,6 +15,9 @@ namespace scheduler {
 #   define SPOOLER_DEFAULT_LANGUAGE     "Perl"
 #endif
 
+// JS-498: Verwendung der JAVA Schnittstelle (statt spidermonkey)
+#define USE_JAVA_SCRIPTING_INTERFACE
+
 //--------------------------------------------------------------------------------------------const
 
 extern const string spooler_init_name;
@@ -84,7 +87,9 @@ struct Module : Object
         kind_scripting_engine,
         kind_com,
         kind_remote,            // Nur für Module_instance
-        kind_internal
+        kind_internal,
+        kind_scripting_engine_java           // JS-498: Scriptverarbeitung über JAVA interface
+
     };
 
     Z_GNU_ONLY(                 Module                      (); )

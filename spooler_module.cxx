@@ -421,6 +421,11 @@ void Module::init()
         {
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+// JS-498: für Testzwecke wird das Scripting über JAVA-Klassen ausgeführt
+#ifdef USE_JAVA_SCRIPTING_INTERFACE
+            Z_LOG2("scheduler","use java-interface for scripting of language " << _language);
+            _kind = kind_scripting_engine_java;
+#endif
         }
     }
 
@@ -455,6 +460,10 @@ void Module::init()
                                         }
 
                                         break;
+
+// JS-498: Vorhandensein von Scriptcode prüfen
+        case kind_scripting_engine_java: if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
+                                         break;
         
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
@@ -559,6 +568,14 @@ ptr<Module_instance> Module::create_instance_impl()
         case kind_internal:
         {
             ptr<Internal_module_instance> p = Z_NEW( Internal_module_instance( this ) );
+            result = +p;
+            break;
+        }
+
+        // JS-498: neue Instanz für java-script via Java-Interface 
+        case kind_scripting_engine_java:
+        {
+            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this, "sos.modules.javascript.ModuleInstanceJavaScript" ) );
             result = +p;
             break;
         }

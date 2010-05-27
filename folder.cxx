@@ -714,26 +714,28 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
     xml::Element_ptr result = dom_document.createElement( "folder" );
     fill_file_based_dom_element( result, show_what );
 
-    Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
-    {
-        Typed_folder* typed_folder = it->second;
+    // Auswerten des flags für die Auflösung der Ordnerstrukur (no_subfolders)
+    if ( !show_what.is_set(show_no_subfolders_flag) ) {                                                           // JS-2010-05-25
 
-        if( !typed_folder->is_empty() )
+        // Das flag show_no_subfolders_flag wird nur intern verwendet. Es ergänzt die Struktur
+        // show_what.
+        Show_what myShowWhat = show_what; 
+        if (show_what.is_set( show_no_subfolders ) )                        // JS-2010-05-25
+           myShowWhat |= show_no_subfolders_flag;
+
+        Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
         {
-            if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
-                result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
-            else
-            //if( !show_what.is_set( show_schedules )  &&  typed_folder->subsystem() == spooler()->schedule_subsystem() )
-            //    result.append_new_comment( "<schedules> suppressed. Use what=\"schedules\"." );
-            //else
-            if( show_what.is_set( show_no_subfolders )  &&  typed_folder->subsystem() == spooler()->folder_subsystem() )
+            Typed_folder* typed_folder = it->second;
+
+            if( !typed_folder->is_empty() )
             {
-                result.appendChild( typed_folder->new_dom_element( dom_document, Show_what() ) );    // "<folders>"
+                if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
+                    result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
+                else
+                    result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
             }
-            else
-                result.appendChild( typed_folder->dom_element( dom_document, show_what ) );
         }
-    }
+    }                                                                           // JS-2010-05-25
 
     return result;
 }
