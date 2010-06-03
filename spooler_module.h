@@ -16,7 +16,7 @@ namespace scheduler {
 #endif
 
 // JS-498: Verwendung der JAVA Schnittstelle (statt spidermonkey)
-#define USE_JAVA_SCRIPTING_INTERFACE
+// #define USE_JAVA_SCRIPTING_INTERFACE
 
 //--------------------------------------------------------------------------------------------const
 
