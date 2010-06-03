@@ -689,6 +689,7 @@ Spooler::Spooler()
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
+    _subsystem_register(this),
     _version(version_string),
     _security(this),
     _communication(this), 

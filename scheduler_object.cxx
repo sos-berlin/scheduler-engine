@@ -65,6 +65,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_standing_order:               return "Standing_order";
         case type_standing_order_folder:        return "Standing_order_folder";
         case type_standing_order_subsystem:     return "Standing_order_subsystem";
+        case type_subsystem_register:           return "Subsystem_register";
         case type_supervisor:                   return "Supervisor";
         case type_supervisor_client:            return "Supervisor_client";
         case type_supervisor_client_connection: return "Supervisor_client_connection";

@@ -23,6 +23,16 @@ string string_from_subsystem_state( Subsystem_state state )
     }
 }
 
+//----------------------------------------------------------------------------Subsystem::Subsystem
+
+Subsystem::Subsystem ( Spooler* spooler, IUnknown* iunknown, Type_code t )
+: 
+    Scheduler_object( spooler, iunknown, t ),
+    _zero_(this+1)
+{
+    _spooler->_subsystem_register.add(this);
+}
+
 //-----------------------------------------------------------Subsystem::throw_subsystem_state_error
 
 void Subsystem::throw_subsystem_state_error( Subsystem_state state, const string& message_text )
@@ -131,6 +141,33 @@ xml::Element_ptr Subsystem::dom_element( const xml::Document_ptr& dom_document, 
     return result;
 }
 
+
+//----------------------------------------------------------------------------Subsystem::~Subsystem
+
+Subsystem::~Subsystem ()
+{
+    _spooler->_subsystem_register.remove(this);
+}
+
+
+//---------------------------------------------------------------------Subsystem_register::contains
+
+boolean Subsystem_register::contains (const string& subsystem_name) const
+{
+    Z_FOR_EACH_CONST(Set, _set, it)
+        if ((*it)->name() == subsystem_name) return true;
+    return false;
+}
+
+//---------------------------------------------------------------------Subsystem_register::contains
+
+Subsystem* Subsystem_register::get (const string& subsystem_name) const
+{
+    Z_FOR_EACH_CONST(Set, _set, it)
+        if ((*it)->name() == subsystem_name) return *it;
+
+    z::throw_xc( "SCHEDULER-472", subsystem_name );
+}
 
 //-------------------------------------------------------------------------------------------------
 

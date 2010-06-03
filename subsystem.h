@@ -23,7 +23,8 @@ string                          string_from_subsystem_state ( Subsystem_state );
 
 struct Subsystem : Scheduler_object, Non_cloneable
 {
-                                Subsystem                   ( Spooler* spooler, IUnknown* iunknown, Type_code t ) : Scheduler_object( spooler, iunknown, t ), _zero_(this+1) {}
+                                Subsystem                   ( Spooler*, IUnknown*, Type_code );
+                                ~Subsystem                  ();
 
               Scheduler_object::obj_name;
 
@@ -45,6 +46,25 @@ struct Subsystem : Scheduler_object, Non_cloneable
 
     Fill_zero                  _zero_;
     Subsystem_state            _subsystem_state;
+};
+
+//----------------------------------------------------------------------------------------Subsystem_register
+
+struct Subsystem_register : Scheduler_object, Non_cloneable, Object
+{
+    typedef stdext::hash_set<Subsystem*> Set;
+
+                                Subsystem_register          ( Scheduler* scheduler ) : Scheduler_object( scheduler, this, type_subsystem_register ), _zero_(this+1) {}
+
+    void                        add(Subsystem* s)           { _set.insert(s); }
+    void                        remove(Subsystem* s)        { _set.erase(s); }
+    const Set*                  set()                       { return &_set; }
+    boolean                     contains(const string&) const;
+    Subsystem*                  get(const string&) const;
+
+private:
+    Fill_zero                  _zero_;
+    Set                        _set;
 };
 
 //-------------------------------------------------------------------------------------------------

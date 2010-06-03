@@ -661,6 +661,7 @@ struct Spooler : Object,
 
     typedef set<File_based_subsystem*>  File_based_subsystems;
     File_based_subsystems              _file_based_subsystems;
+    Subsystem_register                 _subsystem_register;         // alle Subsysteme
 
     ptr<Scheduler_script_subsystem_interface> _scheduler_script_subsystem;
     ptr<Folder_subsystem>            _folder_subsystem;

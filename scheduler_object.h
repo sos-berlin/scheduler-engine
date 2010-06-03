@@ -70,6 +70,7 @@ struct Scheduler_object
         type_standing_order,
         type_standing_order_folder,
         type_standing_order_subsystem,
+        type_subsystem_register,
         type_supervisor,
         type_supervisor_client,
         type_supervisor_client_connection,

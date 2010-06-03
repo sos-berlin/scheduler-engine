@@ -427,19 +427,11 @@ void Show_what::set_what(const string& what) {
 void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsystems_string) {
     
     vector<string> subsystems = vector_split(" +",subsystems_string);
-    Z_FOR_EACH(vector<string>, subsystems, it) {
+    Z_FOR_EACH(vector<string>, subsystems, it)
+    {
         string subsystem_name = *it;
-        if (subsystem_name == "job") _subsystem_set.insert(scheduler.job_subsystem());
-        else
-        if (subsystem_name == "order") _subsystem_set.insert(scheduler.order_subsystem());
-        else
-        if (subsystem_name == "task") _subsystem_set.insert(scheduler.task_subsystem());
-        else
-        if (subsystem_name == "schedule") _subsystem_set.insert(scheduler.schedule_subsystem());
-        else
-        if (subsystem_name == "process_class") _subsystem_set.insert(scheduler.process_class_subsystem());
-        else
-            z::throw_xc( "SCHEDULER-472", subsystem_name );
+        Subsystem* s = scheduler._subsystem_register.get(subsystem_name); 
+        _subsystem_set.insert(s);
     }
 
 }
