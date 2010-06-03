@@ -23,11 +23,11 @@ struct Java_subsystem : Java_subsystem_interface
 
 
     // Java_subsystem_interface:
-    java::Vm*                   java_vm                     ()                                      { return _java_vm; }
+    javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
 
 
   private:
-    ptr<java::Vm>              _java_vm;
+    ptr<javabridge::Vm>        _java_vm;
 };
 
 //-------------------------------------------------------------------------------new_java_subsystem

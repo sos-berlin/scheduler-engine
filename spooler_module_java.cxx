@@ -37,7 +37,7 @@
 #endif
 
 using namespace std;
-using namespace zschimmer::java;
+using namespace zschimmer::javabridge;
 
 extern "C"
 //JNIEXPORT
@@ -160,7 +160,7 @@ bool Module::make_java_class( bool )
 
 //---------------------------------------------------------------Java_module_instance::init_java_vm
 
-void Java_module_instance::init_java_vm( java::Vm* java_vm )
+void Java_module_instance::init_java_vm( javabridge::Vm* java_vm )
 {
     string work_dir = java_vm->work_dir();
     if( !work_dir.empty() )

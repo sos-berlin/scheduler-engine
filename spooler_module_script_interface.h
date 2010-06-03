@@ -8,7 +8,7 @@
 
 using namespace std;
 using namespace zschimmer;
-using namespace zschimmer::java;
+using namespace zschimmer::javabridge;
 
 namespace sos {
 namespace scheduler {
@@ -81,7 +81,7 @@ struct ScriptConnector : object_impl<ScriptConnector_class>
 
 //-------------------------------------------------------------------------------------------------
 
-} //namespace java
+} //namespace javabridge
 } //namespace scheduler
 } //namespace sos
 #endif

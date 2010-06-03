@@ -26,7 +26,7 @@ struct Java_thread_data
 
     Fill_zero                  _zero_;
 
-    z::java::Java_idispatch_container   _idispatch_container;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
+    z::javabridge::Java_idispatch_container   _idispatch_container;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
 };
 
 //-----------------------------------------------------------------------Java_idispatch_stack_frame
@@ -75,7 +75,7 @@ struct Java_idispatch : Java_object
 
 struct Java_module_instance : Module_instance
 {
-    static void                 init_java_vm                ( java::Vm* );
+    static void                 init_java_vm                ( javabridge::Vm* );
 
 
                                 Java_module_instance        ( Module* );
@@ -99,13 +99,13 @@ struct Java_module_instance : Module_instance
 
 
     Fill_zero                  _zero_;
-    java::Global_jobject       _jobject;
+    javabridge::Global_jobject _jobject;
 
-    java::global_jobject<jclass> _java_class;
+    javabridge::global_jobject<jclass> _java_class;
     typedef map<string,jmethodID>  Method_map;
     Method_map                 _method_map;
 
-    typedef list< ptr<z::java::Java_idispatch> >  Added_objects;
+    typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;
 
     Fill_end                   _end_;

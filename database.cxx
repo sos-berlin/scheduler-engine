@@ -569,6 +569,10 @@ void Database::open2( const string& db_name )
                         _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
                         break;
 
+                    case dbms_h2: 
+                        _database_descriptor._use_simple_iso_datetime_string = true;       // 'yyyy-mm-dd' statt {ts'yyyy-mm-dd'}
+                        break;
+
                     default: ;
                 }
 

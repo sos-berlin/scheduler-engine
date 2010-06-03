@@ -42,7 +42,7 @@ struct Script_module_instance : Module_instance
 //    scheduler_java::ScriptConnector  _scriptconnector;                
     scheduler_java::ScriptInterface  _scriptinterface;                
 
-    typedef list< ptr<z::java::Java_idispatch> >  Added_objects;
+    typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;
 
 };

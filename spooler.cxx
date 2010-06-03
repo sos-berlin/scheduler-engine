@@ -3703,7 +3703,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-            if( opt.with_value( "expand-classpath" ) )  { cout << java::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
+            if( opt.with_value( "expand-classpath" ) )  { cout << javabridge::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
             if( opt.flag      ( "show-xml-schema"  ) )  {
 				if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", 

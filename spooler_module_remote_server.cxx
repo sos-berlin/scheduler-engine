@@ -385,7 +385,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
         _server->_module->init();
 
 
-        ptr<java::Vm> java_vm = get_java_vm( false );
+        ptr<javabridge::Vm> java_vm = get_java_vm( false );
         _server->_module->_java_vm = java_vm;
 
         if( !_server->_module->_java_vm->running() )

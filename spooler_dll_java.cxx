@@ -19,12 +19,12 @@ namespace sos
 }
 
 
-using namespace zschimmer::java;
+using namespace zschimmer::javabridge;
 
 
 //-------------------------------------------------------------------------------------------static
 
-static ptr<java::Vm>            static_java_vm;
+static ptr<javabridge::Vm>            static_java_vm;
 
 //---------------------------------------------------------------------------------------JNI_OnLoad
 
@@ -33,9 +33,9 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
     CoInitialize(NULL);
     zschimmer_init();
 
-    static_java_vm = Z_NEW( java::Vm( jvm ) );
+    static_java_vm = Z_NEW( javabridge::Vm( jvm ) );
     static_java_vm._ptr->AddRef();                 // Damit bei Programmende nicht Release gerufen wird (die Java-DLL ist dann vielleicht schon entladen)
-    //java::Vm::set_jvm( jvm );
+    //javabridge::Vm::set_jvm( jvm );
 
     return JNI_VERSION_1_2;
 }
