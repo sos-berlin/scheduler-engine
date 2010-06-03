@@ -1501,6 +1501,7 @@ File_based::File_based( File_based_subsystem* subsystem, IUnknown* iunknown, Typ
 : 
     Scheduler_object( subsystem->spooler(), iunknown, type_code ), 
     _zero_(this+1),
+	_visible(visible_yes),
     _file_based_subsystem(subsystem),
     _state(s_not_initialized)
 {
@@ -2267,6 +2268,7 @@ xml::Element_ptr File_based_subsystem::dom_element( const xml::Document_ptr& dom
 {
     xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
     xml::Element_ptr statistics_element = dom_document.createElement( "file_based.statistics" );
+	statistics_element.setAttribute( "count_visible", visible_file_based_count() );
     statistics_element.setAttribute( "count", file_based_count() );
     result.appendChild( statistics_element );
     return result;

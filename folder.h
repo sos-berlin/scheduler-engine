@@ -185,6 +185,9 @@ struct File_based : Scheduler_object,
     virtual void                set_identification_attributes( const xml::Element_ptr& );
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& );
     virtual bool                is_visible_in_xml_folder    ( const Show_what& ) const              { return true; }
+    virtual void                set_visible                 ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
+    virtual void                set_visible                 ( Visibility v )                        { _visible = v; }
+	virtual bool                is_visible                  () const                                { return _visible == visible_yes; }
 
 
     File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
@@ -273,7 +276,7 @@ struct File_based : Scheduler_object,
     void                    set_file_based_state            ( State );
 
     Fill_zero                  _zero_;
-    // Visibility              _visible();    // aus Job "hochziehen" + Template-Funktion
+	Visibility                 _visible;
 
   private:
     friend struct               Typed_folder;
@@ -495,7 +498,7 @@ struct File_based_subsystem : Subsystem
     File_based*                 file_based                  ( const Absolute_path& path ) const     { return file_based_( path ); }
 
     virtual int                 file_based_count            () const = 0;
-//    virtual int                 visible_file_based_count            () const = 0;
+    virtual int                 visible_file_based_count    () const = 0;
     Typed_folder*               typed_folder                ( const Absolute_path& ) const;
 
     enum                        Handle_attributes           { dont_remove_attributes, remove_attributes };
@@ -541,6 +544,22 @@ struct file_based_subsystem : File_based_subsystem
                                 file_based_subsystem        ( Spooler* spooler, IUnknown* u, Type_code t ) : File_based_subsystem( spooler, u, t ), _zero_(this+1) {}
 
     int                         file_based_count            () const                                { return _file_based_map.size(); }
+	int							visible_file_based_count    () const 
+	{
+		int count = 0;
+		Z_FOR_EACH_CONST( typename File_based_map, _file_based_map, it ) 
+		{
+			File_based* file_based = it->second;
+            
+            if( file_based->is_visible())
+            {
+                count++;
+            }
+		}
+		return count;
+
+	}
+
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
     int                         file_based_map_version      () const                                { return _file_based_map_version; }
     ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }

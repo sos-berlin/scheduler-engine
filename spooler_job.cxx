@@ -515,7 +515,7 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
-    _visible(visible_yes),
+ //   _visible(visible_yes),
     _stop_on_error(true),
     _db_next_start_time( Time::never )
 {

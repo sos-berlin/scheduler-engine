@@ -189,9 +189,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     string                      include_path                () const;
     string                      title                       ()                                      { return _title; }
     string                      profile_section             ();
-    void                    set_visible                     ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
-    void                    set_visible                     ( Visibility v )                        { _visible = v; }
-    bool                     is_visible                     () const                                { return _visible == visible_yes; }
+//    void                    set_visible                     ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
+//    void                    set_visible                     ( Visibility v )                        { _visible = v; }
+//    bool                     is_visible                     () const                                { return _visible == visible_yes; }
     bool                        temporary                   () const                                { return _temporary; }
 
     void                        on_prepare_to_remove        ();
@@ -356,7 +356,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
     Time                       _task_timeout;               // Frist für einen Schritt einer Task
     Time                       _idle_timeout;               // Frist für den Zustand Task::s_running_waiting_for_order
     bool                       _force_idle_timeout;         // _idle_timeout wirkt beendet auch Tasks, wenn _min_tasks unterschritten wird
-    Visibility                 _visible;
+//    Visibility                 _visible;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test
