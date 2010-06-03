@@ -715,23 +715,19 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
     fill_file_based_dom_element( result, show_what );
 
     // Auswerten des flags für die Auflösung der Ordnerstrukur (no_subfolders)
-    if ( !show_what.is_set(show_no_subfolders_flag) ) {                                                           // JS-2010-05-25
+    if ( !show_what.is_set(show_no_subfolders_flag) ) {                                                           // JS-506
 
-        // Das flag show_no_subfolders_flag wird nur intern verwendet. Es ergänzt die Struktur
-        // show_what.
-        Show_what myShowWhat = show_what; 
-        if (show_what.is_set( show_no_subfolders ) )                        // JS-2010-05-25
+        // JS-506: Das flag show_no_subfolders_flag wird nur intern verwendet. Es ergänzt die Struktur show_what.
+        Show_what myShowWhat = show_what;
+        if (show_what.is_set( show_no_subfolders ) )
            myShowWhat |= show_no_subfolders_flag;
 
         Z_FOR_EACH( Typed_folder_map, _typed_folder_map, it )
         {
             Typed_folder* typed_folder = it->second;
-
             if( !typed_folder->is_empty() )
             {
-                if( !show_what.is_set( show_jobs )  &&  typed_folder->subsystem() == spooler()->job_subsystem() )
-                    result.append_new_comment( "<jobs> suppressed. Use what=\"jobs\"." );
-                else
+                if( show_what.is_subsystem_set( typed_folder->subsystem() ) )
                     result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
             }
         }
@@ -2265,6 +2261,15 @@ string File_based_subsystem::normalized_path( const Path& path ) const
     return Path( folder_path.is_root()  ||  folder_path.empty()? folder_path
                                                                : spooler()->folder_subsystem()->normalized_path( folder_path ), 
                  normalized_name( path.name() ) );
+}
+
+xml::Element_ptr File_based_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
+{
+    xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+    xml::Element_ptr statistics_element = dom_document.createElement( "file_based.statistics" );
+    statistics_element.setAttribute( "count", file_based_count() );
+    result.appendChild( statistics_element );
+    return result;
 }
 
 //---------------------------------------------------File_based_subsystem::check_file_based_element

@@ -273,6 +273,7 @@ struct File_based : Scheduler_object,
     void                    set_file_based_state            ( State );
 
     Fill_zero                  _zero_;
+    // Visibility              _visible();    // aus Job "hochziehen" + Template-Funktion
 
   private:
     friend struct               Typed_folder;
@@ -493,6 +494,8 @@ struct File_based_subsystem : Subsystem
     File_based*                 file_based_or_null          ( const Absolute_path& path ) const     { return file_based_or_null_( path ); }
     File_based*                 file_based                  ( const Absolute_path& path ) const     { return file_based_( path ); }
 
+    virtual int                 file_based_count            () const = 0;
+//    virtual int                 visible_file_based_count            () const = 0;
     Typed_folder*               typed_folder                ( const Absolute_path& ) const;
 
     enum                        Handle_attributes           { dont_remove_attributes, remove_attributes };
@@ -512,6 +515,7 @@ struct File_based_subsystem : Subsystem
     virtual xml::Element_ptr    file_baseds_dom_element     ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    new_file_baseds_dom_element ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual xml::Element_ptr    execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what&  );
+    virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) const;
 
   protected:
     friend struct               Typed_folder;
@@ -536,6 +540,7 @@ struct file_based_subsystem : File_based_subsystem
 {
                                 file_based_subsystem        ( Spooler* spooler, IUnknown* u, Type_code t ) : File_based_subsystem( spooler, u, t ), _zero_(this+1) {}
 
+    int                         file_based_count            () const                                { return _file_based_map.size(); }
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
     int                         file_based_map_version      () const                                { return _file_based_map_version; }
     ptr<File_based>             call_new_file_based         ()                                      { return +new_file_based(); }

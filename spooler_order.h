@@ -1046,7 +1046,7 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
 
     // File_based_subsystem
 
-    string                      object_type_name            () const                                { return "Order"; }
+    string                      object_type_name            () const                                { return "Standing_order"; }
     string                      filename_extension          () const                                { return ".order.xml"; }
     void                        assert_xml_element_name     ( const xml::Element_ptr& ) const;
     string                      xml_element_name            () const                                { return "order"; }

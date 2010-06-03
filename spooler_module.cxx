@@ -423,7 +423,7 @@ void Module::init()
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
 // JS-498: für Testzwecke wird das Scripting über JAVA-Klassen ausgeführt
 #ifdef USE_JAVA_SCRIPTING_INTERFACE
-            Z_LOG2("scheduler","use java-interface for scripting of language " << _language);
+            Z_LOG2("scheduler","use java-interface for scripting of language " << _language << "\n");
             _kind = kind_scripting_engine_java;
 #endif
         }
@@ -462,8 +462,13 @@ void Module::init()
                                         break;
 
 // JS-498: Vorhandensein von Scriptcode prüfen
-        case kind_scripting_engine_java: if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
-                                         break;
+        case kind_scripting_engine_java: if( _spooler )
+                                        {
+                                            if( has_source_script() )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+                                            if( !_use_process_class )  _spooler->_has_java = true;              // Java laden    
+                                        }
+
+                                        break;
         
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
@@ -535,6 +540,24 @@ ptr<Module_instance> Module::create_instance_impl()
             break;
         }
 
+        // JS-498: neue Instanz für java-script via Java-Interface 
+        case kind_scripting_engine_java:
+        {
+            if( _spooler )  if( !_spooler->java_subsystem()->java_vm()  ||  !_spooler->java_subsystem()->java_vm()->running() )  z::throw_xc( "SCHEDULER-177" );
+
+            _java_vm = get_java_vm( false );
+            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
+
+            if( !_java_vm->running() )
+            {
+                Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
+            }
+            
+            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this, "sos.modules.javascript.ModuleInstanceJavaScript" ) );
+            result = +p;
+            break;
+        }
+
         case kind_scripting_engine:  
         {
             ptr<Scripting_engine_module_instance> p = Z_NEW( Scripting_engine_module_instance( this ) );
@@ -568,14 +591,6 @@ ptr<Module_instance> Module::create_instance_impl()
         case kind_internal:
         {
             ptr<Internal_module_instance> p = Z_NEW( Internal_module_instance( this ) );
-            result = +p;
-            break;
-        }
-
-        // JS-498: neue Instanz für java-script via Java-Interface 
-        case kind_scripting_engine_java:
-        {
-            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this, "sos.modules.javascript.ModuleInstanceJavaScript" ) );
             result = +p;
             break;
         }
@@ -620,6 +635,7 @@ Process_class* Module::process_class() const
 bool Module::needs_java() 
 {
     bool result = _kind == Module::kind_java  &&  has_source_script();
+    if( !result )  result = _kind == Module::kind_scripting_engine_java  &&  has_source_script();           // JS-498
 
     if( !result )  result = _monitors->needs_java();
 

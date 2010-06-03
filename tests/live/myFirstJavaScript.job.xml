@@ -7,7 +7,7 @@
 var cnt = 0;
 
 // spooler_init() wird einmal nach dem Laden des Skripts gerufen.
-function spooler_open() {
+function spooler_init() {
    spooler_log.info( "spooler_init wurde gerufen" );
 
    // Bei Rückgabe von false wird spooler_exit aufgerufen

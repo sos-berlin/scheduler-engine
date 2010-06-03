@@ -1136,7 +1136,7 @@ void Spooler::check_name( const string& name )
 
 //-----------------------------------------------------------------Spooler::process_class_subsystem
 
-Process_class_subsystem* Spooler::process_class_subsystem()
+Process_class_subsystem* Spooler::process_class_subsystem() const
 {
     if( !_process_class_subsystem )  z::throw_xc( Z_FUNCTION, "Process_class_subsystem is not initialized" );
 
@@ -1145,7 +1145,7 @@ Process_class_subsystem* Spooler::process_class_subsystem()
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
 
-Order_subsystem_interface* Spooler::order_subsystem()
+Order_subsystem_interface* Spooler::order_subsystem() const
 { 
     if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Order_subsystem is not initialized" );
 
@@ -1154,7 +1154,7 @@ Order_subsystem_interface* Spooler::order_subsystem()
 
 //----------------------------------------------------------------Spooler::standing_order_subsystem
 
-Standing_order_subsystem* Spooler::standing_order_subsystem()
+Standing_order_subsystem* Spooler::standing_order_subsystem() const
 { 
     if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Standing_order_subsystem is not initialized" );
 
@@ -1163,7 +1163,7 @@ Standing_order_subsystem* Spooler::standing_order_subsystem()
 
 //----------------------------------------------------------------------Spooler::schedule_subsystem
 
-Schedule_subsystem_interface* Spooler::schedule_subsystem()
+Schedule_subsystem_interface* Spooler::schedule_subsystem() const
 { 
     if( !_schedule_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Schedule_subsystem is not initialized" );
 
@@ -1172,7 +1172,7 @@ Schedule_subsystem_interface* Spooler::schedule_subsystem()
 
 //---------------------------------------------------------------------------Spooler::job_subsystem
 
-Job_subsystem_interface* Spooler::job_subsystem()
+Job_subsystem_interface* Spooler::job_subsystem() const
 { 
     if( !_job_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Job_subsystem is not initialized" );
 
@@ -1181,7 +1181,7 @@ Job_subsystem_interface* Spooler::job_subsystem()
 
 //--------------------------------------------------------------------------Spooler::task_subsystem
 
-Task_subsystem* Spooler::task_subsystem()
+Task_subsystem* Spooler::task_subsystem() const
 { 
     if( !_task_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Task_subsystem is not initialized" );
 

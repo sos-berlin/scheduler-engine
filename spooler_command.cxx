@@ -309,6 +309,141 @@ Show_what::Show_what( Show_what_enum what )
 {
 }
 
+//-------------------------------------------------------------------------Show_what::set_dom
+
+void Show_what::set_dom( const Scheduler& scheduler, const xml::Element_ptr& element )
+{
+
+    string max_orders = element.getAttribute( "max_orders" );
+    if( max_orders != "" )  _max_orders = as_int( max_orders );
+
+    string max_order_history = element.getAttribute( "max_order_history" );
+    if( max_order_history != "" )  _max_order_history = as_int( max_order_history );
+
+    string max_task_history = element.getAttribute( "max_task_history" );
+    if( max_task_history != "" )  _max_task_history = as_int( max_task_history );
+
+    _folder_path = Absolute_path( root_path, element.getAttribute( "path", _folder_path ) );
+
+    set_what( element.getAttribute( "what" ) );
+    set_subsystems( scheduler, element.getAttribute( "subsystems" ) );
+
+    _max_order_history = element.int_getAttribute( "max_order_history", _max_order_history );
+
+}
+
+//--------------------------------------------------------------------------------Show_what::set_what
+void Show_what::set_what(const string& what) {
+
+    const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
+    while( *p )
+    {
+        while( *p == ' ' )  p++;
+
+        if( string_equals_prefix_then_skip( &p, "none"             ) )  _what = show_standard;       // Setzt Flags zurück! (Provisorisch, solange jobs,tasks default ist)
+        else
+        if( string_equals_prefix_then_skip( &p, "all!"             ) )  _what = _what | show_all;
+        else
+        if( string_equals_prefix_then_skip( &p, "all"              ) )  _what = _what | show_all_;
+        else
+        if( string_equals_prefix_then_skip( &p, "task_queue"       ) )  _what = _what | show_task_queue;
+        else
+        if( string_equals_prefix_then_skip( &p, "orders"           ) )  _what = _what | show_orders;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_chains"       ) )  _what = _what | show_job_chains;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_chain_orders" ) )  _what = _what | show_job_chain_orders;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_orders"       ) )  _what = _what | show_job_orders;
+        else
+        if( string_equals_prefix_then_skip( &p, "description"      ) )  _what = _what | show_description;
+        else
+        if( string_equals_prefix_then_skip( &p, "log"              ) )  _what = _what | show_log;
+        else
+        if( string_equals_prefix_then_skip( &p, "task_history"     ) )  _what = _what | show_task_history;
+        else
+        if( string_equals_prefix_then_skip( &p, "order_history"    ) )  _max_order_history = 20;
+        else
+        if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  _what = _what | show_remote_schedulers;
+        else
+        if( string_equals_prefix_then_skip( &p, "schedules"        ) )  _what = _what | show_schedules;
+        else
+        if( string_equals_prefix_then_skip( &p, "run_time"         ) )  _what = _what | show_schedule;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_chain_jobs"   ) )  _what = _what | show_job_chain_jobs;
+        else
+        if( string_equals_prefix_then_skip( &p, "jobs"             ) )  _what = _what | show_jobs;
+        else
+        if( string_equals_prefix_then_skip( &p, "tasks"            ) )  _what = _what | show_tasks;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_commands"     ) )  _what = _what | show_job_commands;
+        else
+        if( string_equals_prefix_then_skip( &p, "blacklist"        ) )  _what = _what | show_blacklist;
+        else
+        if( string_equals_prefix_then_skip( &p, "order_source_files") )  _what = _what | show_order_source_files;
+        else
+        if( string_equals_prefix_then_skip( &p, "payload"          ) )  _what = _what | show_payload;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_params"       ) )  _what = _what | show_job_params;
+        else
+        if( string_equals_prefix_then_skip( &p, "cluster"          ) )  _what = _what | show_cluster;
+        else
+        if( string_equals_prefix_then_skip( &p, "operations"       ) )  _what = _what | show_operations;
+        else
+        if( string_equals_prefix_then_skip( &p, "folders"          ) )  _what = _what | show_folders;
+        else
+        if( string_equals_prefix_then_skip( &p, "no_subfolders"    ) )  _what = _what | show_no_subfolders;
+        else
+        if( string_equals_prefix_then_skip( &p, "source"           ) )  _what = _what | show_source;
+        else
+        if( string_equals_prefix_then_skip( &p, "statistics"       ) )  _what = _what | show_statistics;        // JS-507
+        //else
+        //if( string_equals_prefix_then_skip( &p, "subfolders"       ) )  _what = _what | show_subfolders;
+        else
+        if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
+        else
+/*
+        if( string_equals_prefix_then_skip( &p, "check_folders"    ) )  
+        {
+#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse prüfen
+                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
+                {
+                    _spooler->folder_subsystem()->handle_folders( 1 );  
+                }
+#           endif
+        }
+        else
+*/
+            z::throw_xc( "SCHEDULER-164", what );
+        if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  z::throw_xc( "SCHEDULER-164", what );
+
+        while( *p == ' '  ||  *p == ',' )  p++;
+
+        if( *p == 0 )  break;
+    }
+}
+
+//--------------------------------------------------------------------------------Show_what::set_subsystems
+void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsystems_string) {
+    
+    vector<string> subsystems = vector_split(" +",subsystems_string);
+    Z_FOR_EACH(vector<string>, subsystems, it) {
+        string subsystem_name = *it;
+        if (subsystem_name == "job") _subsystem_set.insert(scheduler.job_subsystem());
+        else
+        if (subsystem_name == "order") _subsystem_set.insert(scheduler.order_subsystem());
+        else
+        if (subsystem_name == "task") _subsystem_set.insert(scheduler.task_subsystem());
+        else
+        if (subsystem_name == "schedule") _subsystem_set.insert(scheduler.schedule_subsystem());
+        else
+        if (subsystem_name == "process_class") _subsystem_set.insert(scheduler.process_class_subsystem());
+        else
+            z::throw_xc( "SCHEDULER-472", subsystem_name );
+    }
+
+}
+
 //-------------------------------------------------------------Command_processor::Command_processor
 
 Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, Communication::Operation* cp )
@@ -514,6 +649,17 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
 
 //-------------------------------------------------------------Command_processor::execute_subsystem
 
+/**
+* \brief JS-507: Informationen zu den Subsystemen in XML-Struktur ausgeben
+* \detail 
+* Diese Methode liefert Informationen zu den Subsystemen in einer XML-Struktur.
+*
+* \version 2.1.1 - 2010-05-28
+*
+* \param element - XML-Kommando (<show_subsystem .../>)
+* \param show_what - Attribut @what in Datenstruktur aufgelöst.
+* \return XML-Element mit den Informationen zu den Subsystemen
+*/
 xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& element, const Show_what& show_what )
 {
     //TODO In eigene Klasse auslagern, z.B. Subsystem_subsystem. Oder Meta_subsystem.
@@ -527,6 +673,11 @@ xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& e
         result.appendChild_if( _spooler->job_subsystem()->dom_element( _answer, show_what ) );
         result.appendChild_if( _spooler->task_subsystem()->dom_element( _answer, show_what ) );
         result.appendChild_if( _spooler->order_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->standing_order_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->schedule_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->process_class_subsystem()->dom_element( _answer, show_what ) );;
+        result.appendChild_if( _spooler->folder_subsystem()->dom_element( _answer, show_what ) );
+
         return result;
     }
     else 
@@ -1388,109 +1539,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     }
 
     Show_what show = show_jobs | show_tasks;        // Zur Kompatibilität. Besser: <show_state what="jobs,tasks"/>
-
-    string max_orders = element.getAttribute( "max_orders" );
-    if( max_orders != "" )  show._max_orders = as_int( max_orders );
-
-    string max_order_history = element.getAttribute( "max_order_history" );
-    if( max_order_history != "" )  show._max_order_history = as_int( max_order_history );
-
-    string max_task_history = element.getAttribute( "max_task_history" );
-    if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
-
-    show._folder_path = Absolute_path( root_path, element.getAttribute( "path", show._folder_path ) );
-
-    string what = element.getAttribute( "what" );
-
-    const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
-    while( *p )
-    {
-        while( *p == ' ' )  p++;
-
-        if( string_equals_prefix_then_skip( &p, "none"             ) )  show = show_standard;       // Setzt Flags zurück! (Provisorisch, solange jobs,tasks default ist)
-        else
-        if( string_equals_prefix_then_skip( &p, "all!"             ) )  show |= show_all;
-        else
-        if( string_equals_prefix_then_skip( &p, "all"              ) )  show |= show_all_;
-        else
-        if( string_equals_prefix_then_skip( &p, "task_queue"       ) )  show |= show_task_queue;
-        else
-        if( string_equals_prefix_then_skip( &p, "orders"           ) )  show |= show_orders;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_chains"       ) )  show |= show_job_chains;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_chain_orders" ) )  show |= show_job_chain_orders;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_orders"       ) )  show |= show_job_orders;
-        else
-        if( string_equals_prefix_then_skip( &p, "description"      ) )  show |= show_description;
-        else
-        if( string_equals_prefix_then_skip( &p, "log"              ) )  show |= show_log;
-        else
-        if( string_equals_prefix_then_skip( &p, "task_history"     ) )  show |= show_task_history;
-        else
-        if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show._max_order_history = 20;
-        else
-        if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
-        else
-        if( string_equals_prefix_then_skip( &p, "schedules"        ) )  show |= show_schedules;
-        else
-        if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_schedule;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_chain_jobs"   ) )  show |= show_job_chain_jobs;
-        else
-        if( string_equals_prefix_then_skip( &p, "jobs"             ) )  show |= show_jobs;
-        else
-        if( string_equals_prefix_then_skip( &p, "tasks"            ) )  show |= show_tasks;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_commands"     ) )  show |= show_job_commands;
-        else
-        if( string_equals_prefix_then_skip( &p, "blacklist"        ) )  show |= show_blacklist;
-        else
-        if( string_equals_prefix_then_skip( &p, "order_source_files") )  show |= show_order_source_files;
-        else
-        if( string_equals_prefix_then_skip( &p, "payload"          ) )  show |= show_payload;
-        else
-        if( string_equals_prefix_then_skip( &p, "job_params"       ) )  show |= show_job_params;
-        else
-        if( string_equals_prefix_then_skip( &p, "cluster"          ) )  show |= show_cluster;
-        else
-        if( string_equals_prefix_then_skip( &p, "operations"       ) )  show |= show_operations;
-        else
-        if( string_equals_prefix_then_skip( &p, "folders"          ) )  show |= show_folders;
-        else
-        if( string_equals_prefix_then_skip( &p, "no_subfolders"    ) )  show |= show_no_subfolders;
-        else
-        if( string_equals_prefix_then_skip( &p, "source"           ) )  show |= show_source;
-        else
-        if( string_equals_prefix_then_skip( &p, "statistics"       ) )  show |= show_statistics;
-        //else
-        //if( string_equals_prefix_then_skip( &p, "subfolders"       ) )  show |= show_subfolders;
-        else
-        if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
-        else
-        if( string_equals_prefix_then_skip( &p, "check_folders"    ) )  
-        {
-#           ifdef Z_UNIX    // Weil wir unter Unix nur periodisch die Verzeichnisse prüfen
-                if( _spooler->folder_subsystem()->subsystem_state() == subsys_active )
-                {
-                    _spooler->folder_subsystem()->handle_folders( 1 );  
-                }
-#           endif
-        }
-        else
-            z::throw_xc( "SCHEDULER-164", what );
-
-        if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  z::throw_xc( "SCHEDULER-164", what );
-
-        while( *p == ' '  ||  *p == ',' )  p++;
-
-        if( *p == 0 )  break;
-    }
-
-    show._max_order_history = element.int_getAttribute( "max_order_history", show._max_order_history );
-
-
+    show.set_dom(*_spooler, element);
 
     string element_name = element.nodeName();
     
@@ -1530,10 +1579,13 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         result = execute_licence( element, show );
     }
     else
+
+    // JS-507: Informationen zu den Subsystemen
     if( string_begins_with( element_name, "subsystem." ) )
     {
         result = execute_subsystem( element, show );
     }
+
     else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else

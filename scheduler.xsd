@@ -1203,11 +1203,12 @@
 
 
     <xsd:complexType name="Show_state">
-        <xsd:attribute name="what"                  type="String"/>
-        <xsd:attribute name="max_orders"            type="xsd:nonNegativeInteger"/>
-        <xsd:attribute name="max_order_history"     type="xsd:nonNegativeInteger"/>
-        <xsd:attribute name="max_task_history"      type="xsd:nonNegativeInteger"/>
-        <xsd:attribute name="path"                  type="Path"/>
+      <xsd:attribute name="what"                  type="String"/>
+      <xsd:attribute name="subsystems"            type="String"/>
+      <xsd:attribute name="max_orders"            type="xsd:nonNegativeInteger"/>
+      <xsd:attribute name="max_order_history"     type="xsd:nonNegativeInteger"/>
+      <xsd:attribute name="max_task_history"      type="xsd:nonNegativeInteger"/>
+      <xsd:attribute name="path"                  type="Path"/>
     </xsd:complexType>
 
 

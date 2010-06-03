@@ -246,7 +246,9 @@ bool Directory::read( Read_flags read_what, double minimum_age )
         dir.open( _directory_tree->directory_path(), path() );
         if( dir.is_opened() )
         {
-            while( ptr<file::File_info> file_info = dir.get() )  file_info_list.push_back( &*file_info );
+            while( ptr<file::File_info> file_info = dir.get() ) {
+                if (file_info->path().name() != ".svn") file_info_list.push_back( &*file_info );
+            }
             dir.close();
         }
 

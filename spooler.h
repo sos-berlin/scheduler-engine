@@ -540,14 +540,14 @@ struct Spooler : Object,
 
     Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
     Folder_subsystem*           folder_subsystem            () const                            { return _folder_subsystem; }
-    Process_class_subsystem*    process_class_subsystem     ();
-    Task_subsystem*             task_subsystem              ();
-    Task_subsystem*             task_subsystem_or_null      ()                                  { return _task_subsystem; }
-    Job_subsystem_interface*    job_subsystem               ();
-    Job_subsystem_interface*    job_subsystem_or_null       ()                                  { return _job_subsystem; }
-    Order_subsystem_interface*  order_subsystem             ();
-    Standing_order_subsystem*   standing_order_subsystem    ();
-    Schedule_subsystem_interface* schedule_subsystem        ();
+    Process_class_subsystem*    process_class_subsystem     () const;
+    Task_subsystem*             task_subsystem              () const;
+    Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
+    Job_subsystem_interface*    job_subsystem               () const;
+    Job_subsystem_interface*    job_subsystem_or_null       () const                            { return _job_subsystem; }
+    Order_subsystem_interface*  order_subsystem             () const;
+    Standing_order_subsystem*   standing_order_subsystem    () const;
+    Schedule_subsystem_interface* schedule_subsystem        () const;
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
 

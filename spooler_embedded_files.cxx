@@ -1213,6 +1213,7 @@ const char file_scheduler_xsd[] =
     "\n"
     "<xsd:complexType name=\"Show_state\">\n"
     "<xsd:attribute name=\"what\"                  type=\"String\"/>\n"
+    "<xsd:attribute name=\"subsystems\"            type=\"String\"/>\n"
     "<xsd:attribute name=\"max_orders\"            type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"max_order_history\"     type=\"xsd:nonNegativeInteger\"/>\n"
     "<xsd:attribute name=\"max_task_history\"      type=\"xsd:nonNegativeInteger\"/>\n"
@@ -2398,8 +2399,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1274954839 },
-    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1225365142 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1275560651 },
+    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1273438315 },
     { NULL, NULL, 0 }
 };
 

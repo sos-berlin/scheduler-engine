@@ -30,7 +30,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
-    show_no_subfolders_flag = 0x80,             // internees Flag für das weitere Auflössen von Unterordnern 
+    show_no_subfolders_flag = 0x80,             // JS-506: internees Flag für das weitere Auflössen von Unterordnern 
     show_remote_schedulers  = 0x100,
     show_schedule           = 0x200,
     show_job_chains         = 0x400,
@@ -38,7 +38,7 @@ enum Show_what_enum
     show_jobs               = 0x1000,   // <jobs>
     show_tasks              = 0x2000,   // <tasks>
     show_payload            = 0x4000,
-    show_statistics         = 0x10000,
+    show_statistics         = 0x10000,          // JS-507
     show_job_commands       = 0x20000,
     show_blacklist          = 0x40000,
     show_order_source_files = 0x80000,
@@ -66,14 +66,23 @@ inline Show_what_enum operator ~ ( Show_what_enum a )                    { retur
 
 struct Show_what
 {
+    typedef stdext::hash_set<Subsystem*> Subsystem_set;  
+
                                 Show_what                   ( Show_what_enum = show_standard );
+
+    void                        set_dom                     ( const Scheduler&, const xml::Element_ptr&  ); 
 
     Show_what                   operator |                  ( Show_what_enum w ) const              { Show_what ww = *this; ww |= w; return ww;; }
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
     void                        operator &=                 ( Show_what_enum w )                    { _what = _what & w; }
     bool                        is_set                      ( Show_what_enum w ) const              { return ( _what & w ) != 0; }
+    bool                        is_subsystem_set            ( Subsystem* s) const                   { return _subsystem_set.find(s) != _subsystem_set.end(); } 
 
+private:
+    void                       set_what(const string&); 
+    void                       set_subsystems(const Scheduler&, const string&);
 
+public:
     Fill_zero                  _zero_;
     Show_what_enum             _what;
     int                        _max_orders;
@@ -82,6 +91,8 @@ struct Show_what
     string                     _job_name;
     int                        _task_id;
     Absolute_path              _folder_path;
+    stdext::hash_set<Subsystem*> _subsystem_set;  
+
 };
 
 //----------------------------------------------------------------------------Show_calendar_options

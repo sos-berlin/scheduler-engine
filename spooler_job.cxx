@@ -275,7 +275,7 @@ void Job_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
 
 xml::Element_ptr Job_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
 {
-    xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+    xml::Element_ptr result = file_based_subsystem<Job>::dom_element( dom_document, show_what );
     xml::Element_ptr job_subsystem_element = dom_document.createElement( "job_subsystem" );
     
     if( show_what.is_set( show_statistics ) ) {

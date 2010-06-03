@@ -2874,6 +2874,13 @@
                 <title>Not supported character for encoding '<p1/>'</title>
             </text>
         </message>
+
+        <message code="SCHEDULER-472">
+          <text xml:lang="en">
+            <title>Unknown subsystem "<p1/>"</title>
+          </text>
+        </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->
