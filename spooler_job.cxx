@@ -72,9 +72,11 @@ struct Job_subsystem : Job_subsystem_interface
 
 
 private:
-    xml::Element_ptr            state_job_statistic_element ( const xml::Document_ptr&, Job::State ) const;
-    xml::Element_ptr            job_statistic_element       ( const xml::Document_ptr&, const string& attribute_name, const string& attribute_value, int count ) const;
-    int                         count_jobs_with_state       ( Job::State ) const;
+    xml::Element_ptr            state_job_statistic_element    ( const xml::Document_ptr&, Job::State ) const;
+    xml::Element_ptr            job_statistic_element          ( const xml::Document_ptr&, const string& attribute_name, const string& attribute_value, int count ) const;
+    xml::Element_ptr            waiting_for_process_job_statistic_element( const xml::Document_ptr& dom_document ) const;
+    int                         count_jobs_with_state          ( Job::State ) const;
+    int                         count_jobs_waiting_for_process () const;
 
 
     ptr<Schedule>              _default_schedule;
@@ -285,11 +287,18 @@ xml::Element_ptr Job_subsystem::dom_element( const xml::Document_ptr& dom_docume
         job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_pending ) );
         job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_running ) );
         job_statistics_element.appendChild( state_job_statistic_element( dom_document, Job::s_stopped ) );
-        //job_statistics_element.appendChild( waiting_for_process_job_statistic_element( dom_document, Job::s_stopped ) );
+        job_statistics_element.appendChild( waiting_for_process_job_statistic_element( dom_document ) );
     }
 
     result.appendChild( job_subsystem_element );
     return result;
+}
+
+//-------------------------------------------------------Job_subsystem::waiting_for_process_job_statistic_element
+
+xml::Element_ptr Job_subsystem::waiting_for_process_job_statistic_element( const xml::Document_ptr& dom_document ) const
+{
+    return job_statistic_element( dom_document, "need_process", "true", count_jobs_waiting_for_process() );
 }
 
 //-------------------------------------------------------Job_subsystem::state_job_statistic_element
@@ -318,6 +327,18 @@ int Job_subsystem::count_jobs_with_state( Job::State state ) const
 
     FOR_EACH_JOB( job )
         if( job->state() == state )  result++;
+
+    return result;
+}
+
+//-------------------------------------------------------------Job_subsystem::count_jobs_with_state
+
+int Job_subsystem::count_jobs_waiting_for_process() const
+{
+    int result = 0;
+
+    FOR_EACH_JOB( job )
+        if( job->_waiting_for_process )  result++;
 
     return result;
 }
