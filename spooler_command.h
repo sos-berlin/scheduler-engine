@@ -76,7 +76,8 @@ struct Show_what
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
     void                        operator &=                 ( Show_what_enum w )                    { _what = _what & w; }
     bool                        is_set                      ( Show_what_enum w ) const              { return ( _what & w ) != 0; }
-    bool                        is_subsystem_set            ( Subsystem* s) const                   { return _subsystem_set.find(s) != _subsystem_set.end(); } 
+    bool                        is_subsystem_set            ( Subsystem* s)		 const              { return _subsystem_set.find(s) != _subsystem_set.end(); } 
+	bool						is_subsystem_set_empty		()					 const				{ return _subsystem_set.empty(); }
 
 private:
     void                       set_what(const string&); 

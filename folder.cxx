@@ -727,6 +727,9 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
             Typed_folder* typed_folder = it->second;
             if( !typed_folder->is_empty() )
             {
+				if(show_what.is_subsystem_set_empty())
+					result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
+				else
                 if( show_what.is_subsystem_set( typed_folder->subsystem() ) )
                     result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
             }
