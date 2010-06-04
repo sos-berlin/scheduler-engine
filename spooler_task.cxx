@@ -92,8 +92,76 @@ string start_cause_name( Start_cause cause )
 
 xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
-    return Subsystem::dom_element( dom_document, show_what );
+	xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+	
+	xml::Element_ptr task_subsystem_element = dom_document.createElement( "task_subsystem" );
+
+	if( show_what.is_set( show_statistics ) ) {
+		
+		xml::Element_ptr statistics_element = task_subsystem_element.append_new_element( "task_subsystem.statistics" );
+		xml::Element_ptr task_statistics_element = statistics_element.append_new_element( "task.statistics" );
+		task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_running ));
+		task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_starting ));
+		task_statistics_element.appendChild(exist_task_statistic_element( dom_document ));
+	}
+
+	result.appendChild( task_subsystem_element );
+	return result;
+
+  //  return Subsystem::dom_element( dom_document, show_what );
 }
+
+//-------------------------------------------------------Task_subsystem::state_task_statistic_element
+
+xml::Element_ptr Task_subsystem::state_task_statistic_element( const xml::Document_ptr& dom_document, Task::State state ) const
+{
+    return task_statistic_element( dom_document, "task_state", Task::state_name( state ), count_tasks_with_state( state ) );
+}
+
+//-------------------------------------------------------Task_subsystem::state_task_statistic_element
+
+xml::Element_ptr Task_subsystem::exist_task_statistic_element( const xml::Document_ptr& dom_document ) const
+{
+    return task_statistic_element( dom_document, "task_state", "exist", count_tasks_exist( ) );
+}
+
+
+//-------------------------------------------------------Task_subsystem::state_task_statistic_element
+
+xml::Element_ptr Task_subsystem::task_statistic_element( const xml::Document_ptr& dom_document, 
+    const string& attribute_name, const string& attribute_value, int count ) const
+{
+    xml::Element_ptr result = dom_document.createElement( "task.statistic" );
+    result.setAttribute( attribute_name, attribute_value );
+    result.setAttribute( "count", count );
+    return result;
+}
+
+//-------------------------------------------------------------Task_subsystem::count_tasks_with_state
+
+int Task_subsystem::count_tasks_with_state( Task::State state ) const
+{
+    int result = 0;
+
+	FOR_EACH_TASK_CONST ( it, task )
+        if( task->state() == state )  result++;
+
+    return result;
+}
+
+//-------------------------------------------------------------------Task_subsystem::count_tasks_exist
+
+int Task_subsystem::count_tasks_exist( ) const
+{
+    int result = 0;
+
+	// TODO ggf. bestimmte Stati nicht zählen
+	FOR_EACH_TASK_CONST ( it, task )
+        result++;
+
+    return result;
+}
+
 
 //---------------------------------------------------------------------------------------Task::Task
 

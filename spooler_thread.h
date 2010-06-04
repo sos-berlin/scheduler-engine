@@ -21,6 +21,12 @@ struct Task_subsystem: Object, Subsystem
 
     string                      name                        () const                                { return "task"; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+	
+	xml::Element_ptr			state_task_statistic_element( const xml::Document_ptr& dom_document, Task::State state ) const;
+	xml::Element_ptr			task_statistic_element		( const xml::Document_ptr& dom_document, const string& attribute_name, const string& attribute_value, int count ) const;
+	int							count_tasks_with_state		( Task::State state ) const;
+	int							count_tasks_exist( ) const;
+	xml::Element_ptr			exist_task_statistic_element( const xml::Document_ptr& dom_document ) const;
     
     bool                        has_tasks                   ()                                      { return !_task_list.empty(); }
 
