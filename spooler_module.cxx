@@ -421,11 +421,11 @@ void Module::init()
         {
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-// JS-498: für Testzwecke wird das Scripting über JAVA-Klassen ausgeführt
-#ifdef USE_JAVA_SCRIPTING_INTERFACE
-            Z_LOG2("scheduler","use java-interface for scripting of language " << _language << "\n");
-            _kind = kind_scripting_engine_java;
-#endif
+            // JS-498: Scripting über JAVA-Klassen ausgeführt
+            if (_language.substr(0,5) == "java:") {
+                Z_LOG2("scheduler","use java-interface for scripting of language " << _language << "\n");
+                _kind = kind_scripting_engine_java;
+            }
         }
     }
 
@@ -553,7 +553,7 @@ ptr<Module_instance> Module::create_instance_impl()
                 Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
-            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this, "sos.modules.javascript.ModuleInstanceJavaScript" ) );
+            ptr<Script_module_instance> p = Z_NEW( Script_module_instance( this ) );
             result = +p;
             break;
         }

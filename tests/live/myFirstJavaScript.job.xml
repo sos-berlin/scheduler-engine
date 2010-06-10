@@ -28,9 +28,13 @@ function spooler_open() {
 
 // spooler_process wird so lange gerufen, bis false zurück gegeben wird
 function spooler_process() {
-   if (cnt < 5) {
+   if (cnt < 1000) {
       cnt++;
-      spooler_log.info( "spooler_process wurde gerufen (" + cnt + ")" );
+      var a = [];
+      for(i = 0; i < 100; i++) {
+        a.push("spooler_process wurde gerufen (" + cnt + ")");
+       }
+      spooler_log.info( a.join("\n") );
       return true;
    }
    return false;

@@ -18,9 +18,8 @@ struct Script_module : Module
 
 struct Script_module_instance : Module_instance
 {
-                                Script_module_instance    ( Module*, const string& servicename );
+                                Script_module_instance    ( Module* );
 
-  //void                        init                        ();
     bool                        load                        ()                                      { _loaded = true; return Module_instance::load(); }
   //void                        start                       ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
@@ -38,8 +37,6 @@ struct Script_module_instance : Module_instance
     Has_log*                   _log;
     bool                       _loaded;
 
-//    string                     _servicename;
-//    scheduler_java::ScriptConnector  _scriptconnector;                
     scheduler_java::ScriptInterface  _scriptinterface;                
 
     typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;

@@ -9,22 +9,11 @@ using namespace std;
 using namespace zschimmer;
 using namespace zschimmer::javabridge;
 
-
 namespace sos {
 namespace scheduler {
 namespace scheduler_java {
 
-// const class_factory<ScriptConnector_class> ScriptConnector_class::class_factory ( "sos.service.scheduler.ModuleScriptConnector" );
-const class_factory<ScriptInterface_class> ScriptInterface_class::class_factory ( "sos.modules.javascript.ModuleScriptJavaScript" );
-
-//------------------------------------------------------------------------ ScriptInterface::add_obj
-
-/*
-void ScriptInterface::add_obj( jobject* object, const string& name )
-{
-    Z_LOG2("scheduler","Script_module_instance::add_obj name=" << name << "\n");
-}
-*/
+const class_factory<ScriptInterface_class> ScriptInterface_class::class_factory ( "sos.service.scripting.Module" );
 
 //-------------------------------------------------------------------------------------------------
 

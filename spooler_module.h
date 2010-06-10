@@ -15,9 +15,6 @@ namespace scheduler {
 #   define SPOOLER_DEFAULT_LANGUAGE     "Perl"
 #endif
 
-// JS-498: Verwendung der JAVA Schnittstelle (statt spidermonkey)
-// #define USE_JAVA_SCRIPTING_INTERFACE
-
 //--------------------------------------------------------------------------------------------const
 
 extern const string spooler_init_name;

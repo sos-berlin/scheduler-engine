@@ -30,17 +30,12 @@ Script_module::Script_module( Spooler* spooler, Prefix_log* log )
 
 //---------------------------------------------------Internal_instance_base::Script_module_instance
     
-Script_module_instance::Script_module_instance( Module* module, const string& servicename )             
+Script_module_instance::Script_module_instance( Module* module )             
 : 
     Module_instance(module),
     _zero_(this+1),
-//    _scriptconnector(servicename),
-    _scriptinterface(servicename)                   // instantiert ScriptInterface
+    _scriptinterface(module->_language, module->read_source_script())                   // instantiert ScriptInterface
 {
-    Z_LOG2("scheduler","Script_module_instance::Script_module_instance service=" << servicename << "\n");
-    _scriptinterface.init(_module->read_source_script());    // Initialisierung und Übergabe des Scriptcodes
-    //_servicename = servicename;
-    //_scriptinterface = _scriptconnector.getService();
 }
 
 //----------------------------------------------------------------Script_module_instance::add_obj
@@ -54,15 +49,12 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
     _scriptinterface.add_obj( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
 }
 
-//-------------------------------------------------------------------Script_module_instance::call
+//-----------------------------------------------------------Script_module_instance::call
 
 Variant Script_module_instance::call( const string& name )
 {
-    string f = replace_regex_ext(name,"^(.*).$","\\1");         // nach Java auslagern
-    Z_LOG2("scheduler","Script_module_instance::call name=" << f << "\n");
-    return _scriptinterface.call(f);
-//    _log->info("Script_module_instance::call" );
-//    return false;
+    Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
+    return _scriptinterface.call_boolean(name);
 }
 
 //-------------------------------------------------------------------Script_module_instance::call
@@ -70,7 +62,6 @@ Variant Script_module_instance::call( const string& name )
 Variant Script_module_instance::call( const string&, const Variant&, const Variant& )
 {
     Z_LOG2("scheduler","Script_module_instance::call\n");
-//    _log->info("Script_module_instance::call");
     assert(0), z::throw_xc( Z_FUNCTION );
 }
 
@@ -78,11 +69,8 @@ Variant Script_module_instance::call( const string&, const Variant&, const Varia
 
 bool Script_module_instance::name_exists( const string& name )
 {
-    //TODO in Java implementiren
-    // Da erst derzeit keine Funktionalität zum Überprüfen des Vorhandenseins einer Methode gibt,
-    // wird erstmal immer true geliefert.
     Z_LOG2("scheduler","Script_module_instance::name_exists name=" << name << "\n");
-    return true;
+    return _scriptinterface.name_exists(name);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -19,16 +19,16 @@ struct ScriptInterface_class : Object_class
 {
     ScriptInterface_class( const string& class_name ) : 
         Object_class( class_name ),
-        _constructor        ( this, "<init>"   ,  Signature::of_types( t_void ) ),
-        _init_method        ( this, "init",       Signature::of_types( t_void, "java.lang.String" ) ),
-        _addObject_method   ( this, "addObject",  Signature::of_types( t_void, "java.lang.Object", "java.lang.String" ) ),
-        _call_method        ( this, "call" ,      Signature::of_types( t_boolean, "java.lang.String" ) )
+        _constructor        ( this, "<init>",         Signature::of_types( t_void, "java.lang.String",  "java.lang.String" ) ),
+        _addObject_method   ( this, "addObject",    Signature::of_types( t_void, "java.lang.Object", "java.lang.String" ) ),
+        _callBoolean_method ( this, "callBoolean" , Signature::of_types( t_boolean, "java.lang.String" ) ),
+        _nameExists_method  ( this, "nameExists" ,  Signature::of_types( t_boolean, "java.lang.String" ) )
     {}
 
     const Constructor _constructor;
     const Method      _addObject_method;
-    const Method      _init_method;
-    const Method      _call_method;
+    const Method      _callBoolean_method;
+    const Method      _nameExists_method;
 
     static const class_factory<ScriptInterface_class> class_factory;     // Für class_factory_based<>
 };
@@ -37,49 +37,14 @@ struct ScriptInterface_class : Object_class
 
 struct ScriptInterface : object_impl<ScriptInterface_class>
 {
-                                ScriptInterface                 ( const string& servicename )            { clas()->_constructor.construct( *this, Parameters() ); }
-    void                             add_obj                    ( jobject object, const string& name )   { clas()->_addObject_method.call( *this, Parameters(object,name) ); }
-    void                             init                       ( const string& sourcecode )             { clas()->_init_method.call( *this, Parameters(sourcecode) ); }
-    bool                             call                       ( const string& name )                   { return clas()->_call_method.bool_call( *this, Parameters(name) ); }
-    bool                             name_exists                ( const string& name )  { return true; }
+                                     ScriptInterface            ( const string& lang, const string& code ) { clas()->_constructor.construct( *this, Parameters(lang,code) ); }
+    void                             add_obj                    ( jobject object, const string& name )     { clas()->_addObject_method.call( *this, Parameters(object,name) ); }
+    bool                             call_boolean               ( const string& name )                     { return clas()->_callBoolean_method.bool_call( *this, Parameters(name) ); }
+    bool                             name_exists                ( const string& name )                     { return clas()->_nameExists_method.bool_call( *this, Parameters(name) ); }
 
 };
 
 //---------------------------------------------------------------------------------ScriptConnector_class
-
-// JAVA-Schnittstelle zum Service-Provider für das ScriptInterface
-/*
-struct ScriptConnector_class : Object_class
-{
-    ScriptConnector_class( const string& class_name ) : 
-        Object_class( class_name ),
-        _constructor           ( this, "<init>",          Signature::of_types( t_void, "java.lang.String" ) ),
-        _getService_method     ( this, "getService",      Signature::of_types( "sos.service.scheduler.ModuleScriptInterface" ) ),
-        _getServicename_method ( this, "getServicename" , Signature::of_types( "java.lang.String" ) )
-    {}
-
-    const Constructor _constructor;
-    const Method      _getService_method;
-    const Method      _getServicename_method;
-
-    static const class_factory<ScriptConnector_class> class_factory;     // Für class_factory_based<>
-};
-*/
-
-//-------------------------------------------------------------------------------------ScriptConnector
-
-/*
-struct ScriptConnector : object_impl<ScriptConnector_class>
-{
-                                ScriptConnector     ( const string& servicename )       { clas()->_constructor.construct( *this, Parameters(servicename) ); }
-
-    // ScriptInterface             getService          ()                                  { return clas()->_getService_method.object_call( *this ); }
-    string                      getServicename      ()                                  { return clas()->_getServicename_method.string_call( *this ); }
-
-};
-*/
-
-//-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge
 } //namespace scheduler
