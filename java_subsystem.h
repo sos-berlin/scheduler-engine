@@ -15,7 +15,7 @@ struct Java_subsystem_interface : Object, Subsystem
     virtual javabridge::Vm*     java_vm                     ()                                      = 0;
 
     static string               classname_of_scheduler_object(const string&);
-    static ptr<Java_idispatch>  instance_of_scheduler_object( IDispatch*, const string&);
+    static ptr<javabridge::Java_idispatch>  instance_of_scheduler_object( IDispatch*, const string&);
 };
 
 //-------------------------------------------------------------------------------------------------

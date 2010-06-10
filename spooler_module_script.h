@@ -1,7 +1,9 @@
 #ifndef __SCRIPT_MODULE_SCRIPT_H
 #define __SCRIPT_MODULE_SCRIPT_H
 
-#include "spooler_module_script_interface.h"
+#include "../javaproxy/sos__service__scripting__Module.h"
+#include "../zschimmer/java_com.h"
+
 namespace sos {
 namespace scheduler {
 
@@ -37,7 +39,7 @@ struct Script_module_instance : Module_instance
     Has_log*                   _log;
     bool                       _loaded;
 
-    scheduler_java::ScriptInterface  _scriptinterface;                
+    javaproxy::sos::service::scripting::Module _java_module;
 
     typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;

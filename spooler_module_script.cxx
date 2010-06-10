@@ -12,8 +12,7 @@
  * </div>
  */
 #include "spooler.h"
-
-using namespace sos::scheduler::scheduler_java;
+#include "../javaproxy/java__lang__String.h"
 
 namespace sos {
 namespace scheduler {
@@ -34,7 +33,7 @@ Script_module_instance::Script_module_instance( Module* module )
 : 
     Module_instance(module),
     _zero_(this+1),
-    _scriptinterface(module->_language, module->read_source_script())                   // instantiert ScriptInterface
+    _java_module( javaproxy::sos::service::scripting::Module_class::new_instance( module->_language, module->read_source_script()) )
 {
 }
 
@@ -44,9 +43,9 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::add_obj name=" << name << "\n");
 
-    ptr<Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(idispatch, name);
+    ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(idispatch, name);
     _added_jobjects.push_back( java_idispatch );
-    _scriptinterface.add_obj( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
+    _java_module.addObject( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
 }
 
 //-----------------------------------------------------------Script_module_instance::call
@@ -54,7 +53,7 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
 Variant Script_module_instance::call( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
-    return _scriptinterface.call_boolean(name);
+    return _java_module.callBoolean(name);
 }
 
 //-------------------------------------------------------------------Script_module_instance::call
@@ -70,7 +69,7 @@ Variant Script_module_instance::call( const string&, const Variant&, const Varia
 bool Script_module_instance::name_exists( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::name_exists name=" << name << "\n");
-    return _scriptinterface.name_exists(name);
+    return _java_module.nameExists(name);
 }
 
 //-------------------------------------------------------------------------------------------------

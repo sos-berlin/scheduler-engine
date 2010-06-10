@@ -120,10 +120,10 @@ string Java_subsystem_interface::classname_of_scheduler_object(const string& obj
 
 //-----------------------------------------Java_subsystem_interface::instance_of_scheduler_object
 
-ptr<Java_idispatch> Java_subsystem_interface::instance_of_scheduler_object( IDispatch* idispatch, const string& objectname)
+ptr<javabridge::Java_idispatch> Java_subsystem_interface::instance_of_scheduler_object( IDispatch* idispatch, const string& objectname)
 {
     string java_class_name = classname_of_scheduler_object(objectname);
-    return Z_NEW( Java_idispatch( idispatch, true, java_class_name.c_str() ) );
+    return Z_NEW( javabridge::Java_idispatch( idispatch, true, java_class_name.c_str() ) );
 }
 
 
