@@ -445,8 +445,8 @@
         <xml_child_element name="settings"/>
         <xml_child_element name="description"/>
         <xml_child_element name="lock.use"                     multiple="yes"/>
-        <xml_child_element name="environment"/>
         <xml_child_element name="params"/>
+        <xml_child_element name="environment"/>
         <xml_child_element name="script"/>
         <xml_child_element name="process"/>
         <xml_child_element name="monitor"/>
