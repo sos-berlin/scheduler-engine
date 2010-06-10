@@ -7,7 +7,7 @@
 
 using namespace std;
 using namespace zschimmer;
-using namespace zschimmer::java;
+using namespace zschimmer::javabridge;
 
 
 namespace sos {
