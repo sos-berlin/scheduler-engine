@@ -59,7 +59,7 @@ struct Subsystem_register : Scheduler_object, Non_cloneable, Object
     void                        add(Subsystem* s)           { _set.insert(s); }
     void                        remove(Subsystem* s)        { _set.erase(s); }
     const Set*                  set()                       { return &_set; }
-    boolean                     contains(const string&) const;
+    bool                        contains(const string&) const;
     Subsystem*                  get(const string&) const;
 
 private:
