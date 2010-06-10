@@ -152,7 +152,7 @@ Subsystem::~Subsystem ()
 
 //---------------------------------------------------------------------Subsystem_register::contains
 
-boolean Subsystem_register::contains (const string& subsystem_name) const
+bool Subsystem_register::contains (const string& subsystem_name) const
 {
     Z_FOR_EACH_CONST(Set, _set, it)
         if ((*it)->name() == subsystem_name) return true;
