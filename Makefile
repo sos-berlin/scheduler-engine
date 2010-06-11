@@ -2,7 +2,7 @@
 
 PROD_DIR = $(shell cd ../.. && /bin/pwd)
 
-DEP_PRODUCTS := kram file fs zschimmer
+DEP_PRODUCTS := javaproxy kram file fs zschimmer
 
 ifeq ($(shell uname -s -m),HP-UX ia64)
 # Java schafft es nicht, libhostjava.so nachzuladen. Also binden wir es ein.
@@ -45,6 +45,7 @@ objects = \
  spooler_module_process.o\
  spooler_module_remote.o\
  spooler_module_remote_server.o\
+ spooler_module_script.o\
  spooler_order.o\
  spooler_order_file.o\
  spooler_process.o\

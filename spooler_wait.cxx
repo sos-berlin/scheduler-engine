@@ -642,6 +642,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 #endif
 }
 
+//-------------------------------------------------------Wait_handles::sosMsgWaitForMultipleObjects
+#ifdef Z_WINDOWS
 /**
 * \brief Steuerung der weiteren Verarbeitung der Prozess-Handles
 * \detail 
@@ -659,6 +661,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 *
 * \return Nummer des Prozesses, für den ein event ausgelöst worden ist.
 */
+
 DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout)
 {
    DWORD  ret;
@@ -676,6 +679,9 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
    return ret;
 }
 
+#endif
+//-----------------------------------------------------Wait_handles::sosMsgWaitForMultipleObjects64
+#ifdef Z_WINDOWS
 /**
 * \brief Polling für alle Prozesse
 * \detail 
@@ -691,6 +697,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 *
 * \return Nummer des Prozesses, für den ein event ausgelöst worden ist.
 */
+
 DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout )
 {
     int     result              = SOS_WAIT_TIMEOUT;
@@ -753,6 +760,8 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
     return result;
 
 }
+
+#endif
 //--------------------------------------------------------------------------Wait_handles::as_string
 
 int Wait_handles::calculateStepTimeout(int timeoutCounter)
