@@ -10,6 +10,31 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+		<change date="2010-04-28" version="2.1.1" subversion_revision="6089">
+        <revision jira="JS-481" type="correction" title="Nicht mehr benötigte TCP Verbindungen werden jetzt zuverlässig freigegeben.">
+            <description>
+            Beim Öffnen einer neuen TCP Verbindung wird geprüft, ob es bereits eine nicht mehr benötigte Verbindung für diesen host/port registriert ist.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-05-07" version="2.1.1" subversion_revision="6101">
+        <revision jira="JS-343" type="correction" title="Die Angabe von @absolute_repeat berücksichtigt jetzt auch die erste Startzeit.">
+            <description>
+            Wurde @absolute_repeat in einer run_time angegeben, ist unter bestimmten Umständen die erste Startzeit nicht korrekt ermittelt worden.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-05-04" version="2.1.1" subversion_revision="6096">
+        <revision jira="JS-380" type="correction" title="Jobscheduler 'friert' nicht mehr ein, wenn Job auf 'supend' gesetzt wird.">
+            <description>
+            Bei API Jobs kam es gelegentlich zu dem Problem, dass der gesamte Jobscheduler 'eingefroren' ist, wenn ein Job auf 'suspend' gesetzt
+            worden ist. Das ist immer dann passiert, wenn das 'suspend' innerhalb einer Operation (spooler_start, spooler_process ...) ausgeführt worden ist.
+            </description>
+        </revision>
+    </change>
+
 		<change date="2010-04-27" version="2.1.1" subversion_revision="6078">
         <revision jira="JS-471" type="modification" title="Mehr als 64 paralle Prozesse unter Windows möglich.">
             <description>
@@ -20,9 +45,9 @@
     </change>
 
 		<change date="2010-05-28" version="2.1.1" subversion_revision="6103">
-        <revision jira="JS-506" type="modification" title="Kommando <show_state waht="folders no_subfolder"> zeigt Namen der Unterordner.">
+        <revision jira="JS-506" type="modification" title="Kommando &lt;show_state what='folders no_subfolder'&gt; zeigt Namen der Unterordner.">
             <description>
-	            Das Kommando <show_state waht="folders no_subfolder"> liefert die Namen der Unterordner, aber nicht deren Inhalte.
+	            Das Kommando &lt;show_state what='folders no_subfolder'&gt; liefert die Namen der Unterordner, aber nicht deren Inhalte.
             </description>
         </revision>
     </change>
