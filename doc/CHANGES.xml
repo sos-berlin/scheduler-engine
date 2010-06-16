@@ -10,6 +10,23 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+		<change date="2010-04-27" version="2.1.1" subversion_revision="6078">
+        <revision jira="JS-471" type="modification" title="Mehr als 64 paralle Prozesse unter Windows möglich.">
+            <description>
+	            Unter Windows besteaht bisher die Beschränkung auf 64 parallel laufende Prozesse. Die mögliche Anzahl ist jetzt analog zu der
+	            unter Unix.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-05-28" version="2.1.1" subversion_revision="6103">
+        <revision jira="JS-506" type="modification" title="Kommando <show_state waht="folders no_subfolder"> zeigt Namen der Unterordner.">
+            <description>
+	            Das Kommando <show_state waht="folders no_subfolder"> liefert die Namen der Unterordner, aber nicht deren Inhalte.
+            </description>
+        </revision>
+    </change>
+
 		<change date="2010-04-13" version="2.1.0" subversion_revision="6065">
         <revision jira="JS-421" type="correction" title="Umgebungsvariable zwischen Scripten werden jetzt richtig übergeben.">
             <description>
