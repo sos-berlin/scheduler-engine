@@ -7,13 +7,13 @@
          author   = "$Author$"
          date     = "$Date$">
 
-    <scheduler_keyword keyword="Änderungsprotokoll"/>
-    <scheduler_keyword keyword="Change log"/>
-
-		<change date="2010-04-28" version="2.1.1" subversion_revision="6089">
-        <revision jira="JS-481" type="correction" title="Nicht mehr benötigte TCP Verbindungen werden jetzt zuverlässig freigegeben.">
+  <scheduler_keyword keyword="Änderungsprotokoll"/>
+  <scheduler_keyword keyword="Change log"/>
+    
+    <change date="2010-05-28" version="2.1.1" subversion_revision="6103">
+        <revision jira="JS-506" type="modification" title="Kommando &lt;show_state what='folders no_subfolder'&gt; zeigt Namen der Unterordner.">
             <description>
-            Beim Öffnen einer neuen TCP Verbindung wird geprüft, ob es bereits eine nicht mehr benötigte Verbindung für diesen host/port registriert ist.
+	            Das Kommando &lt;show_state what='folders no_subfolder'&gt; liefert die Namen der Unterordner, aber nicht deren Inhalte.
             </description>
         </revision>
     </change>
@@ -27,10 +27,18 @@
     </change>
 
 		<change date="2010-05-04" version="2.1.1" subversion_revision="6096">
-        <revision jira="JS-380" type="correction" title="Jobscheduler 'friert' nicht mehr ein, wenn Job auf 'supend' gesetzt wird.">
+        <revision jira="JS-380" type="correction" title="Jobscheduler 'friert' nicht mehr ein, wenn Job auf 'suspend' gesetzt wird.">
             <description>
             Bei API Jobs kam es gelegentlich zu dem Problem, dass der gesamte Jobscheduler 'eingefroren' ist, wenn ein Job auf 'suspend' gesetzt
             worden ist. Das ist immer dann passiert, wenn das 'suspend' innerhalb einer Operation (spooler_start, spooler_process ...) ausgeführt worden ist.
+            </description>
+        </revision>
+    </change>
+
+    <change date="2010-04-28" version="2.1.1" subversion_revision="6089">
+        <revision jira="JS-481" type="correction" title="Nicht mehr benötigte TCP Verbindungen werden jetzt zuverlässig freigegeben.">
+            <description>
+            Beim Öffnen einer neuen TCP Verbindung wird geprüft, ob es bereits eine nicht mehr benötigte Verbindung für diesen host/port registriert ist.
             </description>
         </revision>
     </change>
@@ -43,52 +51,45 @@
             </description>
         </revision>
     </change>
-
-		<change date="2010-05-28" version="2.1.1" subversion_revision="6103">
-        <revision jira="JS-506" type="modification" title="Kommando &lt;show_state what='folders no_subfolder'&gt; zeigt Namen der Unterordner.">
+    
+    <change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+      <revision jira="JS-409" type="modification" title="Startzeitpunkt eines Jobs kann jetzt beliebig festgelegt werden.">
+          <description>
+	          Der Startzeitpunkt eines Jobs kann jetzt um mehr als 24 Stunden in die Zukunft gelegt werden.
+          </description>
+      </revision>
+    </change>
+	  
+	  <change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+        <revision jira="JS-444" type="correction" title="Auch für Monitore werden Includes in der laufenden Scheduler-Instanz aufgelöst und an den Monitor-Prozess übergeben.">
             <description>
-	            Das Kommando &lt;show_state what='folders no_subfolder'&gt; liefert die Namen der Unterordner, aber nicht deren Inhalte.
+	            Die mit dem Attribute live_file bezeichnete Datei wird jetzt bei Änderung nachgeladen, dazu muss die Datei LOKAL abgelegt sein.
             </description>
         </revision>
     </change>
 
-		<change date="2010-04-13" version="2.1.0" subversion_revision="6065">
-        <revision jira="JS-421" type="correction" title="Umgebungsvariable zwischen Scripten werden jetzt richtig übergeben.">
-            <description>
-	            Shell-Scripte können Umgebungsvariablen, die von vorhergehenden Scripten gesetzt worden sind, jetzt korrekt auslesen.
-            </description>
-        </revision>
-    </change>
-
-		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
-        <revision jira="JS-409" type="modification" title="Startzeitpunkt eines Jobs kann jetzt beliebig festgelegt werden.">
-            <description>
-	            Der Startzeitpunkt eines Jobs kann jetzt um mehr als 24 Stunden in die Zukunft gelegt werrden.
-            </description>
-        </revision>
-    </change>
-		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
-        <revision jira="JS-444" type="correction" title="Auch für Monitore werden includes in der laufenden scheduler-Instanz aufgelöst und an den monitor-Prozess übergeben.">
-            <description>
-	            Die mit dem Attribute live_file bezeichnete Datei wird jetzt bei Änderung nachgeladen, dazu muß die Datei LOKAL abgelegt sein.
-            </description>
-        </revision>
-    </change>
-
-		<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
-        <revision jira="JS-457" type="correction" title="Zeitstempel des Jobs jetzt komplett in UTC">
-            <description>
-	            Der Zeitstempel des Jobs wird jetzt in UTC-Zeit geliefert.
-            </description>
-        </revision>
-    </change>
+	<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+      <revision jira="JS-457" type="correction" title="Zeitstempel der Konfigurationsdateien werden jetzt als UTC gekennzeichnet">
+          <description>
+	          Der Zeitstempel der Konfigurationsdateien werden jetzt als UTC gekennzeichnet.
+          </description>
+      </revision>
+  </change>		
 
   <change date="2010-03-23" version="2.1.0" subversion_revision="6070">
     <revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES bei Verwendung von Monitoren unter UNIX möglich">
     </revision>
   </change>
 
-  <change date="2009-06-12" version="2.0.223" subversion_revision="6010">
+  <change date="2010-04-13" version="2.1.0" subversion_revision="6065">
+      <revision jira="JS-421" type="correction" title="Umgebungsvariable zwischen Scripten werden jetzt richtig übergeben.">
+          <description>
+	          Shell-Scripte können Umgebungsvariablen, die von vorhergehenden Scripten gesetzt worden sind, jetzt korrekt auslesen.
+          </description>
+      </revision>
+  </change>
+
+	<change date="2009-06-12" version="2.0.223" subversion_revision="6010">
         <revision type="new" title="Neue API-Aufrufe Order.setback_count und Job.setback_max">
             <description>
                 <ul>
