@@ -137,7 +137,8 @@
 
 
                 <!-- Asynchron ausgeführte Kommandos -->
-                <xsd:element ref="get_events"/>
+                <!-- <xsd:element ref="get_events"/> -->
+                <xsd:element ref="events.get"/>
             </xsd:choice>
         </xsd:complexType>
     </xsd:element>
@@ -1296,7 +1297,8 @@
     </xsd:element>
 
 
-    <xsd:element name="get_events">
+    <!-- <xsd:element name="get_events"> -->
+    <xsd:element name="events.get">
         <xsd:complexType/>
     </xsd:element>
 
