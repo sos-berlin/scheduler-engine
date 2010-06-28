@@ -693,6 +693,7 @@ struct Spooler : Object,
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     file::File_path            _configuration_file_path;            // -config=
+	file::File_path			   _opt_configuration_directory;		// JS-462
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
 

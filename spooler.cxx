@@ -1573,6 +1573,8 @@ void Spooler::load_arg()
             if( opt.with_value( "use-xml-schema"        ) )  ;   // wird in sos::spooler_main vearbeitet
 			else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
+			else
+				if(opt.with_value("configuration-directory")) _opt_configuration_directory = opt.value(); // JS-462
             else
                 throw_sos_option_error( opt );
         }
@@ -1625,6 +1627,17 @@ void Spooler::load_arg()
         {
             _configuration_directories[ confdir_local ] = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
         }
+
+		if(!_opt_configuration_directory.empty()) // JS-462
+		{
+			if(!file::File_info(_opt_configuration_directory).is_directory())
+			{ 
+				z::throw_xc( "SCHEDULER-715", _opt_configuration_directory.c_str() );
+			}
+			_configuration_directories[ confdir_local ] = File_path( _opt_configuration_directory );
+			_configuration_directories_as_option_set[ confdir_local ] = false;					    
+		}
+
     }
 
     _configuration_directories[ confdir_cache ] = File_path( File_path( _configuration_file_path.directory(), "cache" ), "" );        // "live" bis es richtig gemacht ist
@@ -3791,7 +3804,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 					sos::scheduler::embedded_and_dynamic_files.set_dynamic_file(use_external_schema, sos::scheduler::xml_schema_path);
 				}				
                 else
-                    call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
+				  if(opt.with_value("configuration-directory")); // JS-462
+				else
+                  call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
                 command_line += opt.complete_parameter( '"', '"' );
