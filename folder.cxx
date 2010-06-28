@@ -2479,18 +2479,22 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
 {
     int result = 0;
 
-    Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )
-    {
-        File_based_subsystem* subsystem = ds->first;
+//	for(Requisite_sets::const_iterator ds=_requisite_sets.begin(); ds!=_requisite_sets.end();ds++)
+//	{
+//	}
 
-        Z_FOR_EACH_CONST( Requisite_set, ds->second, d )
+    Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
+    {
+        File_based_subsystem* subsystem = ds->first;  // ->first = Key ist der Zeiger auf das Subsystem
+
+        Z_FOR_EACH_CONST( Requisite_set, ds->second, d ) // ->second = Values = Liste der Pfade zu den Requisiten??
         {
             Absolute_path path      ( *d );
             File_based*   requisite = subsystem->file_based_or_null( path );
 
             xml::Element_ptr e = element.append_new_element( "requisite" );
             e.setAttribute( "type", subsystem->object_type_name() );
-            e.setAttribute( "path", path );
+			e.setAttribute( "path", path );
 
             if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
 
