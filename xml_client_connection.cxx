@@ -144,12 +144,6 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
 
                 _socket_operation->connect__start( _host_and_port );
 
-                try
-                {
-                    _socket_operation->set_keepalive( true );
-                }
-                catch( exception& x ) { log()->info( x.what() ); }
-
                 _state = _socket_operation->state() == Buffered_socket_operation::s_connecting? s_connecting : s_connected;
                 something_done = true;
                 break;
@@ -159,6 +153,8 @@ bool Xml_client_connection::async_continue_( Continue_flags flags )
             case s_connecting:
             {
                 if( !_socket_operation->async_finished() )  break;
+
+                _socket_operation->try_set_keepalive( true );
 
                 _state = s_connected;
                 something_done = true;

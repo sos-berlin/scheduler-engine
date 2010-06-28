@@ -10,11 +10,11 @@
         </security>
 
         <process_classes>
-            <process_class name="remote" remote_scheduler="localhost" max_processes="50"/>
+            <process_class name="remote" remote_scheduler="192.11.0.95:6360" max_processes="50"/>
         </process_classes>
 
         <jobs>
-            <job name="remote_shell" process_class="" stop_on_error="no">
+            <job name="remote_shell" process_class="remote" stop_on_error="no">
                 <script language="shell">
                     <![CDATA[
 echo Hallo!                

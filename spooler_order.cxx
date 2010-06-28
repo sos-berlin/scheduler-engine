@@ -136,6 +136,7 @@ struct Order_subsystem : Order_subsystem_interface
     ptr<Order>              try_load_order_from_database    ( Transaction*, const Absolute_path& job_chain_path, const Order::Id&, Load_order_flags );
 
     bool                        has_any_order               ();
+    int                         order_count                 ( Read_transaction* ) const;
 
     Job_chain*                  active_job_chain            ( const Absolute_path& path )           { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const Absolute_path& path )           { return file_based( path ); }
@@ -756,6 +757,38 @@ bool Order_subsystem::has_any_order()
     }
 
     return false;
+}
+
+//---------------------------------------------------------------------Order_subsystem::order_count
+
+int Order_subsystem::order_count( Read_transaction* ta ) const
+{
+    int result = 0;
+
+    if( ta )
+    {
+        list<string> job_chain_names;
+        FOR_EACH_JOB_CHAIN( job_chain )
+            if( job_chain->is_distributed() )
+                job_chain_names.push_back( job_chain->path().without_slash() );
+        
+        if( !job_chain_names.empty() ) {
+            S select_sql;
+            select_sql << "select count(*)  from " << _spooler->_orders_tablename 
+                       << "  where " << "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) // db_where_condition() 
+                       <<    " and `job_chain` in (" << join( ",", job_chain_names ) << ")" 
+                       <<    " and `distributed_next_time` is not null";
+
+            result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+        }
+    }
+
+
+    FOR_EACH_JOB_CHAIN( job_chain )
+        if( !job_chain->is_distributed() )
+            result += job_chain->order_count( (Read_transaction*)NULL );
+
+    return result;
 }
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
@@ -2761,7 +2794,7 @@ bool Job_chain::has_order_in_task() const
 
 //---------------------------------------------------------------------------Job_chain::order_count
 
-int Job_chain::order_count( Read_transaction* ta )
+int Job_chain::order_count( Read_transaction* ta ) const
 {
     int result = 0;
 
@@ -2779,7 +2812,7 @@ int Job_chain::order_count( Read_transaction* ta )
     {
       //set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
-        for( Node_list::iterator it = _node_list.begin(); it != _node_list.end(); it++ )
+        for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
         {
             if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
             {
@@ -3929,7 +3962,7 @@ void Order_queue::unregister_order_source( Order_source* order_source )
 
 //-------------------------------------------------------------------------Order_queue::order_count
 
-int Order_queue::order_count( Read_transaction* ta )
+int Order_queue::order_count( Read_transaction* ta ) const
 {
     int result = 0;
 
@@ -3948,7 +3981,7 @@ int Order_queue::order_count( Read_transaction* ta )
                       )
                       .get_record().as_int( 0 );
 
-            FOR_EACH( Queue, _queue, it )
+            FOR_EACH_CONST( Queue, _queue, it )
             {
                 Order* order = *it;
                 if( !order->_is_in_database )  result++;
@@ -4439,7 +4472,7 @@ Time Order_queue::next_time()
 
 //-------------------------------------------------Order_queue::db_where_expression
 
-string Order_queue::db_where_expression( )
+string Order_queue::db_where_expression() const
 {
     S  result;
     result <<      "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) 
@@ -6430,6 +6463,8 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if( _id_locked )
         {
+            report_event( "SCHEDULER-TEST" );
+
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
         }

@@ -1911,7 +1911,25 @@ library Spooler
         HRESULT                 Tcp_port                ( [out,retval] int* );
     };
 
-    //---------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------Ischeduler_event2
+
+    [
+        uuid       ( feee47bb-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ischeduler_event2 : IDispatch
+    {
+        [id(1),propget]
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [id(2),propget]
+        HRESULT                 Object                      ( [out,retval] Iorder** Result );
+
+        [id(3),propget]
+        HRESULT                 Code                        ( [out,retval] BSTR* Code );
+    }
 
 };
 
@@ -1919,7 +1937,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47bb-6c1b-11d8-8103-000476ee8afb
 feee47bc-6c1b-11d8-8103-000476ee8afb
 feee47bd-6c1b-11d8-8103-000476ee8afb
 feee47be-6c1b-11d8-8103-000476ee8afb

@@ -805,7 +805,7 @@ struct Job_chain : Com_job_chain,
     ptr<Order>                  order                       ( const Order::Id& );
     ptr<Order>                  order_or_null               ( const Order::Id& );
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
-    int                         order_count                 ( Read_transaction* );
+    int                         order_count                 ( Read_transaction* ) const;
     bool                        has_order                   () const;
     bool                        has_order_in_task           () const;
     void                        register_order              ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
@@ -908,7 +908,7 @@ struct Order_queue : Com_order_queue,
     void                        reinsert_order              ( Order* );
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
-    int                         order_count                 ( Read_transaction* );
+    int                         order_count                 ( Read_transaction* ) const;
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order( const Time& now = Time(0) ) const;
@@ -927,7 +927,7 @@ struct Order_queue : Com_order_queue,
     Time                        next_announced_distributed_order_time();
     void                        tip_for_new_distributed_order();
     bool                        is_in_any_distributed_job_chain();
-    string                      db_where_expression         ();
+    string                      db_where_expression         () const;
 
     void                        on_node_replaced            ( job_chain::Order_queue_node* n )      { _order_queue_node = n;  _job_chain = n->job_chain(); }
 
@@ -996,6 +996,7 @@ struct Order_subsystem_interface: Object,
     virtual string              order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id ) = 0;
 
     virtual bool                has_any_order               ()                                      = 0;
+    virtual int                 order_count                 ( Read_transaction* ) const             = 0;
 
     virtual Job_chain*          job_chain                   ( const Absolute_path& )                = 0;
     virtual Job_chain*          job_chain_or_null           ( const Absolute_path& )                = 0;

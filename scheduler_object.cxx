@@ -77,6 +77,8 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_web_service_response:         return "Web_service_response";
         case type_web_services:                 return "Web_services";
         case type_xml_client_connection:        return "Xml_client_connection";
+        case type_scheduler_event2:             return "Scheduler_event2";
+        case type_event_subsystem:              return "Event_subsystem";
         default:                                return S() << "Type_code(" << type_code << ")";
     }
 }
@@ -111,6 +113,13 @@ Scheduler_object::~Scheduler_object()
 IDispatch* Scheduler_object::idispatch()
 {
     z::throw_xc( Z_FUNCTION, obj_name() );
+}
+
+//-------------------------------------------------------------------Scheduler_object::report_event
+
+void Scheduler_object::report_event( const string& code )
+{
+    spooler()->event_subsystem()->report( Scheduler_event2( this, code ) );
 }
 
 //-------------------------------------------------------Scheduler_object::write_element_attributes
