@@ -1653,7 +1653,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
-    if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
+    // if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
+	if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );
     else
     {
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
