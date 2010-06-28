@@ -11,7 +11,7 @@
 <!--<scheduler_keyword keyword="Änderungsprotokoll"/>-->
     <scheduler_keyword keyword="Change log"/>
 
-    <change date="2010-06-22" version="2.1.0" subversion_revision="6125">
+    <change date="2010-06-22" version="2.1.1" subversion_revision="6132">
       <revision jira="JS-462" type="new" title="The command-line option configuration-directory (live folder) is available as documented">
         <description>
           The live folder can also be set by the command-line option configuration-directory.
