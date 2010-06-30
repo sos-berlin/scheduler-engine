@@ -294,7 +294,7 @@ typedef stdext::hash_set<string> String_set;
 #include "subsystem.h"
 #include "spooler_event.h"
 #include "Event_subsystem.h"
-#include "scheduler_event2.h"
+#include "Scheduler_event2.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
 #include "path.h"
