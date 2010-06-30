@@ -146,7 +146,8 @@ const char file_scheduler_xsd[] =
     "\n"
     "\n"
     "<!-- Asynchron ausgef\xc3" "\xbc" "hrte Kommandos -->\n"
-    "<xsd:element ref=\"get_events\"/>\n"
+    "<!-- <xsd:element ref=\"get_events\"/> -->\n"
+    "<xsd:element ref=\"events.get\"/>\n"
     "</xsd:choice>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
@@ -1305,7 +1306,8 @@ const char file_scheduler_xsd[] =
     "</xsd:element>\n"
     "\n"
     "\n"
-    "<xsd:element name=\"get_events\">\n"
+    "<!-- <xsd:element name=\"get_events\"> -->\n"
+    "<xsd:element name=\"events.get\">\n"
     "<xsd:complexType/>\n"
     "</xsd:element>\n"
     "\n"
@@ -2399,8 +2401,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1275577206 },
-    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1225365142 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1277221231 },
+    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1271348520 },
     { NULL, NULL, 0 }
 };
 

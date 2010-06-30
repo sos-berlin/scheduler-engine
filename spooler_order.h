@@ -996,7 +996,7 @@ struct Order_subsystem_interface: Object,
     virtual string              order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id ) = 0;
 
     virtual bool                has_any_order               ()                                      = 0;
-    virtual int                 order_count                 ( Read_transaction* ) const             = 0;
+    virtual int                 order_count                 ( Read_transaction* )  const            = 0;
 
     virtual Job_chain*          job_chain                   ( const Absolute_path& )                = 0;
     virtual Job_chain*          job_chain_or_null           ( const Absolute_path& )                = 0;

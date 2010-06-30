@@ -24,10 +24,13 @@ const int    max_insert_race_retry_count                = 5;                    
 
 //--------------------------------------------------------------------------------------------const
 
+// Datenbank-Feld distributed_next_time
 const string now_database_distributed_next_time         = "2000-01-01 00:00:00";        // Auftrag ist verteilt und ist sofort ausführbar
 const string never_database_distributed_next_time       = "3111-11-11 00:00:00";        // Auftrag ist verteilt, hat aber keine Startzeit (weil z.B. suspendiert)
 const string blacklist_database_distributed_next_time   = "3111-11-11 00:01:00";        // Auftrag ist auf der schwarzen Liste
 const string replacement_database_distributed_next_time = "3111-11-11 00:02:00";        // <order replacement="yes">
+// distributed_next_time is null => Auftrag ist nicht verteilt
+
 const string default_end_state_name                     = "<END_STATE>";
 const string order_select_database_columns              = "`id`, `priority`, `state`, `state_text`, `initial_state`, `title`, `created_time`";
 
@@ -137,6 +140,9 @@ struct Order_subsystem : Order_subsystem_interface
 
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;
+	string						distributed_job_chains_db_where_condition() const;
+	int							processing_order_count		( Read_transaction* ta ) const;
+	xml::Element_ptr			state_statistic_element		(const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const;
 
     Job_chain*                  active_job_chain            ( const Absolute_path& path )           { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const Absolute_path& path )           { return file_based( path ); }
@@ -146,10 +152,9 @@ struct Order_subsystem : Order_subsystem_interface
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
     Order_id_spaces_interface*  order_id_spaces_interface   ()                                      { return &_order_id_spaces; }
     Order_id_spaces*            order_id_spaces             ()                                      { return &_order_id_spaces; }
+	xml::Element_ptr			dom_element					( const xml::Document_ptr& dom_document, const Show_what& show_what ) const;
 
-
-
-    // File_based_subsystem
+	// File_based_subsystem
 
     string                      object_type_name            () const                                { return "Job_chain"; }
     string                      filename_extension          () const                                { return ".job_chain.xml"; }
@@ -165,6 +170,7 @@ struct Order_subsystem : Order_subsystem_interface
     // Privat
 
     bool                        orders_are_distributed      ();
+    string                      db_where_condition          () const;
     string                      job_chain_db_where_condition( const Absolute_path& job_chain_path );
     string                      order_db_where_condition    ( const Absolute_path& job_chain_path, const string& order_id );
     void                        count_started_orders        ();
@@ -761,35 +767,35 @@ bool Order_subsystem::has_any_order()
 
 //---------------------------------------------------------------------Order_subsystem::order_count
 
-int Order_subsystem::order_count( Read_transaction* ta ) const
-{
-    int result = 0;
-
-    if( ta )
-    {
-        list<string> job_chain_names;
-        FOR_EACH_JOB_CHAIN( job_chain )
-            if( job_chain->is_distributed() )
-                job_chain_names.push_back( job_chain->path().without_slash() );
-        
-        if( !job_chain_names.empty() ) {
-            S select_sql;
-            select_sql << "select count(*)  from " << _spooler->_orders_tablename 
-                       << "  where " << "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) // db_where_condition() 
-                       <<    " and `job_chain` in (" << join( ",", job_chain_names ) << ")" 
-                       <<    " and `distributed_next_time` is not null";
-
-            result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
-        }
-    }
-
-
-    FOR_EACH_JOB_CHAIN( job_chain )
-        if( !job_chain->is_distributed() )
-            result += job_chain->order_count( (Read_transaction*)NULL );
-
-    return result;
-}
+//int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507 Erste Version
+//{
+//    int result = 0;
+//
+//    if( ta )
+//    {
+//        list<string> job_chain_names;
+//        FOR_EACH_JOB_CHAIN( job_chain )
+//            if( job_chain->is_distributed() )
+//                job_chain_names.push_back( job_chain->path().without_slash() );
+//        
+//        if( !job_chain_names.empty() ) {
+//            S select_sql;
+//            select_sql << "select count(*)  from " << _spooler->_orders_tablename 
+//                       << "  where " << db_where_condition() 
+//                       <<    " and `job_chain` in (" << join( ",", job_chain_names ) << ")" 
+//                       <<    " and `distributed_next_time` is not null";
+//
+//            result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+//        }
+//    }
+//
+//
+//    FOR_EACH_JOB_CHAIN( job_chain )
+//        if( !job_chain->is_distributed() )
+//            result += job_chain->order_count( (Read_transaction*)NULL );
+//
+//    return result;
+//}
 
 //--------------------------------------------------------Order_subsystem::load_order_from_database
 
@@ -885,17 +891,102 @@ string Order_subsystem::order_db_where_condition( const Absolute_path& job_chain
     return result;
 }
 
+//--------------------------------------------------------------Order_subsystem::db_where_condition
+
+string Order_subsystem::db_where_condition() const
+{
+    S result;
+
+    result << "`spooler_id`=" << sql::quoted( _spooler->id_for_db() );
+
+    return result;
+}
+
 //----------------------------------------------------Order_subsystem::job_chain_db_where_condition
 
 string Order_subsystem::job_chain_db_where_condition( const Absolute_path& job_chain_path )
 {
     S result;
 
-    result << "`spooler_id`=" << sql::quoted( _spooler->id_for_db() ) <<
-         " and `job_chain`="  << sql::quoted( job_chain_path.without_slash() );
+    result << db_where_condition() << " and `job_chain`="  << sql::quoted( job_chain_path.without_slash() );
 
     return result;
 }
+
+//---------------------------------------Order_subsystem::distributed_job_chains_db_where_condition
+
+string Order_subsystem::distributed_job_chains_db_where_condition() const  // JS-507
+{
+    list<string> job_chain_names;
+    FOR_EACH_JOB_CHAIN( job_chain )
+        if( job_chain->is_distributed() )
+		{
+			S s;
+			s << "'" << job_chain->path().without_slash() << "'";
+            job_chain_names.push_back( s );
+		}
+
+    if( job_chain_names.empty() ) 
+        return "";
+    else
+        return S() << db_where_condition() 
+                   << " and `job_chain` in (" << join( ",", job_chain_names ) << ")"; 
+}
+
+//---------------------------------------------------------------------Order_subsystem::order_count
+
+int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507
+{
+    int result = 0;
+
+    //if( ta )
+    //{
+    //    string w = distributed_job_chains_db_where_condition();
+    //    if( w != "" ) {
+    //        S select_sql;
+    //        select_sql << "select count(*)  from " << _spooler->_orders_tablename 
+    //                   << "  where " << w 
+    //                   <<    " and `distributed_next_time` is not null";
+
+    //        result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+    //    }
+    //}
+
+
+    //FOR_EACH_JOB_CHAIN( job_chain )
+    //    if( !job_chain->is_distributed() )
+    //        result += job_chain->order_count( (Read_transaction*)NULL );
+
+    FOR_EACH_JOB_CHAIN( job_chain )
+	    result += job_chain->order_count( ta );
+
+    return result;
+}
+
+
+//----------------------------------------------------------Order_subsystem::processing_order_count
+
+int Order_subsystem::processing_order_count( Read_transaction* ta ) const  // JS-507
+{
+    int result = 0;
+    if( ta ) {
+        string w = distributed_job_chains_db_where_condition();
+        if( w != "" ) {
+            S select_sql;
+            select_sql << "select count(*)" << 
+                          "  from " << _spooler->_orders_tablename <<
+                          "  where " << w <<  " and `occupying_cluster_member_id` is not null";
+			result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+        }
+    }
+
+    //FOR_EACH_JOB_CHAIN( job_chain )
+    //    if( !job_chain->is_distributed() )
+    //        result += job_chain->processing_order_count( (Read_transaction*)NULL );
+
+    return result;
+}
+
 
 //------------------------------------------------------------Order_subsystem::count_started_orders
 
@@ -912,6 +1003,46 @@ void Order_subsystem::count_finished_orders()
     _finished_orders_count++;
     _spooler->update_console_title( 2 );
 }
+
+
+//----------------------------------------------------------------------Order_subsystem::dom_element
+
+xml::Element_ptr Order_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const // JS-507
+{
+	// xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+	xml::Element_ptr result = File_based_subsystem::dom_element( dom_document, show_what );
+	
+	xml::Element_ptr Order_subsystem_element = dom_document.createElement( "order_subsystem" ); 
+
+	if( show_what.is_set( show_statistics ) ) {
+		
+		xml::Element_ptr statistics_element = Order_subsystem_element.append_new_element( "order_subsystem.statistics" );
+		xml::Element_ptr order_statistics_element = statistics_element.append_new_element( "order.statistics" );
+	
+		Read_transaction ta ( _spooler->db() );
+
+		//xml::Element_ptr result = dom_document.createElement( "order.statistic" );
+		//result.setAttribute( "order_state", "clustered" );
+		//result.setAttribute( "count", processing_order_count( &ta ) );
+		order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "clustered", processing_order_count( &ta ) ) );
+		order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "any", order_count( &ta ) ) );
+	}
+
+	result.appendChild( Order_subsystem_element );
+	return result;
+
+}
+
+//----------------------------------------------------------------Order_subsystem::state_statistic_element
+
+xml::Element_ptr Order_subsystem::state_statistic_element (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const
+{
+		xml::Element_ptr result = dom_document.createElement( "order.statistic" );
+		result.setAttribute( attribute_name, attribute_value );
+		result.setAttribute( "count", count );
+		return result;
+}
+
 
 //----------------------------------------------------------------ob_chain_folder::Job_chain_folder
 

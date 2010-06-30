@@ -277,10 +277,6 @@
     <register_keyword_display><code>config_file=</code></register_keyword_display>
     <register_entry register_file='xml/answer/state.xml#attribute_config_file' register_title='&lt;state&gt; (Antwort)'  register_keyword='config_file' type='definition'/>
 </register_keyword>
-<register_keyword keyword='configuration-directory'>
-    <register_keyword_display><code>-configuration-directory=</code></register_keyword_display>
-    <register_entry register_file='command_line.xml#option_configuration-directory' register_title='Kommandozeilenoptionen'  register_keyword='configuration-directory' type='definition'/>
-</register_keyword>
 <register_keyword keyword='configuration_add_event'>
     <register_keyword_display><code>configuration_add_event=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_add_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_add_event' type='definition'/>
@@ -296,6 +292,10 @@
 <register_keyword keyword='configuration_modify_event'>
     <register_keyword_display><code>configuration_modify_event=</code></register_keyword_display>
     <register_entry register_file='xml/config.xml#attribute_configuration_modify_event' register_title='&lt;config&gt; (Konfiguration)'  register_keyword='configuration_modify_event' type='definition'/>
+</register_keyword>
+<register_keyword keyword='configuraton-directory'>
+    <register_keyword_display><code>-configuraton-directory=</code></register_keyword_display>
+    <register_entry register_file='command_line.xml#option_configuraton-directory' register_title='Kommandozeilenoptionen'  register_keyword='configuraton-directory' type='definition'/>
 </register_keyword>
 <register_keyword keyword='connected'>
     <register_keyword_display><code>connected=</code></register_keyword_display>
