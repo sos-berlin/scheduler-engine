@@ -286,10 +286,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Event_subsystem.cxx"
-				>
-			</File>
-			<File
 				RelativePath=".\file_logger.cxx"
 				>
 			</File>
@@ -327,10 +323,6 @@
 			</File>
 			<File
 				RelativePath=".\scheduler_client.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\Scheduler_event2.cxx"
 				>
 			</File>
 			<File

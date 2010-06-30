@@ -95,7 +95,7 @@ struct Scheduler_object
     Spooler*                    spooler                     () const                                { return _spooler; }
 
     virtual void                close                       ()                                      {}
-    void                        report_event                ( const string& code );
+    // void                        report_event                ( const string& code );
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
     virtual string              obj_name                    () const                                { return name_of_type_code( _scheduler_object_type_code ); }
