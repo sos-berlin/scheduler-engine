@@ -871,6 +871,17 @@ struct Isupervisor_client: IDispatch
     virtual HRESULT         get_Tcp_port                    ( int* )                                = 0;
 };
 
+//---------------------------------------------------------------------------------Ischeduler_event2
+
+DEFINE_GUID( IID_Ischeduler_event2, 0xfeee47bb, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47b9-6c1b-11d8-8103-000476ee8afb}
+
+struct Ischeduler_event2 : IDispatch
+{
+    virtual HRESULT     get_Java_class_name             ( BSTR* Result )                            = 0;
+    virtual HRESULT     get_Object                      ( Iorder** Result )                         = 0;
+    virtual HRESULT     get_Code                        ( BSTR* Code )                              = 0;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler_com

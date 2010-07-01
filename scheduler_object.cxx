@@ -119,7 +119,8 @@ IDispatch* Scheduler_object::idispatch()
 
 void Scheduler_object::report_event( const string& code )
 {
-    spooler()->event_subsystem()->report( Scheduler_event2( this, code ) );
+    Scheduler_event2 e ( this, code );
+    spooler()->event_subsystem()->report( e );
 }
 
 //-------------------------------------------------------Scheduler_object::write_element_attributes

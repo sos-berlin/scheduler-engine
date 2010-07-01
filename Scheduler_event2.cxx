@@ -13,8 +13,9 @@ Scheduler_event2::Class_descriptor Scheduler_event2::class_descriptor  ( &typeli
 const Com_method Scheduler_event2::_methods[] =
 {
 #ifdef COM_METHOD
-    COM_PROPERTY_GET( Schedule_event2  1, Java_class_name, VT_BSTR    , 0 ),
-    //COM_PROPERTY_PUT( Schedule_event2,  2, Xml            ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Scheduler_event2, 1, Java_class_name, VT_BSTR     , 0 ),
+    COM_PROPERTY_GET( Scheduler_event2, 2, Object         , VT_DISPATCH, 0 ),
+    COM_PROPERTY_GET( Scheduler_event2, 3, Code           , VT_DISPATCH, 0 ),
 #endif
     {}
 };
