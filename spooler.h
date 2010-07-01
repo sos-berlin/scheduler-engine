@@ -293,8 +293,8 @@ typedef stdext::hash_set<string> String_set;
 #include "scheduler_object.h"
 #include "subsystem.h"
 #include "spooler_event.h"
-// #include "Event_subsystem.h"
-// #include "Scheduler_event2.h"
+#include "Event_subsystem.h"
+#include "scheduler_event2.h"
 #include "spooler_security.h"
 #include "spooler_wait.h"
 #include "path.h"
@@ -552,7 +552,7 @@ struct Spooler : Object,
     Schedule_subsystem_interface* schedule_subsystem        () const;
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
     lock::Lock_subsystem*       lock_subsystem              ()                                  { return _lock_subsystem; }
-    // Event_subsystem*            event_subsystem             () const                            { return _event_subsystem; }
+    Event_subsystem*            event_subsystem             () const                            { return _event_subsystem; }
 
     Process_class_subsystem*    subsystem                   ( Process_class* ) const            { return _process_class_subsystem; }
     lock::Lock_subsystem*       subsystem                   ( lock::Lock* ) const               { return _lock_subsystem; }
@@ -678,7 +678,7 @@ struct Spooler : Object,
     ptr<Web_services_interface>      _web_services;
     ptr<Java_subsystem_interface>    _java_subsystem;
     ptr<lock::Lock_subsystem>        _lock_subsystem;
-    // ptr<Event_subsystem>             _event_subsystem;
+    ptr<Event_subsystem>             _event_subsystem;
 
     Wait_handles               _wait_handles;
 

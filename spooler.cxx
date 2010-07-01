@@ -752,7 +752,7 @@ Spooler::Spooler()
     _http_server                = http::new_http_server( this );
     _web_services               = new_web_services( this );
     _supervisor                 = supervisor::new_supervisor( this );
-    // _event_subsystem            = new_event_subsystem( this );
+    _event_subsystem            = new_event_subsystem( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
