@@ -21,6 +21,8 @@ const int    check_database_orders_period               = 15;
 const int    check_database_orders_period_minimum       = 1;
 const int    database_orders_read_ahead_count           = 1;
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
+const int    unlimited_max_orders                       = 99999;
+const string default_max_orders_attribute               = "unlimited";
 
 //--------------------------------------------------------------------------------------------const
 
@@ -1534,12 +1536,12 @@ void Order_queue_node::set_action( const string& action_string )
     }
 }
 
-//---------------------------------------------------------------------Order_queue_node::is_running
+//--------------------------------------------------Order_queue_node::is_ready_for_order_processing
 
-bool Order_queue_node::is_running()
+bool Order_queue_node::is_ready_for_order_processing()
 {
     return _action != act_stop  &&  
-           _job_chain->state() == Job_chain::s_active;
+       _job_chain->is_ready_for_order_processing();
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
@@ -1548,7 +1550,7 @@ Order* Order_queue_node::fetch_and_occupy_order( const Time& now, const string& 
 {
     Order* result = NULL;
 
-    if( is_running() )
+    if( is_ready_for_order_processing() )
     {
         result = order_queue()->fetch_and_occupy_order( now, cause, occupying_task );
     }
@@ -2074,6 +2076,14 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     set_name( element.getAttribute( "name", name() ) );
     _title = element.getAttribute( "title", _title );
 
+    string max_orders_text = element.getAttribute("max_orders", default_max_orders_attribute);
+    if (max_orders_text.compare("") == 0 || max_orders_text.compare(default_max_orders_attribute) == 0) 
+        _max_orders = unlimited_max_orders;
+    else
+        _max_orders = element.int_getAttribute("max_orders", unlimited_max_orders);
+    Z_LOG2( "scheduler", "at most " << _max_orders << " orders can run simultaneously." << "\n" );
+    // element.intgetAttribute(); / hasAttribute() / getAttribute() / eigene Konstante für unlimmited.
+
     if( element.hasAttribute( "visible" ) )
         _visible = element.getAttribute( "visible" ) == "never"? visible_never :
                    element.bool_getAttribute( "visible" )      ? visible_yes 
@@ -2219,6 +2229,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
+    result.setAttribute( "running_orders", number_of_started_orders() );
     result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
@@ -2735,7 +2746,7 @@ Node* Job_chain::node_from_state_or_null( const Order::State& order_state )
 
 //----------------------------------------------------------------------------Job_chain::first_node
 
-Node* Job_chain::first_node()
+Node* Job_chain::first_node() const
 {
     if( _node_list.empty() )  assert(0), z::throw_xc( Z_FUNCTION );
     return *_node_list.begin();
@@ -3328,6 +3339,52 @@ void Job_chain::set_stopped( bool is_stopped )
     database_record_store();
 
     notify_nodes();     // Fällige Aufträge fortsetzen
+}
+
+//---------------------------------------------------------Job_chain::is_ready_for_order_processing
+
+bool Job_chain::is_ready_for_order_processing() const
+{
+    return
+       state() == s_active  && 
+       !_is_stopped &&
+       !is_max_orders_reached();
+}
+
+//-----------------------------------------------------------------Job_chain::is_max_orders_reached
+
+bool Job_chain::is_max_orders_reached() const
+{
+    int count = number_of_started_orders();
+    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are curently running, " << _max_orders + " allowed at most." << "\n" );
+    return count >= _max_orders;
+}
+
+//-----------------------------------------------------------------Job_chain::is_max_orders_reached
+
+int Job_chain::number_of_started_orders() const
+{
+    assert_is_not_distributed( Z_FUNCTION );
+
+    int count = 0;
+    Z_FOR_EACH_CONST( Node_list, _node_list, it )
+    {
+        if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
+        {
+            if (node == first_node())
+                count += node->order_queue()->running_order_count();
+            else
+                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
+        }
+    }
+    return count;
+}
+
+//-----------------------------------------------------------------Job_chain::assert_is_not_distributed
+
+void Job_chain::assert_is_not_distributed( const string& debug_text ) const
+{
+    if( _is_distributed )  z::throw_xc( "SCHEDULER-376", debug_text );  // TODO eigener Fehlercode für jobchain
 }
 
 //-----------------------------------------------------------------------------Job_chain::set_state
@@ -4089,6 +4146,19 @@ void Order_queue::unregister_order_source( Order_source* order_source )
             return;
         }
     }
+}
+
+//-------------------------------------------------------------------------Order_queue::running_order_count
+
+int Order_queue::running_order_count()
+{
+    int result = 0;
+    FOR_EACH( Queue, _queue, it )
+    {
+        Order* order = *it;
+        if( order->_task != NULL )  result++;
+    }
+    return result;
 }
 
 //-------------------------------------------------------------------------Order_queue::order_count

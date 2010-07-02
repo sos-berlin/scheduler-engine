@@ -315,6 +315,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-470", "Path is not absolute: $1" },
     { "SCHEDULER-471", "Not supported character for encoding '$1'" },
     { "SCHEDULER-472", "Unknown subsystem \"$1\"" },
+    { "SCHEDULER-473", "             operation is not supported for distributed orders: '$1'           " },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
     { "SCHEDULER-902", "state=$1" },
     { "SCHEDULER-904", "Tasks have $1 seconds to terminate" },

@@ -2881,6 +2881,14 @@
           </text>
         </message>
 
+      <message code="SCHEDULER-473">
+        <text xml:lang="en">
+          <title>
+            operation is not supported for distributed orders: '<p1/>'
+          </title>
+        </text>
+      </message>
+
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

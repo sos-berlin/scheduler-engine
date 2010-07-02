@@ -600,7 +600,7 @@ struct Order_queue_node : Node
     void                    set_action                      ( const string& );
     void                        handle_changed_processable_state();
     Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
-    bool                        is_running                  ();
+    bool                        is_ready_for_order_processing ();
 
   private:
     ptr<Order_queue>           _order_queue;
@@ -744,6 +744,8 @@ struct Job_chain : Com_job_chain,
     bool                        on_load                     ();
     bool                        on_activate                 ();
 
+    void                        assert_is_not_distributed   ( const string&) const;
+
     File_based*                 new_base_file               ( const Base_file_info& );
 
     void                        on_prepare_to_remove        ();
@@ -792,7 +794,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            add_end_node                ( const Order::State& input_state );
 
 
-    job_chain::Node*            first_node                  ();
+    job_chain::Node*            first_node                  () const;
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
     job_chain::Node*            node_from_state             ( const Order::State& );
     job_chain::Node*            node_from_state_or_null     ( const Order::State& );
@@ -839,6 +841,10 @@ struct Job_chain : Com_job_chain,
 
     Order_subsystem*            order_subsystem             () const;
 
+    int                         number_of_started_orders    () const;
+    bool                        is_max_orders_reached       () const;
+    bool                        is_ready_for_order_processing() const;
+
   private:
     void                        check_for_removing          ();
     void                        database_record_store       ();
@@ -854,6 +860,7 @@ struct Job_chain : Com_job_chain,
     State                      _state;
     bool                       _is_stopped;
     string                     _title;
+    int                        _max_orders;
     Order_id_space*            _order_id_space;
     Visibility                 _visible;
     bool                       _orders_are_recoverable;
@@ -909,6 +916,7 @@ struct Order_queue : Com_order_queue,
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* ) const;
+    int                         running_order_count         ();
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
     Order*                      first_immediately_processable_order( const Time& now = Time(0) ) const;
