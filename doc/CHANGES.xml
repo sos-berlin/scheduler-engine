@@ -10,6 +10,14 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-07-07" version="2.1.2" subversion_revision="6132">
+      <revision jira="JS-462" type="new" title="Die Kommandozeilenoption configuration-directory (live folder) steht zur Verfügung wie dokumentiert">
+        <description>
+          Das live Verzeichnis kann mit der Kommandozeilenoption configuration-directory angegeben werden.
+        </description>
+      </revision>
+    </change>
+
     <change date="2010-06-22" version="2.1.1" subversion_revision="6132">
       <revision jira="JS-462" type="new" title="Die Kommandozeilenoption configuration-directory (live folder) steht zur Verfügung wie dokumentiert">
         <description>

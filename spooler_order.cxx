@@ -3356,7 +3356,7 @@ bool Job_chain::is_ready_for_order_processing() const
 bool Job_chain::is_max_orders_reached() const
 {
     int count = number_of_started_orders();
-    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are curently running, " << _max_orders + " allowed at most." << "\n" );
+    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are curently running, " << _max_orders << " allowed at most." << "\n" );
     return count >= _max_orders;
 }
 
@@ -3371,10 +3371,10 @@ int Job_chain::number_of_started_orders() const
     {
         if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
         {
-            if (node == first_node())
+//            if (node == first_node())
                 count += node->order_queue()->running_order_count();
-            else
-                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
+//            else
+//                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
         }
     }
     return count;

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           title="Jobkette zum Test des Parallellaufes von Jobketten"
+           max_orders="1"
+           >
+    <job_chain_node state="100"
+                    job="js538-1"
+                    next_state="200"
+                    error_state="error"/>
+    <job_chain_node state="200"
+                    job="js538-2"
+                    next_state="end"
+                    error_state="error"/>
+<!--
+    <job_chain_node state="300"
+                    job="js538-3"
+                    next_state="400"
+                    error_state="error"/>
+    <job_chain_node state="400"
+                    job="js538-4"
+                    next_state="end"
+                    error_state="error"/>
+-->                    
+    <job_chain_node state="end"/>
+    <job_chain_node state="error"/>
+</job_chain>
