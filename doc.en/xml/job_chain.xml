@@ -126,6 +126,17 @@
             </description>
         </xml_attribute>
 
+				<!-- JS-538 -->
+        <xml_attribute name="max_orders" type="postive integer" initial="99999" >
+            <description>
+                <p>
+                In general an unlimited number of orders for a job_chain could ran simultaneously. To declare the attribute max_orders it is 
+                possible to limit this number. E.g. max_numbers='1' let run the job_chain exclusively for one order. A new order for this job_chain
+                can only run, if the first order was finished. 
+                </p>
+            </description>
+        </xml_attribute>
+
 
     </xml_attributes>
 

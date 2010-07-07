@@ -102,6 +102,17 @@
                 </p>
             </description>
         </xml_attribute>
+
+				<!-- JS-538 -->
+        <xml_attribute name="max_orders" type="postive integer" initial="99999" title="max. Anzahl parallel laufender order" >
+            <description>
+                <p>
+                    Grundsätzlich können von einer Jobkette beliebig viele Instanzen (durch verschiedene Order gestartet) parallel laufen. Mit 
+                    max_orders kann diese Anzahl begrenzt werden. max_orders='1' bedeutet z.B., dass eine order diese Jobkette exklusiv für sich 
+                    beansprucht. Eine weitere order für diese Jobkette können erst ausgeführt werden, wenn die erste order beendet worden ist.
+                </p>
+            </description>
+        </xml_attribute>
         
     </xml_attributes>
 

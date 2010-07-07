@@ -11,6 +11,15 @@
 <!--<scheduler_keyword keyword="Änderungsprotokoll"/>-->
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-07-07" version="2.1.2" subversion_revision="6164">
+      <revision jira="JS-538" type="new" title="job_chain should be not run parallel ">
+        <description>
+        	The new attribute max_orders for element job_chain determine how many orders can execute a job_chain simultaneous. Is this attribute missing the number 
+        	of running orders for the chain is unlimited. max_orders="1" executes a job_chain exclusive for one order, before a new order for this chain will be run. 
+        </description>
+      </revision>
+    </change>
+
     <change date="2010-06-22" version="2.1.1" subversion_revision="6132">
       <revision jira="JS-462" type="new" title="The command-line option configuration-directory (live folder) is available as documented">
         <description>
@@ -18,7 +27,411 @@
         </description>
       </revision>
     </change>
+
+    <change date="2010-05-28" version="2.1.1" subversion_revision="6103">
+        <revision jira="JS-506" type="modification" title="Command &lt;show_state what='folders no_subfolder'&gt; shows names of the subdirectories.">
+            <description>
+	            The command &lt;show_state what='folders no_subfolder'&gt; responses the names of the subdirectories without its contents.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-05-07" version="2.1.1" subversion_revision="6101">
+        <revision jira="JS-343" type="correction" title="The attribute @absolute_repeat supports now the first start time too.">
+            <description>
+            If @absolute_repeat is set in a run_time then sometimes the first start time was not correct calculated.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-05-04" version="2.1.1" subversion_revision="6096">
+        <revision jira="JS-380" type="correction" title="Job Scheduler not 'freeze' any longer if a job is set to 'suspend'.">
+            <description>
+            API jobs had once a while the problem that the Job Scheduler 'freezed' if a job is set to 'suspend'. 
+            This was happend when the 'suspend' was called inside of an operation (spooler_start, spooler_process ...).
+            </description>
+        </revision>
+    </change>
+
+    <change date="2010-04-28" version="2.1.1" subversion_revision="6089">
+        <revision jira="JS-481" type="correction" title="TCP connections which are required no more are now unfailing released.">
+            <description>
+            On open a new TCP connection there is checked if an already registered connection for the same host/port is no longer required.
+            </description>
+        </revision>
+    </change>
+
+		<change date="2010-04-27" version="2.1.1" subversion_revision="6078">
+        <revision jira="JS-471" type="modification" title="More than 64 parallel processes are possible on Windows.">
+            <description>
+	            On Windows existed a limit of 64 parallel running processes. The possible number of processes is now analog to Unix.
+            </description>
+        </revision>
+    </change>
     
+    <change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+      <revision jira="JS-409" type="modification" title="Start time of a job is arbitrary set.">
+          <description>
+	          The start time of a job can be set more than 24 hours in the future.
+          </description>
+      </revision>
+    </change>
+	  
+	  <change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+        <revision jira="JS-444" type="correction" title="Includes are extended in the running Scheduler instance for monitor scripts too.">
+            <description>
+	            Files which are denotes with the live_file attribute are reloaded after changes. For this the file must be LOCAL stored.
+            </description>
+        </revision>
+    </change>
+
+	<change date="2010-04-13" version="2.1.0" subversion_revision="6078">
+      <revision jira="JS-457" type="correction" title="Timestamp of the configuration files are marked as UTC">
+          <description>
+	          The timestamp of the configuration files are marked as UTC.
+          </description>
+      </revision>
+  </change>		
+  
+  <change date="2010-04-13" version="2.1.0" subversion_revision="6065">
+      <revision jira="JS-421" type="correction" title="Environment variables are passed properly between scripts.">
+          <description>
+	          Shell scripts can read environment variables which are set from preceding scripts.
+          </description>
+      </revision>
+    </change>
+
+		
+  <change date="2010-03-23" version="2.1.000" subversion_revision="6070">
+        <!--revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES bei Verwendung von Monitoren unter UNIX möglich"-->
+        <revision jira="JS-421" type="correction" title="SCHEDULER_RETURN_VALUES works at UNIX when a monitor is assigned too">
+        </revision>
+    </change>
+
+    <change date="2009-06-12" version="2.0.223" subversion_revision="6010">
+        <revision type="new" title="New API Calls: Order.setback_count and Job.setback_max">
+    <!--<revision type="new" title="Neue API-Aufrufe Order.setback_count und Job.setback_max">-->
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_method class="Order" property="setback_count"/>
+                    </li>
+                    <li>
+                        <scheduler_method class="Job" property="setback_max"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2009-05-07" version="2.0.222" subversion_revision="6007">
+        <revision type="new" title="&lt;job warn_if_shorter_than and warn_if_longer_than>">
+    <!--<revision type="new" title="&lt;job warn_if_shorter_than und warn_if_longer_than>">-->
+            <description>
+                <p>
+                    The Job Scheduler issues a warning when the time a job step takes
+                    lies outside a predefined time span.
+                <!--Wenn die Dauer eines Jobschritts von einer Vorgabe abweicht, 
+                    gibt der Scheduler eine Warnung aus.-->
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="job" attribute="warn_if_shorter_than"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="job" attribute="warn_if_longer_than"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2009-03-20" version="2.0.221" subversion_revision="5985">
+        <revision type="modification" title="Windows: 'kill' Stops All Child Proceses">
+    <!--<revision type="modification" title="Windows: kill bricht alle Kindprozesse ab">-->
+            <description>
+                <p>
+                    <scheduler_element name="kill_task"/> applied to a shell job now stops all child processes
+                    as already happens on Unix systems.
+                <!--Ein <scheduler_element name="kill_task"/> auf einen Shell-Job bricht auch alle Kind- und Kindeskind-Prozesse ab,
+                    wie bereits unter Unix.-->
+                </p>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2009-03-10" version="2.0.221" subversion_revision="5980">
+        <revision type="new" title="Monitor for Shell-Jobs">
+    <!--<revision type="new" title="Monitor für Shell-Jobs">-->
+            <description>
+                <p>
+                    A <scheduler_element name="monitor"/> Can Now Also be Specified for Non-API Jobs.
+                <!--Ein <scheduler_element name="monitor"/> kann jetzt auch für Nicht-API-Jobs angegeben werden.-->
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="monitor"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="modification" title="Database Problems Caused by the Winter / Summer Time Change Have Now Been Solved">
+    <!--<revision type="modification" title="Datenbankproblem mit der Stunde zwischen Winter- und Sommerzeit gelöst">-->
+        </revision>
+    </change>
+    
+
+    <change date="2009-03-02" version="2.0.220" subversion_revision="5972">
+        <revision type="correction" title="Standing Orders are No Longer Immediately Started With the Next Job Scheduler Run After kill -9"/>
+    <!--<revision type="correction" title="Nach kill -9 wird Dauerauftrag nicht mehr sofort beim nächsten Scheduler-Lauf gestartet"/>-->
+        
+        <revision type="new" title="&lt;settings> in &lt;job>">
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="settings"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_error"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_warning"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_success"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="mail_on_delay_after_error"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_to"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_cc"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_mail_bcc"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="log_level"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history_on_process"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="history_with_log"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2009-02-25" version="2.0.220" subversion_revision="5970">
+        <revision type="modification" title="Job Schedulers Running as Unix-Daemons Now Divert stdout/stderr to a File">
+    <!--<revision type="modification" title="Scheduler als Unix-Daemon leitet stdout/stderr in Datei um">-->
+            <description>
+                <p>
+                    As one would expect from a program riunning as a Daemon, 
+                    the Job Scheduler now closes stdout and stderr diverts the output to the 
+                    <code>scheduler.out</code> file. 
+                    Note that this file must be writable.
+                <!--Wie es sich für einen Daemon gehört, 
+                    schließt der Scheduler stdout und stderr und leitet die Ausgaben in die Datei 
+                    <code>scheduler.out</code>. 
+                    Diese Datei muss beschreibbar sein.-->
+                </p>
+                <ul>
+                    <li>
+                        See the <scheduler_option name="service"/> option.
+                    <!--Siehe Option <scheduler_option name="service"/> -->
+                    </li>
+                </ul>
+
+            </description>
+        </revision>
+    </change>
+
+    <change date="2009-01-27" version="2.0.219" subversion_revision="5968">
+        <revision type="correction" title="libhostjava.so for HP-UX/Itanium is now Integrated in the Job Scheduler">
+    <!--<revision type="correction" title="libhostjava.so im Scheduler für HP-UX/Itanium eingebunden">-->
+            <description>
+                <p>
+                    In contrast to HP-UX/PA-RISC, the Itanium libhosthava.so is now integrated in the Job Scheduler.
+                    This means that the "com_construct problem" no longer occurs.
+                <!--Im Gegensatz zu HP-UX/PA-RISC ist jetzt für Itanium die libhosthava.so in den Scheduler eingebunden.
+                    Damit tritt das "com_construct-Problem" nicht mehr auf.-->
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2009-01-21" version="2.0.219" subversion_revision="5966">
+        <revision type="modification" title="Tasks Stopped on Unix Systems With 'kill' No Longer Lead to a Task Error">
+    <!--<revision type="modification" title="Unter Unix mit kill abgebrochene Task führt zum Task-Fehler">-->
+            <description>
+                <p>
+                    This means that behavious on Unix systems is now the same as on Windows.
+                <!--Damit ist das Verhalten unter Unix wie unter Windows.-->
+                </p>
+            </description>
+        </revision>
+
+        <revision jira="JS-321" type="correction" title="Backup Job Schedulers Take Over Job, Task, Job Chain and Order Settings Once More">
+    <!--<revision jira="JS-321" type="correction" title="Backup-Scheduler übernimmt wieder Job-, Task-, Jobketten- und Auftragseinstellungen">-->
+            <description>
+                <p>
+                    The cluster_member_id database columns are no longer filled when 
+                    operating with a backup Job Scheduler.
+                    They are only filled when operating with distributed orders, 
+                    so that records are now only directly allocated to cluster members.
+                <!--Im Betrieb mit einem Backup-Scheduler werden die Spalten cluster_member_id nicht mehr gefüllt.
+                    Die Spalten werden nur nur im Betrieb für verteilte Aufträge gefüllt, 
+                    so dass die Datensätze nur dann den Cluster-Membern fest zugeordnet sind.-->
+                </p>
+            </description>
+        </revision>
+    </change>
+
+    <change date="2008-12-12" version="2.0.219" subversion_revision="5963">
+        <revision jira="JS-305" type="new" title="Resetting an Order">
+    <!--<revision jira="JS-305" type="new" title="Zurücksetzen eines Auftrags">-->
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="modify_order" attribute="action" value="reset"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+
+    <change date="2008-11-18" version="2.0.218" subversion_revision="5961">
+        <revision type="modification" title="&lt;script language=&quot;shell&quot;>: .cmd file Generated in OEM Coding">
+    <!--<revision type="modification" title="&lt;script language=&quot;shell&quot;>: .cmd-Datei wird in OEM-Codierung erstellt">-->
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="script" attribute="language" value="script"/>
+                    </li>
+                </ul>
+                <p>
+                    Windows requires that verlangt OEM coding (CP437) is used for batch files.
+                    When a character from <scheduler_element name="script"/> cannot be interpreted,
+                    the Job Scheduler terminates the job with a <scheduler_message code="SCHEDULER-471"/> message.
+                    Note, however, that when reading the XML configuration file, 
+                    the Job Scheduler ignores chararcters that are not in Latin1: 
+                    see here <scheduler_a href="konfiguration.xml#encoding" quote="yes"/>.
+                <!--Windows verlangt für Batch-Dateien die OEM-Codierung.
+                    Wenn ein Zeichen aus <scheduler_element name="script"/> nicht umgesetzt werden kann,
+                    bricht der Scheduler den Job mit der Meldung <scheduler_message code="SCHEDULER-471"/> ab.
+                    Jedoch ignoriert der Scheduler schon beim Einlesen der XML-Konfiguration Zeichen, die nicht in Latin1 sind,
+                    siehe <scheduler_a href="konfiguration.xml#encoding" quote="yes"/>.-->
+                </p>
+                <scheduler_message level="error" code="SCHEDULER-471"/>
+            </description>
+        </revision>
+    </change>
+
+    
+    <change date="2008-11-12" version="2.0.217" subversion_revision="5956">
+        <revision jira="JS-316" type="new" title="New Environment Variables for Non-API Jobs">
+    <!--<revision jira="JS-316" type="new" title="Neue Umgebungsvariablen für Nicht-API-Jobs">-->
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="process"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
+    
+    <change date="2008-11-05" version="2.0.216" subversion_revision="5953">
+        <revision type="modification" title="Transaction Isolation Changed for Sybase">
+    <!--<revision type="modification" title="Transaktionsisolation für Sybase geändert">-->
+            <description>
+                <p>
+                    <i>read committed</i> is now set for Sybase.
+                <!--Für Sybase ist jetzt <i>read committed</i> eingestellt.-->
+                </p>
+            </description>
+        </revision>
+
+        <revision type="new" title="&lt;start_job force=&quot;no&quot;>: Start a Task Without Unstoppping the Job">
+    <!--<revision type="new" title="&lt;start_job force=&quot;no&quot;>: Task starten, ohne Job zu entstoppen">-->
+            <description>
+                <ul>
+                    <li>
+                        <scheduler_element name="start_job" attribute="force" value="no"/>
+                    </li>
+                </ul>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Windows Z-ASYNC-SOCKET-001 Error Message Corrected">
+    <!--<revision type="correction" title="Fehlermeldung Z-ASYNC-SOCKET-001 unter Windows korrigiert">-->
+            <description>
+                <p>
+                    An internal security test, which was only intended for Unix systems,
+                    sometimes stopped jobs from starting on Windows systems.
+                <!--Eine interne Sicherheitsprüfung, die nur für Unix vorgesehen ist,
+                    verhinderte unter Windows gelegentlich den Start eines Jobs.-->
+                </p>
+            </description>
+        </revision>
+
+        <revision type="correction" title="Errors from 2.0.214.5927 Corrected (Jobs in the Database)">
+    <!--<revision type="correction" title="Fehler aus 2.0.214.5927 (Jobs in der Datenbank) korrigiert">-->
+            <description>
+                In addition, the number of characters per column in the <code>SCHEDULER_JOB_CHAIN_NODES</code> 
+                table has been reduced.
+            <!--Außerdem die Spalten der Tabelle <code>SCHEDULER_JOB_CHAIN_NODES</code> verschmälert.-->
+            </description>
+        </revision>
+        
+    </change>
+
+    <change date="2008-10-28" version="2.0.215" subversion_revision="5938">
+        <revision type="correction" title="Minor Changes Made to the Log Categories"/>
+    <!--<revision type="correction" title="Kleine Korrektur der Log-Kategorien"/>-->
+    </change>
+    
+    <change date="2008-10-22" version="2.0.215" subversion_revision="5937">
+        <revision type="new" title="Special License Keys Now Allow the Job Scheduler to Return the Database Password">
+    <!--<revision type="new" title="Bei besonderem Lizenzsschlüssel liefert der Scheduler das Datenbankkennwort">-->
+            <description>
+                <p>
+                    <scheduler_element name="licence.use"/> can return the license key.
+                    The Job Scheduler no longer supresses the characters which begin with <code>-password=</code> 
+                    in its response to <scheduler_element name="show_state"/>.
+                <!--Der Lizenzschlüssel kann per <scheduler_element name="licence.use"/> übergeben werden.
+                    Daraufhin unterdrückt der Scheduler nicht länger in der Antwort von 
+                    <scheduler_element name="show_state"/> die Zeichenfolge, die mit <code>-password=</code> beginnt.-->
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="licence.use"/>.
+                    </li>
+                    <li>
+                        <scheduler_element directory="xml/answer/" name="state" attribute="db"/>.
+                    </li>
+                </ul>
+            </description>
+        </revision>
+    </change>
+
     <change date="2008-10-20" version="2.0.214" subversion_revision="5931">
         <revision type="correction" title="The General, Central Configuration Directory Can Be Deleted">
     <!--<revision type="correction" title="Allgemeines zentrales Konfigurationsverzeichnis kann gelöscht werden">-->

@@ -10,10 +10,12 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
-    <change date="2010-07-07" version="2.1.2" subversion_revision="6132">
-      <revision jira="JS-462" type="new" title="Die Kommandozeilenoption configuration-directory (live folder) steht zur Verfügung wie dokumentiert">
+    <change date="2010-07-07" version="2.1.2" subversion_revision="6164">
+      <revision jira="JS-538" type="new" title="Neues Attribut max_orders steuert den Parallellauf von Jobketten">
         <description>
-          Das live Verzeichnis kann mit der Kommandozeilenoption configuration-directory angegeben werden.
+          Für das Element job_chain wurde das Attribut max_orders eingeführt. Es bestimmt, wie viele Orders parallel diese Jobkette ausführen können. Fehlt dieses
+          Attribut können es beliebig viele sein. max_orders="1" führt die gesamte Jobkette exklusiv für eine Order aus, bevor die nächste Order für diese Jobkette
+          starten kann.  
         </description>
       </revision>
     </change>

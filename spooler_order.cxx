@@ -22,7 +22,6 @@ const int    check_database_orders_period_minimum       = 1;
 const int    database_orders_read_ahead_count           = 1;
 const int    max_insert_race_retry_count                = 5;                            // Race condition beim Einfügen eines Datensatzes
 const int    unlimited_max_orders                       = 99999;
-const string default_max_orders_attribute               = "unlimited";
 
 //--------------------------------------------------------------------------------------------const
 
@@ -2076,13 +2075,15 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     set_name( element.getAttribute( "name", name() ) );
     _title = element.getAttribute( "title", _title );
 
-    string max_orders_text = element.getAttribute("max_orders", default_max_orders_attribute);
-    if (max_orders_text.compare("") == 0 || max_orders_text.compare(default_max_orders_attribute) == 0) 
-        _max_orders = unlimited_max_orders;
-    else
+    /**
+     * \change 2.1.2 - JS-538: neues Attribut max_orders
+     */
+    if( element.hasAttribute( "max_orders" ) )
         _max_orders = element.int_getAttribute("max_orders", unlimited_max_orders);
+    else
+        _max_orders = unlimited_max_orders;
     Z_LOG2( "scheduler", "at most " << _max_orders << " orders can run simultaneously." << "\n" );
-    // element.intgetAttribute(); / hasAttribute() / getAttribute() / eigene Konstante für unlimmited.
+
 
     if( element.hasAttribute( "visible" ) )
         _visible = element.getAttribute( "visible" ) == "never"? visible_never :
