@@ -108,6 +108,7 @@ struct Order : Com_order,
     void                        assert_no_task              ( const string& debug_text );
     void                        assert_task                 ( const string& debug_text );
 
+    bool                        is_running                  ()                                      { return _task != NULL; }
     bool                        is_immediately_processable  ( const Time& now );
     bool                        is_processable              ();
     void                        handle_changed_processable_state ();
@@ -844,6 +845,7 @@ struct Job_chain : Com_job_chain,
     int                         number_of_started_orders    () const;
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
+    bool                        is_ready_for_new_order_processing() const;
 
   private:
     void                        check_for_removing          ();

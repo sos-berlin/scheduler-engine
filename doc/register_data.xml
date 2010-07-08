@@ -2334,6 +2334,7 @@
 </register_keyword>
 <register_keyword keyword='max_orders'>
     <register_keyword_display><code>max_orders=</code></register_keyword_display>
+    <register_entry register_file='xml/job_chain.xml#attribute_max_orders' register_title='&lt;job_chain&gt; (Konfiguration)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_job.xml#attribute_max_orders' register_title='&lt;show_job&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_job_chain.xml#attribute_max_orders' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>
     <register_entry register_file='xml/show_job_chains.xml#attribute_max_orders' register_title='&lt;show_job_chains&gt; (Kommando)'  register_keyword='max_orders' type='definition'/>

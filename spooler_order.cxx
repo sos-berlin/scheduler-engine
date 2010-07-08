@@ -1540,7 +1540,10 @@ void Order_queue_node::set_action( const string& action_string )
 bool Order_queue_node::is_ready_for_order_processing()
 {
     return _action != act_stop  &&  
-       _job_chain->is_ready_for_order_processing();
+        (this == _job_chain->first_node() 
+            ? _job_chain->is_ready_for_new_order_processing() 
+            : _job_chain->is_ready_for_order_processing()
+        );
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
@@ -3348,7 +3351,14 @@ bool Job_chain::is_ready_for_order_processing() const
 {
     return
        state() == s_active  && 
-       !_is_stopped &&
+       !_is_stopped;
+}
+//---------------------------------------------------------Job_chain::is_ready_for_new_order_processing
+
+bool Job_chain::is_ready_for_new_order_processing() const
+{
+    return
+       is_ready_for_order_processing() &&
        !is_max_orders_reached();
 }
 
@@ -3372,10 +3382,10 @@ int Job_chain::number_of_started_orders() const
     {
         if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
         {
-//            if (node == first_node())
+            if (node == first_node())
                 count += node->order_queue()->running_order_count();
-//            else
-//                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
+            else
+                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
         }
     }
     return count;
@@ -4157,7 +4167,7 @@ int Order_queue::running_order_count()
     FOR_EACH( Queue, _queue, it )
     {
         Order* order = *it;
-        if( order->_task != NULL )  result++;
+        if( order->is_running() ) result++;
     }
     return result;
 }
