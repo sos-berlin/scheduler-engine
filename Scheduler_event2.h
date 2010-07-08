@@ -31,7 +31,7 @@ struct Scheduler_event2 :
     STDMETHODIMP_(char*)  const_java_class_name         ()                                      { return (char*)"sos.spooler.Scheduler_event"; }
 
     // spooler_com::Ischeduler_event2
-    STDMETHODIMP        get_Object                      ( spooler_com::Iorder** );
+    STDMETHODIMP        get_Object                      ( spooler_com::Iorder** );              // Später spooler_com::Ischeduler_object, noch nicht implementiert
     STDMETHODIMP        get_Code                        ( BSTR* );
 
     // Scheduler_object 

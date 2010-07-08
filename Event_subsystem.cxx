@@ -18,7 +18,7 @@ struct Event_subsystem_impl : Event_subsystem
 
     // Subsystem
     void                        close                       ()                                      {}
-  //bool                        subsystem_initialize        ();
+    bool                        subsystem_initialize        ();
   //bool                        subsystem_load              ();
   //bool                        subsystem_activate          ();
     string                      name                        () const                                { return "http_server"; }
@@ -26,7 +26,9 @@ struct Event_subsystem_impl : Event_subsystem
     // Event_subsystem
     void                        report                      ( const Scheduler_event2& );
 
+
     Fill_zero                  _zero_;
+    //javaproxy::..::EventSubsystem _java_event_subsystem;
 };
 
 //------------------------------------------------------------------------------new_event_subsystem
@@ -37,12 +39,28 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
     return +result;
 }
 
+//-------------------------------------------------------Event_subsystem_impl::subsystem_initialize
+
+void Event_subsystem_impl::subsystem_initialize()
+{
+    // In Java eine Klasse Event_subsystem deklarieren mit der Methode report()
+    //_java_event_subsystem = javaproxy::...::EventSubsystem::new_instance();
+}
+
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
 void Event_subsystem_impl::report( const Scheduler_event2& event )
 {
     try {
         _log->info( event.obj_name() );
+
+        //ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event->idispatch(), "name?");
+        //_java_event_subsystem.report( (javaproxy::...::Scheduler_event)java_idispatch->get_jobject() );
+        //Für Java-Methode EventSubsystem.report( Scheduler_event e );
+
+        // Wenn C++-Cast nicht klappt:
+        //_java_event_subsystem.report( java_idispatch->get_jobject() );
+        //Für Java-Method  report( Object o ) { ... (Scheduler_event)o }
 
         if( Scheduler_script* s = spooler()->scheduler_script_subsystem()->scheduler_script_or_null( Absolute_path( "/scheduler-event" ) ) ) {
             s->module_instance()->call_if_exists( "spooler_event(Lsos/spooler/Order)V", event.iunknown() );

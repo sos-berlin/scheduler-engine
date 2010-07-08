@@ -1702,6 +1702,7 @@ void Spooler::load()
         _cluster->switch_subsystem_state( subsys_initialized );
     }
 
+    _event_subsystem         ->switch_subsystem_state( subsys_initialized );
     _supervisor              ->switch_subsystem_state( subsys_initialized );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem      ->switch_subsystem_state( subsys_initialized );
@@ -1931,6 +1932,7 @@ void Spooler::start()
 
 void Spooler::activate()
 {
+    _event_subsystem ->switch_subsystem_state( subsys_loaded );
     _folder_subsystem->switch_subsystem_state( subsys_loaded );
 
     if( !_ignore_process_classes )
@@ -2129,6 +2131,7 @@ void Spooler::stop( const exception* )
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
     _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _event_subsystem           ->switch_subsystem_state( subsys_stopped );
     _java_subsystem            ->switch_subsystem_state( subsys_stopped );
     _supervisor                ->switch_subsystem_state( subsys_stopped );
 
