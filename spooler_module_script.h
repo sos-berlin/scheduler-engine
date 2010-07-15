@@ -39,7 +39,7 @@ struct Script_module_instance : Module_instance
     Has_log*                   _log;
     bool                       _loaded;
 
-    javaproxy::sos::services::scheduler::scripting::Module _java_module;
+    javaproxy::com::sos::services::scheduler::scripting::Module _java_module;
 
     typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;
