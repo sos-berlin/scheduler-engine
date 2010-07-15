@@ -19,7 +19,7 @@ struct Event_subsystem_impl : Event_subsystem
     // Subsystem
     void                        close                       ()                                      {}
     bool                        subsystem_initialize        ();
-  //bool                        subsystem_load              ();
+    bool                        subsystem_load              ();
   //bool                        subsystem_activate          ();
     string                      name                        () const                                { return "http_server"; }
 
@@ -41,10 +41,19 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
 
 //-------------------------------------------------------Event_subsystem_impl::subsystem_initialize
 
-void Event_subsystem_impl::subsystem_initialize()
+bool Event_subsystem_impl::subsystem_initialize()
 {
     // In Java eine Klasse Event_subsystem deklarieren mit der Methode report()
     //_java_event_subsystem = javaproxy::...::EventSubsystem::new_instance();
+	_subsystem_state = Subsystem_state::subsys_initialized;
+	return true;
+}
+
+//------------------------------------------------------------Event_subsystem_impl::subsystem_load
+bool Event_subsystem_impl::subsystem_load()
+{
+	_subsystem_state = Subsystem_state::subsys_loaded;
+	return true;
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
