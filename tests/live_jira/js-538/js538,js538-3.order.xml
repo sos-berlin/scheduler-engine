@@ -6,6 +6,6 @@
     <run_time let_run="no">
         <period absolute_repeat="00:00:15"
                 begin="00:10"
-                end="23:59"/>
+                end="00:05"/>
     </run_time>
 </order>

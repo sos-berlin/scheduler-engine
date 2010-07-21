@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="js540 (Java Class Path class_path am Job)">
+    <script java_class="sos.scheduler.job.JobSchedulerShowParams"
+            language="java"/>
+    <run_time/>
+</job>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<job title="Testjob (javascript) - wartet 15 sec."
+<job title="Testjob (javascript) - wartet 60 sec."
      order="yes"
      idle_timeout="100"
      tasks="10">
@@ -10,7 +10,7 @@ var hostware = new ActiveXObject("hostware.global");
 
 function spooler_process() {
  	spooler_log.info( spooler_task.order.title + " - task js538-1 gestartet" );
- 	hostware.sleep(15);
+ 	hostware.sleep(60);
 }
         ]]>
     </script>
