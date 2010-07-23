@@ -111,6 +111,9 @@
                     max_orders kann diese Anzahl begrenzt werden. max_orders='1' bedeutet z.B., dass eine order diese Jobkette exklusiv für sich 
                     beansprucht. Eine weitere order für diese Jobkette können erst ausgeführt werden, wenn die erste order beendet worden ist.
                 </p>
+                <p>
+                    <b>Diese Einstellung gilt nur für order, die mit dem ersten Knoten der Jobkette starten.</b>
+                </p>
             </description>
         </xml_attribute>
         
