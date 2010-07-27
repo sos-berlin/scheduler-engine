@@ -56,6 +56,18 @@
 
     </xml_attributes>
 
+    <example>
+<pre><![CDATA[
+    <delay_order_after_setback setback_count="1" is_maximum="no" delay="00:10"/>
+    <delay_order_after_setback setback_count="5" is_maximum="no" delay="00:30"/>
+    <delay_order_after_setback setback_count="10" is_maximum="yes" />
+]]></pre>
+
+		<li>- nach dem ersten Fehlversuch wird der Job im Abstand von 10min erneut ausgeführt.</li>
+		<li>- nach dem fünften Fehlversuch wird der Job nur noch im Abstand von 30min ausgeführt.</li>
+		<li>- Nach dem zehnten Fehlversuch läuft der Job noch 1x und bricht bei erneutem Fehler ab.</li>
+		</example>
+		
     <description>
         <p>
             Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>,

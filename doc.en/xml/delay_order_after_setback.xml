@@ -83,4 +83,16 @@
         </p>
     </description>
 
+    <example>
+<pre><![CDATA[
+    <delay_order_after_setback setback_count="1" is_maximum="no" delay="00:10"/>
+    <delay_order_after_setback setback_count="5" is_maximum="no" delay="00:30"/>
+    <delay_order_after_setback setback_count="10" is_maximum="yes" />
+]]></pre>
+
+		<li>- after the 1st attempt is failed the job will be executed again after 10min.</li>
+		<li>- after the 5th attempt is failed the job will be executed again after 30min.</li>
+		<li>- after the 10th attempt the job will run one time again and goes into the error state if it fails.</li>
+		</example>
+
 </xml_element>
