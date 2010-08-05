@@ -2403,7 +2403,8 @@ void Job::set_next_start_time( const Time& now, bool repeat )
                         _repeat = 0;
                     }
                     else
-                    if( now >= _period.begin()  &&  !_period.repeat().is_never() )
+                    //JS-436  if( now >= _period.begin()  &&  !_period.repeat().is_never() )
+                    if( !_period.repeat().is_never() )
                     {
                         next_start_time = _period.next_repeated( now );
 
