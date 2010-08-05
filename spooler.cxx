@@ -1027,6 +1027,29 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( show_what.is_set( show_operations ) )
     {
         state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+
+        Memory_allocator::Allocation_map allocation_map = Memory_allocator::allocation_map();
+        if( !allocation_map.empty() ) {
+            xml::Element_ptr element = state_element.append_new_element( "allocations" );
+            long size_total = 0;
+            int count_total = 0;
+
+            Z_FOR_EACH( Memory_allocator::Allocation_map, allocation_map, it ) {
+                xml::Element_ptr e = element.append_new_element( "allocation" );
+                long size = (long)it->second._size;
+                int count = it->second._count;
+
+                e.setAttribute( "count", count );
+                e.setAttribute( "name", it->first );
+                e.setAttribute( "size", size );
+
+                size_total += size;
+                count_total += count;
+            }
+
+            element.setAttribute( "count", count_total );
+            element.setAttribute( "size", size_total );
+        }
     }
 
     return state_element;
