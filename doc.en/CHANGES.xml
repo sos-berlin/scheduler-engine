@@ -11,6 +11,23 @@
 <!--<scheduler_keyword keyword="Änderungsprotokoll"/>-->
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-08-11" version="2.1.2" >
+      <revision jira="JS-540" type="new" title="Added script attributes for Java API jobs">
+        <description>
+          The script element do have two more attributes 'job_class_path' and 'class_path' (see documentation). The current values will be logged in the task log.
+        </description>
+      </revision>
+    </change> 
+    
+    <change date="2010-07-29" version="2.1.2" >
+      <revision jira="JS-550" type="correction" title="on_exit_code 'error' will be correct evaluated">
+        <description>
+          If the attribute on_exit_code is 'error', then commands with on_exit_code = 'error' will be executed only if the current exit code is not 0 (null).
+          Until now the commands are executed every time.
+        </description>
+      </revision>
+    </change>
+  
     <change date="2010-07-07" version="2.1.2" subversion_revision="6164">
       <revision jira="JS-538" type="new" title="job_chain should be not run parallel ">
         <description>

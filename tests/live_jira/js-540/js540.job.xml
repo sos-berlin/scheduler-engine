@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <!--             job_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\com.sos.scheduler.jar" -->
+<!-- class_path="C:\Programme\scheduler\lib\*.jar;C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\com.sos.scheduler.core.jar"  -->
                                  
-<job title="js540 (Java Class Path class_path am Job)">
+<job title="js540 (Java Class Path class_path am Job)" java_options="-Xmx258m" >
     <script java_class="test.SimpleJavaAPIJob"
-    				class_path="C:\Programme\scheduler\lib\*.jar;C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\com.sos.scheduler.core.jar"
     				job_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\testjob.jar"
             language="java"
             />

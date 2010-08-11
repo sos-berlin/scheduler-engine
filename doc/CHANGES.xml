@@ -10,6 +10,23 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-08-11" version="2.1.2" >
+      <revision jira="JS-540" type="new" title="Weitere script-Attribute für Java API-Jobs">
+        <description>
+					Das script-Element hat zwei weitere Atribute 'job_class_path' und 'class_path' (s. Dokumentation). Die aktuellen Werte werden im Task-Log protokolliert.
+        </description>
+      </revision>
+    </change> 
+
+    <change date="2010-07-29" version="2.1.2" >
+      <revision jira="JS-550" type="correction" title="on_exit_code 'error' wird korrekt ausgewertet">
+        <description>
+           Wenn on_exit_code 'error' ist, werden die Kommandos nur dann ausgeführt, wenn der OS Exit Code ungleich 0 ist.
+           Bisher sind die Kommandos immer ausgeführt worden.
+        </description>
+      </revision>
+    </change> 
+  
     <change date="2010-07-07" version="2.1.2" subversion_revision="6164">
       <revision jira="JS-538" type="new" title="Neues Attribut max_orders steuert den Parallellauf von Jobketten">
         <description>

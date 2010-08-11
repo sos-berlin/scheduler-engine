@@ -262,6 +262,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
     try
     {
+		// JS-540
         string job_name;
         string include_path    = _class_data->_task_process_element.getAttribute( "include_path"    );
         string java_options    = _class_data->_task_process_element.getAttribute( "java_options"    );
@@ -318,6 +319,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 if( key_word == "filename"         )  _server->_module->_filename        = value;
                 else
                 if( key_word == "java_class"       )  _server->_module->_java_class_name = value;
+                else
+				if( key_word == "job_class_path"   )  _server->_module->_job_class_path = value;  // JS-540
+                else
+				if( key_word == "class_path"       )  _server->_module->_class_path = value;
                 else
                 if( key_word == "recompile"        )  _server->_module->_recompile       = value[0] == '1';
                 else
@@ -386,14 +391,13 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
 
         ptr<javabridge::Vm> java_vm = get_java_vm( false );
+
         _server->_module->_java_vm = java_vm;
 
         if( !_server->_module->_java_vm->running() )
         {
-            // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
-            //java_vm->set_log( &_log );
-            if( !java_class_path.empty() )
-                java_vm->set_class_path( java_class_path );
+		
+	        set_vm_class_path (java_vm, java_class_path);  // JS-540
 
             java_vm->set_javac_filename( javac );
             java_vm->set_options( java_options );
@@ -428,6 +432,22 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::construct" ); }
 
     return hr;
+}
+
+void Com_remote_module_instance_server::set_vm_class_path (ptr<javabridge::Vm> java_vm , string task_class_path) const
+{
+
+    // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
+    //java_vm->set_log( &_log );
+    if( !task_class_path.empty() )
+        java_vm->set_class_path( task_class_path );
+
+	if(!_server->_module->_class_path.empty())
+		java_vm->set_class_path( _server->_module->_class_path );
+
+	if (!_server->_module->_job_class_path.empty())
+		java_vm->prepend_class_path(_server->_module->_job_class_path);
+
 }
 
 //-------------------------------------------------------Com_remote_module_instance_server::Add_obj
@@ -569,6 +589,18 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
 
         assert( !_class_data->_remote_instance_pid );
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
+
+		// if( _server->_module->needs_java() )  // Besser needs_java_compiler?						// JS-540 ...
+		bool needs_java_vm;
+		if( _server->_module->kind() == sos::scheduler::Module::kind_java || _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine  )
+			needs_java_vm = true;			
+		if(needs_java_vm)
+		{
+			_server->_log.info("java_class_path:" + _server->_module->_java_vm->class_path()); 
+			_server->_log.info("vm arguments:" + _server->_module->_java_vm->_option_as_string);
+		}																							// ... JS-540 
+		
+		
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 

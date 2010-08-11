@@ -472,7 +472,7 @@ AGAIN:
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 16 + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
+            Variant params ( Variant::vt_array, (16+2) + 8 * _module->_monitors->_monitor_map.size() );   // Wichtig: Größe anpassen!
 
             {
                 Locked_safearray<Variant> params_array ( V_ARRAY( &params ) );
@@ -483,6 +483,9 @@ AGAIN:
                 params_array[ nr++ ] = "filename="        + _module->_filename;
                 params_array[ nr++ ] = "java_class="      + _module->_java_class_name;
                 params_array[ nr++ ] = "java_options="    + _module->_java_options;
+                params_array[ nr++ ] = "job_class_path="  + _module->_job_class_path;  // JS-540
+				params_array[ nr++ ] = "class_path="	  + _module->_class_path;
+
 
                 params_array[ nr++ ] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[ nr++ ] = "script="          + _module->_text_with_includes.includes_resolved().xml();

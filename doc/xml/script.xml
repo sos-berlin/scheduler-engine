@@ -132,6 +132,7 @@
             </description>
         </xml_attribute>
 
+
         <xml_attribute name="java_class" type="java_class_name">
             <description>
                 <p>
@@ -148,6 +149,37 @@
             </messages>
         </xml_attribute>
 
+        <xml_attribute name="job_class_path" type="java_class_path">
+            <description>
+                <p>
+                   Erlaubt einen jobspezifischen Java Klassenpfad.
+                </p>            
+                <p>
+                   Dieses Attribut erweitert den Java Klassenpfad, der in der factory-ini eingestellt ist.
+                </p>
+            </description>
+
+            <messages>
+                <!--message level="error" code="SCHEDULER-398"/-->
+            </messages>
+        </xml_attribute>
+
+
+        <xml_attribute name="class_path" type="java_class_path">
+            <description>
+                <p>
+                   Erlaubt einen jobspezifischen Java Klassenpfad.
+                </p>            
+                <p>
+                   Dieses Attribut ersetzt den Java Klassenpfad, der in der factory-ini eingestellt ist.
+                   Deshalb muß darauf geachtet werden, dass in diesem Klassenpfad alle Job Scheduler spezifischen Jars enthalten sind.
+                </p>
+            </description>
+
+            <messages>
+                <!--message level="error" code="SCHEDULER-398"/-->
+            </messages>
+        </xml_attribute>
 <!--
         <xml_attribute name="recompile" type="yes_no" initial="yes">
             <description>
