@@ -1093,7 +1093,13 @@ void Job::add_on_exit_commands_element( const xml::Element_ptr& commands_element
 }
 
 //--------------------------------------------------------------------Job::prepare_on_exit_commands
-
+/* commands-Exit Codes in OS Exit Codes umsetzen, damit Auswertung des OS ExitCodes am Task-Ende möglich ist
+success => 0
+error   => Wird nicht umgesetzt, da mehrere Werte umfassen kann, alle Integers ungleich 0 (lt. XSD-Schema). Erst bei Task-Ende ausgewertet
+signal  => Nur für Unix, wenn Exit-Code < 0
+numerisch => Unverändert übernommen
+Unix-Signalname (lt. XSD) => Signal-Tabellenwert * (-1)
+*/
 void Job::prepare_on_exit_commands()
 {
     if( _commands_document )
@@ -1112,8 +1118,6 @@ void Job::prepare_on_exit_commands()
             {
                 if( passed_error_commands )  z::throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
                 passed_error_commands = true;
-                //if( _error_commands_element )  z::throw_xc( "SCHEDULER-326", on_exit_code, on_exit_code );
-                //_error_commands_element = commands_element;  // Das behandeln wir am Ende
             }
             else
             {

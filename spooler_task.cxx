@@ -864,6 +864,7 @@ void Task::set_state_direct( State new_state )
             if( new_state == s_starting  &&  _module_instance && _module_instance->process_name() != "" )  details << ", process " << _module_instance->process_name();
 
             _log->log( log_level, message_string( "SCHEDULER-918", state_name(), details ) );
+
         }
     }
 }
@@ -2472,9 +2473,8 @@ void Task::process_on_exit_commands()
             }
 #       endif
         else
-        {
-            commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
-        }
+		if(_exit_code != 0) // JS-550
+			commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
 
         if( commands_element )
         {
