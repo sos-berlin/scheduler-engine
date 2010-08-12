@@ -59,7 +59,17 @@ public class Job_impl
     
     public boolean  spooler_init        ()      throws Exception  { return true; }
 
-    
+/*
+    final boolean call_spooler_init() throws Exception {
+        try {
+            return spooler_init();
+        }
+        catch(Throwable x) {
+            log_exception(x);  //spooler_log.error("Stacktrace: " + stringStackTrace(x));
+            throw x;
+        }
+    }
+*/    
 
     /*+ Wir als allerletzte Methode gerufen, bevor das Java-Objekt verworfen wird. 
       * Hier kann z.B. eine Datenbank-Verbindung geschlossen werden. 
