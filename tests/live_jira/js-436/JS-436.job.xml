@@ -10,7 +10,17 @@ angepasst werden.
 	dir c:\temp
 	]]></script>
 	<run_time>
-	<period begin = "10:15" end = "16:31" repeat = "30"/>
+	<period begin = "10:00" end = "10:17" repeat = "30"/>
 	<!-- <period begin = "13:49" end = "12:55" repeat = "1800"/> -->
 	</run_time>
 </job> 
+
+<!-- Beispiele
+
+Periode: 10:00 - 10:17
+Start: 10:16:51
+Ende: 10:17:52 (nach Periodenende)
+Ergebnis: Es wird keine neue Task um 10:00:00 eingeplant
+
+
+-->

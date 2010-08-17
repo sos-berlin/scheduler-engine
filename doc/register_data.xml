@@ -188,6 +188,7 @@
 </register_keyword>
 <register_keyword keyword='class_path'>
     <register_keyword_display><code>class_path=</code></register_keyword_display>
+    <register_entry register_file='xml/script.xml#attribute_class_path' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='class_path' type='definition'/>
     <register_ini_entry register_file='CHANGES.xml' register_title='Änderungsprotokoll' file='sos.ini' section='java' entry='class_path'/>
     <register_ini_entry register_file='command_line.xml' register_title='Kommandozeilenoptionen' file='sos.ini' section='java' entry='class_path'/>
     <register_ini_entry register_file='email.xml' register_title='eMail-Versand' file='sos.ini' section='java' entry='class_path'/>
@@ -1172,6 +1173,10 @@
     <register_entry register_file='xml/answer/job_chains.xml#' register_title='&lt;job_chains&gt; (Antwort)'  register_keyword='job_chains' type='definition'/>
     <register_entry register_file='xml/job_chains.xml#' register_title='&lt;job_chains&gt; (Konfiguration)'  register_keyword='job_chains' type='definition'/>
     <register_entry register_file='xml/show_state.xml#use_element__job_chains' register_title='&lt;show_state&gt; (Kommando)'  register_keyword='job_chains'/>
+</register_keyword>
+<register_keyword keyword='job_class_path'>
+    <register_keyword_display><code>job_class_path=</code></register_keyword_display>
+    <register_entry register_file='xml/script.xml#attribute_job_class_path' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='job_class_path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='job_name'>
     <register_keyword_display><code>job_name=</code></register_keyword_display>

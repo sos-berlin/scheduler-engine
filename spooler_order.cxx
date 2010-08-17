@@ -6675,7 +6675,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if( _id_locked )
         {
-            report_event( "SCHEDULER-TEST" ); // kommentar
+           // report_event( "SCHEDULER-TEST" ); // kommentar
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );

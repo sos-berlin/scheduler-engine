@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job name="SF.3785149_process" >
+	<process file="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\scheduler\tests\live_sourceforge.net\SF.3785149\do_process.bat"/>
+<!--	<delay_after_error delay="00:00:30" error_count="1"/>
+	<delay_after_error delay="STOP" error_count="4"/>
+	-->
+	<run_time once="yes"/>
+
+	<!-- <commands on_exit_code="ERROR"> -->
+	<commands on_exit_code="error">
+		<add_jobs>
+			<job name="SF.3785149_revert">
+				<process file="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\scheduler\tests\live_sourceforge.net\SF.3785149\do_rollback.bat"/>
+				<run_time once="yes"/> 
+			</job>
+		</add_jobs>
+	</commands>
+</job> 

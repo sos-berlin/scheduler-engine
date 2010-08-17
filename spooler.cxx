@@ -1043,16 +1043,48 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
                 e.setAttribute( "name", it->first );
                 e.setAttribute( "size", size );
 
-                size_total += size;
+                size_total += size * count;
                 count_total += count;
             }
 
             element.setAttribute( "count", count_total );
             element.setAttribute( "size", size_total );
+
+			MEMORYSTATUS m = memory_status_init();
+			element.setAttribute( "reserved_virtual_mb", mb_formatted(memory_status_calculate_reserved_virtual(m)));
+			element.setAttribute( "total_virtual_mb", mb_formatted(m.dwTotalVirtual));
+			element.setAttribute( "avail_virtual_mb", mb_formatted(m.dwAvailVirtual));
+			element.setAttribute( "total_physical_mb", mb_formatted(m.dwTotalPhys));
+			element.setAttribute( "avail_physical_mb", mb_formatted(m.dwAvailPhys));
+			element.setAttribute( "total_pagefile_mb", mb_formatted(m.dwTotalPageFile));
+			element.setAttribute( "avail_pagefile_mb", mb_formatted(m.dwAvailPageFile));
+			element.setAttribute( "memoryload_mb", mb_formatted(m.dwMemoryLoad));
         }
     }
 
     return state_element;
+}
+
+MEMORYSTATUS Spooler::memory_status_init()
+{
+    MEMORYSTATUS m;
+    memset( &m, 0, sizeof m );
+    m.dwLength = sizeof m;
+    GlobalMemoryStatus( &m );
+	return m;
+}
+
+DWORD Spooler::memory_status_calculate_reserved_virtual(MEMORYSTATUS m)
+{
+  DWORD reserved_virtual = m.dwTotalVirtual - m.dwAvailVirtual;      // Das sollte der belegte Adressraum sein
+  return reserved_virtual;
+}
+
+string Spooler::mb_formatted(DWORD value)
+{
+	char buffer [ 30 ];
+	int len = snprintf( buffer, sizeof buffer - 1, "%-.3f", (double)value / 1024 / 1024 );
+	return string(buffer,len);
 }
 
 //------------------------------------------------------Spooler::print_xml_child_elements_for_event
@@ -1725,7 +1757,6 @@ void Spooler::load()
         _cluster->switch_subsystem_state( subsys_initialized );
     }
 
-    _event_subsystem         ->switch_subsystem_state( subsys_initialized );
     _supervisor              ->switch_subsystem_state( subsys_initialized );
     _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem      ->switch_subsystem_state( subsys_initialized );
@@ -1913,6 +1944,8 @@ void Spooler::start()
     {
         _java_subsystem->switch_subsystem_state( subsys_loaded );
       //_java_subsystem->switch_subsystem_state( subsys_active );
+
+// Neues Event_subsystem		_java_subsystem->java_vm()->start();
     }
     catch( const exception& x )
     {
@@ -1920,6 +1953,8 @@ void Spooler::start()
         _log->warn( message_string( "SCHEDULER-259" ) );  // "Java kann nicht gestartet werden. Scheduler startet ohne Java."
     }
 
+	_event_subsystem->switch_subsystem_state( subsys_initialized );
+	_event_subsystem ->switch_subsystem_state( subsys_loaded );
 
     // Datenbank (startet Java, wenn JDBC verwendet wird)
 
@@ -1955,7 +1990,6 @@ void Spooler::start()
 
 void Spooler::activate()
 {
-    _event_subsystem ->switch_subsystem_state( subsys_loaded );
     _folder_subsystem->switch_subsystem_state( subsys_loaded );
 
     if( !_ignore_process_classes )
