@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <spooler
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+    xsi:noNamespaceSchemaLocation = "..\scheduler.xsd"
+    
 >
-    <config>
+    <config   java_options="-Xmx257m" java_class_path="c:\temp\hallo.jar">
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <jobs>

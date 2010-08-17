@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <spooler
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+    xsi:noNamespaceSchemaLocation = "..\scheduler.xsd"
 >
     <config 
         port="6360" 
         supervisor=""
+      
     >
 
         <security>
