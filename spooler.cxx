@@ -49,7 +49,6 @@
 #include "../zschimmer/not_in_recursion.h"
 
 
-
 using namespace std;
 using namespace zschimmer::file;
 
@@ -121,6 +120,8 @@ volatile int                    ctrl_c_pressed_handled              = 0;
 Spooler*                        spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
+
+//const Spooler::Java_proxy_class_factory Spooler::java_proxy_class_factory ("com.sos.scheduler.intern.cpp.SpoolerImpl");
 
 //-------------------------------------------------------------------------------------------------
 
@@ -1036,11 +1037,11 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
 
             Z_FOR_EACH( Memory_allocator::Allocation_map, allocation_map, it ) {
                 xml::Element_ptr e = element.append_new_element( "allocation" );
-                long size = (long)it->second._size;
+                long size = (long)it->first._size;
                 int count = it->second._count;
 
                 e.setAttribute( "count", count );
-                e.setAttribute( "name", it->first );
+                e.setAttribute( "name", it->first._name );
                 e.setAttribute( "size", size );
 
                 size_total += size * count;

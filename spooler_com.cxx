@@ -678,11 +678,34 @@ STDMETHODIMP Com_variable_set::get_Var( BSTR name, VARIANT* value )
     return hr;
 }
 
+//-----------------------------------------------------------Com_variable_set::estimated_byte_count
+
+static const int memory_overhead = 8;
+inline int aligned(int i) { return (i + 7) & ~7; }
+int bstr_bytes(BSTR b) { return memory_overhead + aligned(4 + SysStringLen(b) + 1); }
+
+int Com_variable_set::estimated_byte_count() const 
+{
+    int result = 0;
+    const int overhead = 8;
+    const int bstr_overheaed = overhead + 4 + 1;
+
+    Z_FOR_EACH_CONST (Map, _map, it) {
+        result += bstr_bytes(it->first);
+        if (const Com_variable* v = it->second) {
+            result += bstr_bytes(v->_name);
+            if (v->_value.vt == VT_BSTR)  result += bstr_bytes(V_BSTR(&v->_value)) + 1;
+        }
+    }
+
+    return result;
+}
+
 //----------------------------------------------------------------------Com_variable_set::get_count
 
 STDMETHODIMP Com_variable_set::get_Count( int* result )
 {
-    THREAD_LOCK( _lock )  *result = _map.size();
+    THREAD_LOCK( _lock )  *result = count();
     return NOERROR;
 }
 
@@ -728,7 +751,9 @@ xml::Document_ptr Com_variable_set::dom( const string& element_name, const strin
 
 xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, const string& element_name, const string& subelement_name )
 {
-    xml::Element_ptr varset = doc.createElement( element_name );
+    xml::Element_ptr result = doc.createElement( element_name );
+    result.setAttribute("count",count());
+    result.setAttribute("estimated_byte_count",estimated_byte_count());
 
     THREAD_LOCK( _lock )
     {
@@ -738,12 +763,12 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
             if( v )
             {
                 xml::Element_ptr variable_element = v->dom_element( doc, subelement_name );
-                varset.appendChild( variable_element );
+                result.appendChild( variable_element );
             }
         }
     }
 
-    return varset;
+    return result;
 }
 
 //----------------------------------------------------------Com_variable_set::to_environment_string

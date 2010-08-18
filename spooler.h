@@ -75,6 +75,8 @@
 #include "../zschimmer/threads.h"
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/java.h"
+#include "../zschimmer/Has_java_proxy.h"
+#include "../zschimmer/Java_proxy_class.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/message.h"
 #include "../zschimmer/file_path.h"
@@ -364,7 +366,8 @@ typedef map<Thread_id,Task_subsystem*>      Thread_id_map;
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler : Object,
-                 Scheduler_object
+                 Scheduler_object,
+                 javabridge::has_java_proxy<Spooler>
 {
     enum State
     {
@@ -401,6 +404,10 @@ struct Spooler : Object,
         need_db_strict
     };
     */
+
+    static const                Java_proxy_class_factory    java_proxy_class_factory;
+
+
                                 Spooler                     ();
                                ~Spooler                     ();
 
@@ -469,7 +476,6 @@ struct Spooler : Object,
     void                        load_arg                    ();
     void                        load                        ();
     void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
-    void                        set_next_daylight_saving_transition();
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
 	MEMORYSTATUS				memory_status_init();
@@ -488,7 +494,6 @@ struct Spooler : Object,
     void                        execute_config_commands     ();
     void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );
-    void                        reload                      ();
     void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
     void                        run                         ();
@@ -498,7 +503,6 @@ struct Spooler : Object,
     void                        check_name                  ( const string& name );
 
     // Cluster
-    void                        start_cluster               ();
     void                        check_cluster               ();
     bool                        assert_is_still_active      ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
