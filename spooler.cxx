@@ -1051,21 +1051,26 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
             element.setAttribute( "count", count_total );
             element.setAttribute( "size", size_total );
 
+#ifdef Z_WINDOWS
 			MEMORYSTATUS m = memory_status_init();
-			element.setAttribute( "reserved_virtual_mb", mb_formatted(memory_status_calculate_reserved_virtual(m)));
-			element.setAttribute( "total_virtual_mb", mb_formatted(m.dwTotalVirtual));
-			element.setAttribute( "avail_virtual_mb", mb_formatted(m.dwAvailVirtual));
-			element.setAttribute( "total_physical_mb", mb_formatted(m.dwTotalPhys));
-			element.setAttribute( "avail_physical_mb", mb_formatted(m.dwAvailPhys));
-			element.setAttribute( "total_pagefile_mb", mb_formatted(m.dwTotalPageFile));
-			element.setAttribute( "avail_pagefile_mb", mb_formatted(m.dwAvailPageFile));
-			element.setAttribute( "memoryload_mb", mb_formatted(m.dwMemoryLoad));
+			element.setAttribute( "uom_memory_values", "MB");
+			element.setAttribute( "reserved_virtual", mb_formatted(memory_status_calculate_reserved_virtual(m)));
+			element.setAttribute( "total_virtual", mb_formatted(m.dwTotalVirtual));
+			element.setAttribute( "avail_virtual", mb_formatted(m.dwAvailVirtual));
+			element.setAttribute( "total_physical", mb_formatted(m.dwTotalPhys));
+			element.setAttribute( "avail_physical", mb_formatted(m.dwAvailPhys));
+			element.setAttribute( "total_pagefile", mb_formatted(m.dwTotalPageFile));
+			element.setAttribute( "avail_pagefile", mb_formatted(m.dwAvailPageFile));
+			element.setAttribute( "memoryload", mb_formatted(m.dwMemoryLoad));
+#endif
+
         }
     }
 
     return state_element;
 }
 
+#ifdef Z_WINDOWS
 MEMORYSTATUS Spooler::memory_status_init()
 {
     MEMORYSTATUS m;
@@ -1087,6 +1092,7 @@ string Spooler::mb_formatted(DWORD value)
 	int len = snprintf( buffer, sizeof buffer - 1, "%-.3f", (double)value / 1024 / 1024 );
 	return string(buffer,len);
 }
+#endif
 
 //------------------------------------------------------Spooler::print_xml_child_elements_for_event
 
