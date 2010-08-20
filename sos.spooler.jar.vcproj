@@ -31,7 +31,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description=""
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class com/sos/scheduler/intern/*.class com/sos/scheduler/intern/cppproxy/*.class&#x0D;&#x0A;"
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
 			<Tool
@@ -54,7 +54,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLibrarianTool"
@@ -88,7 +88,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description=""
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class com/sos/scheduler/intern/*.class com/sos/scheduler/intern/cppproxy/*.class&#x0D;&#x0A;"
 				Outputs="$(TargetDir)sos.spooler.jar"
 			/>
 			<Tool
@@ -111,7 +111,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine="echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class&#x0D;&#x0A;cd $(IntDir) &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLibrarianTool"
@@ -150,7 +150,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -161,7 +161,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -176,7 +176,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -187,7 +187,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -202,7 +202,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -213,7 +213,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -228,7 +228,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -239,7 +239,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -254,7 +254,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -265,7 +265,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -280,7 +280,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -291,7 +291,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -306,7 +306,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -317,7 +317,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -332,7 +332,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -343,7 +343,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -358,7 +358,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -369,7 +369,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -384,7 +384,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -395,7 +395,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -410,7 +410,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -421,7 +421,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -436,7 +436,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -447,7 +447,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -462,7 +462,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -473,7 +473,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -488,7 +488,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -499,7 +499,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -514,7 +514,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -525,7 +525,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -540,7 +540,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -551,7 +551,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -566,7 +566,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -577,7 +577,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -592,7 +592,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -603,7 +603,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -618,7 +618,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -629,7 +629,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -644,7 +644,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -655,7 +655,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -670,7 +670,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -681,7 +681,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -696,7 +696,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -707,7 +707,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -722,7 +722,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -733,7 +733,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -748,7 +748,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -759,7 +759,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -774,7 +774,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -785,7 +785,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -800,7 +800,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -811,7 +811,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -826,7 +826,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -837,7 +837,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -852,7 +852,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -863,7 +863,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -878,7 +878,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
@@ -889,14 +889,14 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 						Outputs="$(IntDir)sos\spooler\$(InputName).class"
 					/>
 				</FileConfiguration>
 			</File>
 			<Filter
-				Name="jobs"
+				Name="sos.spooler.jobs"
 				>
 				<File
 					RelativePath=".\sos\spooler\jobs\Web_service_forwarder.java"
@@ -907,7 +907,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description=""
-							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);../_jar/xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);../_jar/xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 							AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"
 						/>
@@ -918,9 +918,117 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description=""
-							CommandLine="echo javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.4 -target 1.4 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);../_jar/xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);../_jar/xercesImpl.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 							AdditionalDependencies="$(IntDir)/sos/spooler/Idispatch.class"
 							Outputs="$(IntDir)/sos/spooler/jobs/$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="com.sos.scheduler.intern.cppproxy"
+				>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\Order_queueC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\SpoolerC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\SpoolerCImpl.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="com.sos.scheduler.intern"
+				>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\Scheduler.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							AdditionalDependencies=""
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
 						/>
 					</FileConfiguration>
 				</File>

@@ -855,6 +855,8 @@ const char file_scheduler_xsd[] =
     "\x09" "\x09" "\x09" "<xsd:attribute name=\"java_class\" type=\"String\"/>\n"
     "\x09" "\x09" "\x09" "<xsd:attribute name=\"recompile\" type=\"Yes_no\"/>\n"
     "\x09" "\x09" "\x09" "<xsd:attribute name=\"encoding\" type=\"Code_page_encoding\"/>\n"
+    "<xsd:attribute name=\"job_class_path\" type=\"String\"/>\n"
+    "<xsd:attribute name=\"class_path\" type=\"String\"/>\n"
     "\x09" "\x09" "\x09" "<!--xsd:attribute name=\"process_class\"         type=\"Path\"    s. eMail von P\xc3" "\xbc" "schel 2007-11-06 12:55 /-->\n"
     "\x09" "\x09" "</xsd:complexType>\n"
     "\x09" "</xsd:element>\n"
@@ -1960,7 +1962,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1278591369 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1282129926 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1225365142 },
     { NULL, NULL, 0 }
 };

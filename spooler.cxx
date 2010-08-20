@@ -121,8 +121,6 @@ Spooler*                        spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
 
-//const Spooler::Java_proxy_class_factory Spooler::java_proxy_class_factory ("com.sos.scheduler.intern.cpp.SpoolerImpl");
-
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml

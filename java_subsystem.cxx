@@ -3,6 +3,13 @@
 #include "spooler.h"
 #include "../kram/sos_java.h"
 
+#ifdef Z_DEBUG
+#include "../javaproxy/java__lang__String.h"
+#include "../javaproxy/com__sos__scheduler__intern__Scheduler.h"
+#include "../javaproxy/com__sos__scheduler__intern__cppproxy__SpoolerC.h"
+typedef javaproxy::com::sos::scheduler::intern::Scheduler SchedulerJ;
+#endif
+
 namespace sos {
 namespace scheduler {
 
@@ -73,7 +80,7 @@ bool Java_subsystem::subsystem_initialize()
 {
     _java_vm = get_java_vm( false );
     _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
-    
+
     _subsystem_state = subsys_initialized;
     return true;
 }
@@ -100,6 +107,17 @@ bool Java_subsystem::subsystem_load()
         Java_module_instance::init_java_vm( _java_vm );
     }
 
+#ifdef Z_DEBUG
+    {
+        Java_module_instance::init_java_vm( _java_vm );
+        Spooler::initialize_java_proxy();
+
+        SchedulerJ schedulerJ = SchedulerJ::new_instance(_spooler->j());
+        javaproxy::java::lang::String message = "Hallo, hier ist C++";
+        schedulerJ.test(message);
+    }
+#endif
+    
     _subsystem_state = subsys_loaded;
     return true;
 }

@@ -21,6 +21,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_directory_file_order_source:  return "Directory_file_order_source";
         case type_directory_observer:           return "Directory_observer";
         case type_directory_tree:               return "Directory_tree";
+        case type_event_subsystem:              return "Event_subsystem";
         case type_exclusive_scheduler_watchdog: return "Exclusive_scheduler_watchdog";
         case type_folder:                       return "Folder";
         case type_subfolder_folder:             return "Subfolder_folder";
@@ -58,6 +59,7 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_schedule_subsystem:           return "Schedule_subsystem";
         case type_schedule_use:                 return "Schedule_use";
         case type_scheduler_event_manager:      return "Scheduler_event_manager";
+        case type_scheduler_event2:             return "Scheduler_event2";
         case type_scheduler_script:             return "Scheduler_script";
         case type_scheduler_script_folder:      return "Scheduler_script_folder";
         case type_scheduler_script_subsystem:   return "Scheduler_script_subsystem";
@@ -77,13 +79,11 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
         case type_web_service_response:         return "Web_service_response";
         case type_web_services:                 return "Web_services";
         case type_xml_client_connection:        return "Xml_client_connection";
-        case type_scheduler_event2:             return "Scheduler_event2";
-        case type_event_subsystem:              return "Event_subsystem";
         default:                                return S() << "Type_code(" << type_code << ")";
     }
 }
 
-//---------------------------------------------------------------S-cheduler_object::Scheduler_object
+//---------------------------------------------------------------Scheduler_object::Scheduler_object
 
 Scheduler_object::Scheduler_object( Spooler* spooler, IUnknown* me, Type_code code )
 : 
