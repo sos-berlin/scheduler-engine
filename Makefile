@@ -17,6 +17,7 @@ objects = \
  file_logger.o\
  folder.o\
  java_subsystem.o\
+ jni__sos__scheduler__Spooler.o\
  include.o\
  lock.o\
  path.o\
