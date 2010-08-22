@@ -182,7 +182,7 @@ Database* Scheduler_object::db() const
 
 //------------------------------------------------------------------Scheduler_object::job_subsystem
 
-Job_subsystem_interface* Scheduler_object::job_subsystem() const
+Job_subsystem* Scheduler_object::job_subsystem() const
 {
     return _spooler->job_subsystem();
 }

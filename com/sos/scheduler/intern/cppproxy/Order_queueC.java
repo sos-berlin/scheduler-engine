@@ -1,13 +1,10 @@
 package com.sos.scheduler.intern.cppproxy;
+
 import com.sos.cplusplus.runtime.CppProxy;
 import com.sos.cplusplus.runtime.annotation.CppClass;
 
 
-/**
- *
- * @author Zschimmer.sos
- */
-@CppClass(clas="sos::scheduler::Order_queue")
+@CppClass(clas="sos::scheduler::Order_queue", directory="scheduler", include="spooler.h")
 public interface Order_queueC extends CppProxy {
     void close();
     String obj_name();

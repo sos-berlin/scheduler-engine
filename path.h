@@ -62,7 +62,7 @@ inline void insert_into_message( Message_string* m, int index, const Path& path 
 
 //------------------------------------------------------------------------------------Absolute_path
 
-struct Absolute_path : Path
+struct Absolute_path : Path     //, javabridge::has_java_proxy<Absolute_path>
 {
     static Absolute_path        build                       ( const File_based* source_file_based, const string& relative );
     static void                 self_test                   ();

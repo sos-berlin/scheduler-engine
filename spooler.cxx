@@ -1234,7 +1234,7 @@ Schedule_subsystem_interface* Spooler::schedule_subsystem() const
 
 //---------------------------------------------------------------------------Spooler::job_subsystem
 
-Job_subsystem_interface* Spooler::job_subsystem() const
+Job_subsystem* Spooler::job_subsystem() const
 { 
     if( !_job_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Job_subsystem is not initialized" );
 

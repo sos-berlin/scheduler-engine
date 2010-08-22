@@ -1,13 +1,13 @@
 package com.sos.scheduler.intern.cppproxy;
+
 import com.sos.cplusplus.runtime.CppProxy;
 import com.sos.cplusplus.runtime.annotation.CppClass;
 
-/**
- *
- * @author Zschimmer.sos
- */
-@CppClass(clas="sos::scheduler::Spooler", include="spooler.h")
+
+@CppClass(clas="sos::scheduler::Spooler", directory="scheduler", include="spooler.h")
 public interface SpoolerC extends CppProxy {
+    Prefix_logC log();
+    
     // Scheduler_object:
 //    void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 //
@@ -138,8 +138,8 @@ public interface SpoolerC extends CppProxy {
 //    Process_class_subsystem*    process_class_subsystem     () const;
 //    Task_subsystem*             task_subsystem              () const;
 //    Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
-//    Job_subsystem_interface*    job_subsystem               () const;
-//    Job_subsystem_interface*    job_subsystem_or_null       () const                            { return _job_subsystem; }
+      Job_subsystemC              job_subsystem               ();
+      Job_subsystemC              job_subsystem_or_null       ();
 //    Order_subsystem_interface*  order_subsystem             () const;
 //    Standing_order_subsystem*   standing_order_subsystem    () const;
 //    Schedule_subsystem_interface* schedule_subsystem        () const;

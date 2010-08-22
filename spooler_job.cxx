@@ -34,11 +34,11 @@ const int    max_task_time_out             = 365*24*3600;
 const double directory_watcher_intervall   = 10.0;          // Nur für Unix (Windows gibt ein asynchrones Signal)
 const bool   Job::force_start_default      = true;
 
-//------------------------------------------------------------------------------------Job_subsystem
+//-------------------------------------------------------------------------------Job_subsystem_impl
 
-struct Job_subsystem : Job_subsystem_interface
+struct Job_subsystem_impl : Job_subsystem
 {
-                                Job_subsystem               ( Scheduler* );
+                                Job_subsystem_impl          ( Scheduler* );
 
     // Subsystem:
     void                        close                       ();
@@ -47,7 +47,7 @@ struct Job_subsystem : Job_subsystem_interface
     bool                        subsystem_activate          ();
 
 
-    // Job_subsystem_interface
+    // Job_subsystem
 
     ptr<Job_folder>             new_job_folder              ( Folder* folder )                      { return Z_NEW( Job_folder( folder ) ); }
     int                         remove_temporary_jobs       ();
@@ -138,42 +138,42 @@ struct Job_lock_requestor : lock::Requestor
 
 //--------------------------------------------------------------------------------new_job_subsystem
 
-ptr<Job_subsystem_interface> new_job_subsystem( Scheduler* scheduler )
+ptr<Job_subsystem> new_job_subsystem( Scheduler* scheduler )
 {
-    ptr<Job_subsystem> job_subsystem = Z_NEW( Job_subsystem( scheduler ) );
+    ptr<Job_subsystem_impl> job_subsystem = Z_NEW( Job_subsystem_impl( scheduler ) );
     return +job_subsystem;
 }
 
-//--------------------------------------------------ob_subsystem_interface::Job_subsystem_interface
+//---------------------------------------------------------------------Job_subsystem::Job_subsystem
 
-Job_subsystem_interface::Job_subsystem_interface( Scheduler* scheduler, Type_code t )   
+Job_subsystem::Job_subsystem( Scheduler* scheduler, Type_code t )   
 : 
     file_based_subsystem<Job>( scheduler, this, t )
 {
 }
 
-//---------------------------------------------------------------------Job_subsystem::Job_subsystem
+//-----------------------------------------------------------Job_subsystem_impl::Job_subsystem_impl
 
-Job_subsystem::Job_subsystem( Scheduler* scheduler )
+Job_subsystem_impl::Job_subsystem_impl( Scheduler* scheduler )
 : 
-    Job_subsystem_interface( scheduler, type_job_subsystem )
+    Job_subsystem( scheduler, type_job_subsystem )
 {
     _default_schedule = _spooler->schedule_subsystem()->new_schedule();
     _default_schedule->set_xml( (File_based*)NULL, "<run_time/>" );
 }
 
-//-----------------------------------------------------------------------------Job_subsystem::close
+//------------------------------------------------------------------------Job_subsystem_impl::close
     
-void Job_subsystem::close()
+void Job_subsystem_impl::close()
 {
     _subsystem_state = subsys_stopped;
 
     file_based_subsystem<Job>::close();
 }
 
-//--------------------------------------------------------------Job_subsystem::subsystem_initialize
+//---------------------------------------------------------Job_subsystem_impl::subsystem_initialize
 
-bool Job_subsystem::subsystem_initialize()
+bool Job_subsystem_impl::subsystem_initialize()
 {
     _subsystem_state = subsys_initialized;
     
@@ -182,9 +182,9 @@ bool Job_subsystem::subsystem_initialize()
     return true;
 }
 
-//--------------------------------------------------------------------Job_subsystem::subsystem_load
+//---------------------------------------------------------------Job_subsystem_impl::subsystem_load
 
-bool Job_subsystem::subsystem_load()
+bool Job_subsystem_impl::subsystem_load()
 {
     //Transaction ta ( db() );
 
@@ -198,9 +198,9 @@ bool Job_subsystem::subsystem_load()
     return true;
 }
 
-//----------------------------------------------------------------Job_subsystem::subsystem_activate
+//-----------------------------------------------------------Job_subsystem_impl::subsystem_activate
 
-bool Job_subsystem::subsystem_activate()
+bool Job_subsystem_impl::subsystem_activate()
 {
     _subsystem_state = subsys_active;           // Schon jetzt für Job::activate()
     file_based_subsystem<Job>::subsystem_activate();
@@ -208,16 +208,16 @@ bool Job_subsystem::subsystem_activate()
     return true;
 }
 
-//--------------------------------------------------------------------Job_subsystem::new_file_based
+//---------------------------------------------------------------Job_subsystem_impl::new_file_based
 
-ptr<Job> Job_subsystem::new_file_based()
+ptr<Job> Job_subsystem_impl::new_file_based()
 {
     return Z_NEW( Job( _spooler ) );
 }
 
-//------------------------------------------------------Job_subsystem::append_calendar_dom_elements
+//-------------------------------------------------Job_subsystem_impl::append_calendar_dom_elements
 
-void Job_subsystem::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+void Job_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
     FOR_EACH_JOB( job )
     {
@@ -227,9 +227,9 @@ void Job_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elemen
     }
 }
 
-//-------------------------------------------------------------Job_subsystem::remove_temporary_jobs
+//--------------------------------------------------------Job_subsystem_impl::remove_temporary_jobs
 
-int Job_subsystem::remove_temporary_jobs()
+int Job_subsystem_impl::remove_temporary_jobs()
 {
     int count = 0;
 
@@ -254,9 +254,9 @@ int Job_subsystem::remove_temporary_jobs()
     return count;
 }
 
-//----------------------------------------------------------------Job_subsystem::is_any_task_queued
+//-----------------------------------------------------------Job_subsystem_impl::is_any_task_queued
 
-bool Job_subsystem::is_any_task_queued()
+bool Job_subsystem_impl::is_any_task_queued()
 {
     FOR_EACH_JOB( job )
     {
@@ -266,16 +266,16 @@ bool Job_subsystem::is_any_task_queued()
     return false;
 }
 
-//----------------------------------------------------------Job_subsystem::assert_xml_elements_name
+//-----------------------------------------------------Job_subsystem_impl::assert_xml_elements_name
 
-void Job_subsystem::assert_xml_elements_name( const xml::Element_ptr& e ) const
+void Job_subsystem_impl::assert_xml_elements_name( const xml::Element_ptr& e ) const
 { 
     if( !e.nodeName_is( "add_jobs" ) )  File_based_subsystem::assert_xml_elements_name( e );
 }
 
-//-----------------------------------------------------------------------Job_subsystem::dom_element
+//------------------------------------------------------------------Job_subsystem_impl::dom_element
 
-xml::Element_ptr Job_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
+xml::Element_ptr Job_subsystem_impl::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
 {
     xml::Element_ptr result = file_based_subsystem<Job>::dom_element( dom_document, show_what );
     xml::Element_ptr job_subsystem_element = dom_document.createElement( "job_subsystem" );
@@ -294,23 +294,23 @@ xml::Element_ptr Job_subsystem::dom_element( const xml::Document_ptr& dom_docume
     return result;
 }
 
-//-------------------------------------------------------Job_subsystem::waiting_for_process_job_statistic_element
+//------------------------------------Job_subsystem_impl::waiting_for_process_job_statistic_element
 
-xml::Element_ptr Job_subsystem::waiting_for_process_job_statistic_element( const xml::Document_ptr& dom_document ) const
+xml::Element_ptr Job_subsystem_impl::waiting_for_process_job_statistic_element( const xml::Document_ptr& dom_document ) const
 {
     return job_statistic_element( dom_document, "need_process", "true", count_jobs_waiting_for_process() );
 }
 
-//-------------------------------------------------------Job_subsystem::state_job_statistic_element
+//--------------------------------------------------Job_subsystem_impl::state_job_statistic_element
 
-xml::Element_ptr Job_subsystem::state_job_statistic_element( const xml::Document_ptr& dom_document, Job::State state ) const
+xml::Element_ptr Job_subsystem_impl::state_job_statistic_element( const xml::Document_ptr& dom_document, Job::State state ) const
 {
     return job_statistic_element( dom_document, "job_state", Job::state_name( state ), count_jobs_with_state( state ) );
 }
 
-//-------------------------------------------------------Job_subsystem::state_job_statistic_element
+//--------------------------------------------------Job_subsystem_impl::state_job_statistic_element
 
-xml::Element_ptr Job_subsystem::job_statistic_element( const xml::Document_ptr& dom_document, 
+xml::Element_ptr Job_subsystem_impl::job_statistic_element( const xml::Document_ptr& dom_document, 
     const string& attribute_name, const string& attribute_value, int count ) const
 {
     xml::Element_ptr result = dom_document.createElement( "job.statistic" );
@@ -319,9 +319,9 @@ xml::Element_ptr Job_subsystem::job_statistic_element( const xml::Document_ptr& 
     return result;
 }
 
-//-------------------------------------------------------------Job_subsystem::count_jobs_with_state
+//--------------------------------------------------------Job_subsystem_impl::count_jobs_with_state
 
-int Job_subsystem::count_jobs_with_state( Job::State state ) const
+int Job_subsystem_impl::count_jobs_with_state( Job::State state ) const
 {
     int result = 0;
 
@@ -331,9 +331,9 @@ int Job_subsystem::count_jobs_with_state( Job::State state ) const
     return result;
 }
 
-//-------------------------------------------------------------Job_subsystem::count_jobs_with_state
+//--------------------------------------------------------Job_subsystem_impl::count_jobs_with_state
 
-int Job_subsystem::count_jobs_waiting_for_process() const
+int Job_subsystem_impl::count_jobs_waiting_for_process() const
 {
     int result = 0;
 
@@ -532,7 +532,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 
 Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 : 
-    file_based<Job,Job_folder,Job_subsystem_interface>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
+    file_based<Job,Job_folder,Job_subsystem>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),

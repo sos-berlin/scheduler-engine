@@ -929,6 +929,76 @@
 				Name="com.sos.scheduler.intern.cppproxy"
 				>
 				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\Absolute_pathC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\Job_subsystemC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\JobC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\com\sos\scheduler\intern\cppproxy\Order_queueC.java"
 					>
 					<FileConfiguration
@@ -947,6 +1017,28 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description=""
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\com\sos\scheduler\intern\cppproxy\Prefix_logC.java"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
 							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
 						/>
@@ -972,32 +1064,6 @@
 							Name="VCCustomBuildTool"
 							Description=""
 							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\com\sos\scheduler\intern\cppproxy\SpoolerCImpl.java"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description=""
-							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-							AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
-							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description=""
-							CommandLine="echo javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;javac -source 1.5 -source 1.5 -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir);..\_jar\com.sos.cplusplus.runtime.jar&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-							AdditionalDependencies="$(IntDir)sos\spooler\Idispatch.class"
 							Outputs="$(IntDir)com\sos\scheduler\intern\cpp\$(InputName).class"
 						/>
 					</FileConfiguration>

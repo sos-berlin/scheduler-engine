@@ -110,7 +110,7 @@ struct Scheduler_object
 
     Prefix_log*                 log                         ()                                      { return _log; }
     Database*                   db                          () const;
-    Job_subsystem_interface*    job_subsystem               () const;
+    Job_subsystem*              job_subsystem               () const;
     Task_subsystem*             task_subsystem              () const;
     Order_subsystem_interface*  order_subsystem             () const;
 

@@ -111,6 +111,9 @@ bool Java_subsystem::subsystem_load()
     {
         Java_module_instance::init_java_vm( _java_vm );
         Spooler::initialize_java_proxy();
+        Prefix_log::initialize_java_proxy();
+        Job_subsystem::initialize_java_proxy();
+        Job::initialize_java_proxy();
 
         SchedulerJ schedulerJ = SchedulerJ::new_instance(_spooler->j());
         javaproxy::java::lang::String message = "Hallo, hier ist C++";

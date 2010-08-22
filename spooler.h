@@ -147,7 +147,7 @@ struct File_logger;
 struct Get_events_command_response;
 struct Job;
 struct Job_folder;
-struct Job_subsystem_interface;
+struct Job_subsystem;
 struct Module;
 struct Module_instance;
 struct Object_server;
@@ -551,8 +551,8 @@ struct Spooler : Object,
     Process_class_subsystem*    process_class_subsystem     () const;
     Task_subsystem*             task_subsystem              () const;
     Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
-    Job_subsystem_interface*    job_subsystem               () const;
-    Job_subsystem_interface*    job_subsystem_or_null       () const                            { return _job_subsystem; }
+    Job_subsystem*              job_subsystem               () const;
+    Job_subsystem*              job_subsystem_or_null       () const                            { return _job_subsystem; }
     Order_subsystem_interface*  order_subsystem             () const;
     Standing_order_subsystem*   standing_order_subsystem    () const;
     Schedule_subsystem_interface* schedule_subsystem        () const;
@@ -562,7 +562,7 @@ struct Spooler : Object,
 
     Process_class_subsystem*    subsystem                   ( Process_class* ) const            { return _process_class_subsystem; }
     lock::Lock_subsystem*       subsystem                   ( lock::Lock* ) const               { return _lock_subsystem; }
-    Job_subsystem_interface*    subsystem                   ( Job* ) const                      { return _job_subsystem; }
+    Job_subsystem*    subsystem                             ( Job* ) const                      { return _job_subsystem; }
     Order_subsystem_interface*  subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
 
     supervisor::Supervisor_client_interface*supervisor_client ();
@@ -675,7 +675,7 @@ struct Spooler : Object,
     ptr<Scheduler_script_subsystem_interface> _scheduler_script_subsystem;
     ptr<Folder_subsystem>            _folder_subsystem;
     ptr<Process_class_subsystem>     _process_class_subsystem;
-    ptr<Job_subsystem_interface>     _job_subsystem;
+    ptr<Job_subsystem>               _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
     ptr<Order_subsystem_interface>   _order_subsystem;
     ptr<Standing_order_subsystem>    _standing_order_subsystem;

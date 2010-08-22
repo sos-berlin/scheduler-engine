@@ -43,7 +43,8 @@ struct Combined_job_nodes : Object
 
 //----------------------------------------------------------------------------------------------Job
 
-struct Job : file_based< Job, Job_folder, Job_subsystem_interface >,
+struct Job : file_based< Job, Job_folder, Job_subsystem >,
+             javabridge::has_java_proxy<Job>,
              Object
 {
     enum State
@@ -458,12 +459,13 @@ struct Job_folder : typed_folder< Job >
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "jobs" ); }
 };
 
-//---------------------------------------------------------------------------Job_subsystem_interface
+//------------------------------------------------------------------------------------Job_subsystem
 
-struct Job_subsystem_interface: Object, 
-                                file_based_subsystem< Job >
+struct Job_subsystem: Object, 
+                      file_based_subsystem< Job >,
+                      javabridge::has_java_proxy<Job_subsystem>
 {
-                                Job_subsystem_interface     ( Scheduler*, Type_code );
+                                Job_subsystem               ( Scheduler*, Type_code );
 
     virtual ptr<Job_folder>     new_job_folder              ( Folder* )                             = 0;
     virtual int                 remove_temporary_jobs       ()                                      = 0;
@@ -473,10 +475,12 @@ struct Job_subsystem_interface: Object,
 
     Job*                        job                         ( const Absolute_path& job_path )       { return file_based( job_path ); } 
     Job*                        job_or_null                 ( const Absolute_path& job_path )       { return file_based_or_null( job_path ); }
+    Job*                        job_by_string               (const string& absolute_path)           { return job(Absolute_path(absolute_path)); }
+    Job*                        job_by_string_or_null       (const string& absolute_path)           { return job_or_null(Absolute_path(absolute_path)); }
     xml::Element_ptr            new_file_baseds_dom_element ( const xml::Document_ptr& doc, const Show_what& ) { return doc.createElement( "jobs" ); }
 };
 
-ptr<Job_subsystem_interface>    new_job_subsystem           ( Scheduler* );
+ptr<Job_subsystem>              new_job_subsystem           ( Scheduler* );
 
 //-------------------------------------------------------------------------------------------------
 
