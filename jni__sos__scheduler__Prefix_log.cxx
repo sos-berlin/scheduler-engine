@@ -9,7 +9,7 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy<::sos::scheduler::Prefix_log>::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.Prefix_logCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Prefix_log >::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.Prefix_logCImpl");
 
 }}
 
@@ -17,7 +17,7 @@ extern "C" void JNICALL Java_com_sos_scheduler_intern_cppproxy_Prefix_1logC_warn
 {
     Env env = jenv;
     try {
-        (has_java_proxy<::sos::scheduler::Prefix_log>::of_java_proxy_cpp_reference(cppReference)->warn(env.string_from_jstring(p0)));
+        (has_java_proxy< ::sos::scheduler::Prefix_log >::of_java_proxy_cpp_reference(cppReference)->warn(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -28,7 +28,7 @@ extern "C" void JNICALL Java_com_sos_scheduler_intern_cppproxy_Prefix_1logC_debu
 {
     Env env = jenv;
     try {
-        (has_java_proxy<::sos::scheduler::Prefix_log>::of_java_proxy_cpp_reference(cppReference)->debug3(env.string_from_jstring(p0)));
+        (has_java_proxy< ::sos::scheduler::Prefix_log >::of_java_proxy_cpp_reference(cppReference)->debug3(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -39,7 +39,7 @@ extern "C" void JNICALL Java_com_sos_scheduler_intern_cppproxy_Prefix_1logC_erro
 {
     Env env = jenv;
     try {
-        (has_java_proxy<::sos::scheduler::Prefix_log>::of_java_proxy_cpp_reference(cppReference)->error(env.string_from_jstring(p0)));
+        (has_java_proxy< ::sos::scheduler::Prefix_log >::of_java_proxy_cpp_reference(cppReference)->error(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -50,7 +50,7 @@ extern "C" void JNICALL Java_com_sos_scheduler_intern_cppproxy_Prefix_1logC_info
 {
     Env env = jenv;
     try {
-        (has_java_proxy<::sos::scheduler::Prefix_log>::of_java_proxy_cpp_reference(cppReference)->info(env.string_from_jstring(p0)));
+        (has_java_proxy< ::sos::scheduler::Prefix_log >::of_java_proxy_cpp_reference(cppReference)->info(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);

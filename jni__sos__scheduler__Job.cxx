@@ -9,7 +9,7 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy<::sos::scheduler::Job>::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.JobCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job >::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.JobCImpl");
 
 }}
 
@@ -17,7 +17,7 @@ extern "C" jstring JNICALL Java_com_sos_scheduler_intern_cppproxy_JobC_name(JNIE
 {
     Env env = jenv;
     try {
-        return env.jstring_from_string(has_java_proxy<::sos::scheduler::Job>::of_java_proxy_cpp_reference(cppReference)->name());
+        return env.jstring_from_string(has_java_proxy< ::sos::scheduler::Job >::of_java_proxy_cpp_reference(cppReference)->name());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -29,7 +29,7 @@ extern "C" jstring JNICALL Java_com_sos_scheduler_intern_cppproxy_JobC_path(JNIE
 {
     Env env = jenv;
     try {
-        return env.jstring_from_string(has_java_proxy<::sos::scheduler::Job>::of_java_proxy_cpp_reference(cppReference)->path());
+        return env.jstring_from_string(has_java_proxy< ::sos::scheduler::Job >::of_java_proxy_cpp_reference(cppReference)->path());
     }
     catch(const exception& x) {
         env.set_java_exception(x);

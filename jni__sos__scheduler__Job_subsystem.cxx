@@ -9,7 +9,7 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy<::sos::scheduler::Job_subsystem>::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.Job_subsystemCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job_subsystem >::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.Job_subsystemCImpl");
 
 }}
 
@@ -17,7 +17,7 @@ extern "C" jobject JNICALL Java_com_sos_scheduler_intern_cppproxy_Job_1subsystem
 {
     Env env = jenv;
     try {
-        return (has_java_proxy<::sos::scheduler::Job_subsystem>::of_java_proxy_cpp_reference(cppReference)->job_by_string(env.string_from_jstring(p0)))->get_jobject();
+        return (has_java_proxy< ::sos::scheduler::Job_subsystem >::of_java_proxy_cpp_reference(cppReference)->job_by_string(env.string_from_jstring(p0)))->get_jobject();
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -29,7 +29,7 @@ extern "C" jobject JNICALL Java_com_sos_scheduler_intern_cppproxy_Job_1subsystem
 {
     Env env = jenv;
     try {
-        return (has_java_proxy<::sos::scheduler::Job_subsystem>::of_java_proxy_cpp_reference(cppReference)->job_by_string_or_null(env.string_from_jstring(p0)))->get_jobject();
+        return (has_java_proxy< ::sos::scheduler::Job_subsystem >::of_java_proxy_cpp_reference(cppReference)->job_by_string_or_null(env.string_from_jstring(p0)))->get_jobject();
     }
     catch(const exception& x) {
         env.set_java_exception(x);
