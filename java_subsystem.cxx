@@ -3,17 +3,22 @@
 #include "spooler.h"
 #include "../kram/sos_java.h"
 
-#ifdef Z_DEBUG
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/com__sos__scheduler__intern__Scheduler.h"
 #include "../javaproxy/com__sos__scheduler__intern__cppproxy__SpoolerC.h"
 typedef javaproxy::com::sos::scheduler::intern::Scheduler SchedulerJ;
-#endif
 
 namespace sos {
 namespace scheduler {
 
-//---------------------------------------------------------------------------------Java_subsystem
+//-------------------------------------------------------------------------------------Java_objects
+
+struct Java_objects : Object
+{
+    SchedulerJ                 _schedulerJ;
+};
+
+//-----------------------------------------------------------------------------------Java_subsystem
 
 struct Java_subsystem : Java_subsystem_interface
 {
@@ -28,6 +33,9 @@ struct Java_subsystem : Java_subsystem_interface
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
 
+    void                        initialize_java_sister      ();
+    void                        register_proxy_classes      ();
+
 
     // Java_subsystem_interface:
     javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
@@ -35,6 +43,7 @@ struct Java_subsystem : Java_subsystem_interface
 
   private:
     ptr<javabridge::Vm>        _java_vm;
+    ptr<Java_objects>          _java_objects;
 };
 
 //-------------------------------------------------------------------------------new_java_subsystem
@@ -93,7 +102,6 @@ bool Java_subsystem::subsystem_load()
     _java_vm->prepend_class_path( _spooler->_config_java_class_path );
     _java_vm->set_options( _spooler->_config_java_options );
 
-    //if( _spooler->_has_java_source )
     if( _spooler->_ignore_process_classes ||
         _spooler->scheduler_script_subsystem()->needs_java() )     // Die Java-Jobs laufen mit unserer JVM
     {
@@ -107,22 +115,34 @@ bool Java_subsystem::subsystem_load()
         Java_module_instance::init_java_vm( _java_vm );
     }
 
-#ifdef Z_DEBUG
-    {
-        Java_module_instance::init_java_vm( _java_vm );
-        Spooler::initialize_java_proxy();
-        Prefix_log::initialize_java_proxy();
-        Job_subsystem::initialize_java_proxy();
-        Job::initialize_java_proxy();
-
-        SchedulerJ schedulerJ = SchedulerJ::new_instance(_spooler->j());
-        javaproxy::java::lang::String message = "Hallo, hier ist C++";
-        schedulerJ.test(message);
-    }
-#endif
+//#ifdef Z_DEBUG
+    Java_module_instance::init_java_vm( _java_vm );
+    initialize_java_sister();
+//#endif
     
     _subsystem_state = subsys_loaded;
     return true;
+}
+
+//-----------------------------------------------------------Java_subsystem::initialize_java_sister
+
+void Java_subsystem::initialize_java_sister()
+{
+    register_proxy_classes();
+
+    _java_objects = Z_NEW( Java_objects );
+    _java_objects->_schedulerJ = SchedulerJ::new_instance(_spooler->j());
+    _java_objects->_schedulerJ.test("Hallo, hier ist C++");
+}
+
+//-----------------------------------------------------------Java_subsystem::register_proxy_classes
+
+void Java_subsystem::register_proxy_classes()
+{
+    Job             ::register_cpp_proxy_class_in_java();
+    Job_subsystem   ::register_cpp_proxy_class_in_java();
+    Prefix_log      ::register_cpp_proxy_class_in_java();
+    Spooler         ::register_cpp_proxy_class_in_java();
 }
 
 //---------------------------------------------------------------Java_subsystem::subsystem_activate
@@ -134,6 +154,7 @@ bool Java_subsystem::subsystem_activate()
 }
 
 //-----------------------------------------Java_subsystem_interface::classname_of_scheduler_object
+
 string Java_subsystem_interface::classname_of_scheduler_object(const string& objectname)
 {
     return "sos/spooler/" + replace_regex_ext( objectname, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"

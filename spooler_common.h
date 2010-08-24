@@ -70,18 +70,6 @@ typedef int64                   Process_id;   // Für Process
 ptr<Com_variable_set>           variable_set_from_environment();
 bool                            is_allowed_operation_while_waiting( Async_operation* op );
 
-//-------------------------------------------------------------------------------scheduler_object<>
-/*
-template< class BASE_CLASS >
-struct scheduler_object : BASE_CLASS, Scheduler_object_base
-{
-                                scheduler_object            ( Spooler* sp, Type_code code )         : Scheduler_object_base( sp, code ) {}
-};
-
-//---------------------------------------------------------------------------------Scheduler_object
-
-typedef scheduler_object< Object >  Scheduler_object;       // Standard-Fall
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler

@@ -122,6 +122,14 @@ struct Scheduler_object
     ptr<Prefix_log>            _log;
 };
 
+//-------------------------------------------------------------------------------scheduler_object<>
+
+//template<class T>
+//struct scheduler_object : Scheduler_object, javabridge::has_java_proxy<T>
+//{
+//                                scheduler_object            (Spooler* s, IUnknown* me, Type_code tc) : Scheduler_object(s, me, tc) {}
+//};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace scheduler
