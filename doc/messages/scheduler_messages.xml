@@ -4304,12 +4304,22 @@
         </message>
 
         <message code="SCHEDULER-715" weight="warn" object="Scheduler">
-          <text xml:lang="en">
-            <title>The command-line option configuration-directory '<p1/>' is not a directory.</title>
-          </text>
+            <text xml:lang="en">
+                <title>
+                    The command-line option configuration-directory '<p1/>' is not a directory.
+                </title>
+            </text>
         </message>
 
-      <!--message code="SCHEDULER-704">
+        <message code="SCHEDULER-716" weight="warn" object="Scheduler">
+            <text xml:lang="en">
+                <title>
+                    jobs are not allowed for the current licence-key(s).
+                </title>
+            </text>
+        </message>
+
+        <!--message code="SCHEDULER-704">
             <text xml:lang="en">
                 <title>Database table <p1/> is being rebuild</title>
             </text>

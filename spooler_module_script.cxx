@@ -69,7 +69,7 @@ Variant Script_module_instance::call( const string&, const Variant&, const Varia
 bool Script_module_instance::name_exists( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::name_exists name=" << name << "\n");
-    return _java_module.nameExists(name);
+    return (_java_module.nameExists(name) != 0);  // weil name_exists jboolean zurück gibt (will JZ noch ändern)
 }
 
 //-------------------------------------------------------------------------------------------------

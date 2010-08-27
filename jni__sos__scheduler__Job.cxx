@@ -8,11 +8,11 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job >::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.JobCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job >::java_proxy_class_factory("com.sos.scheduler.core.cppproxy.JobCImpl");
 
 }}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 {
@@ -28,7 +28,7 @@ static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static jstring JNICALL path(JNIEnv* jenv, jobject, jlong cppReference)
 {
@@ -45,8 +45,8 @@ static jstring JNICALL path(JNIEnv* jenv, jobject, jlong cppReference)
 }}}}}}
 
 const static JNINativeMethod native_methods[] = {
-{ "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::name },
-{ "path__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::path }
+{ "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::name },
+{ "path__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::path }
 };
 
 namespace zschimmer { namespace javabridge { 

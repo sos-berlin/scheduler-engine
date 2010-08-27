@@ -10,6 +10,15 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-08-27" version="2.1.3" >
+      <revision jira="JS-559" type="new" title="Der Scheduler kann jetzt als Agent fungieren">
+        <description>
+					Durch die Verwendung eines speziellen Lizenzschlüssels ist es möglich, den scheduler als Agenten zu betreiben. Er kann in dieser 
+					Funktion keine eigenen Jobs starten, sondern nimmt lediglich Aufträge von remote schedulern entgegen.
+        </description>
+      </revision>
+    </change> 
+
     <change date="2010-08-11" version="2.1.2" >
       <revision jira="JS-540" type="new" title="Weitere script-Attribute für Java API-Jobs">
         <description>
@@ -27,6 +36,14 @@
       </revision>
     </change> 
   
+    <change date="2010-07-29" version="2.1.2">
+      <revision jira="JS-436" type="correction" title="Job der ausserhalb der Periode endet erhält jetzt die korrekte Startzeit">
+        <description>
+        Auch wenn ein Job über das Ende einer Periode hinaus läuft, erhält er jetzt die korrekte nächste Startzeit (nämlich den Beginn der nächsten Periode).
+        </description>
+      </revision>
+    </change>
+    
     <change date="2010-07-07" version="2.1.2" subversion_revision="6164">
       <revision jira="JS-538" type="new" title="Neues Attribut max_orders steuert den Parallellauf von Jobketten">
         <description>

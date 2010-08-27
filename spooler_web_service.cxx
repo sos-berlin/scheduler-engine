@@ -205,6 +205,9 @@ void Web_services::add_web_service( Web_service* web_service )
 
 //---------------------------------------------------------------Web_services::subsystem_initialize
 
+/*!
+ * \change 2.1.2 - JS-559: new licence type scheduler-agent
+ */
 bool Web_services::subsystem_initialize()
 {
     /*
@@ -216,10 +219,13 @@ bool Web_services::subsystem_initialize()
     add_web_service( default_web_service );
     */
 
-    Command_processor command_processor ( _spooler, Security::seclev_all );
+    /** \change 2.1.2 - JS-559: new licence type scheduler-agent */
+    if (_spooler->_jobs_allowed_for_licence) {
+        Command_processor command_processor ( _spooler, Security::seclev_all );
 
-    command_processor.execute_2( job_xml       );
-    command_processor.execute_2( job_chain_xml );
+        command_processor.execute_2( job_xml       );
+        command_processor.execute_2( job_chain_xml );
+    }
 
     
     _subsystem_state = subsys_initialized;

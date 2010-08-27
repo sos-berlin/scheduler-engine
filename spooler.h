@@ -650,6 +650,7 @@ struct Spooler : Object,
     bool                       _wait_endless_for_db_open;   // need_db=yes
     int                        _max_db_errors;              // Nach so vielen Fehlern im Scheduler-Leben DB abschalten (wie need_db)
     bool                       _db_check_integrity;
+    bool                       _jobs_allowed_for_licence;   // z.B. im Agentenbetrieb keine jobs
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
     string                     _waiting_errno_filename;

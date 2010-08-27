@@ -4,9 +4,9 @@
 #include "../kram/sos_java.h"
 
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/com__sos__scheduler__intern__Scheduler.h"
-#include "../javaproxy/com__sos__scheduler__intern__cppproxy__SpoolerC.h"
-typedef javaproxy::com::sos::scheduler::intern::Scheduler SchedulerJ;
+#include "../javaproxy/com__sos__scheduler__core__Scheduler.h"
+#include "../javaproxy/com__sos__scheduler__core__cppproxy__SpoolerC.h"
+typedef javaproxy::com::sos::scheduler::core::Scheduler SchedulerJ;
 
 namespace sos {
 namespace scheduler {

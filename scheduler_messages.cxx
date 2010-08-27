@@ -500,7 +500,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-712", "Step runs longer than the expected duration of $1" },
     { "SCHEDULER-713", "Process handle $1 is already registered" },
     { "SCHEDULER-714", "Scheduler $1 is already registered via connection $2. This connection will be closed now. New connection is $3" },
-    { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory." },
+    { "SCHEDULER-715", "                     The command-line option configuration-directory '$1' is not a directory.                 " },
+    { "SCHEDULER-716", "                     jobs are not allowed for the current licence-key(s).                 " },
     {}
 };
 } //namespace sos

@@ -8,11 +8,11 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Prefix_log >::java_proxy_class_factory("com.sos.scheduler.intern.cppproxy.Prefix_logCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Prefix_log >::java_proxy_class_factory("com.sos.scheduler.core.cppproxy.Prefix_logCImpl");
 
 }}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -27,7 +27,7 @@ static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 
 }}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static void JNICALL debug3__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -42,7 +42,7 @@ static void JNICALL debug3__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cpp
 
 }}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static void JNICALL error__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -57,7 +57,7 @@ static void JNICALL error__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppR
 
 }}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace intern { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
 
 static void JNICALL info__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -73,10 +73,10 @@ static void JNICALL info__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 }}}}}}
 
 const static JNINativeMethod native_methods[] = {
-{ "warn__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::warn__Ljava_lang_String_2 },
-{ "debug3__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::debug3__Ljava_lang_String_2 },
-{ "error__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::error__Ljava_lang_String_2 },
-{ "info__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::intern::cppproxy::info__Ljava_lang_String_2 }
+{ "warn__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::warn__Ljava_lang_String_2 },
+{ "debug3__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::debug3__Ljava_lang_String_2 },
+{ "error__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::error__Ljava_lang_String_2 },
+{ "info__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::info__Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

@@ -684,6 +684,9 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 //---------------------------------------------------------------------------------Spooler::Spooler
 // Die Objektserver-Prozesse haben kein Spooler-Objekt.
 
+/*!
+ * \change 2.1.2 - JS-559: new licence type scheduler-agent
+ */
 Spooler::Spooler() 
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
@@ -715,7 +718,13 @@ Spooler::Spooler()
     if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
-    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+//    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+
+    /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+    if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+    _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
+    if (!_jobs_allowed_for_licence) _log->info( "jobs are not allowed." );
+
 
     _pid          = getpid();
     _tcp_port     = 0;
@@ -1462,6 +1471,8 @@ void Spooler::load_arg()
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _db_check_integrity         =            read_profile_bool      ( _factory_ini, "spooler", "db_check_integrity" , _db_check_integrity );
     _db_log_level               = make_log_level(read_profile_string( _factory_ini ,"spooler", "db_log_level"       , as_string( _db_log_level ) ) );
+
+    Z_LOG("db-connection=" << _db_name << "\n");
 
     // need_db=yes|no|strict
     string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
