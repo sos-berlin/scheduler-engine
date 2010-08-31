@@ -1,7 +1,7 @@
 #ifndef __SCRIPT_MODULE_SCRIPT_H
 #define __SCRIPT_MODULE_SCRIPT_H
 
-#include "../javaproxy/com__sos__scheduler__scripting__Module.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__scripting__Module.h"
 #include "../zschimmer/java_com.h"
 
 namespace sos {
@@ -39,7 +39,7 @@ struct Script_module_instance : Module_instance
     Has_log*                   _log;
     bool                       _loaded;
 
-    javaproxy::com::sos::scheduler::scripting::Module _java_module;
+    javaproxy::com::sos::scheduler::kernel::core::scripting::Module _java_module;
 
     typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;

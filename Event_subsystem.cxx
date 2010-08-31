@@ -1,7 +1,7 @@
 // $Id$
 
 #include "spooler.h"
-#include "../javaproxy/com__sos__scheduler__eventing__SchedulerEventListener.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__eventing__SchedulerEventListener.h"
 #include "../javaproxy/java__lang__String.h"
 
 using namespace std;
@@ -31,7 +31,7 @@ struct Event_subsystem_impl : Event_subsystem
 
     Fill_zero                  _zero_;
 
-    //javaproxy::com::sos::scheduler::eventing::SchedulerEventListener _event_listener;
+    //javaproxy::com::sos::scheduler::kernel::core::eventing::SchedulerEventListener _event_listener;
 
 };
 
@@ -55,7 +55,7 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
 
 bool Event_subsystem_impl::subsystem_initialize()
 {
-	//_event_listener = javaproxy::com::sos::scheduler::eventing::SchedulerEventListener::new_instance();
+	//_event_listener = javaproxy::com::sos::scheduler::kernel::core::eventing::SchedulerEventListener::new_instance();
 	_subsystem_state = subsys_initialized;
 	return true;
 }

@@ -8,11 +8,11 @@ using namespace ::zschimmer::javabridge;
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job_subsystem >::java_proxy_class_factory("com.sos.scheduler.core.cppproxy.Job_subsystemCImpl");
+    template<> const class_factory<Java_proxy_class> has_java_proxy< ::sos::scheduler::Job_subsystem >::java_proxy_class_factory("com.sos.scheduler.kernel.core.cppproxy.Job_subsystemCImpl");
 
 }}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
 static jobject JNICALL job_1by_1string__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -26,9 +26,9 @@ static jobject JNICALL job_1by_1string__Ljava_lang_String_2(JNIEnv* jenv, jobjec
     }
 }
 
-}}}}}}
+}}}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
 static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
 {
@@ -42,11 +42,11 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
     }
 }
 
-}}}}}}
+}}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-{ "job_by_string__native", "(JLjava/lang/String;)Lcom/sos/scheduler/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::job_1by_1string__Ljava_lang_String_2 },
-{ "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 }
+{ "job_by_string__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string__Ljava_lang_String_2 },
+{ "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

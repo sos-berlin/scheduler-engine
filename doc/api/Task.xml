@@ -374,7 +374,7 @@
                 den <scheduler_method class="Task" object="spooler_task" property="exit_code"/> neu setzen.
             </p>
             <p>
-                Der Exit-Codes des (Betriebssystem-)Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen,
+                Der Exit-Code des (Betriebssystem-)Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen,
                 im Gegensatz zu Jobs mit <scheduler_element name="process"/> oder
                 <scheduler_element name="script" attribute="language" value="shell"/>.
             </p>
@@ -423,7 +423,7 @@
                 Siehe hierzu <code>&lt;job></code><scheduler_element name="commands" attribute="on_exit_code"/>.
             </p>
             <p>
-                Der Exit-Codes hat keinen Einfluss darauf, ob der Job gestoppt wird
+                Der Exit-Code hat keinen Einfluss darauf, ob der Job gestoppt wird
                 (eine Fehlermeldung der Task lässt den Job stoppen).
             </p>
             <!--p>
