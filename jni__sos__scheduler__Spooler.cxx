@@ -138,6 +138,21 @@ static jstring JNICALL id(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
+static void JNICALL signal__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->signal(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
 static jstring JNICALL param(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -404,21 +419,6 @@ static void JNICALL cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
-static void JNICALL cmd_1terminate(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
 static void JNICALL cmd_1terminate__ZILjava_lang_String_2Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0, jint p1, jstring p2, jboolean p3)
 {
     Env env = jenv;
@@ -454,6 +454,21 @@ static void JNICALL cmd_1terminate__Z(JNIEnv* jenv, jobject, jlong cppReference,
     Env env = jenv;
     try {
         (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate(p0 != 0));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL cmd_1terminate(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -909,21 +924,6 @@ static jstring JNICALL db_1distributed_1member_1id(JNIEnv* jenv, jobject, jlong 
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
-static void JNICALL signal__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->signal(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
 static jboolean JNICALL signaled(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1147,6 +1147,7 @@ const static JNINativeMethod native_methods[] = {
 { "stop__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::stop },
 { "directory__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::directory },
 { "id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id },
+{ "signal__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signal__Ljava_lang_String_2 },
 { "param__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::param },
 { "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
 { "id_for_db__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id_1for_1db },
@@ -1164,10 +1165,10 @@ const static JNINativeMethod native_methods[] = {
 { "cmd_pause__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1pause },
 { "cmd_continue__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1continue },
 { "cmd_terminate_after_error__native", "(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_String_2 },
-{ "cmd_terminate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate },
 { "cmd_terminate__native", "(JZILjava/lang/String;Z)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2Z },
 { "cmd_terminate__native", "(JZILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2 },
 { "cmd_terminate__native", "(JZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__Z },
+{ "cmd_terminate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate },
 { "cmd_terminate__native", "(JZI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZI },
 { "cmd_terminate_and_restart__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1and_1restart__I },
 { "cmd_let_run_terminate_and_restart__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1let_1run_1terminate_1and_1restart },
@@ -1197,7 +1198,6 @@ const static JNINativeMethod native_methods[] = {
 { "distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::distributed_1member_1id },
 { "db_cluster_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1cluster_1member_1id },
 { "db_distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1distributed_1member_1id },
-{ "signal__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signal__Ljava_lang_String_2 },
 { "signaled__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signaled },
 { "send_cmd__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::send_1cmd },
 { "register_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::register_1pid__I },
