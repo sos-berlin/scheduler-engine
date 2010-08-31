@@ -158,113 +158,6 @@ static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        return env.jstring_from_string(has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->http_url());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static jobject JNICALL job_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        return (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->job_subsystem())->get_jobject();
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jobject();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL cmd_1terminate(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL cmd_1terminate__ZILjava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0, jint p1, jstring p2)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate(p0 != 0, p1, env.string_from_jstring(p2)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL cmd_1terminate__ZILjava_lang_String_2Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0, jint p1, jstring p2, jboolean p3)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate(p0 != 0, p1, env.string_from_jstring(p2), p3 != 0));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL cmd_1terminate__Z(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate(p0 != 0));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL cmd_1terminate__ZI(JNIEnv* jenv, jobject, jlong cppReference, jboolean p0, jint p1)
-{
-    Env env = jenv;
-    try {
-        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate(p0 != 0, p1));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
         (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->set_id(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -281,6 +174,22 @@ static jstring JNICALL id_1for_1db(JNIEnv* jenv, jobject, jlong cppReference)
     Env env = jenv;
     try {
         return env.jstring_from_string(has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->id_for_db());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static jstring JNICALL http_1url(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        return env.jstring_from_string(has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->http_url());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -320,9 +229,9 @@ static jint JNICALL tcp_1port(JNIEnv* jenv, jobject, jlong cppReference)
     }
 }
 
-}}}}}}
+}}}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace core { namespace cppproxy { 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
 static jstring JNICALL include_1path(JNIEnv* jenv, jobject, jlong cppReference)
 {
@@ -413,6 +322,81 @@ static jstring JNICALL string_1need_1db(JNIEnv* jenv, jobject, jlong cppReferenc
     catch(const exception& x) {
         env.set_java_exception(x);
         return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL log_1show_1state(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->log_show_state());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL assign_1stdout(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->assign_stdout());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL cmd_1pause(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_pause());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL cmd_1continue(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_continue());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static void JNICALL cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0, jstring p1)
+{
+    Env env = jenv;
+    try {
+        (has_java_proxy< ::sos::scheduler::Spooler >::of_java_proxy_cpp_reference(cppReference)->cmd_terminate_after_error(env.string_from_jstring(p0), env.string_from_jstring(p1)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
     }
 }
 
