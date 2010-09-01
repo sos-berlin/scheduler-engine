@@ -75,7 +75,7 @@
 #include "../zschimmer/threads.h"
 #include "../zschimmer/com_remote.h"
 #include "../zschimmer/java.h"
-#include "../zschimmer/Has_java_proxy.h"
+#include "../zschimmer/Has_proxy.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/message.h"
 #include "../zschimmer/file_path.h"
@@ -366,7 +366,7 @@ typedef map<Thread_id,Task_subsystem*>      Thread_id_map;
 
 struct Spooler : Object,
                  Scheduler_object,
-                 javabridge::has_java_proxy<Spooler>
+                 javabridge::has_proxy<Spooler>
 {
     enum State
     {

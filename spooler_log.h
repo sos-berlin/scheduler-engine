@@ -52,7 +52,7 @@ struct Log
 
 //---------------------------------------------------------------------------------------Prefix_log
 
-struct Prefix_log : Object, Has_log, javabridge::has_java_proxy<Prefix_log>
+struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 {
     struct Open_and_close
     {

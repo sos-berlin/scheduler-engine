@@ -125,7 +125,7 @@ struct Scheduler_object
 //-------------------------------------------------------------------------------scheduler_object<>
 
 //template<class T>
-//struct scheduler_object : Scheduler_object, javabridge::has_java_proxy<T>
+//struct scheduler_object : Scheduler_object, javabridge::has_proxy<T>
 //{
 //                                scheduler_object            (Spooler* s, IUnknown* me, Type_code tc) : Scheduler_object(s, me, tc) {}
 //};

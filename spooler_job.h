@@ -44,7 +44,7 @@ struct Combined_job_nodes : Object
 //----------------------------------------------------------------------------------------------Job
 
 struct Job : file_based< Job, Job_folder, Job_subsystem >,
-             javabridge::has_java_proxy<Job>,
+             javabridge::has_proxy<Job>,
              Object
 {
     enum State
@@ -463,7 +463,7 @@ struct Job_folder : typed_folder< Job >
 
 struct Job_subsystem: Object, 
                       file_based_subsystem< Job >,
-                      javabridge::has_java_proxy<Job_subsystem>
+                      javabridge::has_proxy<Job_subsystem>
 {
                                 Job_subsystem               ( Scheduler*, Type_code );
 
