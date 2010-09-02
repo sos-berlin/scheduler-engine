@@ -489,7 +489,7 @@ void Process::fill_connection( object_server::Connection* connection )
 
     stdin_xml_writer.begin_element( "task_process" );
     {
-		// JS-540
+        // JS-540
         stdin_xml_writer.set_attribute_optional( "include_path"          , _spooler->include_path() );
         stdin_xml_writer.set_attribute_optional( "java_options"          , _spooler->_config_java_options );
         stdin_xml_writer.set_attribute_optional( "java_class_path"       , _spooler->java_subsystem()->java_vm()->class_path() );

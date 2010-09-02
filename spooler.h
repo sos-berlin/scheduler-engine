@@ -475,9 +475,9 @@ struct Spooler : Object,
 
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
 #ifdef Z_WINDOWS
-	MEMORYSTATUS				memory_status_init();
-	DWORD						memory_status_calculate_reserved_virtual(MEMORYSTATUS m);
-	string						mb_formatted(DWORD value);
+    MEMORYSTATUS                memory_status_init();
+    DWORD                        memory_status_calculate_reserved_virtual(MEMORYSTATUS m);
+    string                        mb_formatted(DWORD value);
 #endif
 
     void                        set_state                   ( State );
@@ -700,7 +700,7 @@ struct Spooler : Object,
     bool                       _validate_xml;
     xml::Schema_ptr            _schema;
     file::File_path            _configuration_file_path;            // -config=
-	file::File_path			   _opt_configuration_directory;		// JS-462
+    file::File_path            _opt_configuration_directory;        // JS-462
     bool                       _configuration_is_job_script;        // Als Konfigurationsdatei ist eine Skript-Datei angegeben worden
     string                     _configuration_job_script_language; 
 

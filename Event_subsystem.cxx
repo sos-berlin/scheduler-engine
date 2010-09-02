@@ -39,8 +39,8 @@ struct Event_subsystem_impl : Event_subsystem
 // ----------------------------------------------------------------------------
 Event_subsystem_impl::Event_subsystem_impl (Scheduler* scheduler)
 :  
-	Event_subsystem( scheduler, type_event_subsystem ),	
-	_zero_(this+1)
+    Event_subsystem( scheduler, type_event_subsystem ),    
+    _zero_(this+1)
 {
 }
 
@@ -55,35 +55,35 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
 
 bool Event_subsystem_impl::subsystem_initialize()
 {
-	//_event_listener = javaproxy::com::sos::scheduler::kernel::core::eventing::SchedulerEventListener::new_instance();
-	_subsystem_state = subsys_initialized;
-	return true;
+    //_event_listener = javaproxy::com::sos::scheduler::kernel::core::eventing::SchedulerEventListener::new_instance();
+    _subsystem_state = subsys_initialized;
+    return true;
 }
 
 //------------------------------------------------------------Event_subsystem_impl::subsystem_load
 bool Event_subsystem_impl::subsystem_load()
 {
-	_subsystem_state = subsys_loaded;
-	return true;
+    _subsystem_state = subsys_loaded;
+    return true;
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
 void Event_subsystem_impl::report( Scheduler_event2& event )
 {
-	return;
+    return;
 
     try {
         _log->info( event.obj_name() );
 
-	    //_event_listener.newEvent(event.code()); 
-		
-		// ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event.object()->idispatch, "spooler_order");
-		ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event.object()->idispatch(), "spooler_order");
-//	    _event_listener.newEvent((::javaproxy::java::lang::Object)java_idispatch->get_jobject() );
-	 //   _event_listener.newEvent( java_idispatch->get_jobject() );
+        //_event_listener.newEvent(event.code()); 
+        
+        // ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event.object()->idispatch, "spooler_order");
+        ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event.object()->idispatch(), "spooler_order");
+//        _event_listener.newEvent((::javaproxy::java::lang::Object)java_idispatch->get_jobject() );
+     //   _event_listener.newEvent( java_idispatch->get_jobject() );
 
-		// ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event->idispatch(), "name?");
+        // ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(event->idispatch(), "name?");
         //_java_event_subsystem.report( (javaproxy::...::Scheduler_event)java_idispatch->get_jobject() );
         //Für Java-Methode EventSubsystem.report( Scheduler_event e );
 

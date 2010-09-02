@@ -448,7 +448,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         if( t <= 0 )  if( again )  break;
                              else  t = 0;  //break;
 
-		// 30min sind 1800s, aber t ist in Millisekunden
+        // 30min sind 1800s, aber t ist in Millisekunden
         if( again ) {
             if( t > 1800 )  { result = false; break; }  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
         }
@@ -460,7 +460,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         handles = new HANDLE [ _handles.size()+1 ];
         for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
 
-		// Regelmässige Ausgabe von Text auf der Konsole
+        // Regelmässige Ausgabe von Text auf der Konsole
         if( _spooler  &&  _spooler->_print_time_every_second )
         {
             int     console_line_length = 0;
@@ -525,8 +525,8 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
             if( console_line_length )  cerr << string( console_line_length, ' ' ) << '\r' << flush;  // Zeile löschen
 
-		// normale Bearbeitung von scheduler-Prozessen
-		} else {
+        // normale Bearbeitung von scheduler-Prozessen
+        } else {
         /**
          * \change  JS-471 - Aufruf über sosMsgWaitForMultipleObjects
          * \b oldcode from 2010-04-01
@@ -539,26 +539,26 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         
         delete [] handles;  handles = NULL;
 
-        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );		// z.B. > 63 handles
+        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );        // z.B. > 63 handles
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )           // "normales" handle
         {
             //THREAD_LOCK( _lock )
             {
                 int            index = ret - WAIT_OBJECT_0;
-                z::Event_base* event = _events[ index ];								// scheduler-internes event-object
+                z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
             
                 if( event )
                 {
                     if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... " << event->as_text() << "\n" );
-                    if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );			// signal für "event" gesetzt
+                    if( event != &_spooler->_waitable_timer )  event->set_signaled( "MsgWaitForMultipleObjects" );            // signal für "event" gesetzt
                 }
                 else
                     if( t > 0 )  Z_LOG2( _spooler->_scheduler_wait_log_category, "... Event " << index << "\n" );
 
                 _catched_event = event;
 
-                if( event != &_spooler->_waitable_timer )  result = true;				// PC aufwecken
+                if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
                 break;
             }
         }
@@ -666,15 +666,15 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 {
    DWORD  ret;
 
-	if (nCount < MAXIMUM_WAIT_OBJECTS)
+    if (nCount < MAXIMUM_WAIT_OBJECTS)
    {
-		ret = MsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );	// wie bisher
+        ret = MsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );    // wie bisher
       if (ret == WAIT_TIMEOUT) ret = SOS_WAIT_TIMEOUT;
    } else {
 #ifdef Z_DEBUG
     Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
 #endif
-		ret = sosMsgWaitForMultipleObjects64( nCount, pHandles, dTimeout );   // polling ...
+        ret = sosMsgWaitForMultipleObjects64( nCount, pHandles, dTimeout );   // polling ...
    }
    return ret;
 }
@@ -704,13 +704,13 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
     int     max_handles         = MAXIMUM_WAIT_OBJECTS - 1;
     Time    now                 = Time::now();
 
-    int     max_sleep_time_ms   = INT_MAX-1;		                                                        // max. Wartezeit in Millisekunden
+    int     max_sleep_time_ms   = INT_MAX-1;                                                                // max. Wartezeit in Millisekunden
     Time    until               = now + (dTimeout/1000.0);
     bool    isWaiting           = true;
     int     timeoutCounter      = 0;
 
     while (isWaiting)
-	 {
+     {
     
         timeoutCounter++;
         int stepTimeout = calculateStepTimeout(timeoutCounter);                                                                        // 1 Millisekunde
@@ -722,7 +722,7 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
             Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << " blocks until " << until << " is reached (steptimeout=" << stepTimeout << ").\n" );
 #       endif
 
-        for (int i=0; i < blockCount; i++ ) {			                                                  // MAXIMUM_WAIT_OBJECTS handles pro block
+        for (int i=0; i < blockCount; i++ ) {                                                              // MAXIMUM_WAIT_OBJECTS handles pro block
 
             int c = min( max_handles, remainingCount);                                                       // c kann beim letzten Block unter MAXIMUM_WAIT_OBJECTS fallen
             assert(c > 0);

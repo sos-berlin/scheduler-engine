@@ -60,7 +60,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
 {
                                 Remote_scheduler            ( Supervisor* supervisor );
 
-	/*! \change JS-481 register_me prüft, registriert und ggf. überflüssige Connection schliessen */
+    /*! \change JS-481 register_me prüft, registriert und ggf. überflüssige Connection schliessen */
     void                        register_me                 ( const xml::Element_ptr&, Communication::Operation*, const Host_and_port& ); 
     void                        connection_lost_event       ( const exception* );
     void                    set_dom                         ( const xml::Element_ptr& );
@@ -92,7 +92,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     Time                       _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
-    Xml_operation_connection*  _connection_operation; 				/*! \change JS-481 Merken der Connection, um neue Connection damit zu vergleichen */
+    Xml_operation_connection*  _connection_operation;                 /*! \change JS-481 Merken der Connection, um neue Connection damit zu vergleichen */
     bool                       _repeated_reading;
     Xc_copy                    _error;
     string                     _configuration_directory_name;
@@ -311,7 +311,7 @@ void Remote_scheduler::register_me( const xml::Element_ptr& register_remote_sche
             Z_LOG2("scheduler","Der Verbindung ist bereits der SELBE remote scheduler zugeordnet: " << *r << " <-- " << *connection_operation << "\n" );
     }
 
-	/*! \change JS-481 Es gibt bereits eine Verbindung und die neue Connection ist nicht dieselbe. Dass darf nicht sein. */
+    /*! \change JS-481 Es gibt bereits eine Verbindung und die neue Connection ist nicht dieselbe. Dass darf nicht sein. */
     if( _connection_operation  &&  _connection_operation != connection_operation ) {
         _log->warn( message_string( "SCHEDULER-714", host_and_port.as_string(), _connection_operation->_connection->obj_name(), connection_operation->_connection->obj_name() ) );
         _connection_operation->_connection->close();
@@ -792,7 +792,7 @@ void Remote_scheduler::connection_lost_event( const exception* x )
 {
     // x kann NULL sein
 
-	
+    
     Z_LOG2( "scheduler", Z_FUNCTION << " " << *this << "\n" ); /*! \change JS-481 */
 
     _disconnected_at = Time::now();

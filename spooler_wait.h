@@ -74,7 +74,7 @@ struct Wait_handles : Non_cloneable
 
     bool                        wait_until                  ( const Time&  , const Object* debug_wait_for_object, 
                                                               const Time& resume_until, const Object* );   // Berücksichtigt Sommerzeitumstellung
-	
+    
 /**
  * \change  JS-471 - Methodendeklaration für eigenes Prozesshandling
  * \version 1.3.8
@@ -85,7 +85,7 @@ struct Wait_handles : Non_cloneable
  *
  * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
  */
-	DWORD						sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout);
+    DWORD                        sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout);
     DWORD                       sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout );
     int                         calculateStepTimeout(int timeoutCounter);
 

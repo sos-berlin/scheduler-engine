@@ -187,7 +187,7 @@ struct File_based : Scheduler_object,
     virtual bool                is_visible_in_xml_folder    ( const Show_what& ) const              { return true; }
     virtual void                set_visible                 ()                                      { if( _visible == visible_no )  _visible = visible_yes; }
     virtual void                set_visible                 ( Visibility v )                        { _visible = v; }
-	virtual bool                is_visible                  () const                                { return _visible == visible_yes; }
+    virtual bool                is_visible                  () const                                { return _visible == visible_yes; }
 
 
     File_based_subsystem*       subsystem                   () const                                { return _file_based_subsystem; }
@@ -276,7 +276,7 @@ struct File_based : Scheduler_object,
     void                    set_file_based_state            ( State );
 
     Fill_zero                  _zero_;
-	Visibility                 _visible;
+    Visibility                 _visible;
 
   private:
     friend struct               Typed_folder;
@@ -544,21 +544,21 @@ struct file_based_subsystem : File_based_subsystem
                                 file_based_subsystem        ( Spooler* spooler, IUnknown* u, Type_code t ) : File_based_subsystem( spooler, u, t ), _zero_(this+1) {}
 
     int                         file_based_count            () const                                { return _file_based_map.size(); }
-	int							visible_file_based_count    () const 
-	{
-		int count = 0;
-		Z_FOR_EACH_CONST( typename File_based_map, _file_based_map, it ) 
-		{
-			File_based* file_based = it->second;
+
+    int                         visible_file_based_count    () const 
+    {
+        int count = 0;
+        Z_FOR_EACH_CONST( typename File_based_map, _file_based_map, it ) 
+        {
+            File_based* file_based = it->second;
             
             if( file_based->is_visible())
             {
                 count++;
             }
-		}
-		return count;
-
-	}
+        }
+        return count;
+    }
 
     bool                        is_empty                    () const                                { return _file_based_map.empty(); }
     int                         file_based_map_version      () const                                { return _file_based_map_version; }

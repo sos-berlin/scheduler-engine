@@ -727,9 +727,9 @@ xml::Element_ptr Folder::dom_element( const xml::Document_ptr& dom_document, con
             Typed_folder* typed_folder = it->second;
             if( !typed_folder->is_empty() )
             {
-				if(show_what.is_subsystem_set_empty())
-					result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
-				else
+                if(show_what.is_subsystem_set_empty())
+                    result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
+                else
                 if( show_what.is_subsystem_set( typed_folder->subsystem() ) )
                     result.appendChild( typed_folder->dom_element( dom_document, myShowWhat ) );
             }
@@ -1504,7 +1504,7 @@ File_based::File_based( File_based_subsystem* subsystem, IUnknown* iunknown, Typ
 : 
     Scheduler_object( subsystem->spooler(), iunknown, type_code ), 
     _zero_(this+1),
-	_visible(visible_yes),
+    _visible(visible_yes),
     _file_based_subsystem(subsystem),
     _state(s_not_initialized)
 {
@@ -2267,11 +2267,13 @@ string File_based_subsystem::normalized_path( const Path& path ) const
                  normalized_name( path.name() ) );
 }
 
+//----------------------------------------------------------------File_based_subsystem::dom_element
+
 xml::Element_ptr File_based_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const
 {
     xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
     xml::Element_ptr statistics_element = dom_document.createElement( "file_based.statistics" );
-	statistics_element.setAttribute( "count_visible", visible_file_based_count() );
+    statistics_element.setAttribute( "count_visible", visible_file_based_count() );
     statistics_element.setAttribute( "count", file_based_count() );
     result.appendChild( statistics_element );
     return result;
@@ -2479,9 +2481,9 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
 {
     int result = 0;
 
-//	for(Requisite_sets::const_iterator ds=_requisite_sets.begin(); ds!=_requisite_sets.end();ds++)
-//	{
-//	}
+//    for(Requisite_sets::const_iterator ds=_requisite_sets.begin(); ds!=_requisite_sets.end();ds++)
+//    {
+//    }
 
     Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
     {
@@ -2494,7 +2496,7 @@ int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
 
             xml::Element_ptr e = element.append_new_element( "requisite" );
             e.setAttribute( "type", subsystem->object_type_name() );
-			e.setAttribute( "path", path );
+            e.setAttribute( "path", path );
 
             if( !requisite  || !requisite->is_active_and_not_to_be_removed() )  e.setAttribute( "is_missing", "yes" );
 

@@ -92,21 +92,21 @@ string start_cause_name( Start_cause cause )
 
 xml::Element_ptr Task_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what )
 {
-	xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
-	
-	xml::Element_ptr task_subsystem_element = dom_document.createElement( "task_subsystem" );
+    xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+    
+    xml::Element_ptr task_subsystem_element = dom_document.createElement( "task_subsystem" );
 
-	if( show_what.is_set( show_statistics ) ) {
-		
-		xml::Element_ptr statistics_element = task_subsystem_element.append_new_element( "task_subsystem.statistics" );
-		xml::Element_ptr task_statistics_element = statistics_element.append_new_element( "task.statistics" );
-		task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_running ));
-		task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_starting ));
-		task_statistics_element.appendChild(exist_task_statistic_element( dom_document ));
-	}
+    if( show_what.is_set( show_statistics ) ) {
+        
+        xml::Element_ptr statistics_element = task_subsystem_element.append_new_element( "task_subsystem.statistics" );
+        xml::Element_ptr task_statistics_element = statistics_element.append_new_element( "task.statistics" );
+        task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_running ));
+        task_statistics_element.appendChild(state_task_statistic_element( dom_document, Task::s_starting ));
+        task_statistics_element.appendChild(exist_task_statistic_element( dom_document ));
+    }
 
-	result.appendChild( task_subsystem_element );
-	return result;
+    result.appendChild( task_subsystem_element );
+    return result;
 
   //  return Subsystem::dom_element( dom_document, show_what );
 }
@@ -143,7 +143,7 @@ int Task_subsystem::count_tasks_with_state( Task::State state ) const
 {
     int result = 0;
 
-	FOR_EACH_TASK_CONST ( it, task )
+    FOR_EACH_TASK_CONST ( it, task )
         if( task->state() == state )  result++;
 
     return result;
@@ -155,8 +155,8 @@ int Task_subsystem::count_tasks_exist( ) const
 {
     int result = 0;
 
-	// TODO ggf. bestimmte Stati nicht zählen
-	FOR_EACH_TASK_CONST ( it, task )
+    // TODO ggf. bestimmte Stati nicht zählen
+    FOR_EACH_TASK_CONST ( it, task )
         result++;
 
     return result;
@@ -1887,7 +1887,7 @@ bool Task::do_something()
 
                                 set_state_direct( s_deleting_files );
                                 //set_state_direct( s_closed );
-				
+                
                                 loop = true;
                             }
 
@@ -2473,8 +2473,8 @@ void Task::process_on_exit_commands()
             }
 #       endif
         else
-		if(_exit_code != 0) // JS-550
-			commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
+        if(_exit_code != 0) // JS-550
+            commands_element = _job->_commands_document.select_node( "/*/commands [ @on_exit_code='error' ]" );
 
         if( commands_element )
         {

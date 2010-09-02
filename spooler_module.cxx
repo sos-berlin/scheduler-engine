@@ -333,8 +333,8 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
-	set_checked_attribute( &_job_class_path    , element, "job_class_path", true );  // JS-540
-	set_checked_attribute( &_class_path        , element, "class_path", true );
+    set_checked_attribute( &_job_class_path    , element, "job_class_path", true );  // JS-540
+    set_checked_attribute( &_class_path        , element, "class_path", true );
 
     if( element.hasAttribute( "encoding" ) )
     {
@@ -537,7 +537,7 @@ ptr<Module_instance> Module::create_instance_impl()
                 Java_module_instance::init_java_vm( _java_vm );     // Native Java-Methoden (Callbacks) bekannt machen
             }
             
-	            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
+                ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
             result = +p;
             break;
         }

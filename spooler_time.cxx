@@ -295,7 +295,7 @@ Time Time::time_with_now( const string& time_string )
 {
     Time result;
 
-	// Startzeit mit "now+HH:MM:SS" oder "now+MM:SS" oder "now+SS" vorgegeben
+    // Startzeit mit "now+HH:MM:SS" oder "now+MM:SS" oder "now+SS" vorgegeben
     if( Regex_submatches matches = Regex( "^ *now *(\\+ *([^ ].*))?$" ).match_subresults( time_string ) )    // " now + HH:MM"
     {
         result = now();
@@ -310,14 +310,14 @@ Time Time::time_with_now( const string& time_string )
             {
                 Time t ( time );
 
-				/*! \change JS-409
-				inaktiv seit Version 2.0.224: siehe http://www.sos-berlin.com/jira/browse/JS-409 
+                /*! \change JS-409
+                inaktiv seit Version 2.0.224: siehe http://www.sos-berlin.com/jira/browse/JS-409 
 
-				Der folgende Code kommt nicht mehr zur Ausführung
-				\code
+                Der folgende Code kommt nicht mehr zur Ausführung
+                \code
                   if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
-			    \endcode
-				*/
+                \endcode
+                */
                 // if( t > 24*60*60 )  z::throw_xc( "SCHEDULER-333", time_string );   // Sollte nicht vorkommen
                 result += t;
             }
@@ -332,7 +332,7 @@ Time Time::time_with_now( const string& time_string )
         }
     }
     else
-	// nimmt eine Datumsangabe im ISO-Format entgegen
+    // nimmt eine Datumsangabe im ISO-Format entgegen
     {
         result.set_datetime( time_string );
     }

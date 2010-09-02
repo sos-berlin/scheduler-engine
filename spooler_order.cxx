@@ -141,9 +141,9 @@ struct Order_subsystem : Order_subsystem_interface
 
     bool                        has_any_order               ();
     int                         order_count                 ( Read_transaction* ) const;
-	string						distributed_job_chains_db_where_condition() const;
-	int							processing_order_count		( Read_transaction* ta ) const;
-	xml::Element_ptr			state_statistic_element		(const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const;
+    string                      distributed_job_chains_db_where_condition() const;
+    int                         processing_order_count      ( Read_transaction* ta ) const;
+    xml::Element_ptr            state_statistic_element     (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const;
 
     Job_chain*                  active_job_chain            ( const Absolute_path& path )           { return active_file_based( path ); }
     Job_chain*                  job_chain                   ( const Absolute_path& path )           { return file_based( path ); }
@@ -153,9 +153,9 @@ struct Order_subsystem : Order_subsystem_interface
     int                         finished_orders_count       () const                                { return _finished_orders_count; }
     Order_id_spaces_interface*  order_id_spaces_interface   ()                                      { return &_order_id_spaces; }
     Order_id_spaces*            order_id_spaces             ()                                      { return &_order_id_spaces; }
-	xml::Element_ptr			dom_element					( const xml::Document_ptr& dom_document, const Show_what& show_what ) const;
+    xml::Element_ptr            dom_element                    ( const xml::Document_ptr& dom_document, const Show_what& show_what ) const;
 
-	// File_based_subsystem
+    // File_based_subsystem
 
     string                      object_type_name            () const                                { return "Job_chain"; }
     string                      filename_extension          () const                                { return ".job_chain.xml"; }
@@ -921,11 +921,11 @@ string Order_subsystem::distributed_job_chains_db_where_condition() const  // JS
     list<string> job_chain_names;
     FOR_EACH_JOB_CHAIN( job_chain )
         if( job_chain->is_distributed() )
-		{
-			S s;
-			s << "'" << job_chain->path().without_slash() << "'";
+        {
+            S s;
+            s << "'" << job_chain->path().without_slash() << "'";
             job_chain_names.push_back( s );
-		}
+        }
 
     if( job_chain_names.empty() ) 
         return "";
@@ -959,7 +959,7 @@ int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507
     //        result += job_chain->order_count( (Read_transaction*)NULL );
 
     FOR_EACH_JOB_CHAIN( job_chain )
-	    result += job_chain->order_count( ta );
+        result += job_chain->order_count( ta );
 
     return result;
 }
@@ -977,7 +977,7 @@ int Order_subsystem::processing_order_count( Read_transaction* ta ) const  // JS
             select_sql << "select count(*)" << 
                           "  from " << _spooler->_orders_tablename <<
                           "  where " << w <<  " and `occupying_cluster_member_id` is not null";
-			result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+            result += ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
         }
     }
 
@@ -1010,27 +1010,27 @@ void Order_subsystem::count_finished_orders()
 
 xml::Element_ptr Order_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const // JS-507
 {
-	// xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
-	xml::Element_ptr result = File_based_subsystem::dom_element( dom_document, show_what );
-	
-	xml::Element_ptr Order_subsystem_element = dom_document.createElement( "order_subsystem" ); 
+    // xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
+    xml::Element_ptr result = File_based_subsystem::dom_element( dom_document, show_what );
+    
+    xml::Element_ptr Order_subsystem_element = dom_document.createElement( "order_subsystem" ); 
 
-	if( show_what.is_set( show_statistics ) ) {
-		
-		xml::Element_ptr statistics_element = Order_subsystem_element.append_new_element( "order_subsystem.statistics" );
-		xml::Element_ptr order_statistics_element = statistics_element.append_new_element( "order.statistics" );
-	
-		Read_transaction ta ( _spooler->db() );
+    if( show_what.is_set( show_statistics ) ) {
+        
+        xml::Element_ptr statistics_element = Order_subsystem_element.append_new_element( "order_subsystem.statistics" );
+        xml::Element_ptr order_statistics_element = statistics_element.append_new_element( "order.statistics" );
+    
+        Read_transaction ta ( _spooler->db() );
 
-		//xml::Element_ptr result = dom_document.createElement( "order.statistic" );
-		//result.setAttribute( "order_state", "clustered" );
-		//result.setAttribute( "count", processing_order_count( &ta ) );
-		order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "clustered", processing_order_count( &ta ) ) );
-		order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "any", order_count( &ta ) ) );
-	}
+        //xml::Element_ptr result = dom_document.createElement( "order.statistic" );
+        //result.setAttribute( "order_state", "clustered" );
+        //result.setAttribute( "count", processing_order_count( &ta ) );
+        order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "clustered", processing_order_count( &ta ) ) );
+        order_statistics_element.appendChild(state_statistic_element (dom_document, "order_state", "any", order_count( &ta ) ) );
+    }
 
-	result.appendChild( Order_subsystem_element );
-	return result;
+    result.appendChild( Order_subsystem_element );
+    return result;
 
 }
 
@@ -1038,10 +1038,10 @@ xml::Element_ptr Order_subsystem::dom_element( const xml::Document_ptr& dom_docu
 
 xml::Element_ptr Order_subsystem::state_statistic_element (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const
 {
-		xml::Element_ptr result = dom_document.createElement( "order.statistic" );
-		result.setAttribute( attribute_name, attribute_value );
-		result.setAttribute( "count", count );
-		return result;
+    xml::Element_ptr result = dom_document.createElement( "order.statistic" );
+    result.setAttribute( attribute_name, attribute_value );
+    result.setAttribute( "count", count );
+    return result;
 }
 
 

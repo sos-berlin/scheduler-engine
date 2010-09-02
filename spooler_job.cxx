@@ -2271,7 +2271,7 @@ void Job::database_record_load( Read_transaction* ta )
 {
     assert( file_based_state() == File_based::s_initialized );
 
-	// lesen aus Tabelle scheduler_jobs
+    // lesen aus Tabelle scheduler_jobs
     Any_file result_set = ta->open_result_set
     ( 
         S() << "select `stopped`, `next_start_time`"

@@ -736,15 +736,15 @@ Spooler::Spooler()
 
     if( _validate_xml )  _schema.read( xml::Document_ptr( 
 
-		/**
-		* \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
-		* \detail
-		*/
-//		embedded_files.string_from_embedded_file( xml_schema_path ) 
-		sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
-		) );
+        /**
+        * \change 2.0.224 - jira-XXX: Dynamisch eingebundes XSD verwenden, falls geladen
+        * \detail
+        */
+//        embedded_files.string_from_embedded_file( xml_schema_path ) 
+        sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
+        ) );
 
-	// nicht die Reihenfolge ändern !!!!!!
+    // nicht die Reihenfolge ändern !!!!!!
     _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
     _folder_subsystem           = new_folder_subsystem( this );
     _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
@@ -799,7 +799,7 @@ void Spooler::close()
     set_ctrl_c_handler( false );
 
     // In der Reihenfolder der Abhängigkeiten löschen:
-	// nicht die Reihenfolge ändern !!!!!!
+    // nicht die Reihenfolge ändern !!!!!!
     _standing_order_subsystem   = NULL;
     _order_subsystem            = NULL;
     _task_subsystem             = NULL;
@@ -1059,16 +1059,16 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
             element.setAttribute( "size", size_total );
 
 #ifdef Z_WINDOWS
-			MEMORYSTATUS m = memory_status_init();
-			element.setAttribute( "uom_memory_values", "MB");
-			element.setAttribute( "reserved_virtual", mb_formatted(memory_status_calculate_reserved_virtual(m)));
-			element.setAttribute( "total_virtual", mb_formatted(m.dwTotalVirtual));
-			element.setAttribute( "avail_virtual", mb_formatted(m.dwAvailVirtual));
-			element.setAttribute( "total_physical", mb_formatted(m.dwTotalPhys));
-			element.setAttribute( "avail_physical", mb_formatted(m.dwAvailPhys));
-			element.setAttribute( "total_pagefile", mb_formatted(m.dwTotalPageFile));
-			element.setAttribute( "avail_pagefile", mb_formatted(m.dwAvailPageFile));
-			element.setAttribute( "memoryload", mb_formatted(m.dwMemoryLoad));
+            MEMORYSTATUS m = memory_status_init();
+            element.setAttribute( "uom_memory_values", "MB");
+            element.setAttribute( "reserved_virtual", mb_formatted(memory_status_calculate_reserved_virtual(m)));
+            element.setAttribute( "total_virtual", mb_formatted(m.dwTotalVirtual));
+            element.setAttribute( "avail_virtual", mb_formatted(m.dwAvailVirtual));
+            element.setAttribute( "total_physical", mb_formatted(m.dwTotalPhys));
+            element.setAttribute( "avail_physical", mb_formatted(m.dwAvailPhys));
+            element.setAttribute( "total_pagefile", mb_formatted(m.dwTotalPageFile));
+            element.setAttribute( "avail_pagefile", mb_formatted(m.dwAvailPageFile));
+            element.setAttribute( "memoryload", mb_formatted(m.dwMemoryLoad));
 #endif
 
         }
@@ -1084,7 +1084,7 @@ MEMORYSTATUS Spooler::memory_status_init()
     memset( &m, 0, sizeof m );
     m.dwLength = sizeof m;
     GlobalMemoryStatus( &m );
-	return m;
+    return m;
 }
 
 DWORD Spooler::memory_status_calculate_reserved_virtual(MEMORYSTATUS m)
@@ -1095,9 +1095,9 @@ DWORD Spooler::memory_status_calculate_reserved_virtual(MEMORYSTATUS m)
 
 string Spooler::mb_formatted(DWORD value)
 {
-	char buffer [ 30 ];
-	int len = snprintf( buffer, sizeof buffer - 1, "%-.3f", (double)value / 1024 / 1024 );
-	return string(buffer,len);
+    char buffer [ 30 ];
+    int len = snprintf( buffer, sizeof buffer - 1, "%-.3f", (double)value / 1024 / 1024 );
+    return string(buffer,len);
 }
 #endif
 
@@ -1639,13 +1639,13 @@ void Spooler::load_arg()
 #           ifdef Z_WINDOWS
                 else if( opt.flag( "debug-break"        ) )  ;   // Bereits von spooler_main() verarbeitet
 #           endif
-			else
-			//! \newoption Neue Option 'use-xml-schema' auf Gültigkeit prüfen
+            else
+            //! \newoption Neue Option 'use-xml-schema' auf Gültigkeit prüfen
             if( opt.with_value( "use-xml-schema"        ) )  ;   // wird in sos::spooler_main vearbeitet
-			else
+            else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
-			else
-				if(opt.with_value("configuration-directory")) _opt_configuration_directory = opt.value(); // JS-462
+            else
+                if(opt.with_value("configuration-directory")) _opt_configuration_directory = opt.value(); // JS-462
             else
                 throw_sos_option_error( opt );
         }
@@ -1699,15 +1699,15 @@ void Spooler::load_arg()
             _configuration_directories[ confdir_local ] = File_path( File_path( _configuration_file_path.directory(), "live" ), "" );
         }
 
-		if(!_opt_configuration_directory.empty()) // JS-462
-		{
-			if(!file::File_info(_opt_configuration_directory).is_directory())
-			{ 
-				z::throw_xc( "SCHEDULER-715", _opt_configuration_directory.c_str() );
-			}
-			_configuration_directories[ confdir_local ] = File_path( _opt_configuration_directory );
-			_configuration_directories_as_option_set[ confdir_local ] = false;					    
-		}
+        if(!_opt_configuration_directory.empty()) // JS-462
+        {
+            if(!file::File_info(_opt_configuration_directory).is_directory())
+            { 
+                z::throw_xc( "SCHEDULER-715", _opt_configuration_directory.c_str() );
+            }
+            _configuration_directories[ confdir_local ] = File_path( _opt_configuration_directory );
+            _configuration_directories_as_option_set[ confdir_local ] = false;                        
+        }
 
     }
 
@@ -1961,7 +1961,7 @@ void Spooler::start()
         _java_subsystem->switch_subsystem_state( subsys_loaded );
       //_java_subsystem->switch_subsystem_state( subsys_active );
 
-// Neues Event_subsystem		_java_subsystem->java_vm()->start();
+// Neues Event_subsystem        _java_subsystem->java_vm()->start();
     }
     catch( const exception& x )
     {
@@ -1969,8 +1969,8 @@ void Spooler::start()
         _log->warn( message_string( "SCHEDULER-259" ) );  // "Java kann nicht gestartet werden. Scheduler startet ohne Java."
     }
 
-	_event_subsystem->switch_subsystem_state( subsys_initialized );
-	_event_subsystem ->switch_subsystem_state( subsys_loaded );
+    _event_subsystem->switch_subsystem_state( subsys_initialized );
+    _event_subsystem ->switch_subsystem_state( subsys_loaded );
 
     // Datenbank (startet Java, wenn JDBC verwendet wird)
 
@@ -3758,13 +3758,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         bool    do_remove_service   = false;
         bool    is_service_set      = false;
         bool    is_backup           = false;
-		/**
-		* \newoption lokale Variabel zur Aufnahme der neuen Option 'use-xml-schema'
-		* \code */
-		string	use_external_schema = "";
-		/**
-		  \endcode
-		*/
+        /**
+        * \newoption lokale Variabel zur Aufnahme der neuen Option 'use-xml-schema'
+        * \code */
+        string    use_external_schema = "";
+        /**
+          \endcode
+        */
         string  id;
         string  service_name, service_display;
         string  service_description = "Job scheduler for process automation";
@@ -3796,10 +3796,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             if( opt.with_value( "expand-classpath" ) )  { cout << javabridge::expand_class_path( opt.value() ) << '\n'; need_call_scheduler = false; }
             else
             if( opt.flag      ( "show-xml-schema"  ) )  {
-				if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", 
-//				scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() 
-				sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path).c_str()
-					); }
+                if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", 
+//                scheduler::embedded_files.string_from_embedded_file( scheduler::xml_schema_path ).c_str() 
+                sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path).c_str()
+                    ); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
@@ -3869,19 +3869,19 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 }
                 else
                 if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
-				else
-				//! \newoption Optionswert in lokaler Variable für spätere Auswertung merken
-				if( opt.with_value( "use-xml-schema" ) )
-				{
-					use_external_schema = opt.value();
-					/*\\< Dynamisches XSD sofort einlesen und statisches "ersetzen". Wenn das erst nach verarbeiten aller
-					Optionen gemacht wird, dann steht das dynamische XSD noch nicht für die Option -show-xml-schema zur Verfügung 
-					*/
-					sos::scheduler::embedded_and_dynamic_files.set_dynamic_file(use_external_schema, sos::scheduler::xml_schema_path);
-				}				
                 else
-				  if(opt.with_value("configuration-directory")); // JS-462
-				else
+                //! \newoption Optionswert in lokaler Variable für spätere Auswertung merken
+                if( opt.with_value( "use-xml-schema" ) )
+                {
+                    use_external_schema = opt.value();
+                    /*\\< Dynamisches XSD sofort einlesen und statisches "ersetzen". Wenn das erst nach verarbeiten aller
+                    Optionen gemacht wird, dann steht das dynamische XSD noch nicht für die Option -show-xml-schema zur Verfügung 
+                    */
+                    sos::scheduler::embedded_and_dynamic_files.set_dynamic_file(use_external_schema, sos::scheduler::xml_schema_path);
+                }                
+                else
+                  if(opt.with_value("configuration-directory")); // JS-462
+                else
                   call_scheduler = true;     // Aber is_scheduler_client hat Vorrang!
 
                 if( !command_line.empty() )  command_line += " ";
@@ -3919,22 +3919,22 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         Z_LOG2( "scheduler", "Scheduler " << scheduler::version_string << "\n" );
 
-		/**
-		* \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
-		* \detail
-		* Der scheduler arbeitet derzeit mit einem festen, in einem c++-Modul gespeicherten (einkompilierten) Schema. Mit
-		* der geannnten Option kann ein variables Schema verwendet werden, welches über den Standard hinaus
-		* gehende Namensbereiche enthalten kann.
-		* \newoption Auswertung des übergebenen Optionswertes
-		*/
+        /**
+        * \change 2.0.224 - JS-XXX: Verwendung der Option 'use-xml-schema' für dynamisches XSD
+        * \detail
+        * Der scheduler arbeitet derzeit mit einem festen, in einem c++-Modul gespeicherten (einkompilierten) Schema. Mit
+        * der geannnten Option kann ein variables Schema verwendet werden, welches über den Standard hinaus
+        * gehende Namensbereiche enthalten kann.
+        * \newoption Auswertung des übergebenen Optionswertes
+        */
         if( use_external_schema != "" ) 
-		{
-			Z_LOG2( "scheduler", "using dynamic schema: " << use_external_schema << "\n" );
-			//zschimmer::embedded_and_dynamic_files
-			string xsd_schema_content = sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path);
-			// xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
-			Z_LOG2( "scheduler", xsd_schema_content << "\n" );
-		}
+        {
+            Z_LOG2( "scheduler", "using dynamic schema: " << use_external_schema << "\n" );
+            //zschimmer::embedded_and_dynamic_files
+            string xsd_schema_content = sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path);
+            // xsd_schema_content = sos::scheduler::file::xsd_from_file(use_external_schema);
+            Z_LOG2( "scheduler", xsd_schema_content << "\n" );
+        }
 
         if( is_scheduler_client )
         {

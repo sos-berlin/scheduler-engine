@@ -23,14 +23,14 @@ extern "C" BOOL WINAPI DllMain( HANDLE hinstance, DWORD ul_reason_being_called, 
             sos::scheduler::typelib.set_hinstance( (HINSTANCE)hinstance );
             break;
 
-	case DLL_THREAD_ATTACH:     
+        case DLL_THREAD_ATTACH:     
             break;
 
-    	case DLL_PROCESS_DETACH: 
+        case DLL_PROCESS_DETACH: 
             sos::application.exit();
             break;
 
-    	case DLL_THREAD_DETACH: 
+        case DLL_THREAD_DETACH: 
             break;
 
         default: 
