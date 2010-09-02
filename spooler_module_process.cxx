@@ -864,6 +864,7 @@ void Process_module_instance::end__end()
 #   endif
 
     _exit_code = (int)exit_code;
+    //transfer_exit_code_to_task();
     _spooler_process_result = _exit_code == 0  &&  _termination_signal == 0;;
 
     _log.log_file( _module->_process_log_filename );
@@ -903,7 +904,7 @@ void Process_module_instance::fill_process_environment_with_params()
     ptr<Com_variable_set> order_params;
 
     if( _task ) {
-		Z_LOG2( "scheduler", "fill_process_environment_with_params(), _task" << "\n" );
+        Z_LOG2( "scheduler", "fill_process_environment_with_params(), _task" << "\n" );
         task_params = _task->params();
         if( _task->order() )  order_params = _task->order()->params();
     } else {
@@ -932,6 +933,20 @@ void Process_module_instance::fill_process_environment_with_params()
             _process_environment->set_var( ucase( "SCHEDULER_PARAM_" + v->second->name() ), v->second->string_value() );
     }
 }
+
+//----------------------------------------------Process_module_instance::transfer_exit_code_to_task
+
+//void Process_module_instance::transfer_exit_code_to_task()
+//{
+//    if( _task ) 
+//        _task->set_exit_code(_exit_code);
+//    else {
+//        IDispatch* task = object( "spooler_task" );
+//        vector<Variant> parameters;
+//        parameters.push_back( _exit_code );
+//        com_invoke( DISPATCH_PROPERTYPUT, task, "Exit_code", &parameters );
+//    }
+//}
 
 //----------------------------------------------Process_module_instance::transfer_back_order_params
 

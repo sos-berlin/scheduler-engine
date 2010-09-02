@@ -2198,7 +2198,8 @@ string Task::remote_process_step__end()
         xml::Element_ptr  process_result_element = dom_document.select_element_strict( "/" "process.result" );
 
         _module_instance->set_spooler_process_result( process_result_element.bool_getAttribute( "spooler_process_result" ) );
-        _module_instance->set_exit_code         ( process_result_element.int_getAttribute( "exit_code", 0 ) );
+        _exit_code = process_result_element.int_getAttribute( "exit_code", 0 );   // JS-563
+        _module_instance->set_exit_code( _exit_code );
         _module_instance->set_termination_signal( process_result_element.int_getAttribute( "signal"   , 0 ) );
 
         set_state_texts_from_stdout( process_result_element.getAttribute( "state_text" ) );
@@ -2720,7 +2721,8 @@ void Module_task::do_close__end()
         _module_instance->close__end();
         _file_logger->flush();
 
-        int exit_code = _module_instance->exit_code();
+        // Siehe auch remote_process_step__end()
+        int exit_code = _module_instance->kind() == Module::kind_process? _module_instance->exit_code() : _exit_code;
         if( exit_code )
         {
             z::Xc x ( "SCHEDULER-280", exit_code, printf_string( "%X", exit_code ) );
@@ -2729,8 +2731,7 @@ void Module_task::do_close__end()
             else  
                 _log->warn( x.what() );
 
-            if( _module_instance->_module->kind() == Module::kind_process )
-                _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
+            _exit_code = exit_code;  // Nach set_error(), weil set_error() _exit_code auf 1 setzt
         }
                                           
         if( int termination_signal = _module_instance->termination_signal() )
