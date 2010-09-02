@@ -115,10 +115,10 @@ bool Java_subsystem::subsystem_load()
         Java_module_instance::init_java_vm( _java_vm );
     }
 
-//#ifdef Z_DEBUG
+#ifdef Z_DEBUG
     Java_module_instance::init_java_vm( _java_vm );
     initialize_java_sister();
-//#endif
+#endif
     
     _subsystem_state = subsys_loaded;
     return true;
