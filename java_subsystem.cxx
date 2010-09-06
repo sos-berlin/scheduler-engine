@@ -133,7 +133,6 @@ void Java_subsystem::initialize_java_sister()
     _java_objects = Z_NEW( Java_objects );
     _java_objects->_schedulerJ = SchedulerJ::new_instance(_spooler->j());
     _java_objects->_schedulerJ.test("Hallo, hier ist C++");
-    _java_objects->_schedulerJ.test2("Hallo, hier ist nochmal C++");
 }
 
 //-----------------------------------------------------------Java_subsystem::register_proxy_classes
@@ -142,6 +141,8 @@ void Java_subsystem::register_proxy_classes()
 {
     Job             ::register_cpp_proxy_class_in_java();
     Job_subsystem   ::register_cpp_proxy_class_in_java();
+    Order           ::register_cpp_proxy_class_in_java();
+    Order_subsystem ::register_cpp_proxy_class_in_java();
     Prefix_log      ::register_cpp_proxy_class_in_java();
     Spooler         ::register_cpp_proxy_class_in_java();
 }

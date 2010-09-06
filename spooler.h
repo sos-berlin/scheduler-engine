@@ -232,7 +232,7 @@ namespace order
   //struct Job_chain_folder;
     struct Order_queue;
     struct Order;
-    struct Order_subsystem_interface;
+    struct Order_subsystem;
     struct Standing_order;
     struct Standing_order_folder;
     struct Standing_order_subsystem;
@@ -553,7 +553,7 @@ struct Spooler : Object,
     Task_subsystem*             task_subsystem_or_null      () const                            { return _task_subsystem; }
     Job_subsystem*              job_subsystem               () const;
     Job_subsystem*              job_subsystem_or_null       () const                            { return _job_subsystem; }
-    Order_subsystem_interface*  order_subsystem             () const;
+    Order_subsystem*            order_subsystem             () const;
     Standing_order_subsystem*   standing_order_subsystem    () const;
     Schedule_subsystem_interface* schedule_subsystem        () const;
     Java_subsystem_interface*   java_subsystem              ()                                  { return _java_subsystem; }
@@ -562,8 +562,8 @@ struct Spooler : Object,
 
     Process_class_subsystem*    subsystem                   ( Process_class* ) const            { return _process_class_subsystem; }
     lock::Lock_subsystem*       subsystem                   ( lock::Lock* ) const               { return _lock_subsystem; }
-    Job_subsystem*    subsystem                             ( Job* ) const                      { return _job_subsystem; }
-    Order_subsystem_interface*  subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
+    Job_subsystem*              subsystem                   ( Job* ) const                      { return _job_subsystem; }
+    Order_subsystem*            subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
 
     supervisor::Supervisor_client_interface*supervisor_client ();
     bool                        has_any_task                ();
@@ -678,7 +678,7 @@ struct Spooler : Object,
     ptr<Process_class_subsystem>     _process_class_subsystem;
     ptr<Job_subsystem>               _job_subsystem;
     ptr<Task_subsystem>              _task_subsystem;
-    ptr<Order_subsystem_interface>   _order_subsystem;
+    ptr<Order_subsystem>             _order_subsystem;
     ptr<Standing_order_subsystem>    _standing_order_subsystem;
     ptr<Schedule_subsystem_interface>_schedule_subsystem;
     ptr<http::Http_server_interface> _http_server;

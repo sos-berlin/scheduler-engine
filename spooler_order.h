@@ -18,7 +18,7 @@ struct Order_id_space;
 struct Order_id_spaces;
 struct Order_queue;
 struct Order_schedule_use;
-struct Order_subsystem;
+struct Order_subsystem_impl;
 struct Standing_order_folder;
 struct Standing_order_subsystem;
 
@@ -35,7 +35,7 @@ namespace job_chain
 //-------------------------------------------------------------------------------FOR_EACH_JOB_CHAIN
 
 #define FOR_EACH_JOB_CHAIN( JOB_CHAIN )  \
-    Z_FOR_EACH( Order_subsystem_interface::File_based_map, spooler()->order_subsystem()->_file_based_map, __job_chain_iterator__ )  \
+    Z_FOR_EACH( Order_subsystem::File_based_map, spooler()->order_subsystem()->_file_based_map, __job_chain_iterator__ )  \
         if( Job_chain* JOB_CHAIN = __job_chain_iterator__->second )
 
 //--------------------------------------------------------------------------------------------const
@@ -49,7 +49,8 @@ typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
-               file_based< Order, Standing_order_folder, Standing_order_subsystem >
+               file_based< Order, Standing_order_folder, Standing_order_subsystem >,
+               javabridge::has_proxy<Order>
 {
     typedef Variant             Payload;
     typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
@@ -288,7 +289,7 @@ struct Order : Com_order,
     void                        db_fill_where_clause    ( sql::Where_clause* );
     int                         db_get_ordering         ( Transaction* ta = NULL );
     Database*                   db                      ();
-    Order_subsystem*            order_subsystem         () const;
+    Order_subsystem_impl*       order_subsystem         () const;
     Com_log*                    com_log                 () const                                    { return _com_log; }
 
 
@@ -711,7 +712,7 @@ struct Sink_node : Job_node
 //----------------------------------------------------------------------------------------Job_chain
 
 struct Job_chain : Com_job_chain, 
-                   file_based< Job_chain, Job_chain_folder_interface, Order_subsystem_interface >,
+                   file_based< Job_chain, Job_chain_folder_interface, Order_subsystem >,
                    is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>
 {
     enum State      // Kann wegfallen, denn file_based_state() hat dieselbe Funktion
@@ -840,7 +841,7 @@ struct Job_chain : Com_job_chain,
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
-    Order_subsystem*            order_subsystem             () const;
+    Order_subsystem_impl*       order_subsystem             () const;
 
     int                         number_of_started_orders    () const;
     bool                        is_max_orders_reached       () const;
@@ -980,10 +981,11 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
     xml::Element_ptr            new_dom_element             ( const xml::Document_ptr& doc, const Show_what& )  { return doc.createElement( "job_chains" ); }
 };
 
-//------------------------------------------------------------------------Order_subsystem_interface
+//----------------------------------------------------------------------------------Order_subsystem
 
-struct Order_subsystem_interface: Object, 
-                                  file_based_subsystem< Job_chain >
+struct Order_subsystem: Object, 
+                        file_based_subsystem< Job_chain >,
+                        javabridge::has_proxy<Order_subsystem>
 {
     enum Load_order_flags
     {
@@ -993,7 +995,7 @@ struct Order_subsystem_interface: Object,
         lo_blacklisted_lock = lo_blacklisted | lo_lock
     };
 
-                                Order_subsystem_interface   ( Scheduler* );
+                                Order_subsystem             ( Scheduler* );
 
 
     virtual ptr<Job_chain_folder_interface> new_job_chain_folder( Folder* )                         = 0;
@@ -1018,7 +1020,7 @@ struct Order_subsystem_interface: Object,
 };
 
 
-ptr<Order_subsystem_interface>  new_order_subsystem         ( Scheduler* );
+ptr<Order_subsystem>            new_order_subsystem         ( Scheduler* );
 
 //----------------------------------------------------------------------------Standing_order_folder
 

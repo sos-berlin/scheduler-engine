@@ -196,7 +196,7 @@ Task_subsystem* Scheduler_object::task_subsystem() const
 
 //----------------------------------------------------------------Scheduler_object::order_subsystem
 
-Order_subsystem_interface* Scheduler_object::order_subsystem() const
+Order_subsystem* Scheduler_object::order_subsystem() const
 {
     return _spooler->order_subsystem();
 }

@@ -3,48 +3,67 @@
 #define __SCHEDULER_EVENT2_H
 
 
+#include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
+
 namespace sos {
 namespace scheduler {
 
+typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
+
 //---------------------------------------------------------------------------------Scheduler_event2
 
-struct Scheduler_event2 :  
-    idispatch_implementation< Scheduler_event2, spooler_com::Ischeduler_event2 >, 
-    spooler_com::Ihas_java_class_name,
-    Scheduler_object,
-    Non_cloneable
-{
-    static Class_descriptor     class_descriptor;
-    static const Com_method    _methods[];
-
-
-                            Scheduler_event2            ( Scheduler_object*, const string& code );
+struct Scheduler_event2 : Scheduler_object, Object {
+                            Scheduler_event2            (Scheduler_object*, const string& code);
                            ~Scheduler_event2            ();
 
-    //IUnknown:
-    STDMETHODIMP_(ULONG)    AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
-    STDMETHODIMP_(ULONG)    Release                     ()                                      { return Idispatch_implementation::Release(); }
-    STDMETHODIMP            QueryInterface              ( const IID&, void** result );
-
-    // Ihas_java_class_name
-    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
-    STDMETHODIMP_(char*)  const_java_class_name         ()                                      { return (char*)"sos.spooler.Scheduler_event"; }
-
-    // spooler_com::Ischeduler_event2
-    STDMETHODIMP        get_Object                      ( spooler_com::Iorder** );              // Später spooler_com::Ischeduler_object, noch nicht implementiert
-    STDMETHODIMP        get_Code                        ( BSTR* );
-
-    // Scheduler_object 
     string                  obj_name                    () const;
-
-    Scheduler_object*       object                      () { return _object; }
-    string                  code                        () { return _code; }
+    jobject                 j                           () const                                    { return _eventJ.j(); }  //? Ist das okay? -Zschimmer
+    //Scheduler_object*       object                      ();
+    //string                  code                        ();
 
 private:
     Fill_zero              _zero_;
-    Scheduler_object*      _object;
-    string                 _code;
+    EventJ                 _eventJ;
 };
+
+//-------------------------------------------------------------------------------------------------
+//struct Scheduler_event2 :  
+//    idispatch_implementation< Scheduler_event2, spooler_com::Ischeduler_event2 >, 
+//    spooler_com::Ihas_java_class_name,
+//    Scheduler_object,
+//    Non_cloneable
+//{
+//    static Class_descriptor     class_descriptor;
+//    static const Com_method    _methods[];
+//
+//
+//                            Scheduler_event2            ( Scheduler_object*, const string& code );
+//                           ~Scheduler_event2            ();
+//
+//    //IUnknown:
+//    STDMETHODIMP_(ULONG)    AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+//    STDMETHODIMP_(ULONG)    Release                     ()                                      { return Idispatch_implementation::Release(); }
+//    STDMETHODIMP            QueryInterface              ( const IID&, void** result );
+//
+//    // Ihas_java_class_name
+//    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+//    STDMETHODIMP_(char*)  const_java_class_name         ()                                      { return (char*)"sos.spooler.Scheduler_event"; }
+//
+//    // spooler_com::Ischeduler_event2
+//    STDMETHODIMP        get_Object                      ( spooler_com::Iorder** );              // Später spooler_com::Ischeduler_object, noch nicht implementiert
+//    STDMETHODIMP        get_Code                        ( BSTR* );
+//
+//    // Scheduler_object 
+//    string                  obj_name                    () const;
+//
+//    Scheduler_object*       object                      () { return _object; }
+//    string                  code                        () { return _code; }
+//
+//private:
+//    Fill_zero              _zero_;
+//    Scheduler_object*      _object;
+//    string                 _code;
+//};
 
 //-------------------------------------------------------------------------------------------------
 

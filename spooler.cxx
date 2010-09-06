@@ -760,7 +760,6 @@ Spooler::Spooler()
     _http_server                = http::new_http_server( this );
     _web_services               = new_web_services( this );
     _supervisor                 = supervisor::new_supervisor( this );
-    _event_subsystem            = new_event_subsystem( this );
 
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
@@ -1216,9 +1215,9 @@ Process_class_subsystem* Spooler::process_class_subsystem() const
 
 //-------------------------------------------------------------------------Spooler::order_subsystem
 
-Order_subsystem_interface* Spooler::order_subsystem() const
+Order_subsystem* Spooler::order_subsystem() const
 { 
-    if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Order_subsystem is not initialized" );
+    if( !_order_subsystem )  assert(0), z::throw_xc( Z_FUNCTION, "Order_subsystem_impl is not initialized" );
 
     return _order_subsystem; 
 }
@@ -1969,8 +1968,9 @@ void Spooler::start()
         _log->warn( message_string( "SCHEDULER-259" ) );  // "Java kann nicht gestartet werden. Scheduler startet ohne Java."
     }
 
+    _event_subsystem = new_event_subsystem( this );
     _event_subsystem->switch_subsystem_state( subsys_initialized );
-    _event_subsystem ->switch_subsystem_state( subsys_loaded );
+    _event_subsystem->switch_subsystem_state( subsys_loaded );
 
     // Datenbank (startet Java, wenn JDBC verwendet wird)
 
@@ -2204,6 +2204,7 @@ void Spooler::stop( const exception* )
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
     _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
+    if (_event_subsystem)
     _event_subsystem           ->switch_subsystem_state( subsys_stopped );
     _java_subsystem            ->switch_subsystem_state( subsys_stopped );
     _supervisor                ->switch_subsystem_state( subsys_stopped );

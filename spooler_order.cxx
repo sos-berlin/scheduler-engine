@@ -49,7 +49,7 @@ struct Job_chain_folder : Job_chain_folder_interface
 
 struct Order_id_space : Object, Scheduler_object
 {
-                                Order_id_space              ( Order_subsystem* );
+                                Order_id_space              ( Order_subsystem_impl* );
 
     void                        close                       ();
   //void                        connect_job_chain           ( Job_chain* );
@@ -88,7 +88,7 @@ struct Order_id_space : Object, Scheduler_object
 
 struct Order_id_spaces : Order_id_spaces_interface
 {
-                                Order_id_spaces             ( Order_subsystem* );
+                                Order_id_spaces             ( Order_subsystem_impl* );
                                ~Order_id_spaces             ()                                     {}
 
     Spooler*                    spooler                     ();
@@ -107,16 +107,16 @@ struct Order_id_spaces : Order_id_spaces_interface
     void                        disconnect_order_id_space   ( Job_chain*, Job_chain* causing_job_chain, const String_set& original_job_chain_set, Job_chain_set* job_chains );
 
     Fill_zero                      _zero_;
-    Order_subsystem*               _order_subsystem;
+    Order_subsystem_impl*               _order_subsystem;
     vector< ptr<Order_id_space> >  _array;                  // [0] unbenutzt, Lücken sind NULL
 };
 
-//----------------------------------------------------------------------------------Order_subsystem
+//-----------------------------------------------------------------------------Order_subsystem_impl
 
-struct Order_subsystem : Order_subsystem_interface
+struct Order_subsystem_impl : Order_subsystem
 {
 
-                                Order_subsystem             ( Spooler* );
+                                Order_subsystem_impl        ( Spooler* );
 
 
     // Subsystem
@@ -129,7 +129,7 @@ struct Order_subsystem : Order_subsystem_interface
     void                        self_check                  ()                                      { _order_id_spaces.self_check(); }
 
 
-    // Order_subsystem_interface
+    // Order_subsystem
 
     void                        check_exception             ();
 
@@ -598,33 +598,33 @@ void Database_order_detector::request_order()
 
 //------------------------------------------------------------------------------new_order_subsystem
 
-ptr<Order_subsystem_interface> new_order_subsystem( Scheduler* scheduler )
+ptr<Order_subsystem> new_order_subsystem( Scheduler* scheduler )
 {
-    ptr<Order_subsystem> order_subsystem = Z_NEW( Order_subsystem( scheduler ) );
+    ptr<Order_subsystem_impl> order_subsystem = Z_NEW( Order_subsystem_impl( scheduler ) );
     return +order_subsystem;
 }
 
-//---------------------------------------------Order_subsystem_interface::Order_subsystem_interface
+//-----------------------------------------------------------------Order_subsystem::Order_subsystem
 
-Order_subsystem_interface::Order_subsystem_interface( Scheduler* scheduler ) 
+Order_subsystem::Order_subsystem( Scheduler* scheduler ) 
 : 
     file_based_subsystem<Job_chain>( scheduler, this, Scheduler_object::type_order_subsystem )
 {
 }
 
-//-----------------------------------------------------------------Order_subsystem::Order_subsystem
+//-------------------------------------------------------Order_subsystem_impl::Order_subsystem_impl
 
-Order_subsystem::Order_subsystem( Spooler* spooler )
+Order_subsystem_impl::Order_subsystem_impl( Spooler* spooler )
 :
-    Order_subsystem_interface( spooler ),
+    Order_subsystem( spooler ),
     _zero_(this+1),
     _order_id_spaces(this)
 {
 }
 
-//---------------------------------------------------------------------------Order_subsystem::close
+//----------------------------------------------------------------------Order_subsystem_impl::close
 
-void Order_subsystem::close()
+void Order_subsystem_impl::close()
 {
     Z_LOGI2( "scheduler", Z_FUNCTION << "\n" );
 
@@ -641,9 +641,9 @@ void Order_subsystem::close()
     file_based_subsystem<Job_chain>::close();
 }
 
-//------------------------------------------------------------Order_subsystem::subsystem_initialize
+//-------------------------------------------------------Order_subsystem_impl::subsystem_initialize
 
-bool Order_subsystem::subsystem_initialize()
+bool Order_subsystem_impl::subsystem_initialize()
 {
     init_file_order_sink( _spooler );
 
@@ -651,9 +651,9 @@ bool Order_subsystem::subsystem_initialize()
     return true;
 }
 
-//------------------------------------------------------------------Order_subsystem::subsystem_load
+//-------------------------------------------------------------Order_subsystem_impl::subsystem_load
 
-bool Order_subsystem::subsystem_load()
+bool Order_subsystem_impl::subsystem_load()
 {
     _subsystem_state = subsys_loaded;
     file_based_subsystem<Job_chain>::subsystem_load();
@@ -661,9 +661,9 @@ bool Order_subsystem::subsystem_load()
     return true;
 }
 
-//--------------------------------------------------------------Order_subsystem::subsystem_activate
+//---------------------------------------------------------Order_subsystem_impl::subsystem_activate
 
-bool Order_subsystem::subsystem_activate()
+bool Order_subsystem_impl::subsystem_activate()
 {
     _subsystem_state = subsys_active;  // Jetzt schon aktiv für die auszuführenden Skript-Funktionen <run_time start_time_function="">
 
@@ -679,33 +679,33 @@ bool Order_subsystem::subsystem_activate()
     return true;
 }
 
-//------------------------------------------------------------Order_subsystem::new_job_chain_folder
+//-------------------------------------------------------Order_subsystem_impl::new_job_chain_folder
 
-ptr<Job_chain_folder_interface> Order_subsystem::new_job_chain_folder( Folder* folder )
+ptr<Job_chain_folder_interface> Order_subsystem_impl::new_job_chain_folder( Folder* folder )
 {
     ptr<Job_chain_folder> result = Z_NEW( Job_chain_folder( folder ) );
     return +result;
 }
 
-//------------------------------------------------------------------Order_subsystem::new_file_based
+//-------------------------------------------------------------Order_subsystem_impl::new_file_based
 
-ptr<Job_chain> Order_subsystem::new_file_based()
+ptr<Job_chain> Order_subsystem_impl::new_file_based()
 {
     return new Job_chain( _spooler );
 }
 
-//-----------------------------------------------------Order_subsystem::new_file_baseds_dom_element
+//------------------------------------------------Order_subsystem_impl::new_file_baseds_dom_element
 
-xml::Element_ptr Order_subsystem::new_file_baseds_dom_element( const xml::Document_ptr& doc, const Show_what& )
+xml::Element_ptr Order_subsystem_impl::new_file_baseds_dom_element( const xml::Document_ptr& doc, const Show_what& )
 { 
     xml::Element_ptr result = doc.createElement( "job_chains" );
     result.setAttribute( "count", (int64)_file_based_map.size() );
     return result;
 }
 
-//----------------------------------------------------Order_subsystem::append_calendar_dom_elements
+//-----------------------------------------------Order_subsystem_impl::append_calendar_dom_elements
 
-void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
+void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )
 {
     FOR_EACH_JOB_CHAIN( job_chain )
     {
@@ -754,9 +754,9 @@ void Order_subsystem::append_calendar_dom_elements( const xml::Element_ptr& elem
     }
 }
 
-//-------------------------------------------------------------------Order_subsystem::has_any_order
+//--------------------------------------------------------------Order_subsystem_impl::has_any_order
 
-bool Order_subsystem::has_any_order()
+bool Order_subsystem_impl::has_any_order()
 { 
     FOR_EACH_JOB_CHAIN( job_chain )
     {
@@ -766,9 +766,9 @@ bool Order_subsystem::has_any_order()
     return false;
 }
 
-//---------------------------------------------------------------------Order_subsystem::order_count
+//----------------------------------------------------------------Order_subsystem_impl::order_count
 
-//int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507 Erste Version
+//int Order_subsystem_impl::order_count( Read_transaction* ta ) const // JS-507 Erste Version
 //{
 //    int result = 0;
 //
@@ -798,9 +798,9 @@ bool Order_subsystem::has_any_order()
 //    return result;
 //}
 
-//--------------------------------------------------------Order_subsystem::load_order_from_database
+//---------------------------------------------------Order_subsystem_impl::load_order_from_database
 
-ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
     ptr<Order> result = try_load_order_from_database( outer_transaction, job_chain_path, order_id, flag );
 
@@ -809,9 +809,9 @@ ptr<Order> Order_subsystem::load_order_from_database( Transaction* outer_transac
     return result;
 }
 
-//----------------------------------------------------Order_subsystem::try_load_order_from_database
+//-----------------------------------------------Order_subsystem_impl::try_load_order_from_database
 
-ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
+ptr<Order> Order_subsystem_impl::try_load_order_from_database( Transaction* outer_transaction, const Absolute_path& job_chain_path, const Order::Id& order_id, Load_order_flags flag )
 {
     assert( !( flag & lo_lock )  ||  outer_transaction );   // lo_lock => outer_transaction
 
@@ -857,16 +857,16 @@ ptr<Order> Order_subsystem::try_load_order_from_database( Transaction* outer_tra
     return result;
 }
 
-//----------------------------------------------------------Order_subsystem::orders_are_distributed
+//-----------------------------------------------------Order_subsystem_impl::orders_are_distributed
 
-bool Order_subsystem::orders_are_distributed()
+bool Order_subsystem_impl::orders_are_distributed()
 {
     return _spooler->orders_are_distributed();
 }
 
-//-------------------------------------------------------------------Order_subsystem::request_order
+//--------------------------------------------------------------Order_subsystem_impl::request_order
 
-void Order_subsystem::request_order()
+void Order_subsystem_impl::request_order()
 {
     if( _database_order_detector )
     {
@@ -874,16 +874,16 @@ void Order_subsystem::request_order()
     }
 }
 
-//-----------------------------------------------------------------Order_subsystem::check_exception
+//------------------------------------------------------------Order_subsystem_impl::check_exception
 
-void Order_subsystem::check_exception()
+void Order_subsystem_impl::check_exception()
 {
     if( _database_order_detector )  _database_order_detector->async_check_exception();
 }
 
-//--------------------------------------------------------Order_subsystem::order_db_where_condition
+//---------------------------------------------------Order_subsystem_impl::order_db_where_condition
 
-string Order_subsystem::order_db_where_condition( const Absolute_path& job_chain_path, const string& order_id )
+string Order_subsystem_impl::order_db_where_condition( const Absolute_path& job_chain_path, const string& order_id )
 {
     S result;
 
@@ -892,9 +892,9 @@ string Order_subsystem::order_db_where_condition( const Absolute_path& job_chain
     return result;
 }
 
-//--------------------------------------------------------------Order_subsystem::db_where_condition
+//---------------------------------------------------------Order_subsystem_impl::db_where_condition
 
-string Order_subsystem::db_where_condition() const
+string Order_subsystem_impl::db_where_condition() const
 {
     S result;
 
@@ -903,9 +903,9 @@ string Order_subsystem::db_where_condition() const
     return result;
 }
 
-//----------------------------------------------------Order_subsystem::job_chain_db_where_condition
+//-----------------------------------------------Order_subsystem_impl::job_chain_db_where_condition
 
-string Order_subsystem::job_chain_db_where_condition( const Absolute_path& job_chain_path )
+string Order_subsystem_impl::job_chain_db_where_condition( const Absolute_path& job_chain_path )
 {
     S result;
 
@@ -914,9 +914,9 @@ string Order_subsystem::job_chain_db_where_condition( const Absolute_path& job_c
     return result;
 }
 
-//---------------------------------------Order_subsystem::distributed_job_chains_db_where_condition
+//----------------------------------Order_subsystem_impl::distributed_job_chains_db_where_condition
 
-string Order_subsystem::distributed_job_chains_db_where_condition() const  // JS-507
+string Order_subsystem_impl::distributed_job_chains_db_where_condition() const  // JS-507
 {
     list<string> job_chain_names;
     FOR_EACH_JOB_CHAIN( job_chain )
@@ -934,9 +934,9 @@ string Order_subsystem::distributed_job_chains_db_where_condition() const  // JS
                    << " and `job_chain` in (" << join( ",", job_chain_names ) << ")"; 
 }
 
-//---------------------------------------------------------------------Order_subsystem::order_count
+//----------------------------------------------------------------Order_subsystem_impl::order_count
 
-int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507
+int Order_subsystem_impl::order_count( Read_transaction* ta ) const // JS-507
 {
     int result = 0;
 
@@ -965,9 +965,9 @@ int Order_subsystem::order_count( Read_transaction* ta ) const // JS-507
 }
 
 
-//----------------------------------------------------------Order_subsystem::processing_order_count
+//-----------------------------------------------------Order_subsystem_impl::processing_order_count
 
-int Order_subsystem::processing_order_count( Read_transaction* ta ) const  // JS-507
+int Order_subsystem_impl::processing_order_count( Read_transaction* ta ) const  // JS-507
 {
     int result = 0;
     if( ta ) {
@@ -989,26 +989,26 @@ int Order_subsystem::processing_order_count( Read_transaction* ta ) const  // JS
 }
 
 
-//------------------------------------------------------------Order_subsystem::count_started_orders
+//-------------------------------------------------------Order_subsystem_impl::count_started_orders
 
-void Order_subsystem::count_started_orders()
+void Order_subsystem_impl::count_started_orders()
 {
     _started_orders_count++;
     //_spooler->update_console_title();
 }
 
-//-----------------------------------------------------------Order_subsystem::count_finished_orders
+//------------------------------------------------------Order_subsystem_impl::count_finished_orders
 
-void Order_subsystem::count_finished_orders()
+void Order_subsystem_impl::count_finished_orders()
 {
     _finished_orders_count++;
     _spooler->update_console_title( 2 );
 }
 
 
-//----------------------------------------------------------------------Order_subsystem::dom_element
+//-----------------------------------------------------------------Order_subsystem_impl::dom_element
 
-xml::Element_ptr Order_subsystem::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const // JS-507
+xml::Element_ptr Order_subsystem_impl::dom_element( const xml::Document_ptr& dom_document, const Show_what& show_what ) const // JS-507
 {
     // xml::Element_ptr result = Subsystem::dom_element( dom_document, show_what );
     xml::Element_ptr result = File_based_subsystem::dom_element( dom_document, show_what );
@@ -1034,9 +1034,9 @@ xml::Element_ptr Order_subsystem::dom_element( const xml::Document_ptr& dom_docu
 
 }
 
-//----------------------------------------------------------------Order_subsystem::state_statistic_element
+//-----------------------------------------------------------Order_subsystem_impl::state_statistic_element
 
-xml::Element_ptr Order_subsystem::state_statistic_element (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const
+xml::Element_ptr Order_subsystem_impl::state_statistic_element (const xml::Document_ptr& dom_document,  const string& attribute_name, const string& attribute_value, int count) const
 {
     xml::Element_ptr result = dom_document.createElement( "order.statistic" );
     result.setAttribute( attribute_name, attribute_value );
@@ -1909,7 +1909,7 @@ xml::Element_ptr Sink_node::dom_element( const xml::Document_ptr& document, cons
 Job_chain::Job_chain( Scheduler* scheduler )
 :
     Com_job_chain( this ),
-    file_based<Job_chain,Job_chain_folder_interface,Order_subsystem_interface>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
+    file_based<Job_chain,Job_chain_folder_interface,Order_subsystem>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(visible_yes)
@@ -2335,7 +2335,7 @@ void Job_chain::append_calendar_dom_elements( const xml::Element_ptr& element, S
 
     //if( _is_distributed  &&  options->_count < options->_limit )
     //{
-    //    Ist bereit von Order_subsystem::append_calendar_dom_elements() gelesen worden
+    //    Ist bereit von Order_subsystem_impl::append_calendar_dom_elements() gelesen worden
     //}
 }
 
@@ -2673,7 +2673,7 @@ bool Job_chain::on_activate()
 
         _order_sources.activate();
 
-        //    // Wird nur von Order_subsystem::activate() für beim Start des Schedulers geladene Jobketten gerufen,
+        //    // Wird nur von Order_subsystem_impl::activate() für beim Start des Schedulers geladene Jobketten gerufen,
         //    // um nach Start des Scheduler-Skripts die <run_time next_start_function="..."> berechnen zu können.
         //    // Für später hinzugefügte Jobketten wird diese Routine nicht gerufen (sie würde auch nichts tun).
         //    Z_FOR_EACH( Order_map, _order_map, o )
@@ -3329,9 +3329,9 @@ void Job_chain::database_record_load( Read_transaction* ta )
 
 //-----------------------------------------------------------------------Job_chain::order_subsystem
 
-Order_subsystem* Job_chain::order_subsystem() const
+Order_subsystem_impl* Job_chain::order_subsystem() const
 {
-    return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
+    return static_cast<Order_subsystem_impl*>( _spooler->order_subsystem() );
 }
 
 //---------------------------------------------------------------------------Job_chain::set_stopped
@@ -3436,7 +3436,7 @@ string Job_chain::state_name()     // Brauchen wir eigentlich nicht mehr, ist du
 
 //-----------------------------------------------------------------Order_id_spaces::Order_id_spaces
 
-Order_id_spaces::Order_id_spaces( Order_subsystem* order_subsystem )
+Order_id_spaces::Order_id_spaces( Order_subsystem_impl* order_subsystem )
 :
     _zero_(this+1),
     _order_subsystem(order_subsystem)
@@ -3744,7 +3744,7 @@ xml::Element_ptr Order_id_spaces::dom_element( const xml::Document_ptr& document
 
 //-------------------------------------------------------------------Order_id_space::Order_id_space
 
-Order_id_space::Order_id_space( Order_subsystem* order_subsystem )
+Order_id_space::Order_id_space( Order_subsystem_impl* order_subsystem )
 : 
     Scheduler_object( order_subsystem->_spooler, this, type_job_chain_group ), 
     _zero_(this+1)
@@ -5538,7 +5538,7 @@ bool Order::db_handle_modified_order( Transaction* outer_transaction )
 
     try
     {
-        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_path, _id, Order_subsystem::lo_lock ) )
+        if( ptr<Order> modified_order = order_subsystem()->try_load_order_from_database( outer_transaction, _job_chain_path, _id, Order_subsystem_impl::lo_lock ) )
         {
             if( modified_order->_is_replacement )
             {
@@ -6675,7 +6675,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if( _id_locked )
         {
-           // report_event( "SCHEDULER-TEST" ); // kommentar
+            Z_DEBUG_ONLY( report_event( "SCHEDULER-ORDER-TEST" ); )
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
@@ -7707,9 +7707,9 @@ Web_service_operation* Order::web_service_operation() const
 
 //---------------------------------------------------------------------------Order::order_subsystem
 
-Order_subsystem* Order::order_subsystem() const
+Order_subsystem_impl* Order::order_subsystem() const
 {
-    return static_cast<Order_subsystem*>( _spooler->order_subsystem() );
+    return static_cast<Order_subsystem_impl*>( _spooler->order_subsystem() );
 }
 
 //----------------------------------------------------------------------------------Order::obj_name

@@ -112,7 +112,7 @@ struct Scheduler_object
     Database*                   db                          () const;
     Job_subsystem*              job_subsystem               () const;
     Task_subsystem*             task_subsystem              () const;
-    Order_subsystem_interface*  order_subsystem             () const;
+    Order_subsystem*            order_subsystem             () const;
 
     Spooler*                   _spooler;
     IUnknown*                  _my_iunknown;

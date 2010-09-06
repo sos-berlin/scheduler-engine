@@ -1301,7 +1301,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
                                            : job_chain->order( id );
 
         if( !order  &&  job_chain->is_distributed() ) 
-            order = _spooler->order_subsystem()->load_order_from_database( &ta, job_chain_path, id, Order_subsystem_interface::lo_lock );  // Exception, wenn von einem Scheduler belegt
+            order = _spooler->order_subsystem()->load_order_from_database( &ta, job_chain_path, id, Order_subsystem::lo_lock );  // Exception, wenn von einem Scheduler belegt
 
         if( xml::Element_ptr run_time_element = modify_order_element.select_node( "run_time" ) )
         {

@@ -569,6 +569,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\jni__sos__scheduler__Order.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\jni__sos__scheduler__Order_subsystem.cxx"
+					>
+				</File>
+				<File
 					RelativePath=".\jni__sos__scheduler__Prefix_log.cxx"
 					>
 				</File>
