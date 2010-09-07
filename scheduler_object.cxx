@@ -123,6 +123,13 @@ void Scheduler_object::report_event( const string& code )
     spooler()->event_subsystem()->report( e );
 }
 
+//-------------------------------------------------------------------Scheduler_object::report_event
+
+//void Scheduler_object::report_event(EventJ* e)
+//{
+//    spooler()->event_subsystem()->report( e );
+//}
+
 //-------------------------------------------------------Scheduler_object::write_element_attributes
 
 void Scheduler_object::write_element_attributes( const xml::Element_ptr& ) const

@@ -6676,6 +6676,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
         if( _id_locked )
         {
             Z_DEBUG_ONLY( report_event( "SCHEDULER-ORDER-TEST" ); )
+            //Z_DEBUG_ONLY( report_event(OrderStateChangeEventJ::new_instance(javaSister()); )
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
