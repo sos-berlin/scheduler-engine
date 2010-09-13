@@ -324,7 +324,7 @@ struct Command_processor
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Communication::Operation*  _communication_operation;
-    bool                       _load_config_immediately;
+    bool                       _load_base_config_immediately;
     bool                       _dont_log_command;
     xml::Document_ptr          _answer;
     Xc_copy                    _error;

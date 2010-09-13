@@ -1,24 +1,4 @@
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
-// §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
-// §1479
-
-/*
-    Hier sind implementiert
-
-    Script_instance
-    Spooler
-    spooler_main()
-    sos_main()
-
-
-    Log-Kategorien:
-
-    scheduler.call                  Beginn und Ende der Job-Methoden (spooler_process() etc.)
-    scheduler.log                   Logs (Task-Log etc., open, unlink)
-    scheduler.order                 payload = 
-    scheduler.nothing_done
-    scheduler.wait                  Warteaufrufe 
-*/
 
 #include "spooler.h"
 #include "scheduler_client.h"
@@ -68,7 +48,6 @@ namespace scheduler {
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    scheduler_character_encoding        = xml::default_character_encoding; // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
-//const string                    scheduler_character_encoding        = "ISO-8859-1";     // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -104,8 +83,6 @@ const double                    delete_temporary_files_retry        = 0.1;
 
 const string                    temporary_process_class_name        = "(temporaries)";
 static bool                     is_daemon                           = false;
-//static t                      daemon_starter_pid;
-//bool                          spooler_is_running      = false;
 
 volatile int                    ctrl_c_pressed                      = 0;                // Tatsächliches Signal ist in last_signal
 volatile int                    ctrl_c_pressed_handled              = 0;
@@ -145,7 +122,6 @@ struct Error_settings
         _cc   = read_profile_string( ini_file, "spooler", "log_mail_cc"  , _cc   );
         _bcc  = read_profile_string( ini_file, "spooler", "log_mail_bcc" , _bcc  );
         _smtp = read_profile_string( ini_file, "spooler", "smtp"         , _smtp );
-        //_queue_only = read_profile_string( ini_file, "spooler", "mail_queue_only", _queue_only );
     }
 
     Fill_zero                  _zero_;
@@ -154,7 +130,6 @@ struct Error_settings
     string                     _cc;
     string                     _bcc;
     string                     _smtp;
-  //bool                       _queue_only;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -162,8 +137,6 @@ struct Error_settings
 static Error_settings           error_settings;
 
 //-------------------------------------------------------------------------------------------------
-
-
 
 /*
 struct Set_console_code_page
@@ -283,14 +256,6 @@ static void self_test()
 {
     zschimmer::Log_categories::self_test();
     zschimmer::file::File_path::self_test();
-
-//    if( extra )
-//    {
-//#       ifdef Z_DEBUG
-//            zschimmer::test_truncate_to_ellipsis();
-//#       endif
-//    }
-
     Path::self_test();
     Absolute_path::self_test();
     test_read_value();
@@ -311,7 +276,6 @@ static void send_error_email( const string& subject, const string& text )
         if( error_settings._cc   != "" )  msg->set_cc  ( error_settings._cc   );
         if( error_settings._bcc  != "" )  msg->set_bcc ( error_settings._bcc  );
         if( error_settings._smtp != "" )  msg->set_smtp( error_settings._smtp );
-        //if( error_settings._queue_only )  msg->set_queue_only( true );
 
         string body = remove_password( text );
 
@@ -713,6 +677,9 @@ Spooler::Spooler()
     _configuration_directories(confdir__max+1),
     _configuration_directories_as_option_set(confdir__max+1)
 {
+    _log->init( this );              // Nochmal nach load_argv()
+    _log->set_title( "Main log" );
+
     Z_DEBUG_ONLY( self_test() );
 
     if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
@@ -744,23 +711,6 @@ Spooler::Spooler()
         sos::scheduler::embedded_and_dynamic_files.string_from_embedded_file(sos::scheduler::xml_schema_path)
         ) );
 
-    // nicht die Reihenfolge ändern !!!!!!
-    _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
-    _folder_subsystem           = new_folder_subsystem( this );
-    _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
-    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
-    _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
-    _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
-    _job_subsystem              = new_job_subsystem( this );
-    _task_subsystem             = Z_NEW( Task_subsystem( this ) );
-    _order_subsystem            = new_order_subsystem( this );
-    _standing_order_subsystem   = new_standing_order_subsystem( this );
-    _java_subsystem             = new_java_subsystem( this );
-    _db                         = Z_NEW( Database( this ) );
-    _http_server                = http::new_http_server( this );
-    _web_services               = new_web_services( this );
-    _supervisor                 = supervisor::new_supervisor( this );
-
     _variable_set_map[ variable_set_name_for_substitution ] = _environment;
 
 
@@ -768,10 +718,7 @@ Spooler::Spooler()
         ::signal( SIGPIPE, SIG_IGN );    // Fuer Linux eigentlich nicht erforderlich, weil com_remote.cxx() SIGPIPE selbst unterdrueckt
 #   endif
     
-
     set_ctrl_c_handler( true );
-
-    _connection_manager = Z_NEW( object_server::Connection_manager );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -797,18 +744,7 @@ void Spooler::close()
     spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
-    // In der Reihenfolder der Abhängigkeiten löschen:
-    // nicht die Reihenfolge ändern !!!!!!
-    _standing_order_subsystem   = NULL;
-    _order_subsystem            = NULL;
-    _task_subsystem             = NULL;
-    _job_subsystem              = NULL;
-    _lock_subsystem             = NULL;
-    _process_class_subsystem    = NULL;
-    _schedule_subsystem         = NULL;
-    _scheduler_script_subsystem = NULL;
-    _folder_subsystem           = NULL;
-    _db                         = NULL;
+    destroy_subsystems();
     
     _security.clear();
 
@@ -1358,7 +1294,7 @@ string Spooler::state_name( State state )
 
 void Spooler::self_check()
 {
-    order_subsystem()->self_check();
+    if (Order_subsystem* o = _order_subsystem)  o->self_check();
 }
 
 //--------------------------------------------------------------------------------Spooler::send_cmd
@@ -1437,8 +1373,25 @@ void Spooler::send_cmd()
 
 void Spooler::load_arg()
 {
-    assert( current_thread_id() == _thread_id );
+    read_ini_filename();
+    read_ini_file();
+    read_command_line_arguments();
+    handle_configuration_directories();
 
+    if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) ) {
+        _configuration_is_job_script = true;
+        _configuration_job_script_language = "javascript";
+        if( !_log_directory_as_option_set )  _log_directory = "*stderr";
+    }
+
+    //_manual = !_job_name.empty();
+    //if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
+}
+
+//-----------------------------------------------------------------------Spooler::read_ini_filename
+
+void Spooler::read_ini_filename()
+{
     for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
     {
         if( opt.with_value( "ini" ) )  _factory_ini = opt.value();
@@ -1447,10 +1400,12 @@ void Spooler::load_arg()
     }
 
     sos::mail::Mail_static::instance()->set_factory_ini_path( _factory_ini );
+}
 
+//---------------------------------------------------------------------------Spooler::read_ini_file
 
-    string log_level = as_string( _log_level );
-
+void Spooler::read_ini_file()
+{
     set_id                      (            read_profile_string    ( _factory_ini, "spooler", "id"                 ) );
     _configuration_file_path    =            read_profile_string    ( _factory_ini, "spooler", "config"             );
     _log_directory              =            read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
@@ -1458,8 +1413,7 @@ void Spooler::load_arg()
     _include_path               =            read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
     _include_path               = subst_env( read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path ) );   _include_path_as_option_set  = !_include_path.empty();
     _spooler_param              =            read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
-    log_level                   =            read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
-    _tasks_tablename            = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_tasks_table"     , "SCHEDULER_TASKS"   ) );
+    _log_level                  = make_log_level(read_profile_string( _factory_ini, "spooler", "log_level"          , as_string(_log_level) ));   
     _job_history_columns        =            read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _job_history_yes            =            read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
     _job_history_on_process     =            read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
@@ -1488,17 +1442,6 @@ void Spooler::load_arg()
 
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
 
-    _db->_jobs_table           .set_name(    read_profile_string ( _factory_ini, "spooler", "db_jobs_table"           , _db->_jobs_table           .name() ) );
-    _db->_job_chains_table     .set_name(    read_profile_string ( _factory_ini, "spooler", "db_job_chains_table"     , _db->_job_chains_table     .name() ) );
-    _db->_job_chain_nodes_table.set_name(    read_profile_string ( _factory_ini, "spooler", "db_job_chain_nodes_table", _db->_job_chain_nodes_table.name() ) );
-    // Könnte auch auf Table_descriptor umgestellt werden:
-    _job_history_tablename      = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_history_table"           , "SCHEDULER_HISTORY" ) );
-    _order_history_tablename    = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_history_table"     , "SCHEDULER_ORDER_HISTORY" ) );
-    _order_step_history_tablename=ucase(     read_profile_string    ( _factory_ini, "spooler", "db_order_step_history_table", "SCHEDULER_ORDER_STEP_HISTORY" ) );
-    _orders_tablename           = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_orders_table"            , "SCHEDULER_ORDERS"    ) );
-    _variables_tablename        = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_variables_table"         , "SCHEDULER_VARIABLES" ) );
-    _clusters_tablename         = ucase(     read_profile_string    ( _factory_ini, "spooler", "db_members_table"           , "SCHEDULER_CLUSTERS" ) );
-
     _mail_on_warning = read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error   );
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
@@ -1520,15 +1463,14 @@ void Spooler::load_arg()
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
   //_zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
+}
+
+//-------------------------------------------------------------Spooler::read_command_line_arguments
+
+void Spooler::read_command_line_arguments()
+{
 
     _my_program_filename = _argv? _argv[0] : "(missing program path)";
-
-    //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
-    {
-      //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-        java_subsystem()->java_vm()->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
-      //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
-    }
 
 
     int param_count = 0;
@@ -1586,7 +1528,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else
-            if( opt.with_value( "log-level"        ) )  log_level = opt.value();
+            if( opt.with_value( "log-level"        ) )  _log_level = make_log_level(opt.value());
             else
             //if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
             //else
@@ -1672,8 +1614,6 @@ void Spooler::load_arg()
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
 
-        _log_level = make_log_level( log_level );
-
         if( _log_level <= log_debug_spooler )  _debug = true;
 
         if( _configuration_file_path.empty() )  z::throw_xc( "SCHEDULER-115" );
@@ -1683,8 +1623,12 @@ void Spooler::load_arg()
         if( !_is_service )  print_usage();
         throw;
     }
+}
 
+//--------------------------------------------------------Spooler::handle_configuration_directories
 
+void Spooler::handle_configuration_directories()
+{
     if( _configuration_directories[ confdir_local ] == "" )
     {
         if( file::File_info( _configuration_file_path ).is_directory() )
@@ -1714,74 +1658,171 @@ void Spooler::load_arg()
 
     if( _central_configuration_directory == "" )
         _central_configuration_directory = File_path( File_path( _configuration_file_path.directory(), "remote" ), "" );
-
-    if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) )  
-    {
-        _configuration_is_job_script = true;
-        _configuration_job_script_language = "javascript";
-
-        if( !_log_directory_as_option_set )  _log_directory = "*stderr";
-    }
-
-    //_manual = !_job_name.empty();
-    //if( _manual  &&  !_log_directory_as_option_set )  _log_directory = "*stderr";
 }
 
 //------------------------------------------------------------------------------------Spooler::load
 
 void Spooler::load()
 {
-    _log->init( this );              // Nochmal nach load_argv()
-    _log->set_title( "Main log" );
-
     set_state( s_loading );
-
     tzset();
-
     _security.clear();             
-
-    _java_subsystem->switch_subsystem_state( subsys_initialized );
-    //_java_vm = get_java_vm( false );
-    //_java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
-
-
     load_arg();
-    
+    open_pid_file();
+    _log->open();
+    fetch_hostname();
 
+    read_xml_configuration();
+    initialize_java_subsystem();
+    new_subsystems();
+    initialize_subsystems();
+    load_config( _config_element_to_load, _config_source_filename );
 
-    if( _pid_filename != ""  &&  !_pid_file.opened() )
-    {
+    if( _zschimmer_mode )  initialize_sleep_handler();
+}
+
+//---------------------------------------------------------------------------Spooler::open_pid_file
+
+void Spooler::open_pid_file() 
+{
+    if( _pid_filename != ""  &&  !_pid_file.opened() ) {
         _pid_file.open( _pid_filename, "w" );
         _pid_file.unlink_later();
         _pid_file.print( as_string( getpid() ) );
         _pid_file.print( "\n" );
         _pid_file.flush();
     }
+}
 
-    _log->open();
+//--------------------------------------------------------------------------Spooler::fetch_hostname
 
+void Spooler::fetch_hostname()
+{
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log->warn( "gethostname(): " + z_strerror( errno ) );
     _short_hostname = hostname;
     _complete_hostname = complete_computer_name();
-    
-    if( _cluster_configuration._orders_are_distributed  ||  _cluster_configuration._demand_exclusiveness ) 
-    {
-        _cluster = cluster::new_cluster_subsystem( this );
-        _cluster->set_configuration( _cluster_configuration );
-        _cluster->switch_subsystem_state( subsys_initialized );
-    }
+}
 
-    _supervisor              ->switch_subsystem_state( subsys_initialized );
-    _folder_subsystem        ->switch_subsystem_state( subsys_initialized );
-    _schedule_subsystem      ->switch_subsystem_state( subsys_initialized );
-    _process_class_subsystem ->switch_subsystem_state( subsys_initialized );
-    _lock_subsystem          ->switch_subsystem_state( subsys_initialized );
-    _order_subsystem         ->switch_subsystem_state( subsys_initialized );
-    _standing_order_subsystem->switch_subsystem_state( subsys_initialized );
-    _http_server             ->switch_subsystem_state( subsys_initialized );
-    _web_services            ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+//---------------------------------------------------------------Spooler::initialize_java_subsystem
 
+void Spooler::initialize_java_subsystem()
+{
+    _java_subsystem = new_java_subsystem(this);
+
+    // Java-Optionen und classpath sind nicht in <base> möglich, siehe Meldung SCHEDULER-475.
+    _java_subsystem->set_java_options  ( subst_env( _config_element_to_load.getAttribute( "java_options"    ) ) );
+    _java_subsystem->prepend_class_path( subst_env( _config_element_to_load.getAttribute( "java_class_path" ) ) );
+
+    _java_subsystem->switch_subsystem_state( subsys_initialized );
+}
+
+//--------------------------------------------------------------------------Spooler::new_subsystems
+
+void Spooler::new_subsystems()
+{
+    // nicht die Reihenfolge ändern !!!!!!
+    _event_subsystem            = new_event_subsystem( this );
+    _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
+    _folder_subsystem           = new_folder_subsystem( this );
+    _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
+    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
+    _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
+    _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
+    _job_subsystem              = new_job_subsystem( this );
+    _task_subsystem             = Z_NEW( Task_subsystem( this ) );
+    _order_subsystem            = new_order_subsystem( this );
+    _standing_order_subsystem   = new_standing_order_subsystem( this );
+    _db                         = Z_NEW( Database( this ) );
+    _http_server                = http::new_http_server( this );
+    _web_services               = new_web_services( this );
+    _supervisor                 = supervisor::new_supervisor( this );
+
+    _connection_manager = Z_NEW( object_server::Connection_manager );
+}
+
+//----------------------------------------------------------------------Spooler::destroy_subsystems
+
+void Spooler::destroy_subsystems()
+{
+    // In der Reihenfolder der Abhängigkeiten löschen:
+    // nicht die Reihenfolge ändern !!!!!!
+    _standing_order_subsystem   = NULL;
+    _order_subsystem            = NULL;
+    _task_subsystem             = NULL;
+    _job_subsystem              = NULL;
+    _lock_subsystem             = NULL;
+    _process_class_subsystem    = NULL;
+    _schedule_subsystem         = NULL;
+    _scheduler_script_subsystem = NULL;
+    _folder_subsystem           = NULL;
+    _db                         = NULL;
+}
+
+//-------------------------------------------------------------------Spooler::initialize_subsystems
+
+void Spooler::initialize_subsystems()
+{
+    initialize_cluster();
+    _supervisor                ->switch_subsystem_state( subsys_initialized );
+    _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
+    _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
+    _process_class_subsystem   ->switch_subsystem_state( subsys_initialized );
+    _lock_subsystem            ->switch_subsystem_state( subsys_initialized );
+    _job_subsystem             ->switch_subsystem_state( subsys_initialized );
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );
+    _order_subsystem           ->switch_subsystem_state( subsys_initialized );
+    _standing_order_subsystem  ->switch_subsystem_state( subsys_initialized );
+    _http_server               ->switch_subsystem_state( subsys_initialized );
+    _web_services              ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+}
+
+//-------------------------------------------------------------------------Spooler::load_subsystems
+
+void Spooler::load_subsystems()
+{
+    _java_subsystem            ->switch_subsystem_state( subsys_loaded );
+    _event_subsystem           ->switch_subsystem_state( subsys_loaded );
+    _folder_subsystem          ->switch_subsystem_state( subsys_loaded );
+
+    if( !_ignore_process_classes )
+    _process_class_subsystem   ->switch_subsystem_state( subsys_loaded );
+
+    _schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
+    _lock_subsystem            ->switch_subsystem_state( subsys_loaded );
+    _job_subsystem             ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
+    _order_subsystem           ->switch_subsystem_state( subsys_loaded );
+    _standing_order_subsystem  ->switch_subsystem_state( subsys_loaded );
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_loaded );
+}
+
+//---------------------------------------------------------------------Spooler::activate_subsystems
+
+void Spooler::activate_subsystems()
+{
+    // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
+    detect_warning_and_send_mail();
+
+    _event_subsystem         ->switch_subsystem_state( subsys_active );
+    _folder_subsystem        ->switch_subsystem_state( subsys_active );
+
+    if( !_ignore_process_classes )
+    _process_class_subsystem ->switch_subsystem_state( subsys_active );
+
+    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
+    _lock_subsystem          ->switch_subsystem_state( subsys_active );
+    _job_subsystem           ->switch_subsystem_state( subsys_active );
+    _order_subsystem         ->switch_subsystem_state( subsys_active );
+    _standing_order_subsystem->switch_subsystem_state( subsys_active );
+    _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+}
+
+//------------------------------------------------------------------Spooler::read_xml_configuration
+
+void Spooler::read_xml_configuration()
+{
+    assert(!_config_element_to_load);
 
     Command_processor cp ( this, Security::seclev_all );
     _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
@@ -1789,53 +1830,14 @@ void Spooler::load()
                                             // damit der Scheduler nicht in einem TCP-Kommando blockiert.
 
     if( _configuration_is_job_script )
-    {
-        S configuration;
-
-        configuration << 
-            "<?xml version='1.0'?>\n" 
-            "<spooler>\n" 
-            "    <config>\n"
-            "        <jobs>\n"
-            "            <job name='" << xml::encode_attribute_value( _configuration_file_path.base_name() ) << "'>\n"
-            "                <script language='" << xml::encode_attribute_value( _configuration_job_script_language ) << "'>\n"
-            "                   <include file='" << xml::encode_attribute_value( _configuration_file_path ) << "'/>\n"
-            "                </script>\n"
-            "                <run_time once='yes'/>\n"
-            "            </job>\n"
-            "        </jobs>\n"
-            "    </config>\n"
-            "</spooler>\n";
-
-        cp.execute( configuration );
-    }
+        cp.execute( configuration_for_single_job_script() );
     else
         cp.execute_config_file( _configuration_file_path );
 
-
-
-#   ifdef Z_WINDOWS
-        if( _zschimmer_mode )
-        {
-            _waitable_timer.set_handle( CreateWaitableTimer( NULL, FALSE, NULL ) );
-            if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
-
-            _waitable_timer.add_to( &_wait_handles );
-        }
-#   endif
+    assert(_config_element_to_load);
 }
 
 //----------------------------------------------------------------------------Spooler::create_window
-/*
-#if defined Z_WINDOWS && defined Z_DEBUG
-    
-    static LRESULT CALLBACK window_callback( HWND, UINT, WPARAM, LPARAM )
-    {
-        return 0;
-    }
-
-#endif
-*/
 
 void Spooler::update_console_title( int level )
 {
@@ -1883,53 +1885,42 @@ void Spooler::update_console_title( int level )
 #   endif
 }
 
-//---------------------------------------------------------------------------Spooler::create_window
+//----------------------------------------------------------------Spooler::initialize_sleep_handler
 
-//void Spooler::create_window()
-//{
-//#   if defined Z_WINDOWS
-//
-///*
-//        const char* window_class_name = "Scheduler";
-//        WNDCLASSEX window_class;
-// 
-//        memset( &window_class, 0, sizeof window_class );
-//        window_class.cbSize        = sizeof window_class;
-//      //window_class.style         = CS_HREDRAW | CS_VREDRAW;
-//        window_class.lpfnWndProc   = window_callback;
-//        window_class.hInstance     = _hinstance;
-//        window_class.hbrBackground = (HBRUSH)COLOR_WINDOW;
-//        window_class.lpszClassName = window_class_name;
-// 
-//        RegisterClassEx( &window_class ); 
-//
-//
-//        HWND window = CreateWindow
-//        ( 
-//            window_class_name,
-//            name().c_str(),      // title-bar string 
-//            WS_OVERLAPPEDWINDOW, // top-level window 
-//            CW_USEDEFAULT,       // default horizontal position 
-//            CW_USEDEFAULT,       // default vertical position 
-//            CW_USEDEFAULT,       // default width 
-//            CW_USEDEFAULT,       // default height 
-//            (HWND)NULL,          // no owner window 
-//            (HMENU)NULL,         // use class menu 
-//            _hinstance,          // handle to application instance 
-//            NULL                 // no window-creation data 
-//        );
-//
-//        ShowWindow( window, SW_SHOW ); 
-//*/
-//#   endif
-//}
-//
+void Spooler::initialize_sleep_handler()
+{
+#ifdef Z_WINDOWS
+    _waitable_timer.set_handle( CreateWaitableTimer( NULL, FALSE, NULL ) );
+    if( !_waitable_timer )  z::throw_mswin( "CreateWaitableTimer" );
+
+    _waitable_timer.add_to( &_wait_handles );
+#endif
+}
+
+//-----------------------------------------------------Spooler::configuration_for_single_job_script
+
+string Spooler::configuration_for_single_job_script()
+{
+    return S() <<
+        "<?xml version='1.0'?>\n" 
+        "<spooler>\n" 
+        "    <config>\n"
+        "        <jobs>\n"
+        "            <job name='" << xml::encode_attribute_value( _configuration_file_path.base_name() ) << "'>\n"
+        "                <script language='" << xml::encode_attribute_value( _configuration_job_script_language ) << "'>\n"
+        "                   <include file='" << xml::encode_attribute_value( _configuration_file_path ) << "'/>\n"
+        "                </script>\n"
+        "                <run_time once='yes'/>\n"
+        "            </job>\n"
+        "        </jobs>\n"
+        "    </config>\n"
+        "</spooler>\n";
+}
+
 //-----------------------------------------------------------------------------------Spooler::start
 
 void Spooler::start()
 {
-    assert( current_thread_id() == _thread_id );
-
     static_log_categories.save_to( &_original_log_categories );
 
     _state_cmd = sc_none;
@@ -1947,32 +1938,9 @@ void Spooler::start()
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
 
-    _job_subsystem             ->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );    // Setzt _has_hava, _has_java_source
-    
+    _java_subsystem->switch_subsystem_state( subsys_loaded );
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
-
     _web_services->switch_subsystem_state( subsys_loaded );
-
-
-    try
-    {
-        _java_subsystem->switch_subsystem_state( subsys_loaded );
-      //_java_subsystem->switch_subsystem_state( subsys_active );
-
-// Neues Event_subsystem        _java_subsystem->java_vm()->start();
-    }
-    catch( const exception& x )
-    {
-        _log->error( x.what() );
-        _log->warn( message_string( "SCHEDULER-259" ) );  // "Java kann nicht gestartet werden. Scheduler startet ohne Java."
-    }
-
-    _event_subsystem = new_event_subsystem( this );
-    _event_subsystem->switch_subsystem_state( subsys_initialized );
-    _event_subsystem->switch_subsystem_state( subsys_loaded );
-
-    // Datenbank (startet Java, wenn JDBC verwendet wird)
 
     if( _cluster_configuration._orders_are_distributed || _cluster_configuration._demand_exclusiveness ) 
     {
@@ -2006,35 +1974,8 @@ void Spooler::start()
 
 void Spooler::activate()
 {
-    _folder_subsystem->switch_subsystem_state( subsys_loaded );
-
-    if( !_ignore_process_classes )
-    _process_class_subsystem->switch_subsystem_state( subsys_loaded );
-
-    _schedule_subsystem      ->switch_subsystem_state( subsys_loaded );
-    _lock_subsystem          ->switch_subsystem_state( subsys_loaded );
-    _job_subsystem           ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
-    _order_subsystem         ->switch_subsystem_state( subsys_loaded );
-    _standing_order_subsystem->switch_subsystem_state( subsys_loaded );
-
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_loaded );
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
-    detect_warning_and_send_mail();
-
-    // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
-
-
-    _folder_subsystem        ->switch_subsystem_state( subsys_active );
-
-    if( !_ignore_process_classes )
-    _process_class_subsystem ->switch_subsystem_state( subsys_active );
-
-    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
-    _lock_subsystem          ->switch_subsystem_state( subsys_active );
-    _job_subsystem           ->switch_subsystem_state( subsys_active );
-    _order_subsystem         ->switch_subsystem_state( subsys_active );
-    _standing_order_subsystem->switch_subsystem_state( subsys_active );
-    _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+    load_subsystems();
+    activate_subsystems();
 
     if( !_xml_cmd.empty() )
     {
@@ -2078,6 +2019,46 @@ void Spooler::execute_config_commands()
     // Jetzt brauchen wir die Konfiguration nicht mehr
     _config_element_to_load = NULL;
     _config_document_to_load = NULL;
+}
+
+//----------------------------------------------------------------------Spooler::initialize_cluster
+
+void Spooler::initialize_cluster() 
+{
+    if( _cluster_configuration._orders_are_distributed  ||  _cluster_configuration._demand_exclusiveness ) 
+    {
+        _cluster = cluster::new_cluster_subsystem( this );
+        _cluster->set_configuration( _cluster_configuration );
+        _cluster->switch_subsystem_state( subsys_initialized );
+    }
+}
+
+//----------------------------------------------------------------------------Spooler::stop_cluster
+
+void Spooler::stop_cluster()
+{
+    if( _cluster )
+    {
+        _assert_is_active = false;
+
+        try
+        {
+            _cluster->set_continue_exclusive_operation( _terminate_continue_exclusive_operation );
+        }
+        catch( exception& x ) { _log->error( S() << x.what() << ", in Cluster::set_continue_exclusive_operation\n" ); }
+
+        if( _terminate_all_schedulers )
+        {
+            // Das Kommando wird in <cluster_command> eingepackt und muss von scheduler.xsd zugelassen sein
+            S cmd;
+            cmd << "<terminate";
+            if( _termination_gmtimeout_at  < time_max )  cmd << " timeout='" << ( _termination_gmtimeout_at - ::time(NULL) ) << "'";
+            if( _terminate_all_schedulers_with_restart )  cmd << " restart='yes'";
+            cmd << "/>";
+
+            _cluster->set_command_for_all_schedulers_but_me( (Transaction*)NULL, cmd );
+        }
+    }
 }
 
 //-----------------------------------------------------------------------Spooler::cluster_is_active
@@ -2168,29 +2149,7 @@ void Spooler::stop( const exception* )
     bool restart = _shutdown_cmd == sc_terminate_and_restart 
                 || _shutdown_cmd == sc_let_run_terminate_and_restart;
 
-
-    if( _cluster )
-    {
-        _assert_is_active = false;
-
-        try
-        {
-            _cluster->set_continue_exclusive_operation( _terminate_continue_exclusive_operation );
-        }
-        catch( exception& x ) { _log->error( S() << x.what() << ", in Cluster::set_continue_exclusive_operation\n" ); }
-
-        if( _terminate_all_schedulers )
-        {
-            // Das Kommando wird in <cluster_command> eingepackt und muss von scheduler.xsd zugelassen sein
-            S cmd;
-            cmd << "<terminate";
-            if( _termination_gmtimeout_at  < time_max )  cmd << " timeout='" << ( _termination_gmtimeout_at - ::time(NULL) ) << "'";
-            if( _terminate_all_schedulers_with_restart )  cmd << " restart='yes'";
-            cmd << "/>";
-
-            _cluster->set_command_for_all_schedulers_but_me( (Transaction*)NULL, cmd );
-        }
-    }
+    stop_cluster();
 
     _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
     _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
@@ -2204,9 +2163,7 @@ void Spooler::stop( const exception* )
     _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
     _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
     _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
-    if (_event_subsystem)
     _event_subsystem           ->switch_subsystem_state( subsys_stopped );
-    _java_subsystem            ->switch_subsystem_state( subsys_stopped );
     _supervisor                ->switch_subsystem_state( subsys_stopped );
 
 
@@ -2225,15 +2182,14 @@ void Spooler::stop( const exception* )
     _db->spooler_stop();
     _db->close();
 
+    _java_subsystem->switch_subsystem_state( subsys_stopped );
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
 
     update_console_title( 0 );
 
     if( restart )  
-    {
         spooler_restart( &_base_log, _is_service );
-    }
 }
 
 //----------------------------------------------------------------------------Spooler::nichts_getan
@@ -2374,6 +2330,33 @@ void Spooler::end_waiting_tasks()
                 task->cmd_end();
             }
         }
+    }
+}
+
+//---------------------------------------------------------------------------------Spooler::try_run
+
+void Spooler::try_run() 
+{
+    try {
+        run();
+    }
+    catch( exception& x ) {
+        set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+
+        try {
+            _log->error( "" );
+            _log->error( x.what() );
+            _log->error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
+        }
+        catch( exception& ) {}
+
+        try { 
+            log_show_state( _log );
+            stop( &x ); 
+        } 
+        catch( exception& x ) { _log->error( x.what() ); }
+
+        throw;
     }
 }
 
@@ -3022,19 +3005,13 @@ void Spooler::suspend_machine()
 }
 
 //-------------------------------------------------------------------------Spooler::cmd_load_config
-// Anderer Thread
 
 void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& source_filename )  
 { 
-    THREAD_LOCK( _lock )  
-    {
-        _config_document_to_load = config.ownerDocument(); 
-        _config_element_to_load  = config;
-        _config_source_filename  = source_filename;
-        _state_cmd = sc_load_config; 
-    }
-
-    if( current_thread_id() != _thread_id )  signal( "load_config" ); 
+    _config_document_to_load = config.ownerDocument(); 
+    _config_element_to_load  = config;
+    _config_source_filename  = source_filename;
+    _state_cmd = sc_load_config; 
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
@@ -3290,14 +3267,11 @@ void Spooler::log_show_state( Prefix_log* log )
 
 int Spooler::launch( int argc, char** argv, const string& parameter_line )
 {
-    int rc;
-
     _argc = argc;
     _argv = argv;
     _parameter_line = parameter_line;
 
-
-    tzset();
+    tzset();    // Timezone
 
     _thread_id = current_thread_id();
 
@@ -3306,88 +3280,43 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     _event.create();
     _event.add_to( &_wait_handles );
 
-    _communication.init();  // Für Windows
-
 #   ifdef Z_WINDOWS
         if( !_is_service )  _has_windows_console = true;
 #   endif
 
+    _communication.init();  // Initialisiert Windows-Sockets
 
-    //do
-    {
-        if( _state_cmd != sc_load_config )  load();
+    if( _state_cmd != sc_load_config )  load();
+    if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
 
-        if( _config_element_to_load == NULL )  z::throw_xc( "SCHEDULER-116", _spooler_id );
+    assign_stdout();
+    //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
+    //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
 
-        load_config( _config_element_to_load, _config_source_filename );
+    // Nachdem argv und profile gelesen sind und config geladen ist:
 
-        assign_stdout();
-        //Erst muss noch _config_commands_element ausgeführt werden: _config_element_to_load = NULL;
-        //Erst muss noch _config_commands_element ausgeführt werden: _config_document_to_load = NULL;
-
-        // Nachdem argv und profile gelesen sind und config geladen ist:
-
-        _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
-        _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
+    _mail_defaults.set( "from_name", name() );      // Jetzt sind _complete_hostname und _tcp_port bekannt
+    _log->init( this );                              // Neue Einstellungen übernehmen: Default für from_name
 
 
-        if( _send_cmd != "" )  
-        { 
-            send_cmd();  
-            stop(); 
-            return 0; 
-        }
-
-
+    if( _send_cmd != "" ) { 
+        send_cmd();  
+        stop(); 
+    }
+    else {
         update_console_title();
         start();
 
         if( !_shutdown_cmd )
-        {
-            try
-            {
-                run();
-            }
-            catch( exception& x )
-            {
-                set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
-
-                try
-                {
-                    _log->error( "" );
-                    _log->error( x.what() );
-                    _log->error( message_string( "SCHEDULER-264" ) );  // "SCHEDULER TERMINATES AFTER SERIOUS ERROR"
-                }
-                catch( exception& ) {}
-
-                try 
-                { 
-                    log_show_state( _log );
-                    stop( &x ); 
-                } 
-                catch( exception& x ) { _log->error( x.what() ); }
-
-                throw;
-            }
-        }
+            try_run();
 
         stop();
+        close();
+        _log->info( message_string( "SCHEDULER-999" ) );        // "Scheduler ordentlich beendet"
+        _log->close();
 
-    }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
-
-
-    close();
-    _log->info( message_string( "SCHEDULER-999" ) );        // "Scheduler ordentlich beendet"
-    _log->close();
-
-   
-    //if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
-
-
-    rc = 0;
-
-    //spooler_is_running = false;
-    return rc;
+    }
+    return 0;
 }
 
 //---------------------------------------------------------------------------Spooler::assign_stdout

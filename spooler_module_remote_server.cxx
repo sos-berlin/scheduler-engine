@@ -396,7 +396,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
 
         if( !_server->_module->_java_vm->running() )
         {
-        
             set_vm_class_path (java_vm, java_class_path);  // JS-540
 
             java_vm->set_javac_filename( javac );
@@ -434,9 +433,10 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
     return hr;
 }
 
-void Com_remote_module_instance_server::set_vm_class_path (ptr<javabridge::Vm> java_vm , string task_class_path) const
-{
+//---------------------------------------------Com_remote_module_instance_server::set_vm_class_path
 
+void Com_remote_module_instance_server::set_vm_class_path(javabridge::Vm* java_vm , const string& task_class_path) const
+{
     // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
     //java_vm->set_log( &_log );
     if( !task_class_path.empty() )
@@ -447,7 +447,6 @@ void Com_remote_module_instance_server::set_vm_class_path (ptr<javabridge::Vm> j
 
     if (!_server->_module->_job_class_path.empty())
         java_vm->prepend_class_path(_server->_module->_job_class_path);
-
 }
 
 //-------------------------------------------------------Com_remote_module_instance_server::Add_obj
@@ -594,11 +593,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java || _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine;
         if(needs_java_vm)
         {
-            _server->_log.info("java_class_path:" + _server->_module->_java_vm->class_path()); 
-            _server->_log.info("vm arguments:" + _server->_module->_java_vm->_option_as_string);
+            _server->_log.info("java_class_path: " + _server->_module->_java_vm->class_path()); 
+            _server->_log.info("vm arguments: " + _server->_module->_java_vm->options());
         }                                                                                            // ... JS-540 
-        
-        
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 

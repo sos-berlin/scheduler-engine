@@ -18,7 +18,8 @@ static void JNICALL error__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppR
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Prefix_log >::of_proxys_cpp_reference(cppReference)->error(env.string_from_jstring(p0)));
+        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::error()");
+        (o_->error(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -33,7 +34,8 @@ static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Prefix_log >::of_proxys_cpp_reference(cppReference)->warn(env.string_from_jstring(p0)));
+        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::warn()");
+        (o_->warn(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -48,7 +50,8 @@ static void JNICALL info__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Prefix_log >::of_proxys_cpp_reference(cppReference)->info(env.string_from_jstring(p0)));
+        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::info()");
+        (o_->info(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -63,7 +66,8 @@ static void JNICALL debug3__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cpp
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Prefix_log >::of_proxys_cpp_reference(cppReference)->debug3(env.string_from_jstring(p0)));
+        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::debug3()");
+        (o_->debug3(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);

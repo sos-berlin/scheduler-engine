@@ -12,6 +12,8 @@ namespace sos {
 namespace scheduler {
 
 //-------------------------------------------------------------------------------------Java_objects
+// Von Java_subsystem_impl entkoppelt, weil Konstruktur der JavaProxys Java voraussetzt. 
+// Also legen wir Java_objects erst an, wenn Java läuft.
 
 struct Java_objects : Object
 {
@@ -32,13 +34,13 @@ struct Java_subsystem : Java_subsystem_interface
     bool                        subsystem_initialize        ();
     bool                        subsystem_load              ();
     bool                        subsystem_activate          ();
-
-    void                        initialize_java_sister      ();
     void                        register_proxy_classes      ();
 
 
     // Java_subsystem_interface:
     javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
+    void                    set_java_options                ( const string& x )                     { _java_vm->set_options(x); }
+    void                        prepend_class_path          ( const string& x )                     { _java_vm->prepend_class_path(x); }
 
 
   private:
@@ -60,9 +62,22 @@ Java_subsystem::Java_subsystem( Scheduler* scheduler )
 : 
     Java_subsystem_interface( scheduler, type_java_subsystem )
 {
+    _java_vm = get_java_vm( false );
+    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
+    _java_vm->set_log( _log );
+    _java_vm->prepend_class_path( subst_env( read_profile_string( _spooler->_factory_ini, "java", "class_path" ) ) );
+
+    if( _spooler->_ignore_process_classes )//||
+        //_spooler->scheduler_script_subsystem()->needs_java() )     // Die Java-Jobs laufen mit unserer JVM
+    {
+        string java_work_dir = _spooler->java_work_dir();
+        _java_vm->set_work_dir( java_work_dir );
+        _java_vm->prepend_class_path( java_work_dir );
+    }
+
 }
 
-//--------------------------------------------------------------Java_subsystem::~Java_subsystem
+//------------------------------------------------------------------Java_subsystem::~Java_subsystem
     
 Java_subsystem::~Java_subsystem()
 {
@@ -73,7 +88,7 @@ Java_subsystem::~Java_subsystem()
     catch( exception& x ) { Z_LOG( Z_FUNCTION << " " << x.what() ); }
 }
 
-//--------------------------------------------------------------------------Java_subsystem::close
+//----------------------------------------------------------------------------Java_subsystem::close
     
 void Java_subsystem::close()
 {
@@ -87,8 +102,11 @@ void Java_subsystem::close()
 
 bool Java_subsystem::subsystem_initialize()
 {
-    _java_vm = get_java_vm( false );
-    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc), wahrscheinlich wegen Hostware ~Sos_static.
+    Java_module_instance::init_java_vm( _java_vm );
+    register_proxy_classes();
+
+    _java_objects = Z_NEW( Java_objects );
+    _java_objects->_schedulerJ.assign( SchedulerJ::new_instance(_spooler->j()) );
 
     _subsystem_state = subsys_initialized;
     return true;
@@ -98,41 +116,20 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
-    _java_vm->set_log( _log );
-    _java_vm->prepend_class_path( _spooler->_config_java_class_path );
-    _java_vm->set_options( _spooler->_config_java_options );
+    _java_objects->_schedulerJ.load();
 
-    if( _spooler->_ignore_process_classes ||
-        _spooler->scheduler_script_subsystem()->needs_java() )     // Die Java-Jobs laufen mit unserer JVM
-    {
-        string java_work_dir = _spooler->java_work_dir();
-        _java_vm->set_work_dir( java_work_dir );
-        _java_vm->prepend_class_path( java_work_dir );
-    }
-
-    if( _spooler->_has_java )     // Nur True, wenn Java-Job nicht in separatem Prozess ausgeführt wird.
-    {
-        Java_module_instance::init_java_vm( _java_vm );
-    }
-
-#ifdef Z_DEBUG
-    Java_module_instance::init_java_vm( _java_vm );
-    initialize_java_sister();
-#endif
-    
     _subsystem_state = subsys_loaded;
     return true;
 }
 
-//-----------------------------------------------------------Java_subsystem::initialize_java_sister
+//---------------------------------------------------------------Java_subsystem::subsystem_activate
 
-void Java_subsystem::initialize_java_sister()
+bool Java_subsystem::subsystem_activate()
 {
-    register_proxy_classes();
+    _java_objects->_schedulerJ.activate("Hallo, hier ist C++");
 
-    _java_objects = Z_NEW( Java_objects );
-    _java_objects->_schedulerJ = SchedulerJ::new_instance(_spooler->j());
-    _java_objects->_schedulerJ.test("Hallo, hier ist C++");
+    _subsystem_state = subsys_active;
+    return true;
 }
 
 //-----------------------------------------------------------Java_subsystem::register_proxy_classes
@@ -147,15 +144,7 @@ void Java_subsystem::register_proxy_classes()
     Spooler         ::register_cpp_proxy_class_in_java();
 }
 
-//---------------------------------------------------------------Java_subsystem::subsystem_activate
-
-bool Java_subsystem::subsystem_activate()
-{
-    _subsystem_state = subsys_active;
-    return true;
-}
-
-//-----------------------------------------Java_subsystem_interface::classname_of_scheduler_object
+//------------------------------------------Java_subsystem_interface::classname_of_scheduler_object
 
 string Java_subsystem_interface::classname_of_scheduler_object(const string& objectname)
 {

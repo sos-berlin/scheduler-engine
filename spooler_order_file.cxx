@@ -728,7 +728,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, con
 void Directory_file_order_source::read_known_orders( String_set* known_orders )
 {
     S select_sql;
-    select_sql << "select `id`  from " << _spooler->_orders_tablename
+    select_sql << "select `id`  from " << db()->_orders_tablename
                << "  where " << _job_chain->db_where_condition();
 
     for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
@@ -742,7 +742,7 @@ void Directory_file_order_source::read_known_orders( String_set* known_orders )
             known_orders->insert( record.as_string( 0 ) );
         }
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_orders_tablename, x ), Z_FUNCTION ); }
 }
 
 //-----------------------------Directory_file_order_source::read_new_files_and_handle_deleted_files

@@ -19,7 +19,7 @@ Scheduler_event2::Scheduler_event2(Scheduler_object* object, const string& code)
     Order* order = dynamic_cast<Order*>(object);
     if (!order)  throw_xc(S() << Z_FUNCTION << ": " << object->obj_name());
 
-    _eventJ = EventJ::new_instance(object->spooler()->j(), order->j(), code);
+    _eventJ.assign( EventJ::new_instance(object->spooler()->j(), order->j(), code) );
 }
 
 //--------------------------------------------------------------Scheduler_event2::~Scheduler_event2

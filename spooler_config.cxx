@@ -7,6 +7,7 @@
 */
 
 #include "spooler.h"
+#include "../kram/sos_java.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/z_com.h"
 
@@ -83,7 +84,7 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
 
 //-----------------------------------------------------------------------------Spooler::load_config
 
-void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename )
+void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename, bool is_base )
 {
     //config_element.ownerDocument().validate_dtd_string( dtd_string );  // Nur <spooler> <config> validieren, nicht die Kommandos. Deshalb hier (s. spooler_command.cxx)
 
@@ -100,21 +101,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
                 string config_filename = make_absolute_filename( directory_of_path( source_filename ), subst_env( e.getAttribute( "file" )  ) );
                 
                 Command_processor cp ( this, Security::seclev_all );
-                cp._load_config_immediately = true;
+                cp._load_base_config_immediately = true;
                 cp.execute_config_file( config_filename );
-
-
-                // Für http://.../show_config?:   Das Basisdokument in <base> ablegen, damit wir eine große Konfiguration bekommen. Nur für HTTP.
-                /*
-                try
-                {
-                    xml::Document_ptr d;
-                    d.create();
-                    int ok = d.try_load_xml( string_from_file( config_filename ) );
-                    if( ok )  e.appendChild( d.documentElement().cloneNode( true ) );
-                }
-                catch( exception& ) {}
-                */
             }
         }
 
@@ -148,8 +136,10 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
       //_priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
          
-        _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
-        _config_java_options    = subst_env( config_element.getAttribute( "java_options"    ) );
+        if (is_base) {
+            if( config_element.getAttribute( "java_class_path" ) != "" ||
+                config_element.getAttribute( "java_options"    ) != ""    )  z::throw_xc("SCHEDULER-475");
+        }
 
         string log_dir =   config_element.getAttribute( "log_dir" );
 

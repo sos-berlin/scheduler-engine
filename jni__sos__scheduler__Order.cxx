@@ -18,7 +18,8 @@ static jstring JNICALL string_1id(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        return env.jstring_from_string(has_proxy< ::sos::scheduler::Order >::of_proxys_cpp_reference(cppReference)->string_id());
+        ::sos::scheduler::Order* o_ = has_proxy< ::sos::scheduler::Order >::of_cpp_reference(cppReference,"::sos::scheduler::Order::string_id()");
+        return env.jstring_from_string(o_->string_id());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -34,7 +35,8 @@ static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Order >::of_proxys_cpp_reference(cppReference)->set_id(env.string_from_jstring(p0)));
+        ::sos::scheduler::Order* o_ = has_proxy< ::sos::scheduler::Order >::of_cpp_reference(cppReference,"::sos::scheduler::Order::set_id()");
+        (o_->set_id(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);

@@ -18,7 +18,8 @@ static jint JNICALL finished_1orders_1count(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        return (has_proxy< ::sos::scheduler::Order_subsystem >::of_proxys_cpp_reference(cppReference)->finished_orders_count());
+        ::sos::scheduler::Order_subsystem* o_ = has_proxy< ::sos::scheduler::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Order_subsystem::finished_orders_count()");
+        return (o_->finished_orders_count());
     }
     catch(const exception& x) {
         env.set_java_exception(x);

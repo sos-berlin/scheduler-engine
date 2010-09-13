@@ -125,10 +125,10 @@ void Scheduler_object::report_event( const string& code )
 
 //-------------------------------------------------------------------Scheduler_object::report_event
 
-//void Scheduler_object::report_event(EventJ* e)
-//{
-//    spooler()->event_subsystem()->report( e );
-//}
+void Scheduler_object::report_event(const EventJ& e)
+{
+    spooler()->event_subsystem()->report( e );
+}
 
 //-------------------------------------------------------Scheduler_object::write_element_attributes
 

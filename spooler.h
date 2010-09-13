@@ -470,9 +470,17 @@ struct Spooler : Object,
     friend struct               Com_spooler;
 
     void                        load_arg                    ();
+    void                        read_ini_filename           ();
+    void                        read_ini_file               ();
+    void                        read_command_line_arguments ();
+    void                        handle_configuration_directories();
     void                        load                        ();
-    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
-
+    void                        open_pid_file               ();
+    void                        fetch_hostname              ();
+    void                        read_xml_configuration      ();
+    void                        initialize_java_subsystem     ();
+    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename, bool is_base = false );
+    string                      configuration_for_single_job_script();
     xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
 #ifdef Z_WINDOWS
     MEMORYSTATUS                memory_status_init();
@@ -493,13 +501,18 @@ struct Spooler : Object,
     void                        stop                        ( const exception* = NULL );
     void                        end_waiting_tasks           ();
     void                        nichts_getan                ( int anzahl, const string& );
+    void                        try_run                     ();
     void                        run                         ();
     bool                        run_continue                ( const Time& now );
 
     bool                        name_is_valid               ( const string& name );
     void                        check_name                  ( const string& name );
 
+    void                        initialize_sleep_handler    ();
+
     // Cluster
+    void                        initialize_cluster          ();
+    void                        stop_cluster                ();
     void                        check_cluster               ();
     bool                        assert_is_still_active      ( const string& debug_function, const string& debug_text = "", Transaction* = NULL );
     bool                        check_is_active             ( Transaction* = NULL );
@@ -542,9 +555,14 @@ struct Spooler : Object,
     Folder*                     root_folder                 ()                                  { return _folder_subsystem->root_folder(); }
 
     Database*                   db                          ()                                  { return _db; }
-    sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
+
+    void                        new_subsystems              ();
+    void                        destroy_subsystems          ();
+    void                        initialize_subsystems       ();
+    void                        load_subsystems             ();
+    void                        activate_subsystems         ();
 
     Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
     Folder_subsystem*           folder_subsystem            () const                            { return _folder_subsystem; }
@@ -619,21 +637,14 @@ struct Spooler : Object,
 
     Time                       _last_mail_timestamp;
 
-    string                     _variables_tablename;
-    string                     _orders_tablename;
-    string                     _clusters_tablename;
-    string                     _tasks_tablename;
-    string                     _job_history_tablename;
     string                     _job_history_columns;
     bool                       _job_history_yes;
     int                        _job_history_on_process;
     Archive_switch             _job_history_archive;
     With_log_switch            _job_history_with_log;
 
-    string                     _order_history_tablename;
     bool                       _order_history_yes;
     With_log_switch            _order_history_with_log;
-    string                     _order_step_history_tablename;
     Log_level                  _db_log_level;
 
     string                     _factory_ini;                // -ini=factory.ini
@@ -654,11 +665,6 @@ struct Spooler : Object,
 
     int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
     string                     _waiting_errno_filename;
-
-    bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
-    bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.
-    string                     _config_java_class_path;     // <config java_class_path="">
-    string                     _config_java_options;        // <config java_config="">
 
     bool                       _interactive;                // Kommandos über stdin zulassen
     bool                       _manual;

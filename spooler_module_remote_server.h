@@ -62,7 +62,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     STDMETHODIMP                Wait_for_subprocesses       ();
 
 private:
-    void set_vm_class_path (ptr<javabridge::Vm> java_vm , string task_class_path) const;
+    void                    set_vm_class_path               (javabridge::Vm* java_vm, const string& task_class_path) const;
 
 public:
     Fill_zero                          _zero_;

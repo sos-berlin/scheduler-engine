@@ -435,14 +435,7 @@ void Module::init()
     if( _kind != kind_internal )
     {
         if( _spooler )  _use_process_class = !_spooler->_ignore_process_classes;  //process_class_subsystem()->has_process_classes();
-
         if( _dont_remote )  _use_process_class = false, _process_class_path.clear();
-
-        //if( _use_process_class )  
-        //{
-        //    //if( _process_class_path != "" )  _process_class_path.set_absolute_if_relative( _folder_path ); 
-        //}
-        //if( _use_process_class )   _kind = kind_remote;     // Bei _kind==kind_process: Nur wirksam, wenn Prozessklasse auch remote_scheduler hat!
     }
 
 
@@ -455,22 +448,10 @@ void Module::init()
 
         case kind_remote:               break;
 
-        case kind_java:                 if( _spooler )
-                                        {
-                                            if( has_source_script() )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
-                                            if( !_use_process_class )  _spooler->_has_java = true;              // Java laden    
-                                        }
-
-                                        break;
+        case kind_java:                 break;
 
 // JS-498: Vorhandensein von Scriptcode prüfen
-        case kind_scripting_engine_java: if( _spooler )
-                                        {
-                                            if( has_source_script() )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
-                                            if( !_use_process_class )  _spooler->_has_java = true;              // Java laden    
-                                        }
-
-                                        break;
+        case kind_scripting_engine_java: break;
         
         case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;

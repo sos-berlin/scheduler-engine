@@ -470,8 +470,8 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     string spooler_id = config_element.getAttribute( "spooler_id" );
     if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
     {
-        if( _load_config_immediately )  _spooler->load_config( config_element, _source_filename );
-                                  else  _spooler->cmd_load_config( config_element, _source_filename );
+        if( _load_base_config_immediately )  _spooler->load_config( config_element, _source_filename, true );
+                                       else  _spooler->cmd_load_config( config_element, _source_filename );
     }
 
     return _answer.createElement( "ok" );
@@ -1193,7 +1193,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             Any_file sel = ta.open_result_set(
                            " select max(`history_id`) as history_id_max "
-                           "  from " + _spooler->_order_history_tablename +
+                           "  from " + _spooler->db()->_order_history_tablename +
                            "  where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and `job_chain`="   + sql::quoted( job_chain_path.without_slash() ) +
                             " and `order_id`="    + sql::quoted( id_string ),
@@ -1206,7 +1206,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             S select_sql;
             select_sql <<  "select `order_id`, `start_time`, `title`, `state`, `state_text`"
-                           "  from " << _spooler->_order_history_tablename <<
+                           "  from " << _spooler->db()->_order_history_tablename <<
                            "  where `history_id`=" << history_id;
             if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
 
@@ -1227,14 +1227,14 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
                 if( show.is_set( show_log ) )
                 {
-                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->_db->db_name() << " -table=" + _spooler->_order_history_tablename << " -blob=log" 
+                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->db()->db_name() << " -table=" + _spooler->db()->_order_history_tablename << " -blob=log" 
                                              " where `history_id`=" << history_id );
                 }
 
                 /* Payload steht nicht in der Historie
                 if( show & show_payload )
                 {
-                    string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -clob=\"PAYLOAD\"" 
+                    string payload = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + db()->_order_history_tablename + " -clob=\"PAYLOAD\"" 
                                                      " where \"HISTORY_ID\"=" + history_id );
                     if( payload != "" )  order->set_payload( payload );
                 }
@@ -1374,7 +1374,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
         ta.commit( Z_FUNCTION );
     }
-    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
+    catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->db()->_orders_tablename, x ), Z_FUNCTION ); }
 
     return _answer.createElement( "ok" );
 }
@@ -1403,7 +1403,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 
         for( Retry_transaction ta ( _spooler->_db ); ta.enter_loop(); ta++ ) try
         {
-            sql::Delete_stmt delete_stmt ( _spooler->database_descriptor(), _spooler->_orders_tablename );
+            sql::Delete_stmt delete_stmt ( _spooler->db()->database_descriptor(), _spooler->db()->_orders_tablename );
 
             delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_path, id.as_string() ) );
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
@@ -1423,7 +1423,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 
             ta.commit( Z_FUNCTION );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_orders_tablename, x ), Z_FUNCTION ); }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->db()->_orders_tablename, x ), Z_FUNCTION ); }
     }
 
     return _answer.createElement( "ok" );
@@ -1798,7 +1798,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                             {
                                 S select_sql;
                                 select_sql << "select max( `history_id` ) as history_id_max "
-                                               "  from " + _spooler->_order_history_tablename +
+                                               "  from " + _spooler->db()->_order_history_tablename +
                                                "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) + 
                                                  " and `job_chain`="   << sql::quoted( job_chain_path.without_slash() ) +
                                                  " and `order_id`="    << sql::quoted( order_id );
@@ -1814,7 +1814,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
                             if( history_id != "" )
                             {
-                                string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->_db->db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=\"LOG\"" 
+                                string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->db()->db_name() + " -table=" + _spooler->db()->_order_history_tablename + " -blob=\"LOG\"" 
                                                                   " where `history_id`=" + history_id );
                                 string title = "Auftrag " + order_id;
                                 //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen

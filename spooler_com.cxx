@@ -4215,7 +4215,7 @@ STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 STDMETHODIMP Com_spooler::get_Db_variables_table_name( BSTR* result )                    
 { 
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_variables_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_variables_tablename, result ); 
 }
 
 //-------------------------------------------------------------Com_spooler::get_Db_tasks_table_name
@@ -4223,7 +4223,7 @@ STDMETHODIMP Com_spooler::get_Db_variables_table_name( BSTR* result )
 STDMETHODIMP Com_spooler::get_Db_tasks_table_name( BSTR* result )
 { 
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_tasks_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_tasks_tablename, result ); 
 }
 
 //------------------------------------------------------------Com_spooler::get_Db_orders_table_name
@@ -4231,7 +4231,7 @@ STDMETHODIMP Com_spooler::get_Db_tasks_table_name( BSTR* result )
 STDMETHODIMP Com_spooler::get_Db_orders_table_name( BSTR* result )                    
 { 
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_orders_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_orders_tablename, result ); 
 }
 
 //-----------------------------------------------------------Com_spooler::get_Db_history_table_name
@@ -4239,7 +4239,7 @@ STDMETHODIMP Com_spooler::get_Db_orders_table_name( BSTR* result )
 STDMETHODIMP Com_spooler::get_Db_history_table_name( BSTR* result )                    
 { 
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_job_history_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_job_history_tablename, result ); 
 }
 
 //-----------------------------------------------------Com_spooler::get_Db_order_history_table_name
@@ -4247,7 +4247,7 @@ STDMETHODIMP Com_spooler::get_Db_history_table_name( BSTR* result )
 STDMETHODIMP Com_spooler::get_Db_order_history_table_name( BSTR* result )                    
 { 
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_order_history_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_order_history_tablename, result ); 
 }
 
 //------------------------------------------------------------------------Com_spooler::get_Ini_path
@@ -6098,7 +6098,7 @@ STDMETHODIMP Com_order_queue::get_Length( int* result )
     {
         Order_queue* order_queue = dynamic_cast<Order_queue*>( this );
 
-        for( Retry_transaction ta ( order_queue->_spooler->db() ); ta.enter_loop(); ta++ ) try
+        for( Retry_transaction ta ( order_queue->db() ); ta.enter_loop(); ta++ ) try
         {
             *result = order_queue->order_count( &ta );
         }

@@ -533,6 +533,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 : 
     file_based<Job,Job_folder,Job_subsystem>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
+    has_proxy<Job>(scheduler->j()),
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),
@@ -1046,7 +1047,7 @@ Time Job::average_step_duration( const Time& deflt )
         Record record;
         S select_sql;
         select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
-                      "  from " << _spooler->_job_history_tablename
+                      "  from " << db()->_job_history_tablename
                    << "  where `steps` > 0 "
                        " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )
                    <<  " and `job_name`=" << sql::quoted( path().without_slash() );
@@ -1055,7 +1056,7 @@ Time Job::average_step_duration( const Time& deflt )
         {
             record = ta.read_single_record( select_sql, Z_FUNCTION );
         }
-        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->_job_history_tablename, x ), Z_FUNCTION ); }
+        catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", db()->_job_history_tablename, x ), Z_FUNCTION ); }
 
         if( !record.null(0) && record.as_string(0) != "" ) {
             result = floor( record.as_double( 0 ) );
@@ -1439,7 +1440,7 @@ void Job::load_tasks_from_db( Read_transaction* ta )
 
     S select_sql;
     select_sql << "select `task_id`, `enqueue_time`, `start_at_time`"
-               << "  from " << _spooler->_tasks_tablename
+               << "  from " << db()->_tasks_tablename
                << "  where `spooler_id`="        << sql::quoted( _spooler->id_for_db() )
                <<    " and `cluster_member_id` " << sql::null_string_equation( _spooler->distributed_member_id() )
                <<    " and `job_name`="          << sql::quoted( path().without_slash() ) 
@@ -1461,13 +1462,13 @@ void Job::load_tasks_from_db( Read_transaction* ta )
             start_at.set_datetime( record.as_string( "start_at_time" ) );
             _log->info( message_string( "SCHEDULER-917", task_id, start_at? start_at.as_string() : "period" ) );
 
-            string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
+            string parameters_xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='parameters'"
                                                                                        " where \"TASK_ID\"=" + as_string( task_id ), 
                                                     "" );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
 
 
-            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='task_xml'"
+            string xml = file_as_string( "-binary " + _spooler->_db->db_name() + " -table=" + db()->_tasks_tablename + " -clob='task_xml'"
                                                                                  " where \"TASK_ID\"=" + as_string( task_id ),
                                          "" );
 
@@ -1517,7 +1518,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 //task->_history.enqueue();
 
                 Insert_stmt insert ( ta.database_descriptor() );
-                insert.set_table_name( _spooler->_tasks_tablename );
+                insert.set_table_name( _spooler->db()->_tasks_tablename );
 
                 insert             [ "TASK_ID"       ] = task->_id;
                 insert             [ "JOB_NAME"      ] = task->_job->path().without_slash();
@@ -1536,7 +1537,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 if( task->has_parameters() )
                 {
                     Any_file blob;
-                    blob = ta.open_file( "-out " + _spooler->_db->db_name(), " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
+                    blob = ta.open_file( "-out " + _spooler->db()->db_name(), " -table=" + _spooler->db()->_tasks_tablename + " -clob='parameters'"
                             "  where \"TASK_ID\"=" + as_string( task->_id ) );
                     blob.put( xml_as_string( task->parameters_as_dom() ) );
                     blob.close();
@@ -1545,7 +1546,7 @@ void Job::Task_queue::enqueue_task( const ptr<Task>& task )
                 xml::Document_ptr task_document = task->dom( show_for_database_only );
                 xml::Element_ptr  task_element  = task_document.documentElement();
                 if( task_element.hasAttributes()  ||  task_element.firstChild() )
-                    ta.update_clob( _spooler->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
+                    ta.update_clob( _spooler->db()->_tasks_tablename, "task_xml", "task_id", task->id(), task_document.xml() );
 
                 ta.commit( Z_FUNCTION );
 
@@ -1579,7 +1580,7 @@ void Job::Task_queue::remove_task_from_db( int task_id )
             {
                 Transaction ta ( _spooler->_db );
 
-                ta.execute( "DELETE from " + _spooler->_tasks_tablename +
+                ta.execute( "DELETE from " + _spooler->db()->_tasks_tablename +
                             "  where \"TASK_ID\"=" + as_string( task_id ),
                             Z_FUNCTION );
                 ta.commit( Z_FUNCTION);

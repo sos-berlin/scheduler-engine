@@ -103,6 +103,14 @@ struct Database : Object, Scheduler_object //Subsystem
     Thread_semaphore           _lock;
     Thread_semaphore           _error_lock;
     
+    string                     _variables_tablename;
+    string                     _orders_tablename;
+    string                     _order_history_tablename;
+    string                     _order_step_history_tablename;
+    string                     _clusters_tablename;
+    string                     _tasks_tablename;
+    string                     _job_history_tablename;
+
     sql::Database_descriptor   _database_descriptor;
     sql::Table_descriptor      _jobs_table;
     sql::Table_descriptor      _job_chains_table;
@@ -243,7 +251,7 @@ struct Transaction : Read_transaction
 
 
     Fill_zero                  _zero_;
-    Transaction*               _outer_transaction;
+    Transaction* const         _outer_transaction;
     bool                       _suppress_heart_beat_timeout_check;
 };
 

@@ -1410,14 +1410,14 @@
             </text>
         </message>
 
-        <message code="SCHEDULER-259">
+        <!--message code="SCHEDULER-259">
             <text xml:lang="de">
                 <title>Java kann nicht gestartet werden. Scheduler startet ohne Java</title>
             </text>
             <text xml:lang="en">
                 <title>Java did not start. Scheduler is starting without Java</title>
             </text>
-        </message>
+        </message-->
 
         <message code="SCHEDULER-260">
             <text xml:lang="en">
@@ -2888,6 +2888,12 @@
           </title>
         </text>
       </message>
+
+        <message code="SCHEDULER-475">
+            <text xml:lang="en">
+                <title>java_options and java_class_path can only be set in primary XML configuration</title>
+            </text>
+        </message>
 
     </messages>
 

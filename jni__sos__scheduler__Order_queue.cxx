@@ -18,7 +18,8 @@ static void JNICALL close(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        (has_proxy< ::sos::scheduler::Order_queue >::of_proxys_cpp_reference(cppReference)->close());
+        ::sos::scheduler::Order_queue* o_ = has_proxy< ::sos::scheduler::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::Order_queue::close()");
+        (o_->close());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -33,7 +34,8 @@ static jstring JNICALL obj_1name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        return env.jstring_from_string(has_proxy< ::sos::scheduler::Order_queue >::of_proxys_cpp_reference(cppReference)->obj_name());
+        ::sos::scheduler::Order_queue* o_ = has_proxy< ::sos::scheduler::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::Order_queue::obj_name()");
+        return env.jstring_from_string(o_->obj_name());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -49,7 +51,8 @@ static jboolean JNICALL is_1distributed_1order_1requested__J(JNIEnv* jenv, jobje
 {
     Env env = jenv;
     try {
-        return (has_proxy< ::sos::scheduler::Order_queue >::of_proxys_cpp_reference(cppReference)->is_distributed_order_requested(p0));
+        ::sos::scheduler::Order_queue* o_ = has_proxy< ::sos::scheduler::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::Order_queue::is_distributed_order_requested()");
+        return (o_->is_distributed_order_requested(p0));
     }
     catch(const exception& x) {
         env.set_java_exception(x);

@@ -3,6 +3,9 @@
 #ifndef __SCHEDULER_OBJECT_H
 #define __SCHEDULER_OBJECT_H
 
+#include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
+typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
+
 namespace sos {
 namespace scheduler {
 
@@ -95,6 +98,7 @@ struct Scheduler_object
     Spooler*                    spooler                     () const                                { return _spooler; }
 
     virtual void                close                       ()                                      {}
+    void                        report_event                (const EventJ&);
     void                        report_event                ( const string& code );
     virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual void                print_xml_child_elements_for_event( String_stream*, Scheduler_event* )  {}
