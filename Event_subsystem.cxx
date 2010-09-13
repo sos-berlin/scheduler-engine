@@ -32,7 +32,7 @@ struct Event_subsystem_impl : Event_subsystem
 
     // Event_subsystem
     void                        report                      (const EventJ&);
-    void                        report                      ( const Scheduler_event2& );
+    //void                        report                      ( const Scheduler_event2& );
 
 private:
     Fill_zero                  _zero_;
@@ -90,10 +90,10 @@ void Event_subsystem_impl::report(const EventJ& eventJ)
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
 
-void Event_subsystem_impl::report( const Scheduler_event2& event )
-{
-    _eventSubsystemJ.report(event.j());
-}
+//void Event_subsystem_impl::report( const Scheduler_event2& event )
+//{
+//    _eventSubsystemJ.report(event.j());
+//}
 
 //-------------------------------------------------------------------------------------------------
 

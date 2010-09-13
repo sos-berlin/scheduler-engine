@@ -117,11 +117,11 @@ IDispatch* Scheduler_object::idispatch()
 
 //-------------------------------------------------------------------Scheduler_object::report_event
 
-void Scheduler_object::report_event( const string& code )
-{
-    Scheduler_event2 e ( this, code );
-    spooler()->event_subsystem()->report( e );
-}
+//void Scheduler_object::report_event( const string& code )
+//{
+//    Scheduler_event2 e ( this, code );
+//    spooler()->event_subsystem()->report( e );
+//}
 
 //-------------------------------------------------------------------Scheduler_object::report_event
 

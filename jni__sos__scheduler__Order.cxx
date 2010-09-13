@@ -14,6 +14,22 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
+static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Order* o_ = has_proxy< ::sos::scheduler::Order >::of_cpp_reference(cppReference,"::sos::scheduler::Order::set_id()");
+        (o_->set_id(env.string_from_jstring(p0)));
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
 static jstring JNICALL string_1id(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -29,25 +45,9 @@ static jstring JNICALL string_1id(JNIEnv* jenv, jobject, jlong cppReference)
 
 }}}}}}}
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
-static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppReference, jstring p0)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Order* o_ = has_proxy< ::sos::scheduler::Order >::of_cpp_reference(cppReference,"::sos::scheduler::Order::set_id()");
-        (o_->set_id(env.string_from_jstring(p0)));
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-    }
-}
-
-}}}}}}}
-
 const static JNINativeMethod native_methods[] = {
-{ "string_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1id },
-{ "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 }
+{ "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
+{ "string_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1id }
 };
 
 namespace zschimmer { namespace javabridge { 

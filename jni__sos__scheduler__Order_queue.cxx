@@ -30,23 +30,6 @@ static void JNICALL close(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
 
-static jstring JNICALL obj_1name(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Order_queue* o_ = has_proxy< ::sos::scheduler::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::Order_queue::obj_name()");
-        return env.jstring_from_string(o_->obj_name());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
-
 static jboolean JNICALL is_1distributed_1order_1requested__J(JNIEnv* jenv, jobject, jlong cppReference, jlong p0)
 {
     Env env = jenv;
@@ -62,10 +45,27 @@ static jboolean JNICALL is_1distributed_1order_1requested__J(JNIEnv* jenv, jobje
 
 }}}}}}}
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace kernel { namespace core { namespace cppproxy { 
+
+static jstring JNICALL obj_1name(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Order_queue* o_ = has_proxy< ::sos::scheduler::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::Order_queue::obj_name()");
+        return env.jstring_from_string(o_->obj_name());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
 const static JNINativeMethod native_methods[] = {
 { "close__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::close },
-{ "obj_name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::obj_1name },
-{ "is_distributed_order_requested__native", "(JJ)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1distributed_1order_1requested__J }
+{ "is_distributed_order_requested__native", "(JJ)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1distributed_1order_1requested__J },
+{ "obj_name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::obj_1name }
 };
 
 namespace zschimmer { namespace javabridge { 

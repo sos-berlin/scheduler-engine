@@ -12,19 +12,19 @@ typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
 
 //---------------------------------------------------------------------------------Scheduler_event2
 
-struct Scheduler_event2 : Scheduler_object, Object {
-                            Scheduler_event2            (Scheduler_object*, const string& code);
-                           ~Scheduler_event2            ();
-
-    string                  obj_name                    () const;
-    jobject                 j                           () const                                    { return _eventJ.j(); }  //? Ist das okay? -Zschimmer
-    //Scheduler_object*       object                      ();
-    //string                  code                        ();
-
-private:
-    Fill_zero              _zero_;
-    EventJ                 _eventJ;
-};
+//struct Scheduler_event2 : Scheduler_object, Object {
+//                            Scheduler_event2            (Scheduler_object*, const string& code);
+//                           ~Scheduler_event2            ();
+//
+//    string                  obj_name                    () const;
+//    jobject                 j                           () const                                    { return _eventJ.j(); }  //? Ist das okay? -Zschimmer
+//    //Scheduler_object*       object                      ();
+//    //string                  code                        ();
+//
+//private:
+//    Fill_zero              _zero_;
+//    EventJ                 _eventJ;
+//};
 
 //-------------------------------------------------------------------------------------------------
 //struct Scheduler_event2 :  

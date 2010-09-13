@@ -9,28 +9,30 @@
 namespace sos {
 namespace scheduler {
 
-//---------------------------------------------------------------Scheduler_event2::Scheduler_event2
+////---------------------------------------------------------------Scheduler_event2::Scheduler_event2
+//
+//Scheduler_event2::Scheduler_event2(Scheduler_object* object, const string& code) 
+//: 
+//    Scheduler_object( object->spooler(), this, Scheduler_object::type_scheduler_event2 ),
+//    _zero_(this+1)
+//{
+//    Order* order = dynamic_cast<Order*>(object);
+//    if (!order)  throw_xc(S() << Z_FUNCTION << ": " << object->obj_name());
+//
+//    _eventJ.assign( EventJ::new_instance(object->spooler()->j(), order->j(), code) );
+//}
+//
+////--------------------------------------------------------------Scheduler_event2::~Scheduler_event2
+//    
+//Scheduler_event2::~Scheduler_event2() {}
+//
+////-----------------------------------------------------------------------Scheduler_event2::obj_name
+//
+//string Scheduler_event2::obj_name() const {
+//    return _eventJ.toString();
+//}
 
-Scheduler_event2::Scheduler_event2(Scheduler_object* object, const string& code) 
-: 
-    Scheduler_object( object->spooler(), this, Scheduler_object::type_scheduler_event2 ),
-    _zero_(this+1)
-{
-    Order* order = dynamic_cast<Order*>(object);
-    if (!order)  throw_xc(S() << Z_FUNCTION << ": " << object->obj_name());
 
-    _eventJ.assign( EventJ::new_instance(object->spooler()->j(), order->j(), code) );
-}
-
-//--------------------------------------------------------------Scheduler_event2::~Scheduler_event2
-    
-Scheduler_event2::~Scheduler_event2() {}
-
-//-----------------------------------------------------------------------Scheduler_event2::obj_name
-
-string Scheduler_event2::obj_name() const {
-    return _eventJ.toString();
-}
 
 //Scheduler_event2::Class_descriptor Scheduler_event2::class_descriptor  ( &typelib, "sos.spooler.Scheduler_event", Scheduler_event2::_methods );
 //
