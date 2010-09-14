@@ -166,6 +166,7 @@ struct Directory_observer : Scheduler_object,
     bool                        is_active                   () const                                { return _directory_tree && _directory_tree->is_watched(); }
 
     Directory_tree*             directory_tree              () const                                { return _directory_tree; }
+    File_path                   directory_path              () const { return _directory_path; }
 
 
   private:
@@ -175,6 +176,8 @@ struct Directory_observer : Scheduler_object,
   //int                        _directory_watch_interval;
     double                     _next_check_at;
     Directory_handler*         _directory_handler;
+    File_path                  _directory_path;
+
 };
 
 //-------------------------------------------------------------------------------------------------

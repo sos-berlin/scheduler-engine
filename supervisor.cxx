@@ -29,7 +29,9 @@ struct Remote_configurations;
 //--------------------------------------------------------------------------------------------const
 
 //const int                       supervisor_configuration_poll_interval = 60;
-const double                    udp_timeout                 = 60;
+const double                    udp_timeout                 = 10;
+const double                    udp_timeout_warn_period     = 5*60;
+const double                    udp_warn_timeout            = 60;
 const double                    max_hostname_age            = 15*60;                                // Nach dieser Zeit gethostbyname() erneut rufen
 const string                    directory_name_for_all_schedulers = "_all";
 const double                    allowed_directory_age       = 0.0;                                  // Verzeichnis nur lesen, wenn letztes Lesen länger her ist
@@ -72,6 +74,7 @@ struct Remote_scheduler : Remote_scheduler_interface,
     void                        write_file_to_xml           ( Xml_writer*, const Directory_entry&, const Xml_file_info* reference );
     bool                        check_remote_configuration  ();
     void                        signal_remote_scheduler     ();
+    void                        check_timeout               ();
   //Directory*                  configuration_directory     ();
     Directory*                  configuration_directory_or_null();
     string                      obj_name                    () const;
@@ -88,8 +91,8 @@ struct Remote_scheduler : Remote_scheduler_interface,
     bool                       _is_cluster_member;
     string                     _scheduler_id;
     string                     _scheduler_version;
-    Time                       _connected_at;
-    Time                       _disconnected_at;
+    time_t                     _connected_at;
+    time_t                     _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
     Xml_operation_connection*  _connection_operation;                 /*! \change JS-481 Merken der Connection, um neue Connection damit zu vergleichen */
@@ -99,7 +102,9 @@ struct Remote_scheduler : Remote_scheduler_interface,
     int                        _configuration_version;
     int                        _configuration_version_all;
     bool                       _configuration_changed;
-    Time                       _configuration_transfered_at;
+    time_t                     _configuration_changed_at;
+    time_t                     _configuration_transfered_at;
+    time_t                     _udp_timeout_warned_at;
 };
 
 //------------------------------------------------------------------------Remote_scheduler_register
@@ -164,8 +169,6 @@ struct Remote_configurations : Object,
     Fill_zero                  _zero_;
     Supervisor*                _supervisor;
     ptr<Directory_observer>    _directory_observer;
-  //double                     _next_check_at;
-  //bool                       _is_activated;
 
     typedef stdext::hash_map< Host_and_port, string >  Hostport_directory_map;
     Hostport_directory_map     _hostport_directory_map;
@@ -446,7 +449,7 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
         _scheduler_id      = register_scheduler_element.     getAttribute( "scheduler_id" );
         _scheduler_version = register_scheduler_element.     getAttribute( "version" );
         _is_cluster_member = register_scheduler_element.bool_getAttribute( "is_cluster_member", false );
-        _connected_at      = Time::now();
+        _connected_at      = ::time(NULL);
     }
 
 
@@ -539,7 +542,7 @@ ptr<Command_response> Remote_scheduler::execute_configuration_fetch_updated_file
     _configuration_version       = my_directory ? my_directory ->version() : 0;
     _configuration_version_all   = all_directory? all_directory->version() : 0;
     _configuration_changed       = false;
-    _configuration_transfered_at = Time::now();
+    _configuration_transfered_at = ::time(NULL);
 
     if( is_active )  _remote_configurations->set_alarm();    // Für alternde Dateieinträge: Nach kurzer Zeit Verzeichnis nochmal prüfen 
 
@@ -649,7 +652,7 @@ void Remote_scheduler::write_file_to_xml( Xml_writer* xml_writer, const Director
             {
                 xml_writer->begin_element( "configuration.file" );
                 xml_writer->set_attribute( "name"           , directory_entry._file_info->path().name() );
-                xml_writer->set_attribute( "last_write_time", Time( directory_entry._file_info->last_write_time(), Time::is_utc ).xml_value() );
+                xml_writer->set_attribute( "last_write_time", xml_of_time_t(directory_entry._file_info->last_write_time()) );
 
                     xml_writer->begin_element( "content" );
                     xml_writer->set_attribute( "encoding", "base64" );
@@ -703,7 +706,11 @@ bool Remote_scheduler::check_remote_configuration()
         }
     }
 
-    _configuration_changed |= changed;
+    if (changed && !_configuration_changed) {
+        _configuration_changed = true;
+        _configuration_changed_at = ::time(NULL);
+        _udp_timeout_warned_at = 0;
+    }
 
     return changed;
 }
@@ -712,8 +719,28 @@ bool Remote_scheduler::check_remote_configuration()
 
 void Remote_scheduler::signal_remote_scheduler()
 {
+    Z_LOG("sending UDP command check_folders to " << Host_and_port( _host_and_port.host(), _udp_port ) << '\n' );
+    check_timeout();
     send_udp_message( Host_and_port( _host_and_port.host(), _udp_port ), "<check_folders/>" );
-    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen
+    set_async_delay( udp_timeout );   // Danach UDP-Nachricht wiederholen, falls Nachricht verloren geht
+}
+//--------------------------------------------------------Remote_scheduler::check_timeout
+
+void Remote_scheduler::check_timeout()
+{
+    if (_configuration_changed) {
+        time_t now = ::time(NULL);
+        if (now >= _configuration_changed_at + udp_warn_timeout && now >= _udp_timeout_warned_at + udp_timeout_warn_period) {
+            time_t t = now - _configuration_changed_at;
+            Msg_insertions mi;
+            mi.append( string_of_time_t(_configuration_changed_at) );
+            mi.append( (int)t );
+            Xc x ("SCHEDULER-474",  mi );
+            log()->warn(x.what());
+            _error = x;
+            _udp_timeout_warned_at = now;
+        }
+    }
 }
 
 //----------------------------------------------------------------Remote_scheduler::async_continue_
@@ -722,6 +749,7 @@ bool Remote_scheduler::async_continue_( Continue_flags )
 {
     if( _is_connected )
     {
+        // UDP-Nachricht nicht angekommen (fetch-Kommando vom Client fehlt)
         signal_remote_scheduler();
     }
 
@@ -754,18 +782,20 @@ xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& documen
     result.setAttribute         ( "connected"       , _is_connected? "yes" : "no" );
 
     if( _connected_at )
-    result.setAttribute         ( "connected_at"    , _connected_at.as_string() );
+    result.setAttribute         ( "connected_at"    , xml_of_time_t(_connected_at) );
 
     if( _disconnected_at )
-    result.setAttribute         ( "disconnected_at" , _disconnected_at.as_string() );
+    result.setAttribute         ( "disconnected_at" , xml_of_time_t(_disconnected_at) );
 
     result.setAttribute_optional( "configuration_directory", _configuration_directory_name );
 
-    if( _configuration_changed )
-    result.setAttribute         ( "configuration_changed", "yes" );
+    if( _configuration_changed ) {
+        result.setAttribute         ( "configuration_changed", "yes" );
+        result.setAttribute         ( "configuration_changed_at", xml_of_time_t(_configuration_changed_at) );
+    }
 
     if( _configuration_transfered_at )
-    result.setAttribute         ( "configuration_transfered_at", _configuration_transfered_at.xml_value() );
+    result.setAttribute         ( "configuration_transfered_at", xml_of_time_t(_configuration_transfered_at) );
     
     if( _error )
     append_error_element( result, _error );
@@ -795,7 +825,7 @@ void Remote_scheduler::connection_lost_event( const exception* x )
     
     Z_LOG2( "scheduler", Z_FUNCTION << " " << *this << "\n" ); /*! \change JS-481 */
 
-    _disconnected_at = Time::now();
+    _disconnected_at = ::time(NULL);
     _is_connected = false;
     _connection_operation = NULL;  /*! \change JS-481 Zugefügtes Objektreferenz wieder auflösen */
 
@@ -837,6 +867,7 @@ void Remote_configurations::close()
 
 bool Remote_configurations::activate()
 {
+    log()->info( message_string("SCHEDULER-718", "remote", _directory_observer->directory_path() ) );
     return _directory_observer->activate();
 }
 

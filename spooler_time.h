@@ -176,93 +176,20 @@ void                            test_summertime             ( const string& date
 xml::Element_ptr                new_calendar_dom_element    ( const xml::Document_ptr&, const Time& );
 
 //-------------------------------------------------------------------------------------------------
+inline string xml_of_time_t(time_t t) {
+    return Time( t, Time::is_utc ).xml_value();
+}
+inline string string_of_time_t(time_t t) {
+    return Time( t, Time::is_utc ).as_string();
+}
 
 } //namespace time
-
-//-------------------------------------------------------------------------------------------Gmtime
-/* Hübsche Klasse, berücksichtigt aber bei der Umrechnug die Sommerzeit nicht.
-// Greenwich Time (UTC)
-
-struct Gmtime
-{
-    enum With_ms
-    {
-        without_ms,
-        with_ms
-    };
-
-    static Gmtime               now                         ()                                      { return Gmtime( double_from_gmtime() ); }
-    static double               round                       ( double t );
-    static double               normalize                   ( double t );
-
-
-                                Gmtime                      ()                                      : _time(0) {}
-    explicit                    Gmtime                      ( const time::Time& t )                 { set_local_time( t ); }
-    explicit                    Gmtime                      ( double t )                            { set( t ); }
-
-                              //operator double             () const                                { return _time; }
-
-  //Gmtime&                     operator =                  ( const Time& t )                       { set_local_time( t );  return *this; }
-  //Gmtime&                     operator =                  ( time_t t )                            { _time = (double)t; }
-
-    void                        operator +=                 ( double t )                            { set( _time + t ); }
-    void                        operator -=                 ( double t )                            { set( _time - t ); }
-
-    Gmtime                      operator +                  ( double t ) const                      { return Gmtime( _time + t ); }
-    Gmtime                      operator +                  ( int    t ) const                      { return Gmtime( _time + (double)t ); }
-    Gmtime                      operator -                  ( double t ) const                      { return Gmtime( _time - t ); }
-    Gmtime                      operator -                  ( int    t ) const                      { return Gmtime( _time - (double)t ); }
-
-    Gmtime                      operator -                  ( const Gmtime& t ) const               { return Gmtime( _time - t._time ); }
-
-    bool                        operator <                  ( const Gmtime& t ) const               { return _time <  t._time; }
-    bool                        operator <=                 ( const Gmtime& t ) const               { return _time <= t._time; }
-    bool                        operator ==                 ( const Gmtime& t ) const               { return _time == t._time; }
-    bool                        operator !=                 ( const Gmtime& t ) const               { return _time != t._time; }
-    bool                        operator >=                 ( const Gmtime& t ) const               { return _time >= t._time; }
-    bool                        operator >                  ( const Gmtime& t ) const               { return _time >  t._time; }
-
-    bool                        operator <                  ( int t ) const                         { return _time <  t; }
-    bool                        operator <=                 ( int t ) const                         { return _time <= t; }
-    bool                        operator ==                 ( int t ) const                         { return _time == t; }
-    bool                        operator !=                 ( int t ) const                         { return _time != t; }
-    bool                        operator >=                 ( int t ) const                         { return _time >= t; }
-    bool                        operator >                  ( int t ) const                         { return _time >  t; }
-
-    void                    set_local_time                  ( const time::Time& t );
-    time::Time                  local_time                  () const;
-    
-    bool                        is_null                     () const                                { return _time == 0; }
-    double                      as_double                   () const                                { return _time; }
-    string                      as_string                   ( With_ms = with_ms ) const;
-    string                      as_local_string             ( With_ms = with_ms ) const;
-
-    void                        set_null                    ()                                      { set( 0.0 ); }
-    void                        set_time_t                  ( time_t t )                            { set( (double)t ); }
-    void                        set                         ( double t );
-
-    Gmtime                      time_of_day                 () const                                { return Gmtime( _time - midnight().as_double() ); }
-    Gmtime                      midnight                    () const                                { return Gmtime( day_nr() * 24*60*60 ); }
-    int                         day_nr                      () const                                { return (int)( int64(_time) / (24*60*60) ); }
-    time_t                      as_time_t                   () const                                { return (time_t)( _time + 0.0001 ); }
-
-  private:
-#   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
-        string                 _time_as_string;
-#   endif    
-
-    double                     _time;
-};
-
-extern const Gmtime             doomsday;
-*/
-//-------------------------------------------------------------------------------------------------
-
-//inline void insert_into_message( Message_string* m, int index, const time::Time& t ) throw()        { m->insert_string( index, t.as_string() ); }
 
 //-------------------------------------------------------------------------------------------------
 
 using time::Time;
+using time::xml_of_time_t;
+using time::string_of_time_t;
 
 } //namespace scheduler
 } //namespace sos

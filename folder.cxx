@@ -243,14 +243,16 @@ bool Folder_subsystem::subsystem_activate()
 {
     bool result = false;
 
-    if( _configurations[ confdir_cache ]._directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
+    if( Directory_observer* d = _configurations[ confdir_cache ]._directory_observer )     // Die zentrale Konfiguration (im Cache) zuerst, sie hat Vorrang
     {
+        log()->info( message_string("SCHEDULER-718", "cache", d->directory_path() ) );
         //_cache_directory_observer->activate();
         result = true;
     }
 
-    if( _configurations[ confdir_local ]._directory_observer )
+    if( Directory_observer* d = _configurations[ confdir_local ]._directory_observer )
     {
+        log()->info( message_string("SCHEDULER-718", "local", d->directory_path() ) );
         _configurations[ confdir_local ]._directory_observer->activate();
         result = true;
     }

@@ -540,7 +540,8 @@ void Directory::assert_ordered_list()
 Directory_observer::Directory_observer( Scheduler* scheduler, const File_path& directory_path, Configuration_origin w )
 :
     Scheduler_object( scheduler, this, type_directory_observer ),
-    _zero_(this+1)
+    _zero_(this+1),
+    _directory_path(directory_path)
 {
     if( directory_path == "" )  z::throw_xc( Z_FUNCTION );
 

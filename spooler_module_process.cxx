@@ -869,20 +869,6 @@ void Process_module_instance::end__end()
 
     _log.log_file( _module->_process_log_filename );
 
-    /* siehe Module_task::do_close__end(), MeldungSCHEDULER-280
-    if( exit_code )
-    {
-        try
-        {
-            z::throw_xc( "SCHEDULER-126", exit_code );
-        }
-        catch( const exception& x )
-        {
-            if( !_module->_process_ignore_error )  throw;
-            _log.warn( x.what() );
-        }
-    }
-    */
 }
 
 //------------------------------------------------------Process_module_instance::termination_signal

@@ -5,8 +5,7 @@
 >
     <config 
         port="6360" 
-        supervisor=""
-      
+        supervisor = "8of9.sos:4136"
     >
 
         <security>

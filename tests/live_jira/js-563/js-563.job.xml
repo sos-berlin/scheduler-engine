@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="spooler_task.exit_code not available in spooler_process_after"
+     order="yes"
+     stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+echo "ping auf unbekannten server"
+ping xyz
+        ]]>
+    </script>
+    <monitor name="process_after"
+             ordering="0">
+        <script language="javascript">
+            <![CDATA[
+// spooler_process wird so lange gerufen, bis false zurück gegeben wird
+
+function spooler_process_after(process_result) {
+
+   spooler_log.info( "EXIT-CODE: " + spooler_task.exit_code );
+   spooler_log.info( "RESULT: " + process_result );
+
+   return false;
+
+}
+            ]]>
+        </script>
+    </monitor>
+    <run_time/>
+</job>

@@ -690,7 +690,9 @@ Spooler::Spooler()
     /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
     _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
+    _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
     if (!_jobs_allowed_for_licence) _log->info( "jobs are not allowed." );
+    if (!_remote_commands_allowed_for_licence) _log->info( "executing of remote commands triggered by a host are not allowed." );
 
 
     _pid          = getpid();
