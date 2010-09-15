@@ -5,7 +5,7 @@
                                  
 <job title="js540 (Java Class Path class_path am Job)" java_options="-Xmx258m" >
     <script java_class="test.SimpleJavaAPIJob"
-    				job_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\testjob.jar"
+    				java_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\testjob.jar"
             language="java"
             />
     <run_time/>

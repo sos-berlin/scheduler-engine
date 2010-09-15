@@ -846,8 +846,7 @@
 			<xsd:attribute name="java_class" type="String"/>
 			<xsd:attribute name="recompile" type="Yes_no"/>
 			<xsd:attribute name="encoding" type="Code_page_encoding"/>
-      <xsd:attribute name="job_class_path" type="String"/>
-      <xsd:attribute name="class_path" type="String"/>
+            <xsd:attribute name="java_class_path" type="String"/> <!-- JS-540 -->
 			<!--xsd:attribute name="process_class"         type="Path"    s. eMail von Püschel 2007-11-06 12:55 /-->
 		</xsd:complexType>
 	</xsd:element>

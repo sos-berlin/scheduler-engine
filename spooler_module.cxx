@@ -333,8 +333,7 @@ void Module::set_dom( const xml::Element_ptr& element )
     set_checked_attribute( &_com_class_name    , element, "com_class" , true );
     set_checked_attribute( &_filename          , element, "filename"         );
     set_checked_attribute( &_java_class_name   , element, "java_class", true );
-    set_checked_attribute( &_job_class_path    , element, "job_class_path", true );  // JS-540
-    set_checked_attribute( &_class_path        , element, "class_path", true );
+    set_checked_attribute( &_java_class_path   , element, "java_class_path", true );  // JS-540
 
     if( element.hasAttribute( "encoding" ) )
     {

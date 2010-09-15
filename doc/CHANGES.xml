@@ -34,7 +34,8 @@
     <change date="2010-08-11" version="2.1.2" >
       <revision jira="JS-540" type="new" title="Weitere script-Attribute für Java API-Jobs">
         <description>
-					Das script-Element hat zwei weitere Atribute 'job_class_path' und 'class_path' (s. Dokumentation). Die aktuellen Werte werden im Task-Log protokolliert.
+					Das script-Element hat ein weiteres Atribute 'java_class_path' (s. Dokumentation). Es wird dem aktuellen Klassenpfad davorgesetzt.
+                    Die aktuellen Werte für den Java Klassenpfad und die Java VM Options werden im Task-Log ausgegeben.
         </description>
       </revision>
     </change> 

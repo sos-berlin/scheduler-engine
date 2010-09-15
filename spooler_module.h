@@ -149,8 +149,7 @@ struct Module : Object
     string                     _java_options;               // Gehört eigentlich nach Job
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
-    string                     _job_class_path;        // JS-540
-    string                     _class_path;
+    string                     _java_class_path;        // JS-540
 
     // Process
     string                     _process_filename;           // Job ist ein externes Programm

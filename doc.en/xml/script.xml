@@ -168,37 +168,17 @@
             </messages>
         </xml_attribute>
         
-        <xml_attribute name="job_class_path" type="java_class_path">
+        <xml_attribute name="java_class_path" type="java_class_path">
             <description>
                 <p>
                     Allow a job-specific Class-Path.
                 </p>
                 <p>
-                	  This attribute is an extension/addition to the classpath customized in the factory-ini - file 
+                	This java classpath will be prepend to the java classpath customized in the factory.ini
                 </p>
             </description>
 
-            <messages>
-                <!--message level="error" code="SCHEDULER-398"/-->
-            </messages>
         </xml_attribute>
-
-
-        <xml_attribute name="class_path" type="java_class_path">
-            <description>
-                <p>
-                    Allow a job-specific Class-Path.
-                </p>
-                <p>
-                	 This attribute is a substiute for the classpath customized in the factory-ini - file. 
-                	 Therefore please ensure, that class_path contains all Job Scheduler specific Jars.
-                </p>                
-            </description>
-
-            <messages>
-                <!--message level="error" code="SCHEDULER-398"/-->
-            </messages>
-        </xml_attribute>        
 
 <!--        
         <xml_attribute name="recompile" type="yes_no" initial="yes">
