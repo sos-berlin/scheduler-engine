@@ -314,7 +314,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-470", "Path is not absolute: $1" },
     { "SCHEDULER-471", "Not supported character for encoding '$1'" },
     { "SCHEDULER-472", "Unknown subsystem \"$1\"" },
-    { "SCHEDULER-473", "Operation is not supported for distributed orders: '$1'" },
+    { "SCHEDULER-473", "operation is not supported for distributed orders: '$1'" },
     { "SCHEDULER-474", "Workload scheduler is not responding to UDP message since $1 ($2s). Workload scheduler's configuration can not be updated." },
     { "SCHEDULER-475", "java_options and java_class_path can only be set in primary XML configuration" },
     { "SCHEDULER-900", "Scheduler $1 is starting with $2, pid=$3" },
@@ -501,10 +501,9 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-712", "Step runs longer than the expected duration of $1" },
     { "SCHEDULER-713", "Process handle $1 is already registered" },
     { "SCHEDULER-714", "Scheduler $1 is already registered via connection $2. This connection will be closed now. New connection is $3" },
-    { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory." },
-    { "SCHEDULER-716", "Local jobs are not allowed for the current licence-key(s)" },
+    { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory" },
+    { "SCHEDULER-716", "jobs are not allowed for the current licence-key(s)" },
     { "SCHEDULER-717", "Remote commands are not allowed for the current licence-key(s)" },
-    { "SCHEDULER-718", "Using $1 configuration directory $2" },
     {}
 };
 } //namespace sos

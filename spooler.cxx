@@ -691,8 +691,8 @@ Spooler::Spooler()
     if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
     _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
     _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
-    if (!_jobs_allowed_for_licence) _log->info( "jobs are not allowed." );
-    if (!_remote_commands_allowed_for_licence) _log->info( "executing of remote commands triggered by a host are not allowed." );
+    if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
+    if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed.\n" );
 
 
     _pid          = getpid();

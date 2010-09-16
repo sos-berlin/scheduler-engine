@@ -2881,18 +2881,20 @@
           </text>
         </message>
 
-      <message code="SCHEDULER-473">
-        <text xml:lang="en">
-          <title>
-            operation is not supported for distributed orders: '<p1/>'
-          </title>
-        </text>
-      </message>
+        <message code="SCHEDULER-473">
+            <text xml:lang="en">
+                <title>operation is not supported for distributed orders: '<p1/>'</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-474">
+            <text xml:lang="en">
+                <title>Workload scheduler is not responding to UDP message since <p1/> (<p2/>s). Workload scheduler's configuration can not be updated.</title>
+            </text>
+        </message>
 
         <message code="SCHEDULER-475">
-            <text xml:lang="en">
-                <title>java_options and java_class_path can only be set in primary XML configuration</title>
-            </text>
+            <text xml:lang="en"><title>java_options and java_class_path can only be set in primary XML configuration</title></text>
         </message>
 
     </messages>
@@ -4311,17 +4313,19 @@
 
         <message code="SCHEDULER-715" weight="warn" object="Scheduler">
             <text xml:lang="en">
-                <title>
-                    The command-line option configuration-directory '<p1/>' is not a directory.
-                </title>
+                <title>The command-line option configuration-directory '<p1/>' is not a directory</title>
             </text>
         </message>
 
         <message code="SCHEDULER-716" weight="warn" object="Scheduler">
             <text xml:lang="en">
-                <title>
-                    jobs are not allowed for the current licence-key(s).
-                </title>
+                <title>jobs are not allowed for the current licence-key(s)</title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-717" weight="warn" object="Scheduler">
+            <text xml:lang="en">
+                <title>Remote commands are not allowed for the current licence-key(s)</title>
             </text>
         </message>
 

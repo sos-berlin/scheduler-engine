@@ -4,10 +4,10 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 <!--$Id: job.xml 4950 2007-04-12 06:39:59Z fs $-->
 
-<description  title="Externe Job-Verarbeitung"
+<description  title="Externe Job-Verarbeitung mit Agenten"
               base_dir=""
-              author="$Author: fs,ur $"
-              date="$Date: 2007-04-20 16:39:59 +0200 (Fr, 20 Apr 2007) $">
+              author="$Author: fs,ur, ss $"
+              date="$Date: 2010-09-16 13:32:59 +0200 (Do, 16 Sep 2010) $">
 
     <scheduler_keyword keyword="Remote Execution"/>
     <scheduler_keyword keyword="Remote"/>
@@ -15,7 +15,19 @@
 
 
     <p>
-      Jobs können auf einem entfernten Job Scheduler ausgeführt werden. 
+      Jobs können auf einem entfernten Job Scheduler ausgeführt werden, wenn dieser als Agent konfiguriert ist. Nur Agenten erlauben es, remote Kommandos
+      von aufrufenden Schedulern entgegen zu nehmen. Die Lizenz für den Betrieb eines Job Scheduler Agenten ist kostenpflichtig.
+    </p>
+    
+    <p>
+      Agenten zeichnen sich durch folgenden Merkmale aus:
+      <ul>
+          <li>Agenten müssen keinen live-folder haben.</li>
+          <li>Evtl. vorhandene lokale Jobs werden nicht ausgeführt. Das gilt auch für scheduler Standardjobs wie <i>scheduler_event_service.</i></li>
+          <li>Wird die Ausführung lokaler Jobs unterdrückt, wird dies mit einer entsprechenden Meldung protokolliert.</li>
+          <li>Interne Jobs (<i>scheduler_file_order_sink</i> und <i>scheduler_web_service</i>) werden nicht ausgeführt.</li>
+          <li>Nur Agenten sind in der Lage, remote Kommandos aufrufender Job Scheduler auszuführen. Wird versucht ein remote Kommando auf einem Scheduler auszuführen, der kein Agent ist, wird dies mit einer Fehlermeldung protokolliert.</li>
+      </ul>
     </p>
     
     <p>
@@ -85,15 +97,26 @@
           </pre>
         </p>
       </li>
+      
+	    <li>
+	      Deklaration eines speziellen Lizenzschlüssels in der Datei <scheduler_a href="sos_ini.xml">sos.ini</scheduler_a>
+	      <p>
+	      Für den Job Scheduler, der als Agent betrieben werden soll, muß ein spezieller Lizenzschlüssel im Abschnitt <scheduler_a href="sos_ini_licence.xml">[licence]</scheduler_a> deklariert worden sein.
+	      </p>
+          <br/><br/>
+	    </li>
+
       <li>
         Beide Job Scheduler müssen gestartet sein.
+          <br/><br/>
       </li>
+	    
     </ol>
     
     
     
     <h2>Konfiguration</h2>
-    
+
     <p>
       Die Job-Definition steht in der Konfigurationsdatei des lokalen, aufrufenden Job Scheduler.<br/>
       Um einen Job auf einem anderen Job Scheduler ausführen zu lassen, sind beim lokalen, 
