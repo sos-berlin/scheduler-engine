@@ -131,7 +131,7 @@
             <description>
                 <p>
                 In general an unlimited number of orders for a job_chain could ran simultaneously. To declare the attribute max_orders it is 
-                possible to limit this number. E.g. max_numbers='1' let run the job_chain exclusively for one order. A new order for this job_chain
+                possible to limit this number. E.g. <i>max_orders='1'</i> let run the job_chain exclusively for one order. A new order for this job_chain
                 can only run, if the first order was finished. 
                 <!--
                 Grundsätzlich können von einer Jobkette beliebig viele Instanzen (durch verschiedene Order gestartet) parallel laufen. Mit 
