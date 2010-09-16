@@ -499,7 +499,7 @@ Time Schedule_use::next_single_start( const Time& time )
  *
  * \detail
  * Mit dem bisherigen Aufruf von period.next_repeated( time ) wurde in der Folge ebenfalls
- * period.next_absolute_repeated aufgerufen, allerings mit next = 1 (2. Parameter), was 
+ * period.next_absolute_repeated aufgerufen, allerdings mit next = 1 (2. Parameter), was 
  * bewirkt hat, das der erste Startzeitpunkt einer Periode "ausgelassen" worden ist.
  *
  * Code gültig bis Version 2.1.0
@@ -1790,7 +1790,8 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     else
     if( !_absolute_repeat.is_never() )
     {
-        result = next_absolute_repeated( t, 1 );
+        // JS-474: result = next_absolute_repeated( t, 1 );
+        result = next_absolute_repeated( t, 0 );
     }
 
     return result;  

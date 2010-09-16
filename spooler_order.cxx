@@ -7513,9 +7513,14 @@ Time Order::next_start_time( bool first_call )
         {
             _period = _schedule_use->next_period( now, schedule::wss_next_period_or_single_start );
 
-            if( !_period.absolute_repeat().is_never() )
+            if( !_period.absolute_repeat().is_never() || !_period.repeat().is_never() )
             {
-                result = _period.next_repeated( now );
+                if( !_period.repeat().is_never() && _period.is_in_time(now) )
+                    {
+                        result = now;
+                    } else {
+                        result = _period.next_repeated( now );
+                    }
 
                 if( result.is_never() )
                 {
@@ -7525,7 +7530,7 @@ Time Order::next_start_time( bool first_call )
             }
             else
             {
-                result = _period.begin();
+                // JS-474: result = _period.begin();
             }
         }
         else
@@ -7547,7 +7552,7 @@ Time Order::next_start_time( bool first_call )
                 if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?
                 {
                     next_period = _schedule_use->next_period( now );
-                    result = next_period.begin();
+                    // JS-474: result = next_period.begin();
                 }
 
                 _period = next_period;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes"
+     title="job läuft gleich los">
+    <script language="shell">
+        <![CDATA[
+dir c:dir c:\
+        ]]>
+    </script>
+    <run_time/>
+</job>
