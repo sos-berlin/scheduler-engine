@@ -7170,7 +7170,9 @@ void Order::handle_end_state()
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
         if( ( next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
-            s != _initial_state )   
+            s != _initial_state
+            || ( _period.absolute_repeat().is_never() && _period.repeat().is_never() && next_start == Time::never  )  // JS-474
+            )   
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
@@ -7179,7 +7181,7 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if( is_file_order()  &&  file_path().file_exists() )
+                if( is_file_order()  &&  file_path().file_exists() ) // RB: Auslösende Datei darf nach Auftragsende nicht mehr da sein. Sonst Fehler.
                 {
                     _log->error( message_string( "SCHEDULER-340" ) );
                     set_on_blacklist();
@@ -7498,7 +7500,11 @@ Time Order::next_time()
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
-
+/*
+Temporäre Dokumentation
+first_call: false, wenn Order endet oder nicht gestartet wurde
+first_call: true, bevor Order gestartet wird
+*/
 Time Order::next_start_time( bool first_call )
 {
     Time result = Time::never;
@@ -7546,7 +7552,7 @@ Time Order::next_start_time( bool first_call )
                  || _period.end()    != next_period.begin()
                  || _period.repeat() != next_period.repeat() )
                 {
-                    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+                // JS-474    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
                 }
 
                 if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?

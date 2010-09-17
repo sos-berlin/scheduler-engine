@@ -2,15 +2,13 @@
 
 <order>
     <run_time let_run="no">
-        <period absolute_repeat="01:00"
-                begin="10:00"
-                end="21:00"/>
-
-
-        <weekdays>
-            <day day="4">
-                <period single_start="20:30"/>
-            </day>
-        </weekdays>
     </run_time>
 </order>
+
+<!-- order>
+    <run_time let_run="no">
+        <period 
+                begin="10:00"
+                end="21:00"/>
+    </run_time>
+</order-->
