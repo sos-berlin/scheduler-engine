@@ -617,7 +617,12 @@ db = scheduler.mdb
     <setting setting = "mail_on_warning"
              type    = "yes|no"
              initial = "no"
-             title   = "Wenn eine Warnung oder ein Fehler ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">
+             title   = "Wenn eine Warnung ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">
+        <description>
+            <p>
+                Damit im Fehlerfall eine Mail verschickt wird, ist <code>mail_on_error=yes</code> explizit zu setzen.
+            </p>
+        </description>
     </setting>
 
 

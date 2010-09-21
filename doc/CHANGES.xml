@@ -10,6 +10,15 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
+    <change date="2010-09-21" version="2.1.3" subversion_revision="6295" >
+      <revision jira="JS-425" type="correction" title=" Im Fehlerfall werden jetzt nur noch mails versendet, wenn mail_on_error=yes gesetzt ist">
+        <description>
+        Bei Auftreten eines Fehlers werden jetzt nur noch Mail versendet, wenn <i>mail_on_error=yes</i> gesetzt ist. Ein implizites Setzen von
+        <i>mail_on_error</i> durch die Angabe von <i>mail_on_warn=yes</i> findet nicht mehr statt.
+        </description>
+      </revision>
+    </change> 
+
     <change date="2010-09-02" version="2.1.3" subversion_revision="6269" >
       <revision jira="JS-563" type="correction" title="exit_code ist jetzt in spooler_task_after abrufbar">
         <description>

@@ -859,8 +859,8 @@ db = scheduler.mdb
     <setting setting = "mail_on_warning"
              type    = "yes|no"
              initial = "no"
-             title   = "An e-mail is sent after a task has ended, should a warning or an error occur">
-         <!--title   = "Wenn eine Warnung oder ein Fehler ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">-->
+             title   = "An e-mail is sent after a task has ended, should a warning occur">
+         <!--title   = "Wenn eine Warnung ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">-->
     </setting>
 
 
