@@ -7503,7 +7503,7 @@ Time Order::next_time()
 /*
 Temporäre Dokumentation
 first_call: false, wenn Order endet oder nicht gestartet wurde
-first_call: true, bevor Order gestartet wird
+first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order ändert
 */
 Time Order::next_start_time( bool first_call )
 {
@@ -7521,12 +7521,12 @@ Time Order::next_start_time( bool first_call )
 
             if( !_period.absolute_repeat().is_never() || !_period.repeat().is_never() )
             {
-                if( !_period.repeat().is_never() && _period.is_in_time(now) )
-                    {
-                        result = now;
-                    } else {
-                        result = _period.next_repeated( now );
-                    }
+                if( _period.is_in_time(now) )
+                {
+                    result = now;
+                } else {
+                    result = _period.next_repeated( now );
+                }
 
                 if( result.is_never() )
                 {
@@ -7537,6 +7537,10 @@ Time Order::next_start_time( bool first_call )
             else
             {
                 // JS-474: result = _period.begin();
+                if (_period.is_single_start() ) // || _period._start_once  )
+                {
+                    result = _period.begin();
+                }
             }
         }
         else
