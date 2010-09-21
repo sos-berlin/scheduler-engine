@@ -5,8 +5,8 @@
 >
     <config 
         port="6360" 
-        supervisor = "8of9.sos:4136"
     >
+<!--        supervisor = "8of9.sos:4136" -->
 
         <security>
             <allowed_host host="0.0.0.0" level="all"/>

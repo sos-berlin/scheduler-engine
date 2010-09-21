@@ -2567,9 +2567,11 @@ void Task::trigger_event( Scheduler_event* scheduler_event )
         {
             bool mail_due_to_error_or_warning = false;
 
-            if( _log->_mail_on_error | _log->_mail_on_warning  &&  ( has_error() || _log->highest_level() >= log_error ) )  mail_due_to_error_or_warning = true;
+//          JS-425:  if( _log->_mail_on_error | _log->_mail_on_warning  &&  ( has_error() || _log->highest_level() >= log_error ) )  mail_due_to_error_or_warning = true;
+            if( _log->_mail_on_error &&  ( has_error() || _log->highest_level() >= log_error ) )  mail_due_to_error_or_warning = true;
             else
-            if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
+//          JS-425: if( _log->_mail_on_warning  &&  _log->has_line_for_level( log_warn ) )  mail_due_to_error_or_warning = true;
+            if( _log->_mail_on_warning &&  ( _log->highest_level() == log_warn ) )  mail_due_to_error_or_warning = true;
 
             if( _job->_delay_after_error.size() > 0 )
             {
