@@ -7187,7 +7187,7 @@ void Order::handle_end_state()
 
         if( ( next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
             s != _initial_state
-            || ( _period.absolute_repeat().is_never() && _period.repeat().is_never() && next_start == Time::never  )  // JS-474
+            || ( _period.absolute_repeat().is_never() && _period.repeat().is_never() && next_start == Time::never && has_base_file()  )  // JS-474
             )   
         {
             _is_virgin = true;

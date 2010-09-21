@@ -1649,14 +1649,13 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
     }
     else
     {
-        string begin = element.getAttribute( "begin", "00:00:00" );
+        string begin = element.getAttribute( "begin", "00:00:00" );        
         if( !begin.empty() )
         {
             if( w == with_date )  dt = begin;
                             else  dt.set_time( begin );
             _begin = dt;
         }
-
         string repeat = element.getAttribute( "repeat" );
         if( !repeat.empty() )
         {

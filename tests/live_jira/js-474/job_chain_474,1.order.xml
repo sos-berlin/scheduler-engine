@@ -28,7 +28,8 @@ Einige interessante Funktionen
     <run_time let_run="no"
               begin="08:00"
               end="18:00">
-        <period single_start="13:56"/>
+        
+        <period repeat="00:05:00"/>
 
 
         <date date="2010-09-20">
