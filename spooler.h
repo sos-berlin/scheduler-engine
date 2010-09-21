@@ -209,7 +209,6 @@ using namespace folder;
 
 namespace include
 {
-  //struct Include_register;
     struct Has_includes;
 };
 using namespace include;
@@ -229,7 +228,6 @@ namespace order
 {
     struct Job_chain;
     struct Job_chain_folder_interface;
-  //struct Job_chain_folder;
     struct Order_queue;
     struct Order;
     struct Order_subsystem;
@@ -277,14 +275,11 @@ namespace supervisor
 typedef stdext::hash_set<string> String_set;
 
 } //namespace scheduler
-
-//namespace http
-//{
-//} //namespace http
 } //namespace sos
 
 //-------------------------------------------------------------------------------------------------
 
+#include "javaproxy.h"
 #include "spooler_com.h"
 #include "spooler_xslt_stylesheet.h"
 #include "spooler_common.h"
@@ -413,7 +408,6 @@ struct Spooler : Object,
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
 
-    // Aufrufe für andere Threads:
     Thread_id                   thread_id                   () const                            { return _thread_id; }
     void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }
@@ -469,6 +463,8 @@ struct Spooler : Object,
 
     friend struct               Com_spooler;
 
+    void                        check_licence               ();
+    void                        release_com_objects         ();
     void                        load_arg                    ();
     void                        read_ini_filename           ();
     void                        read_ini_file               ();
@@ -556,6 +552,7 @@ struct Spooler : Object,
 
     Database*                   db                          ()                                  { return _db; }
 
+    const SchedulerJ&           schedulerJ                  () const                            { return _java_subsystem->schedulerJ(); }
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
     void                        new_subsystems              ();

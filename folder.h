@@ -698,6 +698,16 @@ struct file_based_subsystem : File_based_subsystem
     }
 
 
+    javaproxy::java::util::ArrayList java_file_baseds() 
+    {
+        javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(_file_based_map.size());
+        Z_FOR_EACH (File_based_map, _file_based_map, it)
+            if (Job_chain* job_chain = it->second)
+                result.add(job_chain->java_sister());
+        return result;
+    }
+
+
   protected:
     File_based*                 file_based_or_null_         ( const Absolute_path& path ) const     { return file_based_or_null( path ); }
     File_based*                 file_based_                 ( const Absolute_path& path ) const     { return file_based( path ); }

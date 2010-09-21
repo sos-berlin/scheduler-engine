@@ -68,7 +68,7 @@ inline int weekday_of_day_number( int day_number )
     return ( day_number + 4 ) % 7;
 }
 
-//----------------------------------------------------------------------Day_set::get_weekday_number
+//-------------------------------------------------------------------------------get_weekday_number
 
 static int get_weekday_number( const string& weekday_name )
 {

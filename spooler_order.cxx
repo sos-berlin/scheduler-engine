@@ -6,7 +6,9 @@
 #include "../zschimmer/xml.h"
 
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__Order.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderState.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderStateChangeEvent.h"
+typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderState OrderStateJ;
 typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderStateChangeEvent OrderStateChangeEventJ;
 
 using stdext::hash_set;
@@ -110,7 +112,7 @@ struct Order_id_spaces : Order_id_spaces_interface
     void                        disconnect_order_id_space   ( Job_chain*, Job_chain* causing_job_chain, const String_set& original_job_chain_set, Job_chain_set* job_chains );
 
     Fill_zero                      _zero_;
-    Order_subsystem_impl*               _order_subsystem;
+    Order_subsystem_impl*          _order_subsystem;
     vector< ptr<Order_id_space> >  _array;                  // [0] unbenutzt, Lücken sind NULL
 };
 
@@ -1183,6 +1185,7 @@ namespace job_chain {
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
+    has_proxy<Node>(job_chain->spooler()->j()),
     _zero_(this+1), 
     _job_chain(job_chain),
     _type(type),
@@ -1472,7 +1475,8 @@ xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Sho
 
 Order_queue_node::Order_queue_node( Job_chain* job_chain, const Order::State& state, Node::Type type ) 
 : 
-    Node( job_chain, state, type )
+    Node( job_chain, state, type ),
+    javabridge::has_proxy<Order_queue_node>(job_chain->spooler()->j())
 {
     _order_queue = new Order_queue( this );
 }
@@ -1913,6 +1917,7 @@ Job_chain::Job_chain( Scheduler* scheduler )
 :
     Com_job_chain( this ),
     file_based<Job_chain,Job_chain_folder_interface,Order_subsystem>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
+    javabridge::has_proxy<Job_chain>(scheduler->j()),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(visible_yes)
@@ -2410,6 +2415,17 @@ Node* Job_chain::add_end_node( const Order::State& state )
     _node_list.push_back( node );
 
     return node;
+}
+
+
+//----------------------------------------------------------------------------Job_chain::java_nodes
+
+javaproxy::java::util::ArrayList Job_chain::java_nodes() 
+{
+    javaproxy::java::util::ArrayList result = javaproxy::java::util::ArrayList::new_instance(_node_list.size());
+    Z_FOR_EACH (Node_list, _node_list, it)
+        result.add((*it)->java_sister());
+    return result;
 }
 
 //-------------------------------------------------------------------------Job_chain::on_initialize
@@ -3998,6 +4014,7 @@ string Order_id_space::name() const
 Order_queue::Order_queue( Order_queue_node* order_queue_node )
 :
     Scheduler_object( order_queue_node->spooler(), static_cast<spooler_com::Iorder_queue*>( this ), type_order_queue ),
+    javabridge::has_proxy<Order_queue>(order_queue_node->job_chain()->spooler()->j()),
     _zero_(this+1),
     _order_queue_node(order_queue_node),
     _job_chain(order_queue_node->job_chain()),
@@ -4189,8 +4206,6 @@ int Order_queue::order_count( Read_transaction* ta ) const
                       (
                           S() << "select count(*)  from " << db()->_orders_tablename <<
                                  "  where `distributed_next_time` is not null"
-                                  //" and ( `occupying_cluster_member_id`<>" << sql::quoted( _spooler->cluster_member_id() ) << " or"
-                                  //      " `occupying_cluster_member_id` is null )"
                                     " and " << db_where_expression(),
                           Z_FUNCTION
                       )
@@ -4702,7 +4717,7 @@ Order::Order( Standing_order_subsystem* subsystem )
 :
     Com_order(this),
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
-    has_proxy<Order>(subsystem->spooler()->j()),
+    javabridge::has_proxy<Order>(subsystem->spooler()->j()),
     _zero_(this+1)
 {
     _com_log = new Com_log;
@@ -6661,6 +6676,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 {
     if( order_state != _state )
     {
+        State previous_state = _state;
         _state = order_state;
 
         if( _job_chain )
@@ -6680,7 +6696,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
         if( _id_locked )
         {
 #ifdef Z_DEBUG            
-            report_event( OrderStateChangeEventJ::new_instance(java_sister()) );
+            report_event( OrderStateChangeEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
 #endif
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );

@@ -685,15 +685,7 @@ Spooler::Spooler()
     if( spooler_ptr )  z::throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
-//    if( !SOS_LICENCE( licence_scheduler ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
-
-    /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
-    if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
-    _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
-    _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
-    if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
-    if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed.\n" );
-
+    check_licence();
 
     _pid          = getpid();
     _tcp_port     = 0;
@@ -737,6 +729,18 @@ Spooler::~Spooler()
     }
 }
 
+//---------------------------------------------------------------------------Spooler::check_licence
+
+void Spooler::check_licence() 
+{
+    /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+    if( !SOS_LICENCE( licence_scheduler) && !SOS_LICENCE( licence_scheduler_agent ) )  sos::throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
+    _jobs_allowed_for_licence = SOS_LICENCE(licence_scheduler) != NULL;
+    _remote_commands_allowed_for_licence = SOS_LICENCE(licence_scheduler_agent) != NULL;
+    if (!_jobs_allowed_for_licence) Z_LOG2( "scheduler", "jobs are not allowed.\n"  );
+    if (!_remote_commands_allowed_for_licence) Z_LOG2( "scheduler", "executing of remote commands are not allowed.\n" );
+}
+
 //-----------------------------------------------------------------------------------Spooler::close
 
 void Spooler::close()
@@ -754,13 +758,18 @@ void Spooler::close()
     _event.close();
     _wait_handles.close();
 
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_spooler )  _com_spooler->close();
-    if( _com_log     )  _com_log->set_log( NULL );
+    release_com_objects(); // falls noch jemand eine Referenz darauf hat
 
     //update_console_title( 0 );
+    // _log offenhalten, weil es noch vom Destruktor genutzt werden könnte.
+}
 
-    // _log offenhalten
+//---------------------------------------------------------------------Spooler::release_com_objects
+
+void Spooler::release_com_objects() 
+{
+    if( _com_spooler )  _com_spooler->close();
+    if( _com_log     )  _com_log->set_log( NULL );
 }
 
 //------------------------------------------------------------------------------------Spooler::name
@@ -1706,6 +1715,25 @@ void Spooler::fetch_hostname()
     _complete_hostname = complete_computer_name();
 }
 
+//------------------------------------------------------------------Spooler::read_xml_configuration
+
+void Spooler::read_xml_configuration()
+{
+    assert(!_config_element_to_load);
+
+    Command_processor cp ( this, Security::seclev_all );
+    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
+                                            // database.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
+                                            // damit der Scheduler nicht in einem TCP-Kommando blockiert.
+
+    if( _configuration_is_job_script )
+        cp.execute( configuration_for_single_job_script() );
+    else
+        cp.execute_config_file( _configuration_file_path );
+
+    assert(_config_element_to_load);
+}
+
 //---------------------------------------------------------------Spooler::initialize_java_subsystem
 
 void Spooler::initialize_java_subsystem()
@@ -1802,6 +1830,7 @@ void Spooler::load_subsystems()
 
 void Spooler::activate_subsystems()
 {
+    _java_subsystem->switch_subsystem_state( subsys_active );
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
     _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
     detect_warning_and_send_mail();
@@ -1818,25 +1847,6 @@ void Spooler::activate_subsystems()
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
     _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
-}
-
-//------------------------------------------------------------------Spooler::read_xml_configuration
-
-void Spooler::read_xml_configuration()
-{
-    assert(!_config_element_to_load);
-
-    Command_processor cp ( this, Security::seclev_all );
-    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
-                                            // database.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
-                                            // damit der Scheduler nicht in einem TCP-Kommando blockiert.
-
-    if( _configuration_is_job_script )
-        cp.execute( configuration_for_single_job_script() );
-    else
-        cp.execute_config_file( _configuration_file_path );
-
-    assert(_config_element_to_load);
 }
 
 //----------------------------------------------------------------------------Spooler::create_window

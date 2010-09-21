@@ -708,7 +708,7 @@ static jobject JNICALL job_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
     Env env = jenv;
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem()");
-        return (o_->job_subsystem())->get_jobject();
+        return Has_proxy::jobject_of(o_->job_subsystem());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -725,7 +725,7 @@ static jobject JNICALL job_1subsystem_1or_1null(JNIEnv* jenv, jobject, jlong cpp
     Env env = jenv;
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem_or_null()");
-        return (o_->job_subsystem_or_null())->get_jobject();
+        return Has_proxy::jobject_of(o_->job_subsystem_or_null());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -774,7 +774,7 @@ static jobject JNICALL log(JNIEnv* jenv, jobject, jlong cppReference)
     Env env = jenv;
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log()");
-        return (o_->log())->get_jobject();
+        return Has_proxy::jobject_of(o_->log());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -874,7 +874,7 @@ static jobject JNICALL order_1subsystem(JNIEnv* jenv, jobject, jlong cppReferenc
     Env env = jenv;
     try {
         ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::order_subsystem()");
-        return (o_->order_subsystem())->get_jobject();
+        return Has_proxy::jobject_of(o_->order_subsystem());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -1229,88 +1229,89 @@ static void JNICALL update_1console_1title__I(JNIEnv* jenv, jobject, jlong cppRe
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-{ "abort_immediately__native", "(JZLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1immediately__ZLjava_lang_String_2 },
-{ "abort_immediately_after_distribution_error__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1immediately_1after_1distribution_1error__Ljava_lang_String_2 },
-{ "abort_now__native", "(JZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1now__Z },
-{ "activate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::activate },
-{ "assert_are_orders_distributed__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assert_1are_1orders_1distributed__Ljava_lang_String_2 },
-{ "assert_is_activated__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assert_1is_1activated__Ljava_lang_String_2 },
-{ "assign_stdout__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assign_1stdout },
-{ "begin_dont_suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::begin_1dont_1suspend_1machine },
-{ "check_cluster__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::check_1cluster },
-{ "check_name__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::check_1name__Ljava_lang_String_2 },
-{ "cluster_is_active__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cluster_1is_1active },
-{ "cluster_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cluster_1member_1id },
-{ "cmd_continue__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1continue },
-{ "cmd_let_run_terminate_and_restart__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1let_1run_1terminate_1and_1restart },
-{ "cmd_pause__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1pause },
-{ "cmd_terminate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate },
-{ "cmd_terminate__native", "(JZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__Z },
-{ "cmd_terminate__native", "(JZI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZI },
-{ "cmd_terminate__native", "(JZILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2 },
-{ "cmd_terminate__native", "(JZILjava/lang/String;Z)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2Z },
-{ "cmd_terminate_after_error__native", "(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_String_2 },
-{ "cmd_terminate_and_restart__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1and_1restart__I },
-{ "db_cluster_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1cluster_1member_1id },
-{ "db_distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1distributed_1member_1id },
-{ "detect_warning_and_send_mail__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::detect_1warning_1and_1send_1mail },
-{ "directory__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::directory },
-{ "distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::distributed_1member_1id },
-{ "end_dont_suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::end_1dont_1suspend_1machine },
-{ "end_waiting_tasks__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::end_1waiting_1tasks },
-{ "execute_config_commands__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::execute_1config_1commands },
-{ "execute_state_cmd__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::execute_1state_1cmd },
-{ "has_any_task__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::has_1any_1task },
-{ "has_exclusiveness__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::has_1exclusiveness },
-{ "http_url__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::http_1url },
-{ "id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id },
-{ "id_for_db__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id_1for_1db },
-{ "include_path__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::include_1path },
-{ "is_cluster__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1cluster },
-{ "is_machine_suspendable__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1machine_1suspendable },
-{ "is_service__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1service },
-{ "is_termination_state_cmd__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1termination_1state_1cmd },
-{ "java_work_dir__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1work_1dir },
-{ "job_subsystem__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1subsystem },
-{ "job_subsystem_or_null__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1subsystem_1or_1null },
-{ "load__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::load },
-{ "load_arg__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::load_1arg },
-{ "log__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log },
-{ "log_directory__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log_1directory },
-{ "log_show_state__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log_1show_1state },
-{ "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name },
-{ "name_is_valid__native", "(JLjava/lang/String;)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name_1is_1valid__Ljava_lang_String_2 },
-{ "nichts_getan__native", "(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::nichts_1getan__ILjava_lang_String_2 },
-{ "order_subsystem__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Order_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::order_1subsystem },
-{ "orders_are_distributed__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::orders_1are_1distributed },
-{ "param__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::param },
-{ "register_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::register_1pid__I },
-{ "register_pid__native", "(JIZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::register_1pid__IZ },
-{ "run__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::run },
-{ "run_check_ctrl_c__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::run_1check_1ctrl_1c },
-{ "self_check__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::self_1check },
-{ "send_cmd__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::send_1cmd },
-{ "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
-{ "signal__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signal__Ljava_lang_String_2 },
-{ "signaled__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signaled },
-{ "start__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::start },
-{ "state_name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::state_1name },
-{ "stop__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::stop },
-{ "string_need_db__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1need_1db },
-{ "suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::suspend_1machine },
-{ "tcp_port__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::tcp_1port },
-{ "temp_dir__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::temp_1dir },
-{ "udp_port__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::udp_1port },
-{ "unregister_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::unregister_1pid__I },
-{ "update_console_title__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::update_1console_1title__I }
+    { "abort_immediately__native", "(JZLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1immediately__ZLjava_lang_String_2 },
+    { "abort_immediately_after_distribution_error__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1immediately_1after_1distribution_1error__Ljava_lang_String_2 },
+    { "abort_now__native", "(JZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::abort_1now__Z },
+    { "activate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::activate },
+    { "assert_are_orders_distributed__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assert_1are_1orders_1distributed__Ljava_lang_String_2 },
+    { "assert_is_activated__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assert_1is_1activated__Ljava_lang_String_2 },
+    { "assign_stdout__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::assign_1stdout },
+    { "begin_dont_suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::begin_1dont_1suspend_1machine },
+    { "check_cluster__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::check_1cluster },
+    { "check_name__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::check_1name__Ljava_lang_String_2 },
+    { "cluster_is_active__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cluster_1is_1active },
+    { "cluster_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cluster_1member_1id },
+    { "cmd_continue__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1continue },
+    { "cmd_let_run_terminate_and_restart__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1let_1run_1terminate_1and_1restart },
+    { "cmd_pause__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1pause },
+    { "cmd_terminate__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate },
+    { "cmd_terminate__native", "(JZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__Z },
+    { "cmd_terminate__native", "(JZI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZI },
+    { "cmd_terminate__native", "(JZILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2 },
+    { "cmd_terminate__native", "(JZILjava/lang/String;Z)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate__ZILjava_lang_String_2Z },
+    { "cmd_terminate_after_error__native", "(JLjava/lang/String;Ljava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_String_2 },
+    { "cmd_terminate_and_restart__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::cmd_1terminate_1and_1restart__I },
+    { "db_cluster_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1cluster_1member_1id },
+    { "db_distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::db_1distributed_1member_1id },
+    { "detect_warning_and_send_mail__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::detect_1warning_1and_1send_1mail },
+    { "directory__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::directory },
+    { "distributed_member_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::distributed_1member_1id },
+    { "end_dont_suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::end_1dont_1suspend_1machine },
+    { "end_waiting_tasks__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::end_1waiting_1tasks },
+    { "execute_config_commands__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::execute_1config_1commands },
+    { "execute_state_cmd__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::execute_1state_1cmd },
+    { "has_any_task__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::has_1any_1task },
+    { "has_exclusiveness__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::has_1exclusiveness },
+    { "http_url__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::http_1url },
+    { "id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id },
+    { "id_for_db__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::id_1for_1db },
+    { "include_path__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::include_1path },
+    { "is_cluster__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1cluster },
+    { "is_machine_suspendable__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1machine_1suspendable },
+    { "is_service__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1service },
+    { "is_termination_state_cmd__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1termination_1state_1cmd },
+    { "java_work_dir__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1work_1dir },
+    { "job_subsystem__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1subsystem },
+    { "job_subsystem_or_null__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1subsystem_1or_1null },
+    { "load__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::load },
+    { "load_arg__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::load_1arg },
+    { "log__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log },
+    { "log_directory__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log_1directory },
+    { "log_show_state__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::log_1show_1state },
+    { "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name },
+    { "name_is_valid__native", "(JLjava/lang/String;)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name_1is_1valid__Ljava_lang_String_2 },
+    { "nichts_getan__native", "(JILjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::nichts_1getan__ILjava_lang_String_2 },
+    { "order_subsystem__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Order_subsystemC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::order_1subsystem },
+    { "orders_are_distributed__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::orders_1are_1distributed },
+    { "param__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::param },
+    { "register_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::register_1pid__I },
+    { "register_pid__native", "(JIZ)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::register_1pid__IZ },
+    { "run__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::run },
+    { "run_check_ctrl_c__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::run_1check_1ctrl_1c },
+    { "self_check__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::self_1check },
+    { "send_cmd__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::send_1cmd },
+    { "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
+    { "signal__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signal__Ljava_lang_String_2 },
+    { "signaled__native", "(J)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::signaled },
+    { "start__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::start },
+    { "state_name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::state_1name },
+    { "stop__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::stop },
+    { "string_need_db__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1need_1db },
+    { "suspend_machine__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::suspend_1machine },
+    { "tcp_port__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::tcp_1port },
+    { "temp_dir__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::temp_1dir },
+    { "udp_port__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::udp_1port },
+    { "unregister_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::unregister_1pid__I },
+    { "update_console_title__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::update_1console_1title__I },
+    NULL
 };
 
 namespace zschimmer { namespace javabridge { 
 
     template<> void has_proxy< ::sos::scheduler::Spooler>::register_cpp_proxy_class_in_java() {
         Env env;
-        Class* cls = ::sos::scheduler::Spooler::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, NO_OF(native_methods));
+        Class* cls = has_proxy<::sos::scheduler::Spooler>::proxy_class_factory.clas();
+        int ret = env->RegisterNatives(*cls, native_methods, 74);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

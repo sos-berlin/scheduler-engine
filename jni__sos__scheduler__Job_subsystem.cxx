@@ -19,7 +19,7 @@ static jobject JNICALL job_1by_1string__Ljava_lang_String_2(JNIEnv* jenv, jobjec
     Env env = jenv;
     try {
         ::sos::scheduler::Job_subsystem* o_ = has_proxy< ::sos::scheduler::Job_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string()");
-        return (o_->job_by_string(env.string_from_jstring(p0)))->get_jobject();
+        return Has_proxy::jobject_of(o_->job_by_string(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -36,7 +36,7 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
     Env env = jenv;
     try {
         ::sos::scheduler::Job_subsystem* o_ = has_proxy< ::sos::scheduler::Job_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string_or_null()");
-        return (o_->job_by_string_or_null(env.string_from_jstring(p0)))->get_jobject();
+        return Has_proxy::jobject_of(o_->job_by_string_or_null(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
         env.set_java_exception(x);
@@ -47,16 +47,17 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-{ "job_by_string__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string__Ljava_lang_String_2 },
-{ "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 }
+    { "job_by_string__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string__Ljava_lang_String_2 },
+    { "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 },
+    NULL
 };
 
 namespace zschimmer { namespace javabridge { 
 
     template<> void has_proxy< ::sos::scheduler::Job_subsystem>::register_cpp_proxy_class_in_java() {
         Env env;
-        Class* cls = ::sos::scheduler::Job_subsystem::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, NO_OF(native_methods));
+        Class* cls = has_proxy<::sos::scheduler::Job_subsystem>::proxy_class_factory.clas();
+        int ret = env->RegisterNatives(*cls, native_methods, 2);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

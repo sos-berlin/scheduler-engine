@@ -569,11 +569,27 @@
 					>
 				</File>
 				<File
-					RelativePath=".\jni__sos__scheduler__Order.cxx"
+					RelativePath=".\jni__sos__scheduler__order__Job_chain.cxx"
 					>
 				</File>
 				<File
-					RelativePath=".\jni__sos__scheduler__Order_subsystem.cxx"
+					RelativePath=".\jni__sos__scheduler__order__job_chain__Node.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\jni__sos__scheduler__order__job_chain__Order_queue_node.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\jni__sos__scheduler__order__Order.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\jni__sos__scheduler__order__Order_queue.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\jni__sos__scheduler__order__Order_subsystem.cxx"
 					>
 				</File>
 				<File

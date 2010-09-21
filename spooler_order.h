@@ -434,7 +434,8 @@ namespace job_chain {
 //----------------------------------------------------------------------------------job_chain::Node
 
 struct Node : Com_job_chain_node,
-              Scheduler_object
+              Scheduler_object,
+              javabridge::has_proxy<Node>
 {
     //---------------------------------------------------------------------------------------------
 
@@ -514,10 +515,13 @@ struct Node : Com_job_chain_node,
   //virtual void                replace                     ( Node* )                               {}
 
     const Order::State&         order_state                 () const                                { return _order_state; }
+    string                      string_order_state          () const                                { return _order_state.as_string(); }
     void                    set_next_state                  ( const Order::State& );
     const Order::State&         next_state                  () const                                { return _next_state; }
+    string                      string_next_state           () const                                { return _next_state.as_string(); }
     void                    set_error_state                 ( const Order::State& );
     const Order::State&         error_state                 () const                                { return _error_state; }
+    string                      string_error_state          () const                                { return _error_state.as_string(); }
 
     Node*                       next_node                   () const                                { return _next_node; }
     Node*                       error_node                  () const                                { return _error_node; }
@@ -586,13 +590,15 @@ struct End_node : Node
 
 //----------------------------------------------------------------------job_chain::Order_queue_node
 
-struct Order_queue_node : Node
+struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 {
     typedef Node                Base_class;
     DEFINE_JOB_CHAIN_NODE_CAST_FUNCTIONS( Order_queue_node, n_order_queue )
 
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
+
+    virtual jobject             java_sister                 ()                                      { return javabridge::has_proxy<Order_queue_node>::java_sister(); }
 
     void                        close                       ();
   //void                        replace                     ( Node* old_node );
@@ -713,7 +719,8 @@ struct Sink_node : Job_node
 
 struct Job_chain : Com_job_chain, 
                    file_based< Job_chain, Job_chain_folder_interface, Order_subsystem >,
-                   is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>
+                   is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>,
+                   javabridge::has_proxy<Job_chain>
 {
     enum State      // Kann wegfallen, denn file_based_state() hat dieselbe Funktion
     {
@@ -801,6 +808,7 @@ struct Job_chain : Com_job_chain,
     job_chain::Node*            node_from_state             ( const Order::State& );
     job_chain::Node*            node_from_state_or_null     ( const Order::State& );
     job_chain::Job_node*        node_from_job               ( Job* );
+    javaproxy::java::util::ArrayList java_nodes             ();
 
 
     int                         remove_all_pending_orders   ( bool leave_in_database = false );
@@ -898,7 +906,8 @@ struct Order_id_spaces_interface
 // 1:1-Beziehung mit Order_queue_node
 
 struct Order_queue : Com_order_queue,
-                     Scheduler_object
+                     Scheduler_object,
+                     javabridge::has_proxy<Order_queue>
 {
     Z_GNU_ONLY(                 Order_queue                 ();  )                                  // Für gcc 3.2. Nicht implementiert
                                 Order_queue                 ( job_chain::Order_queue_node* );
@@ -919,6 +928,7 @@ struct Order_queue : Com_order_queue,
     void                        register_order_source       ( Order_source* );
     void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* ) const;
+    int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
     int                         running_order_count         ();
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;

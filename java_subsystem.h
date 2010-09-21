@@ -3,6 +3,8 @@
 #ifndef __SCHEDULER_JAVA_SUBSYSTEM_H
 #define __SCHEDULER_JAVA_SUBSYSTEM_H
 
+#include "javaproxy.h"
+
 namespace sos {
 namespace scheduler {
 
@@ -15,6 +17,7 @@ struct Java_subsystem_interface : Object, Subsystem
     virtual javabridge::Vm*     java_vm                     ()                                      = 0;
     virtual void            set_java_options                ( const string& )                       = 0;
     virtual void                prepend_class_path          ( const string& )                       = 0;
+    virtual const SchedulerJ&   schedulerJ                  () const                                = 0;
 
     static string               classname_of_scheduler_object(const string&);
     static ptr<javabridge::Java_idispatch>  instance_of_scheduler_object( IDispatch*, const string&);
