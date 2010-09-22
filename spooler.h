@@ -231,7 +231,7 @@ namespace order
     struct Order_queue;
     struct Order;
     struct Order_subsystem;
-    struct Standing_order;
+    //struct Standing_order;
     struct Standing_order_folder;
     struct Standing_order_subsystem;
 

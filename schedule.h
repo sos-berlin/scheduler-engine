@@ -86,6 +86,7 @@ struct Period
     bool                        is_single_start             () const                                { return _single_start; }
     bool                        let_run                     () const                                { return _let_run; }
     bool                        has_repeat_or_once          () const                                { return _repeat < Time::never || _start_once; }
+    bool                        is_seamless_repeat_of       (const Period& o) const                 { return begin() == o.end()  &&  !repeat().is_never()  &&  repeat() == o.repeat(); };
     Absolute_path               schedule_path               () const                                { return _schedule_path; }
     Time                        next_repeated               ( const Time& ) const;
     Time                        next_repeated_allow_after_end( const Time& ) const;

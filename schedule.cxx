@@ -733,7 +733,7 @@ Schedule* Schedule::on_replace_now()
     assert( can_be_replaced_now() );
 
     Typed_folder* typed_folder = this->typed_folder();
-    ptr<Schedule> replacement  = dynamic_cast<Schedule*>( this->replacement() );
+    ptr<Schedule> replacement  = this->replacement();
 
     assert( replacement );
 
@@ -1800,6 +1800,7 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
 
 Time Period::next_absolute_repeated( const Time& tim, int next ) const
 {
+    //TODO next ausbauen, ist immer 0
     assert( next == 0  ||  next == 1 );
     assert( !_absolute_repeat.is_never() );
 

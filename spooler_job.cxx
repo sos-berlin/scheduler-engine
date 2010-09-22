@@ -2386,7 +2386,7 @@ void Job::set_next_start_time( const Time& now, bool repeat )
         {
             if( !_period.is_in_time( _next_start_time ) )
             {
-                if( !_repeat )  _next_single_start = _spooler->_zschimmer_mode? _schedule_use->next_any_start( now ) : _schedule_use->next_single_start( now );
+                if( !_repeat )  _next_single_start = _schedule_use->next_single_start( now );
 
                 if( _start_once  ||  
                     _start_min_tasks  ||  
@@ -2538,33 +2538,14 @@ void Job::calculate_next_time( const Time& now )
                 }
                 else
                 {
-                    //Task_queue::iterator it = _task_queue->begin();  
-                    //if( it != _task_queue->end() )
-                    //{
-                    //    if( !(*it)->_start_at  &&  next_time > _period.begin() )  next_time = _period.begin();  // Ohne Startzeit? In nächster Periode starten
-                    //    while( it != _task_queue->end() )
-                    //    {
-                    //        if( (*it)->_start_at )  break;   // Startzeit angegeben?
-                    //        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-                    //        it++;
-                    //    }
-                    //}
-                    //if( it != _task_queue->end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
-
                     next_time = _task_queue->next_start_time();
 
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
-            }
 
-            if( ( _state == s_pending  &&  _max_tasks > 0  ||
-                  ( _state == s_running && _running_tasks_count < _max_tasks ) ) 
-              &&  is_order_controlled() )
-            {
-                Time next_order_time = _combined_job_nodes->next_time();
-                if( next_order_time < _period.begin() )  next_order_time = _period.begin();
-                if( next_time > next_order_time )  next_time = next_order_time;
+                if( is_order_controlled() )
+                    next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
             }
 
 

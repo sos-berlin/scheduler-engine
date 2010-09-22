@@ -5912,6 +5912,13 @@ void Order::on_requisite_removed( File_based* )
     if( file_based_state() == s_active )  set_file_based_state( s_incomplete );     // Verallgemeinern nach File_based
 }
 
+//----------------------------------------------------------------------------Order::on_replace_now
+
+Order* Order::on_replace_now() {
+    // replacement()->_suspended = _suspended;
+    return static_cast<Order*>(My_file_based::on_replace_now());
+}
+
 //-----------------------------------------------------------------------------------Order::set_dom
 // Wird von folder.cxx aufgerufen
 
@@ -7185,10 +7192,8 @@ void Order::handle_end_state()
         Time  next_start    = next_start_time( is_first_call );
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
-        if( ( next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
-            s != _initial_state
-            || ( _period.absolute_repeat().is_never() && _period.repeat().is_never() && next_start == Time::never && has_base_file()  )  // JS-474
-            )   
+        if( ( has_base_file()  ||  next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
+            s != _initial_state )   
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
@@ -7197,9 +7202,9 @@ void Order::handle_end_state()
         {
             if( _job_chain )
             {
-                if( is_file_order()  &&  file_path().file_exists() ) // RB: Auslösende Datei darf nach Auftragsende nicht mehr da sein. Sonst Fehler.
+                if( is_file_order()  &&  file_path().file_exists() )
                 {
-                    _log->error( message_string( "SCHEDULER-340" ) );
+                    _log->error( message_string( "SCHEDULER-340" ) );  // Auslösende Datei darf nach Auftragsende nicht mehr da sein.
                     set_on_blacklist();
                 }
                 
@@ -7516,11 +7521,9 @@ Time Order::next_time()
 }
 
 //---------------------------------------------------------------------------Order::next_start_time
-/*
-Temporäre Dokumentation
-first_call: false, wenn Order endet oder nicht gestartet wurde
-first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order ändert
-*/
+// first_call: false, wenn Order endet oder nicht gestartet wurde
+// first_call: true, bevor Order gestartet wird oder sich die Konfigurationsdatei der Order ändert
+
 Time Order::next_start_time( bool first_call )
 {
     Time result = Time::never;
@@ -7533,30 +7536,21 @@ Time Order::next_start_time( bool first_call )
 
         if( first_call )
         {
-            _period = _schedule_use->next_period( now, schedule::wss_next_period_or_single_start );
+            _period = _schedule_use->next_period( now, schedule::wss_next_any_start );
 
-            if( !_period.absolute_repeat().is_never() || !_period.repeat().is_never() )
+            if( !_period.absolute_repeat().is_never() )
             {
-                if( _period.is_in_time(now) )
-                {
-                    result = now;
-                } else {
-                    result = _period.next_repeated( now );
-                }
+                result = _period.next_repeated( now );
 
                 if( result.is_never() )
                 {
-                    _period = _schedule_use->next_period( _period.end(), schedule::wss_next_period_or_single_start );
+                    _period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
                     result = _period.begin();
                 }
             }
             else
             {
-                // JS-474: result = _period.begin();
-                if (_period.is_single_start() ) // || _period._start_once  )
-                {
-                    result = _period.begin();
-                }
+                result = _period.begin();
             }
         }
         else
@@ -7565,21 +7559,24 @@ Time Order::next_start_time( bool first_call )
 
             if( result >= _period.end() )       // Periode abgelaufen?
             {
-                Period next_period = _schedule_use->next_period( _period.end(), schedule::wss_next_period );        // Bis 2008-04-28: wss_next_begin
+                Period next_period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
                 //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
-                if( _period.repeat().is_never()
-                 || _period.end()    != next_period.begin()
-                 || _period.repeat() != next_period.repeat() )
-                {
-                // JS-474    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+                if (result >= next_period.end()) { // Nächste Periode ist auch abgelaufen?
+                    next_period = _schedule_use->next_period(next_period.end(), schedule::wss_next_any_start);
+                    result = next_period.begin();
                 }
-
-                if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?
-                {
-                    next_period = _schedule_use->next_period( now );
-                    // JS-474: result = next_period.begin();
+                else
+                if( !next_period.is_seamless_repeat_of(_period))
+                    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+                else {
+                    // Perioden gehen nahtlos ineinander über und in result berechneter repeat-Abstand bleibt erhalten.
                 }
+                //if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?
+                //{
+                //    next_period = _schedule_use->next_period( now );
+                //    result = next_period.begin();
+                //}
 
                 _period = next_period;
             }
@@ -7631,7 +7628,7 @@ bool Order::on_schedule_to_be_removed()
 
 void Order::handle_changed_schedule()
 {
-    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_period_or_single_start )
+    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
                                          : Period();
 
     if( is_virgin() )

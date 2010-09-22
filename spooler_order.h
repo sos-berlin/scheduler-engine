@@ -86,6 +86,7 @@ struct Order : Com_order,
 
     bool                        can_be_removed_now          ();
     void                        on_remove_now               ();
+    Order*                      on_replace_now              ();
 
 
     // Dependant
