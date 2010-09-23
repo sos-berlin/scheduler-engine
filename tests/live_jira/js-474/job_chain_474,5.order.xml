@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order>
+    <!-- Test nächster Start nach Periodenende 
+    		 Perioden sind nicht nahtlos und haben gleiches repeat
+    		 Bsp.: Start um 9:43 = end - repeat + 00:00:01,  
+    		 Erwartetes Ergebnis: Start sofort und Beginn Folgeperiode
+    		 Tatsächliches Ergebnis: Wie erwartes. OK
+    --> 
+    
+    <run_time let_run="no">
+        <period repeat="00:03:00"
+                begin="09:00:00"
+                end="10:21:00"/>
+                
+        <period repeat="00:03:00"
+                begin="11:00:00"
+                end="12:00:00"/>
+                                
+    </run_time>
+</order>
