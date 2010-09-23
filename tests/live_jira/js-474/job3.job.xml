@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job>
+    <params/>
+    <script language="shell">
+        <![CDATA[
+dir
+        ]]>
+    </script>
+    <run_time>
+        <period begin="14:00"
+                end="18:00" 
+                absolute_repeat="00:05:00"/>
+    </run_time>
+</job>
