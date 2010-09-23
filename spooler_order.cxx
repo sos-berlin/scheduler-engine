@@ -5915,7 +5915,7 @@ void Order::on_requisite_removed( File_based* )
 //----------------------------------------------------------------------------Order::on_replace_now
 
 Order* Order::on_replace_now() {
-    // replacement()->_suspended = _suspended;
+    replacement()->_suspended = _suspended;
     return static_cast<Order*>(My_file_based::on_replace_now());
 }
 
