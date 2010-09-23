@@ -86,9 +86,9 @@ const static JNINativeMethod native_methods[] = {
 
 namespace zschimmer { namespace javabridge { 
 
-    template<> void has_proxy< ::sos::scheduler::Prefix_log>::register_cpp_proxy_class_in_java() {
+    template<> void has_proxy< ::sos::scheduler::Prefix_log >::register_cpp_proxy_class_in_java() {
         Env env;
-        Class* cls = has_proxy<::sos::scheduler::Prefix_log>::proxy_class_factory.clas();
+        Class* cls = has_proxy< ::sos::scheduler::Prefix_log >::proxy_class_factory.clas();
         int ret = env->RegisterNatives(*cls, native_methods, 4);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }

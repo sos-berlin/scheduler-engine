@@ -6728,7 +6728,7 @@ void Order::reset()
     set_next_start_time();
 }
 
-//-------------------------------------------------------------------------Job_chain::set_end_state
+//-----------------------------------------------------------------------------Order::set_end_state
 
 void Order::set_end_state( const State& end_state )                  
 { 

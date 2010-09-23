@@ -3,6 +3,7 @@
 #include "spooler.h"
 #include "../kram/sos_java.h"
 #include "javaproxy.h"
+#include "jni__register_native_classes.h"
 
 #include "../javaproxy/java__lang__String.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__cppproxy__SpoolerC.h"
@@ -104,7 +105,7 @@ void Java_subsystem::close()
 bool Java_subsystem::subsystem_initialize()
 {
     Java_module_instance::init_java_vm( _java_vm );
-    register_proxy_classes();
+    register_native_classes();
 
     _java_objects = Z_NEW( Java_objects );
     _java_objects->_schedulerJ.assign( SchedulerJ::new_instance(_spooler->j()) );
@@ -134,22 +135,6 @@ bool Java_subsystem::subsystem_activate()
 
     _subsystem_state = subsys_active;
     return true;
-}
-
-//-----------------------------------------------------------Java_subsystem::register_proxy_classes
-
-void Java_subsystem::register_proxy_classes()
-{
-    javabridge::has_proxy<Job             >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Job_chain       >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<job_chain::Node >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<job_chain::Order_queue_node>::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Job_subsystem   >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Order           >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Order_queue     >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Order_subsystem >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Prefix_log      >::register_cpp_proxy_class_in_java();
-    javabridge::has_proxy<Spooler         >::register_cpp_proxy_class_in_java();
 }
 
 //------------------------------------------Java_subsystem_interface::classname_of_scheduler_object
