@@ -2,17 +2,20 @@
 
 <order title="titel">
     <run_time let_run="yes"
-              once="yes"
+              once="no"
+              begin="16:00:00"
+              end="18:00:00"
 
               >
 
        <period 
-              begin="16:00:00"
+              begin="17:00:00"
               end="18:00:00"
                       />
+                  
                       
         <weekdays>
-            <day day="3">
+            <day day="2">
                 <period repeat="00:05"
 
                       />
