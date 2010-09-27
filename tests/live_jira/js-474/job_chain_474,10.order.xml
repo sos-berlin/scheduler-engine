@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <order>
-    <!-- Testfall a  
+    <!-- Testfall 
          Nächster Start nach Periodenende 
+         repeat > Periode
          Eine Periode definiert
     		 Erwartetes Ergebnis: Start sofort und zu Beginn der Periode
-    		 Tatsächliches Ergebnis: Wie erwartes. OK
+    		 Tatsächliches Ergebnis:
     --> 
     
     <run_time let_run="no">
-        <period repeat="00:10:00"
-                begin="09:00:00"
-                end="11:53:00"/>
+        <period repeat="00:15:00"
+                begin="12:05:00"
+                end="12:10:00"/>
                                                 
     </run_time>
 </order>
