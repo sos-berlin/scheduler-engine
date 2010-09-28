@@ -504,6 +504,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory" },
     { "SCHEDULER-716", "jobs are not allowed for the current licence-key(s)" },
     { "SCHEDULER-717", "Remote commands are not allowed for the current licence-key(s)" },
+    { "SCHEDULER-718", "Using '$1' configuration directory '$2'" },
     {}
 };
 } //namespace sos

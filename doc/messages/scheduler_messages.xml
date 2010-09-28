@@ -4329,6 +4329,12 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-718" weight="info" object="Scheduler">
+            <text xml:lang="en">
+                <title>Using '<p1/>' configuration directory '<p2/>'</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-704">
             <text xml:lang="en">
                 <title>Database table <p1/> is being rebuild</title>
