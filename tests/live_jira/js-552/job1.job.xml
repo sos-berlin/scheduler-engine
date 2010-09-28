@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes"
+     stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+dir
+        ]]>
+    </script>
+    <run_time/>
+</job>
