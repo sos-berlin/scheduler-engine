@@ -382,6 +382,7 @@
 			<xsd:attribute name="warn_if_shorter_than" type="Duration_or_percentage"/>
 			<!-- Veraltet, wird ignoriert -->
 			<!-- Für ap, 1.4.06 timeout="0" soll erlaubt sein (kein Aprilscherz) -->
+			<xsd:attribute name="enabled" type="Yes_no"/>
 		</xsd:complexType>
 		<!--libxslt xsd:key name="delay_after_error">
             <xsd:selector xpath="delay_after_error"/>
@@ -579,6 +580,8 @@
 						<xsd:enumeration value="continue"/>
 						<xsd:enumeration value="reread"/>
 						<xsd:enumeration value="remove"/>
+                        <xsd:enumeration value="enable"/>
+                        <xsd:enumeration value="disable"/>                      
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>

@@ -559,6 +559,20 @@
             </messages>
         </xml_attribute>
 
+        <xml_attribute name="enabled" type="yes|no" initial="yes" title="Disable a Job." >
+            <description>
+                <p>
+                    With this attribute a Job can be disabled.
+                    It has the same effect as the stop command but is different displayed in the Operations GUI.
+                    <!-- 
+                    Mit diesem Attribut kann ein  Job deaktiviert werden.
+                    Es wirkt so, als ob der Job gestoppt wird.
+                    Im Operations GUI ist er aber vom Stopp-Zustand unterscheidbar.
+                    -->
+                </p>
+            </description>            
+        </xml_attribute>
+
     </xml_attributes>
 
 

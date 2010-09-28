@@ -439,6 +439,16 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="enabled" type="yes|no" initial="yes" title="Deaktiviert einen Job." >
+            <description>
+                <p>
+                    Mit diesem Attribut kann ein  Job deaktiviert werden.
+                    Es wirkt so, als ob der Job gestoppt wird.
+                    Im Operations GUI ist er aber vom Stopp-Zustand unterscheidbar.
+                </p>
+            </description>            
+        </xml_attribute>
+
     </xml_attributes>
 
     <xml_child_elements>

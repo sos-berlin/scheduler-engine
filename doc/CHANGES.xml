@@ -10,7 +10,17 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
-    <change date="2010-09-23" version="2.1.3" subversion_revision="6304" >
+  <change date="2010-09-27" version="2.1.3" subversion_revision="6308" >
+    <revision jira="JS-551" type="new" title="Inaktivieren von Jobs">
+      <description>
+        Das Job-Element der XML Konfiguration hat ein neues Attribut "enabled". Es kann die Werte yes, no annehmen.
+        Der Wert "no" bewirkt, dass intern der Job gestoppt wird. Die XML-Antwort enthält auch dieses Attribut und
+        ermöglicht es dem Operations GUI diesen Job-Status abweichend vom gestoppt-Status entsprechend darzustellen.
+      </description>
+    </revision>
+  </change>
+
+  <change date="2010-09-23" version="2.1.3" subversion_revision="6304" >
       <revision jira="JS-552" type="correction" title="Aufträge im Status suspended sollen bei Änderung der Konfiguration nicht in Status resumed wechseln">
         <description>
 				Aufträge im Status suspended sollen dort bleiben, auch wenn die Konfigurationsdatei geändert wird.

@@ -59,7 +59,7 @@ struct Task_subsystem: Object, Subsystem
 //private:
     bool                        step                        ( const Time& now );
     bool                        do_something                ( Task*, const Time& now );
-    void                        wait                        ();
+// RB    void                        wait                        ();
     Task*                       get_next_task_to_run        ();
     void                        remove_ended_tasks          ();
     void                        build_prioritized_order_job_array();

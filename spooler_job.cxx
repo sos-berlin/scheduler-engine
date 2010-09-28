@@ -539,7 +539,8 @@ Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
     _history(this),
  //   _visible(visible_yes),
     _stop_on_error(true),
-    _db_next_start_time( Time::never )
+    _db_next_start_time( Time::never ),
+    _enabled(true)      // JS-551
 {
     if( name != "" )  set_name( name );
 
@@ -789,6 +790,15 @@ bool Job::on_activate()
     return result;
 }
 
+//-------------------------------------------------------------------------------------Job::on_replace_now
+//Job* Job::on_replace_now() {
+//    Job* job = static_cast<Job*>(My_file_based::on_replace_now());
+////    _enabled ? signal( state_cmd_name(Job::sc_enable) ) : signal( state_cmd_name(Job::sc_disable) );
+//    _enabled ? _state_cmd = Job::sc_enable : _state_cmd = Job::sc_disable ;    
+//    return job;
+//}
+
+
 //-------------------------------------------------------------------------------------Job::set_dom
 
 void Job::set_dom( const xml::Element_ptr& element )
@@ -869,6 +879,9 @@ void Job::set_dom( const xml::Element_ptr& element )
 
         _warn_if_shorter_than_string = element.getAttribute( "warn_if_shorter_than", _warn_if_shorter_than_string );
         _warn_if_longer_than_string  = element.getAttribute( "warn_if_longer_than" , _warn_if_longer_than_string  );
+        _enabled                     = element.bool_getAttribute( "enabled" , _enabled  );  // JS-551
+        //_enabled ? signal( state_cmd_name(Job::sc_enable) ) : signal( state_cmd_name(Job::sc_disable) );
+        _enabled ? _state_cmd = Job::sc_enable : _state_cmd = Job::sc_disable;   // JS-551
 
         if( order )  set_order_controlled();
 
@@ -1909,10 +1922,17 @@ bool Job::execute_state_cmd()
         {
             switch( state_cmd )
             {
-                case sc_stop:       if( _state != s_stopping
-                                     && _state != s_stopped  )    stop( true ),                something_done = true;
+                case sc_disable: // JS-551
+                case sc_stop:       if( _state != s_stopping && _state != s_stopped  ) 
+                                    {
+                                        stop( true );
+                                        if(state_cmd == sc_disable) // JS-551
+                                            _enabled = false;       // JS-551
+                                         something_done = true;
+                                    }
                                     break;
 
+                case sc_enable: // JS-551
                 case sc_unstop:     if( _state == s_stopping
                                      || _state == s_stopped
                                      || _state == s_error      )
@@ -1926,6 +1946,8 @@ bool Job::execute_state_cmd()
                                             set_state( s_pending );
                                             check_min_tasks( "job has been unstopped" );
                                             set_next_start_time( Time::now() );
+                                            if(state_cmd == sc_enable)  // JS-551
+                                                _enabled = true;        // JS-551
                                             something_done = true;
                                         }
                                     }
@@ -2543,6 +2565,15 @@ void Job::calculate_next_time( const Time& now )
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
+
+            //if( ( _state == s_pending  &&  _max_tasks > 0  ||
+            //      ( _state == s_running && _running_tasks_count < _max_tasks ) ) 
+            //  &&  is_order_controlled() )
+            //{
+            //    Time next_order_time = _combined_job_nodes->next_time();
+            //    if( next_order_time < _period.begin() )  next_order_time = _period.begin();
+            //    if( next_time > next_order_time )  next_time = next_order_time;
+            //}
 
                 if( is_order_controlled() )
                     next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
@@ -3199,11 +3230,13 @@ void Job::set_state_cmd( State_cmd cmd )
     {
         switch( cmd )
         {
+            case sc_disable:    // JS-551
             case sc_stop:       ok = true; 
                                 _state_cmd = cmd;
                                 signal( state_cmd_name(cmd) );
                                 break;
 
+            case sc_enable:     // JS-551
             case sc_unstop:     ok = _state == s_stopped;       if( !ok )  return;
                                 _state_cmd = cmd;
                                 signal( state_cmd_name(cmd) );
@@ -3331,6 +3364,8 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_continue: return "continue";
         case Job::sc_reread:   return "reread";
         case Job::sc_remove:   return "remove";
+        case Job::sc_enable:   return "enable";     // JS-551
+        case Job::sc_disable:  return "disable";    // JS-551
         default:               return as_string( (int)cmd );
     }
 }
@@ -3437,6 +3472,8 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
         if( _warn_if_longer_than_string != "" )
             result.setAttribute( "warn_if_longer_than", _warn_if_longer_than_string );
+
+        result.setAttribute( "enabled", _enabled ? "yes" : "no" );      // JS-551
 
         if( show_what.is_set( show_job_params )  &&  _default_params )  result.appendChild( _default_params->dom_element( document, "params", "param" ) );
 

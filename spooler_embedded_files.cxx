@@ -391,6 +391,7 @@ const char file_scheduler_xsd[] =
     "\x09" "\x09" "\x09" "<xsd:attribute name=\"warn_if_shorter_than\" type=\"Duration_or_percentage\"/>\n"
     "\x09" "\x09" "\x09" "<!-- Veraltet, wird ignoriert -->\n"
     "\x09" "\x09" "\x09" "<!-- F\xc3" "\xbc" "r ap, 1.4.06 timeout=\"0\" soll erlaubt sein (kein Aprilscherz) -->\n"
+    "\x09" "\x09" "\x09" "<xsd:attribute name=\"enabled\" type=\"Yes_no\"/>\n"
     "\x09" "\x09" "</xsd:complexType>\n"
     "\x09" "\x09" "<!--libxslt xsd:key name=\"delay_after_error\">\n"
     "<xsd:selector xpath=\"delay_after_error\"/>\n"
@@ -588,6 +589,8 @@ const char file_scheduler_xsd[] =
     "\x09" "\x09" "\x09" "\x09" "\x09" "\x09" "<xsd:enumeration value=\"continue\"/>\n"
     "\x09" "\x09" "\x09" "\x09" "\x09" "\x09" "<xsd:enumeration value=\"reread\"/>\n"
     "\x09" "\x09" "\x09" "\x09" "\x09" "\x09" "<xsd:enumeration value=\"remove\"/>\n"
+    "<xsd:enumeration value=\"enable\"/>\n"
+    "<xsd:enumeration value=\"disable\"/>                      \n"
     "\x09" "\x09" "\x09" "\x09" "\x09" "</xsd:restriction>\n"
     "\x09" "\x09" "\x09" "\x09" "</xsd:simpleType>\n"
     "\x09" "\x09" "\x09" "</xsd:attribute>\n"
@@ -1961,8 +1964,8 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1285069630 },
-    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1284384920 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1285587311 },
+    { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1284714349 },
     { NULL, NULL, 0 }
 };
 

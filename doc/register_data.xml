@@ -811,6 +811,11 @@
 <register_keyword keyword='eMail-Versand'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='eMail-Versand'/>
 </register_keyword>
+<register_keyword keyword='enabled'>
+    <register_keyword_display><code>enabled=</code></register_keyword_display>
+    <register_entry register_file='xml/answer/job.xml#attribute_enabled' register_title='&lt;job&gt; (Antwort)'  register_keyword='enabled' type='definition'/>
+    <register_entry register_file='xml/job.xml#attribute_enabled' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='enabled' type='definition'/>
+</register_keyword>
 <register_keyword keyword='encoding'>
     <register_keyword_display><code>encoding=</code></register_keyword_display>
     <register_entry register_file='xml/script.xml#attribute_encoding' register_title='&lt;script&gt; (Konfiguration)'  register_keyword='encoding' type='definition'/>

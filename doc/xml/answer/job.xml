@@ -128,6 +128,16 @@
                 </p>
             </description>
         </xml_attribute>
+        
+        <xml_attribute name="enabled" type="yes|no" initial="yes" title="Deaktiviert einen Job." >
+            <description>
+                <p>
+                    Siehe <scheduler_element name="job" attribute="enabled" value="yes"/>.
+                </p>
+            </description>            
+        </xml_attribute>
+
+        
     </xml_attributes>
 
     <xml_child_elements>

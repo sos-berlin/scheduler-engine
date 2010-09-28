@@ -81,6 +81,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         sc_continue,            // s_suspended               -> s_running
         sc_reread,              // Null-Operation, Jira JS-208
         sc_remove,              // Spooler::remove_job
+        sc_enable,              
+        sc_disable,              
         sc__max
     };
 
@@ -162,8 +164,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     Job_folder*                 job_folder                  () const                                { return typed_folder(); }
 
-
-    void                    set_dom                         ( const xml::Element_ptr& );
+ //   Job*                        on_replace_now              ();
+    void                        set_dom                     ( const xml::Element_ptr& );
     Time                        get_step_duration_or_percentage( const string& value, const Time& deflt );
     Time                        average_step_duration       ( const Time& deflt );
     void                        add_on_exit_commands_element( const xml::Element_ptr& commands_element );
@@ -429,6 +431,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
 
     string                     _warn_if_shorter_than_string;
     string                     _warn_if_longer_than_string;
+    bool                       _enabled;
 };
 
 //-------------------------------------------------------------------------------------Internal_job
