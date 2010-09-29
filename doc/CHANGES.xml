@@ -9,7 +9,17 @@
 
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
-  
+
+  <change date="2010-09-29" version="2.1.3" subversion_revision="6321" >
+    <revision jira="JS-544" type="correction" title="Port for SMTP Mail-Server cannot be configure">
+      <description>
+        Ist die Eigenschaft smtp sowohl in sos.ini ([mail].smtp) als auch in factory.ini [spooler].smtp leer
+        oder nicht angegeben, wird die Einstellung in factory.ini [smtp]mail.smtp.host gelöscht.
+        In der Dokumentation zu factory.ini [smtp] ist ein Hinweis auf die Möglichkeit den SMPT Port einzustellen, aufgenommen worden.
+      </description>
+    </revision>
+  </change>
+
   <change date="2010-09-27" version="2.1.3" subversion_revision="6308" >
     <revision jira="JS-456" type="correction" title="An persistent order with single start far in the future will be deleted, wenn an error occurs">
       <description>

@@ -28,7 +28,8 @@
 
     <description>
         <p>
-            Hier können die <i>Properties</i> des JavaMail-Moduls eingestellt werden.
+            Hier können die <i>Properties</i> des JavaMail-Moduls eingestellt werden. 
+            Beispielsweise kann mit <code>mail.smtp.port</code> ein vom Standard abweichender Port eingestellt werden.
             Die Einstellungen <code>mail.smtp.user</code> und <code>mail.smtp.password</code> sind keine Properties und werden wie beschrieben behandelt.
             <code>mail.smtp.host</code> wird in <scheduler_ini_entry file="sos.ini" section="mail" entry="smtp"/> eingestellt.
         </p>
