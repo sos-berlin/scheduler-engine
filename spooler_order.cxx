@@ -3386,7 +3386,7 @@ bool Job_chain::is_ready_for_new_order_processing() const
 bool Job_chain::is_max_orders_reached() const
 {
     int count = number_of_started_orders();
-    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are curently running, " << _max_orders << " allowed at most." << "\n" );
+    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are currently running, " << _max_orders << " allowed at most." << "\n" );
     return count >= _max_orders;
 }
 

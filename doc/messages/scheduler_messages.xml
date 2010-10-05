@@ -4295,7 +4295,7 @@
 
         <message code="SCHEDULER-712" weight="info" object="Task">
             <text xml:lang="en">
-                <title>Step runs longer than the expected duration of <p1/></title>
+                <title>Task runs longer than the expected duration of <p1/></title>  <!-- JS-448 -->
             </text>
         </message>
 

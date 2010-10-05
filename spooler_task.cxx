@@ -1126,14 +1126,21 @@ bool Task::check_if_longer_than( const Time& now )
 
     if( !_warn_if_longer_than.is_never() ) 
     {
-        double step_time = now - _last_operation_time;
+        // double step_time = now - _last_operation_time;   // JS-448
+        double task_duration = now - _running_since;  // JS-448
+        
+        //S s;
+        //s << "id:" << _id <<",now: " << now  << ",task_duration:" << task_duration << ",_running_since:" << _running_since;
+        //_log->info( s );
 
-        if( step_time > _warn_if_longer_than )
+        if( task_duration > _warn_if_longer_than )
         {
-            something_done = true;
-            if( _last_warn_if_longer_operation_time != _last_operation_time ) 
-            {
-                _last_warn_if_longer_operation_time = _last_operation_time;
+            // JS-448 something_done = true;
+            if( _last_warn_if_longer_operation_time != _running_since )     // Merker, damit nur einmal gewarnt wird
+            {                                                                     
+                something_done = true;  // JS-448
+
+                _last_warn_if_longer_operation_time = _running_since;       
 
                 string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( Time::without_ms ) );
                 _log->warn( msg );
@@ -1142,10 +1149,10 @@ bool Task::check_if_longer_than( const Time& now )
                 Mail_defaults mail_defaults( _spooler );
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
-                                              "Step time: " << step_time << "\n" <<
+                                              "Task duration: " << task_duration << "\n" <<
                                               "warn_if_longer_than=" << _warn_if_longer_than.as_string( Time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
-            }
+            }     
         }
     }
 
@@ -1369,7 +1376,9 @@ bool Task::do_something()
 
     if( _operation &&  !_operation->async_finished() )
     {
+        // Die Operation tut was und wir wollen prüfen, ob sie es solange darf
         something_done |= check_timeout( now );
+        something_done |= check_if_longer_than( now ); // JS-448, ggf. nur im Status running prüfen?
     }
     else
     {
@@ -1441,7 +1450,7 @@ bool Task::do_something()
                     }
 
 
-                    switch( _state )
+                    switch( _state ) // nächster Status
                     {
                         case s_loading:
                         {
@@ -1550,7 +1559,7 @@ bool Task::do_something()
                                 _file_logger->flush();
                                 _log->info( message_string( "SCHEDULER-915" ) );
                                 check_if_shorter_than( now );
-                                something_done |= check_if_longer_than( now );
+                                // JS-448 something_done |= check_if_longer_than( now );
                                 count_step();
                                 set_state_direct( s_ending );
                                 loop = true;
@@ -1578,7 +1587,7 @@ bool Task::do_something()
                             {
                                 string result = remote_process_step__end();
                                 check_if_shorter_than( now );
-                                something_done |= check_if_longer_than( now );
+                                // JS-448 something_done |= check_if_longer_than( now );
                                 set_state_direct( s_release );
                                 loop = true;
                             }
@@ -1652,7 +1661,7 @@ bool Task::do_something()
                                 assert( !_delay_until_locks_available );
 
                                 check_if_shorter_than( now );
-                                something_done |= check_if_longer_than( now );
+                                // JS-448 something_done |= check_if_longer_than( now );
 
                                 if( !ok || has_error() )  set_state_direct( s_ending ), loop = true;
 
@@ -1976,7 +1985,7 @@ bool Task::do_something()
                         case s_none:
                         case s__max:
                             assert(0), throw_xc( "state=none?" );
-                    }
+                    }  // switch( _state )
 
 
                     if( _operation )
@@ -2040,8 +2049,8 @@ bool Task::do_something()
                 something_done = true;
 
                 //sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
-            }
-        }
+            } // catch( const exception& x )
+        }  // while 
 
         if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
 
@@ -2062,7 +2071,7 @@ bool Task::do_something()
                 Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
             }
         }
-    }
+    }  // if( _operation &&  !_operation->async_finished() )
 
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 

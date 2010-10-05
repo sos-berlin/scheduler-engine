@@ -498,7 +498,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-709", "Killing descendant pid=$1 ($2)" },
     { "SCHEDULER-710", "Delayed command <scheduler_log.log_categories.reset> has been executed" },
     { "SCHEDULER-711", "Step has run for $2s, which is shorter than the expected duration of $1" },
-    { "SCHEDULER-712", "Step runs longer than the expected duration of $1" },
+    { "SCHEDULER-712", "Task runs longer than the expected duration of $1" },
     { "SCHEDULER-713", "Process handle $1 is already registered" },
     { "SCHEDULER-714", "Scheduler $1 is already registered via connection $2. This connection will be closed now. New connection is $3" },
     { "SCHEDULER-715", "The command-line option configuration-directory '$1' is not a directory" },

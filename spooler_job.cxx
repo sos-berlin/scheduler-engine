@@ -1059,7 +1059,8 @@ Time Job::average_step_duration( const Time& deflt )
     {
         Record record;
         S select_sql;
-        select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
+        // select_sql << "select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )"
+        select_sql << "select round (sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` ),2 )" // JS-448
                       "  from " << db()->_job_history_tablename
                    << "  where `steps` > 0 "
                        " and `spooler_id`=" << sql::quoted( _spooler->id_for_db() )

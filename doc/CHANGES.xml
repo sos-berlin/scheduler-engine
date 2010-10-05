@@ -10,6 +10,16 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
+  <change date="2010-10-05" version="2.1.3" subversion_revision="6326" >
+    <revision jira="JS-448" type="correction" title="warn_if_longer_than Attribut korrekt verarbeiten">
+      <description>
+      Die Warnung, dass eine Task länger als geplant läuft (warn_if_longer_than Attribut),
+      dann als Mail absenden, wenn der Zeitpunkt erreicht und nicht erst am Ende der Task. 
+      Außerdem Behandlung der Angabe in Prozent korrigiert (s. Jira-Eintrag).
+      </description>
+    </revision>
+  </change>
+
   <change date="2010-09-29" version="2.1.3" subversion_revision="6321" >
     <revision jira="JS-544" type="correction" title="Port for SMTP Mail-Server cannot be configure">
       <description>
