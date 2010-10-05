@@ -3,7 +3,8 @@
 <job title="warn_if_longer_than"
      order="yes"
      tasks="5"
-     warn_if_longer_than="5">
+     warn_if_longer_than="5"
+     idle_timeout="100">
     <script language="javascript">
         <![CDATA[
 function spooler_open(){

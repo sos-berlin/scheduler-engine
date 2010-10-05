@@ -1126,21 +1126,21 @@ bool Task::check_if_longer_than( const Time& now )
 
     if( !_warn_if_longer_than.is_never() ) 
     {
-        // double step_time = now - _last_operation_time;   // JS-448
-        double task_duration = now - _running_since;  // JS-448
+        double step_time = now - _last_operation_time;   // JS-448
+        // double task_duration = now - _running_since;  
         
         //S s;
         //s << "id:" << _id <<",now: " << now  << ",task_duration:" << task_duration << ",_running_since:" << _running_since;
         //_log->info( s );
 
-        if( task_duration > _warn_if_longer_than )
+        if( step_time > _warn_if_longer_than )
         {
             // JS-448 something_done = true;
-            if( _last_warn_if_longer_operation_time != _running_since )     // Merker, damit nur einmal gewarnt wird
+            if( _last_warn_if_longer_operation_time != _last_operation_time )     // Merker, damit nur einmal gewarnt wird
             {                                                                     
                 something_done = true;  // JS-448
 
-                _last_warn_if_longer_operation_time = _running_since;       
+                _last_warn_if_longer_operation_time = _last_operation_time;       
 
                 string msg = message_string( "SCHEDULER-712", _warn_if_longer_than.as_string( Time::without_ms ) );
                 _log->warn( msg );
@@ -1149,7 +1149,7 @@ bool Task::check_if_longer_than( const Time& now )
                 Mail_defaults mail_defaults( _spooler );
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
-                                              "Task duration: " << task_duration << "\n" <<
+                                              "Task step time: " << step_time << "\n" <<
                                               "warn_if_longer_than=" << _warn_if_longer_than.as_string( Time::without_ms ) );
                 scheduler_event.send_mail( mail_defaults );
             }     
