@@ -12,5 +12,18 @@
             <allowed_host host="0.0.0.0" level="all"/>
         </security>
         
+        <script language="javascript">
+            <![CDATA[
+function my_runtime(timestamp, job_name)
+{
+spooler_log.info("timestamp:" + timestamp);
+spooler_log.info("job_name:" + job_name);
+
+return "2010-10-11 12:03:33";
+
+}
+            ]]>
+        </script>        
+        
     </config>
 </spooler>
