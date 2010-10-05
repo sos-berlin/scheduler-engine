@@ -10,7 +10,7 @@
   <scheduler_keyword keyword="Änderungsprotokoll"/>
   <scheduler_keyword keyword="Change log"/>
 
-  <change date="2010-10-05" version="2.1.3" subversion_revision="6326" >
+  <change date="2010-10-05" version="2.1.3" subversion_revision="6332" >
     <revision jira="JS-448" type="correction" title="warn_if_longer_than Attribut korrekt verarbeiten">
       <description>
       Die Warnung, dass eine Task länger als geplant läuft (warn_if_longer_than Attribut),

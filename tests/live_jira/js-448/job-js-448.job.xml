@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="warn_if_longer_than"
+     order="yes"
+     tasks="5"
+     warn_if_longer_than="5">
+    <script language="javascript">
+        <![CDATA[
+function spooler_open(){
+
+  spooler_log.info( "begin spooler_open" );	
+
+  var hostware = new ActiveXObject("hostware.global");
+  hostware.sleep(8);  // Sekunden
+
+  spooler_log.info( "exit spooler_open" );	
+  return true;
+} 
+
+function spooler_process(){
+
+  spooler_log.info( "begin spooler_process" );	
+
+  var hostware = new ActiveXObject("hostware.global");
+  hostware.sleep(20);  
+//  hostware.sleep(140);  
+ 
+  spooler_log.info( "exit spooler_process" )	
+  return true;
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>

@@ -1,0 +1,104 @@
+
+
+Beispiel Logging mit aktuellem Verhalten
+
+4:27:59.568 [info]   (Task job-js-448:743) SCHEDULER-842  Task is going to process Order job_chain-js-448:14, state=0, on Scheduler http://mo:6360
+2010-09-29 14:27:59.582 [info]   (Job  job-js-448) SCHEDULER-930  Task 743 started - cause: Order job_chain-js-448:14
+2010-09-29 14:27:59.623 [info]   (Task job-js-448:743) SCHEDULER-918  state=starting (at=never)
+2010-09-29 14:27:59.942 [info]   (Task job-js-448:743) java classpath: c:\temp\hallo.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\activation.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.JSHelper-1.6-0211-6851.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.VirtualFileSystem-1.6-0211-6713.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.configuration-1.6-0211-6417.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.connection-1.6-0211-6317.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.ftp.profiles-1.6-0211-6318.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.ldap-1.6-0211-6319.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.mail-1.6-0211-6320.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.marshalling-1.6-0211-6321.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.net-1.6-0211-6781.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.scheduler-1.6-0211-6832.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.scheduler.editor-1.6-0211-6662.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.scheduler.kernel.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.settings-1.6-0211-6416.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.stresstest-1.6-0211-6325.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.textprocessor-1.6-0211-6326.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.util-1.6-0211-6667.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\com.sos.xml-1.6-0211-6328.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\commons-codec-1.3.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\commons-httpclient-3.0.1.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\commons-logging.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\commons-net-1.2.2.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\db2jcc.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\db2jcc_license_cu.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\h2-1.2.142.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\jaxen-1.1.1.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\jaybird-full-2.1.1.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\jce-jdk13-129.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\jdom.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\jtds-1.2.2.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\log4j-1.2.16.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\mail.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\mysql-connector-java-3.1.13-bin.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\ojdbc14.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\org.apache.commons.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\postgresql-8.1-404.jdbc3.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\sos.hostware.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\sos.scheduler.samples.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\swt.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\trilead-ssh2-build211.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\webdavclient4j-core-0.92.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\xalan.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\xercesImpl.jar;C:\Users\rb\Documents\scheduler_development\kernel\core-cpp\scheduler-jars\xml-apis.jar
+2010-09-29 14:27:59.964 [info]   (Task job-js-448:743) java vm arguments: -Xmx257m  
+2010-09-29 14:27:59.977 [info]   (Task job-js-448:743) begin spooler_process
+2010-09-29 14:28:07.668 [info]   (TCP connection to 127.0.0.1:55959) SCHEDULER-933  TCP connection accepted
+2010-09-29 14:28:10.824 [info]   (Task job-js-448:743) exit spooler_process
+2010-09-29 14:28:10.828 [info]   (Task job-js-448:743) SCHEDULER-843  Task has ended processing of Order job_chain-js-448:14, state=0, on Scheduler http://mo:6360
+2010-09-29 14:28:10.832 [info]   (Order job_chain-js-448:14) set_state 100
+2010-09-29 14:28:10.843 [info]   EventSubsystem: OrderStateChangeEvent object=Order 14, message=ORDEREVENT-1, previousState=0
+2010-09-29 14:28:10.847 [info]   (Order job_chain-js-448:14) SCHEDULER-945  No further job in job chain - order has been carried out
+2010-09-29 14:28:10.849 [info]   (Order job_chain-js-448:14) SCHEDULER-940  Removing order from job chain
+2010-09-29 14:28:10.871 [info]   (Order 14) SCHEDULER-962  Protocol ends in /order.job_chain-js-448.14.log
+2010-09-29 14:28:10.876 [WARN]   (Task job-js-448:743) SCHEDULER-712  Step runs longer than the expected duration of 00:00:05
+
+
+Testfälle
+
+spooler_open: 30s
+spooler_process: 50s
+
+a) Eine Task
+no_longer_than = 10s. Ok
+no_longer_than = 40s. Ok
+
+b) Zwei Tasks parallel
+no_longer_than = 10s
+
+
+
+Zwei Subtasks (Task bleibt nach Ende spooler_process erhalten)
+Welche Startzeit hat zweite Subtask und damit welche Laufzeit?? Die der Task????
+
+
+
+Stichpunkte
+
+select sum( %secondsdiff( `end_time`, `start_time` ) ) / sum( `steps` )  
+from SCHEDULER_HISTORY  
+where `steps` > 0  and `spooler_id`='spooler_id' and `job_name`='job-js-448';
+
+select sum( datediff(ss,"START_TIME","END_TIME") ) / sum( "STEPS" )  
+from SCHEDULER_HISTORY  
+where "STEPS" > 0  and "SPOOLER_ID"='spooler_id' and "JOB_NAME"='job-js-448'
+
+
+- _last_process_start_time
+
+/*
+_operation &&  !_operation->async_finished()
+
+Bedeutet, die Operation ist noch nicht fertig. Im Ablauf ändert der Job-Scheduler gar nichts.
+Es sei denn, wir haben ein Timeout oder neuerdings check_if_longer_than. Im zweiten Fall wird eine Mail versendet
+
+Eine Operation ist z. B.
+
+- "Create Instance"
+- Load ...
+- spooler_process
+- usw.
+
+Das heisst WÄHREND spooler_process reagieren wir bisher nur auf einen Timeout.
+operation->async_finished() liefert true, wenn die Operation zu Ende ist.
+
+*/
+- bool Task::do_something()
+{
+    //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
+
+    bool had_operation      = _operation != NULL;
+    bool something_done     = false;
+    Time now                = Time::now();
+    Time next_time_at_begin = _next_time;
+
+    _signaled = false;
+
+    //if( _end == end_kill_immediately  &&  !_kill_tried )
+    //{
+    //    _log->warn( message_string( "SCHEDULER-277" ) );   // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
+    //    return try_kill();
+    //}
+
+    something_done |= check_subprocess_timeout( now );
+
+    if( _operation &&  !_operation->async_finished() )
+    {
+        something_done |= check_timeout( now );
+        something_done |= check_if_longer_than( now ); // JS-448
+    }
+    else
+    {
+        // Periode endet?
+        if( !_operation )
+
+
+
+
+848: 14:41:16
+849: 14:41:26
