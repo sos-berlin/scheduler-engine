@@ -1185,7 +1185,7 @@ namespace job_chain {
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
-    has_proxy<Node>(job_chain->spooler()->j()),
+    has_proxy<Node>(job_chain->spooler()),
     _zero_(this+1), 
     _job_chain(job_chain),
     _type(type),
@@ -1476,7 +1476,7 @@ xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Sho
 Order_queue_node::Order_queue_node( Job_chain* job_chain, const Order::State& state, Node::Type type ) 
 : 
     Node( job_chain, state, type ),
-    javabridge::has_proxy<Order_queue_node>(job_chain->spooler()->j())
+    javabridge::has_proxy<Order_queue_node>(job_chain->spooler())
 {
     _order_queue = new Order_queue( this );
 }
@@ -1917,7 +1917,7 @@ Job_chain::Job_chain( Scheduler* scheduler )
 :
     Com_job_chain( this ),
     file_based<Job_chain,Job_chain_folder_interface,Order_subsystem>( scheduler->order_subsystem(), static_cast<spooler_com::Ijob_chain*>( this ), type_job_chain ),
-    javabridge::has_proxy<Job_chain>(scheduler->j()),
+    javabridge::has_proxy<Job_chain>(scheduler),
     _zero_(this+1),
     _orders_are_recoverable(true),
     _visible(visible_yes)
@@ -4014,7 +4014,7 @@ string Order_id_space::name() const
 Order_queue::Order_queue( Order_queue_node* order_queue_node )
 :
     Scheduler_object( order_queue_node->spooler(), static_cast<spooler_com::Iorder_queue*>( this ), type_order_queue ),
-    javabridge::has_proxy<Order_queue>(order_queue_node->job_chain()->spooler()->j()),
+    javabridge::has_proxy<Order_queue>(order_queue_node->job_chain()->spooler()),
     _zero_(this+1),
     _order_queue_node(order_queue_node),
     _job_chain(order_queue_node->job_chain()),
@@ -4717,7 +4717,7 @@ Order::Order( Standing_order_subsystem* subsystem )
 :
     Com_order(this),
     file_based<Order,Standing_order_folder,Standing_order_subsystem>( subsystem, static_cast<IDispatch*>( this ), type_standing_order ),
-    javabridge::has_proxy<Order>(subsystem->spooler()->j()),
+    javabridge::has_proxy<Order>(subsystem->spooler()),
     _zero_(this+1)
 {
     _com_log = new Com_log;
@@ -6702,7 +6702,9 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if( _id_locked )
         {
-#ifdef Z_DEBUG            
+#ifdef Z_DEBUG          
+            //TODO Das ist nicht die beste Stelle: Der Auftrag ist noch nicht in dem neuen Jobkettenknoten eingereiht.
+            // Man könnte report_event() in add_order() einbauen, und dann noch das Auftragsende und verteilte Aufträge berücksichtigen.
             report_event( OrderStateChangeEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
 #endif
 

@@ -18,6 +18,7 @@ namespace scheduler {
 struct Java_objects : Object
 {
     SchedulerJ                 _schedulerJ;
+  //PlatformJ                  _platformJ;
 };
 
 //-----------------------------------------------------------------------------------Java_subsystem
@@ -42,6 +43,7 @@ struct Java_subsystem : Java_subsystem_interface
     void                    set_java_options                ( const string& x )                     { _java_vm->set_options(x); }
     void                        prepend_class_path          ( const string& x )                     { _java_vm->prepend_class_path(x); }
     const SchedulerJ&           schedulerJ                  () const                                { return _java_objects->_schedulerJ; }
+  //const PlatformJ&            platformJ                   () const                                { return _java_objects->_platformJ; }
 
 
   private:
