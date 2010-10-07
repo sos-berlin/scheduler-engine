@@ -4,7 +4,8 @@
      order="yes"
      tasks="5"
      warn_if_longer_than="5"
-     idle_timeout="100">
+     idle_timeout="100"
+     stop_on_error="no">
     <script language="javascript">
         <![CDATA[
 function spooler_open(){
@@ -15,6 +16,7 @@ function spooler_open(){
   hostware.sleep(8);  // Sekunden
 
   spooler_log.info( "exit spooler_open" );	
+  spooler_log.error("Test Error");
   return true;
 } 
 
