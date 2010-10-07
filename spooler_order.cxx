@@ -1185,7 +1185,7 @@ namespace job_chain {
 Node::Node( Job_chain* job_chain, const Order::State& order_state, Type type )         
 : 
     Scheduler_object( job_chain->spooler(), static_cast<spooler_com::Ijob_chain_node*>( this ), type_job_chain_node ),
-    has_proxy<Node>(job_chain->spooler()),
+    javabridge::has_proxy<Node>(job_chain->spooler()),
     _zero_(this+1), 
     _job_chain(job_chain),
     _type(type),

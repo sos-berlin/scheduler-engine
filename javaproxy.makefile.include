@@ -1,0 +1,12 @@
+javaproxy_objects=\
+ jni__register_native_classes.o\
+ jni__sos__scheduler__Job.o\
+ jni__sos__scheduler__Job_subsystem.o\
+ jni__sos__scheduler__Prefix_log.o\
+ jni__sos__scheduler__Spooler.o\
+ jni__sos__scheduler__order__Job_chain.o\
+ jni__sos__scheduler__order__Order.o\
+ jni__sos__scheduler__order__Order_queue.o\
+ jni__sos__scheduler__order__Order_subsystem.o\
+ jni__sos__scheduler__order__job_chain__Node.o\
+ jni__sos__scheduler__order__job_chain__Order_queue_node.o

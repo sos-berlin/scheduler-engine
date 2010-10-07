@@ -533,7 +533,7 @@ xml::Element_ptr Combined_job_nodes::dom_element( const xml::Document_ptr& docum
 Job::Job( Scheduler* scheduler, const string& name, const ptr<Module>& module )
 : 
     file_based<Job,Job_folder,Job_subsystem>( scheduler->job_subsystem(), this, Scheduler_object::type_job ),
-    has_proxy<Job>(scheduler),
+    javabridge::has_proxy<Job>(scheduler),
     _zero_(this+1),
     _task_queue( Z_NEW( Task_queue( this ) ) ),
     _history(this),

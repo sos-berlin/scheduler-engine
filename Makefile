@@ -9,15 +9,16 @@ ifeq ($(shell uname -s -m),HP-UX ia64)
 DEP_PRODUCTS += hostjava hostole
 endif
 
+include $(PROD_DIR)/scheduler/javaproxy.makefile.include
 
 objects = \
+ $(javaproxy_objects)\
  cluster.o\
  database.o\
  directory_observer.o\
  file_logger.o\
  folder.o\
  java_subsystem.o\
- jni__sos__scheduler__Spooler.o\
  include.o\
  lock.o\
  path.o\
