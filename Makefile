@@ -70,37 +70,37 @@ objects = \
  Module_monitor_instances.o
 
 
-java_classes=\
- sos/spooler/Error.class\
- sos/spooler/Idispatch.class\
- sos/spooler/Job.class\
- sos/spooler/Job_chain.class\
- sos/spooler/Job_chain_node.class\
- sos/spooler/Job_impl.class\
- sos/spooler/Lock.class\
- sos/spooler/Locks.class\
- sos/spooler/Log.class\
- sos/spooler/Mail.class\
- sos/spooler/Monitor_impl.class\
- sos/spooler/Order.class\
- sos/spooler/Order_queue.class\
- sos/spooler/Process_class.class\
- sos/spooler/Process_classes.class\
- sos/spooler/Spooler.class\
- sos/spooler/Spooler_program.class\
- sos/spooler/Subprocess.class\
- sos/spooler/Task.class\
- sos/spooler/Variable_set.class\
- sos/spooler/jobs/Web_service_forwarder.class
+####java_classes=\
+#### sos/spooler/Error.class\
+#### sos/spooler/Idispatch.class\
+#### sos/spooler/Job.class\
+#### sos/spooler/Job_chain.class\
+#### sos/spooler/Job_chain_node.class\
+#### sos/spooler/Job_impl.class\
+#### sos/spooler/Lock.class\
+#### sos/spooler/Locks.class\
+#### sos/spooler/Log.class\
+#### sos/spooler/Mail.class\
+#### sos/spooler/Monitor_impl.class\
+#### sos/spooler/Order.class\
+#### sos/spooler/Order_queue.class\
+#### sos/spooler/Process_class.class\
+#### sos/spooler/Process_classes.class\
+#### sos/spooler/Spooler.class\
+#### sos/spooler/Spooler_program.class\
+#### sos/spooler/Subprocess.class\
+#### sos/spooler/Task.class\
+#### sos/spooler/Variable_set.class\
+#### sos/spooler/jobs/Web_service_forwarder.class
 
-java_headers=$(patsubst %.class, %.h, $(java_classes) )
+#### java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
 
 include $(PROD_DIR)/make/standard.makefile
 
 
 all:: $(BIN_DIR)/scheduler
-all:: $(BIN_DIR)/sos.spooler.jar
+### all:: $(BIN_DIR)/sos.spooler.jar
 all:: $(BIN_DIR)/setuid
 all:: documentation
 
@@ -116,11 +116,11 @@ all:: documentation
 #libspooler.a: $(java_headers) $(objects)
 #	$(AR) $(ARFLAGS) $@ $(objects)
 
-$(BIN_DIR)/sos.spooler.jar: $(java_classes)
-	$(PROD_DIR)/LINKS/java/bin/jar cfm $@ ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
+####  $(BIN_DIR)/sos.spooler.jar: $(java_classes)
+####	$(PROD_DIR)/LINKS/java/bin/jar cfm $@ ../java_manifest sos/spooler/*.class sos/spooler/jobs/*.class
 
 
-$(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
+### $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
 
 
 ifeq ($(OS),HP-UX)
