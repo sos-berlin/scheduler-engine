@@ -287,7 +287,7 @@ vector<Scheduler_script*> Scheduler_script_subsystem::ordered_file_baseds()
 
 void Scheduler_script_subsystem::set_dom( const xml::Element_ptr& element )
 {
-    assert_subsystem_state( subsys_not_initialized, Z_FUNCTION );
+//    assert_subsystem_state( subsys_not_initialized, Z_FUNCTION );
 
     spooler()->root_folder()->scheduler_script_folder()->add_or_replace_file_based_xml( element, default_scheduler_script_path.name() );
 }

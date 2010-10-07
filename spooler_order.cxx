@@ -7028,7 +7028,7 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
 
 //----------------------------------------------------------------------------------Order::activate
 
-void Order::activate()
+bool Order::activate()
 {
     bool ok = _schedule_use->try_load();
     if( ok )  
@@ -7036,6 +7036,8 @@ void Order::activate()
         if( _setback )  set_setback( _setback );
                   else  set_next_start_time();
     }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------Order::set_next_start_time
@@ -7630,13 +7632,15 @@ bool Order::on_schedule_to_be_removed()
 
 void Order::handle_changed_schedule()
 {
-    _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
-                                         : Period();
+    if (subsystem()->subsystem_state() == subsys_active) {  // JS-576
+        _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
+                                             : Period();
 
-    if( is_virgin() )
-    {
-        //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
-        set_next_start_time();      // Änderung von <run_time> überschreibt Order.at
+        if( is_virgin() )
+        {
+            //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
+            set_next_start_time();      // Änderung von <run_time> überschreibt Order.at
+        }
     }
 }
 
