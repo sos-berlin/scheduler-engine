@@ -314,6 +314,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Order.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\path.cxx"
 				>
 			</File>
@@ -648,6 +652,10 @@
 			</File>
 			<File
 				RelativePath=".\Module_monitor_instances.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Order_subsystem_impl.h"
 				>
 			</File>
 			<File

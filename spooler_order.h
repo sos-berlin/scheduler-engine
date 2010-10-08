@@ -223,7 +223,7 @@ struct Order : Com_order,
     Time                        at                      ()                                          { return _setback; }
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
-    bool                        activate                ();
+    void                        activate_schedule       ();
     void                        handle_changed_schedule ();
     Time                        next_time               ();
     Time                        next_start_time         ( bool first_call = false );
