@@ -9,10 +9,13 @@ ifeq ($(shell uname -s -m),HP-UX ia64)
 DEP_PRODUCTS += hostjava hostole
 endif
 
-include $(PROD_DIR)/scheduler/javaproxy.makefile.include
+include ../jni_cppproxy.makefile.include
 
 objects = \
- $(javaproxy_objects)\
+ $(cppproxy_objects)\
+ Event_subsystem.o\
+ Module_monitor_instances.o\
+ Order.o\
  cluster.o\
  database.o\
  directory_observer.o\
@@ -66,9 +69,7 @@ objects = \
  supervisor.o\
  supervisor_client.o\
  version.o\
- xml_client_connection.o\
- Event_subsystem.o\
- Module_monitor_instances.o
+ xml_client_connection.o
 
 
 ####java_classes=\
