@@ -12,7 +12,7 @@ endif
 include ../jni_cppproxy.makefile.include
 
 objects = \
- $(cppproxy_objects)\
+ $(jni_cppproxy_objects)\
  Event_subsystem.o\
  Module_monitor_instances.o\
  Order.o\
