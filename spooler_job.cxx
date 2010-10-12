@@ -2576,7 +2576,7 @@ void Job::calculate_next_time( const Time& now )
             //    if( next_time > next_order_time )  next_time = next_order_time;
             //}
 
-                if( is_order_controlled() )
+                if( is_order_controlled()  &&  !in_period )
                     next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
             }
 
