@@ -20,16 +20,16 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 
 #ifdef Z_WINDOWS
 #   include <io.h>
-    const int EWOULDBLOCK   = 10035;
-    const int ENOTSOCK      = 10038;
-    const int EADDRINUSE    = WSAEADDRINUSE;
-    const int ENOBUFS       = WSAENOBUFS;
+	const int Z_EWOULDBLOCK   = WSAEWOULDBLOCK;
+	const int Z_EADDRINUSE    = WSAEADDRINUSE;
 #   define ioctl    ioctlsocket
 #   define isatty   _isatty
 #else
 #   include <unistd.h>
 #   include <sys/types.h>
 #   include <signal.h>
+	const int Z_EWOULDBLOCK   = EWOULDBLOCK;
+	const int Z_EADDRINUSE    = EADDRINUSE;
 #endif
 
 #ifndef INADDR_NONE
@@ -390,7 +390,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
     try
     {
         bool ok = this->accept( listen_socket );
-        if( !ok )  return false;        // EWOULDBLOCK
+        if( !ok )  return false;        // Z_EWOULDBLOCK
 
         //_read_socket.set_linger( true, 0 );
         call_ioctl( FIONBIO, 1 );
@@ -600,9 +600,9 @@ bool Communication::Connection::async_continue_( Continue_flags )
     }
     catch( const exception& x ) 
     { 
-        if( string_begins_with( x.what(), "ERRNO-103 "     ) == 0                                  // ECONNABORTED, Firefox trennt sich so
-         || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // ECONNABORTED, Firefox trennt sich so
-         || string_begins_with( x.what(), "ERRNO-104 "     ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
+        if( string_begins_with( x.what(), "ERRNO-103 "     ) == 0                                  // Z_ECONNABORTED, Firefox trennt sich so
+         || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // Z_ECONNABORTED, Firefox trennt sich so
+         || string_begins_with( x.what(), "ERRNO-104 "     ) == 0                                  // Z_ECONNRESET, Internet Explorer trennt sich so
          || string_begins_with( x.what(), "WINSOCK-10054 " ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
                                                                else  _log.error( x.what() );  
 
@@ -848,7 +848,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
-    if( ret == SOCKET_ERROR  &&  socket_errno() == EADDRINUSE )
+    if( ret == SOCKET_ERROR  &&  socket_errno() == Z_EADDRINUSE )
     {
         int my_errno = errno;  // Nur für Unix
 
@@ -864,7 +864,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
             ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
             my_errno = errno;
             if( ret != SOCKET_ERROR ) break;
-            if( socket_errno() != EADDRINUSE )  break;
+            if( socket_errno() != Z_EADDRINUSE )  break;
             if( ctrl_c_pressed )  break;
 
             if( print_dots )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );

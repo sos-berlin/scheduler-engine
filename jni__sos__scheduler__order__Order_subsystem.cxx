@@ -49,8 +49,7 @@ static jobject JNICALL java_1file_1baseds(JNIEnv* jenv, jobject, jlong cppRefere
 
 const static JNINativeMethod native_methods[] = {
     { "finished_orders_count__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::finished_1orders_1count },
-    { "java_file_baseds__native", "(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1file_1baseds },
-    NULL
+    { "java_file_baseds__native", "(J)Ljava/util/ArrayList;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1file_1baseds }
 };
 
 namespace zschimmer { namespace javabridge { 

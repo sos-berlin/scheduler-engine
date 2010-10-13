@@ -67,8 +67,7 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 const static JNINativeMethod native_methods[] = {
     { "string_error_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1error_1state },
     { "string_next_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1next_1state },
-    { "string_order_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1order_1state },
-    NULL
+    { "string_order_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1order_1state }
 };
 
 namespace zschimmer { namespace javabridge { 

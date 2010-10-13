@@ -1303,8 +1303,7 @@ const static JNINativeMethod native_methods[] = {
     { "temp_dir__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::temp_1dir },
     { "udp_port__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::udp_1port },
     { "unregister_pid__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::unregister_1pid__I },
-    { "update_console_title__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::update_1console_1title__I },
-    NULL
+    { "update_console_title__native", "(JI)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::update_1console_1title__I }
 };
 
 namespace zschimmer { namespace javabridge { 

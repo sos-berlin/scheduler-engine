@@ -85,8 +85,7 @@ const static JNINativeMethod native_methods[] = {
     { "order_queue__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Order_queueC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::order_1queue },
     { "string_error_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1error_1state },
     { "string_next_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1next_1state },
-    { "string_order_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1order_1state },
-    NULL
+    { "string_order_state__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1order_1state }
 };
 
 namespace zschimmer { namespace javabridge { 

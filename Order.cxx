@@ -2053,7 +2053,9 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 #ifdef Z_DEBUG          
             //TODO Das ist nicht die beste Stelle: Der Auftrag ist noch nicht in dem neuen Jobkettenknoten eingereiht.
             // Man könnte report_event() in add_order() einbauen, und dann noch das Auftragsende und verteilte Aufträge berücksichtigen.
+#ifndef SUPPRESS_JAVAPROXY
             report_event( OrderStateChangeEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
+#endif
 #endif
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );

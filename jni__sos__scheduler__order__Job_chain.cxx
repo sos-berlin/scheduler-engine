@@ -49,8 +49,7 @@ static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 
 const static JNINativeMethod native_methods[] = {
     { "java_nodes__native", "(J)Ljava/util/List;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1nodes },
-    { "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name },
-    NULL
+    { "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name }
 };
 
 namespace zschimmer { namespace javabridge { 

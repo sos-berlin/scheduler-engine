@@ -49,8 +49,7 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
 
 const static JNINativeMethod native_methods[] = {
     { "job_by_string__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string__Ljava_lang_String_2 },
-    { "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 },
-    NULL
+    { "job_by_string_or_null__native", "(JLjava/lang/String;)Lcom/sos/scheduler/kernel/core/cppproxy/JobC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1by_1string_1or_1null__Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 
