@@ -3036,7 +3036,7 @@ bool Job::do_something()
                 calculate_next_time( now );
 
                 Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
-                        obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
+                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
                         " _next_time=" << _next_time <<
                         " _next_start_time=" << _next_start_time <<
                         " _next_single_start=" << _next_single_start <<
