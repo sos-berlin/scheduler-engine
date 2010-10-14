@@ -1741,6 +1741,7 @@
             </text>
         </message>
 
+        <!-- JS-474
         <message code="SCHEDULER-296">
             <text xml:lang="de">
                 <title>Die &lt;run_time> des Auftrags hat keine nächste Startzeit</title>
@@ -1748,7 +1749,8 @@
             <text xml:lang="en">
                 <title>Order's &lt;run_time> does not have a next start time</title>
             </text>
-        </message>
+        </message> 
+        -->
 
         <message code="SCHEDULER-297">
             <text xml:lang="de">
