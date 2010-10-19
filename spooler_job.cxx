@@ -2521,17 +2521,12 @@ void Job::calculate_next_time( const Time& now )
 
     Time next_time = Time::never;
 
-    if( _state == s_running || _state == s_pending ) //_state > s_not_initialized ) 
+    if( _state == s_running || _state == s_pending )
     {
-        //is_waiting |= _lock_requestor  &&  _lock_requestor->is_enqueued()  &&  ! _lock_requestor->locks_are_available();
-        //is_waiting |= _waiting_for_process && !_waiting_for_process_try_again;
-
         if( _lock_requestor  &&  
             ( _lock_requestor->is_enqueued()  ||  !_lock_requestor->locks_are_known() ) )
         {
             if( _lock_requestor->locks_are_available() )  next_time = 0;    // task_to_start() ruft _lock_requestor->dequeue_lock_requests
-            //else
-            //if( !_lock_requestor->is_enqueued() )  _lock_requestor->enqueue_lock_requests();
         }
         else
         if( _waiting_for_process )
@@ -2545,57 +2540,33 @@ void Job::calculate_next_time( const Time& now )
             {
                 bool in_period = is_in_period(now);
 
-                if( in_period  &&  is_order_controlled() )  
-                {
-                    bool ok = request_order( now, Z_FUNCTION );
-                    if( ok )  next_time = now;
+                if( in_period  &&  ( _start_once || _start_once_for_directory ) )
+                    next_time = 0;
+                else {
+                    next_time = min(next_time, _task_queue->next_start_time() );
+                    next_time = min(next_time, _next_start_time);
+                    next_time = min(next_time, _next_single_start);
                 }
 
-                if( next_time <= now )
-                {
+                if( next_time > now  &&  is_order_controlled() ) {
+                    if (in_period) {
+                        bool has_order = request_order( now, Z_FUNCTION );
+                        if( has_order )  next_time = 0;
+                        else next_time = min(next_time, _combined_job_nodes->next_time() );
+                    }
+                    else
+                        next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
                 }
-                else
-                if( ( _start_once || _start_once_for_directory ) && in_period ) 
-                {
-                    next_time = now;
-                }
-                else
-                {
-                    next_time = _task_queue->next_start_time();
-
-                    if( next_time > _next_start_time   )  next_time = _next_start_time;
-                    if( next_time > _next_single_start )  next_time = _next_single_start;
-                }
-
-            //if( ( _state == s_pending  &&  _max_tasks > 0  ||
-            //      ( _state == s_running && _running_tasks_count < _max_tasks ) ) 
-            //  &&  is_order_controlled() )
-            //{
-            //    Time next_order_time = _combined_job_nodes->next_time();
-            //    if( next_order_time < _period.begin() )  next_order_time = _period.begin();
-            //    if( next_time > next_order_time )  next_time = next_order_time;
-            //}
-
-                if( is_order_controlled()  &&  !in_period )
-                    next_time = min(next_time, _period.begin());  // Zu Beginn der Periode mit request_order() erneut nachsehen, ob Auftrag vorliegt.
             }
 
-
 #           ifdef Z_UNIX
-                if( next_time > _directory_watcher_next_time )  next_time = _directory_watcher_next_time;
+                next_time = min(next_time, _directory_watcher_next_time);
 #           endif
         }
          
-        if( _spooler->_zschimmer_mode )
-        {
-            if( next_time > _next_start_time  &&  _waiting_for_process )  next_time = _next_start_time;
-        }
-        else
-            if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
-
+        next_time = min(next_time, _period.end() );     // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
     }
 
-    //Time old_next_time = _next_time;
     _next_time = next_time;
 
     //Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
