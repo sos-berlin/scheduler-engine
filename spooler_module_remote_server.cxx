@@ -588,8 +588,8 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java || _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine;
         if(needs_java_vm)
         {
-            _server->_log.info("java classpath: " + _server->_module->_java_vm->class_path()); 
-            _server->_log.info("java vm arguments: " + _server->_module->_java_vm->options());
+            _server->_log.debug1("java classpath: " + _server->_module->_java_vm->class_path()); 
+            _server->_log.debug1("java vm arguments: " + _server->_module->_java_vm->options());
         }                                                                                            // ... JS-540 
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
