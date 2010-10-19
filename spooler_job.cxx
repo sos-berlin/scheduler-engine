@@ -2569,9 +2569,11 @@ void Job::calculate_next_time( const Time& now )
 
     _next_time = next_time;
 
-    //Z_LOG2( "zschimmer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
-    //                                                                                               _next_time > old_next_time? " > " : " = " ) 
-    //                                                                << "old " << old_next_time << "\n" );
+#ifdef Z_DEBUG
+    Z_LOG2( "developer", obj_name() << "  " << Z_FUNCTION << " ==> " << _next_time.as_string() << ( _next_time < old_next_time? " < " :
+                                                                                                   _next_time > old_next_time? " > " : " = " ) 
+                                                                    << "old " << old_next_time << "\n" );
+#endif
 }
 
 //------------------------------------------------------------------------Job::signal_earlier_order
