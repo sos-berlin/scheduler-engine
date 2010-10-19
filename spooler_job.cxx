@@ -2567,6 +2567,7 @@ void Job::calculate_next_time( const Time& now )
         next_time = min(next_time, _period.end() );     // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
     }
 
+    Time old_next_time = _next_time;
     _next_time = next_time;
 
 #ifdef Z_DEBUG
