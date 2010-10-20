@@ -1790,13 +1790,14 @@ Time Period::next_repeated_allow_after_end( const Time& t ) const
     if( !_absolute_repeat.is_never() )
     {
         // JS-474: result = next_absolute_repeated( t, 1 );
-        result = next_absolute_repeated( t, 0 );
+        result = next_absolute_repeated( t, 0 ); 
+        // result ist never, wenn Ende der Periode erreicht ist. "allow_after_end" gilt nur für repeat, nicht für absolute_repeat.
     }
 
     return result;  
 }
-//-------------------------------------------------------------------Period::next_absolute_repeated
 
+//-------------------------------------------------------------------Period::next_absolute_repeated
 
 Time Period::next_absolute_repeated( const Time& tim, int next ) const
 {

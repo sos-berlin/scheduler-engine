@@ -2909,8 +2909,10 @@ Time Order::next_start_time( bool first_call )
             if( result >= _period.end() )       // Periode abgelaufen?
             {
                 Period next_period = _schedule_use->next_period( _period.end(), schedule::wss_next_any_start );
-                //Z_DEBUG_ONLY( fprintf(stderr,"%s %s\n", Z_FUNCTION, next_period.obj_name().c_str() ) );
                 
+                if (result.is_never()) 
+                    result = next_period.begin();
+                else
                 if (result >= next_period.end()) { // Nächste Periode ist auch abgelaufen?
                     next_period = _schedule_use->next_period(next_period.end(), schedule::wss_next_any_start);
                     result = next_period.begin();
@@ -2921,11 +2923,6 @@ Time Order::next_start_time( bool first_call )
                 else {
                     // Perioden gehen nahtlos ineinander über und in result berechneter repeat-Abstand bleibt erhalten.
                 }
-                //if( next_period.end() < now )   // Nächste Periode ist auch abgelaufen?
-                //{
-                //    next_period = _schedule_use->next_period( now );
-                //    result = next_period.begin();
-                //}
 
                 _period = next_period;
             }
