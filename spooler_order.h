@@ -599,7 +599,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
-    virtual jobject             java_sister                 ()                                      { return javabridge::has_proxy<Order_queue_node>::java_sister(); }
+    				javabridge::has_proxy<Order_queue_node>::java_sister;
 
     void                        close                       ();
   //void                        replace                     ( Node* old_node );

@@ -12,10 +12,7 @@
 namespace sos {
 namespace scheduler {
 
-//struct Java_vm;
 struct Java_thread_data;
-
-//extern zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //---------------------------------------------------------------------------------Java_thread_data
 
@@ -38,38 +35,6 @@ struct Java_idispatch_stack_frame
                                ~Java_idispatch_stack_frame  ();
 };
 
-//--------------------------------------------------------------------------------------Java_object
-/*
-struct Java_object : Object, Non_cloneable
-{
-    Z_GNU_ONLY(                 Java_object                 ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Java_object                 ( Spooler*, jobject = NULL );
-                               ~Java_object                 ();
-
-    STDMETHODIMP                QueryInterface              ( const IID&, void** );
-
-    void                        operator =                  ( jobject jo )                          { assign( jo ); }
-                                operator jobject            ()                                      { return _jobject; }
-    virtual void                assign                      ( jobject );
-    void                        set_global                  ();
-
-    Spooler*                   _spooler;
-    jobject                    _jobject;
-    bool                       _is_global;
-};
-*/
-//-------------------------------------------------------------------------------------------------
-/*
-struct Java_idispatch : Java_object
-{
-    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Java_idispatch              ( Spooler* sp, IDispatch*, const string& subclass );
-                               ~Java_idispatch              ();
-
-    ptr<IDispatch>             _idispatch;
-    string                     _class_name;
-};
-*/
 //-----------------------------------------------------------------------------Java_module_instance
 // Für Java-Objekte
 

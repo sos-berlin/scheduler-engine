@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;

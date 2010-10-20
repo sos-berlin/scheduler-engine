@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
@@ -19,7 +21,7 @@ static void JNICALL debug3__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cpp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::debug3()");
+        ::sos::scheduler::Prefix_log* o_ = has_proxy<::sos::scheduler::Prefix_log>::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::debug3()");
         (o_->debug3(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -35,7 +37,7 @@ static void JNICALL error__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppR
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::error()");
+        ::sos::scheduler::Prefix_log* o_ = has_proxy<::sos::scheduler::Prefix_log>::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::error()");
         (o_->error(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -51,7 +53,7 @@ static void JNICALL info__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::info()");
+        ::sos::scheduler::Prefix_log* o_ = has_proxy<::sos::scheduler::Prefix_log>::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::info()");
         (o_->info(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -67,7 +69,7 @@ static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Prefix_log* o_ = has_proxy< ::sos::scheduler::Prefix_log >::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::warn()");
+        ::sos::scheduler::Prefix_log* o_ = has_proxy<::sos::scheduler::Prefix_log>::of_cpp_reference(cppReference,"::sos::scheduler::Prefix_log::warn()");
         (o_->warn(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {

@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
@@ -19,7 +21,7 @@ static jobject JNICALL job_1chain(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::job_chain()");
+        ::sos::scheduler::order::Order* o_ = has_proxy<::sos::scheduler::order::Order>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::job_chain()");
         return Has_proxy::jobject_of(o_->job_chain());
     }
     catch(const exception& x) {
@@ -36,7 +38,7 @@ static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::set_id()");
+        ::sos::scheduler::order::Order* o_ = has_proxy<::sos::scheduler::order::Order>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::set_id()");
         (o_->set_id(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -52,7 +54,7 @@ static jstring JNICALL string_1id(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::string_id()");
+        ::sos::scheduler::order::Order* o_ = has_proxy<::sos::scheduler::order::Order>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::string_id()");
         return env.jstring_from_string(o_->string_id());
     }
     catch(const exception& x) {

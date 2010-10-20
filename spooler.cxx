@@ -981,6 +981,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     if( show_what.is_set( show_operations ) )
     {
         state_element.append_new_cdata_or_text_element( "operations", "\n" + _connection_manager->string_from_operations( "\n" ) + "\n" );
+        if (_java_subsystem)  state_element.appendChild(_java_subsystem->dom_element(dom));   // Das sollte vielleicht eingeordnet werden unter <subsystems>
 
         Memory_allocator::Allocation_map allocation_map = Memory_allocator::allocation_map();
         if( !allocation_map.empty() ) {
@@ -1686,8 +1687,11 @@ void Spooler::load()
     read_xml_configuration();
     initialize_java_subsystem();
     new_subsystems();
-    initialize_subsystems();
+
+    _folder_subsystem->switch_subsystem_state( subsys_initialized );
     load_config( _config_element_to_load, _config_source_filename );
+
+    initialize_subsystems();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
 }
@@ -1795,7 +1799,6 @@ void Spooler::initialize_subsystems()
 {
     initialize_cluster();
     _supervisor                ->switch_subsystem_state( subsys_initialized );
-    _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem   ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem            ->switch_subsystem_state( subsys_initialized );

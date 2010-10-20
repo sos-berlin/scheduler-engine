@@ -552,7 +552,7 @@ struct Spooler : Object,
 
     Database*                   db                          ()                                  { return _db; }
 
-    const SchedulerJ&           schedulerJ                  () const                            { return _java_subsystem->schedulerJ(); }
+    SchedulerJ&                 schedulerJ                  () const                            { return _java_subsystem->schedulerJ(); }
     string                      java_work_dir               ()                                  { return temp_dir() + Z_DIR_SEPARATOR "java"; }
 
     void                        new_subsystems              ();
@@ -580,7 +580,7 @@ struct Spooler : Object,
     Job_subsystem*              subsystem                   ( Job* ) const                      { return _job_subsystem; }
     Order_subsystem*            subsystem                   ( Job_chain* ) const                { return _order_subsystem; }
 
-    supervisor::Supervisor_client_interface*supervisor_client ();
+    supervisor::Supervisor_client_interface* supervisor_client();
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();

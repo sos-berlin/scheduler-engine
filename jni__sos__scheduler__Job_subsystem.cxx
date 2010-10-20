@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
@@ -19,7 +21,7 @@ static jobject JNICALL job_1by_1string__Ljava_lang_String_2(JNIEnv* jenv, jobjec
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job_subsystem* o_ = has_proxy< ::sos::scheduler::Job_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string()");
+        ::sos::scheduler::Job_subsystem* o_ = has_proxy<::sos::scheduler::Job_subsystem>::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string()");
         return Has_proxy::jobject_of(o_->job_by_string(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -36,7 +38,7 @@ static jobject JNICALL job_1by_1string_1or_1null__Ljava_lang_String_2(JNIEnv* je
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job_subsystem* o_ = has_proxy< ::sos::scheduler::Job_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string_or_null()");
+        ::sos::scheduler::Job_subsystem* o_ = has_proxy<::sos::scheduler::Job_subsystem>::of_cpp_reference(cppReference,"::sos::scheduler::Job_subsystem::job_by_string_or_null()");
         return Has_proxy::jobject_of(o_->job_by_string_or_null(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {

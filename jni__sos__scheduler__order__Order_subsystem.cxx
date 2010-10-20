@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
@@ -19,7 +21,7 @@ static jint JNICALL finished_1orders_1count(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::finished_orders_count()");
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy<::sos::scheduler::order::Order_subsystem>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::finished_orders_count()");
         return (o_->finished_orders_count());
     }
     catch(const exception& x) {
@@ -36,7 +38,7 @@ static jobject JNICALL java_1file_1baseds(JNIEnv* jenv, jobject, jlong cppRefere
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy< ::sos::scheduler::order::Order_subsystem >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::java_file_baseds()");
+        ::sos::scheduler::order::Order_subsystem* o_ = has_proxy<::sos::scheduler::order::Order_subsystem>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_subsystem::java_file_baseds()");
         return (o_->java_file_baseds()).local_ref();
     }
     catch(const exception& x) {

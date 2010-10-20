@@ -3,6 +3,8 @@
 #include "spooler.h"
 #include "../zschimmer/java.h"
 #include "../zschimmer/Has_proxy.h"
+#include "../zschimmer/javaproxy.h"
+#include "../zschimmer/lazy.h"
 
 using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
@@ -19,7 +21,7 @@ static void JNICALL close(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order_queue* o_ = has_proxy< ::sos::scheduler::order::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::close()");
+        ::sos::scheduler::order::Order_queue* o_ = has_proxy<::sos::scheduler::order::Order_queue>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::close()");
         (o_->close());
     }
     catch(const exception& x) {
@@ -35,7 +37,7 @@ static jboolean JNICALL is_1distributed_1order_1requested__J(JNIEnv* jenv, jobje
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order_queue* o_ = has_proxy< ::sos::scheduler::order::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::is_distributed_order_requested()");
+        ::sos::scheduler::order::Order_queue* o_ = has_proxy<::sos::scheduler::order::Order_queue>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::is_distributed_order_requested()");
         return (o_->is_distributed_order_requested(p0));
     }
     catch(const exception& x) {
@@ -52,7 +54,7 @@ static jint JNICALL java_1order_1count(JNIEnv* jenv, jobject, jlong cppReference
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Order_queue* o_ = has_proxy< ::sos::scheduler::order::Order_queue >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::java_order_count()");
+        ::sos::scheduler::order::Order_queue* o_ = has_proxy<::sos::scheduler::order::Order_queue>::of_cpp_reference(cppReference,"::sos::scheduler::order::Order_queue::java_order_count()");
         return (o_->java_order_count());
     }
     catch(const exception& x) {

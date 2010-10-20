@@ -63,7 +63,7 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
 bool Event_subsystem_impl::subsystem_initialize()
 {
 #ifndef SUPPRESS_JAVAPROXY
-    _eventSubsystemJ.assign( _spooler->schedulerJ().eventSubsystem() );
+    _eventSubsystemJ.assign_( _spooler->schedulerJ().eventSubsystem() );
 #endif
     _subsystem_state = subsys_initialized;
     return true;

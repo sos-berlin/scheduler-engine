@@ -11,16 +11,6 @@
 namespace sos {
 namespace scheduler {
 
-//-------------------------------------------------------------------------------------Java_objects
-// Von Java_subsystem_impl entkoppelt, weil Konstruktur der JavaProxys Java voraussetzt. 
-// Also legen wir Java_objects erst an, wenn Java läuft.
-
-struct Java_objects : Object
-{
-    SchedulerJ                 _schedulerJ;
-  //PlatformJ                  _platformJ;
-};
-
 //-----------------------------------------------------------------------------------Java_subsystem
 
 struct Java_subsystem : Java_subsystem_interface
@@ -42,13 +32,13 @@ struct Java_subsystem : Java_subsystem_interface
     javabridge::Vm*             java_vm                     ()                                      { return _java_vm; }
     void                    set_java_options                ( const string& x )                     { _java_vm->set_options(x); }
     void                        prepend_class_path          ( const string& x )                     { _java_vm->prepend_class_path(x); }
-    const SchedulerJ&           schedulerJ                  () const                                { return _java_objects->_schedulerJ; }
-  //const PlatformJ&            platformJ                   () const                                { return _java_objects->_platformJ; }
-
+    SchedulerJ&                 schedulerJ                  ()                                      { return _schedulerJ; }
+    xml::Element_ptr            dom_element                 (const xml::Document_ptr&);
 
   private:
     ptr<javabridge::Vm>        _java_vm;
-    ptr<Java_objects>          _java_objects;
+    SchedulerJ                 _schedulerJ;
+  //PlatformJ                  _platformJ;
 };
 
 //-------------------------------------------------------------------------------new_java_subsystem
@@ -77,7 +67,6 @@ Java_subsystem::Java_subsystem( Scheduler* scheduler )
         _java_vm->set_work_dir( java_work_dir );
         _java_vm->prepend_class_path( java_work_dir );
     }
-
 }
 
 //------------------------------------------------------------------Java_subsystem::~Java_subsystem
@@ -95,7 +84,7 @@ Java_subsystem::~Java_subsystem()
     
 void Java_subsystem::close()
 {
-    if( _java_objects )  _java_objects->_schedulerJ.close();
+    if (_schedulerJ)  _schedulerJ.close();
     if( _java_vm )  _java_vm->set_log( NULL );
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss
@@ -110,8 +99,7 @@ bool Java_subsystem::subsystem_initialize()
     Java_module_instance::init_java_vm( _java_vm );
     register_native_classes();
 
-    _java_objects = Z_NEW( Java_objects );
-    _java_objects->_schedulerJ.assign( SchedulerJ::new_instance(_spooler->j()) );
+    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j()));
 #endif
     _subsystem_state = subsys_initialized;
     return true;
@@ -121,9 +109,9 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
-#ifndef SUPPRESS_JAVAPROXY
-    _java_objects->_schedulerJ.load();
-#endif
+    #ifndef SUPPRESS_JAVAPROXY
+        _schedulerJ.load();
+    #endif
     _subsystem_state = subsys_loaded;
     return true;
 }
@@ -132,12 +120,12 @@ bool Java_subsystem::subsystem_load()
 
 bool Java_subsystem::subsystem_activate()
 {
-#ifndef SUPPRESS_JAVAPROXY
-    _java_objects->_schedulerJ.activate("Hallo, hier ist C++");
-#ifdef Z_DEBUG
-    _java_objects->_schedulerJ.activateMonitor();
-#endif
-#endif
+    #ifndef SUPPRESS_JAVAPROXY
+        _schedulerJ.activate("Hallo, hier ist C++");
+        #ifdef Z_DEBUG
+            _schedulerJ.activateMonitor();
+        #endif
+    #endif
 
     _subsystem_state = subsys_active;
     return true;
@@ -150,7 +138,7 @@ string Java_subsystem_interface::classname_of_scheduler_object(const string& obj
     return "sos/spooler/" + replace_regex_ext( objectname, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 }
 
-//-----------------------------------------Java_subsystem_interface::instance_of_scheduler_object
+//-------------------------------------------Java_subsystem_interface::instance_of_scheduler_object
 
 ptr<javabridge::Java_idispatch> Java_subsystem_interface::instance_of_scheduler_object( IDispatch* idispatch, const string& objectname)
 {
@@ -158,6 +146,32 @@ ptr<javabridge::Java_idispatch> Java_subsystem_interface::instance_of_scheduler_
     return Z_NEW( javabridge::Java_idispatch( idispatch, true, java_class_name.c_str() ) );
 }
 
+//----------------------------------------------------------------------Java_subsystem::dom_element
+
+xml::Element_ptr Java_subsystem::dom_element(const xml::Document_ptr& dom)
+{
+    xml::Element_ptr result = dom.createElement("java_subsystem");
+    result.append_new_comment("For debugging only");
+    javabridge::Vm* vm = javabridge::Vm::get_vm(false);
+    const javabridge::Statistics& stat = vm->_statistics;
+
+    result.setAttribute("GlobalRef", stat._NewGlobalRef_count - stat._DeleteGlobalRef_count );
+    result.setAttribute("NewGlobalRef", stat._NewGlobalRef_count );
+    result.setAttribute("DeleteGlobalRef", stat._DeleteGlobalRef_count );
+
+    if (javabridge::Jobject_debug_register* reg = javabridge::Vm::static_vm->_jobject_debug_register) {
+        xml::Element_ptr objects_element = result.append_new_element("objects");
+        typedef javabridge::Jobject_debug_register::Class_object_counter_map Map;
+        Map map = reg->class_object_counter_map();
+        Z_FOR_EACH_CONST(Map, map, it) {
+            xml::Element_ptr e = objects_element.append_new_element("object");
+            e.setAttribute("class", it->first);
+            e.setAttribute("count", it->second);
+        }
+    }
+
+    return result;
+}
 
 //-------------------------------------------------------------------------------------------------
 
