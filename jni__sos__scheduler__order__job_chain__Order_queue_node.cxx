@@ -21,7 +21,7 @@ static jobject JNICALL order_1queue(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy<::sos::scheduler::order::job_chain::Order_queue_node>::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::order_queue()");
+        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::order_queue()");
         return Has_proxy::jobject_of(o_->order_queue());
     }
     catch(const exception& x) {
@@ -38,7 +38,7 @@ static jstring JNICALL string_1error_1state(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy<::sos::scheduler::order::job_chain::Order_queue_node>::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_error_state()");
+        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_error_state()");
         return env.jstring_from_string(o_->string_error_state());
     }
     catch(const exception& x) {
@@ -55,7 +55,7 @@ static jstring JNICALL string_1next_1state(JNIEnv* jenv, jobject, jlong cppRefer
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy<::sos::scheduler::order::job_chain::Order_queue_node>::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_next_state()");
+        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_next_state()");
         return env.jstring_from_string(o_->string_next_state());
     }
     catch(const exception& x) {
@@ -72,7 +72,7 @@ static jstring JNICALL string_1order_1state(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy<::sos::scheduler::order::job_chain::Order_queue_node>::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_order_state()");
+        ::sos::scheduler::order::job_chain::Order_queue_node* o_ = has_proxy< ::sos::scheduler::order::job_chain::Order_queue_node >::of_cpp_reference(cppReference,"::sos::scheduler::order::job_chain::Order_queue_node::string_order_state()");
         return env.jstring_from_string(o_->string_order_state());
     }
     catch(const exception& x) {

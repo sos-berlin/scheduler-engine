@@ -21,7 +21,7 @@ static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job* o_ = has_proxy<::sos::scheduler::Job>::of_cpp_reference(cppReference,"::sos::scheduler::Job::name()");
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::name()");
         return env.jstring_from_string(o_->name());
     }
     catch(const exception& x) {
@@ -38,7 +38,7 @@ static jstring JNICALL path(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Job* o_ = has_proxy<::sos::scheduler::Job>::of_cpp_reference(cppReference,"::sos::scheduler::Job::path()");
+        ::sos::scheduler::Job* o_ = has_proxy< ::sos::scheduler::Job >::of_cpp_reference(cppReference,"::sos::scheduler::Job::path()");
         return env.jstring_from_string(o_->path());
     }
     catch(const exception& x) {

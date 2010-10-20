@@ -21,7 +21,7 @@ static void JNICALL abort_1immediately__ZLjava_lang_String_2(JNIEnv* jenv, jobje
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_immediately()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_immediately()");
         (o_->abort_immediately(p0 != 0, env.string_from_jstring(p1)));
     }
     catch(const exception& x) {
@@ -37,7 +37,7 @@ static void JNICALL abort_1immediately_1after_1distribution_1error__Ljava_lang_S
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_immediately_after_distribution_error()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_immediately_after_distribution_error()");
         (o_->abort_immediately_after_distribution_error(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -53,7 +53,7 @@ static void JNICALL abort_1now__Z(JNIEnv* jenv, jobject, jlong cppReference, jbo
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_now()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::abort_now()");
         (o_->abort_now(p0 != 0));
     }
     catch(const exception& x) {
@@ -69,7 +69,7 @@ static void JNICALL activate(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::activate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::activate()");
         (o_->activate());
     }
     catch(const exception& x) {
@@ -85,7 +85,7 @@ static void JNICALL assert_1are_1orders_1distributed__Ljava_lang_String_2(JNIEnv
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assert_are_orders_distributed()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assert_are_orders_distributed()");
         (o_->assert_are_orders_distributed(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -101,7 +101,7 @@ static void JNICALL assert_1is_1activated__Ljava_lang_String_2(JNIEnv* jenv, job
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assert_is_activated()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assert_is_activated()");
         (o_->assert_is_activated(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -117,7 +117,7 @@ static void JNICALL assign_1stdout(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assign_stdout()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::assign_stdout()");
         (o_->assign_stdout());
     }
     catch(const exception& x) {
@@ -133,7 +133,7 @@ static void JNICALL begin_1dont_1suspend_1machine(JNIEnv* jenv, jobject, jlong c
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::begin_dont_suspend_machine()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::begin_dont_suspend_machine()");
         (o_->begin_dont_suspend_machine());
     }
     catch(const exception& x) {
@@ -149,7 +149,7 @@ static void JNICALL check_1cluster(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::check_cluster()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::check_cluster()");
         (o_->check_cluster());
     }
     catch(const exception& x) {
@@ -165,7 +165,7 @@ static void JNICALL check_1name__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlon
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::check_name()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::check_name()");
         (o_->check_name(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -181,7 +181,7 @@ static jboolean JNICALL cluster_1is_1active(JNIEnv* jenv, jobject, jlong cppRefe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cluster_is_active()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cluster_is_active()");
         return (o_->cluster_is_active());
     }
     catch(const exception& x) {
@@ -198,7 +198,7 @@ static jstring JNICALL cluster_1member_1id(JNIEnv* jenv, jobject, jlong cppRefer
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cluster_member_id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cluster_member_id()");
         return env.jstring_from_string(o_->cluster_member_id());
     }
     catch(const exception& x) {
@@ -215,7 +215,7 @@ static void JNICALL cmd_1continue(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_continue()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_continue()");
         (o_->cmd_continue());
     }
     catch(const exception& x) {
@@ -231,7 +231,7 @@ static void JNICALL cmd_1let_1run_1terminate_1and_1restart(JNIEnv* jenv, jobject
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_let_run_terminate_and_restart()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_let_run_terminate_and_restart()");
         (o_->cmd_let_run_terminate_and_restart());
     }
     catch(const exception& x) {
@@ -247,7 +247,7 @@ static void JNICALL cmd_1pause(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_pause()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_pause()");
         (o_->cmd_pause());
     }
     catch(const exception& x) {
@@ -263,7 +263,7 @@ static void JNICALL cmd_1terminate(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
         (o_->cmd_terminate());
     }
     catch(const exception& x) {
@@ -279,7 +279,7 @@ static void JNICALL cmd_1terminate__Z(JNIEnv* jenv, jobject, jlong cppReference,
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
         (o_->cmd_terminate(p0 != 0));
     }
     catch(const exception& x) {
@@ -295,7 +295,7 @@ static void JNICALL cmd_1terminate__ZI(JNIEnv* jenv, jobject, jlong cppReference
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
         (o_->cmd_terminate(p0 != 0, p1));
     }
     catch(const exception& x) {
@@ -311,7 +311,7 @@ static void JNICALL cmd_1terminate__ZILjava_lang_String_2(JNIEnv* jenv, jobject,
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
         (o_->cmd_terminate(p0 != 0, p1, env.string_from_jstring(p2)));
     }
     catch(const exception& x) {
@@ -327,7 +327,7 @@ static void JNICALL cmd_1terminate__ZILjava_lang_String_2Z(JNIEnv* jenv, jobject
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate()");
         (o_->cmd_terminate(p0 != 0, p1, env.string_from_jstring(p2), p3 != 0));
     }
     catch(const exception& x) {
@@ -343,7 +343,7 @@ static void JNICALL cmd_1terminate_1after_1error__Ljava_lang_String_2Ljava_lang_
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate_after_error()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate_after_error()");
         (o_->cmd_terminate_after_error(env.string_from_jstring(p0), env.string_from_jstring(p1)));
     }
     catch(const exception& x) {
@@ -359,7 +359,7 @@ static void JNICALL cmd_1terminate_1and_1restart__I(JNIEnv* jenv, jobject, jlong
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate_and_restart()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::cmd_terminate_and_restart()");
         (o_->cmd_terminate_and_restart(p0));
     }
     catch(const exception& x) {
@@ -375,7 +375,7 @@ static jstring JNICALL db_1cluster_1member_1id(JNIEnv* jenv, jobject, jlong cppR
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::db_cluster_member_id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::db_cluster_member_id()");
         return env.jstring_from_string(o_->db_cluster_member_id());
     }
     catch(const exception& x) {
@@ -392,7 +392,7 @@ static jstring JNICALL db_1distributed_1member_1id(JNIEnv* jenv, jobject, jlong 
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::db_distributed_member_id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::db_distributed_member_id()");
         return env.jstring_from_string(o_->db_distributed_member_id());
     }
     catch(const exception& x) {
@@ -409,7 +409,7 @@ static void JNICALL detect_1warning_1and_1send_1mail(JNIEnv* jenv, jobject, jlon
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::detect_warning_and_send_mail()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::detect_warning_and_send_mail()");
         (o_->detect_warning_and_send_mail());
     }
     catch(const exception& x) {
@@ -425,7 +425,7 @@ static jstring JNICALL directory(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::directory()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::directory()");
         return env.jstring_from_string(o_->directory());
     }
     catch(const exception& x) {
@@ -442,7 +442,7 @@ static jstring JNICALL distributed_1member_1id(JNIEnv* jenv, jobject, jlong cppR
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::distributed_member_id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::distributed_member_id()");
         return env.jstring_from_string(o_->distributed_member_id());
     }
     catch(const exception& x) {
@@ -459,7 +459,7 @@ static void JNICALL end_1dont_1suspend_1machine(JNIEnv* jenv, jobject, jlong cpp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::end_dont_suspend_machine()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::end_dont_suspend_machine()");
         (o_->end_dont_suspend_machine());
     }
     catch(const exception& x) {
@@ -475,7 +475,7 @@ static void JNICALL end_1waiting_1tasks(JNIEnv* jenv, jobject, jlong cppReferenc
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::end_waiting_tasks()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::end_waiting_tasks()");
         (o_->end_waiting_tasks());
     }
     catch(const exception& x) {
@@ -491,7 +491,7 @@ static void JNICALL execute_1config_1commands(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_config_commands()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_config_commands()");
         (o_->execute_config_commands());
     }
     catch(const exception& x) {
@@ -507,7 +507,7 @@ static void JNICALL execute_1state_1cmd(JNIEnv* jenv, jobject, jlong cppReferenc
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_state_cmd()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::execute_state_cmd()");
         (o_->execute_state_cmd());
     }
     catch(const exception& x) {
@@ -523,7 +523,7 @@ static jboolean JNICALL has_1any_1task(JNIEnv* jenv, jobject, jlong cppReference
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::has_any_task()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::has_any_task()");
         return (o_->has_any_task());
     }
     catch(const exception& x) {
@@ -540,7 +540,7 @@ static jboolean JNICALL has_1exclusiveness(JNIEnv* jenv, jobject, jlong cppRefer
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::has_exclusiveness()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::has_exclusiveness()");
         return (o_->has_exclusiveness());
     }
     catch(const exception& x) {
@@ -557,7 +557,7 @@ static jstring JNICALL http_1url(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::http_url()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::http_url()");
         return env.jstring_from_string(o_->http_url());
     }
     catch(const exception& x) {
@@ -574,7 +574,7 @@ static jstring JNICALL id(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::id()");
         return env.jstring_from_string(o_->id());
     }
     catch(const exception& x) {
@@ -591,7 +591,7 @@ static jstring JNICALL id_1for_1db(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::id_for_db()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::id_for_db()");
         return env.jstring_from_string(o_->id_for_db());
     }
     catch(const exception& x) {
@@ -608,7 +608,7 @@ static jstring JNICALL include_1path(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::include_path()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::include_path()");
         return env.jstring_from_string(o_->include_path());
     }
     catch(const exception& x) {
@@ -625,7 +625,7 @@ static jboolean JNICALL is_1cluster(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_cluster()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_cluster()");
         return (o_->is_cluster());
     }
     catch(const exception& x) {
@@ -642,7 +642,7 @@ static jboolean JNICALL is_1machine_1suspendable(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_machine_suspendable()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_machine_suspendable()");
         return (o_->is_machine_suspendable());
     }
     catch(const exception& x) {
@@ -659,7 +659,7 @@ static jboolean JNICALL is_1service(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_service()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_service()");
         return (o_->is_service());
     }
     catch(const exception& x) {
@@ -676,7 +676,7 @@ static jboolean JNICALL is_1termination_1state_1cmd(JNIEnv* jenv, jobject, jlong
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_termination_state_cmd()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::is_termination_state_cmd()");
         return (o_->is_termination_state_cmd());
     }
     catch(const exception& x) {
@@ -693,7 +693,7 @@ static jstring JNICALL java_1work_1dir(JNIEnv* jenv, jobject, jlong cppReference
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::java_work_dir()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::java_work_dir()");
         return env.jstring_from_string(o_->java_work_dir());
     }
     catch(const exception& x) {
@@ -710,7 +710,7 @@ static jobject JNICALL job_1subsystem(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem()");
         return Has_proxy::jobject_of(o_->job_subsystem());
     }
     catch(const exception& x) {
@@ -727,7 +727,7 @@ static jobject JNICALL job_1subsystem_1or_1null(JNIEnv* jenv, jobject, jlong cpp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem_or_null()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::job_subsystem_or_null()");
         return Has_proxy::jobject_of(o_->job_subsystem_or_null());
     }
     catch(const exception& x) {
@@ -744,7 +744,7 @@ static void JNICALL load(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::load()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::load()");
         (o_->load());
     }
     catch(const exception& x) {
@@ -760,7 +760,7 @@ static void JNICALL load_1arg(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::load_arg()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::load_arg()");
         (o_->load_arg());
     }
     catch(const exception& x) {
@@ -776,7 +776,7 @@ static jobject JNICALL log(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log()");
         return Has_proxy::jobject_of(o_->log());
     }
     catch(const exception& x) {
@@ -793,7 +793,7 @@ static jstring JNICALL log_1directory(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log_directory()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log_directory()");
         return env.jstring_from_string(o_->log_directory());
     }
     catch(const exception& x) {
@@ -810,7 +810,7 @@ static void JNICALL log_1show_1state(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log_show_state()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::log_show_state()");
         (o_->log_show_state());
     }
     catch(const exception& x) {
@@ -826,7 +826,7 @@ static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::name()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::name()");
         return env.jstring_from_string(o_->name());
     }
     catch(const exception& x) {
@@ -843,7 +843,7 @@ static jboolean JNICALL name_1is_1valid__Ljava_lang_String_2(JNIEnv* jenv, jobje
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::name_is_valid()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::name_is_valid()");
         return (o_->name_is_valid(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -860,7 +860,7 @@ static void JNICALL nichts_1getan__ILjava_lang_String_2(JNIEnv* jenv, jobject, j
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::nichts_getan()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::nichts_getan()");
         (o_->nichts_getan(p0, env.string_from_jstring(p1)));
     }
     catch(const exception& x) {
@@ -876,7 +876,7 @@ static jobject JNICALL order_1subsystem(JNIEnv* jenv, jobject, jlong cppReferenc
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::order_subsystem()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::order_subsystem()");
         return Has_proxy::jobject_of(o_->order_subsystem());
     }
     catch(const exception& x) {
@@ -893,7 +893,7 @@ static jboolean JNICALL orders_1are_1distributed(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::orders_are_distributed()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::orders_are_distributed()");
         return (o_->orders_are_distributed());
     }
     catch(const exception& x) {
@@ -910,7 +910,7 @@ static jstring JNICALL param(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::param()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::param()");
         return env.jstring_from_string(o_->param());
     }
     catch(const exception& x) {
@@ -927,7 +927,7 @@ static void JNICALL register_1pid__I(JNIEnv* jenv, jobject, jlong cppReference, 
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::register_pid()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::register_pid()");
         (o_->register_pid(p0));
     }
     catch(const exception& x) {
@@ -943,7 +943,7 @@ static void JNICALL register_1pid__IZ(JNIEnv* jenv, jobject, jlong cppReference,
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::register_pid()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::register_pid()");
         (o_->register_pid(p0, p1 != 0));
     }
     catch(const exception& x) {
@@ -959,7 +959,7 @@ static void JNICALL run(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::run()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::run()");
         (o_->run());
     }
     catch(const exception& x) {
@@ -975,7 +975,7 @@ static void JNICALL run_1check_1ctrl_1c(JNIEnv* jenv, jobject, jlong cppReferenc
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::run_check_ctrl_c()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::run_check_ctrl_c()");
         (o_->run_check_ctrl_c());
     }
     catch(const exception& x) {
@@ -991,7 +991,7 @@ static void JNICALL self_1check(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::self_check()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::self_check()");
         (o_->self_check());
     }
     catch(const exception& x) {
@@ -1007,7 +1007,7 @@ static void JNICALL send_1cmd(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::send_cmd()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::send_cmd()");
         (o_->send_cmd());
     }
     catch(const exception& x) {
@@ -1023,7 +1023,7 @@ static void JNICALL set_1id__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::set_id()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::set_id()");
         (o_->set_id(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -1039,7 +1039,7 @@ static void JNICALL signal__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cpp
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::signal()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::signal()");
         (o_->signal(env.string_from_jstring(p0)));
     }
     catch(const exception& x) {
@@ -1055,7 +1055,7 @@ static jboolean JNICALL signaled(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::signaled()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::signaled()");
         return (o_->signaled());
     }
     catch(const exception& x) {
@@ -1072,7 +1072,7 @@ static void JNICALL start(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::start()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::start()");
         (o_->start());
     }
     catch(const exception& x) {
@@ -1088,7 +1088,7 @@ static jstring JNICALL state_1name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::state_name()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::state_name()");
         return env.jstring_from_string(o_->state_name());
     }
     catch(const exception& x) {
@@ -1105,7 +1105,7 @@ static void JNICALL stop(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::stop()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::stop()");
         (o_->stop());
     }
     catch(const exception& x) {
@@ -1121,7 +1121,7 @@ static jstring JNICALL string_1need_1db(JNIEnv* jenv, jobject, jlong cppReferenc
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::string_need_db()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::string_need_db()");
         return env.jstring_from_string(o_->string_need_db());
     }
     catch(const exception& x) {
@@ -1138,7 +1138,7 @@ static void JNICALL suspend_1machine(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::suspend_machine()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::suspend_machine()");
         (o_->suspend_machine());
     }
     catch(const exception& x) {
@@ -1154,7 +1154,7 @@ static jint JNICALL tcp_1port(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::tcp_port()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::tcp_port()");
         return (o_->tcp_port());
     }
     catch(const exception& x) {
@@ -1171,7 +1171,7 @@ static jstring JNICALL temp_1dir(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::temp_dir()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::temp_dir()");
         return env.jstring_from_string(o_->temp_dir());
     }
     catch(const exception& x) {
@@ -1188,7 +1188,7 @@ static jint JNICALL udp_1port(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::udp_port()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::udp_port()");
         return (o_->udp_port());
     }
     catch(const exception& x) {
@@ -1205,7 +1205,7 @@ static void JNICALL unregister_1pid__I(JNIEnv* jenv, jobject, jlong cppReference
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::unregister_pid()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::unregister_pid()");
         (o_->unregister_pid(p0));
     }
     catch(const exception& x) {
@@ -1221,7 +1221,7 @@ static void JNICALL update_1console_1title__I(JNIEnv* jenv, jobject, jlong cppRe
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Spooler* o_ = has_proxy<::sos::scheduler::Spooler>::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::update_console_title()");
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::update_console_title()");
         (o_->update_console_title(p0));
     }
     catch(const exception& x) {

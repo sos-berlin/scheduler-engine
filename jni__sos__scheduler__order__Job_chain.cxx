@@ -21,7 +21,7 @@ static jobject JNICALL java_1nodes(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Job_chain* o_ = has_proxy<::sos::scheduler::order::Job_chain>::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::java_nodes()");
+        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::java_nodes()");
         return (o_->java_nodes()).local_ref();
     }
     catch(const exception& x) {
@@ -38,7 +38,7 @@ static jstring JNICALL name(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::order::Job_chain* o_ = has_proxy<::sos::scheduler::order::Job_chain>::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::name()");
+        ::sos::scheduler::order::Job_chain* o_ = has_proxy< ::sos::scheduler::order::Job_chain >::of_cpp_reference(cppReference,"::sos::scheduler::order::Job_chain::name()");
         return env.jstring_from_string(o_->name());
     }
     catch(const exception& x) {
