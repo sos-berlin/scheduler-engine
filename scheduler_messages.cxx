@@ -159,7 +159,6 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-293", "Waiting for closing module instance ..." },
     { "SCHEDULER-294", "Java class $1 could not be loaded. Java source is being recompiled before retrying " },
     { "SCHEDULER-295", "Error when loading order $1 from database: $2" },
-    { "SCHEDULER-296", "Order's <run_time> does not have a next start time" },
     { "SCHEDULER-297", "Order has been carried out without web_service_operation.send(), operation cancelled" },
     { "SCHEDULER-298", "Ignoring job=$1 because order is removed from job chain" },
     { "SCHEDULER-299", "Removing process $1 after error" },

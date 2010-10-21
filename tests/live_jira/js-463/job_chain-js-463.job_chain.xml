@@ -3,7 +3,8 @@
 <job_chain orders_recoverable="yes"
            visible="yes"
            title="job_chain-js-463">
-    <file_order_source directory="tests\live_jira\js-463\FileOrders\"/>
+    <file_order_source directory="tests\live_jira\js-463\FileOrders\"
+                       regex="^Neues Textdokument.*\.txt$"/>
     <job_chain_node state="0"
                     job="job-js-463"
                     next_state="100"
