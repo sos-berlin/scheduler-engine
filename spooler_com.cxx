@@ -687,8 +687,6 @@ int bstr_bytes(BSTR b) { return memory_overhead + aligned(4 + SysStringLen(b) + 
 int Com_variable_set::estimated_byte_count() const 
 {
     int result = 0;
-    const int overhead = 8;
-    const int bstr_overheaed = overhead + 4 + 1;
 
     Z_FOR_EACH_CONST (Map, _map, it) {
         result += bstr_bytes(it->first);
