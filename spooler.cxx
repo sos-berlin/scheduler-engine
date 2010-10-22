@@ -1687,11 +1687,9 @@ void Spooler::load()
     read_xml_configuration();
     initialize_java_subsystem();
     new_subsystems();
-
-    _folder_subsystem->switch_subsystem_state( subsys_initialized );
-    load_config( _config_element_to_load, _config_source_filename );
-
     initialize_subsystems();
+    load_config( _config_element_to_load, _config_source_filename );
+    initialize_subsystems_after_base_processing();
 
     if( _zschimmer_mode )  initialize_sleep_handler();
 }
@@ -1779,7 +1777,7 @@ void Spooler::new_subsystems()
 
 void Spooler::destroy_subsystems()
 {
-    // In der Reihenfolder der Abhängigkeiten löschen:
+    // In der Reihenfolge der Abhängigkeiten löschen:
     // nicht die Reihenfolge ändern !!!!!!
     _standing_order_subsystem   = NULL;
     _order_subsystem            = NULL;
@@ -1798,16 +1796,30 @@ void Spooler::destroy_subsystems()
 void Spooler::initialize_subsystems()
 {
     initialize_cluster();
-    _supervisor                ->switch_subsystem_state( subsys_initialized );
+    _event_subsystem           ->switch_subsystem_state( subsys_initialized );
+    _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
+    //_supervisor                ->switch_subsystem_state( subsys_initialized );
     _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem   ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem            ->switch_subsystem_state( subsys_initialized );
-    _job_subsystem             ->switch_subsystem_state( subsys_initialized );
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );
+    //_job_subsystem             ->switch_subsystem_state( subsys_initialized );
+    //_scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );
     _order_subsystem           ->switch_subsystem_state( subsys_initialized );
     _standing_order_subsystem  ->switch_subsystem_state( subsys_initialized );
     _http_server               ->switch_subsystem_state( subsys_initialized );
     _web_services              ->switch_subsystem_state( subsys_initialized );        // Ein Job und eine Jobkette einrichten, s. spooler_web_service.cxx
+}
+
+//---------------------------------------------Spooler::initialize_subsystems_after_base_processing
+// Nachdem load_config() die <base> ausgeführt hat. 
+// <base> erlaubt mehrere mischende set_dom() aufs selbe File_based und muss vor der Initialisierung gelaufen sein.
+// Andererseits müssen einige andere Subsysteme bereits vorher initialisiert sein.
+
+void Spooler::initialize_subsystems_after_base_processing()
+{
+    _supervisor                ->switch_subsystem_state( subsys_initialized );
+    _job_subsystem             ->switch_subsystem_state( subsys_initialized );
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_initialized );
 }
 
 //-------------------------------------------------------------------------Spooler::load_subsystems
@@ -1850,6 +1862,30 @@ void Spooler::activate_subsystems()
     _order_subsystem         ->switch_subsystem_state( subsys_active );
     _standing_order_subsystem->switch_subsystem_state( subsys_active );
     _web_services            ->switch_subsystem_state( subsys_active );         // Nicht in Spooler::load(), denn es öffnet schon -log-dir-Dateien (das ist nicht gut für -send-cmd=)
+}
+
+//-------------------------------------------------------------------------Spooler::stop_subsystems
+
+void Spooler::stop_subsystems()
+{
+    _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
+    _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
+    _order_subsystem           ->switch_subsystem_state( subsys_stopped );
+    _job_subsystem             ->switch_subsystem_state( subsys_stopped );
+    _task_subsystem            ->switch_subsystem_state( subsys_stopped );
+    _lock_subsystem            ->switch_subsystem_state( subsys_stopped );
+    _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
+    _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
+    _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
+    _event_subsystem           ->switch_subsystem_state( subsys_stopped );
+    _supervisor                ->switch_subsystem_state( subsys_stopped );
+
+    if( _cluster ) {
+        _cluster->switch_subsystem_state( subsys_stopped );
+        _cluster = NULL;
+    }
+
+    if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_stopped );
 }
 
 //----------------------------------------------------------------------------Spooler::create_window
@@ -2164,31 +2200,9 @@ void Spooler::stop( const exception* )
     bool restart = _shutdown_cmd == sc_terminate_and_restart 
                 || _shutdown_cmd == sc_let_run_terminate_and_restart;
 
-    stop_cluster();
-
-    _scheduler_script_subsystem->switch_subsystem_state( subsys_stopped ); // Scheduler-Skript zuerst beenden, damit die Finalizer die Tasks (von Job.start()) und andere Objekte schließen können.
-    _standing_order_subsystem  ->switch_subsystem_state( subsys_stopped );
-    _order_subsystem           ->switch_subsystem_state( subsys_stopped );
-
     if( _shutdown_ignore_running_tasks )  _spooler->kill_all_processes( kill_task_subsystem );   // Übriggebliebene Prozesse killen
-
-    _job_subsystem             ->switch_subsystem_state( subsys_stopped );
-    _task_subsystem            ->switch_subsystem_state( subsys_stopped );
-    _lock_subsystem            ->switch_subsystem_state( subsys_stopped );
-    _process_class_subsystem   ->switch_subsystem_state( subsys_stopped );
-    _schedule_subsystem        ->switch_subsystem_state( subsys_stopped );
-    _folder_subsystem          ->switch_subsystem_state( subsys_stopped );
-    _event_subsystem           ->switch_subsystem_state( subsys_stopped );
-    _supervisor                ->switch_subsystem_state( subsys_stopped );
-
-
-    if( _cluster )
-    {
-        _cluster->switch_subsystem_state( subsys_stopped );
-        _cluster = NULL;
-    }
-
-    if( _supervisor_client )  _supervisor_client->switch_subsystem_state( subsys_stopped );
+    stop_cluster();
+    stop_subsystems();
 
     if( _scheduler_event_manager )  _scheduler_event_manager->close_responses();
     _communication.finish_responses( 5.0 );

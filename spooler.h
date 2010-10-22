@@ -558,8 +558,10 @@ struct Spooler : Object,
     void                        new_subsystems              ();
     void                        destroy_subsystems          ();
     void                        initialize_subsystems       ();
+    void                        initialize_subsystems_after_base_processing();
     void                        load_subsystems             ();
     void                        activate_subsystems         ();
+    void                        stop_subsystems             ();
 
     Scheduler_script_subsystem_interface* scheduler_script_subsystem() const                    { return _scheduler_script_subsystem; }
     Folder_subsystem*           folder_subsystem            () const                            { return _folder_subsystem; }
