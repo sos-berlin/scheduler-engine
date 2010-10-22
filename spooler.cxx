@@ -1845,7 +1845,8 @@ void Spooler::load_subsystems()
 
 void Spooler::activate_subsystems()
 {
-    _java_subsystem->switch_subsystem_state( subsys_active );
+    _java_subsystem            ->switch_subsystem_state( subsys_active );
+
     // Job- und Order-<run_time> benutzen das geladene Scheduler-Skript
     _scheduler_script_subsystem->switch_subsystem_state( subsys_active );       // ruft spooler_init()
     detect_warning_and_send_mail();
@@ -1988,8 +1989,6 @@ void Spooler::start()
     _daylight_saving_time_transition_detector = time::new_daylight_saving_time_transition_detector( this );
     _daylight_saving_time_transition_detector->set_async_manager( _connection_manager );
 
-
-    _java_subsystem->switch_subsystem_state( subsys_loaded );
     if( _cluster )  _cluster->switch_subsystem_state( subsys_loaded );
     _web_services->switch_subsystem_state( subsys_loaded );
 
