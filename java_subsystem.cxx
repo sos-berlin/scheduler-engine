@@ -95,12 +95,9 @@ void Java_subsystem::close()
 
 bool Java_subsystem::subsystem_initialize()
 {
-#ifndef SUPPRESS_JAVAPROXY
     Java_module_instance::init_java_vm( _java_vm );
     register_native_classes();
-
     _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j()));
-#endif
     _subsystem_state = subsys_initialized;
     return true;
 }
@@ -109,9 +106,7 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
-    #ifndef SUPPRESS_JAVAPROXY
-        _schedulerJ.load();
-    #endif
+    _schedulerJ.load();
     _subsystem_state = subsys_loaded;
     return true;
 }
@@ -120,11 +115,9 @@ bool Java_subsystem::subsystem_load()
 
 bool Java_subsystem::subsystem_activate()
 {
-    #ifndef SUPPRESS_JAVAPROXY
-        _schedulerJ.activate("Hallo, hier ist C++");
-        #ifdef Z_DEBUG
-            _schedulerJ.activateMonitor();
-        #endif
+    _schedulerJ.activate("Hallo, hier ist C++");
+    #ifdef Z_DEBUG
+        _schedulerJ.activateMonitor();
     #endif
 
     _subsystem_state = subsys_active;

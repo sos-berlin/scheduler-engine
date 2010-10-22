@@ -36,9 +36,7 @@ struct Event_subsystem_impl : Event_subsystem
 
 private:
     Fill_zero                  _zero_;
-#ifndef SUPPRESS_JAVAPROXY
     EventSubsystemJ            _eventSubsystemJ;
-#endif
 };
 
 //-------------------------------------------------------Event_subsystem_impl::Event_subsystem_impl
@@ -70,10 +68,9 @@ bool Event_subsystem_impl::subsystem_initialize()
 
 bool Event_subsystem_impl::subsystem_load()
 {
-#ifndef SUPPRESS_JAVAPROXY
     _eventSubsystemJ.assign_( _spooler->schedulerJ().eventSubsystem() );
     assert(_eventSubsystemJ != NULL);
-#endif
+
     _subsystem_state = subsys_loaded;
     return true;
 }
@@ -90,9 +87,7 @@ bool Event_subsystem_impl::subsystem_activate()
 
 void Event_subsystem_impl::report(const EventJ& eventJ)
 {
-#ifndef SUPPRESS_JAVAPROXY
     _eventSubsystemJ.report(eventJ);
-#endif
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report
