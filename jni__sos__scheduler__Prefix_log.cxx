@@ -80,10 +80,10 @@ static void JNICALL warn__Ljava_lang_String_2(JNIEnv* jenv, jobject, jlong cppRe
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { "debug3__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::debug3__Ljava_lang_String_2 },
-    { "error__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::error__Ljava_lang_String_2 },
-    { "info__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::info__Ljava_lang_String_2 },
-    { "warn__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::warn__Ljava_lang_String_2 }
+    { (char*)"debug3__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::debug3__Ljava_lang_String_2 },
+    { (char*)"error__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::error__Ljava_lang_String_2 },
+    { (char*)"info__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::info__Ljava_lang_String_2 },
+    { (char*)"warn__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::warn__Ljava_lang_String_2 }
 };
 
 namespace zschimmer { namespace javabridge { 

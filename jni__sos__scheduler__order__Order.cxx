@@ -66,9 +66,9 @@ static jstring JNICALL string_1id(JNIEnv* jenv, jobject, jlong cppReference)
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { "job_chain__native", "(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1chain },
-    { "set_id__native", "(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
-    { "string_id__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1id }
+    { (char*)"job_chain__native", (char*)"(J)Lcom/sos/scheduler/kernel/core/cppproxy/Job_chainC;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::job_1chain },
+    { (char*)"set_id__native", (char*)"(JLjava/lang/String;)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::set_1id__Ljava_lang_String_2 },
+    { (char*)"string_id__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::string_1id }
 };
 
 namespace zschimmer { namespace javabridge { 

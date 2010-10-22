@@ -50,8 +50,8 @@ static jstring JNICALL path(JNIEnv* jenv, jobject, jlong cppReference)
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { "name__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name },
-    { "path__native", "(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::path }
+    { (char*)"name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::name },
+    { (char*)"path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::path }
 };
 
 namespace zschimmer { namespace javabridge { 

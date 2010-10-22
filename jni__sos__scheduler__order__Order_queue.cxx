@@ -66,9 +66,9 @@ static jint JNICALL java_1order_1count(JNIEnv* jenv, jobject, jlong cppReference
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { "close__native", "(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::close },
-    { "is_distributed_order_requested__native", "(JJ)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1distributed_1order_1requested__J },
-    { "java_order_count__native", "(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1order_1count }
+    { (char*)"close__native", (char*)"(J)V", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::close },
+    { (char*)"is_distributed_order_requested__native", (char*)"(JJ)Z", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::is_1distributed_1order_1requested__J },
+    { (char*)"java_order_count__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::kernel::core::cppproxy::java_1order_1count }
 };
 
 namespace zschimmer { namespace javabridge { 
