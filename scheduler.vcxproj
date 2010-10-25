@@ -434,7 +434,6 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
     </ProjectReference>
     <ProjectReference Include="..\javaproxy\javaproxy.vcxproj">
       <Project>{a17661d7-20a6-47a8-b629-f31828d5a046}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\kram\kram.vcxproj">
       <Project>{1f4bd831-1ad6-4a63-ac49-531f918998ed}</Project>
