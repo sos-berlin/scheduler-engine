@@ -157,6 +157,7 @@ struct Order : Com_order,
     void                    set_state1                  ( const State& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { return _state; }
+	string                      string_state			() const									{ return _state.as_string(); }
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
     State                       initial_state           ()                                          { return _initial_state; }
