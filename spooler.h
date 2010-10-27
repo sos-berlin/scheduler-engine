@@ -399,7 +399,7 @@ struct Spooler : Object,
     };
     */
 
-                                Spooler                     ();
+                                Spooler                     (jobject java_main_context = NULL);
                                ~Spooler                     ();
 
     void                        close                       ();
@@ -408,6 +408,7 @@ struct Spooler : Object,
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
 
 
+    jobject                     java_main_context           () const                            { return _java_main_context; }
     Thread_id                   thread_id                   () const                            { return _thread_id; }
     void                    set_id                          ( const string& );
     const string&               id                          () const                            { return _spooler_id; }
@@ -432,7 +433,7 @@ struct Spooler : Object,
     string                      string_need_db              () const;
 
     void                        log_show_state              ( Prefix_log* log = NULL );
-    int                         launch                      ( int argc, char** argv, const string& params );                                
+    int                         launch                      ( int argc, char** argv, const string& params );
     void                        assign_stdout               ();
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
@@ -589,6 +590,7 @@ struct Spooler : Object,
 
   private:
     Fill_zero                  _zero_;
+    jobject const              _java_main_context;
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
@@ -814,7 +816,7 @@ void                            send_error_email            ( const exception&, 
 
 } //namespace scheduler
 
-int                             spooler_main                ( int argc, char** argv, const string& parameters );
+int                             spooler_main                ( int argc, char** argv, const string& parameters, jobject java_main_context = NULL );
 
 } //namespace sos
 

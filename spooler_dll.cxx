@@ -27,7 +27,7 @@ extern "C" BOOL WINAPI DllMain( HANDLE hinstance, DWORD ul_reason_being_called, 
             break;
 
         case DLL_PROCESS_DETACH: 
-            sos::application.exit();
+            //2010-10-27  Absturz in statisch aufgerufenem ~Sos_client(), weil Java-VM bereits weg ist: sos::application.exit();
             break;
 
         case DLL_THREAD_DETACH: 

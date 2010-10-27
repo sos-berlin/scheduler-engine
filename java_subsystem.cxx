@@ -97,7 +97,7 @@ bool Java_subsystem::subsystem_initialize()
 {
     Java_module_instance::init_java_vm( _java_vm );
     register_native_classes();
-    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j()));
+    _schedulerJ.assign_(SchedulerJ::new_instance(_spooler->j(), _spooler->java_main_context()));
     _subsystem_state = subsys_initialized;
     return true;
 }

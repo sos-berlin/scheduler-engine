@@ -7,12 +7,6 @@
 #ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
 #ifdef Z_WINDOWS
 
-//#ifdef _DEBUG
-//#   include "Debug/sos/spooler/Spooler_program.h"
-//#else
-//#   include "Release/sos/spooler/Spooler_program.h"
-//#endif
-
 namespace sos 
 {
     int sos_main( int argc, char** argv );
@@ -35,7 +29,6 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
 
     static_java_vm = Z_NEW( javabridge::Vm( jvm ) );
     static_java_vm._ptr->AddRef();                 // Damit bei Programmende nicht Release gerufen wird (die Java-DLL ist dann vielleicht schon entladen)
-    //javabridge::Vm::set_jvm( jvm );
 
     return JNI_VERSION_1_2;
 }
@@ -49,6 +42,41 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
 
     zschimmer_terminate();
     CoUninitialize();
+}
+
+//-------------------------------------------------------com.sos.scheduler.kernel.core.main.Main.run
+
+extern "C"
+JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_run(
+    JNIEnv* jenv, jobject, jobjectArray jargs, jstring argument_line_jstr, jobject java_main_context)
+{
+    int    result = -1;
+    char** argv = NULL;
+    int    argc = 0;
+    Env    env  = jenv;
+
+    try
+    {
+        int count = jenv->GetArrayLength( jargs );
+        argv = new char*[ count ];
+
+        for( int i = 0; i < count; i++ )
+        {
+            jobject jparam = jenv->GetObjectArrayElement( jargs, i );
+            string arg = env.string_from_jstring( (jstring)jparam );
+            argv[i] = new char[ arg.length() + 1 ];
+            strcpy( argv[i], arg.c_str() );
+            argc++;
+        }
+
+        result = sos::spooler_main(argc, argv, env.string_from_jstring(argument_line_jstr), java_main_context);
+    }
+    catch(const exception& x) { env.set_java_exception(x); }      
+
+    for( int i = 0; i < argc; i++ )  delete argv[i];
+    delete[] argv;
+
+    return result;
 }
 
 //-------------------------------------------------------------sos.spooler.Spooler_program.construct

@@ -17,6 +17,7 @@
 #include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__event__EventSubsystem.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__job__Job.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__main__MainContext.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderId.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderState.h"

@@ -651,10 +651,11 @@ bool Termination_async_operation::async_continue_( Continue_flags flags )
 /*!
  * \change 2.1.2 - JS-559: new licence type scheduler-agent
  */
-Spooler::Spooler() 
+Spooler::Spooler(jobject java_main_context) 
 : 
     Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
+    _java_main_context(java_main_context),
     _subsystem_register(this),
     _version(version_string),
     _security(this),
@@ -3293,7 +3294,7 @@ void Spooler::log_show_state( Prefix_log* log )
 
 //----------------------------------------------------------------------------------Spooler::launch
 
-int Spooler::launch( int argc, char** argv, const string& parameter_line )
+int Spooler::launch( int argc, char** argv, const string& parameter_line)
 {
     _argc = argc;
     _argv = argv;
@@ -3605,7 +3606,7 @@ void __cdecl delete_new_spooler( void* )
 #endif
 //------------------------------------------------------------------------------------- sos::spooler_main
 
-int spooler_main( int argc, char** argv, const string& parameter_line )
+int spooler_main( int argc, char** argv, const string& parameter_line, jobject java_main_context )
 {
     int ret;
 
@@ -3615,7 +3616,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     while(1)
     {
-        Spooler my_spooler;
+        Spooler my_spooler (java_main_context);
 
         try
         {
@@ -3675,7 +3676,7 @@ int object_server( int argc, char** argv )
 
 //-------------------------------------------------------------------------------------spooler_main
 
-int spooler_main( int argc, char** argv, const string& parameter_line )
+int spooler_main( int argc, char** argv, const string& parameter_line, jobject java_main_context )
 {
     Ole_initialize  ole;
 
@@ -3966,7 +3967,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     }
                     else
                     {
-                        ret = scheduler::spooler_main( argc, argv, parameter_line );
+                        ret = scheduler::spooler_main( argc, argv, parameter_line, java_main_context );
                     }
                 }
 
@@ -3982,7 +3983,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                         scheduler::be_daemon();
                     }
 
-                    ret = scheduler::spooler_main( argc, argv, command_line );
+                    ret = scheduler::spooler_main( argc, argv, command_line, java_main_context );
                 }
 
 #           endif
@@ -4023,7 +4024,7 @@ int sos_main( int argc, char** argv )
     _argc = argc;
     _argv = argv;
 
-    int ret = sos::spooler_main( argc, argv, "" );
+    int ret = sos::spooler_main( argc, argv, "", (jobject)NULL );
 
 
 
