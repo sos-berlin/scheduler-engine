@@ -115,7 +115,7 @@ bool Java_subsystem::subsystem_load()
 
 bool Java_subsystem::subsystem_activate()
 {
-    _schedulerJ.activate("Hallo, hier ist C++");
+    _schedulerJ.activate("_schedulerJ.activate()");
     #ifdef Z_DEBUG
         _schedulerJ.activateMonitor();
     #endif
