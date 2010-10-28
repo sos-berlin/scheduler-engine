@@ -3215,7 +3215,7 @@ bool Job_chain::is_max_orders_reached() const
     return count >= _max_orders;
 }
 
-//-----------------------------------------------------------------Job_chain::is_max_orders_reached
+//-----------------------------------------------------------------Job_chain::number_of_started_orders
 
 int Job_chain::number_of_started_orders() const
 {

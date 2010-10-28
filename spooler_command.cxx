@@ -1023,7 +1023,11 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
-    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+//    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+    if( !_spooler->_remote_commands_allowed_for_licence ) {
+        if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
+        return NULL;
+    }
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
@@ -1053,7 +1057,11 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_remote_task_close( const xml::Element_ptr& close_element )
 {
-    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+//    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
+    if( !_spooler->_remote_commands_allowed_for_licence ) {
+        if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
+        return NULL;
+    }
     if( _security_level < Security::seclev_all )  z::throw_xc( "SCHEDULER-121" );
     _spooler->assert_is_activated( Z_FUNCTION );
 
