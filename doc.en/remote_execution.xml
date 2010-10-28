@@ -16,10 +16,35 @@
     <scheduler_keyword keyword="remote_scheduler"/>
 
 		<p>
-			Jobs may be processed by a Job Scheduler running on a remote computer. 
-	<!--API-Jobs können auf einem entfernten Job Scheduler ausgeführt werden. -->
+Jobs may be processed by a Job Scheduler running on a remote computer if it is configured as an Agent.
+Only Agents are able to execute remote commands, received from Main Scheduler. The licence to run a Job Scheduler Agent is liable to pay costs.
+<!--
+      Jobs können auf einem entfernten Job Scheduler ausgeführt werden, wenn dieser als Agent konfiguriert ist. Nur Agenten erlauben es, remote Kommandos
+      von aufrufenden Schedulern entgegen zu nehmen. Die Lizenz für den Betrieb eines Job Scheduler Agenten ist kostenpflichtig.
+-->
 		</p>
-		
+
+		<p>
+The characteristics of an Job Scheduler Agent are:
+		<ul>
+			<li>Agents must not have a live folder.</li>
+			<li>Potential existing local jobs are not executed. This is also valid for Scheduler default jobs such as scheduler_event_service.</li>
+			<li>An appropriate message will be logged if the execution of a local job should be supressed.</li>
+			<li>Internal jobs (scheduler_file_order_sink and scheduler_web_service) are not executed.</li>
+			<li>Only Agents can execute remote commands received from a Main Scheduler. Trying to execute a remote command at a Scheduler that is not configured as Agent an error message will be logged.</li>
+		</ul>
+<!--
+      Agenten zeichnen sich durch folgenden Merkmale aus:
+      <ul>
+          <li>Agenten müssen keinen live-folder haben.</li>
+          <li>Evtl. vorhandene lokale Jobs werden nicht ausgeführt. Das gilt auch für scheduler Standardjobs wie <i>scheduler_event_service.</i></li>
+          <li>Wird die Ausführung lokaler Jobs unterdrückt, wird dies mit einer entsprechenden Meldung protokolliert.</li>
+          <li>Interne Jobs (<i>scheduler_file_order_sink</i> und <i>scheduler_web_service</i>) werden nicht ausgeführt.</li>
+          <li>Nur Agenten sind in der Lage, remote Kommandos aufrufender Job Scheduler auszuführen. Wird versucht ein remote Kommando auf einem Scheduler auszuführen, der kein Agent ist, wird dies mit einer Fehlermeldung protokolliert.</li>
+      </ul>
+-->		
+		</p>
+
 		<p>
 			
 			Remotely processed jobs behave, with respect to the Job Scheduler which is processing them, 
@@ -114,6 +139,20 @@
 &lt;/security&gt;
 					</pre>
 				</p>
+			</li>
+			<li>
+	      Declaration of a special licence key in file <scheduler_a href="sos_ini.xml">sos.ini</scheduler_a>
+	      <p>
+	      If a Job Scheduler should be run as Agent, a special licence key has to defined in section <scheduler_a href="sos_ini_licence.xml">[licence]</scheduler_a>.
+	      </p>
+          <br/><br/>
+		<!--
+	      Deklaration eines speziellen Lizenzschlüssels in der Datei <scheduler_a href="sos_ini.xml">sos.ini</scheduler_a>
+	      <p>
+	      Für den Job Scheduler, der als Agent betrieben werden soll, muss ein spezieller Lizenzschlüssel im Abschnitt <scheduler_a href="sos_ini_licence.xml">[licence]</scheduler_a> deklariert worden sein.
+	      </p>
+          <br/><br/>
+		-->
 			</li>
 			<li>
 				Both Job Schedulers must be started.
