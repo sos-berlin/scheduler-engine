@@ -20,16 +20,16 @@ const int wait_for_port_available = 2*60;   // Soviele Sekunden warten, bis TCP-
 
 #ifdef Z_WINDOWS
 #   include <io.h>
-	const int Z_EWOULDBLOCK   = WSAEWOULDBLOCK;
-	const int Z_EADDRINUSE    = WSAEADDRINUSE;
+    const int Z_EWOULDBLOCK   = WSAEWOULDBLOCK;
+    const int Z_EADDRINUSE    = WSAEADDRINUSE;
 #   define ioctl    ioctlsocket
 #   define isatty   _isatty
 #else
 #   include <unistd.h>
 #   include <sys/types.h>
 #   include <signal.h>
-	const int Z_EWOULDBLOCK   = EWOULDBLOCK;
-	const int Z_EADDRINUSE    = EADDRINUSE;
+    const int Z_EWOULDBLOCK   = EWOULDBLOCK;
+    const int Z_EADDRINUSE    = EADDRINUSE;
 #endif
 
 #ifndef INADDR_NONE
@@ -94,7 +94,7 @@ Xml_operation_connection::Xml_operation_connection( Communication::Connection* c
 //----------------------------------------------Xml_operation_connection::~Xml_operation_connection
 
 /*! \change JS-481 TCP-Connection zu dem Workload-Scheduler schliessen */
-Xml_operation_connection::~Xml_operation_connection() 				
+Xml_operation_connection::~Xml_operation_connection()                 
 { 
     try {
         if( _remote_scheduler )  
@@ -403,8 +403,8 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
 
         if( _security_level <= Security::seclev_signal 
-			&& 1 == 1  // JS-486 Keine Prüfung mehr
-			)
+            && 1 == 1  // JS-486 Keine Prüfung mehr
+            )
         {
             _log.warn( message_string( "SCHEDULER-287" ) );  // JS-486 Bei Zugriff via telnet und über Browser!
             do_close();

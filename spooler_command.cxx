@@ -1664,7 +1664,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
     // if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
-	if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );
+    if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );
     else
     {
         z::throw_xc( "SCHEDULER-105", element.nodeName() );
@@ -1836,7 +1836,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
                         }
                     }
 
-					// Aufruf ohne Parameter, d.h. show_log?
+                    // Aufruf ohne Parameter, d.h. show_log?
                     else
                     {
                         log = _spooler->_log;  // Hauptprotokoll

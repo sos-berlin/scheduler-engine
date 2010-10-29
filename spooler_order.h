@@ -157,7 +157,7 @@ struct Order : Com_order,
     void                    set_state1                  ( const State& );
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { return _state; }
-	string                      string_state			() const									{ return _state.as_string(); }
+    string                      string_state            () const                                    { return _state.as_string(); }
     bool                        state_is_equal          ( const State& state )                      { return _state == state; }
     static void                 check_state             ( const State& );
     State                       initial_state           ()                                          { return _initial_state; }
@@ -600,7 +600,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
 
                                 Order_queue_node            ( Job_chain*, const Order::State&, Type );
 
-    				javabridge::has_proxy<Order_queue_node>::java_sister;
+                                javabridge::has_proxy<Order_queue_node>::java_sister;
 
     void                        close                       ();
   //void                        replace                     ( Node* old_node );

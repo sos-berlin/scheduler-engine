@@ -27,7 +27,7 @@ namespace time
 
 //-------------------------------------------------------------------------------------------------
 
-extern const Embedded_files			embedded_files;             // spooler_embedded_files.cxx
+extern const Embedded_files            embedded_files;             // spooler_embedded_files.cxx
 
 //-----------------------------------------------------------------------------------------FOR_EACH
 
