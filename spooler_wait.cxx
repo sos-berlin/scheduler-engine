@@ -20,6 +20,7 @@
 
 #include "../kram/sleep.h"
 #include "../kram/log.h"
+#include "Java_thread_unlocker.h"
 
 namespace sos {
 namespace scheduler {
@@ -664,19 +665,31 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
 DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout)
 {
-   DWORD  ret;
+    DWORD  ret;
 
     if (nCount < MAXIMUM_WAIT_OBJECTS)
-   {
-        ret = MsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );    // wie bisher
-      if (ret == WAIT_TIMEOUT) ret = SOS_WAIT_TIMEOUT;
-   } else {
+    {
+        ret = myMsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );    // wie bisher
+        if (ret == WAIT_TIMEOUT) ret = SOS_WAIT_TIMEOUT;
+    } else {
 #ifdef Z_DEBUG
-    Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
+        Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
 #endif
         ret = sosMsgWaitForMultipleObjects64( nCount, pHandles, dTimeout );   // polling ...
-   }
-   return ret;
+    }
+
+    return ret;
+}
+
+#endif
+//--------------------------------------------------------Wait_handles::myMsgWaitForMultipleObjects
+#ifdef Z_WINDOWS
+
+DWORD Wait_handles::myMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, BOOL waitAll, DWORD timeout, DWORD wakeMask) 
+{
+    Java_thread_unlocker unlocker ( _spooler );
+    DWORD result = MsgWaitForMultipleObjects(nCount, pHandles, waitAll, timeout, wakeMask);
+    return result;
 }
 
 #endif
@@ -700,20 +713,18 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
 
 DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout )
 {
-    int     result              = SOS_WAIT_TIMEOUT;
-    int     max_handles         = MAXIMUM_WAIT_OBJECTS - 1;
-    Time    now                 = Time::now();
+    int     result            = SOS_WAIT_TIMEOUT;
+    int     max_handles       = MAXIMUM_WAIT_OBJECTS - 1;
+    Time    now               = Time::now();
 
-    int     max_sleep_time_ms   = INT_MAX-1;                                                                // max. Wartezeit in Millisekunden
-    Time    until               = now + (dTimeout/1000.0);
-    bool    isWaiting           = true;
-    int     timeoutCounter      = 0;
+    int     max_sleep_time_ms = INT_MAX-1;    // max. Wartezeit in Millisekunden
+    Time    until             = now + (dTimeout/1000.0);
+    bool    isWaiting         = true;
+    int     timeoutCounter    = 0;
 
-    while (isWaiting)
-     {
-    
+    while (isWaiting) {    
         timeoutCounter++;
-        int stepTimeout = calculateStepTimeout(timeoutCounter);                                                                        // 1 Millisekunde
+        int stepTimeout = calculateStepTimeout(timeoutCounter);  // 1 Millisekunde
 
         isWaiting = false;
         int blockCount = ( nCount + max_handles - 1 ) / max_handles;
@@ -722,20 +733,19 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
             Z_LOG2( "scheduler.wait", "performing MsgWaitForMultipleObjects for " << blockCount << " blocks until " << until << " is reached (steptimeout=" << stepTimeout << ").\n" );
 #       endif
 
-        for (int i=0; i < blockCount; i++ ) {                                                              // MAXIMUM_WAIT_OBJECTS handles pro block
-
-            int c = min( max_handles, remainingCount);                                                       // c kann beim letzten Block unter MAXIMUM_WAIT_OBJECTS fallen
+        for (int i=0; i < blockCount; i++ ) {  // MAXIMUM_WAIT_OBJECTS handles pro block
+            int c = min( max_handles, remainingCount);  // c kann beim letzten Block unter MAXIMUM_WAIT_OBJECTS fallen
             assert(c > 0);
             remainingCount -= c;
             int remainingMillis = (int)((until - now).as_double() * 1000);
-            int timeout = (i == 0) ? min(stepTimeout, remainingMillis ) : 0;                                                   // wartet 1s für den ersten Block, sonst nur Abfrage der Handles
-            assert(timeout >= 0);           //ist diese Bedingung NICHT erfüllt, bricht die Ausführung ab (nur im Windows debug-Modus)
+            int timeout = (i == 0) ? min(stepTimeout, remainingMillis ) : 0;  // Wartet 1s für den ersten Block, sonst nur Abfrage der Handles
+            assert(timeout >= 0);   // Ist diese Bedingung NICHT erfüllt, bricht die Ausführung ab (nur im Windows debug-Modus)
 
 #           ifdef Z_DEBUG
                 Z_LOG2( "scheduler.wait", "block " << (i+1) << ": " << c << " items, " << timeout << "ms, remaining millis=" << remainingMillis << ".\n" );
 #           endif
 
-            int ret = MsgWaitForMultipleObjects( c, pHandles + (i * max_handles), FALSE, timeout, QS_ALLINPUT );
+            int ret = myMsgWaitForMultipleObjects( c, pHandles + (i * max_handles), FALSE, timeout, QS_ALLINPUT );
             if( ret != WAIT_TIMEOUT ) {
                 if( ret >= WAIT_OBJECT_0 && ret < WAIT_OBJECT_0 + c )
                     result = i * max_handles + ret;
@@ -743,7 +753,6 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
                     result = ret;
                 break;
             }
-
         }
 
         if( result == SOS_WAIT_TIMEOUT ) {
@@ -751,14 +760,12 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *
             if( now < until )
                 isWaiting = true;
         }
-
     }
 
-#       ifdef Z_DEBUG
-            Z_LOG2( "scheduler.wait", "result=" << result << "\n" );
-#       endif
+#   ifdef Z_DEBUG
+        Z_LOG2( "scheduler.wait", "result=" << result << "\n" );
+#   endif
     return result;
-
 }
 
 #endif

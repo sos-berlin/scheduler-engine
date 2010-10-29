@@ -318,6 +318,7 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />
     <ClInclude Include="cluster.h" />
     <ClInclude Include="database.h" />

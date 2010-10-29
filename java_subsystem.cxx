@@ -84,7 +84,11 @@ Java_subsystem::~Java_subsystem()
     
 void Java_subsystem::close()
 {
-    if (_schedulerJ)  _schedulerJ.close();
+    if (_schedulerJ) {
+        _schedulerJ.close();
+        _schedulerJ.assign_(NULL);
+    }
+
     if( _java_vm )  _java_vm->set_log( NULL );
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wir Java stehen und schließen es erst am Schluss

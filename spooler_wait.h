@@ -85,8 +85,9 @@ struct Wait_handles : Non_cloneable
  *
  * siehe auch: [[http://www.sos-berlin.com/jira/browse/JS-471|JS-471]]
  */
-    DWORD                        sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout);
+    DWORD                       sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout);
     DWORD                       sosMsgWaitForMultipleObjects64(unsigned int nCount, HANDLE *pHandles, DWORD dTimeout );
+    DWORD                       myMsgWaitForMultipleObjects (unsigned int nCount, HANDLE *pHandles, BOOL, DWORD dTimeout, DWORD );
     int                         calculateStepTimeout(int timeoutCounter);
 
     bool                        wait_until_2                ( const Time& t, const Object& o )  { return wait_until_2( t, &o, t, &o); }

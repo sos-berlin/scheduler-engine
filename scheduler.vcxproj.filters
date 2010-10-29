@@ -401,6 +401,9 @@
     <ClInclude Include="xml_client_connection.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
+    <ClInclude Include="Java_thread_unlocker.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="spooler.odl">

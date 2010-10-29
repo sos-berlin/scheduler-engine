@@ -44,7 +44,7 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
     CoUninitialize();
 }
 
-//-------------------------------------------------------com.sos.scheduler.kernel.core.main.Main.run
+//----------------------------------------------com.sos.scheduler.kernel.core.main.CppScheduler.run
 
 extern "C"
 JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_run(
@@ -75,6 +75,9 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_run(
 
     for( int i = 0; i < argc; i++ )  delete argv[i];
     delete[] argv;
+
+    sos::sos_static_ptr()->close();
+    sos::log_stop();
 
     return result;
 }
