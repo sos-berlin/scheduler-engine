@@ -71,7 +71,7 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_run(
 
         result = sos::spooler_main(argc, argv, env.string_from_jstring(argument_line_jstr), java_main_context);
     }
-    catch(const exception& x) { env.set_java_exception(x); }      
+    catch(exception& x) { env.set_java_exception(x); }      
 
     for( int i = 0; i < argc; i++ )  delete argv[i];
     delete[] argv;

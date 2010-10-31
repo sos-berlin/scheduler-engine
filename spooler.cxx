@@ -3627,14 +3627,17 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             if( my_spooler._shutdown_cmd == Spooler::sc_reload 
              || my_spooler._shutdown_cmd == Spooler::sc_load_config )  continue;        // Dasselbe in spooler_service.cxx!
         }
-        catch( const exception& x )
+        catch(exception& x)
         {
             //my_spooler._log ist vielleicht noch nicht geöffnet oder schon geschlossen
             my_spooler._log->error( x.what() );
             my_spooler._log->error( message_string( "SCHEDULER-331" ) );
+            string line = S() << "Error " << x.what();
+            if (java_main_context)  cerr << line << "\n" << flush;
+            else SHOW_ERR( line );     // Fehlermeldung vor ~Spooler ausgeben
 
-            SHOW_ERR( "Error " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
+            if (java_main_context)  throw;
             ret = 1;
         }
 
