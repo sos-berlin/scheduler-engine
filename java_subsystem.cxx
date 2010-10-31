@@ -85,7 +85,7 @@ Java_subsystem::~Java_subsystem()
 void Java_subsystem::close()
 {
     if (_schedulerJ) {
-        _schedulerJ.close();
+        _schedulerJ.onClose();
         _schedulerJ.assign_(NULL);
     }
 
@@ -110,7 +110,7 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
-    _schedulerJ.load();
+    _schedulerJ.onLoad();
     _subsystem_state = subsys_loaded;
     return true;
 }
@@ -119,7 +119,7 @@ bool Java_subsystem::subsystem_load()
 
 bool Java_subsystem::subsystem_activate()
 {
-    _schedulerJ.activate("_schedulerJ.activate()");
+    _schedulerJ.onActivate("_schedulerJ.activate()");
     #ifdef Z_DEBUG
         _schedulerJ.activateMonitor();
     #endif
