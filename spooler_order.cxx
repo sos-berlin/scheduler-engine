@@ -3184,8 +3184,8 @@ void Job_chain::set_stopped( bool is_stopped )
 
 void Job_chain::check_max_orders() const 
 {
-    int count = number_of_touched_orders();
-    if (count > _max_orders) {
+    if (is_max_orders_reached()) {
+        int count = number_of_touched_orders();
         _log->warn(message_string("SCHEDULER-719", count, _max_orders));
         Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", count, _max_orders));
     }
