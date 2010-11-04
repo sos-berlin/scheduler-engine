@@ -3997,6 +3997,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         Z_LOG2( "scheduler", x.what() << "\n" );
         if( is_service )  scheduler::send_error_email( x, argc, argv, parameter_line );
         cerr << x << "\n";
+        if (java_main_context)  throw;
         ret = 1;
     }
     catch( const _com_error& x )
@@ -4005,11 +4006,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         Z_LOG2( "scheduler", what << "\n" );
         if( is_service )  scheduler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
         cerr << what << "\n";
+        if (java_main_context)  throw;
         ret = 1;
     }
 
 
-    if( !is_object_server )  Z_LOG2( "scheduler", "Programm wird beendet\n" );
+    if( !is_object_server )  Z_LOG2( "scheduler", "Executable will be terminated.\n" );
 
     return ret;
 }
