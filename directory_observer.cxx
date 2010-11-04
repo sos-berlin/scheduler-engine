@@ -636,7 +636,7 @@ bool Directory_observer::activate()
 
 bool Directory_observer::async_continue_( Continue_flags )
 {
-    Z_LOGI2( "scheduler", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _directory_tree->directory_path() << "\n" );
+    Z_LOGI2( "scheduler", Z_FUNCTION << " check configuration directory " << _directory_tree->directory_path() << "\n" );
 
     bool something_done;
 

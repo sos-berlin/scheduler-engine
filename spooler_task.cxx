@@ -2063,12 +2063,12 @@ bool Task::do_something()
 
             if( _next_time <= now )
             {
-                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
+                Z_LOG2( "scheduler", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time=" << _next_time << ", delayed\n" );
                 _next_time = Time::now() + 0.1;
             }
             else
             {
-                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
+                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin << "\n" );
             }
         }
     }  // if( _operation &&  !_operation->async_finished() )

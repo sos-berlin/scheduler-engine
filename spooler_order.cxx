@@ -17,7 +17,6 @@ using namespace job_chain;
 const int    check_database_orders_period               = 15;
 const int    check_database_orders_period_minimum       = 1;
 const int    database_orders_read_ahead_count           = 1;
-const int    unlimited_max_orders                       = 99999;
 
 //--------------------------------------------------------------------------------------------const
 
@@ -1745,7 +1744,9 @@ Job_chain::Job_chain( Scheduler* scheduler )
     javabridge::has_proxy<Job_chain>(scheduler),
     _zero_(this+1),
     _orders_are_recoverable(true),
-    _visible(visible_yes)
+    _visible(visible_yes),
+    _max_orders(INT_MAX)
+
 {
 }
 
@@ -1914,11 +1915,8 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
     /**
      * \change 2.1.2 - JS-538: neues Attribut max_orders
      */
-    if( element.hasAttribute( "max_orders" ) )
-        _max_orders = element.int_getAttribute("max_orders", unlimited_max_orders);
-    else
-        _max_orders = unlimited_max_orders;
-    Z_LOG2( "scheduler", "at most " << _max_orders << " orders can run simultaneously." << "\n" );
+    _max_orders = element.int_getAttribute("max_orders", _max_orders);
+    if (_max_orders < INT_MAX) Z_LOG2( "scheduler", "at most " << _max_orders << " orders can run simultaneously." << "\n" );
 
 
     if( element.hasAttribute( "visible" ) )
@@ -3201,6 +3199,10 @@ bool Job_chain::is_ready_for_order_processing() const
 
 bool Job_chain::is_ready_for_new_order_processing() const
 {
+    // Kann man das so hinkriegen, dass die Meldung auch in der operations_gui erscheint?
+    if (_max_orders == 0) _log->info( message_string("SCHEDULER-720", name() ) ); 
+    // if (_max_orders == 0) z::throw_xc("SCHEDULER-720", name() ); 
+
     return
        is_ready_for_order_processing() &&
        !is_max_orders_reached();
@@ -3211,7 +3213,9 @@ bool Job_chain::is_ready_for_new_order_processing() const
 bool Job_chain::is_max_orders_reached() const
 {
     int count = number_of_started_orders();
-    Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are currently running, " << _max_orders << " allowed at most." << "\n" );
+    // if( count > _max_orders ) z::throw_xc("SCHEDULER-719", count, _max_orders);
+    if( count > _max_orders ) _log->warn( message_string("SCHEDULER-719", count, _max_orders) );
+    // Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are currently running, " << _max_orders << " allowed at most." << "\n" );
     return count >= _max_orders;
 }
 

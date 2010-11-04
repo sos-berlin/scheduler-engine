@@ -504,6 +504,8 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-716", "jobs are not allowed for the current licence-key(s)" },
     { "SCHEDULER-717", "Remote commands are not allowed for the current licence-key(s)" },
     { "SCHEDULER-718", "Using '$1' configuration directory '$2'" },
+    { "SCHEDULER-719", "                     $1 orders are currently running, $2 allowed at most                 " },
+    { "SCHEDULER-720", "job_chain $1 is deactivated (set max_orders to activate it)" },
     {}
 };
 } //namespace sos

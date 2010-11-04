@@ -61,6 +61,10 @@
     <register_entry register_file='xml/allowed_host.xml#use_element__add_jobs' register_title='&lt;allowed_host&gt; (Konfiguration)'  register_keyword='add_jobs'/>
     <register_entry register_file='xml/job.xml#use_element__add_jobs' register_title='&lt;job&gt; (Konfiguration)'  register_keyword='add_jobs'/>
 </register_keyword>
+<register_keyword keyword='add_lock'>
+    <register_keyword_display><code>add_lock()</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__add_lock' register_title='Locks.add_lock()' register_keyword='add_lock()' type='definition'/>
+</register_keyword>
 <register_keyword keyword='add_or_replace_order'>
     <register_keyword_display><code>add_or_replace_order()</code></register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__add_or_replace_order' register_title='Job_chain.add_or_replace_order()' register_keyword='add_or_replace_order()' type='definition'/>
@@ -85,6 +89,10 @@
 <register_keyword keyword='add_pid'>
     <register_keyword_display><code>add_pid()</code></register_keyword_display>
     <register_entry register_file='api/Task.xml#method__add_pid' register_title='Task.add_pid()' register_keyword='add_pid()' type='definition'/>
+</register_keyword>
+<register_keyword keyword='add_process_class'>
+    <register_keyword_display><code>add_process_class()</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__add_process_class' register_title='Process_classes.add_process_class()' register_keyword='add_process_class()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='after'>
     <register_keyword_display><code>after=</code></register_keyword_display>
@@ -367,7 +375,7 @@
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
     <register_entry register_file='api/Job.xml#use_element__config' register_title='Job'  register_keyword='config'/>
     <register_entry register_file='api/Spooler.xml#use_element__config' register_title='Spooler'  register_keyword='config'/>
-    <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='XXX'  register_keyword='config'/>
+    <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
     <register_entry register_file='central_configuration.xml#use_element__config' register_title='Zentrale Konfiguration durch einen Supervisor Job Scheduler'  register_keyword='config'/>
     <register_entry register_file='command_line.xml#use_element__config' register_title='Kommandozeilenoptionen'  register_keyword='config'/>
     <register_entry register_file='directory_watch.xml#use_element__config' register_title='Verzeichnisüberwachung'  register_keyword='config'/>
@@ -488,9 +496,17 @@
     <register_keyword_display><code>create_job_chain()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
 </register_keyword>
+<register_keyword keyword='create_lock'>
+    <register_keyword_display><code>create_lock()</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__create_lock' register_title='Locks.create_lock()' register_keyword='create_lock()' type='definition'/>
+</register_keyword>
 <register_keyword keyword='create_order'>
     <register_keyword_display><code>create_order()</code></register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='create_order()' type='definition'/>
+</register_keyword>
+<register_keyword keyword='create_process_class'>
+    <register_keyword_display><code>create_process_class()</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__create_process_class' register_title='Process_classes.create_process_class()' register_keyword='create_process_class()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_subprocess'>
     <register_keyword_display><code>create_subprocess()</code></register_keyword_display>
@@ -1231,6 +1247,7 @@
 <register_keyword keyword='hostname (property)'>
     <register_keyword_display><code>hostname</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__hostname' register_title='Spooler.hostname' register_keyword='hostname' type='definition'/>
+    <register_entry register_file='api/Supervisor_client.xml#method__hostname' register_title='Supervisor_client.hostname' register_keyword='hostname' type='definition'/>
 </register_keyword>
 <register_keyword keyword='HTML'>
     <register_entry register_file='http.xml' register_title='HTTP Server und Web Services'  register_keyword='HTML'/>
@@ -1865,7 +1882,7 @@
 <register_keyword keyword='lock'>
     <register_keyword_display><code>&lt;lock&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock' register_title='Änderungsprotokoll'  register_keyword='lock'/>
-    <register_entry register_file='api/Lock.xml#use_element__lock' register_title='XXX'  register_keyword='lock'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock' register_title='Lock'  register_keyword='lock'/>
     <register_entry register_file='dynamic_configuration.xml#use_element__lock' register_title='Konfiguration aus Hot Folders'  register_keyword='lock'/>
     <register_entry register_file='xml.xml#use_element__lock' register_title='Alle XML-Elemente'  register_keyword='lock'/>
     <register_entry register_file='xml/answer/lock.holder.xml#use_element__lock' register_title='&lt;holder&gt; (Antwort)'  register_keyword='lock'/>
@@ -1883,6 +1900,18 @@
     <register_entry register_file='xml/answer/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Antwort)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.remove.xml#attribute_lock' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock' type='definition'/>
     <register_entry register_file='xml/lock.use.xml#attribute_lock' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock' type='definition'/>
+</register_keyword>
+<register_keyword keyword='Lock (class)'>
+    <register_keyword_display><code>Lock</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Lock.xml' register_keyword='Lock' type='definition'/>
+    <register_entry register_file='api/Locks.xml#method__add_lock' register_title='Locks.add_lock()' register_keyword='Lock'/>
+    <register_entry register_file='api/Locks.xml#method__create_lock' register_title='Locks.create_lock()' register_keyword='Lock'/>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='Lock'/>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='Lock'/>
+</register_keyword>
+<register_keyword keyword='lock (property)'>
+    <register_keyword_display><code>lock</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='lock' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock.holder'>
     <register_keyword_display><code>&lt;lock.holder&gt;</code></register_keyword_display>
@@ -1906,7 +1935,7 @@
 <register_keyword keyword='lock.remove'>
     <register_keyword_display><code>&lt;lock.remove&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.remove' register_title='Änderungsprotokoll'  register_keyword='lock.remove'/>
-    <register_entry register_file='api/Lock.xml#use_element__lock.remove' register_title='XXX'  register_keyword='lock.remove'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock.remove' register_title='Lock'  register_keyword='lock.remove'/>
     <register_entry register_file='xml.xml#use_element__lock.remove' register_title='Alle XML-Elemente'  register_keyword='lock.remove'/>
     <register_entry register_file='xml/lock.remove.xml#' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.remove' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.remove' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.remove'/>
@@ -1919,7 +1948,7 @@
 <register_keyword keyword='lock.use'>
     <register_keyword_display><code>&lt;lock.use&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__lock.use' register_title='Änderungsprotokoll'  register_keyword='lock.use'/>
-    <register_entry register_file='api/Lock.xml#use_element__lock.use' register_title='XXX'  register_keyword='lock.use'/>
+    <register_entry register_file='api/Lock.xml#use_element__lock.use' register_title='Lock'  register_keyword='lock.use'/>
     <register_entry register_file='api/Task.xml#use_element__lock.use' register_title='Task'  register_keyword='lock.use'/>
     <register_entry register_file='xml.xml#use_element__lock.use' register_title='Alle XML-Elemente'  register_keyword='lock.use'/>
     <register_entry register_file='xml/answer/lock.requestor.xml#use_element__lock.use' register_title='&lt;lock.requestor&gt; (Antwort)'  register_keyword='lock.use'/>
@@ -1929,6 +1958,15 @@
     <register_entry register_file='xml/lock.remove.xml#use_element__lock.use' register_title='&lt;lock.remove&gt; (Kommando)'  register_keyword='lock.use'/>
     <register_entry register_file='xml/lock.use.xml#' register_title='&lt;lock.use&gt; (Konfiguration)'  register_keyword='lock.use' type='definition'/>
     <register_entry register_file='xml/lock.xml#use_element__lock.use' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='lock.use'/>
+</register_keyword>
+<register_keyword keyword='lock_name'>
+    <register_keyword_display><code>lock_name</code></register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock' register_title='Locks.lock' register_keyword='lock_name'/>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='lock_name'/>
+</register_keyword>
+<register_keyword keyword='lock_or_null (property)'>
+    <register_keyword_display><code>lock_or_null</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Locks.xml#method__lock_or_null' register_title='Locks.lock_or_null' register_keyword='lock_or_null' type='definition'/>
 </register_keyword>
 <register_keyword keyword='lock_path'>
     <register_keyword_display><code>lock_path</code></register_keyword_display>
@@ -1945,6 +1983,7 @@
 </register_keyword>
 <register_keyword keyword='Locks (class)'>
     <register_keyword_display><code>Locks</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Locks.xml' register_keyword='Locks' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__locks' register_title='Spooler.locks' register_keyword='Locks'/>
 </register_keyword>
 <register_keyword keyword='locks (property)'>
@@ -2129,6 +2168,14 @@
 <register_keyword keyword='Mail-Versand'>
     <register_entry register_file='protokolle.xml' register_title='Protokolle'  register_keyword='Mail-Versand'/>
 </register_keyword>
+<register_keyword keyword='mail.smtp.password'>
+    <register_keyword_display><code>mail.smtp.password=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#entry_mail.smtp.password' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='mail.smtp.password' type='definition'/>
+</register_keyword>
+<register_keyword keyword='mail.smtp.user'>
+    <register_keyword_display><code>mail.smtp.user=</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#entry_mail.smtp.user' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='mail.smtp.user' type='definition'/>
+</register_keyword>
 <register_keyword keyword='mail_bcc'>
     <register_keyword_display><code>mail_bcc=</code></register_keyword_display>
     <register_entry register_file='xml/answer/log.xml#attribute_mail_bcc' register_title='&lt;log&gt; (Antwort)'  register_keyword='mail_bcc' type='definition'/>
@@ -2277,6 +2324,10 @@
     <register_entry register_file='xml/answer/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Antwort)'  register_keyword='max_non_exclusive' type='definition'/>
     <register_entry register_file='xml/lock.xml#attribute_max_non_exclusive' register_title='&lt;lock&gt; (Konfiguration)'  register_keyword='max_non_exclusive' type='definition'/>
 </register_keyword>
+<register_keyword keyword='max_non_exclusive (property)'>
+    <register_keyword_display><code>max_non_exclusive</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Lock.xml#method__max_non_exclusive' register_title='Lock.max_non_exclusive' register_keyword='max_non_exclusive' type='definition'/>
+</register_keyword>
 <register_keyword keyword='max_order_history'>
     <register_keyword_display><code>max_order_history=</code></register_keyword_display>
     <register_entry register_file='xml/show_job_chain.xml#attribute_max_order_history' register_title='&lt;show_job_chain&gt; (Kommando)'  register_keyword='max_order_history' type='definition'/>
@@ -2300,6 +2351,10 @@
     <register_keyword_display><code>max_processes=</code></register_keyword_display>
     <register_entry register_file='xml/answer/process_class.xml#attribute_max_processes' register_title='&lt;process_class&gt; (Antwort)'  register_keyword='max_processes' type='definition'/>
     <register_entry register_file='xml/process_class.xml#attribute_max_processes' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='max_processes' type='definition'/>
+</register_keyword>
+<register_keyword keyword='max_processes (property)'>
+    <register_keyword_display><code>max_processes</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_class.xml#method__max_processes' register_title='Process_class.max_processes' register_keyword='max_processes' type='definition'/>
 </register_keyword>
 <register_keyword keyword='max_task_history'>
     <register_keyword_display><code>max_task_history=</code></register_keyword_display>
@@ -2439,6 +2494,8 @@
     <register_keyword_display><code>name</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__name' register_title='Job.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__name' register_title='Job_chain.name' register_keyword='name' type='definition'/>
+    <register_entry register_file='api/Lock.xml#method__name' register_title='Lock.name' register_keyword='name' type='definition'/>
+    <register_entry register_file='api/Process_class.xml#method__name' register_title='Process_class.name' register_keyword='name' type='definition'/>
     <register_entry register_file='api/Web_service.xml#method__name' register_title='Web_service.name' register_keyword='name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='names (property)'>
@@ -2843,7 +2900,7 @@
     <register_keyword_display><code>&lt;process_class&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__process_class' register_title='Änderungsprotokoll'  register_keyword='process_class'/>
     <register_entry register_file='api/Log.xml#use_element__process_class' register_title='Log'  register_keyword='process_class'/>
-    <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='XXX'  register_keyword='process_class'/>
+    <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='Process_class'  register_keyword='process_class'/>
     <register_entry register_file='api/Spooler.xml#use_element__process_class' register_title='Spooler'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
@@ -2867,18 +2924,32 @@
 <register_keyword keyword='Process_class (class)'>
     <register_keyword_display><code>Process_class</code> (class)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__process_class' register_title='Job.process_class' register_keyword='Process_class'/>
+    <register_entry register_file='api/Process_class.xml' register_keyword='Process_class' type='definition'/>
+    <register_entry register_file='api/Process_classes.xml#method__create_process_class' register_title='Process_classes.create_process_class()' register_keyword='Process_class'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='Process_class'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='Process_class'/>
 </register_keyword>
 <register_keyword keyword='process_class (property)'>
     <register_keyword_display><code>process_class</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__process_class' register_title='Job.process_class' register_keyword='process_class' type='definition'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='process_class' type='definition'/>
 </register_keyword>
 <register_keyword keyword='process_class.remove'>
     <register_keyword_display><code>&lt;process_class.remove&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__process_class.remove' register_title='Änderungsprotokoll'  register_keyword='process_class.remove'/>
-    <register_entry register_file='api/Process_class.xml#use_element__process_class.remove' register_title='XXX'  register_keyword='process_class.remove'/>
+    <register_entry register_file='api/Process_class.xml#use_element__process_class.remove' register_title='Process_class'  register_keyword='process_class.remove'/>
     <register_entry register_file='xml.xml#use_element__process_class.remove' register_title='Alle XML-Elemente'  register_keyword='process_class.remove'/>
     <register_entry register_file='xml/process_class.remove.xml#' register_title='&lt;process_class.remove&gt; (Kommando)'  register_keyword='process_class.remove' type='definition'/>
     <register_entry register_file='xml/process_class.xml#use_element__process_class.remove' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='process_class.remove'/>
+</register_keyword>
+<register_keyword keyword='process_class_name'>
+    <register_keyword_display><code>process_class_name</code></register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__process_class' register_title='Process_classes.process_class' register_keyword='process_class_name'/>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='process_class_name'/>
+</register_keyword>
+<register_keyword keyword='process_class_or_null (property)'>
+    <register_keyword_display><code>process_class_or_null</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml#method__process_class_or_null' register_title='Process_classes.process_class_or_null' register_keyword='process_class_or_null' type='definition'/>
 </register_keyword>
 <register_keyword keyword='process_classes'>
     <register_keyword_display><code>&lt;process_classes&gt;</code></register_keyword_display>
@@ -2891,6 +2962,7 @@
 </register_keyword>
 <register_keyword keyword='Process_classes (class)'>
     <register_keyword_display><code>Process_classes</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Process_classes.xml' register_keyword='Process_classes' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__process_classes' register_title='Spooler.process_classes' register_keyword='Process_classes'/>
 </register_keyword>
 <register_keyword keyword='process_classes (property)'>
@@ -2980,6 +3052,10 @@
     <register_keyword_display><code>remote_scheduler=</code></register_keyword_display>
     <register_entry register_file='xml/process_class.xml#attribute_remote_scheduler' register_title='&lt;process_class&gt; (Konfiguration)'  register_keyword='remote_scheduler' type='definition'/>
 </register_keyword>
+<register_keyword keyword='remote_scheduler (property)'>
+    <register_keyword_display><code>remote_scheduler</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Process_class.xml#method__remote_scheduler' register_title='Process_class.remote_scheduler' register_keyword='remote_scheduler' type='definition'/>
+</register_keyword>
 <register_keyword keyword='remote_schedulers'>
     <register_keyword_display><code>&lt;remote_schedulers&gt;</code></register_keyword_display>
     <register_entry register_file='xml.xml#use_element__remote_schedulers' register_title='Alle XML-Elemente'  register_keyword='remote_schedulers'/>
@@ -2990,6 +3066,8 @@
     <register_keyword_display><code>remove()</code></register_keyword_display>
     <register_entry register_file='api/Job.xml#method__remove' register_title='Job.remove()' register_keyword='remove()' type='definition'/>
     <register_entry register_file='api/Job_chain.xml#method__remove' register_title='Job_chain.remove()' register_keyword='remove()' type='definition'/>
+    <register_entry register_file='api/Lock.xml#method__remove' register_title='Lock.remove()' register_keyword='remove()' type='definition'/>
+    <register_entry register_file='api/Process_class.xml#method__remove' register_title='Process_class.remove()' register_keyword='remove()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='remove'>
     <register_keyword_display><code>remove=</code></register_keyword_display>
@@ -3487,6 +3565,10 @@
     <register_entry register_file='xml/run_time.xml#attribute_single_start' register_title='&lt;run_time&gt; (Konfiguration)'  register_keyword='single_start' type='definition'/>
 </register_keyword>
 <register_keyword keyword='smtp'>
+    <register_keyword_display><code>[smtp]</code></register_keyword_display>
+    <register_entry register_file='factory_ini_smtp.xml#' register_title='Datei factory.ini, Abschnitt [smtp]'  register_keyword='smtp' type='definition'/>
+</register_keyword>
+<register_keyword keyword='smtp'>
     <register_keyword_display><code>smtp=</code></register_keyword_display>
     <register_entry register_file='factory_ini_job.xml#entry_smtp' register_title='file factory.ini, section [job]'  register_keyword='smtp' type='definition'/>
     <register_entry register_file='factory_ini_spooler.xml#entry_smtp' register_title='file factory.ini, section [spooler]'  register_keyword='smtp' type='definition'/>
@@ -3828,6 +3910,7 @@
 <register_keyword keyword='Supervisor_client (class)'>
     <register_keyword_display><code>Supervisor_client</code> (class)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__supervisor_client' register_title='Spooler.supervisor_client' register_keyword='Supervisor_client'/>
+    <register_entry register_file='api/Supervisor_client.xml' register_keyword='Supervisor_client' type='definition'/>
 </register_keyword>
 <register_keyword keyword='supervisor_client (property)'>
     <register_keyword_display><code>supervisor_client</code> (property)</register_keyword_display>
@@ -3903,6 +3986,7 @@
 <register_keyword keyword='tcp_port (property)'>
     <register_keyword_display><code>tcp_port</code> (property)</register_keyword_display>
     <register_entry register_file='api/Spooler.xml#method__tcp_port' register_title='Spooler.tcp_port' register_keyword='tcp_port' type='definition'/>
+    <register_entry register_file='api/Supervisor_client.xml#method__tcp_port' register_title='Supervisor_client.tcp_port' register_keyword='tcp_port' type='definition'/>
 </register_keyword>
 <register_keyword keyword='temporary'>
     <register_keyword_display><code>temporary=</code></register_keyword_display>

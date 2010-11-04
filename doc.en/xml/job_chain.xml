@@ -140,6 +140,10 @@
                 -->
                 </p>
                 <p>
+                    The number of simultaneous orders for a job_chain is not limited, if this attribute is not set.
+                    <!-- Fehlt diese Angabe, ist die Anzahl der parallel laufenden Order einer Jobkette nicht begrenzt. -->
+                </p>
+                <p>
                     <b>This attribute take only effect, if the order starts with the first node of the job chain.</b>
                     <!-- <b>Diese Einstellung gilt nur für order, die mit dem ersten Knoten der Jobkette starten.</b> -->
                 </p>

@@ -4337,6 +4337,20 @@
             </text>
         </message>
 
+        <message code="SCHEDULER-719" weight="warn" object="Scheduler">
+            <text xml:lang="en">
+                <title>
+                    <p1/> orders are currently running, <p2/> allowed at most
+                </title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-720" weight="info" object="Scheduler">
+            <text xml:lang="en">
+                <title>job_chain <p1/> is deactivated (set max_orders to activate it)</title>
+            </text>
+        </message>
+
         <!--message code="SCHEDULER-704">
             <text xml:lang="en">
                 <title>Database table <p1/> is being rebuild</title>

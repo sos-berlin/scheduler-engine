@@ -289,7 +289,7 @@ ptr<Folder> Folder_subsystem::new_file_based()
 
 bool Folder_subsystem::on_handle_directory( directory_observer::Directory_observer* )
 {
-    //Z_LOGI2( "zschimmer", Z_FUNCTION << " Prüfe Konfigurationsverzeichnis " << _local_directory_observer->directory_tree()->directory_path() << "\n" );
+    //Z_LOGI2( "zschimmer", Z_FUNCTION << " check configuration directory " << _local_directory_observer->directory_tree()->directory_path() << "\n" );
 
     handle_folders();
     

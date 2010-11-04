@@ -2857,7 +2857,7 @@ ptr<Task> Job::task_to_start()
                     
                     if( !order  &&  !cause )    // Fehlgeschlagen? Dann die Task vergessen 
                     {
-                        Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() fehlgeschlagen, Task wird wieder verworfen\n" );
+                        // Z_LOG2( "scheduler", obj_name() << ": fetch_and_occupy_order() failed, Task will be rejected\n" );  // müllt das Log zu
                         task->close(); 
                         task = NULL;
                     }
@@ -3010,7 +3010,7 @@ bool Job::do_something()
                 calculate_next_time( now );
 
                 Z_LOG2( _next_time <= now? "scheduler" : "scheduler.nothing_done", 
-                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time war " << next_time_at_begin <<
+                        obj_name() << ".do_something()  Nothing done. state=" << state_name() << ", _next_time was " << next_time_at_begin <<
                         " _next_time=" << _next_time <<
                         " _next_start_time=" << _next_start_time <<
                         " _next_single_start=" << _next_single_start <<
