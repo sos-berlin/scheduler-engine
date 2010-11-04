@@ -3,7 +3,7 @@
 <job_chain orders_recoverable="yes"
            visible="yes"
            title="Jobkette zum Test des Parallellaufes von Jobketten"
-           max_orders="1"
+           max_orders="2"
            >
     <job_chain_node state="100"
                     job="js538-1"

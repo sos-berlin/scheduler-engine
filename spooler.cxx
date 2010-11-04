@@ -27,6 +27,7 @@
 #include "../zschimmer/xml_end_finder.h"
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/not_in_recursion.h"
+#include "../zschimmer/file_path.h"
 
 
 using namespace std;
@@ -1390,6 +1391,7 @@ void Spooler::load_arg()
     read_ini_file();
     read_command_line_arguments();
     handle_configuration_directories();
+    set_home_directory();
 
     if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) ) {
         _configuration_is_job_script = true;
@@ -1484,7 +1486,6 @@ void Spooler::read_command_line_arguments()
 {
 
     _my_program_filename = _argv? _argv[0] : "(missing program path)";
-
 
     int param_count = 0;
 
@@ -1636,6 +1637,14 @@ void Spooler::read_command_line_arguments()
         if( !_is_service )  print_usage();
         throw;
     }
+}
+
+
+//----------------------------------------------------------------------Spooler::set_home_directory
+void Spooler::set_home_directory() {
+    File_path p = File_path(_my_program_filename);
+    _home_directory = p.directory().directory();
+    Z_DEBUG_ONLY( _log->debug("the home-directory is " + _home_directory ) );
 }
 
 //--------------------------------------------------------Spooler::handle_configuration_directories

@@ -430,6 +430,7 @@ struct Spooler : Object,
     const schedule::Holidays&   holidays                    () const                            { return _holidays; }
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
+    string                      home_directory              () const                            { return _home_directory; }
     string                      string_need_db              () const;
 
     void                        log_show_state              ( Prefix_log* log = NULL );
@@ -471,6 +472,7 @@ struct Spooler : Object,
     void                        read_ini_file               ();
     void                        read_command_line_arguments ();
     void                        handle_configuration_directories();
+    void                        set_home_directory          ();
     void                        load                        ();
     void                        open_pid_file               ();
     void                        fetch_hostname              ();
@@ -587,6 +589,7 @@ struct Spooler : Object,
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
+
 
   private:
     Fill_zero                  _zero_;
@@ -775,6 +778,7 @@ struct Spooler : Object,
     ptr<Async_operation>       _log_categories_reset_operation;
     Log_categories_content     _original_log_categories;
 
+    string                     _home_directory;
     string                     _directory;
     File                       _pid_file;
 
