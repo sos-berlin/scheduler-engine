@@ -46,6 +46,15 @@ extern const string             scheduler_file_path_variable_name;
 
 typedef stdext::hash_set<Job_chain*>   Job_chain_set;
 
+//--------------------------------------------------------------------------------Virgin_is_allowed
+
+enum Virgin_is_allowed {
+    virgin_not_allowed = false,
+    virgin_allowed = true
+};
+
+//inline Virgin_is_allowed        virgin_is_allowed       (bool b) { return b? virgin_allowed : virgin_not_allowed; }
+
 //--------------------------------------------------------------------------------------------Order
 
 struct Order : Com_order,
@@ -110,7 +119,6 @@ struct Order : Com_order,
     void                        assert_no_task              ( const string& debug_text );
     void                        assert_task                 ( const string& debug_text );
 
-    bool                        is_running                  ()                                      { return _task != NULL; }
     bool                        is_immediately_processable  ( const Time& now );
     bool                        is_processable              ();
     void                        handle_changed_processable_state ();
@@ -134,6 +142,7 @@ struct Order : Com_order,
     Priority                    priority                () const                                    { return _priority; }
 
     bool                        is_virgin               () const                                    { return _is_virgin; }
+    bool                        is_touched              () const                                    { return !_is_virgin; }
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -402,7 +411,7 @@ struct Order_source : Scheduler_object, Event_operation
     virtual void                initialize              ();
     virtual void                activate                ()                                          = 0;
     virtual bool                request_order           ( const string& cause )                     = 0;
-    virtual Order*              fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task ) = 0;
+    virtual Order*              fetch_and_occupy_order  ( Task* occupying_task, const Time& now, const string& cause) = 0;
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
@@ -609,7 +618,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
     Order_queue*                order_queue                 () const                                { return _order_queue; }  // 1:1-Beziehung
     void                    set_action                      ( const string& );
     void                        handle_changed_processable_state();
-    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
+    Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
 
   private:
@@ -853,10 +862,11 @@ struct Job_chain : Com_job_chain,
 
     Order_subsystem_impl*       order_subsystem             () const;
 
-    int                         number_of_started_orders    () const;
+    int                         number_of_touched_orders    () const;
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
-    bool                        is_ready_for_new_order_processing() const;
+    Virgin_is_allowed           is_ready_for_new_order_processing() const;
+    void                        check_max_orders            () const;
 
   private:
     void                        check_for_removing          ();
@@ -931,17 +941,17 @@ struct Order_queue : Com_order_queue,
     void                        unregister_order_source     ( Order_source* );
     int                         order_count                 ( Read_transaction* ) const;
     int                         java_order_count            () const { return order_count((Read_transaction*)NULL); }  // Provisorisch, solange Java Read_transaction nicht kennt
-    int                         running_order_count         ();
+    int                         touched_order_count         ();
     bool                        empty                       ()                                      { return _queue.empty(); }
     Order*                      first_processable_order     () const;
-    Order*                      first_immediately_processable_order( const Time& now = Time(0) ) const;
+    Order*                      first_immediately_processable_order(Virgin_is_allowed, const Time& now ) const;
     Order*                      fetch_order                 ( const Time& now );
-    Order*                      load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now );
-    bool                        has_immediately_processable_order( const Time& now = Time(0) )      { return first_immediately_processable_order( now ) != NULL; }
+    Order*                      load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed, const Time& now);
+    bool                        has_immediately_processable_order( const Time& now = Time(0) );
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_request      ();
     void                        withdraw_distributed_order_request();
-    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
+    Order*                      fetch_and_occupy_order      ( Task* occupying_task, Virgin_is_allowed, const Time& now, const string& cause );
     Time                        next_time                   ();
     bool                        is_distributed_order_requested( time_t now )                        { return _next_distributed_order_check_time <= now; }
     time_t                      next_distributed_order_check_time() const                           { return _next_distributed_order_check_time; }

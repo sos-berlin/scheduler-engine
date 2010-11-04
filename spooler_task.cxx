@@ -2285,7 +2285,7 @@ Order* Task::fetch_and_occupy_order( const Time& now, const string& cause )
     if( !_order  
      && !_end   )   // Kann beim Aufruf aus Job::do_something() passieren 
     {
-        if( Order* order = _job->combined_job_nodes()->fetch_and_occupy_order( now, cause, this ) )
+        if( Order* order = _job->combined_job_nodes()->fetch_and_occupy_order(this, now, cause) )
         {
             if( order->is_file_order() )  _trigger_files = order->file_path();
 

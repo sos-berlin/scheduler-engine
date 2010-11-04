@@ -2899,6 +2899,11 @@
             <text xml:lang="en"><title>java_options and java_class_path can only be set in primary XML configuration</title></text>
         </message>
 
+        <!--message code="SCHEDULER-476">
+            <text xml:lang="en">
+                <title>Limiting with max_orders is not possible with distributed orders</title>
+            </text>
+        </message-->
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

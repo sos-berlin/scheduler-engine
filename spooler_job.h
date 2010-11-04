@@ -26,7 +26,7 @@ struct Combined_job_nodes : Object
     bool                        request_order               ( const Time& now, const string& cause );
     void                        withdraw_order_requests     ();
     Time                        next_time                   ();
-    Order*                      fetch_and_occupy_order      ( const Time& now, const string& cause, Task* occupying_task );
+    Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
     void                        connect_with_order_queues   ();
     void                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );

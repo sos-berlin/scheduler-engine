@@ -1370,22 +1370,20 @@ void Order_queue_node::set_action( const string& action_string )
 
 bool Order_queue_node::is_ready_for_order_processing()
 {
-    return _action != act_stop  &&  
-        (this == _job_chain->first_node() 
-            ? _job_chain->is_ready_for_new_order_processing() 
-            : _job_chain->is_ready_for_order_processing()
-        );
+    return _action != act_stop  &&  _job_chain->is_ready_for_order_processing();
 }
 
 //---------------------------------------------------------Order_queue_node::fetch_and_occupy_order
 
-Order* Order_queue_node::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
+Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
     Order* result = NULL;
 
     if( is_ready_for_order_processing() )
     {
-        result = order_queue()->fetch_and_occupy_order( now, cause, occupying_task );
+        Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+        result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
+        _job_chain->check_max_orders();
     }
 
     return result;
@@ -1492,12 +1490,6 @@ void Job_node::connect_job( Job* job )
         {
             job->set_job_chain_priority( _node_index + 1 );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
             _job = job;
-
-            //In connect_job_node() schon erledigt
-            //if( Order* order = order_queue()->first_immediately_processable_order() )
-            //{
-            //    order->handle_changed_processable_state();
-            //}
         }
     }
 }
@@ -1916,7 +1908,8 @@ void Job_chain::set_dom( const xml::Element_ptr& element )
      * \change 2.1.2 - JS-538: neues Attribut max_orders
      */
     _max_orders = element.int_getAttribute("max_orders", _max_orders);
-    if (_max_orders < INT_MAX) Z_LOG2( "scheduler", "at most " << _max_orders << " orders can run simultaneously." << "\n" );
+    if (_max_orders < INT_MAX) Z_LOG2( "scheduler", "At most " << _max_orders << " orders can run simultaneously." << "\n" );
+    if (_max_orders == 0) _log->warn( message_string("SCHEDULER-720", path() ) ); 
 
 
     if( element.hasAttribute( "visible" ) )
@@ -2064,7 +2057,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
-    result.setAttribute( "running_orders", number_of_started_orders() );
+    result.setAttribute( "running_orders", number_of_touched_orders() );
     result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
@@ -3187,6 +3180,17 @@ void Job_chain::set_stopped( bool is_stopped )
     notify_nodes();     // Fällige Aufträge fortsetzen
 }
 
+//----------------------------------------------------------------------Job_chain::check_max_orders
+
+void Job_chain::check_max_orders() const 
+{
+    int count = number_of_touched_orders();
+    if (count > _max_orders) {
+        _log->warn(message_string("SCHEDULER-719", count, _max_orders));
+        Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", count, _max_orders));
+    }
+}
+
 //---------------------------------------------------------Job_chain::is_ready_for_order_processing
 
 bool Job_chain::is_ready_for_order_processing() const
@@ -3195,33 +3199,27 @@ bool Job_chain::is_ready_for_order_processing() const
        state() == s_active  && 
        !_is_stopped;
 }
-//---------------------------------------------------------Job_chain::is_ready_for_new_order_processing
+//-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
 
-bool Job_chain::is_ready_for_new_order_processing() const
+Virgin_is_allowed Job_chain::is_ready_for_new_order_processing() const
 {
-    // Kann man das so hinkriegen, dass die Meldung auch in der operations_gui erscheint?
-    if (_max_orders == 0) _log->info( message_string("SCHEDULER-720", name() ) ); 
-    // if (_max_orders == 0) z::throw_xc("SCHEDULER-720", name() ); 
-
-    return
+    bool result = 
        is_ready_for_order_processing() &&
        !is_max_orders_reached();
+    return result? virgin_allowed : virgin_not_allowed;
 }
 
 //-----------------------------------------------------------------Job_chain::is_max_orders_reached
 
 bool Job_chain::is_max_orders_reached() const
 {
-    int count = number_of_started_orders();
-    // if( count > _max_orders ) z::throw_xc("SCHEDULER-719", count, _max_orders);
-    if( count > _max_orders ) _log->warn( message_string("SCHEDULER-719", count, _max_orders) );
-    // Z_LOGI2( "scheduler.order", Z_FUNCTION << "  " << count << " orders are currently running, " << _max_orders << " allowed at most." << "\n" );
-    return count >= _max_orders;
+    return _max_orders < INT_MAX  &&  
+           _max_orders <= number_of_touched_orders();
 }
 
-//-----------------------------------------------------------------Job_chain::number_of_started_orders
+//--------------------------------------------------------------Job_chain::number_of_touched_orders
 
-int Job_chain::number_of_started_orders() const
+int Job_chain::number_of_touched_orders() const
 {
     assert_is_not_distributed( Z_FUNCTION );
 
@@ -3229,17 +3227,12 @@ int Job_chain::number_of_started_orders() const
     Z_FOR_EACH_CONST( Node_list, _node_list, it )
     {
         if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
-        {
-            if (node == first_node())
-                count += node->order_queue()->running_order_count();
-            else
-                count += node->order_queue()->order_count( NULL );          // nicht für verteilte Aufträge
-        }
+            count += node->order_queue()->touched_order_count();
     }
     return count;
 }
 
-//-----------------------------------------------------------------Job_chain::assert_is_not_distributed
+//-------------------------------------------------------------Job_chain::assert_is_not_distributed
 
 void Job_chain::assert_is_not_distributed( const string& debug_text ) const
 {
@@ -4008,15 +4001,15 @@ void Order_queue::unregister_order_source( Order_source* order_source )
     }
 }
 
-//-------------------------------------------------------------------------Order_queue::running_order_count
+//-----------------------------------------------------------------Order_queue::touched_order_count
 
-int Order_queue::running_order_count()
+int Order_queue::touched_order_count()
 {
     int result = 0;
     FOR_EACH( Queue, _queue, it )
     {
         Order* order = *it;
-        if( order->is_running() ) result++;
+        if( order->is_touched() ) result++;
     }
     return result;
 }
@@ -4331,9 +4324,17 @@ Order* Order_queue::first_processable_order() const
     return result;
 }
 
+//-------------------------------------------------..Order_queue::has_immediately_processable_order
+
+bool Order_queue::has_immediately_processable_order(const Time& now)
+{ 
+    Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
+    return first_immediately_processable_order(v, now) != NULL; 
+}
+
 //-------------------------------------------------Order_queue::first_immediately_processable_order
 
-Order* Order_queue::first_immediately_processable_order( const Time& now ) const
+Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin_is_allowed, const Time& now) const
 {
     // now kann 0 sein, dann werden nur Aufträge ohne Startzeit beachtet
 
@@ -4343,7 +4344,7 @@ Order* Order_queue::first_immediately_processable_order( const Time& now ) const
     {
         Order* order = *o;
 
-        if( order->is_immediately_processable( now ) )
+        if( order->is_immediately_processable( now )  &&  (virgin_is_allowed  ||  !order->is_virgin()))
         {
             result = order;
             result->_setback = 0;
@@ -4360,24 +4361,24 @@ Order* Order_queue::first_immediately_processable_order( const Time& now ) const
 
 //--------------------------------------------------------------Order_queue::fetch_and_occupy_order
 
-Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
+Order* Order_queue::fetch_and_occupy_order(Task* occupying_task, Virgin_is_allowed virgin_is_allowed,
+    const Time& now, const string& cause)
 {
     assert( occupying_task );
 
 
     // Zuerst Aufträge aus unserer Warteschlange im Speicher
 
-    Order* order = first_immediately_processable_order( now );
+    Order* order = first_immediately_processable_order(virgin_is_allowed, now);
     if( order )  order->occupy_for_task( occupying_task, now );
 
 
     // Dann (alte) Aufträge aus der Datenbank
-    //if( !order  &&  _next_announced_distributed_order_time <= now  &&  is_in_any_distributed_job_chain() )   // Auftrag nur lesen, wenn vorher angekündigt
     if( !order  &&  _next_announced_distributed_order_time <= now )   // Auftrag nur lesen, wenn vorher angekündigt
     {
         withdraw_distributed_order_request();
 
-        order = load_and_occupy_next_distributed_order_from_database( occupying_task, now );
+        order = load_and_occupy_next_distributed_order_from_database(occupying_task, virgin_is_allowed, now );
         // Möglicherweise NULL (wenn ein anderer Scheduler den Auftrag weggeschnappt hat)
         if( order )  assert( order->_is_distributed );
     }
@@ -4385,22 +4386,16 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
     // Die Dateiaufträge (File_order_source)
 
-    if( !order )
+    if( !order && virgin_is_allowed)
     {
         Z_FOR_EACH( Order_source_list, _order_source_list, it )
         {
             Order_source* order_source = *it;
-            order = order_source->fetch_and_occupy_order( now, cause, occupying_task );
+            order = order_source->fetch_and_occupy_order(occupying_task, now, cause);
             if( order )  break;
         }
     }
 
-    //if( order )
-    //{
-    //    _is_distributed_order_requested = false;            // Nächster request_order() führt zum async_wake() des Database_order_detector
-    //}
-
-    //_next_announced_distributed_order_time = Time::never;
     _has_tip_for_new_order = false;
 
     if( order ) 
@@ -4424,8 +4419,10 @@ Order* Order_queue::fetch_and_occupy_order( const Time& now, const string& cause
 
 //--------------------------------Order_queue::load_and_occupy_next_distributed_order_from_database
 
-Order* Order_queue::load_and_occupy_next_distributed_order_from_database( Task* occupying_task, const Time& now )
+Order* Order_queue::load_and_occupy_next_distributed_order_from_database(Task* occupying_task, Virgin_is_allowed virgin_is_allowed, const Time& now)
 {
+    if (!virgin_is_allowed)  _job_chain->assert_is_not_distributed(Z_FUNCTION);
+
     Order* result    = NULL;
     S      select_sql;
 

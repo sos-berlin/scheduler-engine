@@ -460,14 +460,14 @@ void Combined_job_nodes::withdraw_order_requests()
 
 //----------------------------------------------------Combined_job_nodes::fetch_and_occupy_order
 
-Order* Combined_job_nodes::fetch_and_occupy_order( const Time& now, const string& cause, Task* occupying_task )
+Order* Combined_job_nodes::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
     Order* result = NULL;
 
     Z_FOR_EACH( Job_node_set, _job_node_set, it )
     {
         Job_node* job_node = *it;
-        result = job_node->fetch_and_occupy_order( now, cause, occupying_task );
+        result = job_node->fetch_and_occupy_order(occupying_task, now, cause);
         if( result )  break;
     }
 

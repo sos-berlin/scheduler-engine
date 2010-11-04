@@ -67,7 +67,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface
     void                        initialize              ();
     void                        activate                ();
     bool                        request_order           ( const string& cause );
-    Order*                      fetch_and_occupy_order  ( const Time& now, const string& cause, Task* occupying_task );
+    Order*                      fetch_and_occupy_order  ( Task* occupying_task, const Time& now, const string& cause);
     void                        withdraw_order_request  ();
     string                      obj_name                () const;
 
@@ -609,7 +609,7 @@ void Directory_file_order_source::read_directory( bool was_notified, const strin
 
 //----------------------------------------------Directory_file_order_source::fetch_and_occupy_order
 
-Order* Directory_file_order_source::fetch_and_occupy_order( const Time& now, const string&, Task* occupying_task )
+Order* Directory_file_order_source::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause)
 {
     Order* result = NULL;
 
