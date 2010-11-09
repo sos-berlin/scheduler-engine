@@ -765,7 +765,7 @@ void Task::set_enqueued_state()
 void Task::set_state_direct( State new_state )
 {
     if( _enqueued_state ) {
-        Z_LOG2( "scheduler", *this << " _enqueued_state=" + state_name( _enqueued_state ) + " verworfen" );
+        Z_LOG2( "scheduler", *this << " _enqueued_state=" + state_name( _enqueued_state ) + " refused" );
         _enqueued_state = s_none;
     }
 

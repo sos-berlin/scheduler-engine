@@ -902,12 +902,12 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::read()
 
         memset( &data, 0, sizeof data );
 
-        Z_LOG2( "scheduler", "_findfirst(" << quoted_string(pattern) << ") ...\n" );
+        Z_LOG2( "scheduler.wait", "_findfirst(" << quoted_string(pattern) << ") ...\n" );
 
         _handle = _findfirst( pattern.c_str(), &data ); 
         if( _handle == -1 )  throw_errno( errno, "_findfirst", _directory_path.c_str() );  
 
-        Z_LOG2( "scheduler", "_findfirst(" << quoted_string(pattern) << ") OK\n" );
+        Z_LOG2( "scheduler.wait", "_findfirst(" << quoted_string(pattern) << ") OK\n" );
     }
     else
     {

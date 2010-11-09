@@ -413,7 +413,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
         //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
 
-        _log.info( message_string( "SCHEDULER-933" ) );
+		Z_LOG2("socket.accept",message_string( "SCHEDULER-933" ));
         _connection_state = s_ready;
 
     }

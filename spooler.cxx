@@ -1390,8 +1390,8 @@ void Spooler::load_arg()
     read_ini_filename();
     read_ini_file();
     read_command_line_arguments();
-    handle_configuration_directories();
     set_home_directory();
+    handle_configuration_directories();
 
     if( _zschimmer_mode  &&  string_ends_with( _configuration_file_path, ".js" ) ) {
         _configuration_is_job_script = true;
