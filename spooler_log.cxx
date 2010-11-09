@@ -1087,8 +1087,8 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     }
 
 #ifdef Z_DEBUG
-    if (level == log_error)
-        _spooler->event_subsystem()->report_event(ErrorLogEventJ::new_instance(line) );
+    if (level == log_error  &&  _object)
+        _object->report_event(ErrorLogEventJ::new_instance(line) );
 #endif
 }
 
