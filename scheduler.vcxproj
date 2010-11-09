@@ -406,6 +406,7 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)message.cxx;%(Outputs)</Outputs>
+      <SubType>Designer</SubType>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

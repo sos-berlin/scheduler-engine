@@ -153,8 +153,8 @@ struct Task : Object,
     bool                        is_idle                     ()                                      { return _state == s_running_waiting_for_order  &&  !_end; }
 
     bool                        running_state_reached       () const                                { return _running_state_reached; }
-    Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
-    Time                        ending_since                ()                                      { THREAD_LOCK_RETURN( _lock, Time, _ending_since ); }
+    Time                        last_process_start_time     ()                                      { return _last_process_start_time; }
+    Time                        ending_since                ()                                      { return _ending_since; }
 
     void                        merge_params                ( const Com_variable_set* p )           { _params->merge( p ); }
     ptr<Com_variable_set>       params                      ()                                      { return _params; }
@@ -190,7 +190,7 @@ struct Task : Object,
     string                      trigger_files               () const                                { return _trigger_files; }
     Order*                      order                       ()                                      { return _order; }
     pid_t                       pid                         () const                                { return _module_instance? _module_instance->pid() : 0; }
-    Xc_copy                     error                       ()                                      { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
+    Xc_copy                     error                       ()                                      { return _error; }
     
 
   protected:
@@ -250,7 +250,7 @@ struct Task : Object,
     void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
+    void                        reset_error                 ()                                      { _error = NULL,  _non_connection_reset_error = NULL,  _is_connection_reset_error = false,  _log->reset_highest_level(); }
 
     void                    set_next_time                   ( const Time& );
 
@@ -309,7 +309,6 @@ struct Task : Object,
     string                     _obj_name;
 
     Job*                       _job;
-    Thread_semaphore           _lock;
     Task_subsystem*            _thread;
     Task_history               _history;
 

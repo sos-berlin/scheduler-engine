@@ -6,8 +6,12 @@
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderState.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderStateChangeEvent.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderFinishedEvent.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderTouchedEvent.h"
 typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderState OrderStateJ;
 typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderStateChangeEvent OrderStateChangeEventJ;
+typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderFinishedEvent OrderFinishedEventJ;
+typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderTouchedEvent OrderTouchedEventJ;
 
 namespace sos {
 namespace scheduler {
@@ -317,14 +321,18 @@ void Order::occupy_for_task( Task* task, const Time& now )
     _task           = task;
     if( !_start_time )  _start_time = now;      
 
-    if( _is_virgin )
+
+    bool was_virgin = _is_virgin;
+    _is_virgin = false;
+    if( was_virgin )
     {
+        _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
+#ifdef Z_DEBUG
+        report_event( OrderTouchedEventJ::new_instance(java_sister()) );
+#endif
     }
-
-    _is_virgin = false;
-    //_is_virgin_in_this_run_time = false;
 }
 
 //------------------------------------------------------------Order::db_insert_order_history_record
@@ -2516,6 +2524,10 @@ void Order::handle_end_state()
 {
     // Endzustand erreicht. 
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
+
+#ifdef Z_DEBUG
+    report_event( OrderFinishedEventJ::new_instance(java_sister()) );
+#endif
 
     bool is_real_end_state = false;
 

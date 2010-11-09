@@ -44,10 +44,10 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
     CoUninitialize();
 }
 
-//----------------------------------------------com.sos.scheduler.kernel.core.main.CppScheduler.run
+//-----------------------------------------com.sos.scheduler.kernel.core.main.CppScheduler.runNative
 
 extern "C"
-JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_run(
+JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_runNative(
     JNIEnv* jenv, jobject, jobjectArray jargs, jstring argument_line_jstr, jobject java_main_context)
 {
     int    result = -1;

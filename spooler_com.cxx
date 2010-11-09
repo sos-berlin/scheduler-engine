@@ -2608,12 +2608,11 @@ STDMETHODIMP Com_task::get_Error( Ierror** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
-        THREAD_LOCK( _task->_lock )  *result = new Com_error( _task->error() );
+        *result = new Com_error( _task->error() );
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
@@ -2628,7 +2627,6 @@ STDMETHODIMP Com_task::get_Job( Ijob** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2648,7 +2646,6 @@ STDMETHODIMP Com_task::get_Params( Ivariable_set** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2671,7 +2668,6 @@ STDMETHODIMP Com_task::Wait_until_terminated( double* wait_time, VARIANT_BOOL* o
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( _task )  *ok = _task->wait_until_terminated( *wait_time );
@@ -2706,14 +2702,13 @@ STDMETHODIMP Com_task::put_Result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
       //if( !_task->_job->its_current_task(_task) )  z::throw_xc( "SCHEDULER-138" );
 
-        THREAD_LOCK( _task->_lock )  hr = _task->_result.Copy( value );
+        hr = _task->_result.Copy( value );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
@@ -2727,7 +2722,6 @@ STDMETHODIMP Com_task::get_Result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2747,7 +2741,6 @@ STDMETHODIMP Com_task::put_Repeat( double* seconds )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2767,7 +2760,6 @@ STDMETHODIMP Com_task::put_History_field( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2787,7 +2779,6 @@ STDMETHODIMP Com_task::get_Id( int* result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2825,7 +2816,6 @@ STDMETHODIMP Com_task::put_Close_engine( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2844,7 +2834,6 @@ STDMETHODIMP Com_task::get_Order( Iorder** result )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );

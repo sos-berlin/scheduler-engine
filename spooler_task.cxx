@@ -172,7 +172,6 @@ Task::Task( Job* job )
     _job(job),
     _history(&job->_history,this),
     _timeout(Time::never),
-    _lock("Task"),
     _lock_requestors( 1+lock_level__max ),
     _warn_if_longer_than( Time::never )
 {
@@ -530,8 +529,6 @@ void Task::cmd_end( End_mode end_mode )
 {
     assert( end_mode != end_none );
 
-    THREAD_LOCK_DUMMY( _lock )
-    {
         //if( end_mode == end_kill_immediately  &&  _end != end_kill_immediately )  _log->warn( message_string( "SCHEDULER-282" ) );    // Kein Fehler, damit ignore_signals="SIGKILL" den Stopp verhindern kann
         if( end_mode == end_normal  &&  _state < s_ending  &&  !_end )  _log->info( message_string( "SCHEDULER-914" ) );
 
@@ -551,7 +548,6 @@ void Task::cmd_end( End_mode end_mode )
             if( _job )  _job->kill_queued_task( _id );
             // this ist hier möglicherweise ungültig!
         }
-    }
 }
 
 //-------------------------------------------------------------------------------Task::cmd_nice_end
@@ -908,14 +904,11 @@ string Task::state_name( State state )
 
 void Task::signal( const string& signal_name )
 {
-    THREAD_LOCK_DUMMY( _lock )
-    {
         _signaled = true;
         set_next_time( 0 );
 
         if( _spooler->_task_subsystem )  _spooler->_task_subsystem->signal( signal_name );
                //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
-    }
 }
 
 //----------------------------------------------------------------------------------Task::set_cause
@@ -1034,7 +1027,7 @@ void Task::on_locks_are_available( Task_lock_requestor* lock_requestor )
 
 void Task::set_next_time( const Time& next_time )
 {
-    THREAD_LOCK_DUMMY( _lock )  _next_time = next_time;
+    _next_time = next_time;
 }
 
 //----------------------------------------------------------------------------------Task::next_time
@@ -1727,7 +1720,7 @@ bool Task::do_something()
                         {
                             if( !_operation )
                             {
-                                THREAD_LOCK_DUMMY( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
+                                if( !_ending_since )  _ending_since = now;   // Wird auch von cmd_end() gesetzt
 
                                 if( has_error()  ||  _log->highest_level() >= log_error )  _history.start();
 

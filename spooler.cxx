@@ -181,7 +181,7 @@ struct Termination_async_operation : Async_operation
 static void print_usage()
 {
     cerr << "\n"
-            "usage: " << _argv[0] << "\n"
+            "usage: " << (_argc <= 0? "(scheduler)" : _argv[0]) << "\n"
             "       [-config=]XMLFILE\n"
             "       -validate-xml-\n"
             "\n"
@@ -3629,6 +3629,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
         try
         {
+            if (argc < 1)  throw_xc("Missing arguments, argc=0");
+
             my_spooler._is_service = scheduler::is_daemon;
 
             ret = my_spooler.launch( argc, argv, parameter_line );

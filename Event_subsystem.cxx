@@ -56,6 +56,13 @@ ptr<Event_subsystem> new_event_subsystem( Scheduler* scheduler )
     return +result;
 }
 
+//----------------------------------------------------------------------Event_subsystem_impl::close
+
+//void Event_subsystem_impl::close()
+//{
+//    _eventSubsystemJ.close();
+//}
+
 //-------------------------------------------------------Event_subsystem_impl::subsystem_initialize
 
 bool Event_subsystem_impl::subsystem_initialize()

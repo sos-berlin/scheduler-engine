@@ -1383,7 +1383,6 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
     {
         Virgin_is_allowed v = _job_chain->is_ready_for_new_order_processing();
         result = order_queue()->fetch_and_occupy_order(occupying_task, v, now, cause);
-        _job_chain->check_max_orders();
     }
 
     return result;
@@ -3186,8 +3185,10 @@ void Job_chain::check_max_orders() const
 {
     if (is_max_orders_reached()) {
         int count = number_of_touched_orders();
-        _log->warn(message_string("SCHEDULER-719", count, _max_orders));
-        Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", count, _max_orders));
+        if (count > _max_orders) {
+            _log->error(message_string("SCHEDULER-719", _max_orders, count));
+            //Keine Exception nach Order::occupy_for_task() auslösen oder _task=NULL setzen!  Z_DEBUG_ONLY(throw_xc("SCHEDULER-719", _max_orders, count));
+        }
     }
 }
 

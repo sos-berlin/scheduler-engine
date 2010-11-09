@@ -26,6 +26,8 @@
 #    include <unistd.h>   // read(), write(), close()
 #endif
 
+#include "../javaproxy/com__sos__scheduler__kernel__core__event__ErrorLogEvent.h"
+typedef javaproxy::com::sos::scheduler::kernel::core::event::ErrorLogEvent ErrorLogEventJ;
 
 
 namespace sos {
@@ -1083,6 +1085,11 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
             _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
         }
     }
+
+#ifdef Z_DEBUG
+    if (level == log_error)
+        _spooler->event_subsystem()->report_event(ErrorLogEventJ::new_instance(line) );
+#endif
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event
