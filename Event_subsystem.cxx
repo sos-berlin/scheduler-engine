@@ -94,7 +94,8 @@ bool Event_subsystem_impl::subsystem_activate()
 
 void Event_subsystem_impl::report(const EventJ& eventJ)
 {
-    _eventSubsystemJ.report(eventJ);
+    if (_eventSubsystemJ) 
+        _eventSubsystemJ.report(eventJ);
 }
 
 //---------------------------------------------------------------------Event_subsystem_impl::report

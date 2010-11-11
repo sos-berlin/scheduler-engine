@@ -1087,7 +1087,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     }
 
 #ifdef Z_DEBUG
-    if (level == log_error  &&  _object)
+    if (level == log_error  &&  _object  &&  javabridge::Vm::is_active())
         _object->report_event(ErrorLogEventJ::new_instance(line) );
 #endif
 }
