@@ -329,9 +329,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
         _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
-#ifdef Z_DEBUG
         report_event( OrderTouchedEventJ::new_instance(java_sister()) );
-#endif
     }
 }
 
@@ -2058,11 +2056,9 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if( _id_locked )
         {
-#ifdef Z_DEBUG          
             //TODO Das ist nicht die beste Stelle: Der Auftrag ist noch nicht in dem neuen Jobkettenknoten eingereiht.
             // Man könnte report_event() in add_order() einbauen, und dann noch das Auftragsende und verteilte Aufträge berücksichtigen.
             report_event( OrderStateChangeEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
-#endif
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );
@@ -2525,9 +2521,7 @@ void Order::handle_end_state()
     // Endzustand erreicht. 
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
 
-#ifdef Z_DEBUG
     report_event( OrderFinishedEventJ::new_instance(java_sister()) );
-#endif
 
     bool is_real_end_state = false;
 

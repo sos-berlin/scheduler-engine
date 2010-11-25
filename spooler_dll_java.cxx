@@ -2,10 +2,11 @@
 
 #include "spooler.h"
 #include "../zschimmer/java.h"
+#include "../kram/sosstat.h"
 
 
-#ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
-#ifdef Z_WINDOWS
+//#ifdef _DEBUG       // Nur die Debug-Variante wird als DLL erzeugt
+//#ifdef Z_WINDOWS
 
 namespace sos 
 {
@@ -26,11 +27,12 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
 {
     CoInitialize(NULL);
     zschimmer_init();
+    sos::sos_static_ptr()->add_ref();
 
     static_java_vm = Z_NEW( javabridge::Vm( jvm ) );
     static_java_vm._ptr->AddRef();                 // Damit bei Programmende nicht Release gerufen wird (die Java-DLL ist dann vielleicht schon entladen)
 
-    return JNI_VERSION_1_2;
+    return JNI_VERSION_1_6;
 }
 
 //-------------------------------------------------------------------------------------JNI_OnUnload
@@ -40,6 +42,7 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
     if( static_java_vm )  static_java_vm._ptr->Release();
     static_java_vm = NULL;
 
+    sos::sos_static_ptr()->remove_ref();
     zschimmer_terminate();
     CoUninitialize();
 }
@@ -83,6 +86,7 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_kernel_core_main_CppScheduler_runNa
 }
 
 //-------------------------------------------------------------sos.spooler.Spooler_program.construct
+#ifdef Z_WINDOWS
 
 extern "C"
 JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv, jobject, jstring parameters_jstr )
@@ -129,7 +133,8 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
     delete[] argv;
 }
 
+#endif
 //-------------------------------------------------------------------------------------------------
 
-#endif
-#endif
+//#endif
+//#endif

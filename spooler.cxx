@@ -1600,6 +1600,8 @@ void Spooler::read_command_line_arguments()
             else
             if( opt.flag( "show-xml-schema"       ) )  ;   // wird in sos::spooler_main vearbeitet
             else
+            if( opt.flag( "java-events"       ) )  _java_events_allowed = opt.set();
+            else
                 if(opt.with_value("configuration-directory")) _opt_configuration_directory = opt.value(); // JS-462
             else
                 throw_sos_option_error( opt );

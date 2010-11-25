@@ -605,7 +605,11 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         wait->set_polling_interval( 0.1 );
 
-        int ret = wait->wait( (double)( until - now ) );
+        int ret;
+        {
+            Java_thread_unlocker unlocker ( _spooler );
+            int ret = wait->wait( (double)( until - now ) );
+        }
         return ret > 0;
       //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 
