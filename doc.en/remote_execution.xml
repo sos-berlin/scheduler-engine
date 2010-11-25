@@ -28,8 +28,8 @@ Only Agents are able to execute remote commands, received from a Main Scheduler.
 The characteristics of an Job Scheduler Agent are:
 		<ul>
 			<li>Agents must not have a live folder.</li>
-			<li>Potential existing local jobs are not executed. This is also valid for Scheduler default jobs such as <i>scheduler_event_service</i>.</li>
-			<li>An appropriate message will be logged if the execution of a local job should be suppressed.</li>
+			<li>Existing local jobs are not executed. This is also valid for Scheduler default jobs such as <i>scheduler_event_service</i>.</li>
+			<li>An appropriate message will be logged if the execution of a local job is suppressed.</li>
 			<li>Internal jobs (<i>scheduler_file_order_sink</i> and <i>scheduler_web_service</i>) are not executed.</li>
 			<li>Only Agents can execute remote commands received from a Main Scheduler. Trying to execute a remote command at a Scheduler that is not configured as Agent, an error message will be logged.</li>
 		</ul>

@@ -603,8 +603,7 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
 
-        wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
-                                                                                               : 1.0 );
+        wait->set_polling_interval( 0.1 );
 
         int ret = wait->wait( (double)( until - now ) );
         return ret > 0;
