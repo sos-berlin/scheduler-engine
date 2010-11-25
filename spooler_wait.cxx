@@ -27,10 +27,8 @@ namespace scheduler {
 
 //--------------------------------------------------------------------------------------------const
 
-#ifndef Z_WINDOWS
-//    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
-#else
-const DWORD SOS_WAIT_TIMEOUT = -2;                         // WAIT_TIMEOUT ist WAIT_OBJECT_0 + 256 und kann damit mit einem
+#ifdef Z_WINDOWS
+    const DWORD SOS_WAIT_TIMEOUT = -2;                     // WAIT_TIMEOUT ist WAIT_OBJECT_0 + 256 und kann damit mit einem
                                                            // lfd. Prozess (No. 256) kollidieren.
 #endif
 
@@ -178,9 +176,6 @@ bool Wait_handles::signaled()
 
 Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 {
-    //THREAD_LOCK( _lock )
-    //THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
-    {
         Event_vector::iterator   e = o._events.begin();
         Z_WINDOWS_ONLY( vector<HANDLE>::iterator h = o._handles.begin(); )
 
@@ -197,7 +192,6 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
             e++;
             Z_WINDOWS_ONLY( h++ );
         }
-    }
 
     return *this;
 }
@@ -206,76 +200,22 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 void Wait_handles::add( System_event* event )
 {
-    //THREAD_LOCK( _lock )
-    {
 #       ifdef Z_WINDOWS
             assert( event->handle() );
             _handles.push_back( event->handle() );
 #       endif
 
         _events.push_back( event );
-    }
 }
 
-//--------------------------------------------------------------------------Wait_handles::add_handle
-/*#ifdef Z_WINDOWS
-
-void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
-{
-    //THREAD_LOCK( _lock )
-    {
-        // Nützt nicht viel, denn spooler.exe fügt mehrere Wait_handles zusammen (mit operator +=).
-        if( _handles.size() >= MAXIMUM_WAIT_OBJECTS-1 )  z::throw_xc( "SCHEDULER-209", MAXIMUM_WAIT_OBJECTS-1 );   // Grenze für MsgWaitForMultipleObjects() ist 64
-
-        _handles.push_back( handle );
-        _events.push_back( NULL );  //event );
-    }
-}
-
-#endif*/
-//-----------------------------------------------------------------------Wait_handles::remove_handle
-#ifdef Z_WINDOWS
-/*
-void Wait_handles::remove_handle( HANDLE handle, z::Event_base* event )
-{
-    //THREAD_LOCK( _lock )
-    {
-        vector<HANDLE>::iterator it = _handles.begin();
-
-        while( it != _handles.end() )
-        {
-            if( *it == handle )  break;
-            it++;
-        }
-
-        if( it == _handles.end() ) {
-            if( event )  _log->error( "Wait_handles::remove(" + event->as_text() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
-                   else  _log->error( "Wait_handles::remove() fehlt" );
-            return;
-        }
-
-        _events.erase( _events.begin() + ( it - _handles.begin() ) );
-        _handles.erase( it );
-    }
-}
-*/
-#endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
 void Wait_handles::remove( System_event* event )
 {
     if( !event )  return;
 
-//#   ifdef Z_WINDOWS
-
-        //remove_handle( event->handle(), event );
-
-//#   else
-
         // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
 
-        //THREAD_LOCK( _lock )
-        {
             Event_vector::iterator it = _events.begin();
 
             while( it != _events.end() )
@@ -291,88 +231,7 @@ void Wait_handles::remove( System_event* event )
 
             Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
             _events.erase( it );
-        }
-
-//#   endif
 }
-
-//-------------------------------------------------------------------------------Wait_handles::wait
-/*
-bool Wait_handles::wait( double wait_time )
-{
-    return wait_until( Time::now() + wait_time, "" );
-}
-*/
-//-------------------------------------------------------------------------Wait_handles::wait_until
-
-//bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object, const Time& resume_until, const Object* resume_object )
-//{
-//    if( until  &&  until < Time::never )
-//    {
-//        if( _spooler->_zschimmer_mode  &&  _spooler->_next_daylight_saving_transition_time )
-//        {
-//            if( _spooler->_next_daylight_saving_transition_time < until )
-//            {
-//                return wait_until_2( _spooler->_next_daylight_saving_transition_time, String_object( _spooler->_next_daylight_saving_transition_name ) );
-//            }
-//        }
-//        else
-//        {
-//            time_t t;
-//            tm     tm1, tm2;
-//
-//            t = ::time(NULL);
-//            localtime_r( &t, &tm1 );
-//                
-//
-//            while(1)
-//            {
-//                Time now       = Time::now();
-//                bool signaled  = false;
-//
-//                if( tm1.tm_isdst )  // Wir haben Sommerzeit?
-//                {
-//                    Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
-//                    Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
-//
-//                    if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01, String_object( "checking end of daylight saving time" ) );
-//                    else 
-//                    if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01, String_object( "checking end of daylight saving time" ) );
-//                    else
-//                        break;
-//                }
-//                else                // Wir haben Winterzeit?
-//                {
-//                    Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
-//                    Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
-//
-//                    if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01, String_object( "checking begin of daylight saving time" ) );
-//                    else                                                                                      
-//                    if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01, String_object( "checking begin of daylight saving time" ) );
-//                    else
-//                        break;
-//                }
-//
-//                if( signaled )  return signaled;
-//
-//                //ftime( &tm2 );
-//                t = ::time(NULL);
-//                localtime_r( &t, &tm2 );
-//                if( tm1.tm_isdst != tm2.tm_isdst )
-//                {
-//                    _log->info( message_string( tm2.tm_isdst? "SCHEDULER-951" : "SCHEDULER-952" ) );
-//                    break;
-//                }
-//                else
-//                {
-//                    Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
-//                }
-//            }
-//        }
-//    }
-//
-//    return wait_until_2( until, wait_for_object, resume_until, resume_object );
-//}
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
@@ -410,10 +269,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         if( resume_until < Time::never )
         {
             LARGE_INTEGER gmtime;
-
-            //FILETIME      local_time = resume_until.filetime();
-            //ok = LocalFileTimeToFileTime( &local_time, (FILETIME*)&gmtime );   Das könnte zum Beginn der Winterzeit eine Stunde zu früh sein
-            //if( !ok )  z::throw_mswin( "LocalFileTimeToFileTime" );
 
             gmtime.QuadPart = -(int64)( ( resume_until - now ) * 10000000 );  // Negativer Wert bedeutet relative Angabe in 100ns.
             if( gmtime.QuadPart < 0 )
@@ -544,8 +399,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )           // "normales" handle
         {
-            //THREAD_LOCK( _lock )
-            {
                 int            index = ret - WAIT_OBJECT_0;
                 z::Event_base* event = _events[ index ];                                // scheduler-internes event-object
             
@@ -561,7 +414,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
 
                 if( event != &_spooler->_waitable_timer )  result = true;                // PC aufwecken
                 break;
-            }
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
@@ -580,17 +432,9 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
         now = Time::now();
     }
 
-
-    //if( waitable_timer_set )
-    //{
-    //    ok = CancelWaitableTimer( _spooler->_waitable_timer );
-    //    if( !ok )  z::throw_mswin( "CancelWaitableTimer" );
-    //}
-
     return result;
 
-// UNIX-Variante ...
-#else
+#else  // UNIX-Variante ...
 
     {
         Time now = Time::now();
@@ -611,36 +455,6 @@ bool Wait_handles::wait_until( const Time& until, const Object* wait_for_object,
             int ret = wait->wait( (double)( until - now ) );
         }
         return ret > 0;
-      //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-
-
-/*
-
-        // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihum abfragen.
-        //Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
-
-        while(1)
-        {
-            for( int i = _events.size() - 1; i >= 0; i-- )
-            {
-                Event* e = dynamic_cast<Event*>( _events[i] );
-
-                if( typeid( *e ) == typeid (Directory_watcher) )
-                {
-                    if( ((Directory_watcher*)e)->has_changed() )  return i;
-                }
-                else
-                {
-                    bool signaled = e->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-                    if( signaled )  return i;  // Leider auch bei EINTR (EINTR soll ja unterbrechen, aber return i stimmt dann nicht)
-                }
-            }
-
-            //rotating_bar();
-
-            if( Time::now() >= until )  return -1;
-        }
-*/
     }
 
 #endif
@@ -675,9 +489,9 @@ DWORD Wait_handles::sosMsgWaitForMultipleObjects(unsigned int nCount, HANDLE *pH
         ret = myMsgWaitForMultipleObjects( nCount, pHandles, FALSE, dTimeout, QS_ALLINPUT );    // wie bisher
         if (ret == WAIT_TIMEOUT) ret = SOS_WAIT_TIMEOUT;
     } else {
-#ifdef Z_DEBUG
-        Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
-#endif
+        #ifdef Z_DEBUG
+            Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects: " << nCount << " processes waiting (wait time " << dTimeout << "s\n" );
+        #endif
         ret = sosMsgWaitForMultipleObjects64( nCount, pHandles, dTimeout );   // polling ...
     }
 
@@ -845,23 +659,6 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get()
     return result;
 }
 
-//-----------------------------------------------------------------------Directory_reader::get_path
-/*
-string Directory_watcher::Directory_reader::get_path()
-{
-    string filename = get();
-    if( filename == "" )  return "";
-                                   
-    string result = _directory_path;
-    
-    if( !string_ends_with( result, Z_DIR_SEPARATOR )
-     && !string_ends_with( result, "/"             ) )  result += Z_DIR_SEPARATOR;
-
-    result += filename;
-
-    return result;
-}
-*/
 //---------------------------------------------------------------Directory_reader::Directory_reader
 #ifdef Z_WINDOWS
 
