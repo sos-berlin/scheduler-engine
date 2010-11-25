@@ -327,7 +327,6 @@ Communication::Connection::Connection( Communication* communication )
     _communication(communication),
     _log(_spooler)
 {
-    //_receive_at_start = true;
     //recv_clear();
 }
 
@@ -413,7 +412,7 @@ bool Communication::Connection::do_accept( SOCKET listen_socket )
 
         //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
 
-		Z_LOG2("socket.accept",message_string( "SCHEDULER-933" ));
+        Z_LOG2("socket.accept",message_string( "SCHEDULER-933" ));
         _connection_state = s_ready;
 
     }
@@ -477,7 +476,7 @@ bool Communication::Connection::do_recv()
 
         const char* p = buffer;
 
-        if( _connection_state == s_ready )   // Das sind die ersten empfangen Bytes der Anforderung
+        if( _connection_state == s_ready )   // Das sind die ersten empfangenen Bytes der Anforderung
         {
             if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
 
@@ -491,17 +490,10 @@ bool Communication::Connection::do_recv()
                 return true; 
             }
 
-            //_receive_at_start = false;
             _connection_state = s_receiving;
 
             if( !_operation_connection )
             {
-                //if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
-                //{
-                //    _operation_connection = Z_NEW( Object_server_processor_connection( this ) );
-                //}
-                //else
-                //if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
                 if( isupper( (unsigned char)buffer[ 0 ] ) )  // CONNECT, DELETE, GET, HEAD, OPTIONS, POST, PUT, TRACE 
                 {
                     _operation_connection = Z_NEW( http::Operation_connection( this ) );
@@ -622,6 +614,7 @@ xml::Element_ptr Communication::Connection::dom_element( const xml::Document_ptr
 
     result.setAttribute( "state", connection_state_name() + "/" + state_name() );
 
+    result.setAttribute( "responses"     , response_count() );
     result.setAttribute( "received_bytes", recv_total_byte_count() );
     result.setAttribute( "sent_bytes"    , send_total_byte_count() );
 
@@ -779,30 +772,6 @@ void Communication::remove_connection( Connection* connection )
     }
 }
 
-//----------------------------------------------------------------Communication::main_thread_exists
-/*
-bool Communication::main_thread_exists()
-{
-#   ifndef Z_LINUX
-
-        return true;
-
-#    else
-
-        if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
-        {
-            //_spooler->log()->error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
-            //_spooler->_log verklemmt sich manchmal nach Ausgabe des Zeitstemples (vor "[ERROR]"). Vielleicht wegen einer Semaphore?
-
-            //fprintf( stderr, "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=%d) verschwunden ist\n", _spooler->_pid );
-            return false;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
-        }
-
-        return true;
-
-#   endif
-}
-*/
 //-----------------------------------------------------------------------Communication::bind_socket
 
 int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const string& tcp_or_udp )

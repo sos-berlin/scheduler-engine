@@ -1590,7 +1590,7 @@ void Spooler::read_command_line_arguments()
           //else
           //if( opt.with_value( "now"                    ) )  _clock_difference = Time( Sos_date_time( opt.value() ) ) - Time::now();
             else
-            if( opt.flag      ( "check-memory-leak"     ) )  _check_memory_leak = opt.set();  // wird von sos_main0 gelöscht!!
+            if( opt.flag      ( "check-memory-leak"     ) )  set_check_memory_leak(opt.set());
 #           ifdef Z_WINDOWS
                 else if( opt.flag( "debug-break"        ) )  ;   // Bereits von spooler_main() verarbeitet
 #           endif
@@ -1641,10 +1641,24 @@ void Spooler::read_command_line_arguments()
 
 
 //----------------------------------------------------------------------Spooler::set_home_directory
+
 void Spooler::set_home_directory() {
     File_path p = File_path(_my_program_filename);
     _home_directory = p.directory().directory();
     Z_DEBUG_ONLY( _log->debug("the home-directory is " + _home_directory ) );
+}
+
+//-------------------------------------------------------------------Spooler::set_check_memory_leak
+
+void Spooler::set_check_memory_leak(bool on) {
+    // Schon in sos_main0 codiert.
+    //if (on) {
+    //    #ifdef Z_WINDOWS
+    //        // Bei Programmende Speicherzellen ausgeben:
+    //        // http://msdn.microsoft.com/de-de/library/5at7yxcs%28v=VS.100%29.aspx
+    //        _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_CRT_DF);
+    //    #endif
+    //}
 }
 
 //--------------------------------------------------------Spooler::handle_configuration_directories

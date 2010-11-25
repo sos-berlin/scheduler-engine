@@ -473,6 +473,7 @@ struct Spooler : Object,
     void                        read_command_line_arguments ();
     void                        handle_configuration_directories();
     void                        set_home_directory          ();
+    void                        set_check_memory_leak       (bool);
     void                        load                        ();
     void                        open_pid_file               ();
     void                        fetch_hostname              ();
