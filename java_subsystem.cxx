@@ -119,11 +119,7 @@ bool Java_subsystem::subsystem_load()
 
 bool Java_subsystem::subsystem_activate()
 {
-    _schedulerJ.onActivate("_schedulerJ.activate()");
-    #ifdef Z_DEBUG
-        _schedulerJ.activateMonitor();
-    #endif
-
+    _schedulerJ.onActivate();
     _subsystem_state = subsys_active;
     return true;
 }

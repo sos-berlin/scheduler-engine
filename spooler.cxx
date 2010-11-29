@@ -1520,12 +1520,12 @@ void Spooler::read_command_line_arguments()
             if( opt.with_value( "config"           )
              || opt.param(1)                         )  _configuration_file_path = opt.value();
             else
-            if( _zschimmer_mode && opt.param() )
-            {
+            if( opt.param()  &&  opt.value().find('=') != string::npos ) {  // 1. Parameter ist _configuration_file_path, die folgenden sind Parameter name=wert
+                // Nicht offiziell. Verbessert werden könnte, dass <params> diese Werte nicht überschreibt, sondern umgekehrt den Default vorgibt.
+                // Sollte vielleicht auch mit -config funktionieren. Jetzt muss die Konfigurationsdatei als 1. Parameter (ohne -config=) angegeben werden.
                 string value = opt.value();
-                uint   eq    = value.find( '=' );
-                if( eq != string::npos )  _variables->set_var( value.substr( 0, eq ), value.substr( eq + 1 ) );
-                                    else  _variables->set_var( as_string( ++param_count ), value );
+                uint eq = value.find( '=' );
+                _variables->set_var( value.substr( 0, eq ), value.substr( eq + 1 ) );
             }
             else
             if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); } //_directory = dir; }
@@ -1652,7 +1652,7 @@ void Spooler::set_home_directory() {
 
 //-------------------------------------------------------------------Spooler::set_check_memory_leak
 
-void Spooler::set_check_memory_leak(bool on) {
+void Spooler::set_check_memory_leak(bool) {
     // Schon in sos_main0 codiert.
     //if (on) {
     //    #ifdef Z_WINDOWS

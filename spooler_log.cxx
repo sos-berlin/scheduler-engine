@@ -26,8 +26,8 @@
 #    include <unistd.h>   // read(), write(), close()
 #endif
 
-#include "../javaproxy/com__sos__scheduler__kernel__core__event__ErrorLogEvent.h"
-typedef javaproxy::com::sos::scheduler::kernel::core::event::ErrorLogEvent ErrorLogEventJ;
+#include "../javaproxy/com__sos__scheduler__kernel__core__log__ErrorLogEvent.h"
+typedef javaproxy::com::sos::scheduler::kernel::core::log::ErrorLogEvent ErrorLogEventJ;
 
 
 namespace sos {

@@ -75,7 +75,7 @@ bool Event_subsystem_impl::subsystem_initialize()
 
 bool Event_subsystem_impl::subsystem_load()
 {
-    _eventSubsystemJ.assign_( _spooler->schedulerJ().eventSubsystem() );
+    _eventSubsystemJ.assign_( _spooler->schedulerJ().getEventSubsystem() );
     assert(_eventSubsystemJ != NULL);
 
     _subsystem_state = subsys_loaded;
