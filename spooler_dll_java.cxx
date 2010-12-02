@@ -32,7 +32,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
     static_java_vm = Z_NEW( javabridge::Vm( jvm ) );
     static_java_vm._ptr->AddRef();                 // Damit bei Programmende nicht Release gerufen wird (die Java-DLL ist dann vielleicht schon entladen)
 
-    return JNI_VERSION_1_6;
+    return JNI_VERSION_1_4;
 }
 
 //-------------------------------------------------------------------------------------JNI_OnUnload
