@@ -12,6 +12,7 @@
     <scheduler_keyword keyword="Remote Execution"/>
     <scheduler_keyword keyword="Remote"/>
     <scheduler_keyword keyword="remote_scheduler"/>
+		<scheduler_keyword keyword="Agent"/>
 
 
     <p>
@@ -40,8 +41,7 @@
     </p>
     
     <p>
-      Die Protokollausgaben des Jobs, sowie der Endzustand und eventuelle Fehler werden an den 
-      aufrufenden Job Scheduler geleitet.
+      Die Protokollausgaben des Jobs, sowie der Endzustand und eventuelle Fehler werden an den aufrufenden Job Scheduler geleitet.
     </p>
     
     <p>
@@ -78,10 +78,9 @@
     <ol>
       <li>Einstellungen in der Firewall
         <p>
-          Der lokale Job Scheduler muss den entfernten Job Scheduler erreichen können. 
+          Der lokale Job Scheduler muss den Agenten erreichen können. 
           Alle Sicherheitseinstellungen in den Firewalls müssen das berücksichtigen. 
-          Für die Kommunikation in Richtung entfernter Job Scheduler muss der Port des entfernten 
-          Rechners in der Firewall freigeschaltet sein. 
+          Für die Kommunikation in Richtung Agent muss der Port des Agenten in der Firewall freigeschaltet sein. 
           In der entgegengesetzten Richtung verbindet sich die Task mit dem aufrufenden Job Scheduler über 
           einen Port &lt;5999 abwärts zählend pro laufende Task.
           Entsprechend der erwarteten Anzahl Tasks müssen diese Ports in der Firewall freigeschaltet sein.
@@ -91,7 +90,7 @@
       <li>
         Security-Einstellungen in der Job Scheduler Konfiguration
         <p>
-          Der entfernte Job Scheduler muss im Security Element den aufrufenden Job Scheduler legitimieren. 
+          Der Agent muss im Security Element den aufrufenden Job Scheduler legitimieren. 
           <br/><br/>
           Beispiel
           <pre>
@@ -123,8 +122,7 @@
 
     <p>
       Die Job-Definition steht in der Konfigurationsdatei des lokalen, aufrufenden Job Scheduler.<br/>
-      Um einen Job auf einem anderen Job Scheduler ausführen zu lassen, sind beim lokalen, 
-      aufrufenden Job Scheduler folgende Konfigurationen nötig:
+      Um einen Job auf einem Agenten ausführen zu lassen, sind beim lokalen, aufrufenden Job Scheduler folgende Konfigurationen nötig:
     </p>
     <p>
       <ol>
@@ -155,8 +153,8 @@
     <h2>Monitor-Script</h2>
     
     <p>
-      Die zu einem Job gehörenden Monitor-Scripte werden ebenfalls am entfernten Job Scheduler ausgeführt. 
-      So gibt z.B. dieses Testscript den Rechnernamen des entfernten Rechners aus.
+      Die zu einem Job gehörenden Monitor-Scripte werden ebenfalls am Agenten ausgeführt. 
+      So gibt z.B. dieses Testscript den Rechnernamen des Agenten aus.
       <pre>
 function spooler_process_before() {
      spooler_log.info("host:tcp_port:" + spooler.tcp_port);
@@ -175,7 +173,7 @@ function spooler_process_before() {
     
     <p>
       Alle API-Aufrufe beziehen sich auf den lokalen, aufrufenden Job Scheduler. 
-      Allerdings liefern einige Methoden Werte des entfernten Job Schedulers und nicht des aufrufenden Job Schedulers zurück:
+      Allerdings liefern einige Methoden Werte des Agenten und nicht des aufrufenden Job Schedulers zurück:
     </p>
     <ul>
         <li>
@@ -201,7 +199,7 @@ function spooler_process_before() {
     </p>
     
     <p>
-      Einige Einstellungen werden vom entfernten statt vom lokalen, aufrufenden Job Scheduler übernommen:
+      Einige Einstellungen werden vom Agenten statt vom lokalen, aufrufenden Job Scheduler übernommen:
     </p>
     <ul> 
       <li> sos.ini (Abschnitt [java], Eintrag javac=…)</li>
@@ -221,7 +219,7 @@ function spooler_process_before() {
       Ausgaben nach <code>stdout</code> und <code>stderr</code> werden in die Protokolldateien des lokalen, 
       aufrufenden Job Schedulers übernommen. 
       Andere Protokollausgaben, die der Job Scheduler protokolliert, 
-      werden in die Protokolldatei des entfernten Job Schedulers geschrieben.
+      werden in die Protokolldatei des Agenten geschrieben.
     </p>
     
     
