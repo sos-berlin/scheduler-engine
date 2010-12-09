@@ -147,6 +147,7 @@ struct Order : Com_order,
 
     Job_chain*                  job_chain               () const;
     Absolute_path               job_chain_path          () const                                    { return _job_chain_path; }
+    bool                        is_in_job_chain         () const                                    { return !_job_chain_path.empty(); }
     Job_chain*                  job_chain_for_api       () const;
     job_chain::Node*            job_chain_node          () const                                    { return _job_chain_node; }
     Order_queue*                order_queue             ();
