@@ -650,7 +650,7 @@ ptr<zschimmer::file::File_info> Directory_watcher::Directory_reader::get()
         if( name == ".." )  continue;
         if( !_regex || _regex->match( name ) )  break;
 
-        Z_DEBUG_ONLY( Z_LOG2( "zschimmer", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
+        Z_DEBUG_ONLY( Z_LOG2( "scheduler.directory", Z_FUNCTION << "    " << name << " nicht übernommen\n" ); ) 
     }
 
     //Z_DEBUG_ONLY( Z_LOG2( "zschimmer", Z_FUNCTION << " => " << result << "\n" ); ) 
@@ -867,14 +867,14 @@ bool Directory_watcher::has_changed_2( bool throw_error )
         // Für diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
         // Das bremst leider den Scheduler ein wenig.
 
-        Z_LOGI2( "zschimmer", Z_FUNCTION << "  WaitForSingleObject()\n" );
+        Z_LOGI2( "scheduler.directory", Z_FUNCTION << "  WaitForSingleObject()\n" );
         int ret = WaitForSingleObject( _handle, 0 );
         if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
         return ret == WAIT_OBJECT_0;
 
 #   else
 
-        Z_LOGI2( "zschimmer", Z_FUNCTION << "\n" );
+        Z_LOGI2( "scheduler.directory", Z_FUNCTION << "\n" );
 
         bool changed = false;
 
@@ -899,13 +899,13 @@ bool Directory_watcher::has_changed_2( bool throw_error )
                 if( o == old_f->end()  ||  filename < *o )  // Datei hinzugefügt?
                 {
                     changed = true; 
-                    Z_LOG2( "scheduler", Z_FUNCTION << " new file     " << filename << "\n" ); 
+                    Z_LOG2( "scheduler.directory", Z_FUNCTION << " new file     " << filename << "\n" ); 
                 }
                 else
                 for(; o != old_f->end()  &&  *o < filename; o++ )  
                 { 
                     if( _filename_pattern == "" )  changed = true; 
-                    Z_LOG2( "scheduler", Z_FUNCTION << " deleted file " << *o << "\n" ); 
+                    Z_LOG2( "scheduler.directory", Z_FUNCTION << " deleted file " << *o << "\n" ); 
                 }
 
                 if( o != old_f->end()  &&  *o == filename )  o++;
@@ -914,7 +914,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
             for(; o != old_f->end(); o++ )  
             { 
                 if( _filename_pattern == "" )  changed = true; 
-                Z_LOG2( "scheduler", Z_FUNCTION << " deleted_file " << *o << "\n" ); 
+                Z_LOG2( "scheduler.directory", Z_FUNCTION << " deleted_file " << *o << "\n" ); 
             }
 
             dir.close();
