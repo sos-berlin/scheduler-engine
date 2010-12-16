@@ -1782,9 +1782,10 @@ void Spooler::new_subsystems()
     // nicht die Reihenfolge ändern !!!!!!
     _event_subsystem            = new_event_subsystem( this );
     _scheduler_event_manager    = Z_NEW( Scheduler_event_manager( this ) );
+    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
     _folder_subsystem           = new_folder_subsystem( this );
     _scheduler_script_subsystem = new_scheduler_script_subsystem( this );
-    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
+//    _schedule_subsystem         = schedule::new_schedule_subsystem( this );
     _process_class_subsystem    = Z_NEW( Process_class_subsystem( this ) );
     _lock_subsystem             = Z_NEW( lock::Lock_subsystem( this ) );
     _job_subsystem              = new_job_subsystem( this );
@@ -1823,9 +1824,10 @@ void Spooler::initialize_subsystems()
 {
     initialize_cluster();
     _event_subsystem           ->switch_subsystem_state( subsys_initialized );
+    _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
     _folder_subsystem          ->switch_subsystem_state( subsys_initialized );
     //_supervisor                ->switch_subsystem_state( subsys_initialized );
-    _schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
+    //_schedule_subsystem        ->switch_subsystem_state( subsys_initialized );
     _process_class_subsystem   ->switch_subsystem_state( subsys_initialized );
     _lock_subsystem            ->switch_subsystem_state( subsys_initialized );
     //_job_subsystem             ->switch_subsystem_state( subsys_initialized );
@@ -1854,12 +1856,14 @@ void Spooler::load_subsystems()
 {
     _java_subsystem            ->switch_subsystem_state( subsys_loaded );
     _event_subsystem           ->switch_subsystem_state( subsys_loaded );
+
+    _schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
     _folder_subsystem          ->switch_subsystem_state( subsys_loaded );
 
     if( !_ignore_process_classes )
     _process_class_subsystem   ->switch_subsystem_state( subsys_loaded );
 
-    _schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
+    //_schedule_subsystem        ->switch_subsystem_state( subsys_loaded );
     _lock_subsystem            ->switch_subsystem_state( subsys_loaded );
     _job_subsystem             ->switch_subsystem_state( subsys_loaded );         // Datenbank muss geöffnet sein
     _order_subsystem           ->switch_subsystem_state( subsys_loaded );
@@ -1878,12 +1882,13 @@ void Spooler::activate_subsystems()
     detect_warning_and_send_mail();
 
     _event_subsystem         ->switch_subsystem_state( subsys_active );
+    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
     _folder_subsystem        ->switch_subsystem_state( subsys_active );
 
     if( !_ignore_process_classes )
     _process_class_subsystem ->switch_subsystem_state( subsys_active );
 
-    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
+//    _schedule_subsystem      ->switch_subsystem_state( subsys_active );
     _lock_subsystem          ->switch_subsystem_state( subsys_active );
     _job_subsystem           ->switch_subsystem_state( subsys_active );
     _order_subsystem         ->switch_subsystem_state( subsys_active );
