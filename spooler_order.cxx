@@ -2738,7 +2738,15 @@ ptr<Order> Job_chain::order_or_null( const Order::Id& order_id )
 {
     Order_map::iterator it = _order_map.find( Order::string_id( order_id ) );
     return it != _order_map.end()? it->second : NULL;
+
+    // Job_chain::order_or_null_by_string_id() liefert Order* statt ptr<Order>. ptr<Order> scheint unnötig.
 }
+
+//------------------------------------------------------------Job_chain::order_or_null_by_string_id
+
+//Order* Job_chain::order_or_null_by_string_id(const string& order_id) {
+//    return order_or_null(
+//}
 
 //-----------------------------------------------------------------------------Job_chain::has_order
 

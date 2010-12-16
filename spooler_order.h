@@ -175,6 +175,7 @@ struct Order : Com_order,
 
     void                    set_end_state               ( const State& );
     State                       end_state               ()                                          { return _end_state; }
+    string                      string_end_state        ()                                          { return _end_state.as_string(); }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { return _state_text; }
@@ -828,6 +829,7 @@ struct Job_chain : Com_job_chain,
     void                        remove_order                ( Order* );
     ptr<Order>                  order                       ( const Order::Id& );
     ptr<Order>                  order_or_null               ( const Order::Id& );
+    //Order*                      order_or_null_by_string_id  (const string&);
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
     int                         order_count                 ( Read_transaction* ) const;
     bool                        has_order                   () const;
