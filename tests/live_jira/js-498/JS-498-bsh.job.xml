@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob beanshell"
+     order="no">
+    <script language="java:bsh">
+        <![CDATA[
+for (int i=0; i<5; i++)
+	print(i);
+        ]]>
+	
+    </script>
+    <run_time/>
+</job>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob groovy"
+     order="no">
+    <script language="java:groovy">
+        <![CDATA[
+spooler_log.info ("Hallo Groovy") 
+        ]]>
+
+    </script>
+    <run_time/>
+</job>

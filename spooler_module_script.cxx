@@ -33,7 +33,7 @@ Script_module_instance::Script_module_instance( Module* module )
 : 
     Module_instance(module),
     _zero_(this+1),
-    _java_module( javaproxy::com::sos::scheduler::kernel::core::scripting::Module::new_instance( module->_language, module->read_source_script()) )
+    _java_module( javaproxy::com::sos::scheduler::kernel::core::scripting::APIModuleInstance::new_instance( module->_language, module->read_source_script()) )
 {
 }
 

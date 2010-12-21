@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob2 (awk)"
+     order="no">
+    <script language="java:awk">
+        <![CDATA[
+BEGIN {
+	printf("hello world");
+}        ]]>
+    </script>
+    <run_time/>
+</job>

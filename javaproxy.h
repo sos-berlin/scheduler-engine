@@ -23,7 +23,7 @@
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderId.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderState.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderStateChangeEvent.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__scripting__Module.h"
+#include "../javaproxy/com__sos__scheduler__kernel__core__scripting__APIModuleInstance.h"
 #include "../javaproxy/com__sos__scheduler__kernel__core__util__StringValue.h"
 #include "../javaproxy/com__sos__scheduler__kernel__cplusplus__runtime__Sister.h"
 #include "../javaproxy/java__lang__String.h"

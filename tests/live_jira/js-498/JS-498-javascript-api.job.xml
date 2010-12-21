@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<job title="Testjob (java)"
+<job title="Testjob (javascript)"
      order="no">
-    <script language="java:java">
+    <script language="java:javascript">
         <![CDATA[
+var cnt;        
 function spooler_init() {
+	cnt = 0;
    spooler_log.info( "spooler_init wurde gerufen" );
    return true;
 }
@@ -21,10 +23,12 @@ function spooler_close() {
 
 // spooler_process wird so lange gerufen, bis false zurück gegeben wird
 function spooler_process() {
-	File f = new File("C:/temp/testfile.txt");
-	String name = f.getCanonicalPath();
-  spooler_log.info( "full name of the file is " + name );
-  return false;
+   if (cnt < 5) {
+      cnt++;
+      spooler_log.info( "spooler_process wurde JETZT gerufen (" + cnt + ")" );
+      return true;
+   }
+   return false;
 }
 
 function spooler_on_success() {
