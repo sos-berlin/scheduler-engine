@@ -2355,6 +2355,8 @@ void Order::place_or_replace_in_job_chain( Job_chain* job_chain )
             if( other_order != this ) {
                 other_order->remove_from_job_chain();
                 place_in_job_chain( job_chain );
+            } else {
+                activate_schedule();  // Wird sonst von place_in_job_chain ausgeführt // SOS-1219
             }
 
             if( other_order->_task )
@@ -2976,16 +2978,16 @@ bool Order::on_schedule_to_be_removed()
 
 void Order::handle_changed_schedule()
 {
-    //if (subsystem()->subsystem_state() == subsys_active) {  // JS-576
+    if (subsystem()->subsystem_state() == subsys_active) {  // JS-576
         _period = _schedule_use->is_defined()? _schedule_use->next_period( Time::now(), schedule::wss_next_any_start )
                                              : Period();
-
+    
         if( is_virgin() )
         {
             //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
             set_next_start_time();      // Änderung von <run_time> überschreibt Order.at
         }
-    //}
+    }
 }
 
 //------------------------------------------------------------------------------Order::set_schedule

@@ -366,9 +366,9 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
 
     if( element.nodeName_is( "run_time" )  &&  element.hasAttribute( "schedule" ) )     // <run_time schedule="...">
     {                                                                                   // (Besser: <schedule.use schedule="...">)
-        _schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "schedule" ) );
+        _schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "schedule" ) );       
         add_requisite( Requisite_path( spooler()->schedule_subsystem(), _schedule_path ) );
-        set_schedule( _spooler->schedule_subsystem()->schedule_or_null( _schedule_path ) );     // Verweise auf benanntes <schedule>
+        set_schedule( _spooler->schedule_subsystem()->schedule_or_null( _schedule_path ) );     // Verweise auf benanntes <schedule>  // SOS1219 
     }
     else
     {
