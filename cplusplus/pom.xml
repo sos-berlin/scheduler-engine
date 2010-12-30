@@ -4,13 +4,13 @@
 
     <parent>
         <!-- Der Generator funktioniert nur fr den Scheduler, weil dessen C++-Klassen vorausgesetzt werden.  -->
-        <groupId>com.sos.scheduler.kernel</groupId>
-        <artifactId>com.sos.scheduler.kernel.pom</artifactId>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine.pom</artifactId>
         <version>2.1.1-SNAPSHOT</version>
     </parent>
     
-    <groupId>com.sos.scheduler.kernel</groupId>
-    <artifactId>com.sos.scheduler.kernel.cplusplus</artifactId>
+    <groupId>com.sos.scheduler.engine</groupId>
+    <artifactId>com.sos.scheduler.engine.cplusplus</artifactId>
     <version>2.1.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>

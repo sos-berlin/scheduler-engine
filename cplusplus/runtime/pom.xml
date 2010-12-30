@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.sos.scheduler.kernel</groupId>
-        <artifactId>com.sos.scheduler.kernel.cplusplus</artifactId>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine.cplusplus</artifactId>
         <version>2.1.1-SNAPSHOT</version>
     </parent>
     
-    <artifactId>com.sos.scheduler.kernel.cplusplus.runtime</artifactId>
+    <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
     <name>${project.artifactId}</name>
     
     <inceptionYear>2010</inceptionYear>
