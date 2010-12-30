@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.Platform;
 import java.io.StringWriter;
 import org.junit.Test;
 

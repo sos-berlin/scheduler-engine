@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.kernel.util.StringValue;
 import org.junit.*;
-import static org.junit.Assert.*;
 
 
 public class StringValueTest {

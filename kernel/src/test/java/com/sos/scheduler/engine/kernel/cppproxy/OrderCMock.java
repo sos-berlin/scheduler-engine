@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
-import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
 import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
 

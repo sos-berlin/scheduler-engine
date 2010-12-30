@@ -1,8 +1,5 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
-import com.sos.scheduler.engine.kernel.scripting.UnsupportedScriptLanguageException;
-import com.sos.scheduler.engine.kernel.scripting.ModuleInstance;
-import com.sos.scheduler.engine.kernel.scripting.InvalidScriptException;
 import org.junit.Test;
 import com.sos.scheduler.engine.kernel.LogMock;
 

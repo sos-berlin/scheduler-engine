@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
-import com.sos.scheduler.engine.kernel.scripting.ScriptFunction;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import java.io.IOException;

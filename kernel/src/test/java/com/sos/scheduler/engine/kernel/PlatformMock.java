@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC;
 import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logCMock;

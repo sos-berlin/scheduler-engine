@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.ObjectEvent;
 
 

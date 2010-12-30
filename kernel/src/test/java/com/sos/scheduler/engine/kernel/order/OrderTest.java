@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.PlatformMock;
 import com.sos.scheduler.engine.kernel.cppproxy.*;

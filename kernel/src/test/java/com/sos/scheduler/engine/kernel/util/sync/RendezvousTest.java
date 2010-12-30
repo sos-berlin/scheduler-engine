@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.util.sync;
 
-import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
 import com.sos.scheduler.engine.kernel.util.Time;
 import org.junit.*;
 import static org.junit.Assert.*;

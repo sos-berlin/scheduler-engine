@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.kernel;
 
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
-import com.sos.scheduler.engine.kernel.job.Job;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.main.MainContext;
