@@ -3058,6 +3058,13 @@ void Spooler::suspend_machine()
 #   endif
 }
 
+//-----------------------------------------------------------------------------Spooler::execute_xml
+
+string Spooler::execute_xml(const string& xml_command) {
+    Command_processor cp ( _spooler, Security::seclev_all );
+    return cp.execute(xml_command);
+}
+
 //-------------------------------------------------------------------------Spooler::cmd_load_config
 
 void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& source_filename )  

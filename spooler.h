@@ -438,6 +438,7 @@ struct Spooler : Object,
     void                        assign_stdout               ();
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
+    string                      execute_xml                 (const string& xml);
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();

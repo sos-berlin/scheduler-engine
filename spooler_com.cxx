@@ -4255,6 +4255,7 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
 
     try
     {
+        //TODO Spooler::execute_xml() nutzen!
         Command_processor cp ( _spooler, Security::seclev_all );
         hr = String_to_bstr( cp.execute( string_from_bstr( xml ) ), result );
     }
