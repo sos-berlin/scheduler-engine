@@ -8,7 +8,7 @@ import static org.apache.commons.io.FileUtils.*;
 
 public class Environment {
     private static final File workingDirectory = new File(System.getProperty("user.dir"));
-    private static final String moduleBase = "../core-cpp/prod/" + bin() + "/" + "scheduler";
+    private static final String moduleBase = "../kernel-cpp/prod/" + bin() + "/" + "scheduler";
     private static final OperatingSystemHelper os = OperatingSystemHelper.singleton;
     private static final File schedulerModuleFile = new File(workingDirectory, os.makeModuleFilename(moduleBase)).getAbsoluteFile();
     private static final File schedulerExeFile = new File(workingDirectory, os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
