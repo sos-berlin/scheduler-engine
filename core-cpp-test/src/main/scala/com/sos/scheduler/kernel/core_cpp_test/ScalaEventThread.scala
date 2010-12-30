@@ -1,9 +1,9 @@
-package com.sos.scheduler.kernel.core_cpp_test
+package com.sos.scheduler.engine.kernelcpptest
 
-import com.sos.scheduler.kernel.core.event.Event
-import com.sos.scheduler.kernel.core.event.EventPredicate
-import com.sos.scheduler.kernel.core.main.event.EventThread
-import com.sos.scheduler.kernel.core.util.Time
+import com.sos.scheduler.engine.kernel.event.Event
+import com.sos.scheduler.engine.kernel.event.EventPredicate
+import com.sos.scheduler.engine.kernel.main.event.EventThread
+import com.sos.scheduler.engine.kernel.util.Time
 
 
 abstract class ScalaEventThread extends EventThread

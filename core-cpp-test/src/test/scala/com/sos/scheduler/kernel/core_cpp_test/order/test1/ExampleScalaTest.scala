@@ -1,11 +1,11 @@
-package com.sos.scheduler.kernel.core_cpp_test.order.test1
+package com.sos.scheduler.engine.kernelcpptest.order.test1
 
-import com.sos.scheduler.kernel.core.order.OrderEvent
-import com.sos.scheduler.kernel.core.order.OrderFinishedEvent
-import com.sos.scheduler.kernel.core.order.OrderStateChangeEvent
-import com.sos.scheduler.kernel.core.order.OrderTouchedEvent
-import com.sos.scheduler.kernel.core.util.Time
-import com.sos.scheduler.kernel.core_cpp_test._
+import com.sos.scheduler.engine.kernel.order.OrderEvent
+import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
+import com.sos.scheduler.engine.kernel.order.OrderStateChangeEvent
+import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent
+import com.sos.scheduler.engine.kernel.util.Time
+import com.sos.scheduler.engine.kernelcpptest._
 import org.junit._
 
 

@@ -1,4 +1,4 @@
-package com.sos.scheduler.kernel.core_cpp_test
+package com.sos.scheduler.engine.kernelcpptest
 
 import org.junit._
 

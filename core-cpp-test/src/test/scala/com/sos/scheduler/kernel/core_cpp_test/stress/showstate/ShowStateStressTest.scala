@@ -1,7 +1,7 @@
-package com.sos.scheduler.kernel.core_cpp_test.stress.showstate
+package com.sos.scheduler.engine.kernelcpptest.stress.showstate
 
-import com.sos.scheduler.kernel.core_cpp_test.SchedulerTest
-import com.sos.scheduler.kernel.cplusplus.scalautil.io.Util._
+import com.sos.scheduler.engine.kernelcpptest.SchedulerTest
+import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
 import java.io._
 import java.net._
 import java.nio.charset.Charset
