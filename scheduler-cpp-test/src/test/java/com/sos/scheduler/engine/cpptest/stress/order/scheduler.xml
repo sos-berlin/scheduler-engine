@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <jobs>
+            <job name="job.1" order="yes" stop_on_error="no">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    return true
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="job.2" order="yes" stop_on_error="no">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    var order = spooler_task.order
+    var newOrder = spooler.create_order()
+    newOrder.id = order.id
+    order.job_chain.add_or_replace_order(newOrder)
+    return true
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
+        </jobs>
+
+        <job_chains>
+            <job_chain name="myJobChain" orders_recoverable="no" max_orders="3">
+                <job_chain_node     state="state.1" job="job.1"/>
+                <job_chain_node     state="state.2" job="job.2"/>
+                <job_chain_node.end state="state.end"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="myJobChain" id="id.1"/>
+        </commands>
+    </config>
+</spooler>

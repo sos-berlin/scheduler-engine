@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <security>
+            <allowed_host host="localhost" level="info"/>
+        </security>
+    </config>
+</spooler>
