@@ -1,4 +1,4 @@
-package com.sos.scheduler.kernel.core.scripting;
+package com.sos.scheduler.engine.kernel.scripting;
 
 
 import org.junit.BeforeClass;

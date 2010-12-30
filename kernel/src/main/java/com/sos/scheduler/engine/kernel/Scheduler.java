@@ -8,9 +8,9 @@ import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.main.MainContext;
 import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.ThreadLock;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import org.apache.log4j.Logger;
 
 

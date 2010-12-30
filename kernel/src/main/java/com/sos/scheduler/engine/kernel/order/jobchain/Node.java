@@ -6,8 +6,8 @@ import com.sos.scheduler.engine.kernel.cppproxy.NodeC;
 import com.sos.scheduler.engine.kernel.cppproxy.NodeCI;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;
 import com.sos.scheduler.engine.kernel.order.OrderState;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 
 /**
  *

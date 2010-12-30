@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.kernel.order.jobchain;
 import com.sos.scheduler.engine.kernel.order.OrderQueue;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 
 
 public class OrderQueueNode extends Node {

@@ -4,9 +4,9 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.*;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.SisterType;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 @ForCpp

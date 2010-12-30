@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.kernel.order.OrderQueue;
-import com.sos.scheduler.kernel.cplusplus.runtime.CppProxyWithSister;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.CppClass;
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 
 
 @CppClass(clas="sos::scheduler::order::Order_queue", directory="scheduler", include="spooler.h")

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.main.event;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
-import com.sos.scheduler.kernel.cplusplus.runtime.ThreadLock;
+import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
 
 
 public class EventRendezvous extends Rendezvous<Event,Object>

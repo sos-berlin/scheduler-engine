@@ -3,9 +3,9 @@ package com.sos.scheduler.engine.kernel.job;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.cppproxy.JobC;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.SisterType;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 @ForCpp

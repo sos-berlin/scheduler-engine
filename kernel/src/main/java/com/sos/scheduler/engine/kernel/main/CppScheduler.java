@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.main;
 
-import com.sos.scheduler.kernel.cplusplus.runtime.ThreadLock;
+import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
 
 
 public class CppScheduler {

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.log;
 
 import com.sos.scheduler.engine.kernel.log.LogEvent;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 @ForCpp

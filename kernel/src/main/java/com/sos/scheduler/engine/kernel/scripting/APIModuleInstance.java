@@ -21,7 +21,7 @@ package com.sos.scheduler.engine.kernel.scripting;
  * </div>
  */
 
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import java.util.Arrays;
 import java.util.List;
 

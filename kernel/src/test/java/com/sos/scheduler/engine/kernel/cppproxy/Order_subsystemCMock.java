@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
-import com.sos.scheduler.kernel.cplusplus.runtime.CppProxyImpl;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import java.util.ArrayList;
 
 

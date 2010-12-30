@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.kernel.*;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.log4j.*;

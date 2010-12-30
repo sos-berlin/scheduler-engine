@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel;
 
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.kernel.cplusplus.runtime.Sister;
-import com.sos.scheduler.kernel.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 /** Minimale Voraussetzungen für Scheduler-bewusste Objekte.
