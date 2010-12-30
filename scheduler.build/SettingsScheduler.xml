@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<settings name="settings" >
+
+	<copyright>Copyright (c) 2007-2010 SOS GmbH Berlin - www.sos-berlin.com -</copyright>
+	<echoline>------------------------------------------------------------------------------------------------------------------</echoline>
+	
+	
+	<!-- Arbeitsverzeichnis -->
+	<tempdir>temp</tempdir>
+	
+	<!-- root-folder für die cpp-Sourcen des jobschedulers -->
+	<sources>../../prod</sources>
+	
+	<!-- root-folder für die java-Anwendungen -->
+	<javahome>../</javahome>
+
+	<!-- Eigenschaften des cpp-Generators -->
+	<javabridge>
+		<jarfile>../_jars/JavaCppGenerator.jar</jarfile>
+		<mainclass>com.sosberlin.javacppgenerator.Main</mainclass>
+	</javabridge>
+	
+	<!-- Eigenschaften für perl-scripte
+	Mittelfristig sollten die perl-scripte durch andere Technologien ersetzt werden ...
+	-->
+	<perl>
+		<script>
+			<embeddedfiles>../zschimmer/files_to_c++.pl</embeddedfiles>
+			<keywordtoxml>../scheduler_keyword_to_xml.pl</keywordtoxml>
+		</script>
+	</perl>
+	
+</settings>

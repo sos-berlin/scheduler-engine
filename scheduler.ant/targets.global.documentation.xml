@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Targets für die Generierung von Dokumentationen -->
+<project name="targets.documentation" basedir="." xmlns:doxygen="antlib:org.doxygen.tools">
+
+	<property file="../scheduler.ant/properties.global.sos" />
+
+	<!--
+	Test für die Erzeugung einer doxygen Dokumentation
+	-->
+	<target name="doxygen.test.with.defaults">
+		<antcall target="-doxy.documentation.with.defaults">
+			<param name="doxygen.input.directory" value="${basedir}/src" />
+			<param name="doxygen.output.directory" value="c:/temp" />
+		</antcall>
+	</target>
+
+	<!-- 
+	doxygen Dokumentation ohne Konfigurationsdatei erstellen\\
+	Verwendet für die Generierung der Dokumentation feste defaults.
+	* benötigt ant-doxygen.jar im classpath\\
+	-->
+	<target name="-doxy.documentation.with.defaults">
+
+		<echo message="generating documentation for ${ant.project.name}" />
+		<echo message="doxygen.input.directory=${doxygen.input.directory}" />
+		<echo message="doxygen.output.directory=${doxygen.output.directory}" />
+		<echo message="doxygen.app.directory=${doxygen.app.directory}" />
+		<echo message="doxygen.input.recursive=${doxygen.input.recursive}" />
+
+		<delete dir="${doxygen.output.directory}/html/" />
+		<mkdir dir="${doxygen.output.directory}" />
+
+		<doxygen:doxygen doxygenpath="${doxygen.app.directory}/bin/doxygen.exe">
+			<property name="DOXYFILE_ENCODING" value="ISO-8859-1" />
+			<property name="PROJECT_NAME" value="${ant.project.name}" />
+			<property name="PROJECT_NUMBER" value="1.0" />
+			<property name="OUTPUT_DIRECTORY"
+			          value="${doxygen.output.directory}" />
+			<property name="CREATE_SUBDIRS" value="NO" />
+			<property name="OUTPUT_LANGUAGE" value="English" />
+			<property name="BRIEF_MEMBER_DESC" value="YES" />
+			<property name="REPEAT_BRIEF" value="YES" />
+			<property name="ABBREVIATE_BRIEF" value="" />
+			<property name="ALWAYS_DETAILED_SEC" value="NO" />
+			<property name="INLINE_INHERITED_MEMB" value="NO" />
+			<property name="FULL_PATH_NAMES" value="NO" />
+			<property name="STRIP_FROM_PATH" value="${basedir}" />
+			<property name="STRIP_FROM_INC_PATH" value="" />
+			<property name="SHORT_NAMES" value="NO" />
+			<property name="JAVADOC_AUTOBRIEF" value="NO" />
+			<property name="QT_AUTOBRIEF" value="NO" />
+			<property name="MULTILINE_CPP_IS_BRIEF" value="NO" />
+			<property name="DETAILS_AT_TOP" value="NO" />
+			<property name="INHERIT_DOCS" value="YES" />
+			<property name="SEPARATE_MEMBER_PAGES" value="NO" />
+			<property name="TAB_SIZE" value="3" />
+			<property name="ALIASES" value="" />
+			<property name="OPTIMIZE_OUTPUT_FOR_C" value="NO" />
+			<property name="OPTIMIZE_OUTPUT_JAVA" value="YES" />
+			<property name="OPTIMIZE_FOR_FORTRAN" value="NO" />
+			<property name="OPTIMIZE_OUTPUT_VHDL" value="NO" />
+			<property name="BUILTIN_STL_SUPPORT" value="NO" />
+			<property name="CPP_CLI_SUPPORT" value="NO" />
+			<property name="SIP_SUPPORT" value="NO" />
+			<property name="DISTRIBUTE_GROUP_DOC" value="NO" />
+			<property name="SUBGROUPING" value="YES" />
+			<property name="TYPEDEF_HIDES_STRUCT" value="NO" />
+			<property name="EXTRACT_ALL" value="NO" />
+			<property name="EXTRACT_PRIVATE" value="NO" />
+			<property name="EXTRACT_STATIC" value="NO" />
+			<property name="EXTRACT_LOCAL_CLASSES" value="YES" />
+			<property name="EXTRACT_LOCAL_METHODS" value="NO" />
+			<property name="EXTRACT_ANON_NSPACES" value="NO" />
+			<property name="HIDE_UNDOC_MEMBERS" value="YES" />
+			<property name="HIDE_UNDOC_CLASSES" value="YES" />
+			<property name="HIDE_FRIEND_COMPOUNDS" value="NO" />
+			<property name="HIDE_IN_BODY_DOCS" value="NO" />
+			<property name="INTERNAL_DOCS" value="NO" />
+			<property name="CASE_SENSE_NAMES" value="NO" />
+			<property name="HIDE_SCOPE_NAMES" value="NO" />
+			<property name="SHOW_INCLUDE_FILES" value="YES" />
+			<property name="INLINE_INFO" value="YES" />
+			<property name="SORT_MEMBER_DOCS" value="YES" />
+			<property name="SORT_BRIEF_DOCS" value="NO" />
+			<property name="SORT_GROUP_NAMES" value="NO" />
+			<property name="SORT_BY_SCOPE_NAME" value="NO" />
+			<property name="GENERATE_TODOLIST" value="YES" />
+			<property name="GENERATE_TESTLIST" value="YES" />
+			<property name="GENERATE_BUGLIST" value="YES" />
+			<property name="GENERATE_DEPRECATEDLIST" value="YES" />
+			<property name="ENABLED_SECTIONS" value="" />
+			<property name="MAX_INITIALIZER_LINES" value="30" />
+			<property name="SHOW_USED_FILES" value="YES" />
+			<property name="SHOW_DIRECTORIES" value="NO" />
+			<property name="FILE_VERSION_FILTER" value="" />
+			<property name="QUIET" value="NO" />
+			<property name="WARNINGS" value="YES" />
+			<property name="WARN_IF_UNDOCUMENTED" value="YES" />
+			<property name="WARN_IF_DOC_ERROR" value="YES" />
+			<property name="WARN_NO_PARAMDOC" value="NO" />
+			<property name="WARN_FORMAT" value="$file:$line: $text" />
+			<property name="WARN_LOGFILE"
+			          value="${doxygen.output.directory}/doxygen-stderr.txt" />
+			<property name="INPUT" value="${doxygen.input.directory}" />
+			<property name="INPUT_ENCODING" value="ISO-8859-1" />
+			<property name="FILE_PATTERNS" value="" />
+			<property name="RECURSIVE" value="${doxygen.input.recursive}" />
+			<property name="EXCLUDE" value="" />
+			<property name="EXCLUDE_SYMLINKS" value="NO" />
+			<property name="EXCLUDE_PATTERNS" value="" />
+			<property name="EXCLUDE_SYMBOLS" value="" />
+			<property name="EXAMPLE_PATH" value="" />
+			<property name="EXAMPLE_PATTERNS" value="" />
+			<property name="EXAMPLE_RECURSIVE" value="NO" />
+			<property name="IMAGE_PATH" value="" />
+			<property name="INPUT_FILTER" value="" />
+			<property name="FILTER_PATTERNS" value="" />
+			<property name="FILTER_SOURCE_FILES" value="NO" />
+			<property name="SOURCE_BROWSER" value="YES" />
+			<property name="INLINE_SOURCES" value="NO" />
+			<property name="STRIP_CODE_COMMENTS" value="YES" />
+			<property name="REFERENCED_BY_RELATION" value="YES" />
+			<property name="REFERENCES_RELATION" value="YES" />
+			<property name="REFERENCES_LINK_SOURCE" value="YES" />
+			<property name="USE_HTAGS" value="NO" />
+			<property name="VERBATIM_HEADERS" value="YES" />
+			<property name="ALPHABETICAL_INDEX" value="NO" />
+			<property name="COLS_IN_ALPHA_INDEX" value="5" />
+			<property name="IGNORE_PREFIX" value="" />
+			<property name="GENERATE_HTML" value="YES" />
+			<property name="HTML_OUTPUT" value="html" />
+			<property name="HTML_FILE_EXTENSION" value=".html" />
+			<property name="HTML_HEADER" value="" />
+			<property name="HTML_FOOTER" value="" />
+			<property name="HTML_STYLESHEET" value="" />
+			<property name="HTML_ALIGN_MEMBERS" value="YES" />
+			<property name="GENERATE_HTMLHELP" value="NO" />
+			<property name="GENERATE_DOCSET" value="NO" />
+			<property name="DOCSET_FEEDNAME" value="generated docs" />
+			<property name="DOCSET_BUNDLE_ID" value="org.doxygen.Project" />
+			<property name="HTML_DYNAMIC_SECTIONS" value="NO" />
+			<property name="CHM_FILE" value="" />
+			<property name="HHC_LOCATION" value="" />
+			<property name="GENERATE_CHI" value="NO" />
+			<property name="BINARY_TOC" value="NO" />
+			<property name="TOC_EXPAND" value="NO" />
+			<property name="DISABLE_INDEX" value="NO" />
+			<property name="ENUM_VALUES_PER_LINE" value="4" />
+			<property name="GENERATE_TREEVIEW" value="NO" />
+			<property name="TREEVIEW_WIDTH" value="250" />
+			<property name="GENERATE_LATEX" value="NO" />
+			<property name="LATEX_OUTPUT" value="latex" />
+			<property name="LATEX_CMD_NAME" value="latex" />
+			<property name="MAKEINDEX_CMD_NAME" value="makeindex" />
+			<property name="COMPACT_LATEX" value="NO" />
+			<property name="PAPER_TYPE" value="a4wide" />
+			<property name="EXTRA_PACKAGES" value="" />
+			<property name="LATEX_HEADER" value="" />
+			<property name="PDF_HYPERLINKS" value="YES" />
+			<property name="USE_PDFLATEX" value="YES" />
+			<property name="LATEX_BATCHMODE" value="NO" />
+			<property name="LATEX_HIDE_INDICES" value="NO" />
+			<property name="GENERATE_RTF" value="NO" />
+			<property name="RTF_OUTPUT" value="rtf" />
+			<property name="COMPACT_RTF" value="NO" />
+			<property name="RTF_HYPERLINKS" value="NO" />
+			<property name="RTF_STYLESHEET_FILE" value="" />
+			<property name="RTF_EXTENSIONS_FILE" value="" />
+			<property name="GENERATE_MAN" value="NO" />
+			<property name="MAN_OUTPUT" value="man" />
+			<property name="MAN_EXTENSION" value=".3" />
+			<property name="MAN_LINKS" value="NO" />
+			<property name="GENERATE_XML" value="NO" />
+			<property name="XML_OUTPUT" value="xml" />
+			<property name="XML_SCHEMA" value="" />
+			<property name="XML_DTD" value="" />
+			<property name="XML_PROGRAMLISTING" value="YES" />
+			<property name="GENERATE_AUTOGEN_DEF" value="NO" />
+			<property name="GENERATE_PERLMOD" value="NO" />
+			<property name="PERLMOD_LATEX" value="NO" />
+			<property name="PERLMOD_PRETTY" value="YES" />
+			<property name="PERLMOD_MAKEVAR_PREFIX" value="" />
+			<property name="ENABLE_PREPROCESSING" value="YES" />
+			<property name="MACRO_EXPANSION" value="NO" />
+			<property name="EXPAND_ONLY_PREDEF" value="NO" />
+			<property name="SEARCH_INCLUDES" value="YES" />
+			<property name="INCLUDE_PATH" value="" />
+			<property name="INCLUDE_FILE_PATTERNS" value="" />
+			<property name="PREDEFINED" value="" />
+			<property name="EXPAND_AS_DEFINED" value="" />
+			<property name="SKIP_FUNCTION_MACROS" value="YES" />
+			<property name="TAGFILES" value="" />
+			<property name="GENERATE_TAGFILE"
+			          value="${doxygen.output.directory}/${ant.project.name}-tagfile.xml" />
+			<property name="ALLEXTERNALS" value="NO" />
+			<property name="EXTERNAL_GROUPS" value="YES" />
+			<property name="PERL_PATH" value="/usr/bin/perl" />
+			<property name="CLASS_DIAGRAMS" value="YES" />
+			<property name="MSCGEN_PATH" value="" />
+			<property name="HIDE_UNDOC_RELATIONS" value="YES" />
+			<property name="HAVE_DOT" value="NO" />
+			<property name="CLASS_GRAPH" value="YES" />
+			<property name="COLLABORATION_GRAPH" value="YES" />
+			<property name="GROUP_GRAPHS" value="YES" />
+			<property name="UML_LOOK" value="NO" />
+			<property name="TEMPLATE_RELATIONS" value="NO" />
+			<property name="INCLUDE_GRAPH" value="YES" />
+			<property name="INCLUDED_BY_GRAPH" value="YES" />
+			<property name="CALL_GRAPH" value="NO" />
+			<property name="CALLER_GRAPH" value="NO" />
+			<property name="GRAPHICAL_HIERARCHY" value="YES" />
+			<property name="DIRECTORY_GRAPH" value="YES" />
+			<property name="DOT_IMAGE_FORMAT" value="png" />
+			<property name="DOT_PATH" value="" />
+			<property name="DOTFILE_DIRS" value="" />
+			<property name="DOT_GRAPH_MAX_NODES" value="50" />
+			<property name="MAX_DOT_GRAPH_DEPTH" value="0" />
+			<property name="DOT_TRANSPARENT" value="YES" />
+			<property name="DOT_MULTI_TARGETS" value="NO" />
+			<property name="GENERATE_LEGEND" value="YES" />
+			<property name="DOT_CLEANUP" value="YES" />
+			<property name="SEARCHENGINE" value="NO" />
+			<property name="HIDE_UNDOC_RELATIONS" value="YES" />
+			<property name="HAVE_DOT" value="NO" />
+			<property name="CLASS_GRAPH" value="YES" />
+			<property name="COLLABORATION_GRAPH" value="YES" />
+			<property name="GROUP_GRAPHS" value="YES" />
+			<property name="UML_LOOK" value="NO" />
+			<property name="TEMPLATE_RELATIONS" value="NO" />
+			<property name="INCLUDE_GRAPH" value="YES" />
+			<property name="INCLUDED_BY_GRAPH" value="YES" />
+			<property name="CALL_GRAPH" value="NO" />
+			<property name="CALLER_GRAPH" value="NO" />
+			<property name="GRAPHICAL_HIERARCHY" value="YES" />
+			<property name="DIRECTORY_GRAPH" value="YES" />
+			<property name="DOT_IMAGE_FORMAT" value="png" />
+			<property name="DOT_PATH" value="" />
+			<property name="DOTFILE_DIRS" value="" />
+			<property name="DOT_GRAPH_MAX_NODES" value="50" />
+			<property name="MAX_DOT_GRAPH_DEPTH" value="0" />
+			<property name="DOT_TRANSPARENT" value="YES" />
+			<property name="DOT_MULTI_TARGETS" value="NO" />
+			<property name="GENERATE_LEGEND" value="YES" />
+			<property name="DOT_CLEANUP" value="YES" />
+			<property name="SEARCHENGINE" value="NO" />
+		</doxygen:doxygen>
+
+		<echo message="please call ${doxygen.output.directory}/html/index.html to see the documentation." />
+
+	</target>
+
+	<!--
+	doxygen Dokumentation auf Basis eines Konfigurationsfiles erstellen\\
+	* benötigt ant-doxygen.jar im classpath\\
+	-->
+	<target name="-doxy.documentation.from.config">
+
+		<echo message="generating documentation for ${ant.project.name}" />
+		<echo message="input directory is ${basedir}/src" />
+
+		<delete dir="${doxygen.output.directory}/html/" />
+		<mkdir dir="${doxygen.output.directory}" />
+		<doxygen:doxygen doxygenpath="${doxygen.app.directory}/bin/doxygen.cmd"
+		         configfilename="doxygen.default.doxyfile" />
+		<echo message="please call ${doxygen.output.directory}/html/index.html to see the documentation." />
+
+	</target>
+
+</project>

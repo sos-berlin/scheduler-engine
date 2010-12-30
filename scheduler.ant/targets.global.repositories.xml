@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+Targets für den Zugriff auf repositories
+-->
+<project name="targets.repository" basedir=".">
+
+	<property name="svnant.lib.dir"      			value="../scheduler.ant/ext" />
+	<property name="svnant.version"      			value="1.3.0" />
+
+	<!--
+	setup subversion environment for ant                                    
+	-->
+	<target name="-svn.prepare">
+
+			<echo message="expecting svn-ant libraries in folder ${svnant.lib.dir}" />
+			<path id="svn.ant.lib.dir">
+				<fileset dir="${svnant.lib.dir}/svnant-${svnant.version}/lib">
+					<include name="**/*.jar" />
+				</fileset>
+				<!-- 
+			     Wird das mit eingebunden, dann brauchen die Attribute user/password nicht angegeben zu werden    
+			     <fileset dir="${svnant.lib.dir}/org.tmatesoft.svn_1.3.2.standalone/svnkit-1.3.2.6267">      
+			      <include name="**/*.jar" />
+			     </fileset>
+			     -->
+			</path>
+
+			<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svn.ant.lib.dir" />
+
+	</target>
+
+	<!--
+	Ermitteln der HEAD-revison\\
+	Das Ergebnis wird auf .:svn.revision.head:. geschrieben.                                    
+	-->
+	<target name="-svn.revision.head.set" depends="-svn.prepare">
+		<echo message="get HEAD revision from ${svn.url.devel}" />
+		<svn javahl="no" svnkit="on" username="${svn.user}" password="${svn.password}">
+	        <info target="${svn.url.devel}" />
+	    </svn>
+	    <property name="svn.revision.head" value="${svn.info.lastRev}" />
+	    <echo message="svn.revision.head = ${svn.revision.head}" />
+	</target>
+
+	<!--
+	Release-Version auf dem Entwicklungszweig erzeugen
+	-->
+	<target	name="-svn.release.create" depends="-svn.prepare">
+		<tstamp>
+			<format property="svn.revision.date" pattern="yyyy-MM-dd" />
+		</tstamp>     
+		
+	    <property 
+	    	name="revision.path" 
+	    	value="${svn.url.release}/${svn.project}_${svn.revision.version}" 
+	    />
+		
+	    <property 
+	    	name="revision.tag" 
+	    	value="${svn.project}_${svn.revision.version}_${svn.revision.no}_${svn.revision.date}" 
+	    />
+		
+	    <echo message="creating ${revision.path} from revision ${svn.revision.no}" />
+	    <echo message="tagged with ${revision.tag}" />
+	    <echo message="source url is ${svn.url.devel}" />
+		
+		<svn javahl="no" svnkit="on" username="${svn.user}" password="${svn.password}">
+	        <copy 
+	        	srcUrl="${svn.url.devel}" 
+	        	destUrl="${revision.path}"
+	        	message="${revision.tag}"
+	        	revision="${svn.revision.no}"
+	        />
+	    </svn>
+		<!--
+	    -->
+		
+		<!-- Die erzeugte Versionsnummer im property file protokollieren -->
+		<echo>update of file ${basedir}/info.${ant.project.name}:</echo>
+		<echo>info.release.version = ${svn.revision.version}</echo>
+		<propertyfile file="${basedir}/info.${ant.project.name}">
+			<entry key="info.release.version" value="${svn.revision.version}" />
+			<entry key="info.release.folder" value="${revision.tag}" />
+		</propertyfile>
+
+	</target>
+
+	<!--
+	Aktualisiert die Arbeitskopie des Projektes mit der HEAD-revision des repositories
+	-->
+	<target name="-svn.update" 
+			depends="-svn.prepare"
+			if="svn.dir.local"
+	>
+		<echo message="update working copy ${svn.dir.local} with contents of repository" />
+		<svn javahl="no" svnkit="on" username="${svn.user}" password="${svn.password}">
+			<update dir="${svn.dir.local}" />
+	    </svn>
+	</target>
+
+	<!--
+	Schreibt den aktuellen Stand der Arbeitskopie in das repository
+	-->
+	<target 
+		name="-svn.commit" 
+		depends="-svn.prepare" 
+		if="svn.dir.local"
+	>
+		<echo message="commit the changes from working copy ${svn.dir.local} to repository" />
+		<svn javahl="no" svnkit="on" username="${svn.user}" password="${svn.password}">
+			<commit dir="${svn.dir.local}" message="${svn.message}" />
+	    </svn>
+	</target>
+	
+</project>
+

@@ -1,0 +1,221 @@
+<!--
+Targets für den Zugriff auf remote server
+-->
+<project name="targets.global.remote" basedir=".">
+
+	<!--
+	benötigt die folgenden Bibliothekn im classpath:
+	commons-net-x.x.x.jar            für ftp
+   jakarta-oro-x.x.x.jar            für ftp
+   jsch-oro-x.x.x.jar               für sshexec
+	
+	siehe folder extended.
+	-->
+
+	<!-- ======================================================================= -->
+	<!-- TEST targets                                                            -->
+	<!-- ======================================================================= -->
+	
+	<!--
+	-->
+	<target name="test.ftp" description="Test-Target für FTP-Kommunikation">
+		<antcall target="-ftp.transfer">
+			<param name="remote.server" value="bes050.eu.schering.net" />
+			<param name="remote.user" value="sag" />
+			<param name="remote.password" value="ada_bas" />
+			<param name="remote.localdir" value="testdata" />
+			<param name="remote.remotedir" value="/tmp" />
+			<!--
+         wahlweise können die Angaben aus ftp.prepare überschrieben werden ...
+         -->
+		</antcall>
+	</target>
+
+	<target name="test.sftp" description="Test-Target für die Datenübertragung via SFtp">
+		<antcall target="-scp.transfer.password">
+			<param name="remote.server" value="bes050.eu.schering.net" />
+			<param name="remote.user" value="sag" />
+			<param name="remote.password" value="ada_bas" />
+			<param name="remote.localdir" value="testdata" />
+			<param name="remote.remotedir" value="/tmp" />
+			<!--
+	         wahlweise können die Angaben aus ftp.prepare überschrieben werden ...
+	         -->
+		</antcall>
+	</target>
+
+	<!--
+	Es wird sowohl der Zugang per Password als auch der per Keyfile getestet
+	-->
+	<target name="test.ssh" description="Test-Target für die Ausführung von Kommandos via SSH">
+		<antcall target="-ssh.exec.password">
+			<param name="remote.server" value="monk.sos" />
+			<param name="remote.user" value="ss" />
+			<param name="remote.password" value="ss" />
+			<param name="ssh.command" value="pwd" />
+		</antcall>
+		<antcall target="-ssh.exec.keyfile">
+			<param name="remote.server" value="monk.sos" />
+			<param name="remote.user" value="ss" />
+			<param name="ssh.keyfile"
+			       value="C:/Users/schaedi/Documents/ssh/ss.ppk" />
+			<param name="ssh.command" value="pwd" />
+		</antcall>
+	</target>
+
+	<!--
+	setup environment for all remote tasks
+	-->
+	<target name="-remote.prepare">
+
+		<!-- müssen überschrieben werden -->
+		<property name="remote.server" value="" />
+		<property name="remote.user" value="" />
+		<property name="remote.password" value="" />
+		<property name="remote.localdir" value="" />
+		<property name="remote.remotedir" value="" />
+
+		<!-- können überschrieben werden -->
+		<property name="remote.umask" value="777" />
+		<property name="remote.binary" value="true" />
+		<property name="remote.verbose" value="true" />
+		<property name="remote.include" value="**/*" />
+		<property name="remote.exclude" value="" />
+
+	</target>
+
+   	<!--
+	setup environment for ssh
+	-->
+   <target name="-ssh.prepare" depends="-remote.prepare">
+      <property name="ssh.command" value="" />
+      <property name="ssh.keyfile" value="" />
+      <property name="ssh.failonerror" value="true" />
+   </target>
+
+   	<!--
+	builds the fileset for transfer
+	-->
+	<target name="-remote.fileset">
+		<fileset id="remote.fileset"
+		         dir="${remote.localdir}"
+		         casesensitive="yes">
+			<include name="${remote.include}" />
+			<exclude name="${remote.exclude}" />
+		</fileset>
+	</target>
+
+   	<!--
+	Übertragung eines filesets an einen entfernten Server per Ftp
+	-->
+	<target name="-ftp.transfer" depends="-remote.prepare, -remote.fileset">
+
+		<echo message="use ftp-protocol transferring data ..." />
+		<echo message="localdir = ${remote.localdir}" />
+		<echo message="remotedir = ${remote.remotedir}" />
+		<echo message="includes = ${remote.include}" />
+		<echo message="excludes = ${remote.exclude}" />
+
+		<!-- directory anlegen -->
+		<ftp action="mkdir"
+		     remotedir="${remote.remotedir}"
+		     password="${remote.password}"
+		     server="${remote.server}"
+		     userid="${remote.user}">
+		</ftp>
+
+		<!-- files uebertragen -->
+		<ftp binary="${remote.binary}"
+		     remotedir="${remote.remotedir}"
+		     password="${remote.password}"
+		     server="${remote.server}"
+		     userid="${remote.user}"
+		     verbose="${remote.verbose}">
+			<fileset refid="remote.fileset" />
+		</ftp>
+
+		<!-- Rechte setzen -->
+		<ftp binary="true"
+		     action="chmod"
+		     chmod="${remote.umask}"
+		     password="${remote.password}"
+		     server="${remote.server}"
+		     verbose="${remote.verbose}"
+		     userid="${remote.user}">
+			<fileset refid="remote.fileset" />
+		</ftp>
+		<echo message="project-documentation transferred to server ${settings.server.documentation.ftp.name}" />
+
+	</target>
+
+   	<!--
+	Übertragung eines filesets an einen entfernten Server per Scp\\
+	* Die Anmeldung am remote server findet mit UserId/Passwort statt.\\
+	* Das Zielverzeichnis auf dem remote server wird ggf. zuvor angelegt.\\
+	* Nach der Übertragung werden alle Dateien im Zielverzeichnis mit den in remote.umask festgelegten Rechten versehen.\\
+	-->
+	<target name="-scp.transfer.password"
+	        depends="-ssh.prepare, -remote.fileset">
+		<echo message="use sftp-protocol transferring data ..." />
+		<echo message="localdir = ${remote.localdir}" />
+		<echo message="remotedir = ${remote.remotedir}" />
+		<echo message="includes = ${remote.include}" />
+		<echo message="excludes = ${remote.exclude}" />
+
+		<antcall target="-ssh.exec.password">
+			<param name="ssh.command" value="mkdir ${remote.remotedir}" />
+         <param name="ssh.failonerror" value="false" />
+         <param name="remote.verbose" value="false" />
+		</antcall>
+
+		<scp host="${remote.server}"
+		     trust="true"
+		     sftp="true"
+		     username="${remote.user}"
+		     password="${remote.password}"
+		     verbose="${remote.verbose}"
+		     todir="${remote.user}:${remote.password}@${remote.server}:${remote.remotedir}">
+			<fileset refid="remote.fileset" />
+		</scp>
+
+		<antcall target="-ssh.exec.password">
+			<param name="ssh.command"
+			       value="chmod ${remote.umask} ${remote.remotedir}/*" />
+         <param name="ssh.failonerror" value="false" />
+		</antcall>
+
+	</target>
+
+	<!--
+	Ausführen eines remote Kommandos via SSH\\
+	* Die Anmeldung erfolgt mit UserId/Keyfile.
+	-->
+	<target name="-ssh.exec.keyfile" depends="-ssh.prepare">
+		<echo>performing command to ${remote.server} via keyfile</echo>
+		<echo>command ${ssh.command}</echo>
+		<sshexec host="${remote.server}"
+		         trust="true"
+		         username="${remote.user}"
+		         keyfile="${ssh.keyfile}"
+		         verbose="${remote.verbose}"
+		         command="${ssh.command}" />
+	</target>
+
+	<!--
+	Ausführen eines remote Kommandos via SSH\\
+	* Die Anmeldung erfolgt mit UserId/Passwort.
+	-->
+	<target name="-ssh.exec.password" depends="-ssh.prepare">
+		<echo>performing command to ${remote.server} via password</echo>
+		<echo>command = ${ssh.command}</echo>
+		<echo>failonerror = ${ssh.failonerror}</echo>
+		<sshexec host="${remote.server}"
+		         trust="true"
+		         failonerror="${ssh.failonerror}"
+		         username="${remote.user}"
+		         password="${remote.password}"
+		         verbose="${remote.verbose}"
+		         command="${ssh.command}" />
+	</target>
+
+</project>

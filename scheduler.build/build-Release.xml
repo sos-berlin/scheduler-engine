@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns:fn="urn:http://www.w3.org/2005/02/xpath-functions"
+         name="com.sos.scheduler.compile.release"
+         basedir=".">
+   <property name="scheduler.src" value="c:/scheduler/scheduler.src.release/prod"/>
+   <target name="compile.msvc.env" description="Environment für C++ setzen">
+      <exec executable="vcvars32.bat"
+            dir="C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"/>
+   </target>
+   <target name="compile.fs.release" depends="compile.msvc.env"
+           description="compile fs (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/fs">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /Zi /nologo /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /GF /EHsc /MT /Fp&#34;.\Release/fs.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="Fsfile.cxx"/>
+         <arg value=".\rapid.cxx"/>
+         <arg value=".\rapidfil.cxx"/>
+         <env key="INCLUDE"
+              path=";C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.sos.spooler.jar.release" depends="compile.msvc.env"
+           description="compile sos.spooler.jar (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/scheduler">
+         <arg line="/c /EHsc  /errorReport:prompt"/>
+         <arg value=".\sos\spooler\Error.java"/>
+         <arg value=".\sos\spooler\Idispatch.java"/>
+         <arg value=".\sos\spooler\Job.java"/>
+         <arg value=".\sos\spooler\Job_chain.java"/>
+         <arg value=".\sos\spooler\Job_chain_node.java"/>
+         <arg value=".\sos\spooler\Job_impl.java"/>
+         <arg value=".\sos\spooler\Lock.java"/>
+         <arg value=".\sos\spooler\Locks.java"/>
+         <arg value=".\sos\spooler\Log.java"/>
+         <arg value=".\sos\spooler\Mail.java"/>
+         <arg value=".\sos\spooler\Monitor_impl.java"/>
+         <arg value=".\sos\spooler\Order.java"/>
+         <arg value=".\sos\spooler\Order_queue.java"/>
+         <arg value=".\sos\spooler\Process_class.java"/>
+         <arg value=".\sos\spooler\Process_classes.java"/>
+         <arg value=".\sos\spooler\Run_time.java"/>
+         <arg value=".\sos\spooler\Schedule.java"/>
+         <arg value=".\Scheduler_event.java"/>
+         <arg value=".\sos\spooler\Spooler.java"/>
+         <arg value=".\sos\spooler\Spooler_program.java"/>
+         <arg value=".\sos\spooler\Subprocess.java"/>
+         <arg value=".\sos\spooler\Supervisor_client.java"/>
+         <arg value=".\sos\spooler\Task.java"/>
+         <arg value=".\sos\spooler\Variable_set.java"/>
+         <arg value=".\sos\spooler\Web_service.java"/>
+         <arg value=".\sos\spooler\Web_service_operation.java"/>
+         <arg value=".\sos\spooler\Web_service_request.java"/>
+         <arg value=".\sos\spooler\Web_service_response.java"/>
+         <arg value=".\sos\spooler\Xslt_stylesheet.java"/>
+         <env key="INCLUDE"
+              path=";C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.kram.release" depends="compile.msvc.env"
+           description="compile kram (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/kram">
+         <arg line="/Yc&#34;precomp.h&#34; /c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /nologo /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /GF /EHsc /MT /Fp&#34;.\Release/kram.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="_precomp.cxx"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/kram">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /nologo /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /GF /EHsc /MT /Yu&#34;precomp.h&#34; /Fp&#34;.\Release/kram.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="a2a.cxx"/>
+         <arg value="area.cxx"/>
+         <arg value="assert.cxx"/>
+         <arg value="charset.cxx"/>
+         <arg value="cobfield.cxx"/>
+         <arg value="com_server.cxx"/>
+         <arg value="com_simple_standards.cxx"/>
+         <arg value="decimal.cxx"/>
+         <arg value="delphi.cxx"/>
+         <arg value="dynobj.cxx"/>
+         <arg value="e2a.cxx"/>
+         <arg value="ebc2iso.cxx"/>
+         <arg value="ebcdic.cxx"/>
+         <arg value="ebcdifld.cxx"/>
+         <arg value="env.cxx"/>
+         <arg value="exp10.cxx"/>
+         <arg value="frmfield.cxx"/>
+         <arg value="iso2ebc.cxx"/>
+         <arg value="itoa.cxx"/>
+         <arg value="licence.cxx"/>
+         <arg value="licenceg.cxx"/>
+         <arg value="log.cxx"/>
+         <arg value="logwin.cxx"/>
+         <arg value="msec.cxx"/>
+         <arg value="nullasgn.cxx"/>
+         <arg value="olereg.cxx"/>
+         <arg value="olestd.CXX"/>
+         <arg value="optional.cxx"/>
+         <arg value="pointer.cxx"/>
+         <arg value="profile.cxx"/>
+         <arg value="sleep.cxx"/>
+         <arg value="sos_mail.cxx"/>
+         <arg value="sos_mail_java.cxx"/>
+         <arg value="sos_mail_jmail.cxx"/>
+         <arg value="sos_perl.cxx"/>
+         <arg value="sosalloc.cxx"/>
+         <arg value="sosarray.cxx"/>
+         <arg value="sosbeep.cxx"/>
+         <arg value="sosclien.cxx"/>
+         <arg value="sosctype.cxx"/>
+         <arg value="sosdate.cxx"/>
+         <arg value="sosdde.cxx"/>
+         <arg value="sosdll.cxx"/>
+         <arg value="sosdumcl.cxx"/>
+         <arg value="soserror.cxx"/>
+         <arg value="sosfact.cxx"/>
+         <arg value="sosfield.cxx"/>
+         <arg value="sosfiltr.cxx"/>
+         <arg value="sosfld2.cxx"/>
+         <arg value="sosfunc.cxx"/>
+         <arg value="soslimt2.cxx"/>
+         <arg value="soslimtx.cxx"/>
+         <arg value="soslist.cxx"/>
+         <arg value="sosmain0.cxx"/>
+         <arg value="sosmsg.cxx"/>
+         <arg value="sosmswin.cxx"/>
+         <arg value="sosobj.cxx"/>
+         <arg value="sosobjba.cxx"/>
+         <arg value="sosole.cxx"/>
+         <arg value="sosopt.cxx"/>
+         <arg value="sosprof.cxx"/>
+         <arg value="sosprog.cxx"/>
+         <arg value="sosscrpt.cxx"/>
+         <arg value="sosset.cxx"/>
+         <arg value="sossock.cxx"/>
+         <arg value="sossql1.cxx"/>
+         <arg value="sossql2.cxx"/>
+         <arg value="sossql2a.cxx"/>
+         <arg value="sossql3.cxx"/>
+         <arg value="sossql4.cxx"/>
+         <arg value="sossql_group_by.cxx"/>
+         <arg value="sossqlfl.cxx"/>
+         <arg value="sossqlfn.cxx"/>
+         <arg value="sossqlty.cxx"/>
+         <arg value="sosstat.cxx"/>
+         <arg value="sosstrea.cxx"/>
+         <arg value="sosstrg0.cxx"/>
+         <arg value="sosstrng.cxx"/>
+         <arg value="sossv.cxx"/>
+         <arg value="sossv2.cxx"/>
+         <arg value="sossys.cxx"/>
+         <arg value="sostimer.cxx"/>
+         <arg value="sosuser.cxx"/>
+         <arg value="soswin.cxx"/>
+         <arg value="soswnmsg.cxx"/>
+         <arg value="sosxml.cxx"/>
+         <arg value="sqlfield.cxx"/>
+         <arg value="sqlutil.cxx"/>
+         <arg value="stdfield.cxx"/>
+         <arg value="strlwr.cxx"/>
+         <arg value="strupr.cxx"/>
+         <arg value="subrange.cxx"/>
+         <arg value="svstring.cxx"/>
+         <arg value="sysdep.cxx"/>
+         <arg value="sysxcept.cxx"/>
+         <arg value="thread.cxx"/>
+         <arg value="thread_semaphore.cxx"/>
+         <arg value="truncsp.cxx"/>
+         <arg value="typereg.cxx"/>
+         <arg value="video.cxx"/>
+         <arg value="videowin.cxx"/>
+         <arg value="xception.cxx"/>
+         <arg value="xlat.cxx"/>
+         <arg value="xlatgerm.cxx"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.zlib.release" depends="compile.msvc.env"
+           description="compile zlib (configuration is release)">
+      <exec executable="cl.exe"
+            dir="c:/scheduler/scheduler.src.release/prod/3rd_party\zlib">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /Zi /nologo /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /D &#34;_CRT_SECURE_NO_DEPRECATE&#34; /GF /EHsc /MT /Fp&#34;.\Release/zlib.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="adler32.c"/>
+         <arg value="compress.c"/>
+         <arg value="crc32.c"/>
+         <arg value="deflate.c"/>
+         <arg value="gzio.c"/>
+         <arg value="infblock.c"/>
+         <arg value="infcodes.c"/>
+         <arg value="inffast.c"/>
+         <arg value="inflate.c"/>
+         <arg value="inftrees.c"/>
+         <arg value="infutil.c"/>
+         <arg value="trees.c"/>
+         <arg value="uncompr.c"/>
+         <arg value="zutil.c"/>
+         <env key="INCLUDE"
+              path=";C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.regexp.release" depends="compile.msvc.env"
+           description="compile regexp (configuration is release)">
+      <exec executable="cl.exe"
+            dir="c:/scheduler/scheduler.src.release/prod/3rd_party\regexp">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /Zi /nologo /W3 /O2 /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /D &#34;_CRT_SECURE_NO_DEPRECATE&#34; /GF /EHsc /MT /Fp&#34;.\Release/regexp.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="regcomp.c"/>
+         <arg value="regerror.c"/>
+         <arg value="regexec.c"/>
+         <arg value="regfree.c"/>
+         <arg value="split.c"/>
+         <env key="INCLUDE"
+              path=";C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.javaproxy.release"
+           depends="compile.msvc.env,compile.zschimmer.release"
+           description="compile javaproxy (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/javaproxy">
+         <arg line="/c /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /W3 /O2 /Oi /GF /EHsc /MT /Gy /Yu&#34;_precompiled.h&#34;  /errorReport:prompt"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.scheduler.release"
+           depends="compile.msvc.env,compile.libxslt.release,compile.file.release,compile.fs.release,compile.javaproxy.release,compile.kram.release,compile.libxml2.release,compile.regexp.release,compile.zlib.release,compile.zschimmer.release"
+           description="compile scheduler (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/scheduler">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /nologo /W3 /O2 /D &#34;WIN32&#34; /D &#34;NDEBUG&#34; /D &#34;_CONSOLE&#34; /GF /EHsc /MT /Yu&#34;spooler.h&#34; /Fp&#34;.\Release/spooler.pch&#34; /FAcs /Fa&#34;Release/&#34; /Fo&#34;Release/&#34; /Fd&#34;Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="_precompiled_headers.cxx"/>
+         <arg value=".\cluster.cxx"/>
+         <arg value=".\database.cxx"/>
+         <arg value=".\directory_observer.cxx"/>
+         <arg value=".\Event_subsystem.cxx"/>
+         <arg value=".\file_logger.cxx"/>
+         <arg value=".\folder.cxx"/>
+         <arg value=".\include.cxx"/>
+         <arg value=".\java_subsystem.cxx"/>
+         <arg value=".\lock.cxx"/>
+         <arg value=".\Module_monitor_instances.cxx"/>
+         <arg value=".\path.cxx"/>
+         <arg value=".\register.cxx"/>
+         <arg value=".\schedule.cxx"/>
+         <arg value=".\scheduler_client.cxx"/>
+         <arg value=".\Scheduler_event2.cxx"/>
+         <arg value=".\scheduler_object.cxx"/>
+         <arg value=".\scheduler_script.cxx"/>
+         <arg value=".\spooler.cxx"/>
+         <arg value=".\spooler_com.cxx"/>
+         <arg value=".\spooler_command.cxx"/>
+         <arg value=".\spooler_common.cxx"/>
+         <arg value=".\spooler_communication.cxx"/>
+         <arg value=".\spooler_config.cxx"/>
+         <arg value=".\spooler_dll.cxx"/>
+         <arg value=".\spooler_dll_java.cxx"/>
+         <arg value=".\spooler_embedded_files.cxx"/>
+         <arg value=".\spooler_embedded_files_z.cxx"/>
+         <arg value=".\spooler_event.cxx"/>
+         <arg value=".\spooler_http.cxx"/>
+         <arg value=".\spooler_job.cxx"/>
+         <arg value=".\spooler_log.cxx"/>
+         <arg value=".\spooler_mail.cxx"/>
+         <arg value=".\spooler_module.cxx"/>
+         <arg value=".\spooler_module_com.cxx"/>
+         <arg value=".\spooler_module_internal.cxx"/>
+         <arg value=".\spooler_module_java.cxx"/>
+         <arg value=".\spooler_module_process.cxx"/>
+         <arg value=".\spooler_module_remote.cxx"/>
+         <arg value=".\spooler_module_remote_server.cxx"/>
+         <arg value=".\spooler_module_script.cxx"/>
+         <arg value=".\spooler_order.cxx"/>
+         <arg value=".\spooler_order_file.cxx"/>
+         <arg value=".\spooler_process.cxx"/>
+         <arg value=".\spooler_security.cxx"/>
+         <arg value=".\spooler_service.cxx"/>
+         <arg value=".\spooler_subprocess.cxx"/>
+         <arg value=".\spooler_task.cxx"/>
+         <arg value=".\spooler_thread.cxx"/>
+         <arg value=".\spooler_time.cxx"/>
+         <arg value=".\spooler_wait.cxx"/>
+         <arg value=".\spooler_web_service.cxx"/>
+         <arg value=".\spooler_xslt_stylesheet.cxx"/>
+         <arg value=".\spooler_xslt_stylesheet.h"/>
+         <arg value=".\standing_order.cxx"/>
+         <arg value=".\subsystem.cxx"/>
+         <arg value=".\supervisor.cxx"/>
+         <arg value=".\supervisor_client.cxx"/>
+         <arg value=".\version.cxx"/>
+         <arg value=".\xml_client_connection.cxx"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.scheduler_main.release"
+           depends="compile.msvc.env,compile.scheduler.release"
+           description="compile scheduler_main (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/scheduler">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /W3 /O2 /D &#34;WIN32&#34; /D &#34;NDEBUG&#34; /D &#34;_CONSOLE&#34; /GF /EHsc /MT /FAcs /Fa&#34;Release/&#34; /Fo&#34;Release/&#34; /Fd&#34;Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.zschimmer.release" depends="compile.msvc.env"
+           description="compile zschimmer (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/zschimmer">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;..\libxml2\include&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /nologo /W3 /O2 /D &#34;WIN32&#34; /D &#34;NDEBUG&#34; /D &#34;_LIB&#34; /GF /EHsc /MT /Fp&#34;.\Release/zschimmer.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value=".\argv.cxx"/>
+         <arg value=".\async.cxx"/>
+         <arg value=".\async_event.cxx"/>
+         <arg value=".\async_io.cxx"/>
+         <arg value=".\async_socket.cxx"/>
+         <arg value=".\base64.cxx"/>
+         <arg value=".\charset.cxx"/>
+         <arg value=".\charset_messages.cxx"/>
+         <arg value="check_compiler.cxx"/>
+         <arg value=".\com_remote_messages.cxx"/>
+         <arg value=".\directory_lister.cxx"/>
+         <arg value=".\embedded_files.cxx"/>
+         <arg value="file.cxx"/>
+         <arg value=".\file_path.cxx"/>
+         <arg value=".\immutable_string.cxx"/>
+         <arg value=".\loaded_module.cxx"/>
+         <arg value="log.cxx"/>
+         <arg value=".\log_categories.cxx"/>
+         <arg value=".\md5.cxx"/>
+         <arg value=".\message.cxx"/>
+         <arg value=".\mutex.cxx"/>
+         <arg value=".\pipe_collector.cxx"/>
+         <arg value=".\reference.cxx"/>
+         <arg value="regex_class.cxx"/>
+         <arg value=".\string_list.cxx"/>
+         <arg value=".\string_stream.cxx"/>
+         <arg value=".\system_command.cxx"/>
+         <arg value="threads.cxx"/>
+         <arg value=".\threads_base.cxx"/>
+         <arg value=".\xml.cxx"/>
+         <arg value=".\z_gzip.cxx"/>
+         <arg value=".\z_io.cxx"/>
+         <arg value=".\z_mail.cxx"/>
+         <arg value=".\z_md5.cxx"/>
+         <arg value=".\z_process.cxx"/>
+         <arg value=".\z_signals.cxx"/>
+         <arg value=".\z_sockets.cxx"/>
+         <arg value=".\z_sql.cxx"/>
+         <arg value="zschimmer.cxx"/>
+         <env key="INCLUDE"
+              path=".c:/scheduler/scheduler.src.release/prod/zschimmer/libxml2\include;C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.file.release" depends="compile.msvc.env"
+           description="compile file (configuration is release)">
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/file">
+         <arg line="/Yc&#34;precomp.h&#34; /c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /GF /EHsc /MT /Fp&#34;.\Release/file.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="_precomp.cxx"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+      <exec executable="cl.exe" dir="c:/scheduler/scheduler.src.release/prod/file">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;C:/Program Files/Java/jre6\include&#34; /I &#34;C:/Program Files/Java/jre6\include\win32&#34; /Zi /W3 /O2 /D &#34;NDEBUG&#34; /D &#34;WIN32&#34; /D &#34;_WINDOWS&#34; /GF /EHsc /MT /Fp&#34;.\Release/file.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="absfile.cxx"/>
+         <arg value="alias.cxx"/>
+         <arg value="anyfile.cxx"/>
+         <arg value="cache_file.cxx"/>
+         <arg value="cachefl.cxx"/>
+         <arg value="cachsqfl.cxx"/>
+         <arg value="clipbrd.cxx"/>
+         <arg value="colsfile.cxx"/>
+         <arg value="comfile.cxx"/>
+         <arg value="concatfl.cxx"/>
+         <arg value="convfile.cxx"/>
+         <arg value="create_table_file.cxx"/>
+         <arg value="ddefile.cxx"/>
+         <arg value="deletefl.cxx"/>
+         <arg value="dir.cxx"/>
+         <arg value="dosdir.cxx"/>
+         <arg value="ebcascfl.cxx"/>
+         <arg value="ebofile.cxx"/>
+         <arg value="emukeyfl.cxx"/>
+         <arg value="errfile.cxx"/>
+         <arg value="filebase.cxx"/>
+         <arg value="filedde.cxx"/>
+         <arg value="filekey.cxx"/>
+         <arg value="filetab.cxx"/>
+         <arg value="filter.cxx"/>
+         <arg value="fldfile.cxx"/>
+         <arg value="flstream.cxx"/>
+         <arg value="framedm.cxx"/>
+         <arg value="frmpage.cxx"/>
+         <arg value="head_file.cxx"/>
+         <arg value="inlinefl.cxx"/>
+         <arg value="insertfl.cxx"/>
+         <arg value="jdbc.cxx"/>
+         <arg value="jmail_file.cxx"/>
+         <arg value="keyseqfl.cxx"/>
+         <arg value="lockwait.cxx"/>
+         <arg value="logfile.cxx"/>
+         <arg value="nl.cxx"/>
+         <arg value="nlfile.cxx"/>
+         <arg value="nullfile.cxx"/>
+         <arg value="objfile.cxx"/>
+         <arg value="odbc.cxx"/>
+         <arg value="odbctype.cxx"/>
+         <arg value="olefile.cxx"/>
+         <arg value="p_file.cxx"/>
+         <arg value="printers.cxx"/>
+         <arg value="recfile.cxx"/>
+         <arg value="recnofil.cxx"/>
+         <arg value="rectab.cxx"/>
+         <arg value="sam3file.cxx"/>
+         <arg value="selall.cxx"/>
+         <arg value="sosdb.cxx"/>
+         <arg value="sqlfile.cxx"/>
+         <arg value="stdfile.cxx"/>
+         <arg value="storefl.cxx"/>
+         <arg value="tabrec.cxx"/>
+         <arg value="tail_file.cxx"/>
+         <arg value="tb.cxx"/>
+         <arg value="teefl.cxx"/>
+         <arg value="updatefl.cxx"/>
+         <arg value="vflfile.cxx"/>
+         <arg value="winapifl.cxx"/>
+         <arg value="xml_file.cxx"/>
+         <arg value="zlibfl.cxx"/>
+         <env key="INCLUDE"
+              path="C:/Program Files/Java/jre6\include;C:/Program Files/Java/jre6\include\win32;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.libxml2.release" depends="compile.msvc.env"
+           description="compile libxml2 (configuration is release)">
+      <exec executable="cl.exe"
+            dir="c:/scheduler/scheduler.src.release/prod/3rd_party\libxml2">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /I &#34;include&#34; /Zi /nologo /W3 /O2 /D &#34;WIN32&#34; /D &#34;NDEBUG&#34; /D &#34;_LIB&#34; /D &#34;_CRT_NONSTDC_NO_DEPRECATE&#34; /GF /EHsc /MT /Fp&#34;.\Release/libxml2.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value="c14n.c"/>
+         <arg value="catalog.c"/>
+         <arg value=".\chvalid.c"/>
+         <arg value="debugXML.c"/>
+         <arg value=".\dict.c"/>
+         <arg value="DOCBparser.c"/>
+         <arg value="encoding.c"/>
+         <arg value="entities.c"/>
+         <arg value="error.c"/>
+         <arg value="globals.c"/>
+         <arg value="hash.c"/>
+         <arg value="HTMLparser.c"/>
+         <arg value="HTMLtree.c"/>
+         <arg value=".\legacy.c"/>
+         <arg value="list.c"/>
+         <arg value="nanoftp.c"/>
+         <arg value="nanohttp.c"/>
+         <arg value="parser.c"/>
+         <arg value="parserInternals.c"/>
+         <arg value=".\pattern.c"/>
+         <arg value=".\relaxng.c"/>
+         <arg value=".\SAX.c"/>
+         <arg value=".\SAX2.c"/>
+         <arg value="threads.c"/>
+         <arg value="tree.c"/>
+         <arg value="uri.c"/>
+         <arg value="valid.c"/>
+         <arg value="xinclude.c"/>
+         <arg value="xlink.c"/>
+         <arg value="xmlIO.c"/>
+         <arg value="xmlmemory.c"/>
+         <arg value=".\xmlreader.c"/>
+         <arg value=".\xmlregexp.c"/>
+         <arg value=".\xmlsave.c"/>
+         <arg value=".\xmlschemas.c"/>
+         <arg value=".\xmlschemastypes.c"/>
+         <arg value=".\xmlstring.c"/>
+         <arg value="xmlunicode.c"/>
+         <arg value=".\xmlwriter.c"/>
+         <arg value="xpath.c"/>
+         <arg value="xpointer.c"/>
+         <env key="INCLUDE"
+              path="include;C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+   <target name="compile.libxslt.release" depends="compile.msvc.env"
+           description="compile libxslt (configuration is release)">
+      <exec executable="cl.exe"
+            dir="c:/scheduler/scheduler.src.release/prod/3rd_party\libxslt\libxslt">
+         <arg line="/c /D &#34;_VC80_UPGRADE=0x0710&#34; /D &#34;_MBCS&#34; /Zi /nologo /W3 /O2 /D &#34;WIN32&#34; /D &#34;NDEBUG&#34; /D &#34;_LIB&#34; /D &#34;_CRT_NONSTDC_NO_DEPRECATE&#34; /D &#34;_CRT_SECURE_NO_DEPRECATE&#34; /GF /EHsc /MT /Fp&#34;.\Release/libxslt.pch&#34; /FAcs /Fa&#34;./Release/&#34; /Fo&#34;./Release/&#34; /Fd&#34;./Release/vc70.pdb&#34;  /errorReport:prompt"/>
+         <arg value=".\attributes.c"/>
+         <arg value=".\attrvt.c"/>
+         <arg value=".\documents.c"/>
+         <arg value=".\extensions.c"/>
+         <arg value=".\extra.c"/>
+         <arg value=".\functions.c"/>
+         <arg value=".\imports.c"/>
+         <arg value=".\keys.c"/>
+         <arg value=".\namespaces.c"/>
+         <arg value=".\numbers.c"/>
+         <arg value=".\pattern.c"/>
+         <arg value=".\preproc.c"/>
+         <arg value=".\security.c"/>
+         <arg value=".\templates.c"/>
+         <arg value=".\transform.c"/>
+         <arg value=".\variables.c"/>
+         <arg value=".\xslt.c"/>
+         <arg value=".\xsltutils.c"/>
+         <env key="INCLUDE"
+              path=";C:/Program Files/Microsoft Visual Studio 9.0/VC/include;C:/Program Files/Microsoft Visual Studio 9.0/VC/../../Microsoft SDKs/Windows/v6.0A/Include"/>
+      </exec>
+   </target>
+</project>

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+Globale targets für alle ant-builds\\
+Dieser Projektfile sollte in alle ant-build eingebunden werden:\\
+[@
+	<import file="../scheduler.ant/targets.global.xml" />
+@]\\
+\\
+Er stellt grundlegende Funktionalitäten für alle builds in einer allgemeinen Form zur Verfügung.\\
+Dazu werden die Basis-Targets für verschiedene Anwendungsbereiche eingebunden:\\
+* Targets für die Arbeit mit repositories\\
+* Targets für die Generierung von Dokumentationen\\
+* Targets für Dialoge\\
+* Targets für remote-Kommunikation\\
+\\
+Weitere allgeimeine Projektfiles sind hier einzubinden.\\
+\\
+Weiterhin stellt diese Projektdatei eine allgemeingültige Hierachie von property-Files zur Verfügung:\\
+* persönliche properties (.:properties.personal.(userid):.) aus dem Projekt scheduler.ant\\
+* projektspezifische properties (.:properties.(projektname):.) aus dem Projektverzeichnis\\
+* globale Properties (.:properties.global.sos:.) aus dem Projekt scheduler.ant\\
+-->
+
+<project name="targets.global" default="-noop" basedir=".">
+
+	<property file="../scheduler.ant/properties.personal.${user.name}" />
+	<property file="properties.${ant.project.name}" />
+	<property file="../scheduler.ant/properties.global.sos" />
+
+	<import file="../scheduler.ant/targets.global.repositories.xml" />
+	<import file="../scheduler.ant/targets.global.dialog.xml" />
+	<import file="../scheduler.ant/targets.global.remote.xml" />
+	<import file="../scheduler.ant/targets.global.documentation.xml" />
+
+	<!-- 
+	no operation\\
+	Default target für jeden build-file. 
+	-->
+	<target name="-noop">
+		<echo>no-op in ${ant.project.name} started</echo>
+	</target>
+
+	<!--
+	Ermittelt alle ant-build files des aktuellen Projektes, generiert Dokumentationen im PMWiki-Format
+	und überträgt diese an das Wiki, welches mit der property ${build.wiki.docs} bestimmt worden ist.
+	-->
+	<target name="documentation.ant.build"
+	        depends="java.prepare"
+	        description="Dokumentation von ant-builds"
+	>
+		<property name="wiki.output.folder" value="${build.wiki.docs}" />
+		<echo>${global.echoline}</echo>
+		<echo>generating buildfiles documentation for buildfile ${ant.file} ...</echo>
+		<echo>output to folder ${wiki.output.folder}</echo>
+		<echo>java.home = ${java.home}</echo>
+		<echo>${global.echoline}</echo>
+		<xslt includes="build.xml targets.*.xml"
+		      destdir="${wiki.output.folder}"
+		      style="xsl/antbuild-docu.xsl"
+		      force="true"
+		      extension=".tmp"
+		>
+			<param name="P_AUTHOR" expression="${user.name}" />
+			<param name="P_COPYRIGHT" expression="${global.copyright}" />
+			<param name="P_ENCODING" expression="${global.encoding}" />
+			<param name="P_JAVA_HOME" expression="${java.home}" />
+			<classpath location="../scheduler.ant/ext/saxon9he.jar" />
+		</xslt>
+		<delete dir="${wiki.output.folder}" includes="*.tmp" />
+	</target>
+
+	<target name="documentation.ant.build.transfer"
+	        depends="documentation.ant.build"
+	        description="Übertragen der ANT build Dokumentationen in das Wiki"
+	>
+		<echo>copy folder ${wiki.output.folder} to ${wiki.target.dir}</echo>
+		<copy todir="${wiki.target.dir}" verbose="true" overwrite="true">
+			<fileset dir="${wiki.output.folder}" />
+		</copy>
+	</target>
+
+	<!-- 
+	Im Dialog können eingegeben werden:\\
+	* major-, minor- und subversion des Projektes\\
+	-->
+	<target name="svn.release.dialog"
+	        description="Erzeugen einer Release-Version auf Basis der HEAD-Revision"
+	        depends="-dia.release, -svn.revision.head.set"
+	>
+		<antcall target="-svn.release.create">
+			<param name="svn.url.devel"
+			       value="${svn.url.devel}/${dia.in.project}"
+			/>
+			<param name="svn.revision.version" value="${dia.in.version}" />
+			<param name="svn.revision.no" value="${svn.revision.head}" />
+			<param name="svn.project" value="${dia.in.project}" />
+		</antcall>
+
+	</target>
+
+	<target name="svn.update"
+	        description="update der Arbeitskopie des Projektes mit der HEAD revision des repositories"
+	>
+		<antcall target="-svn.update">
+			<param name="svn.dir.local" value="${basedir}" />
+		</antcall>
+	</target>
+
+	<!--
+	Vor dem einchecken kann im Dialog ein Änderungstext eingegeben werden, mit dem die revision im\\
+	repository getagt wird.
+    -->
+	<target name="svn.commit"
+	        depends="-dia.message"
+	        description="einchecken der Änderungen in das repository mit vorheriger Abfrage der Versionsnummer"
+	        if="svn.dir.local"
+	>
+		<antcall target="-svn.commit">
+			<param name="svn.dir.local" value="${basedir}" />
+			<param name="svn.message" value="${dia.in.message}" />
+		</antcall>
+	</target>
+
+	<!--
+	Erzeugt die doxygen-Dokumentation des Projektes mit default-Einstellungen (ohne spezielle Konfigurationsdatei)
+	-->
+	<target name="doxygen.documentation"
+	        description="doxygen-Dokumentation erzeugen"
+	>
+		<antcall target="-doxy.documentation.with.defaults">
+			<param name="doxygen.input.directory" value="${basedir}/src" />
+			<param name="doxygen.output.directory" value="${build.api.docs}" />
+		</antcall>
+	</target>
+
+	<target name="generate.properties.file"
+	        description="projektspezifischen property-file erzeugen"
+	>
+		<touch file="${basedir}/properties.${ant.project.name}"
+		       description="create property file for project ${ant.project.name}"
+		/>
+	</target>
+
+	<target name="java.init"
+	        description="Initialisierungen für alle java-targets"
+	>
+
+		<!-- Subproject source tree description.                                     -->
+		<property name="build.history" location="./history" />
+		<property name="build.dir" location="./build" />
+		<property name="build.src" location="${build.dir}/src" />
+		<property name="build.version" value="1.0" />
+		<property name="build.docs" location="${build.dir}/docs" />
+		<property name="build.api.docs" location="${build.docs}/api" />
+		<property name="build.wiki.docs" location="${build.docs}/wiki" />
+		<property name="build.classpath" value="../_jars" />
+
+		<!-- Build tree description.                                                 -->
+		<property name="build.classes" location="${build.dir}/bin" />
+		<property name="build.lib" location="${build.dir}/lib" />
+		<property name="build.jar"
+		          location="${build.lib}/${ant.project.name}.jar"
+		/>
+
+		<!-- Compile parameters.                                                     -->
+		<property name="compile.debug" value="true" />
+		<property name="compile.deprecation" value="false" />
+		<property name="compile.optimize" value="true" />
+
+
+		<!-- Set CLASSPATH, get all required jars.                                   -->
+		<path id="int.classpath">
+			<fileset dir="${build.classpath}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+	</target>
+
+	<target name="java.echo"
+	        depends="java.init"
+	        description="write some variables to console"
+	>
+		<echo message="ant.file = ${ant.file}" />
+		<echo message="ant.home = ${ant.home}" />
+		<echo message="ant.java.version = ${ant.java.version}" />
+		<echo message="ant.version = ${ant.version}" />
+		<echo message="basedir = ${basedir}" />
+
+		<echo message="java.package.prefix = ${java.package.prefix}" />
+
+		<echo message="build.dir = ${build.dir}" />
+		<echo message="build.lib = ${build.lib}" />
+		<echo message="build.history = ${build.history}" />
+
+	</target>
+
+	<target name="java.clean"
+	        depends="java.echo"
+	        description="entfernt das 'build' Verzeichnis."
+	>
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="java.prepare"
+	        depends="java.clean"
+	        description="create all necessary folders (build,classes,lib,docs)"
+	>
+		<echo>------------------------------------------------------------------</echo>
+		<echo>Create Build-Path, Libs and Files for ${ant.project.name}:</echo>
+		<echo>${global.copyright}</echo>
+		<echo>------------------------------------------------------------------</echo>
+		<echo>Source-Folder :     ${build.src}</echo>
+		<echo>Build-Path    :     ${build.dir}</echo>
+		<echo>------------------------------------------------------------------</echo>
+
+		<mkdir dir="${build.src}" />
+		<mkdir dir="${build.classes}" />
+		<mkdir dir="${build.lib}" />
+		<mkdir dir="${build.docs}" />
+		<mkdir dir="${build.api.docs}" />
+		<mkdir dir="${build.wiki.docs}" />
+
+		<property name="base.src" location="${basedir}/src" />
+
+		<copy todir="${build.src}" overwrite="true">
+			<fileset dir="${base.src}">
+			</fileset>
+		</copy>
+
+		<echo>copy files to folder ${build.dir} ...</echo>
+		<copy todir="${build.dir}/bin" overwrite="true">
+			<fileset dir="${basedir}/bin" />
+		</copy>
+
+		<copy todir="${build.dir}" overwrite="true">
+			<fileset dir="${basedir}">
+				<include name=".project" />
+				<include name=".classpath" />
+				<include name="*build*.xml" />
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="java.compile"
+	        depends="java.prepare"
+	        description="compiles the project"
+	>
+		<javac destdir="${build.classes}"
+		       debug="${compile.debug}"
+		       deprecation="${compile.deprecation}"
+		       optimize="${compile.optimize}"
+		       includeantruntime="false"
+		>
+			<src path="${build.src}" />
+			<classpath refid="int.classpath" />
+		</javac>
+	</target>
+
+	<target name="java.jar"
+	        depends="java.compile"
+	        description="generating jar file for ${ant.project.name} in ${build.jar}"
+	>
+		<tstamp>
+			<format property="timestamp_for_jar" pattern="yyyy-MM-dd">
+			</format>
+		</tstamp>
+
+		<tstamp>
+			<format property="timestamp_for_build"
+			        pattern="yyyy-MM-dd'T'HH:mm:SS"
+			/>
+		</tstamp>
+
+		<manifest file="${build.dir}/MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Built-On" value="${timestamp_for_build}" />
+			<attribute name="Main-Class" value="${java.main.class}" />
+		</manifest>
+
+		<jar jarfile="${build.lib}/${ant.project.name}.jar"
+		     compress="true"
+		     basedir="${build.dir}/bin"
+		     manifest="${build.dir}/MANIFEST.MF"
+		>
+			<fileset dir="${build.dir}">
+				<include name="*build*.xml" />
+			</fileset>
+			<!--
+         <fileset dir="${build.dir}/src" />
+         <fileset dir="${build.api.docs}" />
+         -->
+		</jar>
+
+		<echo message="timestamp 4 jar = ${timestamp_for_jar}" />
+
+		<copy tofile="${build.lib}/${ant.project.name}-${timestamp_for_jar}.jar"
+		      file="${build.lib}/${ant.project.name}.jar"
+		/>
+
+		<!--
+          Alle jar-Files (tageweise) in einem Backup-Folder sammeln 
+          EQCPN-2009-05-15
+    -->
+		<mkdir dir="${build.history}" />
+		<copy tofile="${build.history}/${ant.project.name}-${timestamp_for_jar}.jar"
+		      file="${build.lib}/${ant.project.name}.jar"
+		/>
+	</target>
+
+</project>

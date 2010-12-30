@@ -1,0 +1,16 @@
+# hier die globalen Einstellungen für die SOS
+global.echoline=------------------------------------------------------------------------------------------------------------------
+global.copyright=Copyright (c) 2007-2010 SOS GmbH Berlin - www.sos-berlin.com -
+global.encoding=iso-8859-1
+
+#
+build.classpath=../_jars
+
+# Einstellungen für doxygen
+doxygen.lib.dir=ext
+doxygen.app.directory=J:/E/java/doxygen
+doxygen.output.directory=c:/temp/http
+doxygen.input.directory=${basedir}/src
+doxygen.input.recursive=YES
+
+wiki.target.dir=J:/E/scheduler_devel/wiki/sandbox/wiki.d

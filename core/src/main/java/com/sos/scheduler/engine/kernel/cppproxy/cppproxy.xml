@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cppproxy>
+    <!-- So könnte eine Konfiguration für einen C++-Namensraum aussehen. -->
+    <namespace path="::sos::scheduler" directory="scheduler"/>
+    <include include="spooler.h"/>
+    <nameRule javaClassNameSuffix="C"/>
+</cppproxy>
