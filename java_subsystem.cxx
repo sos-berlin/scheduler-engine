@@ -6,7 +6,7 @@
 #include "jni__register_native_classes.h"
 
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__cppproxy__SpoolerC.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 
 namespace sos {
 namespace scheduler {

@@ -3,12 +3,12 @@
 #define __SCHEDULER_EVENT2_H
 
 
-#include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__event__Event.h"
 
 namespace sos {
 namespace scheduler {
 
-typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::event::Event EventJ;
 
 //---------------------------------------------------------------------------------Scheduler_event2
 

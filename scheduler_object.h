@@ -3,8 +3,8 @@
 #ifndef __SCHEDULER_OBJECT_H
 #define __SCHEDULER_OBJECT_H
 
-#include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
-typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
+#include "../javaproxy/com__sos__scheduler__engine__kernel__event__Event.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::event::Event EventJ;
 
 namespace sos {
 namespace scheduler {

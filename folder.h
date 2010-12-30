@@ -708,7 +708,7 @@ struct file_based_subsystem : File_based_subsystem
     }
 
 
-    javaproxy::com::sos::scheduler::kernel::core::folder::FileBased java_file_based_or_null(const string& absolute_path) {
+    javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased java_file_based_or_null(const string& absolute_path) {
         return file_based_or_null(Absolute_path(absolute_path))->java_sister();
     }
 

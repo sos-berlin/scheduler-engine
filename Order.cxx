@@ -3,15 +3,15 @@
 #include "spooler.h"
 #include "Order_subsystem_impl.h"
 
-#include "../javaproxy/com__sos__scheduler__kernel__core__order__Order.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderState.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderStateChangeEvent.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderFinishedEvent.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__order__OrderTouchedEvent.h"
-typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderState OrderStateJ;
-typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderStateChangeEvent OrderStateChangeEventJ;
-typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderFinishedEvent OrderFinishedEventJ;
-typedef javaproxy::com::sos::scheduler::kernel::core::order::OrderTouchedEvent OrderTouchedEventJ;
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangeEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangeEvent OrderStateChangeEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderFinishedEvent OrderFinishedEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent OrderTouchedEventJ;
 
 namespace sos {
 namespace scheduler {

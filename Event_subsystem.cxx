@@ -1,9 +1,9 @@
 // $Id$
 
 #include "spooler.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__cppproxy__SpoolerC.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__event__EventSubsystem.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__event__Event.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__event__Event.h"
 #include "../javaproxy/java__lang__String.h"
 
 using namespace std;
@@ -11,8 +11,8 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
-typedef javaproxy::com::sos::scheduler::kernel::core::event::Event EventJ;
-typedef javaproxy::com::sos::scheduler::kernel::core::event::EventSubsystem EventSubsystemJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::event::Event EventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem EventSubsystemJ;
 
 //-------------------------------------------------------------------------------------------static
 //--------------------------------------------------------------------------------------------const

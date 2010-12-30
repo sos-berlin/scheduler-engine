@@ -2,8 +2,8 @@
 
 #include "spooler.h"
 #include "../javaproxy/java__lang__String.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__cppproxy__SpoolerC.h"
-#include "../javaproxy/com__sos__scheduler__kernel__core__cppproxy__OrderC.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__OrderC.h"
 
 
 namespace sos {
