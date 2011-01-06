@@ -11,12 +11,12 @@ public class APIModuleInstanceTest {
 	@Test
 	public void javascriptApi() throws NoSuchMethodException {
 		String script = "var cnt;\n"
-			+ "function spooler_init() {\n"
+			+ "function scheduler_init() {\n"
 			+ "   cnt = 0;\n"
 			+ "   return true;\n"
 			+ "}"
 			+ " "
-			+ "function spooler_process() {\n"
+			+ "function scheduler_process() {\n"
 			+ "  if (cnt < 5) {;\n"
 			+ "    cnt++;\n"
 			+ "    print('iteration no ' + cnt + '\\n');\n"
@@ -26,8 +26,8 @@ public class APIModuleInstanceTest {
 			+ "}";
 		System.out.println("START javascriptApi ---------------------------------------------------------------------");
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
-		module.call("spooler_init");
-		while (module.callBoolean("spooler_process")) {
+		module.call("scheduler_init");
+		while (module.callBoolean("scheduler_process")) {
 			;
 		}
 		System.out.println("END javascriptApi -----------------------------------------------------------------------");
@@ -38,9 +38,9 @@ public class APIModuleInstanceTest {
 		System.out.println("START javascriptWithoutFunctions ---------------------------------------------------------------------");
 		String script =	"print('script ran successfully\\n');\n";
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
-		module.call("spooler_init");
-		module.call("spooler_process");
-		module.call("spooler_exit");
+		module.call("scheduler_init");
+		module.call("scheduler_process");
+		module.call("scheduler_exit");
 		System.out.println("END javascriptWithoutFunctions -----------------------------------------------------------------------");
 	}
 
@@ -49,10 +49,10 @@ public class APIModuleInstanceTest {
 	 * \detail
 	 * Calls a javascript snippet and gives them some objects
 	 * via the addObject method.
-	 * The script does not contain any function, but calls the spooler_process
+	 * The script does not contain any function, but calls the scheduler_process
 	 * method to cause the executing of the script. This is a special behavior 
-	 * of the JobScheduler api: The execution of call("spooler_process") is just the 
-	 * same like call() if the function spooler_process is not defined in the script. 
+	 * of the JobScheduler api: The execution of call("scheduler_process") is just the 
+	 * same like call() if the function scheduler_process is not defined in the script. 
 	 * http://www.mozilla.org/rhino/
 	 * jar-file: inherited in java
 	 */
@@ -64,7 +64,7 @@ public class APIModuleInstanceTest {
 		APIModuleInstance module = new APIModuleInstance("javascript",script);
 		module.addObject("walter", "name");
 		module.addObject(new LogMock(), "log");
-		module.call("spooler_process");
+		module.call("scheduler_process");
 		System.out.println("END javascriptWithObjects -----------------------------------------------------------------------");
 	}
 
@@ -79,7 +79,7 @@ public class APIModuleInstanceTest {
 	 * jar-file: jython-engine.jar
 	 */
         @Ignore //TODO 2010-12-30 Zschimmer com.sos.scheduler.engine.kernel.scripting.UnsupportedScriptLanguageException: Scriptlanguage jython is not supported
-	 @Test
+//	 @Test
 	//	maven dependencies not found for bean
 	public void jythonScriptFromFile() {
 		System.out.println("START jythonScriptFromFile ---------------------------------------------------------------------");
@@ -87,15 +87,15 @@ public class APIModuleInstanceTest {
 		module.setSourceFile(script_root + "test.py");
 		module.addObject("jythonScriptFromFile", "name");
 		module.addObject(new LogMock(), "log");
-		module.call("spooler_init");
+		module.call("scheduler_init");
 		try {
-			while ( module.callBoolean("spooler_process")) {
+			while ( module.callBoolean("scheduler_process")) {
 				;
 			}
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-		module.call("spooler_exit");
+		module.call("scheduler_exit");
 		System.out.println("END jythonScriptFromFile -----------------------------------------------------------------------");
 	}
 
@@ -108,18 +108,18 @@ public class APIModuleInstanceTest {
 	 * jar-file: groovy-all-1.5.6.jar
 	 * jar-file: groovy-engine.jar
 	 */
-	// @Test
-	//	maven dependencies not found for bean
+//	 @Test
+	//	maven dependencies not found for groovy
 	public void groovyScriptFromFile() throws NoSuchMethodException {
 		System.out.println("START groovyScriptFromFile --------------------------------------------------------------------");
 		ModuleInstance module = new ModuleInstance("groovy");
 		module.setSourceFile(script_root + "test.groovy");
 		module.addObject("groovyScriptFromFile", "name");
-		module.call("spooler_init");
-		while (module.callBoolean("spooler_process")) {
+		module.call("scheduler_init");
+		while (module.callBoolean("scheduler_process")) {
 			;
 		}
-		module.call("spooler_exit");
+		module.call("scheduler_exit");
 		System.out.println("END groovyScriptFromFile -----------------------------------------------------------------------");
 	}
 

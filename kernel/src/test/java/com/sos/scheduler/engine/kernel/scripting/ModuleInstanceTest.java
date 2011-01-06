@@ -64,13 +64,16 @@ public class ModuleInstanceTest {
 
 	@Test
 	public void javaScriptWithFunctions() {
-		String script = "function add (a, b) {c = a + b; return c; }";
+		String script = "function add (a, b) {c = a + b; param = 'abc';return c; }";
 		ModuleInstance module = new ModuleInstance("javascript");
 		module.setSourceCode(script);
-		module.addObject("hugo", "name");
+		String param = "Hugo";
+		module.addObject(param, "param");
 		Object result;
 		try {
 			result = module.call("add", new Object[] { 5, 2 });
+			System.out.println("param: " + module.getObject("param"));
+			System.out.println("param: " + param);
 			System.out.println("result: " + result);
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
@@ -92,17 +95,18 @@ public class ModuleInstanceTest {
 	}
 
 	@Test
-	public void javaScriptFromFile() {
+	public void javaScriptFromFile() throws NoSuchMethodException {
 		ModuleInstance module = new ModuleInstance("javascript");
 		module.setSourceFile(script_root + "test.js");
 		module.addObject("hugo", "name");
 		try {
-			module.call("spooler_init");
-			while (module.callBoolean("spooler_process")) {
+			module.call("scheduler_init");
+			while (module.callBoolean("scheduler_process")) {
 				;
 			}
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
+			throw e;
 		}
 	}
 

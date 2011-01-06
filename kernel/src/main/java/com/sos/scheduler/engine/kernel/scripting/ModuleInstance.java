@@ -59,7 +59,6 @@ public class ModuleInstance implements Module {
 		try {
 			sm = new ScriptEngineManager();
 			se = sm.getEngineByName(getLanguageId());
-			//	        sb = se.createBindings();
 			sb = se.getBindings(ScriptContext.ENGINE_SCOPE);
 		}
 		catch (Exception e) {
@@ -99,13 +98,18 @@ public class ModuleInstance implements Module {
 		return (sb != null) ? sb.toString() : "";
 	}
 
+	public Object getObject(String name) {
+		return scriptbindings.get(name); 		
+	}
+	
 	public void addObject(Object object, String name) {
+		String object_name = APIScriptFunction.replaceSpoolerPrefix(name);
 		if (object instanceof Log) {
 			log = (Log) object;
 			log("scriptlanguage is " + getLanguageId() + " (" + rawLanguageId + ")");
 		}
-		log("addObject " + name + " = " + object.toString());
-		scriptbindings.put(name, object);
+		log("addObject " + object_name + " = " + object.toString());
+		scriptbindings.put(object_name, object);
 	}
 
 //	private void logBindings() {

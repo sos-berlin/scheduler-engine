@@ -30,21 +30,21 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 
 	private final static String LANGUAGE_PREFIX = "java:";
 
-	private final static String SPOOLER_INIT = "spooler_init";
-	private final static String SPOOLER_OPEN = "spooler_open";
-	private final static String SPOOLER_CLOSE = "spooler_close";
-	private final static String SPOOLER_ON_SUCCESS = "spooler_on_success";
-	private final static String SPOOLER_EXIT = "spooler_exit";
-	private final static String SPOOLER_ON_ERROR = "spooler_on_error";
-	private final static String SPOOLER_PROCESS = "spooler_process";
+	private final static String SCHEDULER_INIT = "scheduler_init";
+	private final static String SCHEDULER_OPEN = "scheduler_open";
+	private final static String SCHEDULER_CLOSE = "scheduler_close";
+	private final static String SCHEDULER_ON_SUCCESS = "scheduler_on_success";
+	private final static String SCHEDULER_EXIT = "scheduler_exit";
+	private final static String SCHEDULER_ON_ERROR = "scheduler_on_error";
+	private final static String SCHEDULER_PROCESS = "scheduler_process";
 
 	private final String schedulerLanguageId;
 
 	/**
 	 * These are the optional methods of the scheduler script api.
 	 */
-	List<String> optionalMethods = Arrays.asList(SPOOLER_INIT, SPOOLER_OPEN,
-			SPOOLER_CLOSE, SPOOLER_ON_SUCCESS, SPOOLER_EXIT, SPOOLER_ON_ERROR);
+	List<String> optionalMethods = Arrays.asList(SCHEDULER_INIT, SCHEDULER_OPEN,
+			SCHEDULER_CLOSE, SCHEDULER_ON_SUCCESS, SCHEDULER_EXIT, SCHEDULER_ON_ERROR);
 
 	public APIModuleInstance(String scriptlanguage, String sourcecode) {
 		super(getScriptLanguage(scriptlanguage));
@@ -85,19 +85,18 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 	@Override
 	public Object call(String rawfunctionname, Object[] params) {
 		Object result = null;
-		String function = new ScriptFunction(rawfunctionname)
-				.getNativeFunctionName();
+		String function = new APIScriptFunction(rawfunctionname).getNativeFunctionName();
 //		log("call for function " + rawfunctionname);
 		boolean isFunction = (getSourcecode().contains(function)) ? true : false;
 		if (isFunction) {
 			try {
-				result = super.call(rawfunctionname, params);
+				result = super.call(function, params);
 			} catch (NoSuchMethodException e) {
 				log("the function " + function + " does not exist.");
 			}
-			function = getLastFunction().getNativeFunctionName();
+//			function = getLastFunction().getNativeFunctionName();
 		} else {
-			if (function.equals(SPOOLER_PROCESS)) {
+			if (function.equals(SCHEDULER_PROCESS)) {
 				result = super.call();
 			}
 		}
@@ -125,9 +124,9 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 		Object result = ret;
 		if (result == null || !(ret instanceof Boolean)) {
 			result = true;
-			if (function.equals(SPOOLER_PROCESS))
+			if (function.equals(SCHEDULER_PROCESS))
 				result = false;
-			if (function.equals(SPOOLER_EXIT))
+			if (function.equals(SCHEDULER_EXIT))
 				result = false;
 		}
 		return result;
