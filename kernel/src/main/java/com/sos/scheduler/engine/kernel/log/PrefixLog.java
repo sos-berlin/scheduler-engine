@@ -14,4 +14,5 @@ public class PrefixLog {
     public void warn(String s) { prefix_logC.warn(s); }
     public void error(String s) { prefix_logC.error(s); }
     public void debug3(String s) { prefix_logC.debug3(s); }
+    public void debug(String s) { debug3(s); }
 }

@@ -22,34 +22,40 @@ package com.sos.scheduler.engine.kernel.scripting;
  */
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+
 import java.util.Arrays;
 import java.util.List;
 
 @ForCpp
 public class APIModuleInstance extends ModuleInstance implements APIModule {
 
-	private final static String LANGUAGE_PREFIX = "java:";
+	private final static String LANGUAGE_PREFIX = "javax.script:";
 
-	private final static String SCHEDULER_INIT = "scheduler_init";
-	private final static String SCHEDULER_OPEN = "scheduler_open";
-	private final static String SCHEDULER_CLOSE = "scheduler_close";
-	private final static String SCHEDULER_ON_SUCCESS = "scheduler_on_success";
-	private final static String SCHEDULER_EXIT = "scheduler_exit";
-	private final static String SCHEDULER_ON_ERROR = "scheduler_on_error";
-	private final static String SCHEDULER_PROCESS = "scheduler_process";
+	private final static String SPOOLER_INIT = "spooler_init";
+	private final static String SPOOLER_OPEN = "spooler_open";
+	private final static String SPOOLER_CLOSE = "spooler_close";
+	private final static String SPOOLER_ON_SUCCESS = "spooler_on_success";
+	private final static String SPOOLER_EXIT = "spooler_exit";
+	private final static String SPOOLER_ON_ERROR = "spooler_on_error";
+	private final static String SPOOLER_PROCESS = "spooler_process";
 
 	private final String schedulerLanguageId;
+	private final PrefixLog	jsLogger;
+
 
 	/**
 	 * These are the optional methods of the scheduler script api.
 	 */
-	List<String> optionalMethods = Arrays.asList(SCHEDULER_INIT, SCHEDULER_OPEN,
-			SCHEDULER_CLOSE, SCHEDULER_ON_SUCCESS, SCHEDULER_EXIT, SCHEDULER_ON_ERROR);
+	List<String> optionalMethods = Arrays.asList(SPOOLER_INIT, SPOOLER_OPEN,
+			SPOOLER_CLOSE, SPOOLER_ON_SUCCESS, SPOOLER_EXIT, SPOOLER_ON_ERROR);
 
-	public APIModuleInstance(String scriptlanguage, String sourcecode) {
+	public APIModuleInstance(PrefixLog log, String scriptlanguage, String sourcecode) {
 		super(getScriptLanguage(scriptlanguage));
 		setSourceCode(sourcecode);
 		schedulerLanguageId = scriptlanguage;
+		jsLogger = log;
+		jsLogger.info("the scriptlanguage is " + schedulerLanguageId);
 	}
 
 	/**
@@ -85,22 +91,23 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 	@Override
 	public Object call(String rawfunctionname, Object[] params) {
 		Object result = null;
-		String function = new APIScriptFunction(rawfunctionname).getNativeFunctionName();
+		String function = new ScriptFunction(rawfunctionname).getNativeFunctionName();
 //		log("call for function " + rawfunctionname);
 		boolean isFunction = (getSourcecode().contains(function)) ? true : false;
 		if (isFunction) {
 			try {
 				result = super.call(function, params);
 			} catch (NoSuchMethodException e) {
-				log("the function " + function + " does not exist.");
+				jsLogger.error("the function " + function + " does not exist.");
 			}
 //			function = getLastFunction().getNativeFunctionName();
 		} else {
-			if (function.equals(SCHEDULER_PROCESS)) {
+			if (function.equals(SPOOLER_PROCESS)) {
 				result = super.call();
 			}
 		}
-		return check_result(function, result);
+//		return check_result(function, result);
+		return result;
 	}
 
 	@Override
@@ -109,8 +116,9 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 	}
 
 	/**
-	 * \brief check and modify the result of the script call \details The
-	 * scheduler need a boolean as a result from a script call. Sometimes the
+	 * \brief check and modify the result of the script call
+	 * \details 
+	 * The scheduler need a boolean as a result from a script call. Sometimes the
 	 * script do not implement an explicit 'return' command, in this case the
 	 * script result will changed depending on the called function.
 	 * 
@@ -120,17 +128,17 @@ public class APIModuleInstance extends ModuleInstance implements APIModule {
 	 *            - the result from the script
 	 * @return Object
 	 */
-	private Object check_result(String function, Object ret) {
-		Object result = ret;
-		if (result == null || !(ret instanceof Boolean)) {
-			result = true;
-			if (function.equals(SCHEDULER_PROCESS))
-				result = false;
-			if (function.equals(SCHEDULER_EXIT))
-				result = false;
-		}
-		return result;
-	}
+//	private Object check_result(String function, Object ret) {
+//		Object result = ret;
+//		if (result == null || !(ret instanceof Boolean)) {
+//			result = true;
+//			if (function.equals(SPOOLER_PROCESS))
+//				result = false;
+//			if (function.equals(SPOOLER_EXIT))
+//				result = false;
+//		}
+//		return result;
+//	}
 
 	/**
 	 * \brief dummy for checking the existence of a funtion \details

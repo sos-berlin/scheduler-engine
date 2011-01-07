@@ -47,7 +47,7 @@ public class ModuleInstance implements Module {
 
 	private String				sourceCode;
 	private ScriptFunction		lastFunction	= null;
-	protected Log				log				= null;
+//	protected Log				log				= null;
 
 	public ModuleInstance(String scriptlanguage) {
 		rawLanguageId = scriptlanguage;
@@ -102,13 +102,14 @@ public class ModuleInstance implements Module {
 		return scriptbindings.get(name); 		
 	}
 	
+	@Override
 	public void addObject(Object object, String name) {
-		String object_name = APIScriptFunction.replaceSpoolerPrefix(name);
-		if (object instanceof Log) {
-			log = (Log) object;
-			log("scriptlanguage is " + getLanguageId() + " (" + rawLanguageId + ")");
-		}
-		log("addObject " + object_name + " = " + object.toString());
+		String object_name = name;
+//		if (object instanceof Log) {
+//			log = (Log) object;
+//			log("scriptlanguage is " + getLanguageId() + " (" + rawLanguageId + ")");
+//		}
+//		log("addObject " + object_name + " = " + object.toString());
 		scriptbindings.put(object_name, object);
 	}
 
@@ -217,12 +218,9 @@ public class ModuleInstance implements Module {
 		return lastFunction;
 	}
 
-	public void log(String message) {
-		String output = this.getClass().getName() + " - " + message;
-		if (log == null)
-			System.out.println(output);
-		else
-			log.debug(output);
-	}
+//	public void log(String message) {
+//		String output = this.getClass().getName() + " - " + message;
+//		System.out.println(output);
+//	}
 
 }
