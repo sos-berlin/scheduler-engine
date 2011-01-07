@@ -24,6 +24,7 @@ struct Script_module_instance : Module_instance
 
     bool                        load                        ()                                      { _loaded = true; return Module_instance::load(); }
   //void                        start                       ();
+    virtual void                init                        ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //void                        close__end                  ();
     Variant                     call                        ( const string& name );
@@ -39,7 +40,7 @@ struct Script_module_instance : Module_instance
     Has_log*                   _log;
     bool                       _loaded;
 
-    javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance _java_module;
+    javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance _java_module_instance;
 
     typedef list< ptr<z::javabridge::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;

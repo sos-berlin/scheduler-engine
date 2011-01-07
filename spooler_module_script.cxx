@@ -32,9 +32,15 @@ Script_module::Script_module( Spooler* spooler, Prefix_log* log )
 Script_module_instance::Script_module_instance( Module* module )             
 : 
     Module_instance(module),
-    _zero_(this+1),
-    _java_module( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( module->_language, module->read_source_script()) )
+    _zero_(this+1)
 {
+}
+
+//----------------------------------------------------------------Script_module_instance::init
+
+void Script_module_instance::init()
+{
+    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( _log, _module->_language, _module->read_source_script()) );
 }
 
 //----------------------------------------------------------------Script_module_instance::add_obj
@@ -45,7 +51,7 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
 
     ptr<javabridge::Java_idispatch> java_idispatch = Java_subsystem_interface::instance_of_scheduler_object(idispatch, name);
     _added_jobjects.push_back( java_idispatch );
-    _java_module.addObject( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
+    _java_module_instance.addObject( java_idispatch->get_jobject(), name );            // registriert das Object in ScriptInterface
 }
 
 //-----------------------------------------------------------Script_module_instance::call
@@ -53,7 +59,9 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
 Variant Script_module_instance::call( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
-    return _java_module.callBoolean(name);
+    javaproxy::java::lang::Object result = _java_module_instance.call(name);
+    Variant empty = VT_EMPTY;
+    return (result == NULL) ? empty : result; 
 }
 
 //-------------------------------------------------------------------Script_module_instance::call
@@ -69,7 +77,7 @@ Variant Script_module_instance::call( const string&, const Variant&, const Varia
 bool Script_module_instance::name_exists( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::name_exists name=" << name << "\n");
-    return (_java_module.nameExists(name) != 0);  // weil name_exists jboolean zurück gibt (will JZ noch ändern)
+    return (_java_module_instance.nameExists(name) != 0);  // weil name_exists jboolean zurück gibt (will JZ noch ändern)
 }
 
 //-------------------------------------------------------------------------------------------------

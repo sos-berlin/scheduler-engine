@@ -28,6 +28,7 @@ function spooler_process() {
       spooler_log.info( "spooler_process wurde JETZT gerufen (" + cnt + ")" );
       return true;
    }
+//   spooler_task.error = "this is an error";
    return false;
 }
 

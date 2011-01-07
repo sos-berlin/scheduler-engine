@@ -4,7 +4,7 @@
      order="no">
     <script language="java:javascript">
         <![CDATA[
-spooler_log.info( "spooler_process wurde JETZT gerufen aus " + spooler_job.name() );
+scheduler_log.info( "spooler_process wurde JETZT gerufen aus " + scheduler_job.name() );
         ]]>
     </script>
     <run_time/>

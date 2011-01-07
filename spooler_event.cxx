@@ -271,7 +271,7 @@ int Scheduler_event::send_mail( const Mail_defaults& mail_defaults )
 
         if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : NULL )
         {
-            if( !mail_element.bool_getAttribute( "suppress" ) )
+            if( !mail_element.bool_getAttribute( "suppress" ) )         // suppress="true" im <mail>-Element unterbindet den Mailversand
             {
                 mail = new Com_mail( _spooler );
                 mail->init();

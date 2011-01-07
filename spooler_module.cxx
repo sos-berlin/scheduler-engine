@@ -423,7 +423,7 @@ void Module::init()
             _kind = kind_scripting_engine;
             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
             // JS-498: Scripting über JAVA-Klassen ausgeführt
-            if (_language.substr(0,5) == "java:") {
+            if (_language.substr(0,13) == "javax.script:") {
                 Z_LOG2("scheduler","use java-interface for scripting of language " << _language << "\n");
                 _kind = kind_scripting_engine_java;
             }

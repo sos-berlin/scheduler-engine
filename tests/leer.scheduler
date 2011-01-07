@@ -4,7 +4,7 @@
     xsi:noNamespaceSchemaLocation = "..\scheduler.xsd"
     
 >
-    <config   java_options="-Xmx257m" java_class_path="c:\temp\hallo.jar">
+    <config   java_options="-Xmx257m">
         <base file="$SCHEDULER_TEST/base.scheduler"/>
 
         <jobs>
