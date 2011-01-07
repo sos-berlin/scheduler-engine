@@ -40,7 +40,11 @@ Script_module_instance::Script_module_instance( Module* module )
 
 void Script_module_instance::init()
 {
-    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( _log, _module->_language, _module->read_source_script()) );
+    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( 
+        _log,
+        _module->_language,
+        _module->read_source_script())
+    );
 }
 
 //----------------------------------------------------------------Script_module_instance::add_obj
@@ -60,7 +64,7 @@ Variant Script_module_instance::call( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
     javaproxy::java::lang::Object result = _java_module_instance.call(name);
-    return (result == NULL) ? VT_EMPTY : result; 
+    return (result == NULL) ? empty_variant : result; 
 }
 
 //-------------------------------------------------------------------Script_module_instance::call
