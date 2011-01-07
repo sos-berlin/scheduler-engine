@@ -60,8 +60,7 @@ Variant Script_module_instance::call( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
     javaproxy::java::lang::Object result = _java_module_instance.call(name);
-    Variant empty = VT_EMPTY;
-    return (result == NULL) ? empty : result; 
+    return (result == NULL) ? VT_EMPTY : result; 
 }
 
 //-------------------------------------------------------------------Script_module_instance::call
