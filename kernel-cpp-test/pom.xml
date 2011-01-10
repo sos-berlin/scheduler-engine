@@ -8,7 +8,7 @@
         <version>2.1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.sos.scheduler.engine.core-cpp-test</artifactId>
+    <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>

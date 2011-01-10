@@ -10,6 +10,7 @@ import org.junit.Test;
 
 public class OrderStressTest extends SchedulerTest {
     // In Maven setzen mit -DargLine=-DOrderStressTest.limit=26 (Surefire plugin 2.6), 2010-11-28
+    // Zum Beispiel: mvn test -Dtest=OrderStressTest -DargLine=-DOrderStressTest.limit=26
     private static final int testLimit = Integer.parseInt(System.getProperty("OrderStressTest.limit", "100"));
 
 
