@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="Testjob groovy"
-     order="no">
-    <script language="java:groovy">
+     order="yes">
+    <script language="javax.script:groovy">
         <![CDATA[
 public cnt;
 
@@ -26,9 +26,7 @@ public boolean spooler_exit() {
   spooler_log.info("END of Test --------------------------------------------------");
   return true;
 }
-
         ]]>
-
     </script>
     <run_time/>
 </job>

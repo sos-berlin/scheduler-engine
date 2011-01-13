@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="Testjob jython"
-     order="no">
-    <script language="java:jython">
+     order="yes">
+    <script language="javax.script:python">
         <![CDATA[
 global cnt
 
@@ -24,9 +24,7 @@ def spooler_process():
 def spooler_exit():
   spooler_log.info('END of Test --------------------------------------------------');
   return True;
-
         ]]>
-
     </script>
     <run_time/>
 </job>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="Testjob (javascript)"
-     order="no">
-    <script language="java:javascript">
+     order="yes">
+    <script language="javax.script:javascript">
         <![CDATA[
-scheduler_log.info( "spooler_process wurde JETZT gerufen aus " + scheduler_job.name() );
+	spooler_log.info( "spooler_process wurde JETZT gerufen aus " + spooler_job.name() );
         ]]>
     </script>
     <run_time/>

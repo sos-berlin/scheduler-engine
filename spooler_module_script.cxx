@@ -13,6 +13,9 @@
  */
 #include "spooler.h"
 #include "../javaproxy/java__lang__String.h"
+#include "../zschimmer/java_com.h"
+
+using namespace zschimmer::javabridge;
 
 namespace sos {
 namespace scheduler {
@@ -32,19 +35,9 @@ Script_module::Script_module( Spooler* spooler, Prefix_log* log )
 Script_module_instance::Script_module_instance( Module* module )             
 : 
     Module_instance(module),
-    _zero_(this+1)
+    _zero_(this+1),
+    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( module->_language, module->read_source_script()) )
 {
-}
-
-//----------------------------------------------------------------Script_module_instance::init
-
-void Script_module_instance::init()
-{
-    _java_module_instance( javaproxy::com::sos::scheduler::engine::kernel::scripting::APIModuleInstance::new_instance( 
-        _log,
-        _module->_language,
-        _module->read_source_script())
-    );
 }
 
 //----------------------------------------------------------------Script_module_instance::add_obj
@@ -63,8 +56,9 @@ void Script_module_instance::add_obj( IDispatch* idispatch, const string& name )
 Variant Script_module_instance::call( const string& name )
 {
     Z_LOG2("scheduler","Script_module_instance::call name=" << name << "\n");
+    Com_env env = _module->_java_vm->jni_env();
     javaproxy::java::lang::Object result = _java_module_instance.call(name);
-    return (result == NULL) ? empty_variant : result; 
+    return (result == NULL) ? empty_variant : env.jobject_to_variant( result ); 
 }
 
 //-------------------------------------------------------------------Script_module_instance::call

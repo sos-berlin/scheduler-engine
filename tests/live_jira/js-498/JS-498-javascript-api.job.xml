@@ -2,7 +2,7 @@
 
 <job title="Testjob (javascript)"
      order="no">
-    <script language="java:javascript">
+    <script language="javax.script:javascript">
         <![CDATA[
 var cnt;        
 function spooler_init() {
@@ -16,11 +16,6 @@ function spooler_open() {
    return true;
 }
 
-function spooler_close() {
-   spooler_log.info( "spooler_close wurde gerufen" );
-   return true;
-}
-
 // spooler_process wird so lange gerufen, bis false zurück gegeben wird
 function spooler_process() {
    if (cnt < 5) {
@@ -28,23 +23,27 @@ function spooler_process() {
       spooler_log.info( "spooler_process wurde JETZT gerufen (" + cnt + ")" );
       return true;
    }
+   spooler_log.info( "the exit code is " + spooler_task.exit_code );
+//   spooler_task.exit_code = 77;
+//   spooler_log.info( "the exit code is " + spooler_task.exit_code );
 //   spooler_task.error = "this is an error";
    return false;
 }
 
+function spooler_close() {
+   spooler_log.info( "spooler_close wurde gerufen" );
+}
+
 function spooler_on_success() {
    spooler_log.info( "spooler_on_success wurde gerufen" );
-   return true;
 }
 
 function spooler_exit() {
    spooler_log.info( "spooler_exit wurde gerufen" );
-   return false;
 }
 
 function spooler_on_error() {
 	spooler_log.error( "es ist ein Fehler aufgetreten: " + spooler_task.error );
-	return true;
 }
         ]]>
     </script>

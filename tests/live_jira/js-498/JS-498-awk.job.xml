@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="Testjob2 (awk)"
-     order="no">
-    <script language="java:awk">
+     order="yes">
+    <script language="javax.script:javascript">
+        <![CDATA[
+spooler_log.info("the AWK snippet below will be executed, but the process does not come back out of the AWK-jar.");
+        ]]>
+    </script>
+<!--     
+    <script language="javax.script:awk">
         <![CDATA[
 BEGIN {
 	printf("hello world");
-}        ]]>
+}
+        ]]>
     </script>
+-->    
     <run_time/>
 </job>
