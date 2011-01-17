@@ -223,6 +223,10 @@
                 </executions>
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
+                    <jvmArgs>
+                        <!-- Vermeidet StackOverflowError auf manchen Linux-Rechnern: -->
+                        <jvmArg>-Xss1M</jvmArg>
+                    </jvmArgs>
                     <args>
                         <arg>-target:jvm-1.5</arg>
                         <arg>-optimise</arg>
