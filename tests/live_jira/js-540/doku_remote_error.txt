@@ -1,0 +1,5 @@
+JS-540: java_class_path
+     
+xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document();  
+
+COM-80020009  Ausnahmefehler aufgetreten. [construct] [] [server::construct   [5] [java_class_path], in Remote_module_instance_server::construct], method=call
