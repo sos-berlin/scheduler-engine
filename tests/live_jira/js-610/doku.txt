@@ -1,0 +1,14 @@
+js-610
+
+if( !_is_success_state  &&  job_node  &&  job_node->is_on_error_setback() )  setback();
+order_queue()->reinsert_order( this );
+void Order_queue::reinsert_order( Order* order )
+
+
+Hier Breakpoint setzen, um Order-Ablauf zu verfolgen
+     FOR_EACH( vector<Job*>, _prioritized_order_job_array, j )
+     
+     
+     
+
+   
