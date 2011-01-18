@@ -16,14 +16,14 @@
 
     <dependencies>
 
-				<!-- mvn install:install-file -Dfile=C:\scheduler\scheduler.src.devel\workspace\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->        
+				<!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.util</artifactId>
             <version>1.0</version>
         </dependency>
 
-				<!-- mvn install:install-file -Dfile=C:\scheduler\scheduler.src.devel\workspace\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
+				<!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.JSHelper</artifactId>
