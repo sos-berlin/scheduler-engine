@@ -1,22 +1,23 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
 /**
- * \file ModuleInstance.java
- * \brief general wrapper for the javax interface 
+ * \file ScriptInstance.java
+ * \brief general wrapper for the javax.script interface 
  *  
- * \class ModuleInstance 
- * \brief general wrapper for the javax interface 
+ * \class ScriptInstance 
+ * \brief general wrapper for the javax.script interface 
  * 
  * \details
  * This class provides a general mechanism to call script in different languages.
  *    
  * \code
-	ModuleInstance module = new ModuleInstance("javascript","print('Hello ' + name + '\\n');");
+	ScriptInstance module = new ScriptInstance("javascript");
+	module.setSourceCode("print('Hello ' + name + '\\n');");
 	module.addObject("nick", "name");
 	module.call();
   \endcode
  *
- * \author EQCPN
+ * \author ss
  * \version 17.12.2010 12:04:34
  * <div class="sos_branding">
  *   <p>© 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
@@ -27,7 +28,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -36,12 +36,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import sos.spooler.Log;
+import org.apache.log4j.Logger;
 
-public class ModuleInstance implements Module {
+public class ScriptInstance implements Script {
 
+	private final Logger 		logger = Logger.getRootLogger();
+	
 	private final String		languageId;
-	private final String		rawLanguageId;
 	private final ScriptEngine	scriptengine;
 	private final Bindings		scriptbindings;
 
@@ -49,9 +50,10 @@ public class ModuleInstance implements Module {
 	private ScriptFunction		lastFunction	= null;
 //	protected Log				log				= null;
 
-	public ModuleInstance(String scriptlanguage) {
-		rawLanguageId = scriptlanguage;
+	public ScriptInstance(String scriptlanguage) {
+//		logger = Logger.getLogger(this.getClass());
 		languageId = scriptlanguage;
+		logger.debug("the language id is " + scriptlanguage);
 
 		ScriptEngineManager sm;
 		ScriptEngine se;
@@ -62,7 +64,7 @@ public class ModuleInstance implements Module {
 			sb = se.getBindings(ScriptContext.ENGINE_SCOPE);
 		}
 		catch (Exception e) {
-			throw new UnsupportedScriptLanguageException(e, "Scriptlanguage " + getLanguageId() + " is not supported.", rawLanguageId);
+			throw new UnsupportedScriptLanguageException(e, "Scriptlanguage " + getLanguageId() + " is not supported.", scriptlanguage);
 		}
 		scriptengine = se;
 		scriptbindings = sb;
@@ -79,6 +81,7 @@ public class ModuleInstance implements Module {
 	private String readFile(String filename) {
 		StringBuffer sb = null;
 		FileReader fr = null;
+		logger.info("reading script from file " + filename);
 		try {
 			fr = new FileReader(filename);
 			BufferedReader br = new BufferedReader(fr);
@@ -105,22 +108,10 @@ public class ModuleInstance implements Module {
 	@Override
 	public void addObject(Object object, String name) {
 		String object_name = name;
-//		if (object instanceof Log) {
-//			log = (Log) object;
-//			log("scriptlanguage is " + getLanguageId() + " (" + rawLanguageId + ")");
-//		}
 //		log("addObject " + object_name + " = " + object.toString());
+		logger.debug("addObject " + name + " to script");
 		scriptbindings.put(object_name, object);
 	}
-
-//	private void logBindings() {
-//		if (log != null) {
-//			log.debug("used objects for script:");
-//			for (Map.Entry<String, Object> entry  : scriptbindings.entrySet()) {
-//				log.debug("addObject " + entry.getKey() + " = " + entry.getValue().toString() );
-//			}
-//		}
-//	}
 	
 	public Object call() {
 		Object result = true;
@@ -150,7 +141,7 @@ public class ModuleInstance implements Module {
 		}
 		
 		try {
-//    		log("executing function " + functionname);
+			logger.debug("executing function " + functionname);
 			scriptengine.eval(code, scriptbindings);
 			Invocable invocableEngine = (Invocable) scriptengine;
 			result = invocableEngine.invokeFunction(functionname, params);

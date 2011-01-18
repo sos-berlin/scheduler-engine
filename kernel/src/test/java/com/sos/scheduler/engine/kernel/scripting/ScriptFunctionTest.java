@@ -12,6 +12,12 @@ public class ScriptFunctionTest {
 	}
 
 	@Test
+	public void functionTestAPI() {
+		APIScriptFunction function = new APIScriptFunction("spooler");
+		printOut(function);
+	}
+
+	@Test
 	public void functionTest() {
 		ScriptFunction function = new ScriptFunction("myFunction");
 		printOut(function);

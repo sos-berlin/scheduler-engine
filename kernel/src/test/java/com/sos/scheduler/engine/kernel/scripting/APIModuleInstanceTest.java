@@ -114,7 +114,7 @@ public class APIModuleInstanceTest {
 	//	maven dependencies not found for groovy
 	public void groovyScriptFromFile() throws NoSuchMethodException {
 		System.out.println("START groovyScriptFromFile --------------------------------------------------------------------");
-		ModuleInstance module = new ModuleInstance("groovy");
+		ScriptInstance module = new ScriptInstance("groovy");
 		module.setSourceFile(script_root + "test.groovy");
 		module.addObject("groovyScriptFromFile", "name");
 		module.call("scheduler_init");

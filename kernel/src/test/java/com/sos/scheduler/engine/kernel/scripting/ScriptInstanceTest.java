@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.scripting;
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import com.sos.scheduler.engine.kernel.LogMock;
 
@@ -31,20 +32,25 @@ import com.sos.scheduler.engine.kernel.LogMock;
 * Created on 15.12.2010 13:55:53
  */
 
-public class ModuleInstanceTest {
+public class ScriptInstanceTest {
+	
+//	private final static Logger logger = Logger.getLogger(ScriptInstanceTest.class);
+	private final static Logger logger = Logger.getRootLogger();
 	
 	private final static String script_root = "./src/test/scripts/";
 
 	@Test
 	public void javaScript() {
-		ModuleInstance module = new ModuleInstance("javascript");
+		logger.debug("===== javaScript");
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode("print('Hallo Welt\\n');");
 		module.call();
 	}
 
 	@Test
 	public void javaScriptWithParams() {
-		ModuleInstance module = new ModuleInstance("javascript");
+		logger.debug("===== javaScriptWithParams");
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode("print('Hallo ' + name + '\\n');");
 		module.addObject("Walter", "name");
 		module.call();
@@ -52,8 +58,9 @@ public class ModuleInstanceTest {
 
 	@Test
 	public void javaScriptWithFunction() {
-		String script = "function show () {print('hallo welt'); }\n";
-		ModuleInstance module = new ModuleInstance("javascript");
+		logger.debug("===== javaScriptWithFunction");
+		String script = "function show () {print('hallo welt\\n'); }\n";
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode(script);
 		try {
 			module.call("show");
@@ -64,8 +71,9 @@ public class ModuleInstanceTest {
 
 	@Test
 	public void javaScriptWithFunctions() {
+		logger.debug("===== javaScriptWithFunctions");
 		String script = "function add (a, b) {c = a + b; param = 'abc';return c; }";
-		ModuleInstance module = new ModuleInstance("javascript");
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode(script);
 		String param = "Hugo";
 		module.addObject(param, "param");
@@ -82,8 +90,9 @@ public class ModuleInstanceTest {
 
 	@Test
 	public void javaScriptDoubleFunction() {
+		logger.debug("===== javaScriptDoubleFunction");
 		String script = "function divide (a, b) {c = a / b; return c; }";
-		ModuleInstance module = new ModuleInstance("javascript");
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode(script);
 		Object result;
 		try {
@@ -96,7 +105,8 @@ public class ModuleInstanceTest {
 
 	@Test
 	public void javaScriptFromFile() throws NoSuchMethodException {
-		ModuleInstance module = new ModuleInstance("javascript");
+		logger.debug("===== javaScriptFromFile");
+		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceFile(script_root + "test.js");
 		module.addObject("hugo", "name");
 		try {
@@ -121,8 +131,9 @@ public class ModuleInstanceTest {
 	// @Test - maven dependencies not found for bean
 	// http://www.beanshell.org/
 	public void beanScript() {
+		logger.debug("===== beanScript");
 		String script = "for (int i=0; i<5; i++)\n" + "print(i);\n" + "print(\"Hello \" + name);\n";
-		ModuleInstance module = new ModuleInstance("bsh");
+		ScriptInstance module = new ScriptInstance("bsh");
 		module.setSourceCode(script);
 		module.addObject("hugo", "name");
 		module.call();
@@ -145,7 +156,8 @@ public class ModuleInstanceTest {
 	// @Test
 	//	maven dependencies not found for bean
 	public void jythonScriptFromFile() throws NoSuchMethodException {
-		ModuleInstance module = new ModuleInstance("jython");
+		logger.debug("===== jythonScriptFromFile");
+		ScriptInstance module = new ScriptInstance("jython");
 		module.setSourceFile(script_root + "test.py");
 		module.addObject("jythonScriptFromFile", "name");
 		module.addObject(new LogMock(), "log");
@@ -167,16 +179,18 @@ public class ModuleInstanceTest {
 	// @Test
 	//	maven dependencies not found for bean
 	public void groovyScript() {
+		logger.debug("===== groovyScript");
 		String script = "println 'hello, groovy world'\n";
-		ModuleInstance module = new ModuleInstance("groovy");
+		ScriptInstance module = new ScriptInstance("groovy");
 		module.setSourceCode(script);
 		module.call();
 	}
 
 	@Test(expected = UnsupportedScriptLanguageException.class)
 	public void unsupportedScriptLanguage() {
+		logger.debug("===== unsupportedScriptLanguage");
 		try {
-			ModuleInstance module = new ModuleInstance("tolami");
+			ScriptInstance module = new ScriptInstance("tolami");
 			module.setSourceCode("print('Hallo Welt\\n');");
 			module.call();
 		}
@@ -186,8 +200,9 @@ public class ModuleInstanceTest {
 
 	@Test(expected = InvalidScriptException.class)
 	public void missingScriptCode() {
+		logger.debug("===== missingScriptCode");
 		try {
-			ModuleInstance module = new ModuleInstance("javascript");
+			ScriptInstance module = new ScriptInstance("javascript");
 			module.call();
 		}
 		finally {

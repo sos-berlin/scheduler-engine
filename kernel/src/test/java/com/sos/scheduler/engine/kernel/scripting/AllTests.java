@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( 
 		{ 
 			com.sos.scheduler.engine.kernel.scripting.ScriptFunctionTest.class,
-			com.sos.scheduler.engine.kernel.scripting.ModuleInstanceTest.class,
+			com.sos.scheduler.engine.kernel.scripting.ScriptInstanceTest.class,
 			com.sos.scheduler.engine.kernel.scripting.APIModuleInstanceTest.class
 		}
 )

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.kernel.log;
 
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC;
 
-
+@ForCpp
 public class PrefixLog {
     private Prefix_logC prefix_logC;
     
