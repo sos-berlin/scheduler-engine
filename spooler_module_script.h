@@ -24,7 +24,6 @@ struct Script_module_instance : Module_instance
 
     bool                        load                        ()                                      { _loaded = true; return Module_instance::load(); }
   //void                        start                       ();
-    virtual void                init                        ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //void                        close__end                  ();
     Variant                     call                        ( const string& name );
