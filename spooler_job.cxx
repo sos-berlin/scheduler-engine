@@ -2766,7 +2766,8 @@ ptr<Task> Job::task_to_start()
             cause = cause_min_tasks;
         }
 
-        if( !cause  &&  is_order_controlled() )
+        // js-610 if( !cause  &&  is_order_controlled() )
+        if( is_order_controlled() && ( !cause || cause == cause_delay_after_error) )
         {
             has_order = request_order( now, obj_name() );
         }
