@@ -14,7 +14,7 @@ package com.sos.scheduler.engine.kernel.scripting;
  * \author ss
  * \version 1.0 - 18.01.2011 11:17:54
  * <div class="sos_branding">
- *   <p>© 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 public interface Script {

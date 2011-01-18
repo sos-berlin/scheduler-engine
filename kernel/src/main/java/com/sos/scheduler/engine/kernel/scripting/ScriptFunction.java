@@ -4,21 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * \file class for handling different function calls
- * \brief 
- *  
- * \class class for handling different function calls 
- * \brief 
- * 
- * \details
- *
- * \author Stefan Schaedlich
- * \version 17.12.2010 12:01:08
- * <div class="sos_branding">
- *   <p>Â© 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-/**
  * \file ScriptFunction.java
  * \brief class for handling function names
  *  
@@ -40,7 +25,7 @@ import java.util.regex.Pattern;
  * \author ss
  * \version 1.0 - 18.01.2011 11:20:08
  * <div class="sos_branding">
- *   <p>© 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 public class ScriptFunction {

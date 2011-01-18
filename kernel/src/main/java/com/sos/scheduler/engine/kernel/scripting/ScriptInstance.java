@@ -20,7 +20,7 @@ package com.sos.scheduler.engine.kernel.scripting;
  * \author ss
  * \version 17.12.2010 12:04:34
  * <div class="sos_branding">
- *   <p>© 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ *   <p>(c) 2010 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 
