@@ -11,11 +11,11 @@ public class ScriptFunctionTest {
 	public static void setUpBeforeClass() throws Exception {
 	}
 
-	@Test
-	public void functionTestAPI() {
-		APIScriptFunction function = new APIScriptFunction("spooler");
-		printOut(function);
-	}
+//	@Test
+//	public void functionTestAPI() {
+//		APIScriptFunction function = new APIScriptFunction("spooler");
+//		printOut(function);
+//	}
 
 	@Test
 	public void functionTest() {

@@ -28,8 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Appender;
-import org.apache.log4j.Logger;
-
 import sos.spooler.Log;
 import sos.util.SOSSchedulerLogger;
 
@@ -42,17 +40,16 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 
 	private final static String LANGUAGE_PREFIX = "javax.script:";
 
-	private final static String SCHEDULER_INIT = "scheduler_init";
-	private final static String SCHEDULER_OPEN = "scheduler_open";
-	private final static String SCHEDULER_CLOSE = "scheduler_close";
-	private final static String SCHEDULER_ON_SUCCESS = "scheduler_on_success";
-	private final static String SCHEDULER_EXIT = "scheduler_exit";
-	private final static String SCHEDULER_ON_ERROR = "scheduler_on_error";
-	private final static String SCHEDULER_PROCESS = "scheduler_process";
+	private final static String SCHEDULER_INIT = "spooler_init";
+	private final static String SCHEDULER_OPEN = "spooler_open";
+	private final static String SCHEDULER_CLOSE = "spooler_close";
+	private final static String SCHEDULER_ON_SUCCESS = "spooler_on_success";
+	private final static String SCHEDULER_EXIT = "spooler_exit";
+	private final static String SCHEDULER_ON_ERROR = "spooler_on_error";
+	private final static String SCHEDULER_PROCESS = "spooler_process";
 
 	private final String schedulerLanguageId;
 	private final JobSchedulerLog4JAppender jsAppender;
-	private final static Logger logger = Logger.getLogger(APIModuleInstance.class);
 
 	/**
 	 * These are the optional methods of the scheduler script api.
@@ -62,19 +59,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 
 	public APIModuleInstance(String scriptlanguage, String sourcecode) {
 		super(getScriptLanguage(scriptlanguage));
-		
-//		Appender apn = logger.getAppender("scheduler");
-//		if (apn == null) {
-//			// @TODO sollte Bestandteil von Log4JHelper werden ...
-//			SimpleLayout layout = new SimpleLayout();
-//			apn = new BufferedJobSchedulerLog4JAppender(layout);
-//			Appender consoleAppender = apn; // JobSchedulerLog4JAppender(layout);
-//			logger.addAppender(consoleAppender);
-//			logger.setLevel(Level.DEBUG);
-//			logger.debug("LOG-I-0010: Log4j configured programmatically");
-//		}
-//		stdoutAppender = apn;
-		
+	
 		JobSchedulerLog4JAppender bapn = null;
 		Appender stdoutAppender = logger.getAppender("scheduler");
 		if (stdoutAppender instanceof JobSchedulerLog4JAppender) {
@@ -106,18 +91,20 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	
 	@Override
 	public void addObject(Object object, String name) {
-		String object_name = new APIScriptFunction(name).getNativeFunctionName();
-		if (object instanceof Log && jsAppender != null) {
-			Log log = (Log) object;
-			try {
-				SOSSchedulerLogger l = new SOSSchedulerLogger(log);
-				jsAppender.setSchedulerLogger( l );
-			} catch (Exception e) {
-				logger.error("LOG-E-0120: job scheduler log object could not set in log4j properties");
-				e.printStackTrace();
+		if (object instanceof Log) {
+			Log log = (Log) object;		// log object of the scheduler-task
+			if (jsAppender != null) {
+				try {
+					SOSSchedulerLogger l = new SOSSchedulerLogger(log);
+					jsAppender.setSchedulerLogger( l );
+				} catch (Exception e) {
+					logger.error("LOG-E-0120: job scheduler log object could not set in log4j properties");
+					e.printStackTrace();
+				}
 			}
+			super.addObject(logger, "logger");
 		}
-		super.addObject(object, object_name);
+		super.addObject(object, name);
 	}
 
 	/**
@@ -136,7 +123,7 @@ public class APIModuleInstance extends ScriptInstance implements APIModule {
 	@Override
 	public Object call(String rawfunctionname, Object[] params) {
 		Object result = null;
-		APIScriptFunction fobj = new APIScriptFunction(rawfunctionname);
+		ScriptFunction fobj = new ScriptFunction(rawfunctionname);
 		String function = fobj.getNativeFunctionName();
 		logger.info("call for function " + function);
 		if ( fobj.isFunction(getSourcecode())) {

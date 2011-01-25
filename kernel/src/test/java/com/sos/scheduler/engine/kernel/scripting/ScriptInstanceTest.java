@@ -41,7 +41,7 @@ public class ScriptInstanceTest {
 
 	@Test
 	public void javaScript() {
-		logger.debug("===== javaScript");
+		logger.debug("===== javaScript: " + ScriptInstanceTest.class.getPackage().getName());
 		ScriptInstance module = new ScriptInstance("javascript");
 		module.setSourceCode("print('Hallo Welt\\n');");
 		module.call();

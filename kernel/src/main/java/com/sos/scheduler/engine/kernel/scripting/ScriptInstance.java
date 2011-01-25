@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
 
 public class ScriptInstance implements Script {
 
-	private final Logger 		logger = Logger.getRootLogger();
+	protected final Logger 		logger = Logger.getLogger(ScriptInstance.class.getPackage().getName());
 	
 	private final String		languageId;
 	private final ScriptEngine	scriptengine;
@@ -48,10 +48,8 @@ public class ScriptInstance implements Script {
 
 	private String				sourceCode;
 	private ScriptFunction		lastFunction	= null;
-//	protected Log				log				= null;
 
 	public ScriptInstance(String scriptlanguage) {
-//		logger = Logger.getLogger(this.getClass());
 		languageId = scriptlanguage;
 		logger.debug("the language id is " + scriptlanguage);
 
@@ -108,7 +106,6 @@ public class ScriptInstance implements Script {
 	@Override
 	public void addObject(Object object, String name) {
 		String object_name = name;
-//		log("addObject " + object_name + " = " + object.toString());
 		logger.debug("addObject " + name + " to script");
 		scriptbindings.put(object_name, object);
 	}
@@ -208,10 +205,5 @@ public class ScriptInstance implements Script {
 	public ScriptFunction getLastFunction() {
 		return lastFunction;
 	}
-
-//	public void log(String message) {
-//		String output = this.getClass().getName() + " - " + message;
-//		System.out.println(output);
-//	}
 
 }
