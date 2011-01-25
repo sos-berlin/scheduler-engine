@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <job title="Testjob2 (awk)"
-     order="yes">
+     order="no">
     <script language="javax.script:javascript">
         <![CDATA[
-spooler_log.info("the AWK snippet below will be executed, but the process does not come back out of the AWK-jar.");
+	logger.info("the AWK snippet below will be executed, but the process does not come back out of the AWK-jar.");
         ]]>
     </script>
 <!--     

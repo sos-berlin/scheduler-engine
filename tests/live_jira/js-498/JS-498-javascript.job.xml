@@ -4,7 +4,10 @@
      order="yes">
     <script language="javax.script:javascript">
         <![CDATA[
-	spooler_log.info( "spooler_process wurde JETZT gerufen aus " + spooler_job.name() );
+function spooler_process() {
+	logger.info( "spooler_process wurde JETZT gerufen aus " + spooler_job.name() );
+	return true;
+}
         ]]>
     </script>
     <run_time/>

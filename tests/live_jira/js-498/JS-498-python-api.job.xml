@@ -9,20 +9,20 @@ global cnt
 def spooler_init():
   global cnt
   cnt = 0
-  spooler_log.info('START of Test ------------------------------------------------');
-  spooler_log.debug('spooler_init is called by ' + spooler_job.name() )
+  logger.info('START of Test ------------------------------------------------');
+  logger.debug('spooler_init is called by ' + spooler_job.name() )
   return True;
 
 def spooler_process():
   global cnt
   if cnt < 5:
     cnt = cnt + 1
-    spooler_log.info('spooler_process: iteration no ' +  str(cnt) )
+    logger.info('spooler_process: iteration no ' +  str(cnt) )
     return True;
   return False;
 
 def spooler_exit():
-  spooler_log.info('END of Test --------------------------------------------------');
+  logger.info('END of Test --------------------------------------------------');
   return True;
         ]]>
     </script>

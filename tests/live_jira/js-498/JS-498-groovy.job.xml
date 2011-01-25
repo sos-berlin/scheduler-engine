@@ -4,7 +4,10 @@
      order="yes">
     <script language="javax.script:groovy">
         <![CDATA[
-spooler_log.info ("Hallo Groovy")
+public boolean spooler_process() {
+	logger.info ("Hallo Groovy")
+	return true
+}
         ]]>
     </script>
     <run_time/>

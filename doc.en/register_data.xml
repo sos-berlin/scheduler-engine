@@ -5,7 +5,7 @@
 
 <register_data
     author="$Author: scheduler_keyword_to_xml.pl $"
-    date= "$Date: 2011/1/20 14:44:30 $"
+    date= "$Date: 2011/1/25 9:48:17 $"
 >
 <register_keyword keyword='?'>
     <register_keyword_display><code>-?=</code></register_keyword_display>
@@ -13,10 +13,12 @@
 </register_keyword>
 <register_keyword keyword='abort_immediately'>
     <register_keyword_display><code>abort_immediately()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__abort_immediately' register_title='Scheduler.abort_immediately()' register_keyword='abort_immediately()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately' register_title='Spooler.abort_immediately()' register_keyword='abort_immediately()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='abort_immediately_and_restart'>
     <register_keyword_display><code>abort_immediately_and_restart()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__abort_immediately_and_restart' register_title='Scheduler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__abort_immediately_and_restart' register_title='Spooler.abort_immediately_and_restart()' register_keyword='abort_immediately_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='absolute_repeat'>
@@ -49,6 +51,7 @@
 </register_keyword>
 <register_keyword keyword='add_job_chain'>
     <register_keyword_display><code>add_job_chain()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__add_job_chain' register_title='Scheduler.add_job_chain()' register_keyword='add_job_chain()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='add_job_chain()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='add_jobs'>
@@ -103,6 +106,7 @@
 </register_keyword>
 <register_keyword keyword='all_schedulers'>
     <register_keyword_display><code>all_schedulers</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate' register_title='Scheduler.terminate()' register_keyword='all_schedulers'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='all_schedulers'/>
 </register_keyword>
 <register_keyword keyword='all_schedulers'>
@@ -378,6 +382,7 @@
     <register_keyword_display><code>&lt;config&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__config' register_title='Änderungsprotokoll'  register_keyword='config'/>
     <register_entry register_file='api/Job.xml#use_element__config' register_title='Job'  register_keyword='config'/>
+    <register_entry register_file='api/Scheduler.xml#use_element__config' register_title='Scheduler'  register_keyword='config'/>
     <register_entry register_file='api/Spooler.xml#use_element__config' register_title='Spooler'  register_keyword='config'/>
     <register_entry register_file='api/Supervisor_client.xml#use_element__config' register_title='Supervisor_client'  register_keyword='config'/>
     <register_entry register_file='central_configuration.xml#use_element__config' register_title='Central Configuration Using a Supervisor Job Scheduler'  register_keyword='config'/>
@@ -435,6 +440,7 @@
 <register_keyword keyword='configuration_directory (property)'>
     <register_keyword_display><code>configuration_directory</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__configuration_directory' register_title='Job.configuration_directory' register_keyword='configuration_directory' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__configuration_directory' register_title='Scheduler.configuration_directory' register_keyword='configuration_directory' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__configuration_directory' register_title='Spooler.configuration_directory' register_keyword='configuration_directory' type='definition'/>
 </register_keyword>
 <register_keyword keyword='configuration_modify_event'>
@@ -468,6 +474,7 @@
 </register_keyword>
 <register_keyword keyword='continue_exclusive_operation'>
     <register_keyword_display><code>continue_exclusive_operation</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate' register_title='Scheduler.terminate()' register_keyword='continue_exclusive_operation'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='continue_exclusive_operation'/>
 </register_keyword>
 <register_keyword keyword='continue_exclusive_operation'>
@@ -500,6 +507,7 @@
 </register_keyword>
 <register_keyword keyword='create_job_chain'>
     <register_keyword_display><code>create_job_chain()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__create_job_chain' register_title='Scheduler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='create_job_chain()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_lock'>
@@ -508,6 +516,7 @@
 </register_keyword>
 <register_keyword keyword='create_order'>
     <register_keyword_display><code>create_order()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__create_order' register_title='Scheduler.create_order()' register_keyword='create_order()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='create_order()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_process_class'>
@@ -520,10 +529,12 @@
 </register_keyword>
 <register_keyword keyword='create_variable_set'>
     <register_keyword_display><code>create_variable_set()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__create_variable_set' register_title='Scheduler.create_variable_set()' register_keyword='create_variable_set()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='create_variable_set()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='create_xslt_stylesheet'>
     <register_keyword_display><code>create_xslt_stylesheet()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__create_xslt_stylesheet' register_title='Scheduler.create_xslt_stylesheet()' register_keyword='create_xslt_stylesheet()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='create_xslt_stylesheet()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='created'>
@@ -609,6 +620,7 @@
 </register_keyword>
 <register_keyword keyword='db_history_table_name (property)'>
     <register_keyword_display><code>db_history_table_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_history_table_name' register_title='Scheduler.db_history_table_name' register_keyword='db_history_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_history_table_name' register_title='Spooler.db_history_table_name' register_keyword='db_history_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_members_table'>
@@ -617,6 +629,7 @@
 </register_keyword>
 <register_keyword keyword='db_name (property)'>
     <register_keyword_display><code>db_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_name' register_title='Scheduler.db_name' register_keyword='db_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_name' register_title='Spooler.db_name' register_keyword='db_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_order_history_table'>
@@ -627,6 +640,7 @@
 </register_keyword>
 <register_keyword keyword='db_order_history_table_name (property)'>
     <register_keyword_display><code>db_order_history_table_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_order_history_table_name' register_title='Scheduler.db_order_history_table_name' register_keyword='db_order_history_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_order_history_table_name' register_title='Spooler.db_order_history_table_name' register_keyword='db_order_history_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_order_step_history_table'>
@@ -641,6 +655,7 @@
 </register_keyword>
 <register_keyword keyword='db_orders_table_name (property)'>
     <register_keyword_display><code>db_orders_table_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_orders_table_name' register_title='Scheduler.db_orders_table_name' register_keyword='db_orders_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_orders_table_name' register_title='Spooler.db_orders_table_name' register_keyword='db_orders_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_tasks_table'>
@@ -650,6 +665,7 @@
 </register_keyword>
 <register_keyword keyword='db_tasks_table_name (property)'>
     <register_keyword_display><code>db_tasks_table_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_tasks_table_name' register_title='Scheduler.db_tasks_table_name' register_keyword='db_tasks_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_tasks_table_name' register_title='Spooler.db_tasks_table_name' register_keyword='db_tasks_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_variables_table'>
@@ -659,6 +675,7 @@
 </register_keyword>
 <register_keyword keyword='db_variables_table_name (property)'>
     <register_keyword_display><code>db_variables_table_name</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__db_variables_table_name' register_title='Scheduler.db_variables_table_name' register_keyword='db_variables_table_name' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__db_variables_table_name' register_title='Spooler.db_variables_table_name' register_keyword='db_variables_table_name' type='definition'/>
 </register_keyword>
 <register_keyword keyword='db_waiting'>
@@ -797,6 +814,7 @@
 </register_keyword>
 <register_keyword keyword='directory (property)'>
     <register_keyword_display><code>directory</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__directory' register_title='Scheduler.directory' register_keyword='directory' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__directory' register_title='Spooler.directory' register_keyword='directory' type='definition'/>
 </register_keyword>
 <register_keyword keyword='directory_path'>
@@ -914,6 +932,7 @@
 </register_keyword>
 <register_keyword keyword='ERROR'>
     <register_keyword_display><code>&lt;ERROR&gt;</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#use_element__ERROR' register_title='Scheduler'  register_keyword='ERROR'/>
     <register_entry register_file='api/Spooler.xml#use_element__ERROR' register_title='Spooler'  register_keyword='ERROR'/>
     <register_entry register_file='xml.xml#use_element__ERROR' register_title='All XML Elements'  register_keyword='ERROR'/>
     <register_entry register_file='xml/answer/ERROR.xml#' register_title='&lt;ERROR&gt; (Answer)'  register_keyword='ERROR' type='definition'/>
@@ -995,6 +1014,7 @@
 <register_keyword keyword='exclusive'>
     <register_keyword_display><code>-exclusive=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__exclusive' register_title='Änderungsprotokoll'  register_keyword='exclusive'/>
+    <register_entry register_file='api/Scheduler.xml#use_option__exclusive' register_title='Scheduler'  register_keyword='exclusive'/>
     <register_entry register_file='api/Spooler.xml#use_option__exclusive' register_title='Spooler'  register_keyword='exclusive'/>
     <register_entry register_file='backupscheduler.xml#use_option__exclusive' register_title='Backup Job Schedulers'  register_keyword='exclusive'/>
     <register_entry register_file='command_line.xml#use_option__exclusive' register_title='XXX'  register_keyword='exclusive'/>
@@ -1011,6 +1031,7 @@
 </register_keyword>
 <register_keyword keyword='execute_xml'>
     <register_keyword_display><code>execute_xml()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__execute_xml' register_title='Scheduler.execute_xml()' register_keyword='execute_xml()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='execute_xml()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='exit'>
@@ -1276,6 +1297,7 @@
 </register_keyword>
 <register_keyword keyword='hostname (property)'>
     <register_keyword_display><code>hostname</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__hostname' register_title='Scheduler.hostname' register_keyword='hostname' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__hostname' register_title='Spooler.hostname' register_keyword='hostname' type='definition'/>
     <register_entry register_file='api/Supervisor_client.xml#method__hostname' register_title='Supervisor_client.hostname' register_keyword='hostname' type='definition'/>
 </register_keyword>
@@ -1345,6 +1367,7 @@
     <register_keyword_display><code>id</code> (property)</register_keyword_display>
     <register_entry register_file='api/Order.xml#method__id' register_title='Order.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Order~.xml#method__id' register_title='Order.id' register_keyword='id' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__id' register_title='Scheduler.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__id' register_title='Spooler.id' register_keyword='id' type='definition'/>
     <register_entry register_file='api/Task.xml#method__id' register_title='Task.id' register_keyword='id' type='definition'/>
 </register_keyword>
@@ -1415,6 +1438,7 @@
 <register_keyword keyword='include_path (property)'>
     <register_keyword_display><code>include_path</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job.xml#method__include_path' register_title='Job.include_path' register_keyword='include_path' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__include_path' register_title='Scheduler.include_path' register_keyword='include_path' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__include_path' register_title='Spooler.include_path' register_keyword='include_path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Indices (SQL)'>
@@ -1426,6 +1450,7 @@
 </register_keyword>
 <register_keyword keyword='ini'>
     <register_keyword_display><code>-ini=</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#use_option__ini' register_title='Scheduler'  register_keyword='ini'/>
     <register_entry register_file='api/Spooler.xml#use_option__ini' register_title='Spooler'  register_keyword='ini'/>
     <register_entry register_file='command_line.xml#use_option__ini' register_title='XXX'  register_keyword='ini'/>
     <register_entry register_file='email.xml#use_option__ini' register_title='Sending E-mails'  register_keyword='ini'/>
@@ -1433,6 +1458,7 @@
 </register_keyword>
 <register_keyword keyword='ini_path (property)'>
     <register_keyword_display><code>ini_path</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__ini_path' register_title='Scheduler.ini_path' register_keyword='ini_path' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__ini_path' register_title='Spooler.ini_path' register_keyword='ini_path' type='definition'/>
 </register_keyword>
 <register_keyword keyword='input_state'>
@@ -1470,6 +1496,7 @@
 </register_keyword>
 <register_keyword keyword='is_service (property)'>
     <register_keyword_display><code>is_service</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__is_service' register_title='Scheduler.is_service' register_keyword='is_service' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__is_service' register_title='Spooler.is_service' register_keyword='is_service' type='definition'/>
 </register_keyword>
 <register_keyword keyword='java'>
@@ -1574,6 +1601,7 @@
     <register_entry register_file='api/Job_impl.xml#method__spooler_job' register_title='Job_impl.spooler_job' register_keyword='Job'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_job' register_title='Monitor_impl.spooler_job' register_keyword='Job'/>
     <register_entry register_file='api/Order~.xml#method__job' register_title='Order.job' register_keyword='Job'/>
+    <register_entry register_file='api/Scheduler.xml#method__job' register_title='Scheduler.job' register_keyword='Job'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='Job'/>
     <register_entry register_file='api/Task.xml#method__job' register_title='Task.job' register_keyword='Job'/>
 </register_keyword>
@@ -1581,6 +1609,7 @@
     <register_keyword_display><code>job</code> (property)</register_keyword_display>
     <register_entry register_file='api/Job_chain_node.xml#method__job' register_title='Job_chain_node.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Order~.xml#method__job' register_title='Order.job' register_keyword='job' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__job' register_title='Scheduler.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='job' type='definition'/>
     <register_entry register_file='api/Task.xml#method__job' register_title='Task.job' register_keyword='job' type='definition'/>
 </register_keyword>
@@ -1615,6 +1644,7 @@
     <register_keyword_display><code>&lt;job_chain&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__job_chain' register_title='Änderungsprotokoll'  register_keyword='job_chain'/>
     <register_entry register_file='api/Job_chain.xml#use_element__job_chain' register_title='Job_chain'  register_keyword='job_chain'/>
+    <register_entry register_file='api/Scheduler.xml#use_element__job_chain' register_title='Scheduler'  register_keyword='job_chain'/>
     <register_entry register_file='api/Spooler.xml#use_element__job_chain' register_title='Spooler'  register_keyword='job_chain'/>
     <register_entry register_file='command_line.xml#use_element__job_chain' register_title='XXX'  register_keyword='job_chain'/>
     <register_entry register_file='dynamic_configuration.xml#use_element__job_chain' register_title='Configuration Using Hot Folders'  register_keyword='job_chain'/>
@@ -1647,6 +1677,9 @@
     <register_entry register_file='api/Job_chain.xml' register_keyword='Job_chain' type='definition'/>
     <register_entry register_file='api/Order.xml#method__job_chain' register_title='Order.job_chain' register_keyword='Job_chain'/>
     <register_entry register_file='api/Order~.xml#method__job_chain' register_title='Order.job_chain' register_keyword='Job_chain'/>
+    <register_entry register_file='api/Scheduler.xml#method__add_job_chain' register_title='Scheduler.add_job_chain()' register_keyword='Job_chain'/>
+    <register_entry register_file='api/Scheduler.xml#method__create_job_chain' register_title='Scheduler.create_job_chain()' register_keyword='Job_chain'/>
+    <register_entry register_file='api/Scheduler.xml#method__job_chain' register_title='Scheduler.job_chain' register_keyword='Job_chain'/>
     <register_entry register_file='api/Spooler.xml#method__add_job_chain' register_title='Spooler.add_job_chain()' register_keyword='Job_chain'/>
     <register_entry register_file='api/Spooler.xml#method__create_job_chain' register_title='Spooler.create_job_chain()' register_keyword='Job_chain'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='Job_chain'/>
@@ -1655,6 +1688,7 @@
     <register_keyword_display><code>job_chain</code> (property)</register_keyword_display>
     <register_entry register_file='api/Order.xml#method__job_chain' register_title='Order.job_chain' register_keyword='job_chain' type='definition'/>
     <register_entry register_file='api/Order~.xml#method__job_chain' register_title='Order.job_chain' register_keyword='job_chain' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__job_chain' register_title='Scheduler.job_chain' register_keyword='job_chain' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='job_chain' type='definition'/>
 </register_keyword>
 <register_keyword keyword='job_chain.modify'>
@@ -1666,6 +1700,7 @@
 </register_keyword>
 <register_keyword keyword='job_chain_exists'>
     <register_keyword_display><code>job_chain_exists()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__job_chain_exists' register_title='Scheduler.job_chain_exists()' register_keyword='job_chain_exists()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='job_chain_exists()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='job_chain_node'>
@@ -1731,6 +1766,7 @@
 <register_keyword keyword='job_name'>
     <register_keyword_display><code>job_name</code></register_keyword_display>
     <register_entry register_file='api/Job_chain.xml#method__add_job' register_title='Job_chain.add_job()' register_keyword='job_name'/>
+    <register_entry register_file='api/Scheduler.xml#method__job' register_title='Scheduler.job' register_keyword='job_name'/>
     <register_entry register_file='api/Spooler.xml#method__job' register_title='Spooler.job' register_keyword='job_name'/>
 </register_keyword>
 <register_keyword keyword='job_name'>
@@ -1825,6 +1861,7 @@
 </register_keyword>
 <register_keyword keyword='let_run_terminate_and_restart'>
     <register_keyword_display><code>let_run_terminate_and_restart()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__let_run_terminate_and_restart' register_title='Scheduler.let_run_terminate_and_restart()' register_keyword='let_run_terminate_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__let_run_terminate_and_restart' register_title='Spooler.let_run_terminate_and_restart()' register_keyword='let_run_terminate_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='level'>
@@ -1997,10 +2034,12 @@
 <register_keyword keyword='Locks (class)'>
     <register_keyword_display><code>Locks</code> (class)</register_keyword_display>
     <register_entry register_file='api/Locks.xml' register_keyword='Locks' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__locks' register_title='Scheduler.locks' register_keyword='Locks'/>
     <register_entry register_file='api/Spooler.xml#method__locks' register_title='Spooler.locks' register_keyword='Locks'/>
 </register_keyword>
 <register_keyword keyword='locks (property)'>
     <register_keyword_display><code>locks</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__locks' register_title='Scheduler.locks' register_keyword='locks' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__locks' register_title='Spooler.locks' register_keyword='locks' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Log'>
@@ -2031,11 +2070,13 @@
     <register_entry register_file='api/Log.xml' register_keyword='Log' type='definition'/>
     <register_entry register_file='api/Monitor_impl.xml#method__spooler_log' register_title='Monitor_impl.spooler_log' register_keyword='Log'/>
     <register_entry register_file='api/Order.xml#method__log' register_title='Order.log' register_keyword='Log'/>
+    <register_entry register_file='api/Scheduler.xml#method__log' register_title='Scheduler.log' register_keyword='Log'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='Log'/>
 </register_keyword>
 <register_keyword keyword='log (property)'>
     <register_keyword_display><code>log</code> (property)</register_keyword_display>
     <register_entry register_file='api/Order.xml#method__log' register_title='Order.log' register_keyword='log' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__log' register_title='Scheduler.log' register_keyword='log' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__log' register_title='Spooler.log' register_keyword='log' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Log Categories'>
@@ -2092,6 +2133,7 @@
 </register_keyword>
 <register_keyword keyword='log_dir (property)'>
     <register_keyword_display><code>log_dir</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__log_dir' register_title='Scheduler.log_dir' register_keyword='log_dir' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__log_dir' register_title='Spooler.log_dir' register_keyword='log_dir' type='definition'/>
 </register_keyword>
 <register_keyword keyword='log_file'>
@@ -2417,6 +2459,7 @@
 <register_keyword keyword='modify_spooler'>
     <register_keyword_display><code>&lt;modify_spooler&gt;</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_element__modify_spooler' register_title='Änderungsprotokoll'  register_keyword='modify_spooler'/>
+    <register_entry register_file='api/Scheduler.xml#use_element__modify_spooler' register_title='Scheduler'  register_keyword='modify_spooler'/>
     <register_entry register_file='api/Spooler.xml#use_element__modify_spooler' register_title='Spooler'  register_keyword='modify_spooler'/>
     <register_entry register_file='termination.xml#use_element__modify_spooler' register_title='Terminating the Job Scheduler'  register_keyword='modify_spooler'/>
     <register_entry register_file='xml.xml#use_element__modify_spooler' register_title='All XML Elements'  register_keyword='modify_spooler'/>
@@ -2470,6 +2513,9 @@
 </register_keyword>
 <register_keyword keyword='name'>
     <register_keyword_display><code>name</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__job_chain' register_title='Scheduler.job_chain' register_keyword='name'/>
+    <register_entry register_file='api/Scheduler.xml#method__job_chain_exists' register_title='Scheduler.job_chain_exists()' register_keyword='name'/>
+    <register_entry register_file='api/Scheduler.xml#method__var' register_title='Scheduler.var' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain' register_title='Spooler.job_chain' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__job_chain_exists' register_title='Spooler.job_chain_exists()' register_keyword='name'/>
     <register_entry register_file='api/Spooler.xml#method__var' register_title='Spooler.var' register_keyword='name'/>
@@ -2644,6 +2690,7 @@
     <register_entry register_file='api/Order.xml' register_keyword='Order' type='definition'/>
     <register_entry register_file='api/Order_queue.xml#method__add_order' register_title='Order_queue.add_order()' register_keyword='Order'/>
     <register_entry register_file='api/Order~.xml' register_keyword='Order' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__create_order' register_title='Scheduler.create_order()' register_keyword='Order'/>
     <register_entry register_file='api/Spooler.xml#method__create_order' register_title='Spooler.create_order()' register_keyword='Order'/>
     <register_entry register_file='api/Task.xml#method__order' register_title='Task.order' register_keyword='Order'/>
 </register_keyword>
@@ -2749,6 +2796,7 @@
 </register_keyword>
 <register_keyword keyword='param (property)'>
     <register_keyword_display><code>param</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__param' register_title='Scheduler.param' register_keyword='param' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__param' register_title='Spooler.param' register_keyword='param' type='definition'/>
 </register_keyword>
 <register_keyword keyword='param.get'>
@@ -2793,6 +2841,7 @@
     <register_keyword_display><code>path</code></register_keyword_display>
     <register_entry register_file='api/Log.xml#method__log_file' register_title='Log.log_file()' register_keyword='path'/>
     <register_entry register_file='api/Mail.xml#method__add_file' register_title='Mail.add_file()' register_keyword='path'/>
+    <register_entry register_file='api/Scheduler.xml#method__schedule' register_title='Scheduler.schedule' register_keyword='path'/>
     <register_entry register_file='api/Spooler.xml#method__schedule' register_title='Spooler.schedule' register_keyword='path'/>
     <register_entry register_file='api/Xslt_stylesheet.xml#method__load_file' register_title='Xslt_stylesheet.load_file()' register_keyword='path'/>
 </register_keyword>
@@ -2931,6 +2980,7 @@
     <register_entry register_file='CHANGES.xml#use_element__process_class' register_title='Änderungsprotokoll'  register_keyword='process_class'/>
     <register_entry register_file='api/Log.xml#use_element__process_class' register_title='Log'  register_keyword='process_class'/>
     <register_entry register_file='api/Process_class.xml#use_element__process_class' register_title='Process_class'  register_keyword='process_class'/>
+    <register_entry register_file='api/Scheduler.xml#use_element__process_class' register_title='Scheduler'  register_keyword='process_class'/>
     <register_entry register_file='api/Spooler.xml#use_element__process_class' register_title='Spooler'  register_keyword='process_class'/>
     <register_entry register_file='api/Subprocess.xml#use_element__process_class' register_title='Subprocess'  register_keyword='process_class'/>
     <register_entry register_file='api/Task.xml#use_element__process_class' register_title='Task'  register_keyword='process_class'/>
@@ -2993,10 +3043,12 @@
 <register_keyword keyword='Process_classes (class)'>
     <register_keyword_display><code>Process_classes</code> (class)</register_keyword_display>
     <register_entry register_file='api/Process_classes.xml' register_keyword='Process_classes' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__process_classes' register_title='Scheduler.process_classes' register_keyword='Process_classes'/>
     <register_entry register_file='api/Spooler.xml#method__process_classes' register_title='Spooler.process_classes' register_keyword='Process_classes'/>
 </register_keyword>
 <register_keyword keyword='process_classes (property)'>
     <register_keyword_display><code>process_classes</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__process_classes' register_title='Scheduler.process_classes' register_keyword='process_classes' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__process_classes' register_title='Spooler.process_classes' register_keyword='process_classes' type='definition'/>
 </register_keyword>
 <register_keyword keyword='processes'>
@@ -3176,6 +3228,7 @@
 </register_keyword>
 <register_keyword keyword='restart'>
     <register_keyword_display><code>restart</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate' register_title='Scheduler.terminate()' register_keyword='restart'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='restart'/>
 </register_keyword>
 <register_keyword keyword='restart'>
@@ -3261,11 +3314,13 @@
     <register_keyword_display><code>Schedule</code> (class)</register_keyword_display>
     <register_entry register_file='api/Run_time.xml#method__schedule' register_title='Run_time.schedule' register_keyword='Schedule'/>
     <register_entry register_file='api/Schedule.xml' register_keyword='Schedule' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__schedule' register_title='Scheduler.schedule' register_keyword='Schedule'/>
     <register_entry register_file='api/Spooler.xml#method__schedule' register_title='Spooler.schedule' register_keyword='Schedule'/>
 </register_keyword>
 <register_keyword keyword='schedule (property)'>
     <register_keyword_display><code>schedule</code> (property)</register_keyword_display>
     <register_entry register_file='api/Run_time.xml#method__schedule' register_title='Run_time.schedule' register_keyword='schedule' type='definition'/>
+    <register_entry register_file='api/Scheduler.xml#method__schedule' register_title='Scheduler.schedule' register_keyword='schedule' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__schedule' register_title='Spooler.schedule' register_keyword='schedule' type='definition'/>
 </register_keyword>
 <register_keyword keyword='schedule.remove'>
@@ -3276,6 +3331,10 @@
 <register_keyword keyword='scheduler'>
     <register_keyword_display><code>-scheduler=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#use_option__scheduler' register_title='XXX'  register_keyword='scheduler'/>
+</register_keyword>
+<register_keyword keyword='Scheduler (class)'>
+    <register_keyword_display><code>Scheduler</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml' register_keyword='Scheduler' type='definition'/>
 </register_keyword>
 <register_keyword keyword='scheduler.log'>
     <register_entry register_file='protokolle.xml' register_title='Logs'  register_keyword='scheduler.log'/>
@@ -3895,11 +3954,13 @@
 </register_keyword>
 <register_keyword keyword='Supervisor_client (class)'>
     <register_keyword_display><code>Supervisor_client</code> (class)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__supervisor_client' register_title='Scheduler.supervisor_client' register_keyword='Supervisor_client'/>
     <register_entry register_file='api/Spooler.xml#method__supervisor_client' register_title='Spooler.supervisor_client' register_keyword='Supervisor_client'/>
     <register_entry register_file='api/Supervisor_client.xml' register_keyword='Supervisor_client' type='definition'/>
 </register_keyword>
 <register_keyword keyword='supervisor_client (property)'>
     <register_keyword_display><code>supervisor_client</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__supervisor_client' register_title='Scheduler.supervisor_client' register_keyword='supervisor_client' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__supervisor_client' register_title='Spooler.supervisor_client' register_keyword='supervisor_client' type='definition'/>
 </register_keyword>
 <register_keyword keyword='supervisor_proxy'>
@@ -3984,6 +4045,7 @@
 </register_keyword>
 <register_keyword keyword='tcp_port (property)'>
     <register_keyword_display><code>tcp_port</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__tcp_port' register_title='Scheduler.tcp_port' register_keyword='tcp_port' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__tcp_port' register_title='Spooler.tcp_port' register_keyword='tcp_port' type='definition'/>
     <register_entry register_file='api/Supervisor_client.xml#method__tcp_port' register_title='Supervisor_client.tcp_port' register_keyword='tcp_port' type='definition'/>
 </register_keyword>
@@ -4001,10 +4063,12 @@
 </register_keyword>
 <register_keyword keyword='terminate'>
     <register_keyword_display><code>terminate()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate' register_title='Scheduler.terminate()' register_keyword='terminate()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='terminate()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='terminate_and_restart'>
     <register_keyword_display><code>terminate_and_restart()</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate_and_restart' register_title='Scheduler.terminate_and_restart()' register_keyword='terminate_and_restart()' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='terminate_and_restart()' type='definition'/>
 </register_keyword>
 <register_keyword keyword='terminated (property)'>
@@ -4035,6 +4099,8 @@
 </register_keyword>
 <register_keyword keyword='timeout'>
     <register_keyword_display><code>timeout</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__terminate' register_title='Scheduler.terminate()' register_keyword='timeout'/>
+    <register_entry register_file='api/Scheduler.xml#method__terminate_and_restart' register_title='Scheduler.terminate_and_restart()' register_keyword='timeout'/>
     <register_entry register_file='api/Spooler.xml#method__terminate' register_title='Spooler.terminate()' register_keyword='timeout'/>
     <register_entry register_file='api/Spooler.xml#method__terminate_and_restart' register_title='Spooler.terminate_and_restart()' register_keyword='timeout'/>
     <register_entry register_file='api/Task.xml#method__add_pid' register_title='Task.add_pid()' register_keyword='timeout'/>
@@ -4107,6 +4173,7 @@
 </register_keyword>
 <register_keyword keyword='udp_port (property)'>
     <register_keyword_display><code>udp_port</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__udp_port' register_title='Scheduler.udp_port' register_keyword='udp_port' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__udp_port' register_title='Spooler.udp_port' register_keyword='udp_port' type='definition'/>
 </register_keyword>
 <register_keyword keyword='ultimos'>
@@ -4181,6 +4248,7 @@
 </register_keyword>
 <register_keyword keyword='var (property)'>
     <register_keyword_display><code>var</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__var' register_title='Scheduler.var' register_keyword='var' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__var' register_title='Spooler.var' register_keyword='var' type='definition'/>
     <register_entry register_file='api/Variable_set.xml#method__var' register_title='Variable_set.var' register_keyword='var' type='definition'/>
 </register_keyword>
@@ -4200,6 +4268,8 @@
     <register_entry register_file='api/Order.xml#method__payload' register_title='Order.payload' register_keyword='Variable_set'/>
     <register_entry register_file='api/Order~.xml#method__params' register_title='Order.params' register_keyword='Variable_set'/>
     <register_entry register_file='api/Order~.xml#method__payload' register_title='Order.payload' register_keyword='Variable_set'/>
+    <register_entry register_file='api/Scheduler.xml#method__create_variable_set' register_title='Scheduler.create_variable_set()' register_keyword='Variable_set'/>
+    <register_entry register_file='api/Scheduler.xml#method__variables' register_title='Scheduler.variables' register_keyword='Variable_set'/>
     <register_entry register_file='api/Spooler.xml#method__create_variable_set' register_title='Spooler.create_variable_set()' register_keyword='Variable_set'/>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='Variable_set'/>
     <register_entry register_file='api/Subprocess.xml#method__env' register_title='Subprocess.env' register_keyword='Variable_set'/>
@@ -4210,6 +4280,7 @@
 </register_keyword>
 <register_keyword keyword='variables (property)'>
     <register_keyword_display><code>variables</code> (property)</register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__variables' register_title='Scheduler.variables' register_keyword='variables' type='definition'/>
     <register_entry register_file='api/Spooler.xml#method__variables' register_title='Spooler.variables' register_keyword='variables' type='definition'/>
 </register_keyword>
 <register_keyword keyword='Verschachtelte Jobketten'>
@@ -4405,6 +4476,8 @@
 </register_keyword>
 <register_keyword keyword='xml'>
     <register_keyword_display><code>xml</code></register_keyword_display>
+    <register_entry register_file='api/Scheduler.xml#method__create_xslt_stylesheet' register_title='Scheduler.create_xslt_stylesheet()' register_keyword='xml'/>
+    <register_entry register_file='api/Scheduler.xml#method__execute_xml' register_title='Scheduler.execute_xml()' register_keyword='xml'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='xml'/>
     <register_entry register_file='api/Spooler.xml#method__execute_xml' register_title='Spooler.execute_xml()' register_keyword='xml'/>
     <register_entry register_file='api/Xslt_stylesheet.xml#method__apply_xml' register_title='Xslt_stylesheet.apply_xml()' register_keyword='xml'/>
@@ -4452,6 +4525,7 @@
 <register_keyword keyword='Xslt_stylesheet (class)'>
     <register_keyword_display><code>Xslt_stylesheet</code> (class)</register_keyword_display>
     <register_entry register_file='api/Mail.xml#method__xslt_stylesheet' register_title='Mail.xslt_stylesheet' register_keyword='Xslt_stylesheet'/>
+    <register_entry register_file='api/Scheduler.xml#method__create_xslt_stylesheet' register_title='Scheduler.create_xslt_stylesheet()' register_keyword='Xslt_stylesheet'/>
     <register_entry register_file='api/Spooler.xml#method__create_xslt_stylesheet' register_title='Spooler.create_xslt_stylesheet()' register_keyword='Xslt_stylesheet'/>
     <register_entry register_file='api/Xslt_stylesheet.xml' register_keyword='Xslt_stylesheet' type='definition'/>
 </register_keyword>

@@ -8,22 +8,22 @@ public cnt;
 
 public boolean spooler_init() {
   cnt = 0;
-  spooler_log.info("START of Test ------------------------------------------------");
-  spooler_log.info("spooler_init is called by " + spooler_job.name() );
+  logger.info("START of Test ------------------------------------------------");
+  logger.info("spooler_init is called by " + spooler_job.name() );
   return true;
 }
 
 public boolean spooler_process() {
   if (cnt < 5) {
     cnt++;
-    spooler_log.info("spooler_process: iteration no " +  cnt);
+    logger.info("spooler_process: iteration no " +  cnt);
     return true;
   }
   return false;
 }
 
 public boolean spooler_exit() {
-  spooler_log.info("END of Test --------------------------------------------------");
+  logger.info("END of Test --------------------------------------------------");
   return true;
 }
         ]]>

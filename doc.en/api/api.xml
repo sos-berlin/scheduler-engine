@@ -25,6 +25,15 @@
             (beachten Sie die Installationsvoraussetzungen).
             Unter Microsoft Windows stehen auch JScript und VBScript zur Verfügung.-->
         </p>
+        <p/>
+        <hr/>
+        <p style="color:red">
+            Since Scheduler Version 1.3.10 the javax.script package is supported. Using this plugin different
+            implementations for a lot of script languages such as javascript (Rhino implementation), groovy and python
+            are available. The Spidermonkey implementation for javascript is marked as "deprecated". 
+        </p>
+        <p/>
+        <hr/>
         <p>
             Jobs are implemented according to the <scheduler_method class="Job_impl"/> interface.
             Job Scheduler objects may be accessed using this interface either directly or indirectly.
