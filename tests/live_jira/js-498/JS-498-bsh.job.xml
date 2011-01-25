@@ -2,6 +2,14 @@
 
 <job title="Testjob beanshell"
      order="no">
+    <description>
+        <![CDATA[
+        <h2>running a bean script (<a href="http://www.beanshell.org/">http://www.beanshell.org/</a>)</h2>
+        <p>
+        This job provides a bean sample for the javax.script API.
+        </p>
+        ]]>
+    </description>
     <script language="javax.script:bsh">
         <![CDATA[
 	for (int i=0; i<5; i++)

@@ -2,6 +2,14 @@
 
 <job title="Testjob groovy"
      order="yes">
+    <description>
+        <![CDATA[
+        <h2>running a groovy script (<a href="http://groovy.codehaus.org/">http://groovy.codehaus.org/</a>)</h2>
+        <p>
+        This job provides a groovy sample for the javax.script API.
+        </p>
+        ]]>
+    </description>
     <script language="javax.script:groovy">
         <![CDATA[
 public boolean spooler_process() {

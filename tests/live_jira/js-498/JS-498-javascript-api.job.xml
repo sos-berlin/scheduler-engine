@@ -2,44 +2,53 @@
 
 <job title="Testjob (javascript)"
      order="yes">
+    <description>
+        <![CDATA[
+        <h2>running a javascript (Rhino implementation) script (<a href="http://www.mozilla.org/rhino/">http://www.mozilla.org/rhino/</a>)</h2>
+        <p>
+        This job provides a javascript sample for the rhino implementation.
+        It executes all methods of the interface Job_Impl.
+        </p>
+        ]]>
+    </description>
     <script language="javax.script:javascript">
         <![CDATA[
 var cnt;        
 function spooler_init() {
 	cnt = 0;
-   logger.info( "spooler_init wurde gerufen" );
+   logger.info( "spooler_init was called" );
    return true;
 }
 
 function spooler_open() {
-   logger.info( "spooler_open wurde gerufen" );
+   logger.info( "spooler_open was called" );
    return true;
 }
 
-// spooler_process wird so lange gerufen, bis false zurück gegeben wird
+// spooler_process will be called until false returned
 function spooler_process() {
    if (cnt < 5) {
       cnt++;
-      logger.info( "spooler_process wurde JETZT gerufen (" + cnt + ")" );
+      logger.info( "spooler_process was called (" + cnt + ")" );
       return true;
    }
    return false;
 }
 
 function spooler_close() {
-   logger.info( "spooler_close wurde gerufen" );
+   logger.info( "spooler_close was called" );
 }
 
 function spooler_on_success() {
-   logger.info( "spooler_on_success wurde gerufen" );
+   logger.info( "spooler_on_success was called" );
 }
 
 function spooler_exit() {
-   logger.info( "spooler_exit wurde gerufen" );
+   logger.info( "spooler_exit was called" );
 }
 
 function spooler_on_error() {
-	logger.error( "es ist ein Fehler aufgetreten: " + spooler_task.error );
+	logger.error( "an error occured: " + spooler_task.error );
 }
         ]]>
     </script>
