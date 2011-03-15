@@ -29,6 +29,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__log__ErrorLogEvent.h"
 typedef javaproxy::com::sos::scheduler::engine::kernel::log::ErrorLogEvent ErrorLogEventJ;
 
+const int log_buffer_max = 100*1000;
 
 namespace sos {
 namespace scheduler {
@@ -874,7 +875,16 @@ void Prefix_log::write( const char* text, int len )
     {
         if( this == _spooler->_log  ||  _spooler->log_directory() != "*stderr" )        // Datei wird noch geöffnet?
         {
-            _log_buffer.append( text, len );
+            if (!_log_buffer_is_full) {
+                if (_log_buffer.length() + len > log_buffer_max) {
+                    _log_buffer_is_full = true;
+                    string msg = "Buffered log for deferred opened log file grows too big and is truncated";
+                    _log_buffer.append("\n" "... (" + msg + ") ...\n");
+                    Z_LOG2("scheduler", msg << "\n");  // Wird denn open_file() nicht aufgerufen?
+                }
+                else
+                    _log_buffer.append( text, len );
+            }
         }
     }
     else

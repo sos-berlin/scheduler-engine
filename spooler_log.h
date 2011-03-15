@@ -245,6 +245,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     bool                       _is_logging_continuing;
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
+    bool                       _log_buffer_is_full;
 
     bool                       _remove_after_close;
     list<Event_base*>          _events;
