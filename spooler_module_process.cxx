@@ -282,17 +282,17 @@ bool Process_module_instance::begin__end()
     fill_process_environment_with_params();
 
 
+    File stdin_file ("nul", "rI");
     PROCESS_INFORMATION process_info;
     STARTUPINFO         startup_info;
     BOOL                ok;
 
     memset( &process_info, 0, sizeof process_info );
 
-
     memset( &startup_info, 0, sizeof startup_info );
     startup_info.cb          = sizeof startup_info;
     startup_info.dwFlags     = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-    startup_info.hStdInput   = INVALID_HANDLE_VALUE;
+    startup_info.hStdInput   = stdin_file.handle();
     startup_info.hStdOutput  = _stdout_file.handle();
     startup_info.hStdError   = _stderr_file.handle();
     startup_info.wShowWindow = SW_MINIMIZE;            // Als Dienst mit Zugriff auf Desktop wird ein leeres Konsol-Fenster gezeigt. Das minimieren wir.
