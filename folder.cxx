@@ -2027,8 +2027,8 @@ void File_based::fill_file_based_dom_element( const xml::Element_ptr& result, co
     result.setAttribute         ( "path", path().with_slash() );
     result.setAttribute_optional( "name", name() );
 
-    xml::Node_ptr    original_first_node = result.firstChild();
-    xml::Element_ptr file_based_element  = result.insertBefore( File_based::dom_element( result.ownerDocument(), show_what ), original_first_node  );
+    xml::Node_ptr original_first_node = result.firstChild();
+    result.insertBefore( File_based::dom_element( result.ownerDocument(), show_what ), original_first_node );
 
     if( replacement() ) 
     {
@@ -2098,9 +2098,9 @@ xml::Element_ptr File_based::dom_element( const xml::Document_ptr& document, con
 
     if( has_includes() )  result.appendChild( Has_includes::dom_element( document, show_what ) );
 
-    const xml::Element_ptr& requisites_element = document.createElement( "requisites" );
-    int count = append_requisite_dom_elements( requisites_element );
-    if( count > 0 )  result.appendChild( requisites_element );
+    xml::Element_ptr requisites_element = document.createElement( "requisites" );
+    append_requisite_dom_elements( requisites_element );
+    result.appendChild( requisites_element );
 
     if( !_remove_xc.is_empty() )  result.append_new_element( "removed" ).appendChild( create_error_element( document, _remove_xc ) );
 
@@ -2482,10 +2482,6 @@ void Dependant::remove_accompanying_dependant( Dependant* d )
 int Dependant::append_requisite_dom_elements( const xml::Element_ptr& element )
 {
     int result = 0;
-
-//    for(Requisite_sets::const_iterator ds=_requisite_sets.begin(); ds!=_requisite_sets.end();ds++)
-//    {
-//    }
 
     Z_FOR_EACH_CONST( Requisite_sets, _requisite_sets, ds )  
     {
