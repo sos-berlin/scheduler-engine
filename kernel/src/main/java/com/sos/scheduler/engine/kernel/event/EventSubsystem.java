@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.kernel.event;
 
 import com.sos.scheduler.engine.kernel.*;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import org.apache.log4j.*;
 
 
@@ -12,7 +12,7 @@ public class EventSubsystem extends AbstractHasPlatform
 {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
-    private final List<EventSubscriber> subscribers = new LinkedList<EventSubscriber>();        // Weak references nutzen?
+    private final Collection<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
     private int reportEventNesting = 0;
 
 
@@ -24,15 +24,13 @@ public class EventSubsystem extends AbstractHasPlatform
     public void report(Event e) {
         reportEventNesting++;   // Kann Rekursiv aufgerufen werden.
         try {
-            //log().info(this + ": " + e);
-            tellSubscribers(e);
-        }
-        catch (Exception x) { log().error(getClass().getSimpleName() + ".report(" + e.getClass().getName() + "): " + x); }
+            publishEvent(e);
+        } catch (Exception x) { log().error(getClass().getSimpleName() + ".report(" + e.getClass().getName() + "): " + x); }
         finally { reportEventNesting--; }
     }
 
     
-    private void tellSubscribers(Event e) {
+    private void publishEvent(Event e) {
         if (reportEventNesting > 1)  throw new SchedulerException("Recursive reportEvent() " + e);
         for (EventSubscriber s: subscribers)
             try { s.onEvent(e); }

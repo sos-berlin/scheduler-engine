@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.log.SchedulerLogger;
 
 
-/** Sollte möglichst unabhängig von den Scheduler-Objekten sein */
+/** Schnittstelle für alle Scheduler-Objekte */
 public interface SchedulerObject {
     // Für Event usw. (?)
-    PrefixLog log();
+    SchedulerLogger log();
     //? SchedulerObjectType objectType();   // Z.B. Singleton "JobObjectType"
     //? String objectName();   // Z.B. "Job /a"
 }

@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.cplusplus.scalautil.io
 
 import java.io._
 import java.nio.charset.Charset
-import org.junit._
 import org.apache.commons.io.FileUtils
+import org.junit._
 import org.junit.Assert._
 import FileUtil._
 

@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
-import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.AbstractEvent;
 
 
-/** Event von SchedulerThread oder EventThread.
+/** AbstractEvent von SchedulerThread oder EventThread.
  *
  * @author Zschimmer.sos
  */
-abstract public class MainEvent extends Event {}
+abstract public class MainEvent extends AbstractEvent {}

@@ -17,9 +17,9 @@ class CppObjectClass(cppClass: CppClass) extends CppCode
     private val classClassName = cppClass.cppClassClass.name
 
     private val javaSuperclass: Option[Class[_]] = {
-        def knownSuperclass( clas: Class[_] ): Option[Class[_]] = clas.getSuperclass match {
+        def knownSuperclass(clas: Class[_]): Option[Class[_]] = clas.getSuperclass match {
             case null => ClassOps.superclass(clas)
-            case superclass => if (cppClass.knownClasses.contains(superclass)) Some(superclass)  else knownSuperclass(superclass)
+            case superclass => if (cppClass.knownClasses contains superclass) Some(superclass)  else knownSuperclass(superclass)
         }
 
         knownSuperclass(cppClass.javaClass)

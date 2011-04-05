@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
 import com.sos.scheduler.engine.kernel.event.Message;
+import com.sos.scheduler.engine.kernel.event.SimpleMessage;
 
 
 public class ExceptionEvent extends MainEvent
@@ -18,7 +19,7 @@ public class ExceptionEvent extends MainEvent
 
     
     @Override public Message getMessage() {
-        if (message == null)  message = new Message(throwable.toString());
+        if (message == null)  message = new SimpleMessage(throwable.toString());
         return message;
     }
 }

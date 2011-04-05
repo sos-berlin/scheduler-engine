@@ -15,16 +15,15 @@
     <description>Java-Klassen für den Scheduler-Kern</description>
 
     <dependencies>
-
-				<!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->        
         <dependency>
+            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.util</artifactId>
             <version>1.0</version>
         </dependency>
 
-				<!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
         <dependency>
+            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.JSHelper</artifactId>
             <version>1.0</version>
@@ -46,6 +45,12 @@
             <artifactId>commons-net</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -78,6 +83,5 @@
 					<artifactId>groovy-all</artifactId>
 					<version>1.5.6</version> 
         </dependency>
-                
     </dependencies>
 </project>

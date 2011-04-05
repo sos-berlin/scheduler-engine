@@ -7,10 +7,13 @@ import com.sos.scheduler.engine.kernel.event.EventSubsystem;
 import com.sos.scheduler.engine.kernel.main.MainContext;
 import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
+import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 
 @ForCpp
@@ -22,6 +25,7 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     private final MainContext mainContext;
     private final Platform platform;
     private final PrefixLog log;
+    private PlugInSubsystem plugInSubsystem;
     private JobSubsystem jobSubsystem;
     private OrderSubsystem orderSubsystem;
     private EventSubsystem eventSubsystem;
@@ -72,15 +76,24 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     }
     
 
-    public void onLoad() {
-        eventSubsystem = new EventSubsystem(platform);
-        jobSubsystem = new JobSubsystem(platform, spoolerC.job_subsystem());
-        orderSubsystem = new OrderSubsystem(platform, spoolerC.order_subsystem());
+    public void onLoad(String configurationXml) {
+        Element configElement = loadXml(configurationXml).getDocumentElement();
+        addSubsystems(configElement);
         if (mainContext != null)  mainContext.setScheduler(this);
     }
 
 
+    private void addSubsystems(Element configElement) {
+        eventSubsystem = new EventSubsystem(platform);
+        jobSubsystem = new JobSubsystem(platform, spoolerC.job_subsystem());
+        orderSubsystem = new OrderSubsystem(platform, spoolerC.order_subsystem());
+        plugInSubsystem = new PlugInSubsystem(this);
+        plugInSubsystem.load(configElement);
+    }
+
+    
     public void onActivate() {
+        plugInSubsystem.activate();
         if (mainContext != null)  mainContext.onSchedulerActivated();
     }
 

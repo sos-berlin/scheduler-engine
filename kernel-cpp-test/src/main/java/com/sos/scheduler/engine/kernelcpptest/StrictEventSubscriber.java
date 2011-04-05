@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernelcpptest;
 
-import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
+import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import org.apache.log4j.Logger;
 
 
@@ -33,11 +33,11 @@ public class StrictEventSubscriber implements EventSubscriber {
             eventSubscriber.onEvent(e);
         }
         catch (Exception x) {
-            schedulerController.terminateAfterException(x);
+            if (schedulerController != null)  schedulerController.terminateAfterException(x);
         }
         catch (Error x) {
             //logger.error(x);
-            schedulerController.terminateAfterException(x);
+            if (schedulerController != null)  schedulerController.terminateAfterException(x);
         }
     }
 }

@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventPredicate;
 
 
+
 public class ScriptEventPredicate implements EventPredicate {
     private final ScriptEventPredicateEngine context;
     private final String expression;

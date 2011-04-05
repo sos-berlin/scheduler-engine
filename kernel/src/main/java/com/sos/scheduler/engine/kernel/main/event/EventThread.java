@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
-import org.apache.log4j.Level;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventPredicate;

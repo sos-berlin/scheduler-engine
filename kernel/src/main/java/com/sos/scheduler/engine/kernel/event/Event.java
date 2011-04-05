@@ -1,22 +1,11 @@
 package com.sos.scheduler.engine.kernel.event;
 
-import com.sos.scheduler.engine.kernel.NullSchedulerObject;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.SchedulerObject;
 
 
-abstract public class Event
-{
-    public SchedulerObject getObject() {
-        return NullSchedulerObject.singleton;
-    }
-
-
-    public Message getMessage() {
-        return Message.empty;
-    }
-
-    
-    @Override public String toString() {
-        return getClass().getName();
-    }
+@ForCpp
+public abstract class Event {  // Abstrakte Klasse statt Interface, damit C++/Java-Generator Event als Oberklasse akzeptiert.
+    public abstract SchedulerObject getObject();
+    public abstract Message getMessage();
 }

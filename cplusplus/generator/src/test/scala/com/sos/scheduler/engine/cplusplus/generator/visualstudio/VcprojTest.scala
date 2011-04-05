@@ -6,9 +6,8 @@ import com.sos.scheduler.engine.cplusplus.generator.module.CppModule
 import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 import java.io.File
 import org.apache.log4j.Logger
+import org.hamcrest.Matchers._
 import org.junit.Assert._
-import org.junit.matchers.JUnitMatchers._
-import org.hamcrest.CoreMatchers._
 import scala.xml.Elem
 import scala.xml.Utility.trimProper
 import scala.xml.XML

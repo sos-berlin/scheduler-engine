@@ -1,17 +1,15 @@
 package com.sos.scheduler.engine.kernel.main;
 
-import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.main.event.TerminatedEvent;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
-import com.sos.scheduler.engine.kernel.main.event.UnexpectedTerminatedEventException;
 import com.sos.scheduler.engine.kernel.util.Time;
+import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 

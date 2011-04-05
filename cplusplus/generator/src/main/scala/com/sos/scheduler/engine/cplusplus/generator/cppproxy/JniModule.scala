@@ -34,7 +34,7 @@ extends CppModule {
 
         def cppRegisterNativesDefinition = if (jniMethods.isEmpty) ""  else
             "const static JNINativeMethod native_methods[] = {\n" +
-            ( jniMethods map { "    " + _.registerNativeArrayEntry} ).mkString("", ",\n", "\n") +
+            (jniMethods map { "    " + _.registerNativeArrayEntry }).mkString("", ",\n", "\n") +
             "};\n"
 
         def cppRegisterNativesFunction = {

@@ -5,6 +5,8 @@ import com.sos.scheduler.engine.kernel.event.EventPredicate;
 
 
 public class UnexpectedEventException extends RuntimeException {
+    private static final long serialVersionUID = 2011040301;
+    
     final Event event;
     final EventPredicate eventPredicate;
 
