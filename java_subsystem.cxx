@@ -110,7 +110,7 @@ bool Java_subsystem::subsystem_initialize()
 
 bool Java_subsystem::subsystem_load()
 {
-    _schedulerJ.onLoad();
+    _schedulerJ.onLoad(string_from_file(_spooler->_configuration_file_path));
     _subsystem_state = subsys_loaded;
     return true;
 }
