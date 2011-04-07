@@ -1713,20 +1713,11 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
 
         if( http_request->_http_cmd == "GET" )
         {
-            if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state
+            if( string_begins_with( path, "/<" ) )   // direct XML command, e.g. <show_state/>
             {
                 string xml = path.substr( 1 );
-                if( !string_ends_with( path, "/>" ) )
-                {
-                    if( string_ends_with( path, ">" ) )  *xml.rbegin() = '/',  xml += ">";
-                                                   else  xml += "/>";
-                }
-                
                 http_response->set_header( "Cache-Control", "no-cache" );
-                //if( _log )  _log->info( message_string( "SCHEDULER-932", _request ) );
-
-                response_body = execute( xml, "  " );  // JS-486, hier wird der Security Level auch geprüft mit ordentlicher Fehlermeldung
-
+                response_body = execute( xml, "  " );  // JS-486, the security level will be checked here, too (with error message)
                 response_content_type = "text/xml";
             }
             else
