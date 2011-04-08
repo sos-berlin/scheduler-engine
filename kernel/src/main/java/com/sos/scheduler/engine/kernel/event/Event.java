@@ -6,6 +6,8 @@ import com.sos.scheduler.engine.kernel.SchedulerObject;
 
 @ForCpp
 public abstract class Event {  // Abstrakte Klasse statt Interface, damit C++/Java-Generator Event als Oberklasse akzeptiert.
+    //public abstract EventId getId();
+    //public long getTimestampMs();
     public abstract SchedulerObject getObject();
     public abstract Message getMessage();
 }

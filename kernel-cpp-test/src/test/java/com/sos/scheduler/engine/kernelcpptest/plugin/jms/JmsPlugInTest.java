@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.*;
 
 
 public class JmsPlugInTest extends SchedulerTest {
-    /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=http://localhost:61616 */
+    /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
     private static final Logger logger = Logger.getLogger(JmsPlugInTest.class);

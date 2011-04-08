@@ -4,19 +4,18 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
 import org.apache.log4j.*;
 import org.junit.Test;
 import static java.lang.Math.max;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 
 public class MaxOrderTest extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(MaxOrderTest.class);
-    private static final Time eventTimeout = Time.of(5);
     private static final int maxOrders = 3;         // Derselbe Wert wie <job_chain max_orders="">
     private static final int addedOrderCount = 9;   // Anzahl der <add_order>
+    private static final Logger logger = Logger.getLogger(MaxOrderTest.class);
 
 
     @Test public void test() throws Exception {
@@ -31,7 +30,6 @@ public class MaxOrderTest extends SchedulerTest {
         private int finishedOrderCount = 0;
         
         @Override public void onEvent(Event e) {
-            //logger.info(e);
             if (e instanceof OrderTouchedEvent) {
                 touchedOrderCount++;
                 maxTouchedOrderCount = max(maxTouchedOrderCount, touchedOrderCount);
@@ -51,9 +49,9 @@ public class MaxOrderTest extends SchedulerTest {
         }
 
         private void check() {
-            assert touchedOrderCount >= 0 : "touchedOrderCount >= 0 failed, activeOrderCount=" + touchedOrderCount;
-            assert touchedOrderCount <= maxOrders : "touchedOrderCount=" + touchedOrderCount + " > maxOrders=" + maxOrders;
-            assertEquals(maxOrders, maxTouchedOrderCount);
+            assertThat("touchedOrderCount != 0", touchedOrderCount, equalTo(0));
+            assertThat(maxTouchedOrderCount, lessThanOrEqualTo(maxOrders));
+            assertThat(maxTouchedOrderCount, equalTo(maxOrders));   // Strenger, das Maximum soll genutzt worden sein
         }
     }
 }

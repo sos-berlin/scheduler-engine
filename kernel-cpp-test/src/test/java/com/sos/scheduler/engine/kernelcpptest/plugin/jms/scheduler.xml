@@ -3,6 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
 >
     <config>
+        <!-- irgendwas.plugin.xml -->
+        <!-- com.sos.scheduler.engine.playground.mq.JMSPlugIn.plugin.xml -->
         <plugin java_class="com.sos.scheduler.engine.playground.mq.JMSPlugIn">
             <jms>
                 <connection providerUrl="vm:com.sos.scheduler"/>
