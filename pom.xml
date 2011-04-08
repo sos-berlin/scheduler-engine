@@ -17,6 +17,7 @@
         <module>kernel-cpp/prod</module>
         <module>cplusplus</module>
         <module>jar</module>
+        <module>playground</module>
         <!-- <module>core-cpp</module> -->
     </modules>
 

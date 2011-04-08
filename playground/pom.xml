@@ -8,6 +8,10 @@
         <version>2.1.1-SNAPSHOT</version>
     </parent>
 
+    <modules>
+        <module>mq</module>
+    </modules>
+
     <artifactId>com.sos.scheduler.engine.playground</artifactId>
     <packaging>pom</packaging>
 
