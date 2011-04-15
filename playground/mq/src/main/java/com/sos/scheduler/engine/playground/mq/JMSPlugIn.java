@@ -51,11 +51,6 @@ public class JMSPlugIn implements PlugIn, EventSubscriber {
     }
 
 
-    @Override public String toString() {
-        return "PlugIn " + getClass().getName();
-    }
-
-    
     public static PlugInFactory factory() {
         return new PlugInFactory() {
             @Override public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {

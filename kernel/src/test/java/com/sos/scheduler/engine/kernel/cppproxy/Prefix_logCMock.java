@@ -13,7 +13,6 @@ import java.io.Writer;
 public class Prefix_logCMock extends CppProxyImpl<Sister> implements Prefix_logC
 {
     private final Writer writer;
-    private String id = "TESTORDER-ID";
 
     public Prefix_logCMock(Writer w) { writer = w; }
 

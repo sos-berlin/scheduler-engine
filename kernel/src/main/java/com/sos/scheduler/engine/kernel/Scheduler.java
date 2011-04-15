@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel;
 
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
@@ -9,7 +10,6 @@ import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
-import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
@@ -104,12 +104,12 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
 
 
     public final void threadLock() {
-        ThreadLock.lock();
+        CppProxy.threadLock.lock();
     }
 
 
     public final void threadUnlock() {
-        ThreadLock.unlock();
+        CppProxy.threadLock.unlock();
     }
 
     public String executeXml(String xml) {

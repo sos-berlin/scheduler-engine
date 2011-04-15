@@ -13,7 +13,7 @@ public class PlugInSubsystem extends AbstractHasPlatform {
     private static final String staticFactoryMethodName = "factory";
     
     private final Scheduler scheduler;
-    private final List<PlugIn> plugIns = new ArrayList<PlugIn>();
+    private final List<PlugInAdapter> plugIns = new ArrayList<PlugInAdapter>();
 
     
     public PlugInSubsystem(Scheduler scheduler) {
@@ -38,7 +38,7 @@ public class PlugInSubsystem extends AbstractHasPlatform {
     private void tryAddPlugIn(String className, Element e) {
         try {
             PlugIn p = newPlugIn(className, e);
-            plugIns.add(p);
+            plugIns.add(new PlugInAdapter(p, className, log()));
             log().info(p + " added");
         } catch (Exception x) {
             log().error("Plug-in " + className + ": " + x.toString());
@@ -54,31 +54,11 @@ public class PlugInSubsystem extends AbstractHasPlatform {
 
 
     public void activate() {
-        for (PlugIn p: plugIns)  tryActivatePlugIn(p);
-    }
-
-
-    private void tryActivatePlugIn(PlugIn p) {
-        try {
-           p.activate();
-           log().info(p + " activated");
-        } catch (Exception x) {
-            log().error(p + ": " + x);
-        }
+        for (PlugInAdapter p: plugIns)  p.tryActivate();
     }
 
 
     public void close() {
-        for (PlugIn p: plugIns)  tryClosePlugIn(p);
-    }
-
-
-    private void tryClosePlugIn(PlugIn p) {
-        try {
-           p.close();
-           log().info(p + " closed");
-        } catch (Exception x) {
-            log().error(x.toString());
-        }
+        for (PlugInAdapter p: plugIns)  p.tryClose();
     }
 }

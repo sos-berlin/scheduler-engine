@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.cplusplus.generator.util._
 import com.sos.scheduler.engine.cplusplus.generator.util.ClassOps._
 import com.sos.scheduler.engine.cplusplus.generator.util.MyRichString._
 import com.sos.scheduler.engine.cplusplus.generator.util.Util._
-import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
 
 
 class JavaMethod(m: ProcedureSignature) {
@@ -18,13 +18,13 @@ class JavaMethod(m: ProcedureSignature) {
             inParentheses(javaParameterDeclarations)
             
         val code =
-            "        " + classOf[ThreadLock].getName + ".lock();\n" +
+            "        " + classOf[CppProxy].getName + ".threadLock.lock();\n" +
             "        try {\n" +
             "            " + "return " ? m.hasReturnType + m.nativeJavaName +
                              inParentheses("cppReference()" :: (m.parameters map javaCallArgument)) + ";\n" +
             "        }\n" +
             "        finally {\n" +
-            "            " + classOf[ThreadLock].getName + ".unlock();\n" +
+            "            " + classOf[CppProxy].getName + ".threadLock.unlock();\n" +
             "        }\n"
 
         declaration + " {\n" + 

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.main;
 
-import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 
 
 public class CppScheduler {
@@ -10,12 +10,12 @@ public class CppScheduler {
 
     
     public int run(String[] arguments, String argumentLine, MainContext javaMainContext) {
-        ThreadLock.lock();
+        CppProxy.threadLock.lock();
         try {
             return runNative(arguments, argumentLine, javaMainContext);
         }
         finally {
-            ThreadLock.unlock();
+            CppProxy.threadLock.unlock();
         }
     }
 

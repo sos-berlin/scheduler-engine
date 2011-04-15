@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.main.event;
 
+import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.Rendezvous;
-import com.sos.scheduler.engine.cplusplus.runtime.ThreadLock;
 
 
 public class EventRendezvous extends Rendezvous<Event,Object>
@@ -15,12 +15,12 @@ public class EventRendezvous extends Rendezvous<Event,Object>
 
 
     public void unlockAndCall(Event e) {
-        ThreadLock.unlock();
+        CppProxy.threadLock.unlock();
         try {
             call(e);
         }
         finally {
-            ThreadLock.lock();
+            CppProxy.threadLock.lock();
         }
     }
 

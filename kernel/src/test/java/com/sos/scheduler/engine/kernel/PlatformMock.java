@@ -8,6 +8,8 @@ import java.io.Writer;
 
 
 public class PlatformMock {
+    private PlatformMock() {}
+    
     public static Platform newInstance(Writer w) {
         Prefix_logC prefix_logC = new Prefix_logCMock(w);
         PrefixLog log = new PrefixLog(prefix_logC);

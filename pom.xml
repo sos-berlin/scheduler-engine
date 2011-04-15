@@ -2,6 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--distributionManagement>
+        <repository>
+            <id>zschimmer-archiva-internal</id>
+            <name>Internal Release Repository</name>
+            <url>http://192.168.222.2:8080/archiva/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>zschimmer-archiva-snapshots</id>
+            <name>Internal Snapshot Repository</name>
+            <url>http://192.168.222.2:8080/archiva/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement-->
+    
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>com.sos.scheduler.engine.pom</artifactId>
     <version>2.1.1-SNAPSHOT</version>
@@ -12,13 +25,13 @@
     <inceptionYear>2010</inceptionYear>
 
     <modules>
+        <module>cplusplus</module>
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp/prod</module>
-        <module>cplusplus</module>
-        <module>jar</module>
+        <module>kernel-cpp-test</module>
         <module>playground</module>
-        <!-- <module>core-cpp</module> -->
+        <module>jar</module>
     </modules>
 
     <repositories>

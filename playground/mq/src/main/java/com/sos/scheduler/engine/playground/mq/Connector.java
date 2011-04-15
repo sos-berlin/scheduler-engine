@@ -19,7 +19,7 @@ class Connector implements Closeable {
     Connector(Configuration c) {
         try {
             brokerService.setBrokerName(Configuration.brokerName);
-            brokerService.addConnector("tcp://localhost:63102");
+            //brokerService.addConnector("tcp://localhost:63102");
             connection = c.topicConnectionFactory.createTopicConnection();
             topic = c.topic;
             session = newTopicSession();
