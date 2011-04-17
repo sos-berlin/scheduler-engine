@@ -9,12 +9,12 @@ class Prefix_logCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProx
     }
 
     @Override public void debug3(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             debug3__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -22,12 +22,12 @@ class Prefix_logCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProx
 
 
     @Override public void error(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             error__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -35,12 +35,12 @@ class Prefix_logCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProx
 
 
     @Override public void info(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             info__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -48,12 +48,12 @@ class Prefix_logCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProx
 
 
     @Override public void warn(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             warn__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 

@@ -10,12 +10,12 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     }
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_queueC order_queue() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return order_queue__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -23,12 +23,12 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
 
 
     @Override public java.lang.String string_error_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return string_error_state__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -36,12 +36,12 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
 
 
     @Override public java.lang.String string_next_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return string_next_state__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -49,12 +49,12 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
 
 
     @Override public java.lang.String string_order_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return string_order_state__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 

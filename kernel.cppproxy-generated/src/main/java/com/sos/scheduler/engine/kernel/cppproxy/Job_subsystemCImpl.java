@@ -9,12 +9,12 @@ class Job_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppP
     }
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return job_by_string__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -22,12 +22,12 @@ class Job_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppP
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string_or_null(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return job_by_string_or_null__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 

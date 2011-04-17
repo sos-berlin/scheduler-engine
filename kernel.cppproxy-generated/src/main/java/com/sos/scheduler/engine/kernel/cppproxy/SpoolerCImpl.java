@@ -9,12 +9,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     }
 
     @Override public void abort_immediately(boolean p0, java.lang.String p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             abort_immediately__native(cppReference(), p0, p1);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -22,12 +22,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void abort_immediately_after_distribution_error(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             abort_immediately_after_distribution_error__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -35,12 +35,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void abort_now(boolean p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             abort_now__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -48,12 +48,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void activate() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             activate__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -61,12 +61,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void assert_are_orders_distributed(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             assert_are_orders_distributed__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -74,12 +74,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void assert_is_activated(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             assert_is_activated__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -87,12 +87,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void assign_stdout() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             assign_stdout__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -100,12 +100,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void begin_dont_suspend_machine() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             begin_dont_suspend_machine__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -113,12 +113,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void check_cluster() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             check_cluster__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -126,12 +126,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void check_name(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             check_name__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -139,12 +139,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean cluster_is_active() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return cluster_is_active__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -152,12 +152,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String cluster_member_id() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return cluster_member_id__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -165,12 +165,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_continue() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_continue__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -178,12 +178,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_let_run_terminate_and_restart() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_let_run_terminate_and_restart__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -191,12 +191,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_pause() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_pause__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -204,12 +204,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -217,12 +217,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate(boolean p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -230,12 +230,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate(boolean p0, int p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate__native(cppReference(), p0, p1);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -243,12 +243,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate(boolean p0, int p1, java.lang.String p2) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate__native(cppReference(), p0, p1, p2);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -256,12 +256,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate(boolean p0, int p1, java.lang.String p2, boolean p3) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate__native(cppReference(), p0, p1, p2, p3);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -269,12 +269,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate_after_error(java.lang.String p0, java.lang.String p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate_after_error__native(cppReference(), p0, p1);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -282,12 +282,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void cmd_terminate_and_restart(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             cmd_terminate_and_restart__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -295,12 +295,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String db_cluster_member_id() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return db_cluster_member_id__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -308,12 +308,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String db_distributed_member_id() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return db_distributed_member_id__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -321,12 +321,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void detect_warning_and_send_mail() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             detect_warning_and_send_mail__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -334,12 +334,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String directory() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return directory__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -347,12 +347,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String distributed_member_id() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return distributed_member_id__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -360,12 +360,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void end_dont_suspend_machine() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             end_dont_suspend_machine__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -373,12 +373,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void end_waiting_tasks() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             end_waiting_tasks__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -386,12 +386,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void execute_config_commands() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             execute_config_commands__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -399,12 +399,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void execute_state_cmd() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             execute_state_cmd__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -412,12 +412,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String execute_xml(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return execute_xml__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -425,12 +425,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean has_any_task() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return has_any_task__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -438,12 +438,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean has_exclusiveness() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return has_exclusiveness__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -451,12 +451,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String http_url() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return http_url__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -464,12 +464,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String id() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return id__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -477,12 +477,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String id_for_db() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return id_for_db__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -490,12 +490,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String include_path() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return include_path__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -503,12 +503,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean is_cluster() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_cluster__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -516,12 +516,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean is_machine_suspendable() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_machine_suspendable__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -529,12 +529,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean is_service() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_service__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -542,12 +542,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean is_termination_state_cmd() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_termination_state_cmd__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -555,12 +555,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String java_work_dir() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return java_work_dir__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -568,12 +568,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return job_subsystem__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -581,12 +581,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem_or_null() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return job_subsystem_or_null__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -594,12 +594,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void load() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             load__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -607,12 +607,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void load_arg() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             load_arg__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -620,12 +620,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return log__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -633,12 +633,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String log_directory() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return log_directory__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -646,12 +646,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void log_show_state() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             log_show_state__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -659,12 +659,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String name() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return name__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -672,12 +672,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean name_is_valid(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return name_is_valid__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -685,12 +685,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void nichts_getan(int p0, java.lang.String p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             nichts_getan__native(cppReference(), p0, p1);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -698,12 +698,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC order_subsystem() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return order_subsystem__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -711,12 +711,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean orders_are_distributed() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return orders_are_distributed__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -724,12 +724,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String param() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return param__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -737,12 +737,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void register_pid(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             register_pid__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -750,12 +750,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void register_pid(int p0, boolean p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             register_pid__native(cppReference(), p0, p1);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -763,12 +763,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void run() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             run__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -776,12 +776,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void run_check_ctrl_c() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             run_check_ctrl_c__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -789,12 +789,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void self_check() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             self_check__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -802,12 +802,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void send_cmd() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             send_cmd__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -815,12 +815,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void set_id(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             set_id__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -828,12 +828,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void signal(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             signal__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -841,12 +841,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public boolean signaled() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return signaled__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -854,12 +854,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void start() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             start__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -867,12 +867,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String state_name() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return state_name__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -880,12 +880,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void stop() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             stop__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -893,12 +893,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String string_need_db() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return string_need_db__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -906,12 +906,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void suspend_machine() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             suspend_machine__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -919,12 +919,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public int tcp_port() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return tcp_port__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -932,12 +932,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public java.lang.String temp_dir() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return temp_dir__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -945,12 +945,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public int udp_port() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return udp_port__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -958,12 +958,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void unregister_pid(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             unregister_pid__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -971,12 +971,12 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
 
 
     @Override public void update_console_title(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             update_console_title__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 

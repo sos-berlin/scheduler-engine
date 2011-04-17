@@ -9,12 +9,12 @@ class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.Cp
     }
 
     @Override public int finished_orders_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return finished_orders_count__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -22,12 +22,12 @@ class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.Cp
 
 
     @Override public com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return java_file_based_or_null__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -35,12 +35,12 @@ class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.Cp
 
 
     @Override public java.util.ArrayList java_file_baseds() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return java_file_baseds__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 

@@ -10,12 +10,12 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
     }
 
     @Override public void close() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             close__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -23,12 +23,12 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
 
 
     @Override public boolean is_distributed_order_requested(long p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_distributed_order_requested__native(cppReference(), p0);
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
@@ -36,12 +36,12 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
 
 
     @Override public int java_order_count() {
-        com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.lock();
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return java_order_count__native(cppReference());
         }
         finally {
-            com.sos.scheduler.engine.cplusplus.runtime.ThreadLock.unlock();
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
