@@ -25,7 +25,6 @@ extern const string spooler_process_name;
 extern const string spooler_on_error_name;
 extern const string spooler_on_success_name;
 extern const string spooler_api_version_name;
-//extern const string wait_for_subprocesses_name;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -63,7 +62,6 @@ struct Text_with_includes : Non_cloneable
     File_based*                _file_based;
     File_path                  _include_path;
     xml::Document_ptr          _dom_document;
-  //Time                       _max_modification_time;
 };
 
 //-------------------------------------------------------------------------------------------Module
@@ -149,7 +147,7 @@ struct Module : Object
     string                     _java_options;               // Gehört eigentlich nach Job
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
     bool                       _compiled;
-    string                     _java_class_path;        // JS-540
+    string                     _java_class_path;            // JS-540
 
     // Process
     string                     _process_filename;           // Job ist ein externes Programm
@@ -297,7 +295,7 @@ struct Module_instance : Object
     bool                       _initialized;
     bool                       _load_called;
 
-    ptr<Process>               _process;                    // Wird nur von Remote_instance_module_procy benutzt, sonst Dummy
+    ptr<Process>               _process;                    // Wird nur von Remote_instance_module_proxy benutzt, sonst Dummy
     ptr<Com_variable_set>      _process_environment;
     bool                       _has_order;
     Object_list                _object_list;

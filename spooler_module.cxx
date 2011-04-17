@@ -1,14 +1,4 @@
 // $Id$
-// §1172
-/*
-    Hier sind implementiert
-
-    Source_part
-    Text_with_includes
-    Module
-    Com_module_instance
-*/
-
 
 #include "spooler.h"
 #include "../file/anyfile.h"
@@ -32,7 +22,6 @@ extern const string spooler_api_version_name    = "spooler_api_version()Ljava.la
 const string        default_monitor_name        = "scheduler";
 
 const string shell_language_name         = "shell";
-
 const int encoding_code_page_none        = -1;
 
 //-----------------------------------------------------------Text_with_includes::Text_with_includes
