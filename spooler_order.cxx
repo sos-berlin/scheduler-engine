@@ -2057,6 +2057,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
     result.setAttribute( "running_orders", number_of_touched_orders() );
+    result.setAttribute( "max_orders", _max_orders );
     result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
