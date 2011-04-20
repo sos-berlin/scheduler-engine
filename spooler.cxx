@@ -99,6 +99,8 @@ Spooler*                        spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
 
+static const Time               max_micro_step_time                 = Time(10);
+
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
@@ -2464,6 +2466,8 @@ void Spooler::run()
         if( _shutdown_cmd )  if( !_task_subsystem  ||  !_task_subsystem->has_tasks()  ||  _shutdown_ignore_running_tasks )  break;
 
         Time now = Time::now();
+        Time micro_step_start_time = now;
+        
         bool something_done = run_continue( now );
         
         if( _cluster )  check_cluster();
@@ -2541,7 +2545,6 @@ void Spooler::run()
             }
         }
 
-
       //if( !something_done  &&  wait_until > 0  &&  _state_cmd == sc_none  &&  wait_until > Time::now() )   Immer wait() rufen, damit Event.signaled() gesetzt wird!
         {
             Wait_handles wait_handles ( this );
@@ -2618,6 +2621,11 @@ void Spooler::run()
    \endcode
  */
 
+
+            {
+                Time n = Time::now();
+                if (n >= micro_step_start_time + max_micro_step_time)  _log->warn(message_string("SCHEDULER-721", (n - micro_step_start_time).as_string()));
+            }
 
             //-------------------------------------------------------------------------------WARTEN
 
@@ -3668,7 +3676,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
             my_spooler._log->error( message_string( "SCHEDULER-331" ) );
             string line = S() << "Error " << x.what();
             if (java_main_context)  cerr << line << "\n" << flush;
-            else SHOW_ERR( line );     // Fehlermeldung vor ~Spooler ausgeben
+            else show_msg( line );     // Fehlermeldung vor ~Spooler ausgeben
 
             if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
             if (java_main_context)  throw;
@@ -3719,6 +3727,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
 
     add_message_code_texts( sos::scheduler::scheduler_messages );
 
+    set_log_category_default ( "log4j.*"             , true );      // Fürs Loggen aus Java
     set_log_category_default ( "scheduler"           , true );
   //set_log_category_default ( "scheduler.*"         , true );
     set_log_category_explicit( "scheduler.wait"      );

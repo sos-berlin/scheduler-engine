@@ -591,6 +591,7 @@ struct Spooler : Object,
     bool                        has_any_task                ();
 
     void                        detect_warning_and_send_mail();
+    void                        write_to_scheduler_log      (const string& category, const string& text) { Z_LOG2(category, text); }  // Für Java nicht mit Mutex abgesichert
 
 
   private:
