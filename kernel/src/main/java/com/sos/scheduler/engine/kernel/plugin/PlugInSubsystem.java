@@ -8,6 +8,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
+//TODO Eigenes PrefixLog einführen
 
 public class PlugInSubsystem extends AbstractHasPlatform {
     private static final String staticFactoryMethodName = "factory";
@@ -23,33 +24,36 @@ public class PlugInSubsystem extends AbstractHasPlatform {
 
 
     public void load(Element root) {
-        for (Element e: elementsXPath(root, "config/plugin"))
-            tryAddPlugIn(e);
+        Element plugInsElement = elementXPathOrNull(root, "config/plugins");
+        if (plugInsElement != null) {
+            for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugIn(e);
+        }
     }
 
 
     private void tryAddPlugIn(Element e) {
         String className = e.getAttribute("java_class");
         if (className.isEmpty())  throw new SchedulerException("Missing attribute java_class in <plugin>");
-        tryAddPlugIn(className, e);
+        Element contentElement = elementXPathOrNull(e, "plugin.config");
+        tryAddPlugIn(className, contentElement);
     }
+    
 
-
-    private void tryAddPlugIn(String className, Element e) {
+    private void tryAddPlugIn(String className, Element elementOrNull) {
         try {
-            PlugIn p = newPlugIn(className, e);
-            plugIns.add(new PlugInAdapter(p, className, log()));
+            PlugInAdapter p = new PlugInAdapter(newPlugIn(className, elementOrNull), className, log());
+            plugIns.add(p);
             log().info(p + " added");
         } catch (Exception x) {
-            log().error("Plug-in " + className + ": " + x.toString());
+            log().error("Plug-in " + className + ": " + x);
         }
     }
 
 
-    private PlugIn newPlugIn(String className, Element e) throws Exception {
+    private PlugIn newPlugIn(String className, Element elementOrNull) throws Exception {
         Class<?> c = Class.forName(className);
         PlugInFactory f = (PlugInFactory)c.getMethod(staticFactoryMethodName).invoke(null);
-        return f.newInstance(scheduler, e);
+        return f.newInstance(scheduler, elementOrNull);
     }
 
 

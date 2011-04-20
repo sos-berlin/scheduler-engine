@@ -5,5 +5,5 @@ import org.w3c.dom.Element;
 
 
 public interface PlugInFactory {
-    PlugIn newInstance(Scheduler scheduler, Element configuration);
+    PlugIn newInstance(Scheduler scheduler, Element configurationOrNull);
 }

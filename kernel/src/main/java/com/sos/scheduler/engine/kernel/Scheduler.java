@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel;
 
+import com.sos.scheduler.engine.kernel.log.LogSubsystem;
+import com.sos.scheduler.engine.kernel.log.SchedulerLog;
+import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
@@ -19,12 +22,14 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 @ForCpp
 public class Scheduler implements HasPlatform, Sister  // extends SchedulerObject
 {
+    private static final float loadWarnLevel = 0.9f;
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SpoolerC spoolerC;
     private final MainContext mainContext;
     private final Platform platform;
     private final PrefixLog log;
+    private LogSubsystem logSubsystem;
     private PlugInSubsystem plugInSubsystem;
     private JobSubsystem jobSubsystem;
     private OrderSubsystem orderSubsystem;
@@ -66,6 +71,9 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
 
             if (eventSubsystem != null)
                 eventSubsystem.report(new SchedulerCloseEvent(this));
+            
+            try { logSubsystem.close(); }
+            catch (Exception x) { log().error("logSubsystem.close(): " + x); }
         }
         finally {
             if (threadInitiallyLocked) {
@@ -73,6 +81,7 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
                 threadInitiallyLocked = false;
             }
         }
+        
     }
     
 
@@ -84,6 +93,7 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
 
 
     private void addSubsystems(Element configElement) {
+        logSubsystem = new LogSubsystem(new SchedulerLog(spoolerC));
         eventSubsystem = new EventSubsystem(platform);
         jobSubsystem = new JobSubsystem(platform, spoolerC.job_subsystem());
         orderSubsystem = new OrderSubsystem(platform, spoolerC.order_subsystem());
@@ -93,6 +103,7 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
 
     
     public void onActivate() {
+        logSubsystem.activate();
         plugInSubsystem.activate();
         if (mainContext != null)  mainContext.onSchedulerActivated();
     }
@@ -124,4 +135,11 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     public String getHttpUrl() { return spoolerC.http_url(); }
 
     public int getTcpPort() { return spoolerC.tcp_port(); }
+
+    public void callCppAndDoNothing() { spoolerC.tcp_port(); }
+
+    /** @param text Sollte auf \n enden */
+    public void writeToSchedulerLog(LogCategory category, String text) {
+        spoolerC.write_to_scheduler_log(category.string(), text);
+    }
 }

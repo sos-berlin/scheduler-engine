@@ -78,7 +78,7 @@ public class RendezvousTest {
                 r = f(a);
             }
             catch(RuntimeException x) {
-                rendezvous.leave(x);
+                rendezvous.leaveException(x);
             }
             finally {
                 if (rendezvous.isInRendezvous())    // Wenn keine Exception

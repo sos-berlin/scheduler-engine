@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 /** Zur Rendezvous-Synchronisierung zweier Threads, also zum synchronsierten Aufruf eines Entrys eines anderen Threads.
  * Der rufende Thread ruft call(ARG a) und wartet damit auf den dienenden Thread, bis dieser enter() erreicht.
  * enter() setzt erst fort, wenn ein rufender Thread im call() ist. Dann beginnt das Rendezvous.
- * Der dienende Thread bekommt a während der rufende Thread wartet, bis der dienende Thread leave(RESULT r) ruft.
+ * Der dienende Thread bekommt a während der rufende Thread wartet, bis der dienende Thread leaveException(RESULT r) ruft.
  * r wird dem rufenden Thread zurückgegeben und beide Threads setzen unabhängig fort.
  *
  * @param <ARG> Typ zu Übergabe an den dienenden Thread
@@ -34,7 +34,7 @@ public class Rendezvous<ARG,RESULT> {
             if (inRendezvous) {
                 RendezvousServerClosedException x = new RendezvousServerClosedException();
                 logger.error(x, x);
-                leave(x);
+                leaveException(x);
                 throw x;
             }
         }
@@ -56,18 +56,47 @@ public class Rendezvous<ARG,RESULT> {
 
 
     public RESULT call(ARG o) {
+        asyncCall(o);
+        return awaitResult();
+    }
+
+
+    /** Danach syncResult() aufrufen, bis der Aufruf nicht NULL liefert **/
+    public void asyncCall(ARG o) {
         try {
             assertIsNotClosed();
             argumentQueue.put(o);
-            Return r = returnQueue.take();
-            if  (r.runtimeException != null)  throw r.runtimeException;
-            return r.result;
         }
         catch (InterruptedException x) { throw new RuntimeException(x); }
     }
 
 
-    /** Am Ende immer leave rufen! */
+    public RESULT awaitResult() {
+        return awaitResult(Time.eternal);
+    }
+
+    /** Wenn awaitResult() NULL liefert, den Aufruf wiederholen! */
+    public RESULT awaitResult(Time t) {
+        try {
+            Return r = returnQueue.poll(t.value, t.unit);
+            if (r == null)
+                return null;
+            else {
+                if  (r.runtimeException != null)  throw r.runtimeException;
+                return r.result;
+            }
+        }
+        catch (InterruptedException x) { throw new RuntimeException(x); }
+    }
+
+
+    /** Am Ende immer leave aufrufen! */
+    public ARG enter() {
+        return enter(Time.eternal);
+    }
+
+
+    /** Am Ende immer leave() aufrufen! */
     public ARG enter(Time timeout) {
         try {
             assertIsServingThread();
@@ -86,8 +115,9 @@ public class Rendezvous<ARG,RESULT> {
     }
 
 
-    public void leave(RuntimeException o) {
-        leave(new Return(o));
+    public void leaveException(Throwable t) {
+        RuntimeException x = t instanceof RuntimeException? (RuntimeException)t : new RuntimeException(t);
+        leave(new Return(x));
     }
 
 
@@ -102,7 +132,7 @@ public class Rendezvous<ARG,RESULT> {
 
 
     private void assertIsServingThread() {
-        if (servingThread == null)  throw new RendezvousException("startServing() has not been not called");
+        if (servingThread == null)  throw new RendezvousException("beginServing() has not been not called");
         if (servingThread != Thread.currentThread())  throw new RendezvousException("Method must be called in serving thread only");
     }
 

@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppThreadSafe;
 
 
 @CppClass(clas="sos::scheduler::Spooler", directory="scheduler", include="spooler.h")
@@ -158,4 +159,5 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
     boolean has_any_task();
 
     void detect_warning_and_send_mail();
+    @CppThreadSafe void write_to_scheduler_log(String category, String text);
 }
