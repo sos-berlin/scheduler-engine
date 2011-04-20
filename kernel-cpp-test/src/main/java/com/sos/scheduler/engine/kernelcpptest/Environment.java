@@ -7,17 +7,27 @@ import static org.apache.commons.io.FileUtils.*;
 
 
 public class Environment {
-    private static final File workingDirectory = new File(System.getProperty("user.dir"));
-    private static final String moduleBase = "../kernel-cpp/prod/" + bin() + "/" + "scheduler";
+    private static final String kernelCppDirName = "kernel-cpp";
+    private static final String moduleBase = kernelCppDir() + "/prod/" + bin() + "/" + "scheduler";
     private static final OperatingSystemHelper os = OperatingSystemHelper.singleton;
-    private static final File schedulerModuleFile = new File(workingDirectory, os.makeModuleFilename(moduleBase)).getAbsoluteFile();
-    private static final File schedulerExeFile = new File(workingDirectory, os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
+    private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
+    private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
 
-    private final Object mainObject;
     final File directory;
     final File factoryIniFile;
+    private final Object mainObject;
     private final File logDirectory;
 
+
+    private static File kernelCppDir() {
+        File dir = new File("..");
+        while (dir.exists()) {
+            File result = new File(dir, kernelCppDirName);
+            if (result.exists()) return result;
+            dir = new File(dir, "..");
+        }
+        throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
+    }
     
     private static String bin() {
         return OperatingSystemHelper.isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt

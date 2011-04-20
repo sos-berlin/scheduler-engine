@@ -8,7 +8,7 @@ import javax.naming.NamingException;
 
 
 public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komplex für public
-    public static final String brokerName = "com.sos.scheduler";
+    public static final String brokerName = "localhost";//"com.sos.scheduler";
     public static final String initialContextFactoryName = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     public static final String topicConnectionFactoryName = "TopicCF";
     public static final String topicName = "com.sos.scheduler.engine.Event";   // + hostName + portNumber in Url-Notation tcp://host:4444

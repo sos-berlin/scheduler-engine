@@ -17,12 +17,14 @@
     <build>
         <testResources>
             <testResource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>${project.build.testSourceDirectory}</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
             </testResource>
             <testResource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>src/test/scala</directory>
                 <excludes>
                     <exclude>**/*.scala</exclude>
@@ -53,12 +55,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.playground.mq</artifactId>
             <version>${project.version}</version>
         </dependency>
 

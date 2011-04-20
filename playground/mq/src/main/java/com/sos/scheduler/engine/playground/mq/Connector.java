@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +8,12 @@ import org.apache.activemq.broker.BrokerService;
 
 
 class Connector implements Closeable {
-    private final BrokerService brokerService = new BrokerService();
+//    private final BrokerService brokerService = new BrokerService();
+    // BrokerService auskommentiert, weil der BrokerService am Ende nicht ordentlich abgeräumt wird, dann liegt noch eine MBean herum:
+    // "javax.management.InstanceAlreadyExistsException: org.apache.activemq:BrokerName=com.sos.scheduler,Type=Broker" in addMBean()
+    // ActiveMQ hat einen automatisch startenden BrokerService unter dem Namen "localhost".
+    // Der legt im Arbeitsverzeichnis seine Datenbank an, im Unterverzeichnis activemq-data.
+
     private final TopicConnection connection;
     private final Topic topic;
     private final TopicSession session;
@@ -18,7 +22,7 @@ class Connector implements Closeable {
 
     Connector(Configuration c) {
         try {
-            brokerService.setBrokerName(Configuration.brokerName);
+            //brokerService.setBrokerName(Configuration.brokerName);
             //brokerService.addConnector("tcp://localhost:63102");
             connection = c.topicConnectionFactory.createTopicConnection();
             topic = c.topic;
@@ -32,34 +36,33 @@ class Connector implements Closeable {
     }
 
 
-    void setPersistenceDirectory(File dir) {
-        try {
-            brokerService.getPersistenceAdapter().setDirectory(dir);
-        } catch (IOException x) { throw new RuntimeException(x); }
-    }
-
-    
-    void start() {
-        try {
-            brokerService.start();
-        } catch (Exception x) { throw new RuntimeException(x); }
-    }
-    
-
     private TopicSession newTopicSession() throws JMSException {
         boolean transacted = false;
         return connection.createTopicSession(transacted, Session.AUTO_ACKNOWLEDGE);
     }
 
 
-    @Override public void close() {
+    void setPersistenceDirectory(File dir) {
+//        try {
+//            brokerService.getPersistenceAdapter().setDirectory(dir);
+//        } catch (IOException x) { throw new RuntimeException(x); }
+    }
+
+    
+    void start() {
+//        try {
+//            brokerService.start();
+//        } catch (Exception x) { throw new RuntimeException(x); }
+    }
+
+
+    public void stop() {
         try {
             try {
                 connection.close();
             } catch (JMSException x) { throw new RuntimeException(x); }
             finally {
-                brokerService.stop();
-                //Brauche wir ein asynchrones stop()? brokerService.waitUntilStopped();
+//                brokerService.stop();
             }
         } catch (Exception x) {
             if (x instanceof RuntimeException)  throw (RuntimeException)x;
@@ -67,9 +70,15 @@ class Connector implements Closeable {
         }
     }
 
+    
+    @Override public void close() {
+        stop();
+//        brokerService.waitUntilStopped();
+    }
 
-    @VisibleForTesting void waitUntilStopped() throws Exception {
-        brokerService.waitUntilStopped();
+
+    void waitUntilStopped() throws Exception {
+//        brokerService.waitUntilStopped();
         //brokerService.getPersistenceAdapter().stop();
     }
 

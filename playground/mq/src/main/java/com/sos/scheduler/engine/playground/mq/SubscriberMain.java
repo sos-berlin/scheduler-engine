@@ -1,9 +1,8 @@
-package com.sos.scheduler.engine.kernelcpptest.plugin.jms;
+package com.sos.scheduler.engine.playground.mq;
 
 // Start mit
 // mvn exec:java -Dexec.mainClass=com.sos.scheduler.engine.kernelcpptest.plugin.jms.SubscriberMain
 
-import com.sos.scheduler.engine.playground.mq.Configuration;
 import java.io.PrintStream;
 import javax.jms.JMSException;
 import javax.jms.Message;

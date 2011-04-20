@@ -983,4 +983,11 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     private static native void update_console_title__native(long cppReference, int p0);
 
 
+    @Override public void write_to_scheduler_log(java.lang.String p0, java.lang.String p1) {
+            write_to_scheduler_log__native(cppReference(), p0, p1);
+    }
+
+    private static native void write_to_scheduler_log__native(long cppReference, java.lang.String p0, java.lang.String p1);
+
+
 }

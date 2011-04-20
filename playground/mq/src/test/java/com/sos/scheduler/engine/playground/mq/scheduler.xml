@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <spooler
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd"
 >
     <config>
         <!-- irgendwas.plugin.xml -->
         <!-- com.sos.scheduler.engine.playground.mq.JMSPlugIn.plugin.xml -->
-        <plugin java_class="com.sos.scheduler.engine.playground.mq.JMSPlugIn">
-            <jms>
-                <connection providerUrl="vm:com.sos.scheduler"/>
-                <!--connection providerUrl="tcp://localhost:63102"/-->
-                <!--brokerService name="com.sos.scheduler">
-                    <connector url="tcp://localhost:63102"/>
-                </brokerService-->
-            </jms>
-        </plugin>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.playground.mq.JMSPlugIn">
+                <plugin.config>
+                    <jms>
+                        <connection providerUrl="vm:localhost"/>
+                        <!--connection providerUrl="vm:com.sos.scheduler"/-->
+                        <!--connection providerUrl="tcp://localhost:63102"/-->
+                        <!--brokerService name="com.sos.scheduler">
+                            <connector url="tcp://localhost:63102"/>
+                        </brokerService-->
+                    </jms>
+                </plugin.config>
+            </plugin>
+        </plugins>
 
         <jobs>
             <job name="job.1" order="yes" stop_on_error="no">

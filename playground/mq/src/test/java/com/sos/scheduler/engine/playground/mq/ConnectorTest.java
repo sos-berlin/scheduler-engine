@@ -25,7 +25,6 @@ public class ConnectorTest {
         try {
             connector.close();
         } finally {
-            connector.waitUntilStopped();
             //TODO Nicht löschbar: Files.deleteRecursively(tmpDir);
         }
     }

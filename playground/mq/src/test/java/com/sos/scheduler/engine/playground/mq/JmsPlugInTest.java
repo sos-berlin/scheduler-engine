@@ -1,6 +1,5 @@
-package com.sos.scheduler.engine.kernelcpptest.plugin.jms;
+package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.playground.mq.Configuration;
 import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -24,9 +23,9 @@ public class JmsPlugInTest extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Logger logger = Logger.getLogger(JmsPlugInTest.class);
     private static final Time schedulerTimeout = Time.of(5);
     private static final Configuration conf = Configuration.newInstance(providerUrl);
+    private static final Logger logger = Logger.getLogger(JmsPlugInTest.class);
 
     private final Topic topic = conf.topic;
     private final TopicConnection topicConnection = conf.topicConnectionFactory.createTopicConnection();
@@ -49,7 +48,7 @@ public class JmsPlugInTest extends SchedulerTest {
 
     
     @Test public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-validate-xml-", "-e");
+        runScheduler(schedulerTimeout, "-e");
         assertThat(resultQueue.poll(0, TimeUnit.SECONDS), equalTo(true));
     }
 
@@ -60,7 +59,7 @@ public class JmsPlugInTest extends SchedulerTest {
             boolean result = false;
             try {
                 TextMessage textMessage = (TextMessage) message;
-                logger.debug("onMessage: " + textMessage.getText());
+                System.err.println("onMessage: " + textMessage.getText());
                 assertThat(textMessage.getText(), startsWith("com.sos.scheduler.engine."));  // Erstmal ist der Klassenname vorangestellt.
                 result = true;
             }
