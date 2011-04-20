@@ -18,17 +18,22 @@ class JavaMethod(m: ProcedureSignature) {
             inParentheses(javaParameterDeclarations)
             
         val code =
-            "        " + classOf[CppProxy].getName + ".threadLock.lock();\n" +
-            "        try {\n" +
             "            " + "return " ? m.hasReturnType + m.nativeJavaName +
-                             inParentheses("cppReference()" :: (m.parameters map javaCallArgument)) + ";\n" +
+                             inParentheses("cppReference()" :: (m.parameters map javaCallArgument)) + ";\n"
+
+        def threadSafeCode = {
+            val threadLock = classOf[CppProxy].getName + ".threadLock"
+            "        " + threadLock  + ".lock();\n" +
+            "        try {\n" +
+            code +
             "        }\n" +
             "        finally {\n" +
-            "            " + classOf[CppProxy].getName + ".threadLock.unlock();\n" +
+            "            " + threadLock + ".unlock();\n" +
             "        }\n"
+        }
 
         declaration + " {\n" + 
-        code + 
+        (if (m.isThreadSafe) code else threadSafeCode) +
         "    }\n"
     }
 
