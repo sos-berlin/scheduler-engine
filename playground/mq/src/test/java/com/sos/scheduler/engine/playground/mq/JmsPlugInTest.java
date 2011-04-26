@@ -59,13 +59,13 @@ public class JmsPlugInTest extends SchedulerTest {
             boolean result = false;
             try {
                 TextMessage textMessage = (TextMessage) message;
-                System.err.println("onMessage: " + textMessage.getText());
+                logger.debug("onMessage: " + textMessage.getText());
                 assertThat(textMessage.getText(), startsWith("com.sos.scheduler.engine."));  // Erstmal ist der Klassenname vorangestellt.
                 result = true;
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
-                resultQueue.add(result);
+                resultQueue.offer(result);
             }
         }
     }
