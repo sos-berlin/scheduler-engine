@@ -14,7 +14,7 @@ import scala.annotation.tailrec
 trait Rendezvous[ARG,RESULT] {
     private val j = new JavaRendezvous[ARG,RESULT]
     
-    def serve(f: => Unit) {
+    def serveCalls(f: => Unit) {
         try {
             j.beginServing()
             f
@@ -40,7 +40,13 @@ trait Rendezvous[ARG,RESULT] {
                 }
         }
 
-    def callWithTimeout(arg: ARG, timeout: Time)(timeoutCode: => Time): RESULT = {
+    def callImpatient(arg: ARG, timeout: Time, repeatAfter: Time = Time.eternal)(timeoutCode: => Unit): RESULT =
+        callImpatientWithVariableRepeat(arg, timeout) {
+            timeoutCode
+            repeatAfter
+        }
+
+    def callImpatientWithVariableRepeat(arg: ARG, timeout: Time)(timeoutCode: => Time): RESULT = {
         j.asyncCall(arg)
         awaitResult(timeout) getOrElse {
             try {

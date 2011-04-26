@@ -19,7 +19,8 @@ class WatchdogPlugIn(scheduler: Scheduler, configuration: Option[xml.Elem]) exte
     private val thread1 = new Thread1
     private val thread2 = new Thread2
     private val periodMs = 5*100
-    private val timeout = Time.ofMs(1*100)
+    private val timeout = Time.of(0.1)
+    private val repeatAfter = Time.of(1)
 
     def activate() {
         thread1.start()
@@ -37,10 +38,7 @@ class WatchdogPlugIn(scheduler: Scheduler, configuration: Option[xml.Elem]) exte
         override def run() {
             untilTerminated {
                 val timer = new Timer(timeout)
-                thread2.callWithTimeout(true, timeout) { 
-                    logger.warn("Scheduler does not respond after " + timer)
-                    Time.of(1)
-                }
+                thread2.callImpatient(true, timeout, repeatAfter) { logger.warn("Scheduler does not respond after " + timer) }
                 sleepThread(periodMs)
             }
         }
@@ -48,7 +46,7 @@ class WatchdogPlugIn(scheduler: Scheduler, configuration: Option[xml.Elem]) exte
 
     private class Thread2 extends Thread with Terminatable with Rendezvous[Boolean,Boolean] {
         override def run() {
-            serve {
+            serveCalls {
                 untilTerminated {
                     acceptCall { arg: Boolean =>
                         val timer = new Timer(timeout)
