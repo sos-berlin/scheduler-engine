@@ -61,6 +61,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.8.1</scala.version>
         <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
+        <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
     </properties>
 
     <dependencyManagement>
@@ -297,6 +298,17 @@
             </plugin-->
         </plugins>
     </build>
+
+    <!--issueManagement>
+        <system>JIRA</system>
+        <url>http://www.sos-berlin.com/jira/browse/</url>
+    </issueManagement-->
+    
+    <scm>
+        <connection>scm:svn:${sos.subversion.url}</connection>
+        <developerConnection>scm:svn:${sos.subversion.url}</developerConnection>
+        <url>${sos.subversion.url}</url>
+    </scm>
 
     <reporting>
         <plugins>

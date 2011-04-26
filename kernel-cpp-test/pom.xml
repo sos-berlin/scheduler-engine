@@ -17,6 +17,10 @@
     <build>
         <testResources>
             <testResource>
+                <!-- Standard Wiederholen -->
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
                 <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>${project.build.testSourceDirectory}</directory>
                 <excludes>
