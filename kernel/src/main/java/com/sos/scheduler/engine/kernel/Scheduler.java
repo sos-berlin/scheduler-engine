@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.log.LogSubsystem;
-import com.sos.scheduler.engine.kernel.log.SchedulerLog;
-import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
-import com.sos.scheduler.engine.kernel.log.PrefixLog;
-import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
+import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
+import com.sos.scheduler.engine.kernel.log.LogCategory;
+import com.sos.scheduler.engine.kernel.log.LogSubsystem;
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import com.sos.scheduler.engine.kernel.log.SchedulerLog;
 import com.sos.scheduler.engine.kernel.main.MainContext;
 import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
@@ -22,7 +22,6 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 @ForCpp
 public class Scheduler implements HasPlatform, Sister  // extends SchedulerObject
 {
-    private static final float loadWarnLevel = 0.9f;
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SpoolerC spoolerC;
