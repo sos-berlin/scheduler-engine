@@ -14,6 +14,7 @@ object Util {
      * B ist üblicherweise Unit.
     */
     def closingFinally[A <: HasClose, B](a: A)(function: A => B): B = {
+        if (a == null)  throw new NullPointerException("closingFinally: object is null")
         var ok = false
         try {
             val b = function(a)

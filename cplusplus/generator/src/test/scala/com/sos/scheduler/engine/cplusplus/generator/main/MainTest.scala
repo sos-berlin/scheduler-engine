@@ -10,8 +10,7 @@ import Main._
 
 
 class MainTest {
-    private val tmp = new File(System.getProperty("java.io.tmpdir"))        // Warum ist das unter Maven das Home-Verzeichnis?
-    System.err.println("java.io.tmpdir=" + tmp)
+    private val tmp = new File(System.getProperty("java.io.tmpdir"))
     requireDirectoryExists(tmp,"Temporary directory")
     //if (List("tmp", "temp") forall { a => !(tmp.toString.toLowerCase contains a)}) throw new RuntimeException("Seems to be an invalid temporary directory: " + tmp)
     

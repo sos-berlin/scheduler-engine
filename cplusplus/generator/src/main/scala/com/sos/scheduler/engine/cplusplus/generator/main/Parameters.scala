@@ -14,8 +14,11 @@ class Parameters(
 
 object Parameters
 {
+    //val pom = new Pom("com.sos.scheduler.engine", "com.sos.scheduler.engine.cplusplus.generator")
+    val mavenProperties = new MavenProperties(getClass)
     private val optionWithValue = """-([^=]+)=(.*)""".r
     private val option = """-(.*)""".r
+
 
     def ofCommandLine(args: Array[String]): Parameters = {
         var cppOutputDirectory: Option[File] = None
@@ -30,6 +33,7 @@ object Parameters
                 case unknownName => throw new RuntimeException("Unbekannte Option -" + unknownName + "=")
             }
             case option(name) => name match {
+                case "version" | "V" => System.err.println("Version " + mavenProperties.version)
                 case "?" => System.err.println(usage)
                 case "deep" => deep = true
                 case unknownName => throw new RuntimeException("Unbekannte Option -" + unknownName)
@@ -46,6 +50,8 @@ object Parameters
 
 
     def usage = "java ... " + classOf[Main].getName + "\n"
+        "    -?\n" +
+        "    -version | -V\n" +
         "    -cpp-output-directory=\n" +
         "    -java-output-directory=\n" +
         "    CLASSES...\n"

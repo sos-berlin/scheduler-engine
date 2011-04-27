@@ -13,7 +13,20 @@
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
 
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/scala</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/maven.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!--plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
