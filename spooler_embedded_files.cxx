@@ -8,12 +8,12 @@
 
 const char file_scheduler_xsd[] = 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<!-- $Id$ -->\n"
+    "<!-- $Id: scheduler.xsd 6487 2011-04-20 10:31:15Z jz $ -->\n"
     "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n"
     "<!-- <xsd:key> nicht verwenden, libxslt kann das nicht: \"Internal error: xmlSchemaAreValuesEqual, failed to compare the values.\" -->\n"
     "<xsd:annotation>\n"
     "<xsd:documentation xml:lang=\"de\">\n"
-    "$Id$\n"
+    "$Id: scheduler.xsd 6487 2011-04-20 10:31:15Z jz $\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html\n"
     "</xsd:documentation>\n"
@@ -1796,13 +1796,13 @@ const char file_doc_en_log_categories_xml[] =
     "\xef" "\xbb" "\xbf" "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<?xml-stylesheet href=\"scheduler.xsl\" type=\"text/xsl\"?>\n"
     "\n"
-    "<!--$Id$-->\n"
+    "<!--$Id: log_categories.xml 3623 2005-04-20 06:53:16Z jz $-->\n"
     "\n"
     "<log_categories \n"
     "\x09" "\x09" "title=\"Log Categories\" \n"
     "\x09" "\x09" "base_dir=\"\" \n"
-    "\x09" "\x09" "author=\"$Author$\" \n"
-    "date     = \"$Date$\"\n"
+    "\x09" "\x09" "author=\"$Author: jz $\" \n"
+    "date     = \"$Date: 2008-10-02 16:15:45 +0200 (Do, 02 Okt 2008) $\"\n"
     ">\n"
     "\n"
     "\x09" "\x09" "<scheduler_keyword keyword=\"Log Categories\"/>\n"
@@ -2042,7 +2042,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1303123575 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1303295475 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1293710249 },
     { NULL, NULL, 0 }
 };
