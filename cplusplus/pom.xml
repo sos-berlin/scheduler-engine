@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <!-- Der Generator funktioniert nur fr den Scheduler, weil dessen C++-Klassen vorausgesetzt werden.  -->
+        <!-- Der Generator funktioniert nur für den Scheduler, weil dessen C++-Klassen vorausgesetzt werden. -->
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.pom</artifactId>
         <version>2.1.1-SNAPSHOT</version>
@@ -17,7 +17,7 @@
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>Generator fr C++-Proxys im Java-Code und Java-Proxys im C++-Code</description>
+    <description>Generator für C++-Proxys im Java-Code und Java-Proxys im C++-Code</description>
 
     <modules>
         <module>generator</module>
