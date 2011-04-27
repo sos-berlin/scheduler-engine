@@ -2009,6 +2009,7 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
 
+  //_log->info( message_string( "SCHEDULER-900", _version + " \"" + (string)schedulerJ().getVersion() + "\"", _configuration_file_path, getpid() ) );
     _log->info( message_string( "SCHEDULER-900", _version, _configuration_file_path, getpid() ) );
     _spooler_start_time = Time::now();
 
