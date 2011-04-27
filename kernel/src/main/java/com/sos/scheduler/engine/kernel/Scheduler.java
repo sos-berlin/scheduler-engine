@@ -33,6 +33,7 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     private JobSubsystem jobSubsystem;
     private OrderSubsystem orderSubsystem;
     private EventSubsystem eventSubsystem;
+    private MavenProperties mavenProperties = new MavenProperties(getClass());
     private Monitor monitor;
     private boolean threadInitiallyLocked = false;
     
@@ -140,5 +141,9 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     /** @param text Sollte auf \n enden */
     public void writeToSchedulerLog(LogCategory category, String text) {
         spoolerC.write_to_scheduler_log(category.string(), text);
+    }
+
+    public String getVersion() {
+        return mavenProperties.getVersion();
     }
 }

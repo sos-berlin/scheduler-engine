@@ -14,6 +14,21 @@
     <inceptionYear>2010</inceptionYear>
     <description>Java-Klassen für den Scheduler-Kern</description>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.build.sourceDirectory}</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/maven.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <dependency>
             <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->
