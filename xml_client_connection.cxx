@@ -68,6 +68,7 @@ bool Xml_client_connection::is_send_possible()
 
 void Xml_client_connection::send( const string& s )
 {
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << s << "\n");
     if( !is_send_possible() )  assert(0), z::throw_xc( Z_FUNCTION, "Connection is currently in use" );
 
     _received_data.clear();
@@ -83,6 +84,7 @@ void Xml_client_connection::send( const string& s )
 
 xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
 {
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
     xml::Document_ptr result;
 
     if( _state == s_connected  &&  !_received_data.is_empty() )
@@ -98,6 +100,7 @@ xml::Document_ptr Xml_client_connection::fetch_received_dom_document()
                     if( e2.nodeName_is( "ERROR" ) )  z::throw_xc( "SCHEDULER-223", _host_and_port.as_string(), e2.getAttribute( "text" ) );
     }
 
+    if (result)  Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml() << "\n");
     return result;
 }
 

@@ -1023,6 +1023,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( const xml::Element_ptr& start_task_element )
 {
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << " " << start_task_element.xml() << "\n");
 //    if( !_spooler->_remote_commands_allowed_for_licence ) z::throw_xc( "SCHEDULER-717" );   /** \change 2.1.2 - JS-559: new licence type "scheduler agent" */
     if( !_spooler->_remote_commands_allowed_for_licence ) {
         if( _log )  _log->warn( message_string( "SCHEDULER-717" ) );
@@ -1035,14 +1036,17 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     string kind   = start_task_element.    getAttribute( "kind" );
 
 
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " new Process\n");
     ptr<Process> process = Z_NEW( Process( _spooler ) );
 
     process->set_controller_address( Host_and_port( _communication_operation->_connection->_peer_host_and_port._host, tcp_port ) );
     process->set_run_in_thread( kind == "process" );
     process->set_log_stdout_and_stderr( true );     // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " process->start()\n");
     process->start();
 
 
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " register_task_process()\n");
     _communication_operation->_operation_connection->register_task_process( process );
     
     if( _log )  _log->info( message_string( "SCHEDULER-848", process->pid() ) );
@@ -1050,6 +1054,7 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     xml::Element_ptr result = _answer.createElement( "process" ); 
     result.setAttribute( "process_id", process->process_id() );
     if( process->pid() )  result.setAttribute( "pid", process->pid() );
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml() << "\n");
     return result;
 }
 

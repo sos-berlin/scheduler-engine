@@ -252,6 +252,7 @@ Process::Com_server_thread::Com_server_thread( object_server::Connection_to_own_
     
 int Process::Com_server_thread::thread_main()
 {
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
     int result = 0;
 
     Com_initialize com_initialize;
@@ -272,6 +273,7 @@ int Process::Com_server_thread::thread_main()
         cerr << s;
     }
 
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
     return result;
 }
 
@@ -465,6 +467,7 @@ void Process::start_local_process()
 
 void Process::start_local_thread()
 {
+    Z_LOGI2("Z-REMOTE-118", Z_FUNCTION << "\n");
     ptr<object_server::Connection_to_own_server_thread> connection = _spooler->_connection_manager->new_connection_to_own_server_thread();
    
     fill_connection( connection );
@@ -476,6 +479,7 @@ void Process::start_local_thread()
     _connection = +connection;
 
     _spooler->log()->debug9( message_string( "SCHEDULER-948", _connection->short_name() ) );  // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
+    Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " okay\n");
 }
 
 //-------------------------------------------------------------------------Process::fill_connection
@@ -613,7 +617,7 @@ bool Process::async_remote_start_continue( Async_operation::Continue_flags )
         {
             xml::Document_ptr dom_document = _xml_client_connection->fetch_received_dom_document();
             if( !dom_document )  break;
-
+                                                              
             Z_LOG2( "scheduler", Z_FUNCTION << " XML-Antwort: " << dom_document.xml() );
 
             //if( _spooler->_validate_xml )  _spooler->_schema.validate( dom_document );
