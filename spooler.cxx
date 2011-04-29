@@ -99,8 +99,6 @@ Spooler*                        spooler_ptr                         = NULL;
 
 const string                    variable_set_name_for_substitution  = "$";              // Name der Variablenmenge für die ${...}-Ersetzung
 
-static const Time               max_micro_step_time                 = Time(10);
-
 //-------------------------------------------------------------------------------------------------
 
 extern zschimmer::Message_code_text  scheduler_messages[];            // messages.cxx, generiert aus messages.xml
@@ -679,7 +677,8 @@ Spooler::Spooler(jobject java_main_context)
     _holidays(this),
     _next_process_id(1),
     _configuration_directories(confdir__max+1),
-    _configuration_directories_as_option_set(confdir__max+1)
+    _configuration_directories_as_option_set(confdir__max+1),
+    _max_micro_step_time(Time(10))
 {
     _log->init( this );              // Nochmal nach load_argv()
     _log->set_title( "Main log" );
@@ -2002,6 +2001,7 @@ string Spooler::configuration_for_single_job_script()
 void Spooler::start()
 {
     static_log_categories.save_to( &_original_log_categories );
+    _max_micro_step_time = _variables->get_int("scheduler.message.SCHEDULER-721.timeout", _max_micro_step_time.as_time_t());
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -2625,7 +2625,7 @@ void Spooler::run()
 
             {
                 Time n = Time::now();
-                if (n >= micro_step_start_time + max_micro_step_time)  _log->warn(message_string("SCHEDULER-721", (n - micro_step_start_time).as_string()));
+                if (n >= micro_step_start_time + _max_micro_step_time)  _log->warn(message_string("SCHEDULER-721", (n - micro_step_start_time).as_string()));
             }
 
             //-------------------------------------------------------------------------------WARTEN
@@ -3913,7 +3913,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 S cmd; cmd << "gzip <" << path << " >" << gz_path;
                 try
                 {
-                    //_log->debug( scheduler_message( "SCHEDULER-848", gz_path ) );
                     copy_file( "file -b " + path, "gzip | " + gz_path ); //gzip_file( log_filename, log_filename + ".gz" );
                 }
                 catch( exception& x ) { cerr << x.what() << ", while " << cmd << "\n"; }

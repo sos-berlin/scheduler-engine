@@ -569,6 +569,18 @@ string Com_variable_set::get_string( const string& name )
     return string_from_variant( result );
 }
 
+//---------------------------------------------------------------------Com_variable_set::get_string
+
+int Com_variable_set::get_int(const string& name, int deflt) {
+    int result = deflt;
+    string s = get_string(name);
+    if (!s.empty()) 
+        try { result = as_int(s); } 
+        catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
+        catch (Xc& x) { x.insert("parameter " + name); throw; }
+    return result;
+}
+
 //-------------------------------------------------------------Com_variable_set::get_string_by_name
 
 string Com_variable_set::get_string_by_name( const string& name, bool* name_found ) const

@@ -174,6 +174,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     void                        set_var                     ( const string& name, const char* value )   { set_var( name, string( value ) ); }
     void                        get_var                     ( BSTR name, VARIANT* value ) const;
     string                      get_string                  ( const string& name );
+    int                         get_int                     ( const string& name, int deflt );
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();

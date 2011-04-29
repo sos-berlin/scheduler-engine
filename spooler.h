@@ -806,6 +806,7 @@ struct Spooler : Object,
     bool                       _has_windows_console;
     bool                       _check_memory_leak;
     Process_id                 _next_process_id;
+    Time                       _max_micro_step_time;
 };
 
 //------------------------------------------------------------------------------------Object_server 
