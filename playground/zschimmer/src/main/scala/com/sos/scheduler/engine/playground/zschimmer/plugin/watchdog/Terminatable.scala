@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 
-trait Terminatable {
+@deprecated("") trait Terminatable {
     this: Thread =>
     private var terminateReceived = false
     private var sleeping = false

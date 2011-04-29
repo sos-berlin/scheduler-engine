@@ -2,11 +2,10 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.PlugIn
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory
-import com.sos.scheduler.engine.kernel.util.Time
-import com.sos.scheduler.engine.playground.zschimmer.Rendezvous
+import com.sos.scheduler.engine.playground.zschimmer._
+import com.sos.scheduler.engine.playground.zschimmer.Threads._
+import java.lang.Math.max
 import org.apache.log4j.Logger
-import org.w3c.dom.Element
 
 /** Nicht für Produktion. Spielwiese für Scala-Rendezvous.
  * Prüft periodisch, ob der Scheduler reagiert, also ob er die große Scheduler-Schleife durchläuft und dabei einen API-Aufruf annimmt.
@@ -14,13 +13,12 @@ import org.w3c.dom.Element
  * (mit Async_operation) und das PlugIn in eimem Thread prüft, ob die Aufrufe rechtzeitig erfolgen.
  *
  */
-class WatchdogPlugIn(scheduler: Scheduler, configuration: Option[xml.Elem]) extends PlugIn {
+class WatchdogPlugIn(scheduler: Scheduler, confElemOption: Option[xml.Elem]) extends PlugIn {
     import WatchdogPlugIn._
     private val thread1 = new Thread1
     private val thread2 = new Thread2
-    private val periodMs = 5*100
-    private val timeout = Time.of(0.1)
-    private val repeatAfter = Time.of(1)
+    private val conf = Configuration(confElemOption)
+
 
     def activate() {
         thread1.start()
@@ -28,31 +26,30 @@ class WatchdogPlugIn(scheduler: Scheduler, configuration: Option[xml.Elem]) exte
     }
 
     def close() {
-        try thread1.close()
-        finally thread2.close()
+        try interruptAndJoinThread(thread1)
+        finally interruptAndJoinThread(thread2)
     }
 
     def getXmlState = "<watchdogPlugIn/>"
     
-    private class Thread1 extends Thread with Terminatable {
+    private class Thread1 extends Thread {
         override def run() {
-            untilTerminated {
-                val timer = new Timer(timeout)
-                thread2.callImpatient(true, timeout, repeatAfter) { logger.warn("Scheduler does not respond after " + timer) }
-                sleepThread(periodMs)
+            untilInterrupted {
+                val t = new Timer(conf.timeout)
+                thread2.callImpatient((), conf.timeout, conf.warnEvery) { logger.warn("Scheduler does not respond after " + t) }
+                Thread.sleep(max(0, conf.checkEvery.getMillis - t.elapsedMs))
             }
         }
     }
 
-    private class Thread2 extends Thread with Terminatable with Rendezvous[Boolean,Boolean] {
+    private class Thread2 extends Thread with Rendezvous[Unit,Unit] {
         override def run() {
             serveCalls {
-                untilTerminated {
-                    acceptCall { arg: Boolean =>
-                        val timer = new Timer(timeout)
+                untilInterrupted {
+                    acceptCall { arg: Unit =>
+                        val t = new Timer(conf.timeout)
                         scheduler.callCppAndDoNothing()
-                        if (timer.isElapsed)  logger.warn("Scheduler response time was " + timer)
-                        true
+                        if (t.isElapsed)  logger.warn("Scheduler response time was " + t)
                     }
                 }
             }
@@ -65,9 +62,6 @@ object WatchdogPlugIn {
     private val logger = Logger.getLogger(classOf[WatchdogPlugIn])
 
     def factory = new PlugInFactory {
-        def newInstance(scheduler: Scheduler, configurationOrNull: Element) = {
-            val elem = Option(configurationOrNull) map { XMLs.fromJavaDom(_).asInstanceOf[xml.Elem] }
-            new WatchdogPlugIn(scheduler, elem)
-        }
+        def newInstance(scheduler: Scheduler, conf: Option[xml.Elem]) = new WatchdogPlugIn(scheduler, conf)
     }
 }

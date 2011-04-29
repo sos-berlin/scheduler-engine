@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.playground.zschimmer
 
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernel.util.sync.{Rendezvous => JavaRendezvous}
+import java.lang.Math.max
 import scala.annotation.tailrec
 
 /** Spielwiese.
@@ -47,19 +48,21 @@ trait Rendezvous[ARG,RESULT] {
         }
 
     def callImpatientWithVariableRepeat(arg: ARG, timeout: Time)(timeoutCode: => Time): RESULT = {
+        val startTime = System.currentTimeMillis    //TODO In einem RepeatTimer auslagern
         j.asyncCall(arg)
         awaitResult(timeout) getOrElse {
             try {
-                @tailrec def f: RESULT = {
+                @tailrec def f(start: Long): RESULT = {
                     val nextTimeout = timeoutCode
-                    awaitResult(nextTimeout) match {
-                        case None => f
+                    val next = max(0, start + nextTimeout.getMillis)
+                    awaitResult(Time.ofMillis(next - System.currentTimeMillis)) match {
+                        case None => f(next)
                         case Some(o) => o
                     }
                 }
-                f
+                f(startTime + timeout.getMillis)
             }
-            finally j.awaitResult
+            finally j.awaitResult   //TODO Bei einer Exception soll der call abgebrochen werden. Das Rendezvous ist dann nicht wiederholbar.
         }
     }
 

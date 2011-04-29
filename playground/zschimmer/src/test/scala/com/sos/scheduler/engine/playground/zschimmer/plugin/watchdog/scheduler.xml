@@ -3,12 +3,18 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd"
 >
     <config>
+        <params>
+            <param name="scheduler.message.SCHEDULER-721.timeout" value="10"/>
+        </params>
+        
         <security>
             <allowed_host host="localhost" level="info"/>
         </security>
 
         <plugins>
-            <plugin java_class="com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugIn"></plugin>
+            <plugin java_class="com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog.WatchdogPlugIn">
+                <plugin.config checkEvery="1" timeout="5" warnEvery="1"/>
+            </plugin>
         </plugins>
 
         <jobs>

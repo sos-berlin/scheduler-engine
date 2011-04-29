@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
+package com.sos.scheduler.engine.playground.zschimmer
 
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
