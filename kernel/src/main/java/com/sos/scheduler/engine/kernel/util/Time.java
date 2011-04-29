@@ -35,7 +35,7 @@ public class Time {
 
     public static Time of(double seconds) { return new Time((long)(seconds * 1000000000), TimeUnit.NANOSECONDS); }
 
-    //public static Time of(Date d) { return ofMs(d.getTime()); }
+    //public static Time of(Date d) { return ofMillis(d.getTime()); }
 
-    public static Time ofMs(long value) { return new Time(value, TimeUnit.MILLISECONDS); }
+    public static Time ofMillis(long value) { return new Time(value, TimeUnit.MILLISECONDS); }
 }
