@@ -1,11 +1,13 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import java.util.ArrayList;
 import java.util.List;
 import org.w3c.dom.Element;
+import static com.sos.scheduler.engine.kernel.util.Util.stackTrace;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 //TODO Eigenes PrefixLog einführen
@@ -45,7 +47,7 @@ public class PlugInSubsystem extends AbstractHasPlatform {
             plugIns.add(p);
             log().info(p + " added");
         } catch (Exception x) {
-            log().error("Plug-in " + className + ": " + x);
+            logError(log(), "Plug-in " + className, x);
         }
     }
 
@@ -64,5 +66,10 @@ public class PlugInSubsystem extends AbstractHasPlatform {
 
     public void close() {
         for (PlugInAdapter p: plugIns)  p.tryClose();
+    }
+
+
+    public static void logError(PrefixLog log, String plugInName, Throwable t) {
+        log.error(plugInName + ": " + t + "\n" + stackTrace(t));
     }
 }

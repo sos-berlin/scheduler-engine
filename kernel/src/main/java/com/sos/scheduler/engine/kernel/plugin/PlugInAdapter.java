@@ -40,7 +40,7 @@ class PlugInAdapter implements PlugIn {
         try {
             plugIn.activate();
         } catch (Exception x) {
-            log.error(this + ": " + x);
+            logThrowable(x);
         }
     }
 
@@ -49,8 +49,13 @@ class PlugInAdapter implements PlugIn {
         try {
             plugIn.close();
         } catch (Exception x) {
-            log.error(this + ": " + x);
+            logThrowable(x);
         }
+    }
+
+
+    private void logThrowable(Throwable t) {
+        PlugInSubsystem.logError(log, toString(), t);
     }
 
 
