@@ -41,19 +41,20 @@ trait Rendezvous[ARG,RESULT] {
                 }
         }
 
-    def callImpatient(arg: ARG, timeout: Time, repeatAfter: Time = Time.eternal)(timeoutCode: => Unit): RESULT =
-        callImpatientWithVariableRepeat(arg, timeout) {
-            timeoutCode
+    def callImpatient(arg: ARG, timeout: Time, repeatAfter: Time = Time.eternal)(timeoutCode: Time => Unit): RESULT =
+        callImpatientWithVariableRepeat(arg, timeout) { t: Time =>
+            timeoutCode(t)
             repeatAfter
         }
 
-    def callImpatientWithVariableRepeat(arg: ARG, timeout: Time)(timeoutCode: => Time): RESULT = {
+    def callImpatientWithVariableRepeat(arg: ARG, timeout: Time)(timeoutCode: Time => Time): RESULT = {
         val startTime = System.currentTimeMillis    //TODO In einem RepeatTimer auslagern
         j.asyncCall(arg)
         awaitResult(timeout) getOrElse {
             try {
                 @tailrec def f(start: Long): RESULT = {
-                    val nextTimeout = timeoutCode
+                    val elapsed = Time.ofMillis(start - startTime)
+                    val nextTimeout = timeoutCode(elapsed)
                     val next = max(0, start + nextTimeout.getMillis)
                     awaitResult(Time.ofMillis(next - System.currentTimeMillis)) match {
                         case None => f(next)

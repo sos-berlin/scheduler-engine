@@ -13,13 +13,13 @@ object Configuration {
     def apply(e: Option[Elem]): Configuration = apply(e getOrElse defaultElem)
     
     def apply(e: Elem): Configuration = {
-        def confAttribute(name: String) = (e.attribute(name) getOrElse defaultElem.attribute(name).get).text
-        def timeConfAttribute(name: String) = Time.of(java.lang.Double.parseDouble(confAttribute(name)))
+        def attribute(name: String) = (e.attribute(name) getOrElse defaultElem.attribute(name).get).text
+        def timeAttribute(name: String) = Time.of(java.lang.Double.parseDouble(attribute(name)))
 
         Configuration(
-            checkEvery = timeConfAttribute("checkEvery"),
-            timeout = timeConfAttribute("timeout"),
-            warnEvery = timeConfAttribute("warnEvery")
+            checkEvery = timeAttribute("checkEvery"),
+            timeout = timeAttribute("timeout"),
+            warnEvery = timeAttribute("warnEvery")
         )
     }
 }

@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.PlugIn
 import com.sos.scheduler.engine.playground.zschimmer._
+import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.playground.zschimmer.Threads._
 import java.lang.Math.max
 import org.apache.log4j.Logger
@@ -15,9 +16,9 @@ import org.apache.log4j.Logger
  */
 class WatchdogPlugIn(scheduler: Scheduler, confElemOption: Option[xml.Elem]) extends PlugIn {
     import WatchdogPlugIn._
+    private val conf = Configuration(confElemOption)
     private val thread1 = new Thread1
     private val thread2 = new Thread2
-    private val conf = Configuration(confElemOption)
 
 
     def activate() {
@@ -31,22 +32,22 @@ class WatchdogPlugIn(scheduler: Scheduler, confElemOption: Option[xml.Elem]) ext
     }
 
     def getXmlState = "<watchdogPlugIn/>"
-    
+
+
     private class Thread1 extends Thread {
-        override def run() {
-            untilInterrupted {
-                val t = new Timer(conf.timeout)
-                thread2.callImpatient((), conf.timeout, conf.warnEvery) { logger.warn("Scheduler does not respond after " + t) }
-                Thread.sleep(max(0, conf.checkEvery.getMillis - t.elapsedMs))
+        override def run() = untilInterruptedEvery(conf.checkEvery) {
+            thread2.callImpatient((), conf.timeout, conf.warnEvery) { 
+                t => logger.warn("Scheduler does not respond after " + t)
             }
         }
     }
 
+    
     private class Thread2 extends Thread with Rendezvous[Unit,Unit] {
         override def run() {
             serveCalls {
                 untilInterrupted {
-                    acceptCall { arg: Unit =>
+                    acceptCall { arg =>
                         val t = new Timer(conf.timeout)
                         scheduler.callCppAndDoNothing()
                         if (t.isElapsed)  logger.warn("Scheduler response time was " + t)
