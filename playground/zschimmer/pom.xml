@@ -51,6 +51,7 @@
                                     </goals>
                                     <configuration>
                                         <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                        <includeScope>runtime</includeScope>
                                     </configuration>
                                 </execution>
                             </executions>
@@ -70,15 +71,11 @@
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
             <version>2.1.1-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-core</artifactId>
-            <version>5.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -89,10 +86,6 @@
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
   </project>
