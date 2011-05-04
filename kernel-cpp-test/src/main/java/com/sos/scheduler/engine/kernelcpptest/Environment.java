@@ -8,7 +8,7 @@ import static org.apache.commons.io.FileUtils.*;
 
 public class Environment {
     private static final String kernelCppDirName = "kernel-cpp";
-    private static final String moduleBase = kernelCppDir() + "/prod/" + bin() + "/" + "scheduler";
+    private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
     private static final OperatingSystemHelper os = OperatingSystemHelper.singleton;
     private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
     private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
