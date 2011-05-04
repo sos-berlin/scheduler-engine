@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "run_time"
+             title    = "Laufzeiten"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+        <xml_parent_element name="add_order"/>
+        <xml_parent_element name="order" directory="xml/answer/"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="schedule" path="path" title="Abzurufender Zeitplan">
+            <description>
+                <p>
+                    Gibt den benannten <scheduler_element name="schedule"/> an, der verwendet werden soll.
+                </p>
+                <p>
+                    Alle anderen Attribute und Kindelement werden nicht beachtet.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        
+        <xml_attribute name="start_time_function" type="name">
+            <description>
+                <p>
+                    Gibt gibt den Namen einer Funktion im Scheduler-Skript an, die die nächste Startzeit liefert.
+                </p>
+                <p>
+                    Der Scheduler übergibt der Funktion im ersten Parameter den Zeitpunkt, 
+                    ab dem sie eine Startzeit liefern soll,
+                    als Zeichenkette im Format <code>"yyyy-mm-dd HH:MM:SS"</code>.
+                </p>
+                <p>
+                    Im zweiten Parameter erhält die Funktion den Jobnamen bzw. die Auftragskennung.
+                </p>
+                <p>
+                    Rückgabe der Funktion ist ein Zeitpunkt, der nicht vor dem ersten Parameter liegen darf,
+                    oder nichts (d.h. <code>""</code> oder <code>Empty</code>).
+                    Der Scheduler erwartet als Rückgabe eine Zeichenkette im Format <code>"yyyy-mm-dd hh:mm:ss"</code>.
+                </p>
+            </description>
+
+            <!--example>
+                Das ist zu kompliziert.                
+            </example-->
+
+            <messages>
+                <message level="error" code="SCHEDULER-393"/>
+             <!--message level="error" code="SCHEDULER-395"/-->
+                <message level="warn"  code="SCHEDULER-394"/>
+            </messages>
+        </xml_attribute>
+        
+        
+        <xml_attribute name="once" type="yes_no" initial="no">
+            <description>
+                <p>
+                    Bei <code>once="yes"</code> startet der <span class="sos_name">Scheduler</span>
+                    den Job einmal nach Start des <span class="sos_name">Schedulers</span>,
+                    sobald die <code>&lt;run_time></code> dies zulässt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <!-- Die Beschreibungen für let_run, single_start, begin und end werden auch für andere Elemente (date, weekday etc.) verwendet.
+             Also den Text neutral halten! -->
+
+        <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" type="hh:mm[:ss]" initial="24:00">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="repeat" type="hh:mm[:ss] oder sekunden">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="single_start" type="hh:mm[:ss]">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="let_run" type="yes_no">
+            <description>
+                <p>
+                    Hiermit wird bestimmt, ob ein laufender Task nach Ablauf einer Periode weitere Process-Schritte ausführen soll oder nicht.
+                    Per Default führt ein Job keine weiteren Process-Schritte mit Ablauf der Periode aus und wird beendet (let_run="no").
+                    <br/><br/>
+                    Für auftragsgesteuerte Jobs gilt: 
+                    <br/>
+                    Wenn ein auftragsgesteuerter Job eine Periode definiert (z.B. 12:00 - 14:00) und während dieser Periode ein Auftrag
+                    eintrifft, wird der Auftrag ausgeführt. Nach Beendigung der Ausführung entscheidet der Wert für idle_timeout, ob die 
+                    Task gestartet bleibt und mögliche weitere Aufträge entgegennimmt. Wenn die Task gestartet bleibt und einen Auftrag 
+                    entgegennimmt, wird der Wert für let_run geprüft.
+                    <br/>
+                    let_run="yes": Der Auftrag wird ausgeführt.
+                    <br/>
+                    let_run="no": Der Auftrag wird nur ausgeführt, wenn der Startzeitpunkt innerhalb der Periode des Jobs liegt.
+                </p>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="when_holiday">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung,
+                    andernfalls ist es die Voreinstellung für die Kind-Elemente
+                    (siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="period" multiple="yes">
+            <description>
+                <p>
+                    Voreinstellung der Perioden für die Elemente
+                    <code>&lt;date></code>,
+                    <code>&lt;weekdays></code>,
+                    <code>&lt;monthdays></code> und
+                    <code>&lt;ultimos></code>.
+                    Diese Elemente können weitere Perioden hinzufügen.
+                    Wenn keines dieser Elemente angegeben ist, gelten die Perioden für jeden Tag.
+                    (Siehe oben <a href="#defaults">Verkürzte Schreibweise</a>).
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="at" multiple="yes"/>
+
+        <xml_child_element name="date" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="weekdays">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="month">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="monthdays">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="ultimos">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="holidays">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+
+
+    <description>
+        <p>
+            <code>&lt;run_time></code> gibt an, zu welchen Zeiten der Scheduler Tasks dieses Jobs laufen lässt.
+            Das wird realisiert durch Perioden (s. <scheduler_element name="period"/>).
+            Der Scheduler wählt die erste Periode aus, die zu einer Zeit gilt (deren Ende noch nicht abgelaufen ist).
+            Diese Periode gilt bis zu ihrem Ende. Dann wählt der Scheduler erneut eine Periode aus.
+        </p>
+        <p>
+            Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.
+        </p>
+        <p>
+            <scheduler_element name="show_calendar"/> zeigt das Ergebnis.
+        </p>
+
+
+        <h3>Sommer- und Winterzeit</h3>
+        <p>
+            Der Scheduler berücksichtigt die Zeitumstellung zu Beginn und Ende der Sommerzeit.
+            Es gilt stets die lokale Zeit.
+        </p>
+        <p>
+            Ein Job, der eine Startzeit zwischen 2 und 3 Uhr hat, kann zum Ende
+            der Sommerzeit zweimal gestartet werden.
+        </p>
+
+        
+        <h3>
+            <a name="defaults"/>
+            Verkürzte Schreibweise mit &lt;period> und den Attributen begin=, end=, repeat=, let_run=, single_start= und when_holiday=
+        </h3>
+        <p>
+            <scheduler_element name="period"/> innerhalb von <code>&lt;run_time></code> werden verwendet für
+            die Elemente
+            <scheduler_element name="date"/>,
+            <scheduler_element name="weekdays"/>,
+            <scheduler_element name="monthdays"/> und
+            <scheduler_element name="ultimos"/>,
+            wenn diese keine eigenen <scheduler_element name="period"/> haben.
+            Ausgenommen ist also <scheduler_element name="month"/>.
+        </p>
+        <pre>&lt;run_time>
+    &lt;period begin="07:00" end="09:00"/>
+    &lt;monthdays>
+        &lt;day day="1"/>
+        &lt;day day="2">
+            &lt;period begin="22:00" end="23:00"/>
+        &lt;/day>
+    &lt;/monthdays>
+&lt;/run_time></pre>
+        <p>wird zu</p>
+        <pre>&lt;run_time>
+    &lt;monthdays>
+        &lt;day day="1">
+            &lt;period begin="07:00" end="09:00"/>
+        &lt;/day>
+        &lt;day day="2">
+            &lt;period begin="22:00" end="23:00"/>
+        &lt;/day>
+    &lt;/monthdays>
+&lt;/run_time></pre>
+        <p>
+            Wenn dagegen keins der Elemente
+            <scheduler_element name="date"/>,
+            <scheduler_element name="weekdays"/>,
+            <scheduler_element name="monthdays"/> und
+            <scheduler_element name="ultimos"/>
+            aufgeführt ist,
+            gelten die <scheduler_element name="period"/> für jeden Tag der Woche.
+        </p>
+        <p>
+            Die Attribute
+            <code>begin=</code>,
+            <code>end=</code>,
+            <code>repeat=</code>,
+            <code>let_run=</code> und
+            <code>single_start=</code>
+            wirken, wenn kein <scheduler_element name="period"/> angegeben ist,
+            und lassen den Scheduler eins mit denselben Attributen erzeugen.
+        </p>
+        <pre>&lt;run_time begin="07:00" end="09:00"/></pre>
+        <p>wird zu</p>
+        <pre>&lt;run_time>
+    &lt;period begin="07:00" end="09:00"/>
+&lt;run_time></pre>
+    </description>
+
+    <example>
+        <pre>&lt;run_time/></pre>
+
+            ist, wegen der Voreinstellungen für <code>begin=</code> und <code>end=</code>, dasselbe wie
+
+        <pre>&lt;run_time begin="00:00" end="24:00"/></pre>
+
+            ist, weil <code>&lt;run_time></code> leer ist, dasselbe wie
+
+        <pre>&lt;run_time>
+    &lt;period begin="00:00" end="24:00"/>
+&lt;/run_time></pre>
+
+            also eine Periode für jeden Tag rund um die Uhr.
+            Der Job kann immer laufen.
+    </example>
+
+</xml_element>

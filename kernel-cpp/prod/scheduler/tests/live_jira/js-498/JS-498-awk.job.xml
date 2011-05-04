@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob2 (awk)"
+     order="no">
+    <description>
+        <![CDATA[
+        <h2>running a awk script (<a href="http://jawk.sourceforge.net/">http://jawk.sourceforge.net/</a>)</h2>
+        <p>
+        This job provides a awk sample for the javax.script API.
+        </p>
+        ]]>
+    </description>
+    <script language="javax.script:javascript">
+        <![CDATA[
+	logger.info("the AWK snippet below will be executed, but the process does not come back out of the AWK-jar.");
+        ]]>
+    </script>
+<!--     
+    <script language="javax.script:awk">
+        <![CDATA[
+BEGIN {
+	printf("hello world");
+}
+        ]]>
+    </script>
+-->    
+    <run_time/>
+</job>

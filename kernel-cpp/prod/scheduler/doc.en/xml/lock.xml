@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: web_service.xml 4858 2007-02-19 17:32:03Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--         title    = "Deklaration einer Sperre"-->
+
+<xml_element name     = "lock"
+             title    = "Lock Declaration"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-02-19 18:32:03 +0100 (Mo, 19 Feb 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="locks"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="name" type="name" title="The lock name">
+    <!--<xml_attribute name="name" type="name" title="Name der Sperre">-->
+            <description>
+                <p>
+                    <!--See also <scheduler_method class="Lock" property="name"/>.AA-->
+                <!--Siehe auch <scheduler_method class="Lock" property="name"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="max_non_exclusive" type="integer" title="Restricting Non-Exclusive Use">
+    <!--<xml_attribute name="max_non_exclusive" type="integer" title="Begrenzung der nicht-exklusiven Belegungen">-->
+            <description>
+                <p>
+                   The default setting is unlimited - 
+                    which means that with
+                    <scheduler_element name="lock.use" attribute="exclusive" value="no"/> 
+                    an unlimited number of non-exclusive tasks can be started
+                    (but only one exclusive).
+                <!--Die Voreinstellung ist unbegrenzt, 
+                    es können also mit 
+                    <scheduler_element name="lock.use" attribute="exclusive" value="no"/> 
+                    beliebig viele nicht-exklusive Tasks gestartet werden
+                    (aber nur eine exklusive).-->
+                </p>
+                <p>
+                    <!--See also <scheduler_method class="Lock" property="max_non_exclusive"/>.AA-->
+                <!--Siehe auch <scheduler_method class="Lock" property="max_non_exclusive"/>.-->
+                </p>
+            </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-887"/>
+                <!--message code="SCHEDULER-854" level="error"/   sollte nie auftreten -->
+            </messages>
+        </xml_attribute>
+
+
+    </xml_attributes>
+
+
+    
+    <behavior_with_xml_element element="base" complete="yes"/>
+    
+    
+    
+    <description>
+        <p>
+            A lock can stop two tasks from running at the same time.
+        <!--Mit einer Sperre kann verhindert werden, dass zwei Tasks gleichzeitig laufen.-->
+        </p>
+        <p>
+            <!--See <scheduler_a href="../lock.xml" quote="yes"/>.-->
+        <!--Siehe <scheduler_a href="../lock.xml" quote="yes"/>.-->
+        </p>
+        <!--p>
+            Das ist ein Read-Write-Lock,
+            s. <a href="http://de.wikipedia.org/wiki/Lock">Wikipedia</a>
+            und die Java-Klasse
+            <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/locks/ReadWriteLock.html">java.util.concurrent.ReadWriteLock</a>,
+            mit zusätzlicher Begrenzung der Anzahl Leser.
+        </p-->
+        <p>
+            See <scheduler_element name="lock.use"/> for information about the use of locks.
+        <!--Zur Verwendung einer Sperre siehe <scheduler_element name="lock.use"/>-->
+        </p>
+        <p>
+            See also <scheduler_element name="lock.remove"/> <!--and AA-->
+        <!--Siehe auch <scheduler_element name="lock.remove"/>,-->
+            <!--<scheduler_method class="Lock"/>.AA-->
+        </p>
+    </description>
+    
+    <example>
+        <pre>&lt;locks>
+    &lt;lock name="switching_database"/>
+    &lt;lock name="only_three_tasks" max_non_exclusive="3"/>
+&lt;/locks></pre>
+    </example>
+</xml_element>

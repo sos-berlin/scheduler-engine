@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob (javascript)"
+     order="yes">
+    <script language="javascript">
+        <![CDATA[
+function spooler_process() {
+	spooler_log.info( "spooler_process wurde JETZT gerufen aus " + spooler_job.name() );
+	return true;
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>

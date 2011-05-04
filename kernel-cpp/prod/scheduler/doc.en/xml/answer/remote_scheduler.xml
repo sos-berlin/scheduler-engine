@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: remote_scheduler.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name          = "remote_scheduler" 
+             title         = "A Registrierted Job Scheduler"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "remote_schedulers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-01-31 12:42:37 +0100 (Di, 31 Jan 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="remote_schedulers"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="ip" type="ip_address" title="Job Scheduler IP address">
+    <!--<xml_attribute name="ip" type="ip_address" title="IP-Adresse des Schedulers">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="hostname" type="hostname" title="Name of the Job Scheduler IP address">
+    <!--<xml_attribute name="hostname" type="hostname" title="Name der IP-Adresse des Schedulers">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="tcp_port" type="number" title="">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="scheduler_id" type="name" title="Job Scheduler identifier (-id=)">
+    <!--<xml_attribute name="scheduler_id" type="name" title="Kennung des Schedulers (-id=)">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="version" title="Scheduler version number">
+    <!--<xml_attribute name="version" title="Versionsnummer des Schedulers">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="connected" type="yes|no" title="No, when the Job Scheduler is no longer connected">
+    <!--<xml_attribute name="connected" type="yes|no" title="no, wenn der Scheduler nicht mehr angebunden ist">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="connected_at" type="yyyy-mm-dd hh:mm:ss" title="Time of connection">
+    <!--<xml_attribute name="connected_at" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt der Anmeldung">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="disconnected_at" type="yyyy-mm-dd hh:mm:ss" title="Time of disconnection">
+    <!--<xml_attribute name="disconnected_at" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt der Abmeldung">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+    
+    <description>
+        <p>
+            <code>&lt;show_state what="remote_scheduler"/></code>
+        <!--<code>&lt;show_state what="remote_schedulers"/></code>-->
+        </p>
+    </description>
+    
+</xml_element>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+
+<!-- 
+Ergebniss: am 20.9. 15:08 
+
+Nach Scheduler-Start: never
+Nach Start Order: 
+
+Korrigierte Version => Zunächst 21.9 13:53, nach Dateiänderung: never
+1.3.8 - Version => Zunächst 21.9 13:53, nach Dateiänderung: 21.9. 12:00
+
+-->
+
+<order>
+    <run_time let_run="no"
+              begin="08:00"
+              end="18:00">
+        <period single_start="13:56"/>
+
+
+        <date date="2010-09-20">
+            <period single_start="14:55"/>
+        </date>
+
+
+        <date date="2010-09-21">
+            <period begin="12:00"
+                    end="13:00"/>
+        </date>
+
+
+        <weekdays>
+            <day day="1">
+                <period single_start="13:54"/>
+            </day>
+        </weekdays>
+
+
+        <monthdays>
+            <day day="21">
+                <period single_start="13:53"/>
+            </day>
+
+            <weekday day="monday"
+                     which="3">
+                <period repeat="14:56"
+                        begin="00:00"
+                        end="00:00"/>
+            </weekday>
+        </monthdays>
+    </run_time>
+</order>

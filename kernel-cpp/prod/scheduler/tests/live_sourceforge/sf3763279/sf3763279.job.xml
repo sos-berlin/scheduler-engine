@@ -1,0 +1,27 @@
+<job name="sf3763279"
+     title="job chain stops all orders on one order error"
+     order="yes"
+     visible="yes"
+     stop_on_error="no"
+     tasks="4"
+>
+  <params>
+    <param name="PARM" value="myParam"/>
+  </params>
+  <script language="shell">
+  	<![CDATA[
+@echo off
+@echo PARM==%SCHEDULER_PARAM_PARM% > sf3763279.txt
+if "%SCHEDULER_PARAM_PARM%"=="error" goto error
+goto end
+
+:error
+@echo job ende with error 99 >> sf3763279.txt
+exit 99
+
+:end
+@echo job ends normal >> sf3763279.txt
+  	]]>
+  </script>
+  <run_time/>
+ </job> 

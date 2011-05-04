@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class max_processes="10"/>
+        </process_classes>
+        
+
+        <script language="JavaScript">
+            <![CDATA[
+
+var locks = spooler.locks;
+var lock = locks.create_lock();
+lock.name = "Island";
+lock.max_non_exclusive = 10;
+spooler_log.info( "lock.name=" + lock.name );
+spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive );
+locks.add_lock( lock );
+
+            ]]>
+        </script>
+
+        
+        <commands>
+            <lock name="Kirgisien"/>
+            <!--start_job job="A"/>
+            <start_job job="B"/>
+            <start_job job="C"/>
+            <start_job job="D"/>
+            <start_job job="E"/>
+            <start_job job="java"/-->
+        </commands>
+    </config>
+</spooler>

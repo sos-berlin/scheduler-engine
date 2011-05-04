@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: copy_params.xml 4336 2006-06-06 18:03:24Z jz $-->
+
+<xml_element name     = "copy_params"
+             title    = "Passing Parameters"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-12-04 09:06:32 +0100 (Mo, 04 Dez 2006) $">
+
+    <description>
+        <p>
+            The element hands over the parameters from a task or order.
+            This can be used in <scheduler_element name="start_job"/> and <scheduler_element name="add_order"/>
+            according to the following hierarchy:
+        <!--Das Element übernimmt die Parameter der Task oder des Auftrags.
+            Es kann in <scheduler_element name="start_job"/> und <scheduler_element name="add_order"/>
+            in folgender Hierarchie verwendet werden:-->
+        </p>
+        
+        <!--pre>&lt;<a href="job.xml">job</a> name="…">
+    …      
+    &lt;<a href="commands.xml">commands</a> on_exit_code="…">
+        &lt;<a href="start_job">start_job</a> job="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;copy_params from="task"/>
+                &lt;copy_params from="order"/>
+            &lt;/params>
+        &lt;/start_job>
+        &lt;<a href="start_job">add_order</a> job_chain="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;copy_params from="task"/>
+                &lt;copy_params from="order"/>
+            &lt;/params>
+        &lt;/add_order>
+    &lt;commands>
+&lt;job></pre-->
+        
+        <pre><scheduler_element name="job"/> …
+  <scheduler_element name="commands" attribute="on_exit_value"/> …
+    <scheduler_element name="start_job"/>&#160; or &#160;<scheduler_element name="add_order"/> …
+<!--<scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …-->
+       <scheduler_element name="params"/> …
+          <scheduler_element name="copy_params" attribute="from" value="order"/></pre>
+        <p>
+            Should the same parameter name occur twice then the parameter value will be set 
+            according to the order in which the parameters with
+            <code>&lt;copy_params></code> and <scheduler_element name="param"/> are specified.
+            When the same parameter name occurs more than once, the last value will be used (
+            any subsequent parameter overrides the value of a predecessor having the same name).
+        <!--Bei doppelten Parameternamen entscheidet
+            die Reihenfolge von <code>&lt;copy_params></code> und <scheduler_element name="param"/>,
+            welcher Parameterwert verwendet wird.
+            Ein nachfolgender Parameter überschreibt einen vorangehenden mit gleichen Namen.-->
+        </p>
+    </description>
+
+    <xml_parent_elements>
+        <xml_parent_element name="params">
+        </xml_parent_element>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="from" title="Parameter Sources">
+    <!--<xml_attribute name="from" title="Quelle der Parameter">-->
+            <description>
+                <dl>
+                    <dt><code>from="task"</code></dt>
+                    <dd>
+                        Task parameters (<scheduler_method class="Task" property="params"/>) will be handed over.
+                    <!--Die Parameter der Task (<scheduler_method class="Task" property="params"/>) werden übernommen.-->
+                    </dd>
+                    <dt><code>from="order"</code></dt>
+                    <dd>
+                        <p>
+                            The parameters of the last order executed
+                            (<scheduler_method class="Order" object="spooler_task.order" property="params"/>)
+                            will be handed over.
+                            Note that the order parameters are available after a task has been carried out when:
+                        <!--Die Parameter des zuletzt ausgeführten Auftrags
+                            (<scheduler_method class="Order" object="spooler_task.order" property="params"/>)
+                            werden übernommen.
+                            Der Auftrag steht am Ende der Task nur zur Verfügung, wenn-->
+                        </p>
+                        <ul>
+                            <li>
+                                the job has been implemented with <scheduler_element name="process"/> or
+                                <scheduler_element name="script" attribute="language" value="shell"/>;
+                            <!--der Job mit <scheduler_element name="process"/> oder
+                                <scheduler_element name="script" attribute="language" value="shell"/> implementiert ist,-->
+                            </li>
+                            <li>
+                                the <scheduler_method class="Task" method="end"/> method has been called or
+                            <!--während der Ausführung <scheduler_method class="Task" method="end"/> aufgerufen worden ist oder-->
+                            </li>
+                            <li>
+                                an error has occurred during the execution.
+                            <!--während der Ausführung ein Fehler aufgetreten ist.-->
+                            </li>
+                        </ul>
+                        <p>
+                            An error (<scheduler_message code="SCHEDULER-329"/>)
+                            occurs when the job is not order driven
+                            (<scheduler_element name="job" attribute="order" value="no"/>).
+                        <!--Es ist ein Fehler (<scheduler_message code="SCHEDULER-329"/>),
+                            wenn der Job nicht auftragsgesteuert ist (<scheduler_element name="job" attribute="order" value="no"/>).-->
+                        </p>
+                        <!--p>
+                            wenn eine Task ohne Auftrag gestartet
+                            (z.B. automatisch durch <scheduler_element name="job" attribute="min_tasks" value="1"/>)
+                            und beendet wird, ohne einen Auftrag ausgeführt zu haben.
+                            Damit ist bei
+                            <scheduler_element name="job"/><scheduler_element name="commands" attribute="on_exit_code" value="0"/>
+                            zu rechnen.
+                        </p-->
+                        <!--pre><scheduler_element name="job" attribute="order" value="yes"/> …
+  <scheduler_element name="commands" attribute="on_exit_value" value="0"/> …
+    <scheduler_element name="start_job"/>&#160; oder &#160;<scheduler_element name="add_order"/> …
+      <scheduler_element name="params"/> …
+        <scheduler_element name="copy_params" attribute="from" value="order"/>
+            &lt;!- - Das kann zum Fehler <scheduler_message code="SCHEDULER-329"/> führen. - -></pre-->
+                    </dd>
+                </dl>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-329"/>
+            </messages>
+        </xml_attribute>
+    </xml_attributes>
+
+</xml_element>

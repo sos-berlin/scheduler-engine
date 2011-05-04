@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order title="order js538-2"
+       job_chain="js538"
+       state="300"
+       id="js538-2">
+    <run_time let_run="no">
+        <period absolute_repeat="00:00:15"
+                begin="00:00"
+                end="23:59"/>
+    </run_time>
+</order>

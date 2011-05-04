@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: event.xml 4598 2006-11-22 10:06:24Z jz $-->
+
+<xml_element name          = "period"
+             title         = "Periode"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-11-22 11:06:24 +0100 (Mi, 22 Nov 2006) $"
+>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="calendar"/>
+    </xml_parent_elements>
+
+    
+    <xml_attributes>
+        <xml_attribute name="begin" type="yyyy-mm-ddThh:mm:ss">
+            <description>
+                <p>
+                    Beginn der Periode, siehe <scheduler_element name="period" attribute="begin"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" type="yyyy-mm-ddThh:mm:ss">
+            <description>
+                <p>
+                    Ende der Periode, siehe <scheduler_element name="period" attribute="end"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="repeat" type="seconds">
+            <description>
+                <p>
+                    Wiederholungsintervall, siehe <scheduler_element name="period" attribute="repeat"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="let_run" type="yes_no">
+            <description>
+                <p>
+                    Ende der Periode soll Lauf beenden, siehe <scheduler_element name="period" attribute="let_run"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="job"       same_as_element="at"/>
+        <xml_attribute name="job_chain" same_as_element="at"/>
+        <xml_attribute name="order"     same_as_element="at"/>
+    </xml_attributes>
+
+    
+    <!--description>
+        <p>
+        </p>
+    </description-->
+
+</xml_element>

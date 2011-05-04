@@ -1,0 +1,907 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Spooler.xml 3945 2005-09-26 07:56:50Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Spooler"
+    object_name = "spooler"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-05-08 12:23:19 +0200 (Do, 08 Mai 2008) $"
+>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="abort_immediately">
+    <com/>
+
+    <title>
+        Aborts the Job Scheduler immediately
+    <!--Bricht den Scheduler augenblicklich ab-->
+    </title>
+  
+    <description>
+        <p>
+            Stops the Job Scheduler immediately.
+            Jobs do not have the possibility of reacting.
+        <!--Bricht den Scheduler augenblicklich ab.
+            Kein Job hat Gelegenheit, darauf zu reagieren.-->
+        </p>
+        <p>
+            The Job Scheduler kills all tasks and the processes that were started using the 
+            <scheduler_method class="Task" method="create_subprocess"/> method. 
+            The Job Scheduler also kills processes for which a process ID has been stored using the 
+            <scheduler_method class="Task" method="add_pid"/> method.
+        <!--Der Scheduler bricht zuvor alle gestarteten Prozesse ab.
+            Das sind die Tasks und die Prozesse von <scheduler_method class="Task" method="create_subprocess"/>
+            und <scheduler_method class="Task" method="add_pid"/>.-->
+        </p>
+        <p>
+            See <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately"/>
+            and <a href="../termination.xml">Terminating the Job Scheduler</a>.
+        <!--Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="abort_immediately_and_restart">
+    <com/>
+
+    <title>
+        Aborts the Job Scheduler immediately and then restarts it.
+    <!--Bricht den Scheduler augenblicklich ab und startet ihn neu.-->
+    </title>
+
+    <description>
+        <p>
+            Similar to the <scheduler_method class="Spooler" method="abort_immediately"/> method,
+            only that the Job Scheduler restarts itself after aborting.
+            It reuses the command line parameters to do this.
+        <!--Wie <scheduler_method class="Spooler" method="abort_immediately"/>,
+            nur dass der Scheduler sich erneut startet.
+            Dabei verwendet er die Kommandozeilenparameter wieder.-->
+        </p>
+        <p>
+            See <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately_and_restart"/>
+            and <a href="../termination.xml">Terminating the Job Scheduler</a>.
+        <!--Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="add_job_chain">
+    <com>
+        <com.parameter>
+            <com.type class="Job_chain"/>
+        </com.parameter>
+    </com>
+
+    <description>
+        <p>
+            <scheduler_method class="Job_chain" property="orders_recoverable"/><code>=true</code>
+            causes the Job Scheduler to load the orders for a job chain from the database.
+        <!--Bei <scheduler_method class="Job_chain" property="orders_recoverable"/><code>=true</code>
+            lädt der Scheduler die Aufträge der Jobkette aus der Datenbank.-->
+        </p>
+        <p>
+            See <scheduler_method class="Spooler" method="create_job_chain"/>.
+            and <scheduler_element name="job_chain"/>.
+        <!--Siehe <scheduler_method class="Spooler" method="create_job_chain"/>.
+            und <scheduler_element name="job_chain"/>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="configuration_directory" access="read" setting="configuration_directory">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         Path of the Configuration Directory with hot folders
+     <!--Pfad des Konfigurationsverzeichnisses-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="create_job_chain">
+    <com>
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            Returns a new <scheduler_method class="Job_chain"/> object.
+            This job chain can be added to the Job Scheduler using
+            <scheduler_method class="Spooler" method="add_job_chain"/>
+            after it has been filled with jobs.
+        <!--Liefert eine neue <scheduler_method class="Job_chain"/>.
+            Diese Jobkette kann, nachdem sie mit Jobs gefüllt worden ist,
+            mit <scheduler_method class="Spooler" method="add_job_chain"/>
+            dem Scheduler hinzugefügt werden-->
+        </p>
+        <p>
+            See <scheduler_element name="job_chain"/>.
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="create_order">
+    <com>
+        <com.result>
+            <com.type class="Order"/>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            Creates a new order.
+            This order can be assigned to a job chain using the 
+            <scheduler_method class="Job_chain" method="add_order"/>
+            method.
+        <!--Erzeugt einen neuen Auftrag.
+            Dieser Auftrag kann mit <scheduler_method class="Job_chain" method="add_order"/>
+            einer Jobkette übergeben werden.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="create_variable_set">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="create_xslt_stylesheet">
+    <com>
+        <com.parameter name="xml" optional="true">
+            <com.type type="BSTR"/>
+
+            <description>
+                Creates an XSLT style sheet as an XML string.
+            <!--XSLT-Stylesheet als XML-String-->
+            </description>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Xslt_stylesheet"/>
+        </com.result>
+    </com>
+
+    <java>
+        <java.result>
+            <com.type class="Xslt_stylesheet"/>
+        </java.result>
+    </java>
+
+    <java>
+        <java.parameter name="path">
+            <java.type type="java.io.path"/>
+        </java.parameter>
+
+        <java.result>
+            <com.type class="Xslt_stylesheet"/>
+        </java.result>
+    </java>
+
+    <java>
+        <java.parameter name="path">
+            <com.type type="BSTR"/>
+        </java.parameter>
+
+        <java.result>
+            <com.type class="Xslt_stylesheet"/>
+        </java.result>
+    </java>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_name" access="read" setting="db">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The database path
+    <!--Hostware-Pfad der Datenbank-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_history_table_name" access="read" setting="db_history_table">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         The name of the database table used for the job history
+     <!--Name der Datenbanktabelle für die Historie-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_order_history_table_name" access="read" setting="db_order_history_table">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         The name of the order history database table
+     <!--Name der Datenbanktabelle für die Auftragshistorie-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_orders_table_name" access="read" setting="db_orders_table">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The name of the database table used for orders
+    <!--Name der Datenbanktabelle für die Aufträge-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_tasks_table_name" access="read" setting="db_tasks_table">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The name of the task database table
+    <!--Name der Datenbanktabelle für die Tasks-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="db_variables_table_name" access="read" setting="db_variables_table">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The name of the database table used by the Job Scheduler for internal variables
+    <!--Name der Datenbanktabelle für interne Variablen des Schedulers-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="directory" access="read" setting="directory">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+            <description>
+                <p>
+                    The directory ends on Unix with "<code>/</code>" and on Windows with "<code>\</code>".
+                <!--Der Pfad endet unter Unix mit "<code>/</code>" und unter Windows mit "<code>\</code>".-->
+                </p>
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        The working directory of the Job Scheduler on starting
+    <!--Das Arbeitsverzeichnis beim Start des Schedulers-->
+    </title>
+
+    <description>
+        <p>
+            A task executed on a remote Job Scheduler 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            returns the value for the remote Scheduler.
+        <!--Eine auf einem entfernten Scheduler ausgeführte Task 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="execute_xml">
+    <com>
+        <com.parameter name="xml">
+            <com.type type="BSTR"/>
+            <description>
+                <p>
+                    See <a href="../xml_commands.xml">XML Commands</a>.
+                <!--Siehe <a href="../xml_commands.xml">XML-Kommandos</a>.-->
+                </p>
+            </description>
+        </com.parameter>
+
+        <com.result name="xml_result">
+            <com.type type="BSTR"/>
+            <description>
+                <p>
+                    Returns the answer to a command in XML format.
+                <!--Liefert die XML-Antwort des ausgeführten Kommandos.-->
+                </p>
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Carries out XML commands
+    <!--Führt ein XML-Kommando aus-->
+    </title>
+
+    <description>
+        <p>
+            Errors are returned as XML <scheduler_element name="ERROR" directory="xml/answer/"/> replies.
+        <!--Fehler werden als XML-Antwort <scheduler_element name="ERROR" directory="xml/answer/"/> geliefert.-->
+        </p>
+    </description>
+
+    <example programming_language="javascript">
+    <pre>spooler_log.info( spooler.execute_xml( "&lt;show_state/>" ) );</pre>
+    </example>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="hostname" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The name of the computer on which the Job Scheduler is running.
+    <!--Name des Rechners, auf dem der Scheduler läuft.-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="id" access="read" setting="option_id">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The value of the command line <code>-id=</code> setting
+    <!--Wert der Kommandozeilenoption <code>-id=</code>-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="include_path" access="read" setting="include_path">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        Returns the command line setting <code>-include-path=</code>.
+    <!--Liefert die Kommandozeilenoption <code>-include-path=</code>.-->
+    </title>
+
+    <description>
+        <p>
+            A task executed on a remote Job Scheduler 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            returns the value for the remote Scheduler.
+        <!--Eine auf einem entfernten Scheduler ausgeführte Task 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="ini_path" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+         The value of the <code>-ini=</code> option (the name of the <code>factory.ini</code> file)
+     <!--Wert der Option <code>-ini=</code> (Dateiname der <code>factory.ini</code>)-->
+    </title>
+
+    <description>
+        <p>
+            A task executed on a remote Job Scheduler 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            returns the value for the remote Scheduler.
+        <!--Eine auf einem entfernten Scheduler ausgeführte Task 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.-->
+        </p>
+        <p>
+            See <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>
+        <!--Siehe <scheduler_option name="ini"/>, <a href="../factory_ini.xml"><code>factory.ini</code></a>-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="is_service" access="read">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+            <description>
+                is true, when the Job Scheduler is running as a service (on Windows) or as a daemon (on Unix).
+            <!--true, genau dann wenn der Scheduler als Dienst (in Windows) oder als Daemon (in Unix) läuft.-->
+            </description>
+        </com.result>
+    </com>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="job" access="read">
+    <com>
+        <com.parameter name="job_name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Job"/>
+        </com.result>
+    </com>
+    
+    <title>
+        Returns a job
+    <!--Liefert einen Job-->
+    </title>
+    
+    <description>
+        An exception is returned should the job name not be known.
+    <!--Wenn der Jobname nicht bekannt ist, wird eine Exception geliefert.-->
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="job_chain" access="read">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+    </com>
+    
+    <title>
+        Returns a job chain
+    <!--Liefert eine Jobkette-->
+    </title>
+    
+    <description>
+        Should the name of the job chain not be known, then the Job Scheduler returns an exception.
+    <!--Wenn der Name der Jobkette nicht bekannt ist, wird eine Exception geliefert.-->
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="job_chain_exists">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="locks" access="read">
+    <com>
+        <com.result>
+            <com.type class="Locks"/>
+        </com.result>
+    </com>
+
+    <title>Returns the locks</title>
+<!--<title>Liefert die Locks</title>-->
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="log" access="read">
+    <com>
+        <com.result>
+            <com.type class="Log"/>
+        </com.result>
+    </com>
+
+    <title>
+        The main log
+    <!--Das Hauptprotokoll-->
+    </title>
+
+    <description>
+        <p>
+            <scheduler_method class="Job_impl" method="spooler_log"/> is usually used for this property.
+        <!--Normalerweise wird man <scheduler_method class="Job_impl" method="spooler_log"/> verwenden.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="log_dir" access="read" setting="log_dir">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            A task executed on a remote Job Scheduler 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            returns the value for the remote Scheduler.
+        <!--Eine auf einem entfernten Scheduler ausgeführte Task 
+            (<scheduler_element name="process_class" attribute="remote_scheduler"/>)
+            liefert den Wert des entfernten Schedulers.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="param" access="read" setting="param">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The command line option <code>-param=</code>
+    <!--Kommandozeilenoption <code>-param=</code>-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="process_classes" access="read">
+    <com>
+        <com.result>
+            <com.type class="Process_classes"/>
+        </com.result>
+    </com>
+
+    <title>Returns the process classes</title>
+<!--<title>Liefert die Prozessklassen</title>-->
+</property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="schedule" access="read">
+        <com>
+            <com.parameter name="path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+            
+            <com.result>
+                <com.type class="Schedule"/>
+            </com.result>
+        </com>
+
+        <title>Returns the <scheduler_method class="Schedule"/> with the name specified or <api.null/></title>
+    <!--<title>Liefert den benannten <scheduler_method class="Schedule"/> oder <api.null/></title>-->
+    </property>
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="supervisor_client" access="read">
+        <com>
+            <com.result>
+                <com.type class="Supervisor_client"/>
+            </com.result>
+        </com>
+
+        <!-- <title>Liefert den Supervisor_client</title>-->
+        <title>Returns the Supervisor_client</title>
+
+        <messages>
+            <message level="error" code="SCHEDULER-423"/>
+        </messages>
+    </property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="terminate">
+    <title>
+        The proper ending of the Job Scheduler and all related tasks
+    <!--Scheduler mit allen Tasks ordentlich beenden-->
+    </title>
+
+    <com>
+        <com.parameter name="timeout" optional="true">
+            <com.type type="int"/>
+
+            <description>
+                The time in seconds which the Job Scheduler allows for a task to end. 
+                After this time the Job Scheduler stops all processes before stopping itself.
+                If this parameter is not set then the Job Scheduler will wait on tasks indefinitely.
+            <!--Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
+                und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.
+                Ohne diesen Parameter wartet der Scheduler endlos auf die Tasks.-->
+            </description>
+        </com.parameter>
+
+        <com.parameter name="restart" optional="true">
+            <com.type type="bool"/>
+
+            <description>
+                <code>restart=true</code> allows the Job Scheduler to restart after ending.
+            <!--<code>restart=true</code> lässt den Scheduler nach Beendigung neu starten.-->
+            </description>
+        </com.parameter>
+
+        <com.parameter name="all_schedulers" optional="true">
+            <com.type type="boolean"/>
+
+            <description>
+                <code>all_schedulers=true</code> ends all the Job Schedulers belonging to a cluster 
+                (see <scheduler_option name="exclusive"/>).
+                This may take a minute.
+            <!--<code>all_schedulers=true</code> beendet alle Scheduler im Cluster 
+                (s. <scheduler_option name="exclusive"/>)
+                Das kann eine Minute dauern.-->
+            </description>
+        </com.parameter>
+
+        <com.parameter name="continue_exclusive_operation" optional="true">
+            <com.type type="boolean"/>
+
+            <description>
+                <code>continue_exclusive_operation=true</code>
+                causes another Job Scheduler in the Cluster to take become active
+                (see <scheduler_option name="exclusive"/>).
+            <!--<code>continue_exclusive_operation=true</code>
+                lässt einen anderen Scheuler im Cluster
+                (s. <scheduler_option name="exclusive"/>)
+                den Betrieb fortsetzen.-->
+            </description>
+        </com.parameter>
+    </com>
+
+    <description>
+        <p>
+            Ends all tasks
+            (by calling the <scheduler_method class="Job_impl" method="spooler_close"/>) method
+            and terminates the Job Scheduler.
+        <!--Beendet alle Tasks
+            (durch Aufruf von <scheduler_method class="Job_impl" method="spooler_close"/>)
+            und schließlich sich selbst.-->
+        </p>
+        <p>
+            Should a time limit be specified, then the Job Scheduler ends all processes still running after this limit has expired.
+            (Typical processes are tasks which have remained too long in a method call such as
+            <scheduler_method class="Job_impl" method="spooler_process"/>.)
+        <!--Wenn eine Frist angegeben ist, bricht der Scheduler nach Ablauf alle noch laufenden Prozesse ab
+            (das sind Tasks, die zulange in einem Aufruf wie <scheduler_method class="Job_impl" method="spooler_process"/> verharren).-->
+        </p>
+        <p>
+            See <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>
+            and <a href="../termination.xml">Terminating the Job Scheduler</a>.
+        <!--Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="terminate_and_restart">
+    <title>
+        Correctly terminates the Job Scheduler and all tasks before restarting
+    <!--Scheduler mit allen Tasks ordentlich beenden und erneut starten-->
+    </title>
+
+    <com>
+        <com.parameter name="timeout" optional="true">
+            <com.type type="int"/>
+
+            <description>
+                The time in seconds which the Job Scheduler allows for a task to end. 
+                After this time the Job Scheduler stops all processes before stopping itself.
+                If this parameter is not set then the Job Scheduler will wait on tasks indefinitely.
+            <!--Frist in Sekunden, die der Scheduler auf die Beendigung der Tasks wartet
+                und nach der der Scheduler alle Prozesse abbricht, um sich schließlich selbst zu beenden.
+                Ohne diesen Parameter wartet der Scheduler endlos auf die Tasks.-->
+            </description>
+        </com.parameter>
+    </com>
+
+
+    <description>
+        <p>
+            Similar to the <scheduler_method class="Spooler" method="terminate"/> method,
+            but the Job Scheduler restarts itself.
+        <!--Wie <scheduler_method class="Spooler" method="terminate"/>,
+            aber der Scheduler startet sich neu.-->
+        </p>
+        <p>
+            See <scheduler_element name="modify_spooler" attribute="cmd" value="terminate_and_restart"/>
+            and <a href="../termination.xml">Terminating the Job Scheduler</a>.
+        <!--Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="terminate_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="let_run_terminate_and_restart">
+    <com/>
+
+    <description>
+        <p>
+            The Job Scheduler ends all tasks 
+            (by calling the <scheduler_method class="Job_impl" name="spooler_close"/> method)
+            as soon as all orders have been completed
+            and then stops itself.
+            It will then be restarted under the same command line parameters.
+        <!--Sobald alle Aufträge abgearbeitet sind,
+            beendet der Scheduler alle Tasks
+            (durch Aufruf von <scheduler_method class="Job_impl" name="spooler_close"/>)
+            und beendet dann sich selbst.
+            Ein neuer Scheduler mit unveränderten Kommandozeilenparametern wird gestartet.-->
+        </p>
+        <p>
+            See <scheduler_element name="modify_spooler" attribute="cmd" value="let_run_terminate_and_restart"/>
+            and <a href="../termination.xml">Terminating the Job Scheduler</a>.
+        <!--Siehe <scheduler_element name="modify_spooler" attribute="cmd" value="let_run_terminate_and_restart"/>
+            und <a href="../termination.xml">Beendigung des Schedulers</a>.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="tcp_port" access="read" setting="tcp_port">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+            <description>
+                0, when no port is open.
+            <!--0, wenn kein Port geöffnet ist.-->
+            </description>
+        </com.result>
+    </com>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="udp_port" access="read" setting="udp_port">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+            <description>
+                0, when no port is open.
+            <!--0, wenn kein Port geöffnet ist.-->
+            </description>
+        </com.result>
+    </com>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="var">
+    <not_implemented programming_language="javascript"/>    <!-- var ist Schlüsselwort -->
+
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        Allows access to variables defined in the Job Scheduler start script
+    <!--Zugriff auf Scheduler-weite Variablen-->
+    </title>
+
+    <description>
+        <p>
+            The variables are used by all Job Scheduler job implementations.
+        <!--Die Variablen sind überall im Scheduler benutzbar.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="variables" access="read">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+
+    <title>
+        The Job Scheduler variables as a <code>Variable_set</code>
+    <!--Die Scheduler-weiten Variablen als <code>Variable_set</code>-->
+    </title>
+
+    <description>
+        <p>
+            The variables can be set in the configuration file using
+            <scheduler_element name="config" child="params"/>.
+        <!--Die Variablen können in der Konfigurationsdatei eingestellt werden mit <scheduler_element name="config" child="params"/>.-->
+        </p>
+    </description>
+    <!-- var ist nicht für Javsascript implementiert! description>
+        See <scheduler_method class="Spooler" method="var"/>-->
+    <!--Siehe <scheduler_method class="Spooler" method="var"/>-->
+<!--</description>-->
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<description>
+    <p>
+        There is only one class for this object: <scheduler_method class="Job_impl" property="spooler"/>.
+    <!--Von dieser Klasse gibt es nur ein Objekt: <scheduler_method class="Job_impl" property="spooler"/>.-->
+    </p>
+</description>
+
+</api.class>

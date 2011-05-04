@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config port="6360">
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes/>
+
+        <script language="javascript">
+            <![CDATA[
+{
+    // <copy_params> außerhalb von <commands on_exit_code="">:
+    
+    var cmd = "<start_job job='javascript'><params><copy_params from='task'/></params></start_job>";
+    var result = spooler.execute_xml( cmd );
+    
+    if( result.match( "\\<ERROR" ) )  spooler_log.info( "Ok: " + cmd + " ==> " + result );
+                                else  spooler_log.error( "Das sollte einen Fehler liefern: " + cmd + " ==> " + result );
+}
+
+
+function start_job( job_name, exit_code )
+{
+    var params = spooler.create_variable_set();
+    params.value( "exit_code" ) = "" + exit_code;
+    params.value( "a"         ) = "aaa";
+    spooler.job( job_name ).start( params );
+}
+
+//start_job( "shell"     , "" );
+start_job( "javascript", "" );
+            
+        ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="shell" timeout="1" ignore_signals="SIGINT SIGHUP 7">
+                <process file="/tmp/test.cmd"/>
+                
+                <commands on_exit_code="success">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SUCCESS"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="error">
+                    <start_job job="following" at="  now  ">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                </commands>
+            </job>
+
+            
+            <job name="javascript" ignore_signals="SIGKILL SIGTERM">
+                <script language="JavaScript">
+                    <![CDATA[
+
+new ActiveXObject( "hostware.global" ).sleep( 30 );
+
+spooler_log.info( 'order=' + ( spooler_job.order_queue? "yes" : "no" ) );
+
+var initial_exit_code = spooler_task.exit_code;
+
+var wished_exit_code = spooler_task.params( "exit_code" );
+
+switch( wished_exit_code )
+{
+    case "": 
+        break;
+        
+    case "error": 
+        spooler_log.error( "Ein Fehler" );
+        break;
+        
+    default: 
+    spooler_task.exit_code = wished_exit_code;
+}
+
+spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code=" + wished_exit_code + "  exit_code=" + spooler_task.exit_code );
+
+                    ]]>
+                </script>
+
+                <commands on_exit_code="success">
+                    <!-- Kommentar -->
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SUCCESS"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                    <!--start_job job="gibsnich"/-->
+                </commands>
+
+                <commands on_exit_code="signal">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="signal"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="SIGKILL">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SIGKILL"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="SIGUSR1">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SIGUSR1"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="error">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                        </params>
+                    </start_job>
+                </commands>
+           </job>
+
+
+            <job name="javascript">
+                <commands on_exit_code="SIGHUP">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SIGHUP"/>
+                        </params>
+                    </start_job>
+                </commands>
+            </job>
+
+
+
+            <job name="following">
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( "param=" + spooler_task.params( "param" ) + "   a=" + spooler_task.params( "a" ) );
+
+                    ]]>
+                </script>
+            </job>
+
+        </jobs>
+
+    </config>
+</spooler>

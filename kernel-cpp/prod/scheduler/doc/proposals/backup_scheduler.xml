@@ -1,0 +1,309 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Backup-Scheduler"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <p>
+        Der Scheduler kann aus zwei Mitgliedern bestehen:
+        Dem Haupt-Mitglied und dem Backup-Mitglied.
+        Letzteres hält sich bereit, um beim Ausfall des Hauptmitglieds den Betrieb zu übernehmen.
+        Es kann auf einem anderen Rechner laufen.
+    </p>
+    
+    
+    <!--h3>Begriffe</h3>
+    <dl>
+        <dt>Scheduler</dt>
+        <dd>Die Mitglieder bildern zusammen einen Scheduler mit einer Scheduler-Id</dd>
+        <dt>Mitglied</dt>
+        <dd>Ein laufende Scheduler-Programm</dd>
+        <dt></dt>
+    </dl-->
+
+
+    
+    <h3>Datenbank</h3>
+    
+    <p>
+        Eine Datenbank ist Voraussetzung.
+        Sie bekommt eine neue Tabelle.
+        Deren Name kann eingestellt werden in der Datei
+        <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_members_table"/>.
+    </p>
+    <pre>create table scheduler_members
+( 
+    scheduler_id         varchar(100) not null,
+    scheduler_member_id  varchar(100) not null,
+    running_since        datetime,
+    last_heart_beat      number(12) not null,     // Seconds since 1970-01-01 00:00 GMT<!--
+    last_heart_beat      timestamp not null,      // Local time (for logging only)-->
+    next_heart_beat      number(12),              // Seconds since 1970-01-01 00:00 GMT<!--
+    next_heart_beat      timestamp,               // Local time (for logging only)--><!--   
+    ip_address           varchar(40),
+    udp_port             integer,
+    tcp_port             integer,-->
+    http_url             varchar(100)
+)</pre>
+
+    
+
+    <h3>Uhren</h3>
+    <p>
+        Die Uhren der Rechner und der Datenbank müssen auf einige Sekunden genau gleichlaufen.
+    </p>
+    <!-->
+        Der Scheduler prüft (beim Start?) die Übereinstimmung seiner Uhr mit der Datenbankuhr.
+        Der Backup-Scheduler bricht bei zu großer Abweichung ab.
+    </p-->
+    <!--p>
+        Alle Rechner müssen in der selben Zeitzone liegen.
+    </p-->
+    
+
+    <h3>Scheduler-Mitglieder</h3>
+    <p>
+        Jedes Mitglied hat eine eigene Mitgliedskennung,
+        die automatisch gebildet wird,
+        z.B. aus Rechnernamen und TCP-Port.
+        Sie kann per Kommandozeilenoption vorgegeben werden:
+        <scheduler_option name="member-id"/>
+        und muss mit der Scheduler-Id beginnen,
+        so dass sie unter verschiedenen Schedulern eindeutig ist.
+    </p>
+    <p>
+        Das Kommando <scheduler_element name="terminate"/> beendet den aktiven Scheduler,
+        ohne dass der Backup-Scheduler den Betrieb übernimmt.
+    </p>
+
+    <h2>Haupt-Mitglied</h2>
+
+    <p>
+        Normalerweise betreibt das Haupt-Mitglied den Scheduler.
+        Es ist dann das aktive Mitglied.
+        Nur das Haupt-Mitglied kann einen ordentlich beendeten Scheduler starten.
+    </p>
+    <p>
+        In der Datenbank trägt sich das Haupt-Mitglied unter seiner Mitgliedskennung
+        als aktives Mitglied für die Scheduler-Id ein.
+    </p>
+    <pre>insert into scheduler_variables ( name, value ) 
+    values ( "scheduler/<i>scheduler_id</i>/active_member", "<i>scheduler_member_id</i>" )</pre>
+    <!--pre>insert into schedulers ( scheduler_id, scheduler_member_id ) 
+    values ( "<i>scheduler_id</i>", "<i>scheduler_member_id</i>" )</pre-->
+    <p>
+        Wenn bereits ein anderes Mitglied aktiv ist, 
+        wird das Haupt-Mitglied zum inaktiven Mitglied
+        und wartet auf den Ausfall des anderen Mitglieds.
+    </p>
+
+
+    <h2>Aktives Mitglied</h2>
+    <h3>Herzschlag</h3>
+    <p>
+        Das aktive Mitglied hat einen Datenbanksatz,
+        den es periodisch (minütlich) mit einem Zeitstempel versieht (Herzschlag).
+    </p>
+    <pre>update scheduler_members
+    set last_heart_beat=<i>now</i>, next_heart_beat=<i>time</i>
+    where scheduler_member_id="<i>scheduler_member_id</i>"
+      and ( select value from scheduler_variables
+             where name = "scheduler/<i>scheduler_id</i>/active_member" ) 
+          = "<i>my scheduler_member_id</i>"</pre>
+    <p>
+        Der Datenbanksatz muss vor Ablauf der Frist erneuert werden.
+        Das Mitglied erneuert den Satz, wenn weniger als ein Zehntel der Frist verbleibt.
+    </p>
+    <p>
+        Wenn das Mitglied den Satz verspätet, aber mit Erfolg ändern kann,
+        gibt es eine Warnung aus.
+    </p>
+    <scheduler_message level="warn" code="SCHEDULER-996"/>
+    <p>
+        Wenn der Satz wegen der Where-Klausel nicht geändert werden kann,
+        dann ist das Mitglied nicht mehr aktiv und 
+        es bricht mit 
+        <scheduler_method class="Spooler" method="abort_immediately"/> 
+        ab.
+        Das sollte nur passieren, wenn das aktive Mitglied mit dem Herzschlag sich verspätet.
+    </p>
+    <scheduler_message level="error" code="SCHEDULER-356"/>
+    <scheduler_message level="info" code="SCHEDULER-995"/>
+
+
+    <h3>Ordentliches Ende des aktiven Mitglieds</h3>
+    <p>
+        Wenn das aktive Mitglied sich ordentlich beendet,
+        entfernt es seinen Datensatz aus der Tabelle <code>scheduler_members</code>.
+        Das Backup-Mitglied läuft nicht an.
+        <!--setzt er das Datenbankfeld <code>next_heart_beat</code> auf <code>null</code>.
+        Er entfernt den Satz nicht, um dem Backup-Scheduler die Prüfung mit SQL zu erleichtern.-->
+    </p>
+    <!--p>
+        <i>Jetzt haben wir zwei Möglichkeiten. Welche nehmen wir?</i>
+    </p>
+    <ul>
+        <li>
+            Ordentliches Beenden des aktiven Mitglieds 
+            (z.B. mit <scheduler_element name="terminate"/>)
+            beendet den ganzen Scheduler,
+            d.h. der Backup-Scheduler soll nicht starten.
+        </li>
+        <li>
+            Der Backup-Scheduler erkennt, dass das aktive Mitglied ausgefallen ist,
+            und übernimmt den Scheduler-Betrieb.
+            Zum Beenden des gesamten Schedulers muss also erst das Backup-Mitglied
+            und dann das aktive Mitglied beendet werden.
+        </li>
+    </ul>
+    <p>
+        Die erste Variante bedeutet auch, dass das Backup-Mitglied den Scheduler nicht starten kann.
+        Es kann nur den Betrieb übernehmen, wenn er den Ausfall des aktiven Mitglieds bemerkt.
+    </p>
+    <p>
+        Die zweite Variante bedeutet im Gegenteil, dass der Backup-Scheduler auch den Scheduler starten kann,
+        wenn das erste Mitglied nicht angelaufen ist (was bei gleichzeitigem Start durch Fristen geregelt werden müsste).
+    </p>
+    <p>
+        <i>Ich bin für die erste Variante.</i>
+        Wenn der Scheduler einmal mit dem Backup-Mitglied gestartet werden muss,
+        kann der Administrator vorher seine Rolle wechseln.
+    </p-->
+
+
+    <h2>Backup-Mitglied</h2>
+    <p>
+        Das Backup-Mitglied (Option <scheduler_option name="backup"/>)
+        startet als inaktives Mitglied
+        und kann das aktive Mitglied bei Ausfall ersetzen.
+        Es wird dann zum aktiven Mitglied.
+        Das Backup-Mitglied wird nicht einen ordentlich beendeten Scheduler starten.
+    </p>
+
+    
+
+    <h2>Nicht aktives Mitglied</h2>
+    <p>
+        Aufgabe des inaktiven Mitglieds ist allein,
+        das aktive Mitglied nach seinem Ausfall zu ersetzen und selbst zum aktiven Mitglied zu werden.
+    </p>
+    
+
+    <h3>Überwachung des Herzschlags</h3>
+    <p>
+        Das aktive Mitglied gilt als ausgefallen, wenn die von ihm selbst gesetzte
+        Frist (<code>next_heart_beat</code>) oder
+        die aus <code>last_heart_beat + </code><i>periodenlänge</i> errechnete Frist
+        überschritten ist.
+    </p>
+    <ul>
+        <li>
+            <code>next_heart_beat > <i>jetzt</i></code>, oder
+        </li>
+        <li>
+            <code>last_heart_beat + <i>periodenlänge</i> > <i>jetzt</i></code>
+        </li>
+    </ul>
+    <pre>select 
+    m.last_heart_beat, 
+    m.next_heart_beat, 
+    %now
+  from scheduler_members m, scheduler_variables v
+  where v.name = "scheduler/" || "<i>scheduler_id</i>" || "/active_member"
+    and m.scheduler_member_id = v.wert</pre>
+
+    <scheduler_message level="warn" code="SCHEDULER-993"/>
+    <scheduler_message level="warn" code="SCHEDULER-994"/>
+
+    <h3>Übernahme des Betriebs durch das inaktive Mitglied</h3>
+    <p>
+        Wenn das inaktive Mitglied feststellt, 
+        dass das aktive Mitglied seinen Herzschlag nicht mehr erneuert,
+        versucht es den Betrieb zu übernehmen.
+        Dazu trägt es sich als aktives Mitglied ein.
+    </p>
+    <pre>update scheduler_variables 
+    set value="<i>my scheduler_member_id</i>"
+    where name = "scheduler/<i>scheduler_id</i>/active_member"
+      and value="<i>old scheduler_member_id</i>"
+      and ( select last_heart_beat from scheduler_members 
+             where scheduler_member_id="<i>old scheduler_member_id</i>" ) = <i>last_heart_beat</i></pre>
+    
+    <!--pre>update scheduler_members
+    set active=1
+    where scheduler_member_id = "<i>my scheduler_member_id</i>"
+      and value="<i>old scheduler_instance_id</i>"
+      and ( select last_heart_beat from scheduler_instances 
+             where scheduler_instance_id="<i>old scheduler_instance_id</i>" ) = <i>last_heart_beat</i></pre-->
+    
+
+    <!--h3>Überwachung des Herzschlags</h3>
+    <p>
+        Der zweite Scheduler überwacht das EKG des ersten.
+        Sobald dessen Herzschlag aussetzt 
+        (<code>next_heart_beat</code> und Nachfrist sind verstrichen),
+        trägt sich der zweite Scheduler als laufender Scheduler ein
+        und übernimmt den Betrieb.
+        Er hat die Rolle des ersten Schedulers und 
+        schreibt nun selbst seinen Herzschlag in die Datenbank.
+    </p>
+
+    <p>
+        Der Scheduler kann seinen Herzschlag nur in die Datenbank schreiben,
+        wenn er als laufender Scheduler eingetragen ist.
+        Das wird durch eine Where-Klausel geprüft.
+        Wenn er nicht mehr laufender Scheduler ist, bricht er sich und 
+        alle seine Tasks sofort ab.
+    </p>
+    <p>
+        Außerdem prüft der Scheduler nach jedem Schreiben des Herzschlags,
+        ob er sich verspätet hat,
+        und gibt in dem Fall eine Warnung aus.
+    </p-->
+
+
+    <!--h3>Beide Mitglieder sind gleichrangig</h3>
+    <p>
+        Der Scheduler, der sich zuerst in die Datenbank als laufendes Mitglied einträgt,
+        ist der laufende, der andere der Backup-Scheduler.
+    </p>
+    <p>
+        Wenn der Backup-Scheduler den Betrieb übernommen hat, ist er der laufende Scheduler,
+        während der neu startende erste Scheduler Backup-Scheduler wird.
+    </p>
+
+
+    <h3>Vorrang festlegen</h3>
+    <p>
+        Wenn ein Scheduler Vorrang haben soll, z.B. beim gleichzeitigen Start zweier Scheduler,
+        kann dem einen Scheduler eine Wartezeit vorgegeben werden.
+        Nur wenn während der Wartezeit sich der andere Scheduler nicht als laufendes Mitglied registriert,
+        übernimmt er den Betrieb.
+    </p>
+
+
+    <h3>Normales Beenden des laufenden Mitglieds</h3>
+    <p>
+        Wenn das laufende Mitglied normal beendet wird, 
+        kann er dem Backup-Mitglied per UDP ein Telegramm über sein bevorstehendes Ableben schicken,
+        sodass das schneller reagieren kann.
+        <i>(Woher weiß er dessen UDP-Adresse?)</i>
+    </p>
+
+    
+    <h3>Details</h3>
+    <p>
+        Das genaues Verhalten mit Fristen und Nachfristen wird noch festgelegt.
+        Ebenso das Datenbankschema.
+    </p-->
+
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</description>

@@ -1,0 +1,17 @@
+<order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+       
+       title="Wir haben einen Auftrag! 777"
+>
+
+    <params>
+        <param name="base_directory" value="./samples/config/files/job_chain"/>
+        <param name="base_name"      value="sample_file_b"/>
+        <param name="overwrite"      value="yes"/>
+
+    </params>
+
+
+    <run_time repeat="10"/>
+
+
+</order>

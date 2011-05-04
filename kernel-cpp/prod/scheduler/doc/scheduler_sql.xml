@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Vom Scheduler verwendete SQL-Anweisungen"
+    base_dir            = ""
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <scheduler_keyword keyword="Datenbanktabellen"/>
+    <scheduler_keyword keyword="create table (SQL)"/>
+    <scheduler_keyword keyword="Indices (SQL)"/>
+
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    <h2>SQL-Anweisungen zum Einrichten der Tabellen</h2>
+
+    <p>
+        Der Scheduler richtet beim Start fehlende Tabellen mit folgenden Anweisungen ein.
+        Die Anweisungen unterscheiden sich nach verwendeter Datenbank-Software.
+    </p>
+
+    <ul>
+        <li>
+            <scheduler_a href="scheduler_sql_db2.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_microsoft_sql_server.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_mysql.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_oracle.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_postgresql.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="scheduler_sql_sybase.xml"/>
+        </li>
+    </ul>    
+
+</description>

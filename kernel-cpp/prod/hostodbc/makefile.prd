@@ -1,0 +1,14 @@
+prod = sosodbc
+
+!ifdef SYSTEM_WINDLL
+
+objects = odbcbase odbccat odbcdll odbccols odbcenv odbcconn odbcstmt
+
+all:: sosodbc.dll
+!endif
+
+
+
+#LIBS=hostapi btrieve gnu file connect rapid fs kram sv tools
+
+

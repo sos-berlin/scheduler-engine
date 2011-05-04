@@ -1,0 +1,152 @@
+//                                                    ©1996 SOS GmbH Berlin
+// Für das Eigenschaftenblatt der Datei in Windows 95.
+
+//Bespiel für #defines:
+//
+//#define VER_FILEVERSION         0,1,0,0
+//#define VER_PRODUCTVERSION      0,1,0,0
+//#define VER_FILEFLAGSMASK       0x3L
+//#define VER_FILEFLAGS           0x0L
+//#define VER_FILEOS              0x10001L
+//#define VER_FILETYPE            VFT_DLL
+//#define VER_FILESUBTYPE         VFT2_UNKNOWN
+//#define VER_FILEDESC_STR        "ODBC-Treiber für BS2000 und anderes\0"
+//#define VER_FILEVERSION_STR     "0.1.0000\0"
+//#define VER_NAME_STR            "sosodbc\0"
+//#define VER_LEGALCOPYRIGHT_STR  "©1992-1999 SOS GmbH Berlin\0"
+//#define VER_LEGALTRADEMARKS_STR "ODBC(TM) is a trademark of Microsoft Corporation.  Microsoft\256 is a registered trademark of Microsoft Corporation. Windows(TM) is a trademark of Microsoft Corporation.  BS2000\256 ist ein eingetragenes Warenzeichen der Siemens Nixdorf Informationssysteme AG.\0"
+//#define VER_FILENAME_STR        "SOSDB16.DLL\0"
+//#define VER_PRODUCTNAME_STR     "hostODBC\0"
+//#define VER_PRODUCTVERSION_STR  "0.1.0000\0"
+
+#include <winver.h>  // einige #defines
+
+#define SOS_COPYRIGHT "Copyright ©1988-2006 Software- und Organisations-Service GmbH"
+
+
+// DEFAULTS:
+
+
+#ifndef VER_COPYRIGHT
+#   define VER_COPYRIGHT SOS_COPYRIGHT
+#endif
+
+
+#ifndef VER_FILEOS
+#   if defined _WIN32
+#       define VER_FILEOS VOS__WINDOWS32        // VOS_DOS_WINDOWS32, VOS_NT_WINDOWS32 ??
+#   else
+#       define VER_FILEOS VOS_DOS_WINDOWS16
+#   endif
+#endif
+
+#if !defined VER_NAME_STR
+#   define VER_NAME_STR VER_PRODUCTNAME_STR
+#endif
+
+#if !defined VER_FILEVERSION
+#    define VER_FILEVERSION VER_PRODUCTVERSION
+#endif
+
+#if !defined VER_FILEVERSION_STR
+#    define VER_FILEVERSION_STR VER_PRODUCTVERSION_STR
+#endif
+
+
+VS_VERSION_INFO VERSIONINFO
+
+#ifdef VER_FILEVERSION
+    FILEVERSION VER_FILEVERSION
+#endif
+
+#ifdef VER_PRODUCTVERSION
+    PRODUCTVERSION VER_PRODUCTVERSION
+#endif
+
+#ifdef VER_FILEFLAGSMASK
+    FILEFLAGSMASK VER_FILEFLAGSMASK
+#endif
+
+#if defined _DEBUG
+#   define VER_FILEFLAGS_DEBUG  VS_FF_DEBUG 
+# else
+#   define VER_FILEFLAGS_DEBUG  VS_FF_DEBUG 
+#endif
+
+#ifdef VER_FILEFLAGS
+    FILEFLAGS VER_FILEFLAGS    | VER_FILEFLAGS_DEBUG
+#else
+    FILEFLAGS VS_FF_PRERELEASE | VER_FILEFLAGS_DEBUG
+#endif
+
+#ifdef VER_FILEOS
+    FILEOS VER_FILEOS
+#endif
+
+#ifdef VER_FILETYPE
+    FILETYPE VER_FILETYPE
+#endif
+
+#ifdef VER_FILESUBTYPE
+    FILESUBTYPE VER_FILESUBTYPE
+#endif
+
+
+{
+    BLOCK "StringFileInfo"
+    {
+        BLOCK "040704E4"
+        {
+#           if defined VER_FILEVERSION_STR
+                VALUE "FileVersion"     , VER_FILEVERSION_STR
+#           endif
+
+            VALUE "FileDescription"     , VER_FILEDESC_STR
+
+            //VALUE "LegalCopyright"    , VER_LEGALCOPYRIGHT_STR
+            VALUE "LegalCopyright"      , VER_COPYRIGHT
+
+
+#           if defined VER_LEGALTRADEMARKS_STR
+                VALUE "LegalTrademarks" , VER_LEGALTRADEMARKS_STR
+#           endif
+
+#           if defined VER_PRODUCTVERSION_STR
+                VALUE "ProductVersion"  , VER_PRODUCTVERSION_STR
+#           endif
+
+            VALUE "OriginalFilename" , VER_FILENAME_STR
+            VALUE "ProductName"      , VER_PRODUCTNAME_STR
+            VALUE "CompanyName"      , "Software- und Organisations-Service GmbH,  Fax +49 30 861 3335, eMail info@sos-berlin.com\0"
+          //VALUE "CompanyEmail"     , "info@sos-berlin.com\0"
+          //VALUE "CompanyAddress"   , "Badensche Str. 29\r\nD-10715 Berlin\r\nGermany\r\n\r\nfax +49 30 861 3335\r\ne-mail info@sos-berlin.com\0"
+
+#           if defined VER_NAME_STR
+                VALUE "InternalName"     , VER_NAME_STR
+#           endif
+
+#           if defined VER_COMMENTS_STR
+                VALUE "Comments"         , VER_COMMENTS_STR
+#           endif
+
+#           if defined VER_OLESELFREGISTER
+                VALUE "OLESelfRegister", VER_OLESELFREGISTER
+#           endif
+        }
+    }
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x407, 1252
+    END
+  //BLOCK "VarFileInfo"
+  //{
+  //    VALUE "Translation", 0x409, 1252
+  //Oder, gesehen im Ole-Server von Brockschmidt:
+  //#ifdef UNICODE
+  // VALUE "Translation", 0x409, 1200  //English (0x409), Unicode (1200)
+  //#else
+  // VALUE "Translation", 0x409, 1252  //English (0x409), ANSI (1252)
+  //#endif
+  //}
+}

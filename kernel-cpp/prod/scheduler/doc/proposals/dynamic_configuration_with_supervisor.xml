@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Konfiguration mit Supervisor verteilen"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "proposal"
+>
+
+
+    <p>
+        Siehe auch
+    </p>
+    <ul>
+        <li>
+            <scheduler_a href="dynamic_configuration_commands.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="dynamic_configuration.xml"/>
+        </li>
+        <li>
+            <scheduler_a href="directories.xml"/>
+        </li>
+    </ul>
+
+    <p>
+        Der Supervisor kann die Dateien der 
+        <scheduler_a href="dynamic_configuration.xml">dateibasierten Konfiguration</scheduler_a>
+        an mehrere Scheduler verteilen.
+    </p>
+
+    <p>
+        ...
+    </p>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+
+</description>

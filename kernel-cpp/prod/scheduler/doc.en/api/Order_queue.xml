@@ -1,0 +1,107 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Order_queue.xml 3921 2005-09-20 18:30:46Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Order_queue"
+    object_name = "q"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-01-31 12:42:37 +0100 (Di, 31 Jan 2006) $"
+>
+
+
+<property name="length" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+
+    <title>
+        The number of orders in the order queue
+    <!--Anzahl der Aufträge in der Auftragswarteschlange-->
+    </title>
+</property>
+
+
+<!--<method name="add_order" deprecated="true">
+    <com>
+        <com.parameter name="order_or_payload">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Order"/>
+        </com.result>
+    </com>
+
+    <title>
+        Add an order to the order queue - depreciated-->
+    <!--Fügt einen Auftrag der Auftragswarteschlange hinzu-->
+<!--</title>
+
+    <description>
+        <p>
+            This call is only valid for the case of an order not being in a job chain.-->
+        <!--Der Aufruf gilt nur für den Fall, dass der Auftrag nicht in einer Jobkette enthalten ist.
+        </p>
+        <p>
+            The order priority 
+            (<scheduler_method class="Order" property="priority"/>)
+            is taken account of here.-->
+        <!--Die Priorität des Auftrags
+            (<scheduler_method class="Order" property="priority"/>)
+            wird dabei berücksichtigt.-->
+    <!--</p>
+        <p>
+            Should the order queue contain an order with the same Id, then this order will be replaced.-->
+        <!--Wenn die Auftragswarteschlange bereits einen Auftrag mit gleicher Id enthält,
+            wird dieser ersetzt.-->
+    <!--</p>
+    </description>
+</method>-->
+
+
+<title>
+    The order queue for an order controlled job
+<!--Auftragswarteschlange eines auftragsgesteuerten Jobs-->
+</title>
+
+
+<description>
+    <p>
+        An order controlled job (<scheduler_element name="job" attribute="order" value="yes"/>
+        has an order queue,
+        which is filled by the orders to be processed by a job.
+        The orders are sorted according to their priority and the time at which they enter the queue.
+    <!--Ein auftragsgesteuerter Job (<scheduler_element name="job" attribute="order" value="yes"/>
+        hat eine Auftragswarteschlange,
+        die die vom Job zu verarbeitenden Aufträge aufnimmt.
+        Die Aufträge sind nach Priorität und Zeitpunkt des Eintreffens geordnet.-->
+    </p>
+    <p>
+        Processing means that the Job Scheduler calls the 
+        <scheduler_method class="Job_impl" method="spooler_process"/> 
+        method for a task.
+        This method can access the order using the 
+        <scheduler_method class="Task" property="order"/>
+        property.
+        Should the <code>spooler_process()</code> end without an error (i.e. without any exceptions),
+        then the Job Scheduler removes the order from the order queue.
+        If the order is in a job chain then it is moved to the next position in the chain.
+    <!--Verarbeiten bedeutet, dass der Scheduler die Methode
+        <scheduler_method class="Job_impl" method="spooler_process"/>
+        einer Task des Jobs aufruft.
+        Die Methode kann über
+        <scheduler_method class="Task" property="order"/>
+        auf den Auftrag zugreifen.
+        Endet <code>spooler_process()</code> ohne Fehler (ohne Exception),
+        entfernt der Scheduler den Auftrag aus der Auftragswarteschlange.
+        Ist der Auftrag in einer Jobkette, dann rückt der Auftrag an die nächste Position der Jobkette.-->
+    </p>
+</description>
+
+</api.class>

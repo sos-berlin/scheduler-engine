@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api.xsl" type="text/xsl"?>
+
+
+<class_references
+    base_dir="../"
+>
+    <class_reference class="api"/>                      <!-- Für "Übersicht" -->
+    <class_reference class="Error"/>
+    <class_reference class="Job"/>
+    <class_reference class="Job_chain"/>
+    <class_reference class="Job_chain_node"/>
+    <class_reference class="Job_impl"/>
+    <class_reference class="Lock"/>
+    <class_reference class="Locks"/>
+    <class_reference class="Log"/>
+    <class_reference class="Mail"/>
+    <class_reference class="Monitor_impl"/>
+    <class_reference class="Order"/>
+    <class_reference class="Order_queue"/>
+    <class_reference class="Process_class"/>
+    <class_reference class="Process_classes"/>
+    <class_reference class="Run_time"/>
+    <class_reference class="Schedule"/>
+    <class_reference class="Spooler"/>
+    <class_reference class="Spooler_program"/>
+    <class_reference class="Subprocess"/>
+    <class_reference class="Supervisor_client"/>
+    <class_reference class="Task"/>
+ <!--class_reference class="Variable"/-->
+    <class_reference class="Variable_set"/>
+    <class_reference class="Web_service"/>
+    <class_reference class="Web_service_operation"/>
+    <class_reference class="Web_service_request"/>
+    <class_reference class="Web_service_response"/>
+    <class_reference class="Xslt_stylesheet"/>
+</class_references>

@@ -1,0 +1,736 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<command_line program  = "scheduler"
+              title    = "Kommandozeilenoptionen"
+              base_dir = ""
+              author   = "$Author$"
+              date     = "$Date$">
+
+    <command_options name="run" title="Start des Job Schedulers">
+        <description>
+            <p>
+                Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden.
+                Für Windows muss die Endung "<code>.exe</code>" angegeben werden, da der Job Scheduler den vollständigen Dateinamen benötigt, um einen Job oder sich selbst neu zu starten.
+            </p>
+        </description>
+
+        <command_option name="config" setting="config">
+            <description>
+                <p>
+                    "<code>-config=</code>" vor dem Dateinamen kann weggelassen werden.
+                </p>
+                <p>
+                    Die Option gibt die Konfigurationsdatei oder das Konfigurationsverzeichnis an.
+                    Im letzteren Fall erwartet der Scheduler die Konfigurationsdatei im
+                    Konfigurationsverzeichnis unter dem Namen <code>scheduler.xml</code>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="log" setting="scheduler_log"/>
+        
+        <command_option name="log-dir" setting="log_dir"/>
+
+
+        <command_option name="id" setting="option_id"/>
+
+        <command_option name="cd" setting="directory"/>
+
+        <command_option name="pid-file" type="dateiname" title="Dateiname für Prozess-ID">
+            <description>
+                <p>
+                    Für Unix:
+                    In diese Datei schreibt der Job Scheduler seine PID.
+                    Beim Beenden löscht der Job Scheduler die Datei.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="log-level"    setting="log_level"/>
+        <command_option name="param"        setting="param"/>
+        <command_option name="include-path" setting="include_path"/>
+        <command_option name="port"         setting="port">
+            <description>
+                <p>
+                    Siehe auch <scheduler_option name="tcp-port"/> 
+                    und <scheduler_option name="udp-port"/>.
+                </p>
+                <p>
+                    Wenn der Port blockiert ist, versucht der Job Scheduler zwei Minuten lang, ihn zu belegen, bevor er aufgibt.
+                </p>
+            </description>
+        </command_option>
+        
+        <command_option name="tcp-port"     setting="tcp_port">
+            <description>
+                <p>
+                    Siehe auch <scheduler_option name="port"/>.
+                </p>
+            </description>
+        </command_option>
+        
+        <command_option name="udp-port"     setting="udp_port">
+            <description>
+                <p>
+                    Siehe auch <scheduler_option name="port"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="ip-address"   setting="ip_address"/>
+
+        <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden">
+            <description>
+                <p>
+                    Die Option soll nur in Ausnahmefällen benutzt werden, sie schaltet
+                    die Prüfung ab, ob ein Port vom Betriebssystem freigegeben ist.
+                </p>
+                <p>
+                    Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
+                </p>
+                <p>
+		                Die Option sollte <span style="text-decoration: underline">nur im Notfall</span> benutzt werden,
+		    						falls das Betriebssystem den Port dauerhaft sperrt,
+		    						obwohl keine Anwendung ihn mehr belegt.
+		    						Das kann unter Windows XP passieren, wenn die Anwendung mit einem Debugger abgebrochen wird.
+		    						Unix kann ggf. fast eine Minute benötigen, um einen Port freizugeben.
+                </p>
+                <p>
+		    						U.U. ist der Job Scheduler mit <code>-reuse-port</code> über TCP oder UDP nicht erreichbar,
+		    						wenn statt dessen der Port einer anderen Anwendung angesprochen wird.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="cmd" type="xmlkommando" title="Sofort auszuführendes Kommando">
+            <description>
+                <p>
+                    Der Job Scheduler führt beim Start das XML-Kommando aus.
+                    Das kann z.B. ein <scheduler_element name="start_job"/> sein.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="ini" type="dateiname" title="Anderer Pfad/ Name für Datei factory.ini">
+            <description>
+                <p>
+                    Wählt eine andere Datei für die Datei <a href="factory_ini.xml"><code>factory.ini</code></a> aus.
+                </p>
+                <p>
+                    In dieser Dokumentation ist dann mit der Datei <code>factory.ini</code> die hier eingestellte gemeint.
+                </p>
+                <p>
+                    Siehe auch <scheduler_method class="Spooler" property="ini_path"/>
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="sos.ini" type="dateiname" title="Anderer Pfad/ Name für Datei sos.ini">>
+            <description>
+                <p>
+                    Wählt eine andere Datei für globale Konfigurationen <a href="sos_ini.xml"><code>sos.ini</code></a> aus.
+                    Diese Datei enthält u.a. den Lizenzschlüssel.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="program-file" type="dateiname" title="Dateiname des Schedulers">
+            <description>
+                <p>
+                    Beim Aufruf des Job Schedulers aus einer Java-Klasse heraus (zum Debuggen)
+                    geben Sie hier den Programmdateinamen an,
+                    wenn der Job Scheduler Jobs in eigenen Prozessen starten können soll.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service" title="Als Daemon starten">
+            <description>
+                <p>
+                    Unter Unix versetzt sich der Job Scheduler in den Hintergrund und trennt sich vom Terminal.
+                </p>
+                <p>
+                    Unter Unix schließt der Scheduler stdin, stdout und stderr und
+                    leitet die Ausgaben in die Datei <code>scheduler.out</code>,
+                    die beschreibbar sein muss.
+                </p>
+            </description>
+        </command_option>
+
+
+<!-- funktioniert nicht 2005-01-22
+        <command_option name="renew-service" type="name" title="Windows-Dienst entfernen und erneut installieren">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    <code>-renew-service=</code><i>name</i> ist dasselbe wie
+                    <code>-renew-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+-->
+
+        <command_option name="validate-xml" title="XML-Dokumente gegen eingebettetes Schema validieren">
+            <description>
+                <p>
+                    <code>-validate-xml-</code> schaltet die Validierung ab 
+                    (für den Fall, dass das Schema fehlerhaft ist).
+                </p>
+                <p>
+                    Siehe <scheduler_option name="show-xml-schema"/>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="env" multiple="yes" type="name=value" title="Umgebungsvariable setzen">
+            <description>
+                <p>
+                    <code>-env=NAME=VALUE</code> setzt die Umgebungsvariable NAME.
+                </p>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-318"/>
+            </messages>
+        </command_option>
+
+
+        <command_option name="exclusive" title="Startet den Job Scheduler für die exklusive Ausführung">
+            <description>
+                <p>
+                    Voraussetzung ist Datenbankbetrieb, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>.
+                </p>
+                <p>
+                    Mehrere Job Scheduler mit derselben Scheduler-Id (<scheduler_option name="id"/>) und derselben Datenbank
+                    können mit <code>-exclusive</code> gestartet werden, wobei nur einer aktiv wird.
+                    Erst wenn der aktive Job Scheduler ausfällt oder einzeln beendet wird 
+                    (<scheduler_element name="terminate" attribute="continue_exclusive_operation" value="yes"/>),
+                    wird ein anderer Job Scheduler aktiv.
+                    Die Übernahme kann einige Minuten dauern.
+                </p>
+                <p>
+                    Vorsicht: 
+                    Alle beteiligten Job Scheduler müssen mit <code>-exclusive</code> oder <scheduler_option name="distributed-orders"/>
+                    gestartet werden.
+                    Wenn ein Job Scheduler mit und einer ohne die Einstellung gestartet wird,
+                    laufen zwei Job Scheduler gleichzeitig, was zu unerwarteten Ergebnissen führen kann.
+                </p>
+                <p>
+                    Siehe auch <scheduler_option name="backup"/>.
+                </p>
+            </description>
+
+            <messages>
+                <message level="error" code="SCHEDULER-357"/>
+                <message level="error" code="SCHEDULER-358"/>
+                <message level="error" code="SCHEDULER-359"/>
+                <message level="error" code="SCHEDULER-362"/>
+                <message level="error" code="SCHEDULER-365"/>
+                <message level="error" code="SCHEDULER-367"/>
+                <message level="error" code="SCHEDULER-371"/>
+                <message level="error" code="SCHEDULER-372"/>
+                <message level="error" code="SCHEDULER-377"/>
+                <message level="error" code="SCHEDULER-381"/>
+                <message level="error" code="SCHEDULER-386"/>
+                <message level="info"  code="SCHEDULER-805"/>
+                <message level="info"  code="SCHEDULER-807"/>
+                <!--message level="info"  code="SCHEDULER-809"/-->
+                <message level="info"  code="SCHEDULER-811"/>
+                <message level="info"  code="SCHEDULER-814"/>
+                <!--message level="info"  code="SCHEDULER-818"/-->
+                <message level="info"  code="SCHEDULER-819"/>
+                <message level="info"  code="SCHEDULER-820"/>
+                <message level="info"  code="SCHEDULER-821"/>
+                <message level="info"  code="SCHEDULER-822"/>
+                <message level="warn"  code="SCHEDULER-823"/>
+                <!--message level="info"  code="SCHEDULER-824"/-->
+                <message level="info"  code="SCHEDULER-825"/>
+                <message level="info"  code="SCHEDULER-826"/>
+                <message level="warn"  code="SCHEDULER-827"/>
+                <!--message level="info"  code="SCHEDULER-828"/-->
+                <message level="info"  code="SCHEDULER-831"/>
+                <message level="info"  code="SCHEDULER-832"/>
+                <message level="info"  code="SCHEDULER-833"/>
+                <message level="info"  code="SCHEDULER-834"/>
+                <message level="info"  code="SCHEDULER-835"/>
+                <message level="warn"  code="SCHEDULER-836"/>
+                <message level="warn"  code="SCHEDULER-837"/>
+                <message level="info"  code="SCHEDULER-838"/>
+                <message level="warn"  code="SCHEDULER-994"/>
+                <message level="info"  code="SCHEDULER-995"/>
+                <message level="warn"  code="SCHEDULER-996"/>
+                <message level="warn"  code="SCHEDULER-997"/>
+                <!--message level="info"  code="SCHEDULER-998"/-->
+            </messages>
+        </command_option>
+
+
+        <command_option name="backup" title="Startet den Job Scheduler im Backup-Betrieb">
+            <description>
+                <p>
+                    Nur mit <scheduler_option name="exclusive"/> möglich.
+                </p>
+                <p>
+                    Ein Backup Job Scheduler übernimmt den Betrieb nur, beginnt aber keinen neuen Betrieb.
+                    D.h. nach <scheduler_element name="terminate" attribute="continue_exclusive_operation" value="no"/>
+                    läuft er nicht an, sondern wartet auf einen anderen Job Scheduler, der den Betrieb startet.
+                </p>
+                <p>
+                    Zusammem mit <scheduler_option name="install-service"/> und <scheduler_option name="remove-service"/>
+                    führt <code>-backup</code> zu einem eigenen Dienstenamen,
+                    so dass der Backup Job Scheduler als eigener Dienst auf demselben Rechner installiert werden kann.
+                </p>
+                <p>
+                    Der Dateiname des <scheduler_a href="protokolle.xml">Hauptprotokolls</scheduler_a>
+                    erhält den Zusatz "<code>_backup</code>".
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="backup-precedence" type="integer" initial="1" title="Vorrang unter den Backup Job Schedulern">
+            <description>
+                <p>
+                    Nur mit <scheduler_option name="exclusive"/> möglich.
+                </p>
+                <p>
+                    Wenn mehrere inaktive Backup Job Scheduler einen ausgefallenen Job Scheduler 
+                    ersetzen können, 
+                    übernimmt der mit dem kleinsten Wert von <scheduler_option name="backup-precedence"/>.
+                </p>
+                <p>
+                    Wenn die Uhren nicht gleichlaufen, kann ein anderer Job Scheduler als der mit dem vorderen Rang den Betrieb übernehmen.
+                </p>
+                <p>
+                    Mit der Option <scheduler_option name="backup"/> ist die Voreinstellung 1, sonst 0.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="distributed-orders" title="Verteilte Aufträge">
+            <description>
+                <p>
+                    Voraussetzung ist Datenbankbetrieb
+                    (<scheduler_ini_file file="factory.ini" section="spooler" entry="db"/>).
+                    Mehrere Job Scheduler mit derselben Scheduler-Id (<scheduler_option name="id"/>), derselben Datenbank
+                    und derselben Konfiguration können gestartet werden,
+                    die sich die Ausführung der Aufträge teilen.
+                </p>
+                <p>
+                    Mit <scheduler_element name="job_chain" attribute="distributed" value="yes"/>
+                    lassen sie eine Job-Kette für den verteilten Betrieb zu.
+                </p>
+            </description>
+            <messages>
+                <message level="error" code="SCHEDULER-357"/>
+                <message level="error" code="SCHEDULER-358"/>
+                <message level="error" code="SCHEDULER-361"/>
+                <message level="error" code="SCHEDULER-370"/>
+                <message level="error" code="SCHEDULER-373"/>
+                <message level="error" code="SCHEDULER-375"/>
+                <message level="error" code="SCHEDULER-378"/>
+                <message level="error" code="SCHEDULER-379"/>
+                <message level="error" code="SCHEDULER-380"/>
+                <message level="error" code="SCHEDULER-384"/>
+                <message level="error" code="SCHEDULER-385"/>
+                <message level="warn"  code="SCHEDULER-812"/>
+                <message level="info"  code="SCHEDULER-813"/>
+                <message level="info"  code="SCHEDULER-815"/>
+                <message level="warn"  code="SCHEDULER-816"/>
+                <message level="warn"  code="SCHEDULER-817"/>
+                <message level="info"  code="SCHEDULER-829"/>
+                <message level="info"  code="SCHEDULER-830"/>
+                <message level="warn"  code="SCHEDULER-879"/>
+            </messages>
+        </command_option>
+
+
+				<!-- 2010-04-27-SS-JS-462 - siehe Option config
+        <command_option name="configuraton-directory" title="Konfigurationsverzeichnis">
+            <description>
+                <p>
+                    Voreingestellt ist das Verzeichnis <code>live</code> im Verzeichnis
+                    der Konfigurationsdatei (<scheduler_option name="config"/>).
+                </p>
+                <p>
+                    Diesem Verzeichnis entnimmt der Job Scheduler 
+                    Jobs, Job-Ketten, Daueraufträge, Prozessklassen und Sperren.
+                </p>
+            </description>
+        </command_option>
+        -->
+
+        <example>
+            <pre>c:\bin\scheduler.exe c:\scheduler\config.xml -log-dir=c:\scheduler\logs</pre>
+        </example>
+    </command_options>
+
+    
+
+    <command_options name="install_service" title="Installation eines Windows-Dienstes">
+        <command_option name="install-service" type="name" title="Als Windows-Dienst installieren">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    Die Option startet nicht den Job Scheduler,
+                    sondern installiert ihn als Windows-Dienst.
+                    Dabei werden folgende Optionen aus der Kommandozeile übernommen:
+                </p>
+                <p>
+                    <scheduler_option name="cd"/>
+                    <br/>
+                    <scheduler_option name="config"/>
+                    <br/>
+                    <scheduler_option name="id"/>
+                    <br/>
+                    <scheduler_option name="ini"/>
+                    <br/>
+                    <scheduler_option name="log"/>
+                    <br/>
+                    <scheduler_option name="pid-file"/>
+                    <br/>
+                    <scheduler_option name="sos.ini"/>
+                    <br/>
+                    <scheduler_option name="env"/>
+                    <br/>
+                </p>
+                <p>
+                    <code>-install-service=</code><i>name</i> ist dasselbe wie
+                    <code>-install-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="remove-service" type="name" title="Windows-Dienst entfernen">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    Entfernt einen zuvor mit <code>-install-service</code> installierten Dienst.
+                </p>
+                <p>
+                    <code>-remove-service=</code><i>name</i> ist dasselbe wie
+                    <code>-remove-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="service-name" type="name" initial="sos_scheduler" title="Interner Name des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code> oder <code>-remove-service</code>.
+                    Wenn diese Option fehlt und <code>-id=</code> angegeben ist,
+                    verwendet der Job Scheduler den Namen <code>sos_scheduler_</code><i>scheduler_id</i>.
+                    Bei <scheduler_option name="backup"/> fügt er <code>_backup</code> hinzu.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service-display" type="text" title="Angezeigter Name des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code>.
+                    Die Dienstesteuerung von Windows zeigt diesen Namen.
+                    Er darf Leerzeichen enthalten.
+                    Wenn die Option fehlt, erzeugt der Scheduler einen aus dem Dienstnamen (s. <code>-service-name=</code>).
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service-descr" type="text" title="Beschreibung des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="need-service" type="name" title="Vom Scheduler vorausgesetzter Dienst">
+            <description>
+                <p>
+                    In Verbindung mit <code>-install-service</code> können Sie hier einen anderen Dienst angegeben,
+                    der laufen soll, bevor Windows den Job Scheduler Dienst startet.
+                    Das kann z.B. ein Datenbank-Server sein.
+                </p>
+                <p>
+                    Diese Option kann wiederholt angegeben werden, wenn der Job Scheduler mehrere Dienste voraussetzt.
+                </p>
+            </description>
+        </command_option>
+
+    </command_options>
+
+
+    
+    <command_options name="start_job" title="Laufendem Job Scheduler einen Job übergeben">
+
+        <command_option name="scheduler" type="host:port" title="TCP-Adresse des Schedulers">
+            <description>
+                <p>
+                    Rechnername (oder IP-Nummer) und Portnummer des anzusprechenden Job Schedulers.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="log" setting="scheduler_log" reference="yes"/>
+
+        <command_option name="process-class" type="name">
+            <description>
+                <p>
+                    Name der Prozessklasse für den temporären Job,
+                    siehe <scheduler_element name="job" attribute="process_class"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="language" type="script_language" initial="shell" title="Skriptsprache des Jobs">
+            <description>
+                <p>
+                    Skriptsprache,
+                    siehe <scheduler_element name="script" attribute="language"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="at" type="yyyy-mm-dd HH:MM" initial="now" title="Startzeitpunkt">
+            <description>
+                <p>
+                    Startzeitpunkt in der Form "yyyy-mm-dd HH:MM[:SS]".
+                    Siehe <scheduler_element name="at" attribute="at"/>.
+                </p>
+                <p>
+                    Der Job wird nicht gestartet, wenn der Startzeitpunkt in der Vergangenheit liegt.
+                </p>
+                <p>
+                    Maßgeblich ist die Uhr des Rechners, auf dem der Job Scheduler läuft.
+                </p>
+                <p>
+                    <code>-at=now</code> ist voreingestellt und lässt den Job sofort starten.
+                </p>
+            </description>
+        </command_option>
+
+        <description>
+            <p>
+                Dem mit <scheduler_option name="scheduler" value="host:port"/> adressierten Job Scheduler
+                wird ein temporärer Job übergeben.
+            </p>
+            <p>
+                Bei einem Neustart des Job Schedulers geht der Job verloren.                
+            </p>
+        </description>
+
+        <example>
+            <pre>echo ls -l | scheduler -scheduler=localhost:4444 -at="2006-04-04 12:00"</pre>
+        </example>
+    </command_options>
+
+
+    
+    <command_options name="add_order" title="Laufendem Job Scheduler einen Auftrag übergeben">
+        <command_option name="scheduler" reference="yes"/>
+        <command_option name="log" reference="yes"/>
+
+        <command_option name="job-chain" type="name" title="Job-Kette">
+            <description>
+                <p>
+                    Name der Job-Kette für den Auftrag,
+                    siehe <scheduler_element name="add_order" attribute="job_chain"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="order-id" type="id" title="Kennung des Auftrags">
+            <description>
+                <p>
+                    Kennung des Auftrags,
+                    siehe <scheduler_element name="add_order" attribute="id"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="title" type="text" title="Titel des Auftrags">
+            <description>
+                <p>
+                    Dem Auftrag kann ein Titel gegeben werden.
+                    Siehe <scheduler_element name="add_order" attribute="title"/>.
+                </p>
+            </description>
+        </command_option>
+
+        <description>
+            <p>
+                Dem mit <scheduler_option name="scheduler" value="host:port"/> adressierten Job Scheduler
+                wird ein Auftrag übergeben.
+            </p>
+            <p>
+                Die Parameter des Auftrags (s. <scheduler_method class="Order" property="payload"/>) können
+                an der Kommandozeile in der Form <i>name</i><code>=</code><i>value</i> übergeben werden.
+            </p>
+        </description>
+
+        <example>
+            <pre>scheduler -scheduler=localhost:4444 -job-chain=my_job_chain -order-id=123 city=Berlin phone="+4930 864790-0" </pre>
+        </example>
+    </command_options>    
+
+    <command_options name="send_cmd" title="XML-Kommando an laufenden Job Scheduler übergeben">
+        <command_option name="tcp-port" reference="yes"/>
+
+        <command_option name="send-cmd" type="xmlkommando" title="Anderem Job Scheduler zu schickendes Kommando">
+            <description>
+                <p>
+                    Mit dieser Option startet der Job Scheduler nicht,
+                    sondern schickt einem anderen Job Scheduler mit gleicher Option <code>-tcp-port=</code>
+                    auf demselben Rechner das XML-Kommando.
+                    Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
+                </p>
+                <p>
+                    Das Kommando wird an die mit <scheduler_element name="config" attribute="ip_address"/> eingestellte IP-Adresse geschickt,
+                    oder, wenn diese fehlt, an 127.0.0.1.
+                </p>
+            </description>
+        </command_option>
+    </command_options>
+
+    
+
+    <command_options name="kill" title="Laufenden Job Scheduler mit kill abbrechen">
+        <command_option name="kill" title="Laufenden Job Scheduler mit kill abbrechen">
+            <description>
+                <p>
+                    Bricht den Job Scheduler mit <code>kill&#160;-SIGKILL</code> ab, 
+                    dessen Prozess-Id in der mit <scheduler_option name="pid-file"/> angegebenen Datei steht.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="kill" type="pid" title="Laufenden Job Scheduler mit kill abbrechen">
+            <description>
+                <p>
+                    Bricht den Prozess mit der PID mit <code>kill&#160;-SIGKILL</code> ab.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="pid-file" type="dateiname" reference="yes"/>
+
+        <example>
+            <pre>scheduler -kill -pid-file=/home/scheduler/scheduler.pid</pre>
+        </example>
+    </command_options>
+
+    
+
+    <command_options name="xml_schema" title="XML-Schema zeigen">
+        <command_option name="show-xml-schema" title="schreibt das XML-Schema nach stdout">
+            <description>
+                <p>
+                    Der Job Scheduler verfügt über ein eingebautes XML-Schema,
+                    dem die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
+                </p>
+                <p>
+                    Siehe <a href="xml/scheduler.xsd" type="text/plain" charset="utf-8">XML-Schema des Job Schedulers</a>.
+                </p>
+            </description>
+        </command_option>
+
+        <example>
+            <pre>scheduler -show-xml-schema | less</pre>
+        </example>
+    </command_options>
+
+    
+    <command_options name="classpath" title="Java-Classpath expandieren">
+        <command_option name="expand-classpath" title="Java-Classpath expandieren">
+            <description>
+                <p>
+                    Expandiert den als Parameter angegebenen Java-Classpath,
+                    d.h. die Joker werden verarbeitet wie <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
+                </p>
+                <p>
+                    Das Ergebnis schreibt der Job Scheduler nach <code>stdout</code>.
+                    Wenn keine weiteren Optionen es verlangen, beendet sich der Job Scheduler ohne weitere Ausgaben.
+                </p>
+            </description>
+            <example>
+                <pre>export CLASSPATH="`scheduler -expand-classpath='/opt/java/lib/*.jar'`"</pre>
+            </example>
+        </command_option>
+    </command_options>
+
+    
+    <command_options name="version" title="Versionsnummer zeigen">
+        <command_option name="V" title="Versionsnummer zeigen">
+            <description>
+                <p>
+                    Lässt den Job Scheduler beim Start Versionsnummer und Versionsdatum ausgeben.
+                </p>
+            </description>
+        </command_option>
+        
+        <command_option name="?" title="Optionen zeigen">
+            <description>
+                <p>
+                    Zeigt die Kommandozeilenoptionen.
+                </p>
+            </description>
+        </command_option>
+
+        <command_option name="h" title="Optionen zeigen">
+            <description>
+                <p>
+                    Zeigt die Kommandozeilenoptionen.
+                </p>
+            </description>
+        </command_option>
+    </command_options>
+
+
+    <description>
+        <p>
+            Der Job Scheduler kann durch einen einfachen Aufruf gestartet werden:
+        </p>
+        <p>
+            <pre>C:\>…<i>scheduler installation path</i>…\bin\scheduler.exe …\my_scheduler_configuration.xml …</pre>
+            <pre>user@host:~>…<i>installation path</i>…/bin/scheduler …/my_scheduler_configuration.xml …</pre>
+        </p>
+        <p>
+            Die Parameter (rechts vom Gleichheitszeichen) 
+            der hier beschriebenen Kommandozeilenoptionen
+            können in Anführungszeichen oder in Apostrophe
+            gesetzt werden.
+        </p>
+        <p>
+            Das Installationsprogramm erzeugt das Startskript <code>.\bin\jobscheduler.cmd</code> (Windows)
+            bzw. <code>./bin/jobscheduler.sh</code> (Unix), in dem Kommandozeilenoptionen und Umgebungsvariablen
+            bereits gesetzt werden. Das Startskript kann bei Bedarf angepasst werden.
+        </p>
+        <p>
+            Startskript und Umgebungsvariablen sind im Handbuch »Installation und Konfiguration« beschrieben.
+
+            <!-- TODO Welche? Das sollte hier kurz aufgeführt werden und steht jetzt sicher ausführlich in einer Installationsbeschreibung.
+                 Pfad für JVM, javac, libstdc++, libspidermonkey.so, libjavascript.so -->
+        </p>
+    </description>
+
+    <scheduler_keyword keyword="Kommandozeile"/>
+    <scheduler_keyword keyword="Optionen"/>
+
+</command_line>

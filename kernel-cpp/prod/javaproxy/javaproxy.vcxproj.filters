@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Quelldateien\Generated C++/Java-Proxies">
+      <UniqueIdentifier>{2b85850e-6353-45f8-91c1-d90582abf8c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="_precompiled.cxx">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <ClCompile Include="java__lang__Object.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="java__lang__String.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="java__util__AbstractCollection.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="java__util__AbstractList.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="java__util__ArrayList.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+  <ClCompile Include="com__sos__scheduler__engine__cplusplus__runtime__Sister.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__AbstractHasPlatform.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__Platform.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__Scheduler.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__JobC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_chainC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__NodeC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__OrderC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queueC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_queue_nodeC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__event__EventSubsystem.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__event__ObjectEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__folder__FileBased.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__job__Job.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__log__ErrorLogEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__log__LogEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__main__MainContext.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__Order.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderId.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderState.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderStateChangeEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__util__StringValue.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__log__PrefixLog.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__scripting__ScriptInstance.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__event__AbstractEvent.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="com__sos__scheduler__engine__kernel__event__Event.cxx"><Filter>Quelldateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="_precompiled.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="show_state">
+                <script language="javascript"><![CDATA[
+
+for( var i = 1; i < 400000; i++ )  spooler_log.info( "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" );
+
+//var a = spooler.execute_xml( "<show_state what='task_queue job_chains job_chain_orders job_params blacklist job_orders job_commans description log'>" );                
+var a = spooler.execute_xml( "<show_task id='" + spooler_task.id + "' what='log'/>" );
+spooler_job.state_text = a.length + " Zeichen";
+                
+                ]]></script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>

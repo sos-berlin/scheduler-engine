@@ -1,0 +1,54 @@
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+           distributed="yes"
+>
+    
+    <file_order_source directory="$SOS_MOUNT/tmp/x/" regex="^g.*\.ok$"/>
+    <!--
+                <file_order_source directory="$SOS_MOUNT/tmp/y/" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/1" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/2" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/3" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/4" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/5" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/6" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/7" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/8" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/9" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/10" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/11" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/12" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/13" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/14" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/11" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/16" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/17" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/18" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/19" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/20" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/21" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/22" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/23" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/24" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/25" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/26" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/27" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/28" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/29" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/20" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/31" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/32" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/33" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/34" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/35" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/36" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/37" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/38" regex="^g.*\.ok$"/>
+                <file_order_source directory="$SOS_MOUNT/tmp/z/39" regex="^g.*\.ok$"/>
+                -->
+    <job_chain_node state="edno" job="javascript"/>
+    <job_chain_node state="dwa"  job="shell"/>
+    <!--job_chain_node state="tri"  job="java"/-->
+    <file_order_sink state="move" move_to="$SOS_MOUNT/tmp/x/moved"/>
+    <!--file_order_sink state="remove" remove="yes"/-->
+
+</job_chain>

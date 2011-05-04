@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: event.xml 4598 2006-11-22 10:06:24Z jz $-->
+
+          <!--title         = "Ereignis"-->
+
+<xml_element name          = "event"
+             title         = "Event"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-11-22 11:06:24 +0100 (Mi, 22 Nov 2006) $"
+             document_state= "work_in_progress"
+>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="events"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="event_type" type="event_type" title="Event type">
+    <!--<xml_attribute name="event_type" type="event_type" title="Ereignistyp">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    
+    <xml_child_elements>
+        <xml_child_element name="state">
+            <description>
+                <p>
+                    Only a selection from the attributes and elements will be used.
+                <!--Nur eine Auswahl der Attribute und Elemente Elements wird verwendet.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="job">
+            <description>
+                <p>
+                    Only a selection from the attributes and elements will be used.
+                <!--Nur eine Auswahl der Attribute und Elemente Elements wird verwendet.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="task">
+            <description>
+                <p>
+                    Only a selection from the attributes and elements will be used.
+                <!--Nur eine Auswahl der Attribute und Elemente Elements wird verwendet.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="order">
+                    <description>
+                        <p>
+                    Only a selection from the attributes and elements will be used.
+                <!--Nur eine Auswahl der Attribute und Elemente Elements wird verwendet.-->
+                        </p>
+                    </description>
+        </xml_child_element>
+    </xml_child_elements>
+
+    <!--description>
+        <p>
+        </p>
+    </description-->
+
+</xml_element>

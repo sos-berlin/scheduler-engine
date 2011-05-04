@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    head_title          = "Callbacks für bestimmte Ereignisse im Scheduler"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+
+    <h1>Callbacks für bestimmte Ereignisse im Scheduler</h1>
+
+    <p>
+        Wie ein Monitor für eine Task könnten auch Scheduler-weite Ereignisse Callbacks aufrufen.
+    </p>
+    
+    <p>
+        Der Scheduler kennt Ereignisse.
+        Einem Ereignis kann eine eMail oder der Aufruf einer Funktion des Scheduler-Skripts zugeordnet werden.
+    </p>
+    <p>
+        Denkbare Ereignisse wären
+    </p>
+
+    <table cellspacing="12" cellpadding="0">
+        <col valign="top"/>
+        <col style="padding-left: 2ex"/>
+
+        <tr>
+            <td>- Scheduler startet</td>
+            <td>
+                <p>
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Scheduler beendet sich</td>
+            <td>
+                <p>
+                    Einleitung der Beendigung (warten auf Tasks).<br/>
+                    Tatsächliche Beendigung, evtl. mit Neustart.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Scheduler hat ein Problem mit der Datenbank</td>
+            <td>
+                <p>
+                    Scheduler wartet, schaltet auf Textdateien um oder beendet sich.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Scheduler beendet sich wegen eines Fehlers</td>
+            <td>
+                <p>
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Task endet</td>
+            <td>
+                <p>
+                    mit Erfolg, Warnung oder Fehler.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Task wechselt Zustand</td>
+            <td>
+                <p>
+                    Task startet.<br/>
+                    Task wartet auf weitere Aufträge.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Protokoll</td>
+            <td>
+                <p>
+                    Ins Protokoll wird eine Fehlermeldung oder eine Warnung geschrieben.<br/>
+                    Protokoll ist geschlossen, aber noch nicht gelöscht worden.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- Jobkette</td>
+            <td>
+                <p>
+                    Jobkette ist leer.<br/>
+                    Ein Auftrag ist abgearbeitet und aus der Jobkette entfernt worden.
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>- HTTP/TCP</td>
+            <td>
+                <p>
+                    Ein besonderes XML-Kommando löst ein Ereignis aus.
+                    Das Scheduler-Skript kann eine XML-Antwort liefern.
+                </p>
+            </td>
+        </tr>
+    </table>
+
+</description>

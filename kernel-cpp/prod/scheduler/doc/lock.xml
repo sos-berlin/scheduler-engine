@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: windows_job_objects.xml 4270 2006-04-21 08:26:33Z jz $-->
+
+<description
+    title               = "Sperren"
+    base_dir            = ""
+    author              = "$Author: jz,ur $"
+    date                = "$Date: 2006-04-21 10:26:33 +0200 (Fr, 21 Apr 2006) $"
+>
+    <scheduler_keyword keyword="Sperre"/>
+    <scheduler_keyword keyword="Lock"/>
+    <scheduler_keyword keyword="Mutex"/>
+    <scheduler_keyword keyword="Semaphor"/>
+
+    <p>
+			Sperren im Job Scheduler verhindern die Ausführung eines Jobs, 
+			solange eine bestimmte Sperre von einem oder mehreren anderen Job(s) belegt ist. 
+			Sperren stehen für Jobs in Job-Ketten und für einzelne Jobs zur Verfügung. 
+			Wartet ein Job auf die Freigabe einer Sperre, wird er automatisch gestartet,
+			sobald die Sperre freigegeben wird.
+    </p>
+    <p>
+        Ein beispielhaftes Problem:
+        Jobs benutzen eine Datenbank.
+        Ein weiterer Job aber schaltet die Datenbank um.
+        Er darf das nur tun, wenn die ersten Jobs nicht laufen.
+    </p>
+
+    <h2>Konfiguration</h2>
+    
+    <p>
+      Damit Jobs Sperren belegen können, müssen die Sperren zunächst bekanntgemacht werden.
+    </p>
+    <pre>&lt;config>
+    <scheduler_element name="locks"/>
+        &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>"/>
+        &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name2</i>"/>
+        …
+    &lt;/locks></pre>   
+    
+    <p>
+      Beim einzelnen Job werden die anzuwendenden Sperren deklariert
+    </p>
+    <pre><scheduler_element name="job"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name2</i>"/></pre>
+    
+    <p>
+      Sperren können exklusiv und nicht exklusiv verwendet werden. Bei nicht exklusiver Verwendung einer Sperre kann 
+      die Zahl der nicht exklusiven Belegungen begrenzt werden. 
+      Die Voreinstellung für die Verwendung einer Sperre ist die exklusive Belegung
+    </p>
+    
+    <p>
+      Wenn eine Sperre verwendet wird, die nicht deklariert wurde, startet der Job Scheduler 
+      den Job nicht.
+    </p>
+    
+    <p>
+      <b>Achtung:</b> Bei Namen von Sperren wird Groß- und Kleinschreibung unterschieden!
+    </p>
+    
+    <p>
+      Die Belegung einer Sperre beginnt mit dem Start einer Task und endet mit ihr.
+      Eine exklusive Sperre erlaubt nur eine Task.
+    </p>
+    
+    
+    <p><b>Exklusives Sperren</b></p>
+
+    <p>
+        Eine Task, die eine Sperre belegt, lässt keine andere Task zu, die dieselbe Sperre beansprucht.
+     </p>
+
+    <p>
+        Deklaration:
+    </p>
+    
+    <pre>&lt;config>
+    <scheduler_element name="locks"/>
+        &lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>"/>
+        …
+    &lt;/locks></pre>
+
+    <p>
+        Anwendung:
+    </p>
+    <pre><scheduler_element name="job"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/></pre>
+
+
+
+    <p><b>Nicht exklusives Sperren</b></p>
+
+    <p>
+        Eine Sperre kann nicht-exklusiv von mehreren Jobs belegt werden.
+    </p>
+    <p>
+        Die Zahl der nicht-exklusiven Belegungen lässt sich begrenzen.
+        <pre>&lt;<a href="xml/lock.xml">lock</a> name="<i>lock_name</i>" max_non_exclusive="2"/></pre>
+    </p>
+
+
+    <pre><scheduler_element name="job" attribute="name" value="my_database_job"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>" exclusive="no"/> …&lt;/job>
+
+    <scheduler_element name="job" attribute="name" value="my_other_database_job"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>" exclusive="no"/> …&lt;/job>
+
+    <scheduler_element name="job" attribute="name" value="switch_database"/>
+    &lt;<a href="xml/lock.use.xml">lock.use</a> lock="<i>lock_name</i>"/> …&lt;/job></pre>
+
+    <p>
+        Die ersten beiden Jobs können gleichzeitig ablaufen, 
+        aber keiner der ersten beiden Jobs kann mit dem dritten zusammen ablaufen,
+        der die Sperre exklusiv beansprucht.
+    </p>
+    
+    
+    <h2>Sperren in Job-Ketten</h2>
+    
+    <p>Da Sperren von Tasks belegt werden, können sie in Job-Ketten verwendet werden, wenn  
+       die Tasks der einzelnen Job-Knoten sich nach Ausführung beenden. Dazu muss das Attribut 
+       <code>idle_timeout</code> idealerweise auf 0 gesetzt sein.
+    </p>
+    
+    <p>&#160;</p>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+    <!--h2>Variante: Verwendung aller Sperren an einer Stelle beschreiben</h2>
+    <p>
+        Vielleicht ist es übersichtlicher, die Verwendung einer Sperre an nur einer Stelle zu beschreiben.
+    </p>
+    <pre>&lt;lock name="<i>lock_name</i>" non_exclusive_locks="2"
+    &lt;apply_lock job="replicate_from_adabase" exclusive="no"/>
+    &lt;apply_lock job="replicate_from_as400"   exclusive="no"/>
+    &lt;apply_lock job="switch_database">
+&lt;/lock></pre-->
+    
+    
+    <!--h2>Wirkung auf Prozesse</h2>
+    <p>
+        <code>sqlldr</code> zum Beispiel läuft in einem eigenen Prozess.
+    </p>
+    <p>
+        Wenn der Scheduler neu gestartet worden ist, aber der die Task ausführende Prozess oder ein Subprozess
+        noch läuft (das passiert bei kill -9 auf den Scheduler),
+        dann ist die Sperre frei, obwohl die zu schützende Operation noch läuft.
+        <!- -Unter Windows könnte das anscheinend mit den <a href="windows_job_objects.xml">Windows-Jobs</a> 
+        (mit <code>JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</code>) verhindet werden.
+        Gibt es einen ähnlichen Mechanismus für Unix?- ->
+    </p-->
+    
+
+    <!--h2>Nur einen Jobschritt schützen</h2>
+
+    <pre>&lt;job …>&lt;lock lock="<i>lock_name</i>" for="spooler_process"/></pre>
+
+
+    <h2>Aufträge?</h2>
+
+    <p>
+        Auch einzelne Aufträge könnten Sperren zugeordnet werden. 
+        Die Sperren wirken auf <scheduler_method class="Job_impl" method="spooler_process"/> oder die ganze Task.
+    </p>
+
+
+    <h2>API (nicht ausgereift)</h2>
+
+    <pre>boolean spooler_process()
+{
+    if( !spooler_task.try_lock( "my_lock" ) )  return true;
+    
+    ... operation
+}</pre>
+    
+    <p>
+        Task.lock_exclusive() wartet nicht, sondern liefert <code>true</code>,
+        wenn die Sperre gesetzt werden konnte. 
+        Wenn der Aufruf <code>false</code> liefert, 
+        verlässt man spooler_process(). 
+        Der Scheduler wiederholt den Aufruf von spooler_process(), 
+        sobald die Sperre frei ist. 
+        Die Sperre wird freigegeben, 
+        wenn die Task kein weiteres spooler_process() ausführt (return false, Task.end(), Task.delay_next_process()). 
+        Eine Task, die die Sperre erhalten hat,
+        behält sie damit für alle weiteren spooler_process(). 
+        Wenn diese Task nicht endet, verhungern die wartenden Tasks. 
+        Das könnte man mit einem geeigneten Algorithmus verhindern: 
+        Jede wartende Task kommt einmal ran. 
+        Aber ich denke, die erste Task sollte zu Ende laufen (man kann das später einstellbar machen).
+    </p>
+    <p>
+        Der gleiche Mechanismus gilt für spooler_init() und spooler_open(), 
+        die Sperre wird aber erst bei Task-Ende freigegeben.
+    </p>
+    <p>
+        Mehrere sperren könnte man mit einem Aufruf lock_mutexes sperren. 
+        Der Aufruf bekommt alle Sperren in einem Array. 
+        Im Allgemeinen kommt man aber mit einer Sperre aus.
+
+    </p>
+    <p>
+        Um Deadlocks zu vermeiden, darf keine Sperre gesetzt werden, wenn die Task bereits eine Sperre hat.
+    </p-->
+
+</description>

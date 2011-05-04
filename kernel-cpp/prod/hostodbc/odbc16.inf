@@ -1,0 +1,55 @@
+; ODBC.INF für 16 bit-ODBC (Windows 3.1 und 3.11)
+
+[Source Media Descriptions]
+    "2", "hostODBC (16 bit) - ODBC-Treiber der SOS GmbH", "sosdb16.dll", "."
+;   "1", "hostODBC (32 bit) - ODBC-Treiber der SOS GmbH", "sosodbc.dll", "."
+
+[ODBC Drivers]
+"hostODBC" =
+
+[ODBC]
+"Help"     = 2, odbcinst.hlp,,,, 1994-08-17,  ,,      ,  ,,,,,       ,   17412,,,,          ,
+"Main"     = 2, odbcinst.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED,   86800,,,, 2.0.15.10,
+
+[ODBC Administrator]
+"Windows00"= 2, odbcadm.exe ,,,, 1994-08-17,  ,, OLDER,  ,,,,,       ,    6496,,,, 2.0.15.10,
+
+[ODBC Driver Manager]
+"Driver"   = 2, odbc.dll    ,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED,   55792,,,, 2.0.15.10,
+"CrsrLib"  = 2, odbccurs.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED,   88896,,,, 2.0.20.11,
+"bc453rtl" = 2, bc453rtl.dll,,,, 1996-01-25,  ,, OLDER,  ,,,,, SHARED,  222720,,,,          ,
+"Ctl3dv2"  = 2, ctl3dv2.dll ,,,, 1995-03-03,  ,, OLDER,  ,,,,, SHARED,   26832,,,, 2.26.0.0 ,
+
+[hostODBC]
+"Driver"   = 2, sosdb16.dll ,,,, 1997-12-11,  ,, OLDER,  ,,,,,       , 1400000,,,, 1.1.0.0,
+;"Setup"    = 2, sosdb16.dll,,,, 1997-12-08,  ,, OLDER,  ,,,,,        ,   12000,,,, 1.0.0.2,
+"Ctl3dv2"  = 2, ctl3dv2.dll ,,,, 1995-03-03,  ,, OLDER,  ,,,,, SHARED,   26832,,,, 2.26.0.0,
+"bc453rtl" = 2, bc453rtl.dll,,,, 1996-01-25,  ,, OLDER,  ,,,,, SHARED,  222720,,,,          ,
+"soserror" = 2, soserror.txt,,,, 1997-12-11,  ,, OLDER,  ,,,,, SHARED,  100000,,,, 1.0.00.00,
+;"sosodbc.cob"=2,sosodbc.cob,,,, 1996-09-08,  ,, OLDER,  ,,,,, SHARED,  100000,,,, 1.0.00.00,
+
+
+[Win32s ODBC]
+"Thunk" = 1, cpn16ut.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED, 3264,,,,,
+"Main" = 1, odbccp32.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED, 5632,,,,,
+
+[Win32s ODBC Driver Manager]
+"Thunk" = 1, odbc16ut.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED, 5792,,,,,
+"Driver" = 1, odbc32.dll,,,, 1994-08-17,  ,, OLDER,  ,,,,, SHARED, 12288,,,,,
+
+
+[hostODBC-Keys]
+;Folgende Zeile aktivieren für Datenquelle der Tabellenbeschreibungen (Meta-Datenquelle):
+;CreateDSN=hostODBC data sources
+
+APILevel=1
+ConnectFunctions=YYN
+DriverODBCVer=02.00
+;FileUsage=1
+;FileExtns=*.txt,*.csv
+;SQLLevel=0
+
+[hostODBC data sources]
+Description=hostODBC Datenquellen
+Catalog=sossql_profile_catalog 'sossql catalogs' sos.ini
+

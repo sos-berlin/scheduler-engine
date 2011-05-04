@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Erweiterte &lt;run_time>"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+    document_state      = "proposal"
+>
+
+    <h2>&lt;holidays> mit &lt;include></h2>
+    <pre>&lt;holidays>
+    &lt;include file="…"/>
+    …
+&lt;holidays></pre>
+    <p>
+        Die angegebene Datei enthält ein XML-Dokument mit <scheduler_element name="holidays"/>.
+    </p>
+    
+    
+
+    <h2>Ein Wochentag im Monat</h2>
+    <p>
+        Mit <scheduler_element name="run_time"/> kann der erste oder letzte Wochentag eines Monats angegeben werden.
+    </p>
+    <pre>&lt;run_time>
+    &lt;monthdays>
+        &lt;day weekday="monday">             &lt;period …/>  &lt;/day>
+        &lt;day weekday="tuesday" which="2">  &lt;period …/>  &lt;/day>
+        &lt;day weekday="friday" which="-1">  &lt;period …/>  &lt;/day>
+    &lt;/monthdays>
+&lt;/run_time></pre>
+
+    <p>
+        Das Beispiel legt Perioden für den ersten Montag (<code>which="1"</code> ist voreingestellt),
+        den zweiten Dienstag und
+        den letzten Freitag jeden Monats fest.
+    </p>
+    <p>
+        Bei <code>which="5"</code> und <code>which="-5"</code> kommt es
+        nicht zur Ausführung, wenn der Wochentag nicht fünfmal in dem Monat vorkommt.
+    </p>
+    <p>
+        <i>Ist "which" ein gutes Wort für das Attribut?</i>
+    </p>
+
+
+    <h2>Skript, das nächste Startzeit liefert</h2>
+    <p>
+        Erster Vorlage mit einem Skript direkt in <scheduler_element name="run_time"/>:
+    </p>
+    <pre>&lt;run_time>
+    &lt;script language="javascript">
+        function spooler_next_start_time( job_name, now )
+        {
+            return new Date( … );
+        }
+    &lt;/script>
+&lt;/run_time></pre>
+
+    <p>
+        Wenn wir das Scheduler-Skript für die Funktion nehmen, 
+        brauchen wir nicht für jede <scheduler_element name="run_time"/>
+        eine eigene Skripting-Engine, was vielleicht doch zu viele Resourcen belegen würde.
+        Kleiner Nachteil: Wir sind auf eine Skript-Sprache für alle Funktionen festgelegt.
+        Dennoch finde ich das besser.
+    </p>
+    <p>
+        Du gibst den Namen der aufzurufenden Funktion an:
+    </p>
+    <pre>&lt;script language="javascript">
+    // Scheduler-Skript
+    
+    function my_next_start_time( job_name, now )
+    {
+        return new Date( … );
+    }
+&lt;/script>
+    
+&lt;jobs>
+    &lt;job …>
+        &lt;run_time start_time_function="my_next_start_time">
+            …
+        &lt;/run_time>
+    &lt;/job>
+&lt;/jobs></pre>
+
+    <p>
+        Die Funktion ist immer zusätzlich zu den bisher möglichen Angaben.
+        Sie sollte möglichst schnell sein, 
+        denn sie wird vom Hauptprozess gerufen.
+        Blockiert die Funktion, blockiert der gesamte Scheduler.
+        <i>(Zukünftig könnte man den Aufruf in einen Thread auslagern.)</i>
+    </p>
+    <p>
+        Die Funktion bekommt Jobnamen und aktuelle Uhrzeit und liefert ein <code>Date</code>
+        oder einen String mit einem ISO-Datum (in lokaler Zeit).
+        Alle Skriptsprachen sind möglich.
+    </p>
+
+</description>

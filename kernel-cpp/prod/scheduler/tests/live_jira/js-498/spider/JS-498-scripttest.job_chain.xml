@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           title="Jobkette zum Ausführen diverser Scriptsprachen">
+    <job_chain_node state="javascript"
+                    job="JS-498-javascript"
+                    next_state="javascript-api"
+                    error_state="error"/>
+    <job_chain_node state="javascript-api"
+                    job="JS-498-javascript-api"
+                    next_state="end"
+                    error_state="error"/>
+    <job_chain_node state="end"/>
+    <job_chain_node state="error"/>
+</job_chain>

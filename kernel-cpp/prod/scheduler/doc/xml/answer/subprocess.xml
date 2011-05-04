@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name          = "subprocess"
+             title         = "Subprozess (abhängiger Prozess)"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author$"
+             date          = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="subprocesses"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystems"/>
+
+        <xml_attribute name="priority" type="priority">
+            <description>
+                <p>
+                    Priorität des Prozesses:
+                    Unter Unix -20 bis 20, unter Windows
+                    <code>idle</code>,
+                    <code>below_normal</code>,
+                    <code>normal</code>,
+                    <code>above_normal</code> oder
+                    <code>high</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses">
+            <description>
+                <p>
+                    Wenn der Prozess mit
+                    <scheduler_method class="Task" method="add_pid" java_signature="int, double"/>
+                    eine Frist bekommen hat.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="killed" type="yes|no" initial="no" title="Wenn die Task gerade abgebrochen wird"/>
+    </xml_attributes>
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+</xml_element>

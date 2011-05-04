@@ -1,0 +1,39 @@
+#! /bin/bash
+# $Id$
+
+# Zur parallelen Compilierung auf zwei Rechnern "loka" und "sunne". Wenn die Rechner nicht so heißen, wird nur localhost verwendet
+
+my_host=`hostname`
+my_name=`basename $0`
+#my_pids=`pidof $my_name`
+pidfile="`dirname $0`/.$my_name.$my_host.pid"
+
+other_pid=`cat $pidfile 2>/dev/null`
+
+#if [ -n "$other_pid" ]; then \
+#    if ! ps $other_pid &>/dev/null; then \
+#        echo pid $other_pid in $pid_file ist veraltet
+#        #rm -fv $pidfile
+#        other_pid=
+#    fi
+#fi
+
+if [ -n "$other_pid" ]; then \
+
+    if [ "$my_host" == "loka"  ]; then other_host=sunne; fi
+    if [ "$my_host" == "sunne" ]; then other_host=loka;  fi
+
+    if [ -n "$other_host" ]; then \
+        echo -e $other_host:\\t$*
+        rsh $other_host "cd $PWD && ( $* )"
+        exit $?
+    fi
+
+fi
+
+echo $$ >$pidfile
+echo -e $my_host:\\t$*
+$*
+ret=$?
+( rm -f $pidfile )
+exit $ret

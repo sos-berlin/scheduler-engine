@@ -1,0 +1,13 @@
+NAME         _BOOTSTP
+
+DESCRIPTION  '32-bit Setup Bootstrapper'
+
+EXETYPE      WINDOWS
+
+STUB         'winstub.exe'
+
+CODE         PRELOAD MOVEABLE DISCARDABLE
+DATA         PRELOAD MOVEABLE MULTIPLE
+
+HEAPSIZE     2048
+STACKSIZE    8192

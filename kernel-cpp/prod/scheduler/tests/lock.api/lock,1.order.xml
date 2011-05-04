@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<order
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+    
+    title="Robots in Disguise"
+>
+    <run_time repeat="60"/>
+    
+</order>

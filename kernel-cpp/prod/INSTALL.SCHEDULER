@@ -1,0 +1,79 @@
+KOMPILATION DES SCHEDULERS
+
+
+
+
+VORAUSSETZUNGEN
+
+- C++-Compiler gcc Version 4.1.2 (empfohlen)
+- Java SDK ab Version 1.4
+- bzip2
+- perl
+- ant und javadoc (nur für Dokumentation der Java-Schnittstellen)
+- unixODBC-devel (Dateien sql.h und sqlext.h)
+- Java-Archive activation.jar und mail.jar
+- Suse ab Version 9.1
+- Mit Paket zlib-devel
+
+
+
+
+AUSLIEFERUNG
+
+Ausgeliefert wird die Datei scheduler.tar.bz2.
+Sie wird entpackt mit:
+
+    bzip2 <scheduler.tar.bz2 | tar xf -
+    cd scheduler
+
+
+
+
+VORBEREITUNG
+
+Arbeitsverzeichnis für Beispiele ist scheduler (mit den Unterverzeichnissen prod und spidermonkey).
+
+Verzeichnis scheduler/prod/LINKS: Hier muss ein Link aufs Java-SDK gesetzt werden. Z.B.:
+
+    cd prod/LINKS
+    ln -s /opt/java java
+
+Wenn die Archive mail.jar und activation.jar nicht im Java-Verzeichnis lib/ext enthalten sind,
+kopieren Sie dies ins Verzeichnis prod/LINKS (oder setzen Sie einen Link).
+
+
+Außerdem wird ein Verweis auf Ihre Perl-Installation benötigt, ungefähr so:
+
+    ls -s /opt/perl/lib/5.8.0/i686-linux-thread-multi perl
+
+
+
+
+ÜBERSETZUNG
+
+Der Scheduler:
+    cd prod
+    make/make-scheduler
+    cd ..
+
+Für JavaScript:
+    cd spidermonkey
+    make
+    cd ..
+
+
+
+
+ERGEBNIS
+
+prod/bin/scheduler                   - Der Scheduler
+prod/bin/sos.spooler.jar             - Für Jobs in Java
+prod/bin/sos.mail.jar                - Für eMail-Versand mit JavaMail
+prod/scheduler/html                  - Die HTML-Seiten zur Scheduler-Bedienung
+prod/scheduler/doc                   - Dokumentation des Schedulers
+spidermonkey/bin/libspidermonkey.so  - Für Jobs in JavaScript
+
+
+
+------------------------------
+Joacim Zschimmer, 8.2.2005    

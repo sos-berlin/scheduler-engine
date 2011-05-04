@@ -1,0 +1,33 @@
+#! /bin/bash
+# $Id$
+# Kopiert ausgewählte Dateien von bin zur SOS
+
+
+case `uname` in
+    Linux)
+        subdir=linux
+        ;;
+
+    sunos?)
+        subdir=solaris
+        ;;
+
+    *)
+        echo uname liefert unbekanntes Betriebssystem   
+        exit 1
+esac
+
+( cd bin && \
+  files=`echo hostcopy \
+              spooler \
+              hostjava.jar \
+              sos.*.jar \
+              ../hostphp/{hostphp,hostware_file,hostware_dynobj}.inc \
+              ../spooler/spooler.dtd \
+              libsosperlscript.so \
+              libhostphp-*.so \
+              libhostjava.so` &&
+  cmd="rsync -zv --progress $files cvs.sos:/home/sos/jz/$subdir/"
+  echo $cmd
+  $cmd
+)

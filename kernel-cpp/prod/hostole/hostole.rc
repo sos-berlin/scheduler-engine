@@ -1,0 +1,11 @@
+// $Id$
+
+#ifdef _DEBUG
+1                       TYPELIB MOVEABLE PURE   "debug\\hostole.tlb"
+#else
+1                       TYPELIB MOVEABLE PURE   "release\\hostole.tlb"
+#endif
+
+
+#include "hostole_version.h"
+#include "../kram/sosvers.rc"

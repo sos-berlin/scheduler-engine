@@ -1,0 +1,106 @@
+DLGINCLUDE RCDATA DISCARDABLE
+BEGIN
+	"DRVSETUP.H\0"
+END
+
+WELCOME DIALOG DISCARDABLE  36, 33, 200, 105
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "hostODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "&Continue",IDOK,52,85,40,14,WS_GROUP
+    PUSHBUTTON      "E&xit",IDCANCEL,108,85,40,14
+    CTEXT           "Welcome to the Microsoft Open Database Connectivity (ODBC) Setup utility.",
+		    -1,45,10,140,25,SS_NOPREFIX
+    CTEXT           "Setup installs and configures Microsoft Open Database Connectivity components.  Choose Continue to install or Exit to leave without installing Microsoft ODBC.",
+		    -1,10,40,180,35,NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END
+
+ASKQUIT DIALOG DISCARDABLE  34, 44, 200, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "&Back",IDOK,52,70,40,14,WS_GROUP
+    PUSHBUTTON      "E&xit",IDX,108,70,40,14
+    LTEXT           "The setup process is not complete.  If you exit now, Microsoft ODBC will not be installed.",
+		    -1,45,10,150,30,SS_NOPREFIX
+    CTEXT           "If you exit, you will need to rerun setup to install Microsoft ODBC.",
+		    -1,10,40,180,20,NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END
+
+EXITSUCCESS DIALOG DISCARDABLE  27, 34, 200, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,80,70,40,14
+    CTEXT           "Microsoft ODBC has been successfully installed.",-1,10,
+		    40,180,16,SS_NOPREFIX
+    ICON            IDI_ICON,-1,8,8,18,20
+    LTEXT           "Setup Succeeded!",-1,45,15,118,8
+END
+
+EXITQUIT DIALOG DISCARDABLE  33, 35, 200, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,80,70,40,14
+    CTEXT           "Run setup again to install Microsoft ODBC.",-1,10,40,
+		    180,16,SS_NOPREFIX
+    LTEXT           "Microsoft ODBC has not been installed.",-1,45,15,150,20,
+		    SS_NOPREFIX | NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END
+
+EXITFAILURE DIALOG DISCARDABLE  26, 25, 200, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,80,70,40,14
+    CTEXT           "Please correct the problem and rerun setup to install Microsoft ODBC.",
+		    -1,10,40,180,20,SS_NOPREFIX
+    LTEXT           "Microsoft ODBC could not be installed.",-1,45,15,150,16,
+		    SS_NOPREFIX | NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END
+
+AWELCOME DIALOG DISCARDABLE  36, 33, 201, 75
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    CTEXT           "Welcome to the Microsoft Open Database Connectivity (ODBC) Setup utility.",
+		    -1,45,10,140,25,SS_NOPREFIX
+    CTEXT           "Please wait while setup installs and configures the Microsoft Open Database components.",
+		    -1,10,40,180,30,NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END
+
+AEXITSUCCESS DIALOG DISCARDABLE  27, 34, 201, 75
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    CTEXT           "Microsoft ODBC has been successfully installed.",-1,10,
+		    40,180,16,SS_NOPREFIX
+    ICON            IDI_ICON,-1,8,8,18,20
+    LTEXT           "Setup Succeeded!",-1,45,15,118,8
+END
+
+AEXITFAILURE DIALOG DISCARDABLE  26, 25, 200, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Microsoft ODBC Setup"
+FONT 8, "Helv"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,80,70,40,14
+    CTEXT           "Please correct the problem and rerun setup to install Microsoft ODBC.",
+		    -1,10,40,180,20,SS_NOPREFIX
+    LTEXT           "Microsoft ODBC could not be installed.",-1,45,15,150,16,
+		    SS_NOPREFIX | NOT WS_GROUP
+    ICON            IDI_ICON,-1,8,8,18,20
+END

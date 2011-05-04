@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: protokolle.xml 3639 2005-04-25 10:30:08Z jz $-->
+
+<description 
+    title    = "Logs" 
+    base_dir = ""
+    author   = "$Author: ap $"
+    date     = "$Date: 2007-09-30 18:47:01 +0200 (So, 30 Sep 2007) $"
+>
+
+	<scheduler_keyword keyword="Log"/>
+	<scheduler_keyword keyword="Log file"/>
+	<scheduler_keyword keyword="Protocol"/>
+	
+	<p>
+    The directory in which the Job Scheduler writes its log files is specified using the 
+    <scheduler_option name="log-dir"/> option.
+<!--Der Scheduler schreibt seine Protokolle in das mit der Option <scheduler_option name="log-dir"/> 
+    eingestellte Verzeichnis.-->
+	</p>
+	
+    <p>
+        Entries are numbered - 
+        see <scheduler_a href="messages/index.xml" quote="yes"/>
+    <!--Die Meldungen sind numeriert,
+        siehe <scheduler_a href="messages/index.xml" quote="yes"/>.-->
+    </p>
+
+	<scheduler_keyword keyword="Main Log Files" type="definition"/>
+	<!--<scheduler_keyword keyword="Hauptprotokoll" type="definition"/>-->
+
+	<h3>Main Log Files</h3>
+<!--<h3>Hauptprotokoll</h3>-->
+
+	<p>
+    All log files are summarized in the main log file.
+    The name of the main log file is made up from the scheduler id, the date and the time thus:
+    <code>scheduler-2004-08-24-104111.log</code>.
+<!--Das Hauptprotokoll fast alle Protokolle zusammen.
+    Der Dateiname wird aus Scheduler-Id, Datum und Uhrzeit gebildet, z.B. 
+    <code>scheduler-2004-08-24-104111.log</code>.-->
+	</p>
+
+
+	<scheduler_keyword keyword="Job Protocol"/>
+<!--<scheduler_keyword keyword="Jobprotokoll"/>-->
+
+	<h3>Job Protocols</h3>
+<!--<h3>Jobprotokolle</h3>-->
+
+	<p>
+    The Job Scheduler records a job log file containing the task start information and the orders processed - 
+    for example: <code>job.my_job.log</code>
+		<!--Für jeden Job erstellt der Scheduler ein Jobprotokoll
+    mit den Starts der Tasks und eingetroffenen Aufträgen.
+    Beispiel: <code>job.mein_job.log</code>-->
+	</p>
+<p>
+    The Job Scheduler changes characters in job names, which cannot be used in file names, into "_".
+<!--Zeichen im Jobnamen, die nicht im Dateinamen verwendet werden können, tauscht der Scheduler gegen "_".-->
+</p>
+
+
+	<scheduler_keyword keyword="Task Protocol"/>
+<!--<scheduler_keyword keyword="Taskprotokoll"/>-->
+
+	<h3>Task Protocols</h3>
+<!--<h3>Taskprotokolle</h3>-->
+
+	<p>
+    A task log file is written for every task the scheduler starts.
+    The name of the task log file is made up of the job name and, should more than one task be allowed at once, the task id.
+    E.g. <code>task.my_job.log</code> and <code>task.a_job.1234.log</code>.
+    Note that task log files with a task-id are deleted after completion of the task.
+<!--Für jeden Task erstellt der Scheduler ein Taskprotokoll. 
+    Der Dateiname wird aus dem Jobnamen und, wenn mehrere Tasks zugelassen sind, der Task-Id gebildet, 
+    z.B.: <code>task.mein_job.log</code> und <code>task.ein_job.1234.log</code>.
+    Taskprotokolle mit Task-Id werden nach Ende der Task gelöscht.-->
+	</p>
+
+
+	<scheduler_keyword keyword="Order Protocol"/>
+<!--<scheduler_keyword keyword="Auftragsprotokoll"/>-->
+
+	<h3>Order Protocols</h3>
+	<!--<h3>Auftragsprotokolle</h3>-->
+
+	<p>
+    The Job Scheduler compiles an order log file containing the results 
+    of all tasks processed in the course of an order.
+    The name of this log file is made up from the name of the job chain and the order id - 
+    e.g.: <code>order.my_job_chain.9876.log</code>.
+    Order log files are deleted after individual orders are completed.
+<!--Für jeden Auftrag erstellt der Scheduler ein Auftragsprotokoll
+    mit den Ausgaben aller Tasks, die der Auftrag durchläuft.
+    Der Dateiname wird aus der Job-Kette und der Auftrags-Id gebildet,
+    z.B.: <code>order.meine_Job-Kette.9876.log</code>.
+    Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.-->
+	</p>
+
+
+	<scheduler_keyword keyword="Log File"/>
+<!--<scheduler_keyword keyword="Log-Datei"/>-->
+	<scheduler_keyword keyword="scheduler.log"/>
+<!--<scheduler_keyword keyword="scheduler.log"/>-->
+
+	<h3>scheduler.log</h3>
+	<!--<h3>scheduler.log</h3>-->
+
+	<p>
+    The Job Scheduler can write the <code>scheduler.log</code> as a debugging aid. 
+    The name of this log file is set using the 
+    <scheduler_ini_entry file="factory.ini" section="spooler" entry="log"/> parameter.
+    "<code>factory.ini</code>" is used in this documentation for the file name entered here.
+<!--Zur Fehlerdiagnose kann der Scheduler das <code>scheduler.log</code> schreiben. 
+    In <scheduler_ini_entry file="factory.ini" section="spooler" entry="log"/> stellen sie den Dateinamen ein.
+    In dieser Dokumentation steht <code>factory.ini</code> für den hier eingestellten Dateinamen.-->
+	</p>
+<p>
+    For further information see the <a href="log_categories.xml">List of Log Categories</a>.
+<!--Hier die <a href="log_categories.xml">Liste der Log-Kategorien</a>.-->
+</p>
+
+
+<h2>Log File Size</h2>
+<!--<h2>Umfang</h2>-->
+<p>
+    The detail with which log files are noted (error, warn, info, debug to debug9) can be set using
+    <scheduler_option name="log-level"/> and 
+    <scheduler_method class="Log" property="level" access="write" java_signature="int"/>
+<!--Mit <scheduler_option name="log-level"/> und 
+    <scheduler_method class="Log" property="level" access="write" java_signature="int"/>
+    kann die Stufe (error, warn, info, debug bis debug9) eingestellt werden, ab der Protokollzeilen gelten.-->
+</p>
+
+
+<h2>Message Codes</h2>
+<!--<h2>Meldungs-Codes</h2>-->
+<p>
+    Messages are allocated codes, such as <code>SCHEDULER-900</code>.
+    All codes can be found in the <a href="messages/index.xml">List of Job Scheduler Message Codes</a> .
+<!--Die Meldungen sind mit Codes versehen, z.B. <code>SCHEDULER-900</code>.
+    Hier ist eine <a href="messages/index.xml">Liste der Meldungs-Codes</a> des Schedulers.-->
+</p>
+
+
+<h2>Full Disc Drive</h2>
+<!--<h2>Plattenplatzmangel</h2>-->
+<p>
+    An error occurs when insufficient disc space is available when a log file is opened.
+    Should it not be possible to open the main log file then the scheduler aborts.
+<!--Wenn nicht genug Plattenplatz beim Öffnen einer Protokolldatei vorhanden ist, gibt es einen Fehler.
+    Wenn das Hauptprotokoll nicht geöffnet werden kann, bricht der Scheduler ab.-->
+</p>
+<p>
+    The scheduler stops should insufficient disc space be available to continue writing a log file.
+    However, it will still respond to TCP, UDP or HTTP commands 
+<!--Wenn nicht genug Plattenplatz vorhanden ist, um ein Protokoll fortzuschreiben, 
+    hält der Scheduler an.
+    Er reagiert auf über TCP, UDP oder HTTP übergebene Kommandos.-->
+</p>
+<p>
+    In this situation, the <a href="xml/modify_spooler.xml"><code>&lt;modify_spooler></code></a> 
+    command will only be carried out to a limited extent.
+<!--Das Kommando <a href="xml/modify_spooler.xml"><code>&lt;modify_spooler></code></a> wirkt nur eingeschränkt.-->
+</p>
+<p>
+    The scheduler can be made to continue using the <code>&lt;modify_scheduler cmd="continue"/></code>, once disc space has been made available.
+<!--Wenn wieder Plattenplatz bereit steht, können Sie den Scheduler fortsetzen mit <code>&lt;modify_scheduler cmd="continue"/></code>.-->
+</p>
+<p>
+    The  above procedure does not apply to the <code>scheduler.log</code> file, for which errors are ignored. 
+<!--Die Datei <code>scheduler.log</code> ist von diesem Verfahren nicht betroffen. Fehler werden hier ignoriert.-->
+</p>
+
+
+	<scheduler_keyword keyword="Database"/>
+	<scheduler_keyword keyword="Data base"/>
+<!--<scheduler_keyword keyword="Datenbank"/>-->
+
+	<h2>Database Storage of Protocols</h2>
+	<!--<h2>Ablage in den Datenbank</h2>-->
+
+	<p>
+    The Job Scheduler can store task and order log files in the history under the following conditions:
+<!--Der Scheduler kann die Task- und Auftragsprotokolle mit in die Historie schreiben.
+    Voraussetzung sind-->
+	</p>
+
+	<ul>
+		<li>
+        operation with a <a href="datenbank.xml">database</a>, 
+    <!--Betrieb mit einer <a href="datenbank.xml">Datenbank</a>, -->
+		</li>
+		<li>
+        activation of the history function using the 
+        <scheduler_ini_entry file="factory.ini" section="spooler" entry="history"/>), setting,
+    <!--die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="history"/>), 
+        um die Historie einzuschalten,-->
+		</li>
+		<li>
+        use of the <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_with_log"/> 
+        setting for the Task Protocol,
+    <!--die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_with_log"/> 
+        fürs Task-Protokoll,-->
+		</li>
+		<li>
+        use of the setting <scheduler_ini_entry file="factory.ini" section="job" entry="history_with_log"/> 
+        for distinct jobs,
+    <!--die Einstellung <scheduler_ini_entry file="factory.ini" section="job" entry="history_with_log"/> 
+        für bestimmte Jobs,-->
+		</li>
+		<li>
+        use of the <scheduler_ini_entry file="factory.ini" section="spooler" entry="order_history_with_log"/> 
+        setting for the Order Protocol.
+    <!--die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="order_history_with_log"/> 
+        fürs Auftragsprotokoll.-->
+		</li>
+	</ul>
+
+
+<h2>Program Interface</h2>
+<!--<h2>Programmschnittstelle</h2>-->
+<p>
+    The log files and settings available are set using the <scheduler_method class="Log"/> class.
+<!--Die Klasse <scheduler_method class="Log"/> beschreibt die Protokolle und erlaubt verschiedene Einstellungen.-->
+</p>
+
+
+	<scheduler_keyword keyword="E-mail Forwarding"/>
+<!--<scheduler_keyword keyword="eMail-Versand"/>-->
+	<scheduler_keyword keyword="Mail Forwarding"/>
+<!--<scheduler_keyword keyword="Mail-Versand"/>-->
+
+	<h2>E-mail Forwarding</h2>
+	<!--<h2>eMail-Versand</h2>-->
+
+	<p>
+    Task log files can be sent per e-mail. Further details can be found in <a href="email.xml">e-mail</a>.
+<!--Der Scheduler kann das Task-Protokoll per eMail verschicken. Lesen Sie weiter im Kapitel <a href="email.xml">eMail</a>.-->
+	</p>
+
+
+	<h2>Protocol Display</h2>
+	<!--<h2>Anzeigen der Protokolle</h2>-->
+
+	<p>
+    See the <scheduler_element name="show_state"/>, <scheduler_element name="show_task"/> and 
+    <scheduler_element name="show_history"/> commands.
+<!--Siehe Kommandos <scheduler_element name="show_state"/>, <scheduler_element name="show_task"/> und 
+    <scheduler_element name="show_history"/>.-->
+	</p>
+
+	<p>
+    Protocols can be viewed real-time when the Job Scheduler <a href="http.xml">HTTP-Server</a> 
+    is called up using a web browser.
+<!--Mit einem Browser können Sie den eingebauten <a href="http.xml">HTTP-Server</a> ansprechen 
+    und sich ein Protokoll fortlaufend anzeigen lassen.-->
+	</p>
+
+</description>

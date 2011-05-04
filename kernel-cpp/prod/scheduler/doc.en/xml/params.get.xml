@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: params.get.xml 5825 2008-07-08 08:14:29Z jz $-->
+<!--         title    = "Scheduler-Variablen zeigen"-->
+
+<xml_element name     = "params.get"
+             title    = "Show Job Scheduler variables"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-07-08 10:14:29 +0200 (Di, 08 Jul 2008) $">
+
+
+    <xml_attributes>
+        <xml_attribute name="name" type="name" title="The parameter name"/>
+    <!--<xml_attribute name="name" type="name" title="Name des Parameters"/>-->
+    </xml_attributes>
+
+    <description>
+        <p>
+            Returns <scheduler_element directory="xml/answer/" name="params"/> 
+            including all Job Scheduler variables.
+        <!--Liefert <scheduler_element directory="xml/answer/" name="params"/> 
+            mit allen Scheduler-Variablen.-->
+        </p>
+    </description>
+
+    <xml_answer element="params"/>
+
+</xml_element>

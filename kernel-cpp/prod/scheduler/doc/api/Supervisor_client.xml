@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--$Id: CHANGES.xml 4985 2007-04-19 14:54:41Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Supervisor_client"
+    object_name = "supervisor_client"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2007-01-23 22:30:13 +0100 (Di, 23 Jan 2007) $"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="hostname" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+        
+        <title>
+            Name oder IP-Nummer des Rechners, auf dem der Supervisor läuft
+        </title>
+        
+        <description>
+            <p>
+                Siehe auch <scheduler_element name="config" attribute="supervisor"/>.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="tcp_port" access="read">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            TCP-Port des Supervisors
+        </title>
+
+        <description>
+            <p>
+                Siehe auch <scheduler_element name="config" attribute="supervisor"/>.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            <scheduler_method class="Spooler" property="supervisor_client"/> liefert dieses Objekt.
+        </p>
+    </description>
+
+    <example programming_language="javascript">
+        <pre>var supervisor_hostname = spooler.supervisor_client.hostname;</pre>
+    </example>
+
+</api.class>

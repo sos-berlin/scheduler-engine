@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: select_events.xml 4601 2006-11-22 10:14:31Z jz $-->
+
+         <!--title    = "Ereignisse auswählen"-->
+
+<xml_element name     = "select_events"
+             title    = "Select Events"
+             category = "Kommando"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-11-22 11:14:31 +0100 (Mi, 22 Nov 2006) $"
+             document_state = "work_in_progress"
+>
+    <description>
+        <p>
+            Selects the events, which are to be  <scheduler_element name="get_events"/> gemeldet werden sollen.
+            Ausgewählt werden können mit mehreren
+        <!--Wählt die Ereignisse aus, die von <scheduler_element name="get_events"/> gemeldet werden sollen.
+            Ausgewählt werden können mit mehreren-->
+        </p>
+        <ul>
+            <li>
+                <code>&lt;select_event job="…"/></code> einzelne Jobs (sonst alle Jobs)
+            <!--<code>&lt;select_event job="…"/></code> einzelne Jobs (sonst alle Jobs)-->
+            </li>
+            <li>
+                <code>&lt;select_event event_type="…"/></code> einzelne Ereignistypen (sonst alle Ereignistypen)
+            <!--<code>&lt;select_event event_type="…"/></code> einzelne Ereignistypen (sonst alle Ereignistypen)-->
+            </li>
+            <li>
+                <code>&lt;select_event scheduler_id="…"/></code> einzelne Scheduler (sonst alle Scheduler)
+            <!--<code>&lt;select_event scheduler_id="…"/></code> einzelne Scheduler (sonst alle Scheduler)-->
+            </li>
+        </ul>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="get_events"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+
+        <xml_attribute name="job" type="name">
+            <description>
+                <p>
+                    Only events relevant to the job specified should be reported.
+                    More than one <code>&lt;get_events></code> with differing <code>job="…"</code> can be specified.
+                <!--Nur Ereignisse, die den angegebenen Job betreffen, sollen gemeldet werden.
+                    Mehrere <code>&lt;get_events></code> mit verschiedenen <code>job="…"</code> können angegeben werden.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="event_type" type="name">
+            <description>
+                <p>
+                    Only events of the specified type should be reported.
+                    More than one <code>&lt;get_events></code> with differing <code>event_type="…"</code> can be specified.
+                <!--Nur Ereignisse des angegebenen Typs sollen gemeldet werden.
+                    Mehrere <code>&lt;get_events></code> mit verschiedenen <code>event_type="…"</code> können angegeben werden.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="scheduler_id" type="id">
+            <description>
+                <p>
+                    A &lt;scheduler_a href="../supervisor.xml">Supervisor&lt;/scheduler_a> Job Scheduler,
+                    can deliver the event reports from other Job Schedulers, whose IDs are specified here.
+                    More than one <code>&lt;get_events></code> with differing <code>event_type="…"</code> can be specified.
+                <!--Ein &lt;scheduler_a href="../supervisor.xml">Supervisor&lt;/scheduler_a> kann Ereignismeldungen von anderen Schedulern
+                    liefern, die hier ausgewählt werden können.
+                    Mehrere <code>&lt;get_events></code> mit verschiedenen <code>event_type="…"</code> können angegeben werden.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <xml_answer element="events"/>
+
+</xml_element>

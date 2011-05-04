@@ -1,0 +1,44 @@
+#! /bin/bash
+
+name=libsosperlscript
+
+files=
+files="$files $(for f in $(make/make zschimmer show-libsosperlscript-files 2> /dev/null); do echo prod/zschimmer/$f; done)"
+files="$files prod/zschimmer/Makefile"
+files="$files prod/zschimmer/*.h"
+#files="$files prod/zschimmer/system.h"
+#files="$files prod/zschimmer/mutex_base.h"
+#files="$files prod/zschimmer/z_posix_event.h"
+#files="$files prod/zschimmer/filename.h"
+files="$files prod/make/make-libsosperlscript"
+files="$files prod/make/"
+files="$files prod/revision.h"
+
+exclude=""
+exclude="$exclude  --exclude .svn"
+exclude="$exclude  --exclude Release"
+exclude="$exclude  --exclude Debug"
+exclude="$exclude  --exclude '*.class'"
+
+
+[ `whoami` == "root" ]  &&  echo "Skript darf wegen 'rm -rf' nicht als root laufen, zu gefährlich!" && exit 1
+
+tmp=/tmp/`whoami`/$name-source
+[ -d "$tmp" ] || mkdir -p "$tmp" || exit
+rm -rf "$tmp/$name/"
+mkdir "$tmp/$name"
+
+module=$(basename `pwd`)
+archive=$tmp/$name.tar.bz2
+
+
+make/generate-revision.h
+
+#echo $files werden nach $tmp kopiert ...
+( cd `pwd -P`/..  &&  rsync -av  --keep-dirlinks --relative --cvs-exclude $exclude --delete --force --delete-excluded $rsync_options  $files  $tmp/$name )
+
+rm -rf $tmp/$name/$module/LINKS  &&  mkdir $tmp/$name/$module/LINKS
+
+
+echo "tar prod >$archive ..."
+tar cf - -C $tmp  $name  |  bzip2 >$archive  &&  ls -l $archive

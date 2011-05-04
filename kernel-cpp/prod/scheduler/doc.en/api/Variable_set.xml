@@ -1,0 +1,348 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Variable_set.xml 3943 2005-09-25 18:33:33Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Variable_set"
+    object_name = "variable_set"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-06-03 08:56:27 +0200 (Di, 03 Jun 2008) $"
+>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="count" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+
+    <title>
+        The number of variables
+    <!--Anzahl der Variablen-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="value" default_property="true">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result name="value">
+            <com.type type="VARIANT"/>
+
+            <description>
+                <api.empty/>, should a variable not exist.
+            <!--<api.empty/>, wenn die Variable nicht vorhanden ist.-->
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        A variable
+    <!--Eine Variable-->
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="var">
+    <not_implemented programming_language="javascript"/>        <!-- var ist Schlüsselwort -->
+
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.result name="value">
+            <com.type type="VARIANT"/>
+
+            <description>
+                <api.empty/>, should a variable not exist.
+            <!--<api.empty/>, wenn die Variable nicht vorhanden ist.-->
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        A variable
+    <!--Eine Variable-->
+    </title>
+
+    <description>
+        <p>
+            Use the <scheduler_method class="Variable_set" property="value"/>, 
+            which is available in all languages.
+        <!--Verwenden Sie <scheduler_method class="Variable_set" property="value"/>, 
+            das ist in allen Sprachen verfügbar.-->
+        </p>
+    </description>
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="set_var">
+    <com>
+        <com.parameter name="name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.parameter name="value">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+    </com>
+
+    <not_implemented programming_language="java"/>
+
+    <title>
+        Sets a variable
+    <!--Setzt eine Variable-->
+    </title>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                XML document as a string.
+                Returns <scheduler_element name="sos.spooler.variable_set"/>.
+                When setting this property to an XML value, then the name of the root element is ignored;
+                <scheduler_element name="params"/> or <scheduler_element name="sos.spooler.variable_set"/>
+                may be returned.
+            <!--XML-Dokument als String.
+                Liefert <scheduler_element name="sos.spooler.variable_set"/>.
+                Beim Setzen wird der Name des Wurzelelements nicht beachtet, 
+                <scheduler_element name="params"/> oder <scheduler_element name="sos.spooler.variable_set"/>
+                kann übergeben werden.-->
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        <code>Variable_set</code> as an XML document
+    <!--<code>Variable_set</code> als XML-Dokument-->
+    </title>
+
+    <description>
+        <p>
+            See <scheduler_element name="sos.spooler.variable_set"/>, <scheduler_element name="params"/>.
+        <!--Siehe <scheduler_element name="sos.spooler.variable_set"/>, <scheduler_element name="params"/>.-->
+        </p>
+    </description>
+
+    <example programming_language="javascript">
+        <pre>var variable_set = spooler.create_variable_set();
+spooler_log.info( variable_set.xml );   // Liefert &lt;?xml version='1.0'?>&lt;sos.spooler.variable_set/>
+
+variable_set.xml= "&lt;?xml version='1.0'?>" +
+                  "&lt;params>" +
+                      "&lt;param name='surname' value='Meier'/>" +
+                      "&lt;param name='christian name' value='Hans'/>" + 
+                  "&lt;/params>";
+spooler_log.info( variable_set.xml );
+spooler_log.info( "nachname=" + variable_set.value( "surname" ) );
+spooler_log.info( "vorname =" + variable_set.value( "christian name" ) );</pre></example>
+<!--
+    <example programming_language="javascript">
+        <pre>var variable_set = spooler.create_variable_set();
+spooler_log.info( variable_set.xml );   // Liefert &lt;?xml version='1.0'?>&lt;sos.spooler.variable_set/>
+
+variable_set.xml= "&lt;?xml version='1.0'?>" +
+                  "&lt;params>" +
+                      "&lt;param name='nachname' value='Meier'/>" +
+                      "&lt;param name='vorname' value='Hans'/>" + 
+                  "&lt;/params>";
+spooler_log.info( variable_set.xml );
+spooler_log.info( "nachname=" + variable_set.value( "nachname" ) );
+spooler_log.info( "vorname =" + variable_set.value( "vorname" ) );</pre></example>
+-->
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="names" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                All variable names should be separated by semicolons.
+            <!--Die Namen aller Variablen durch Semikolon getrennt.-->
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        The separation of variable names by semicolons
+    <!--Alle Variablennamen durch Semikolon getrennt-->
+    </title>
+    
+    <example programming_language="javascript">
+        <pre>var variable_set = spooler.create_variable_set();
+spooler_log.info( '"' + variable_set.names + '"' );        // ==> ""
+
+variable_set( "variable_1" ) = "edno";
+variable_set( "variable_2" ) = "dwa";
+
+spooler_log.info( '"' + variable_set.names + '"' );        // ==> "variable_1;variable_2"
+
+var names = variable_set.names.split( ";" );
+for( var i in names )  spooler_log.info( names[i] + "=" + variable_set( names[i] ) );</pre>
+    </example>
+
+    <example programming_language="java">
+        <pre>Variable_set variable_set = spooler.create_variable_set();
+spooler_log.info( "\"" + variable_set.names() + "\"" );    // ==> ""
+
+variable_set.set_var( "variable_1", "edno" );
+variable_set.set_var( "variable_2", "dwa" );
+
+spooler_log.info( "\"" + variable_set.names() + "\"" );    // ==> "variable_1;variable_2"
+
+java.util.StringTokenizer t = new java.util.StringTokenizer( variable_set.names(), ";" ); 
+while( t.hasMoreTokens() )
+{
+    String name = t.nextToken();
+    spooler_log.info( name + "=" + variable_set.var( name ) );
+}</pre>
+    </example>
+
+</property>
+
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="merge">
+    <com>
+        <com.parameter>
+            <com.type class="Variable_set"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Merges with values from another Variable_set
+    <!--Mischt eine andere Variablenmenge ein-->
+    </title>
+
+    <description>
+        <p>
+            Variables with the same name are overwritten.
+        <!--Gleichnamige Variablen werden überschrieben.-->
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="substitute">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                The string containing the substituted $ variables.
+            <!--Die Zeichenkette mit den ersetzten $-Variablen-->
+            </description>
+        </com.result>
+        <com.parameter>
+            <com.type type="BSTR"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Replaces $-Variables in a String
+    <!--Ersetzt $-Variablen in einem String-->
+    </title>
+
+    <description>
+        <p>
+            In the example below, the <scheduler_method class="Subprocess" property="env"/> method is used.
+        <!--Im Beispiel wird <scheduler_method class="Subprocess" property="env"/> verwendet.-->
+        </p>
+        <p>
+            References in the string in the form 
+            <code>$</code><i>name</i> and <code>${</code><i>name</i><code>}</code>
+            are replaced by variables.
+            <!--See also <scheduler_a href="../variable_substitution.xml" quote="yes"/>.-->
+        <!--Referenzen der Form <code>$</code><i>name</i> und <code>${</code><i>name</i><code>}</code>
+            im String werden durch Variablenwerte ersetzt,
+            siehe auch <scheduler_a href="../variable_substitution.xml" quote="yes"/>.-->
+        </p>
+    </description>
+    
+    <example programming_language="javascript">
+        <pre>subprocess.start( subprocess.env.substitute( "${MY_HOME}/my_program" ) );</pre>
+    </example>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>
+    A Variable_set may be used to pass parameters
+<!--Variablenmenge zur Übergabe von Parametern-->
+</title>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<description>
+    <!--
+    <p>
+        Die Variablenmenge hält Variablen mit Namen und Wert.
+        Die Variablenwerte können von jedem COM-Typ sein (Java: nur Strings).
+    </p>
+    <p>
+        Objekte sollten nicht als Variablenwert verwendet werden.
+    </p>
+    -->
+
+    <p>
+        Variable_set is used for the Job Scheduler variables and task parameters.
+        A new Variable_set is created using
+        <scheduler_method class="Spooler" method="create_variable_set"/>.
+    <!--Variablenmengen werden gebraucht für die Scheduler-weiten Variablen und Task-Parameter.
+        Eine neue Variablenmenge wird mit
+        <scheduler_method class="Spooler" method="create_variable_set"/>
+        angelegt.-->
+    </p>
+    <p>
+        Variable names are case independent.
+    <!--Die Großschreibung der Variablennamen ist nicht relevant.-->
+    </p>
+    <p>
+        The value of a variable is known as a variant in the COM interface (JavaScript, VBScript, Perl).
+        Because variables are usually written in the Job Scheduler database, 
+        only variant types which can be converted into strings should be used here.
+    <!--In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant.
+        Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden,
+        sollten nur nach String konvertierbare Variant-Werte verwendet werden
+        (d.h. es sollten keine Objekte verwendet werden).-->
+    </p>
+    <p>
+        The value of a variable in Java is a string.
+        Therefore, a string value is returned when reading this variable, 
+        when it is set as a variant in the COM interface.
+        <code>Null</code> and <code>Empty</code> are returned as <api.null/>.
+        An error is caused should the value of a variant not be convertible.
+    <!--In Java ist ein Variablenwert ein String.
+        Wenn die Variable mit COM als Variant gesetzt worden ist,
+        wird beim Lesen der nach String konvertierte Wert zurückgegeben.
+        <code>Null</code> und <code>Empty</code> werden als <api.null/> zurückgeliefert.
+        Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.-->
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</api.class>

@@ -1,0 +1,73 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: modify_hot_folder.xml 5758 2008-04-29 12:16:14Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--         title    = "XML-Dokument in ein Konfigurationsverzeichnis schreiben"-->
+
+<xml_element name     = "modify_hot_folder"
+             title    = "Add an XML Document to a Configuration Directory"
+             category = "Command"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-08-14 11:30:02 +0200 (Do, 14 Aug 2008) $">
+
+
+    <description>
+        <p>
+            This command adds a child element to a configuration directory.
+            The file name is formed according to the rules for file-based configuration of jobs and tasks
+            (see <scheduler_a href="../dynamic_configuration.xml" quote="yes"/>).
+        <!--Das Kommando schreibt das Kind-Element in ein Konfigurationsverzeichnis.
+            Der Dateiname wird nach dem Regeln für die dateibasierte Konfiguration gebildet
+            (s. <scheduler_a href="../dynamic_configuration.xml" quote="yes"/>).-->
+        </p>
+        <p>
+            Already existing files will be overwritten.
+        <!--Eine vorhandene Datei wird überschrieben.-->
+        </p>
+        <p>
+            The child element (only one can be specified) must possess a <code>name=</code> attribute, 
+            or, if it is an order, <code>job_chain=</code> and <code>id=</code> attributes.
+        <!--Das Kind-Element (nur eins kann angegeben werden) muss das Attribut <code>name=</code> haben, 
+            oder bei einem Auftrag <code>job_chain=</code> und <code>id=</code>.-->
+        </p>
+    </description>
+
+    <messages>
+        <message level="info" code="SCHEDULER-707"/>
+    </messages>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="folder" type="path" initial="/">
+            <description>
+                <p>
+                    Specifies the folder in which XML elements should be written.
+                    The Job Scheduler creates this directory if it does not already exist 
+                    (including all higher level directories, if necessary to the root directory).
+                <!--Gibt den Ordner an, in das das XML-Element geschrieben werden soll.
+                    Der Scheduler legt das Konfigurationsverzeichnis bei Bedarf an
+                    (einschließlich aller oberen Verzeichnisse, bis auf das Wurzelverzeichnis).-->
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    <xml_child_elements>
+        <xml_child_element name="job"/>
+        <xml_child_element name="job_chain"/>
+        <xml_child_element name="lock"/>
+        <xml_child_element name="order"/>
+        <xml_child_element name="process_class"/>
+        <xml_child_element name="schedule"/>
+    </xml_child_elements>
+
+    <xml_answer element="ok"/>
+
+</xml_element>

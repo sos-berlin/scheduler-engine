@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           title="Warning if running longer than"
+           max_orders="5">
+    <job_chain_node state="0"
+                    job="job-js-448"
+                    next_state="100"
+                    error_state="error"/>
+    <job_chain_node state="100"/>
+    <job_chain_node state="error"/>
+</job_chain>

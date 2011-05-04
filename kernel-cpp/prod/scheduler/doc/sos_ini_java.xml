@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<ini_section
+    file     = "sos.ini"
+    name     = "java"
+    weight   = "10"
+    title    = ""
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$">
+
+    <ini_entries>
+        <ini_entry name="vm" type="path" title="Dateipfad der Java virtual machine">
+            <scheduler_keyword keyword="Java Runtime Environment"/>
+            <description>
+                <p>
+                    Voreingestellt ist für HP-UX <code>jvm.sl</code> und für andere Unix-Varianten <code>jvm.so</code>.
+                </p>
+                <p>
+                    Die Voreinstellung für Windows wird aus der Registrierung gelesen.
+                    Aus dem Schlüssel
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment</pre>
+                <p>
+                    wird der Eintrag <code>CurrentVersion</code> gelesen, der die aktuelle Versionsnummer enthält,
+                    z.B. "<code>1.5</code>".
+                    Anschließend wird der Schlüssel der Version gelesen, z.B.
+                </p>
+                <pre>HKEY_LOCAL_MACHINE\software\JavaSoft\Java Runtime Environment\1.5</pre>
+                <p>
+                und dem dortigen Eintrag <code>RuntimeLib</code> der Pfad der <code>jvm.dll</code> entnommen.
+                </p>
+                <!--p>
+                    Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist,
+                    können Sie hier den vollständigen Pfad angeben.
+                </p-->
+            </description>
+        </ini_entry>
+
+        <ini_entry name="class_path" setting="java_class_path"/>
+
+        <ini_entry name="options" type="text" setting="java_options"/>
+
+        <ini_entry name="debug" type="yes_no">
+            <description>
+                <p>
+                    <code>debug=yes</code> lässt die Aufruf an Java ins <code>scheduler.log</code> protokollieren
+                    Außerdem versetzt die Einstellung Java in den Debug-Modus, 
+                    wodurch z.B. bei einer Exception der Aufruf-Stack nach stdout (oder stderr) geschrieben wird.
+                </p>
+            </description>
+        </ini_entry>
+
+        <ini_entry name="javac" type="path" initial="javac" title="Pfad zum Java-Compiler">
+            <description>
+                <p>
+                    Wenn zum Entwickeln von Java-Jobs der Quell-Code direkt in <scheduler_element name="script"/> notiert wird,
+                    übersetzt der Scheduler mit dem hier eingestellten Java-Compiler.
+                </p>
+            </description>
+        </ini_entry>
+
+    </ini_entries>
+
+    <description>
+        <p>
+            Hier werden Einstellungen für Java vorgenommen.
+        </p>
+    </description>
+</ini_section>

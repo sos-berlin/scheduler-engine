@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- $Id: api-perl.xml 4070 2006-01-31 11:42:37Z jz $ -->
+
+<?xml-stylesheet href="api-perl.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "api"
+    base_dir             = "../"
+    title                = "Application Programming Interface (API) for Perl"
+>
+
+Sorry, you need a browser which can process XML files with XSLT style sheets.
+
+
+
+    <!--description>
+        <pre>package main;
+use vars qw($spooler $spooler_log $spooler_job $spooler_task);</pre>
+    </description-->
+
+
+
+</api.class>

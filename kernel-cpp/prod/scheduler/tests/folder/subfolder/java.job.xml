@@ -1,0 +1,24 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <script java_class="spooler_job.My_job">
+        <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.util.Date;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "spooler.configuration_directory='" + spooler.configuration_directory() + "'" );
+      //spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path() + "'" );
+        spooler_log.info( "spooler_job.configuration_directory='" + spooler_job.configuration_directory() + "'" );
+        return false;
+    }
+}
+                ]]>
+    </script>
+    
+    <run_time once="yes"/>
+</job>
+

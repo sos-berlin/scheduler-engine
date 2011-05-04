@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: state.xml 4367 2006-06-19 07:57:00Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--         title         = "Halter der Sperre"-->
+
+<xml_element name          = "holder"
+             title         = "Lock Holder"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-06-19 09:57:00 +0200 (Mo, 19 Jun 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="lock.holders"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="job" type="path" title="The job path"/>
+        <xml_attribute name="task" type="integer" title="Task ID"/>
+    <!--<xml_attribute name="job" type="path" title="Pfad des Jobs"/>
+        <xml_attribute name="task" type="integer" title="Task-ID"/>-->
+    </xml_attributes>
+
+
+    <description>
+        <p>
+            Shows the task currently holding the lock.
+            If the lock is exclusive, then this task will block other tasks which require the lock from running.
+        <!--Zeígt die Task an, die gerade die Sperre hält.-->
+        </p>
+        <p>
+            See the definition of a lock: <scheduler_element name="lock"/>.
+        <!--Siehe Definition einer Sperre: <scheduler_element name="lock"/>.-->
+        </p>
+    </description>
+
+</xml_element>

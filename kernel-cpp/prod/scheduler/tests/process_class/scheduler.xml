@@ -1,0 +1,30 @@
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+var process_classes = spooler.process_classes;
+var process_class = process_classes.create_process_class();
+process_class.name = "Reykjavik";
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+process_class.max_processes = 7;
+if( process_class.max_processes != 7 )  spooler_log.error( "process_class.max_processes != 7" );
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+spooler_log.info( "process_class.name=" + process_class.name );
+
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+process_classes.add_process_class( process_class );
+
+//process_classes.process_class( "Istanbul" ).remove();
+
+            ]]>
+        </script>
+
+        <commands>
+            <process_class name="Caracas" replace="yes"/>
+        </commands>
+    </config>
+</spooler>

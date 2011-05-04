@@ -1,0 +1,26 @@
+<!-- $Id$ -->
+<html>
+    <head>
+        <TITLE>Scheduler</TITLE>
+        <meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    </head>
+    
+    <frameset id="left_and_right_frameset" cols="50%,50%">
+    
+        <frame name="left_frame"    src="left_frame.html"   >
+        <frame name="details_frame" src="details_frame.html" onload="_details_frame_loaded = true">
+        
+        <noframes>
+            <p>Only a browser supporting frames can show this page.</p>
+        </noframes>
+    </frameset>
+    
+    <script event="onload" for="window"><!--
+        // onload wird nicht gerufen.    
+        //alert("x"); 
+        //document.all.left_frame.start();
+        //document.all.details_frame.start();
+    
+    --></script>
+</html>

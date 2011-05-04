@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "param"
+             title    = "Ein Parameter"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <description>
+        <p>
+            Siehe <scheduler_element name="params" />.
+        </p>
+        <p>
+            Bestimmt einen einzelnen Parameter für den Scheduler, einen Job oder einen Auftrag.
+            Die Parameter können zur Laufzeit überschrieben und erweitert werden.
+        </p>
+        <p>
+            Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.
+        </p>
+        <p>
+            Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
+        </p>
+        <p>
+            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.
+        </p>
+        <p>
+            Siehe auch die Klasse <scheduler_method class="Variable_set" />.
+        </p>
+    </description>
+
+    <xml_parent_elements>
+        <xml_parent_element name="params">
+        </xml_parent_element>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="name" title="Eindeutiger Name"/>
+        <xml_attribute name="value" subst_env="yes">
+            <description>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+
+    <behavior_with_xml_element element="base" complete_attribute="name"/>
+
+</xml_element>

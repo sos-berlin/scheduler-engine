@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="remote-schedule" order="no">
+    <script language="javascript">
+        <![CDATA[
+
+// spooler_process wird so lange gerufen, bis false zurück gegeben wird
+function spooler_process() {
+   spooler_log.warn( "jetzt gibts ne warnung" );
+   invalid_command;
+   return false;
+}
+        ]]>
+    </script>
+
+    <run_time />
+</job>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<?xml-stylesheet type="text/xsl" href="scheduler_configuration_documentation.xsl"?> 
+<settings>
+    <job_chain name="job_chain-js-463">
+        <note language="de"/>
+
+        <note language="en"/>
+
+        <order>
+            <params/>
+
+            <process state="100">
+                <note language="de"/>
+
+                <note language="en"/>
+
+                <params/>
+            </process>
+        </order>
+    </job_chain>
+</settings>

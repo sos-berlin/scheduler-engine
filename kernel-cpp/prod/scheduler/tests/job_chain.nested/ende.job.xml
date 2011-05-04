@@ -1,0 +1,16 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+     order="yes"
+>
+    
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{               
+    //spooler.job_chain( "job_chain.nested" ).remove();
+    return true;
+}
+
+        ]]>
+    </script>
+</job>

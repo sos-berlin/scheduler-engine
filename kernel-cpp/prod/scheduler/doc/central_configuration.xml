@@ -1,0 +1,143 @@
+﻿<?xml version="1.0"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: central_configuration.xml 5348 2007-10-17 07:28:03Z ap $-->
+
+<description
+    title               = "Zentrale Konfiguration durch einen Supervisor Job Scheduler"
+    base_dir            = ""
+    parent_page         = "index.xml"
+    author              = "$Author: ur $"
+    date                = "$Date: 2008-01-15 17:28:03 +0200 (Mi, 17 Okt 2007) $"
+>
+    <p>
+      Bei der zentralen Administration von Konfigurationen für Objekte (Jobs, Job-Ketten, Aufträgen und Sperren)
+      melden sich sogenannte "Workload Job Scheduler" an einem zentralen Job Scheduler, dem "Supervisor" an und werden von 
+      ihm mit den Konfigurationsdateien für Objekte versorgt. Zusätzlich 
+      zu der vom Supervisor bereitgestellten Konfiguration werden die lokalen Konfigurationen aus 
+      den <a href="dynamic_configuration.xml">Hot Folders</a> der Workload Job Scheduler (<code>./config/live</code>) 
+      sowie der Konfigurationsdatei <code>./config/scheduler.xml</code> eingelesen.
+    </p>
+
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <scheduler_table_of_content/>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+    
+     <h2>Eine typische Konfiguration</h2>
+    <p>
+      Ein Supervisor Job Scheduler mit dem Verzeichnis <code>./config/remote</code>. 
+      Darin gibt es einen Ordner <code>_all</code>, der allgemeine Objekte für alle Workload Job Scheduler bereitstellt.
+      Für die Workload Job Scheduler gibt es jeweils ein Verzeichnis mit den zu replizierenden Objekten.
+    </p>
+   
+    
+    		<img src="images/central_configuration.gif" style="margin: 20px 0px ; border:1px solid gray;"/>
+
+    
+     
+    <h2>Der Supervisor</h2>
+    
+    <p>
+        Der Supervisor verwaltet die Konfigurationen für die Workload Scheduler in dem 
+        Verzeichnis <code>./config/remote</code>.  Beim Start des Supervisors sowie bei Änderungen an den 
+        Konfigurationsdateien werden diese an die betroffenen, laufenden Workload Job Scheduler in deren 
+        Verzeichnis <code>./config/cache</code> repliziert. Die Workload Job Scheduler überwachen dieses lokale
+        Verzeichnis und übernehmen die Konfigurationen daraus (siehe <a href="dynamic_configuration.xml">Hot Folders</a>).
+    </p>
+
+    <p>
+        Im zentralen Konfigurationsverzeichnis <code>./config/remote</code> wird dazu pro Workload Job Scheduler ein Verzeichnis
+        mit dem Namen <code>host#port</code> angelegt. Außerdem wird pro vorhandenem Job Scheduler Cluster 
+        siehe <a href="backupscheduler.xml">Backup Clusters</a> und <a href="distributed_orders.xml">Load Balancing</a>, 
+        ein Verzeichnis mit der <code>Scheduler ID</code> des Clusters angelegt. Die in den jeweiligen Verzeichnissen enthaltene 
+        Verzeichnisstruktur wird an die zugehörigen Workload Job Scheduler bzw. an den zugehörigen Job Scheduler Cluster repliziert.
+    </p>
+   <p>
+        Zusätzlich wird die Verzeichnisstruktur, die im Ordner <code>_all</code> vorliegt, an alle Workload Job Scheduler repliziert. 
+        Damit ist es möglich Definitionen für Objekte, die für alle Workload Job Scheduler gültig sein sollen, an einer Stelle zu verwalten.
+   </p>
+   <p>
+      Fällt der Supervisor aus, können die Workload Job Scheduler mit der zuletzt erfolgreich replizierten Konfiguration problemlos gestartet werden. 
+   </p>
+   
+   
+   <h2>Einen Job Scheduler an den Supervisor anmelden</h2>
+   <p>
+      Ein Workload Job Scheduler meldet sich am Supervisor mit einem Eintrag in der Konfigurationsdatei <code>./config/scheduler.xml</code> an. Das Attribut
+      <scheduler_element name="config" attribute="supervisor"/> im Element <code>config </code> bezeichnet den Host 
+      und den Port des Supervisors in der Syntax <code>host:port</code>.
+    </p>
+    <p>
+      Wenn der Supervisor nicht erreichbar ist, startet der Workload Job Scheduler mit der zuletzt erfolgreich replizierten Konfiguration.
+    </p>
+   
+   <h2>Wirksamkeit von lokalen Änderungen an der Konfiguration</h2>
+    <p>
+     Lokale Konfigurationen können zusätzlich zu der Konfiguration, die durch den Supervisor bereitgestellt wurde, angelegt werden.
+    </p>
+   <p>
+      Die Job Scheduler Konfigurationsdatei <code>./config/scheduler.xml</code> eines Workload Schedulers kann Definitionen für lokale Objekte beinhalten. 
+      Ebenso können im Hot Folder <code>./config/live</code> lokale Objekte definiert werden.
+   </p>
+   <p> 
+      Die zentral beim Supervisor gespeicherte und erfolgreich replizierte Konfiguration hat Vorrang vor lokalen Konfigurationen.
+      Bei Namensgleichheit wird die zentrale Konfiguration verwendet. Wenn ein bereits in der zentralen Konfiguration vorhandenes 
+      Element in der lokalen Konfiguration hinzugefügt wird, wird das vom Workload Job Scheduler bemerkt und abgewiesen. 
+      Im Protokoll wird dann eine entsprechende Warnung eingetragen.
+   </p>
+   
+    <p>
+      Wenn beim Supervisor ein Objekt hinzugefügt wird, das bereits in der lokalen Konfiguration vorhanden ist, 
+      wird die lokale Konfiguration überschrieben. Die lokale Konfigurationsdatei bleibt erhalten, wird aber nicht mehr verwendet (stattdessen
+      wird eine Warnung ins Protokoll geschrieben s.o.).
+    </p>
+    <p>
+      Wird ein Objekt beim Supervisor gelöscht, das auch in der lokalen ´Konfiguration vorhanden ist, 
+      wird der Job aus dem Workload Job Scheduler entfernt:
+      <br/><br/>
+         a) Der Job ist im <a href="dynamic_configuration.xml">Hot Folder</a> <code>./config/live</code> lokal konfiguriert: die lokale Konfiguration wird eingelesen
+         <br/>
+         b) Der Job ist in <code>./config/scheduler.xml</code> konfiguriert: der Job wird beim nächsten Start des Job Schedulers eingelesen.
+    </p>         
+
+   <h2>Übernehmen einer vorhandenen Konfiguration in die zentrale Verwaltung</h2>
+   <p>
+   Wenn ein vorhandener, lokal administrierter Job Scheduler in die zentrale Verwaltung eines Supervisors 
+   aufgenommen werden soll, sind folgende Schritte notwendig.
+   </p>
+   
+     <ul>
+        <li>
+           Ordner für Workload Job Scheduler beim Supervisor anlegen (<code>./config/remote/host#port</code>)
+        </li>
+        <li>
+         	 Ordner <code>./config/cache</code> beim Workload Job Scheduler anlegen
+        </li>
+        <li>
+         	 Inhalt von Ordner <code>./config/live</code> des Workload Job Schedulers nach <code>./config/remote/host#port</code> des Supervisors kopieren         		
+        </li>    
+        <li>
+         	 Anmeldung an an Supervisor konfigurieren. Dazu Eintrag <scheduler_element name="config" attribute="supervisor"/> 
+         	 in <code>./config/scheduler.xml</code> des Workload Job Schedulers anlegen
+        </li>
+     </ul>
+   
+    <h2>Verhalten der Job Scheduler beim Start</h2>
+    
+    <h3>Workload Job Scheduler</h3>
+    <p>
+       Der Job Scheduler baut die Verbindung zum Supervisor auf und bestellt die Konfiguration. Erst nach der Replikation beginnt er den Betrieb. 
+       Wenn der Supervisor nicht erreichbar ist, verwendet der Job Scheduler die vorhandene Konfiguration. Falls die Replikation später möglich wird, 
+       wird sie durchgeführt. Änderungen an der zentralen Konfiguration werden dann sofort wirksam.
+     </p>
+     
+     <h3>Supervisor Job Scheduler</h3>
+      <p>Wenn der Supervisor startet, repliziert er die Konfigurationen für die Workload Job Scheduler. </p>
+
+
+         
+</description>

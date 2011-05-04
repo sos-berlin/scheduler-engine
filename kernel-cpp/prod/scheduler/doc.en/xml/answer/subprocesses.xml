@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: subprocesses.xml,v 1.3 2004/09/08 19:23:23 jz Exp $-->
+
+<!--         title         = "Subprozesse (abhängige Prozesse)"-->
+
+<xml_element name          = "subprocesses" 
+             title         = "Sub-Processes (dependent processes)"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-04-20 08:53:16 +0200 (Mi, 20 Apr 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="state">
+            <description>
+                <p>
+                    Tasks currently running and those which have been added with 
+                    <scheduler_method class="Task" method="add_pid" java_signature="int"/>
+                    are listed in <code>&lt;state></code> 
+                <!--Innerhalb von <code>&lt;state></code> sind hier 
+                    die Prozesse der laufenden Tasks und die mit 
+                    <scheduler_method class="Task" method="add_pid" java_signature="int"/>
+                    hinzugefügten Prozesse aufgelistet.-->
+                </p>
+                <p>
+                    The Job Scheduler breaks off these processes before terminating itself in the event of a 
+                    <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately"/>
+                    command.
+                <!--Bei
+                    <scheduler_element name="modify_spooler" attribute="cmd" value="abort_immediately"/>
+                    bricht der Scheduler diese Prozesse ab, bevor er sich selbst abbricht.-->
+                </p>
+            </description>
+        </xml_parent_element>
+        
+        <xml_parent_element name="task">
+            <description>
+                <p>
+                    Tasks which have been added with 
+                    <scheduler_method class="Task" method="add_pid" java_signature="int"/>
+                    are listed in <code>&lt;task></code>.
+                <!--Innerhalb von <code>&lt;task></code> sind hier 
+                    die mit <scheduler_method class="Task" method="add_pid" java_signature="int"/>
+                    hinzugefügten Tasks aufgelistet.-->
+                </p>
+                <p>
+                    These processes are immediately broken off in the event of a 
+                    <scheduler_element name="kill_task"/> 
+                    command.
+                <!--Das Kommando
+                    <scheduler_element name="kill_task"/> 
+                    bricht diese Prozesse mit der Task ab.-->
+                </p>
+            </description>
+        </xml_parent_element>
+    </xml_parent_elements>
+    
+    <xml_child_elements>
+        <xml_child_element name="subprocess" multiple="yes"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

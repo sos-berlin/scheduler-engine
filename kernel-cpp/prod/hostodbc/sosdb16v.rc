@@ -1,0 +1,5 @@
+// sosdb16v.rc
+
+#include <sosodbcv.h>
+#include <sosvers.rc>
+

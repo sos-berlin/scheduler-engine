@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "start_job"
+             title    = "Eine Task starten"
+             category = "Kommando"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+    
+    <xml_attributes>
+        <xml_attribute name="job" type="job_name">
+            <description>
+                <p>
+                    Der Jobname.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Hier kann der Task ein Name gegeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="after" type="zahl">
+            <description>
+                <p>
+                    Eine Anzahl Sekunden, nach deren Ablauf erst die Task gestartet werden soll.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss | now | period" initial="now">
+            <description>
+                <p>
+                    Zeitpunkt, zu dem die Task gestartet werden soll.
+                    Die Voreinstellung <code>force="yes"</code> setzt <scheduler_element name="run_time"/> ist außer Kraft.
+                </p>
+                <p>
+                    Relative Zeitangaben <code>"now"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code>
+                    sind möglich.
+                </p>
+                <!--p>
+                    Statt eines Zeitpunkts kann auch <code>at="now"</code> angeben werden, um den Job sofort zu starten.
+                    <code>"now"</code> ist voreingestellt.
+                </p-->
+                <p>
+                    <code>at="period"</code> lässt den Job erst Starten, wenn die <scheduler_element name="run_time"/> dies zulässt
+                    (also in der laufenden oder der nächsten Periode).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="force" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>force="no"</code>:
+                </p>
+                <ul>
+                    <li>
+                        Wenn der Job gestoppt ist, bleibt er gestoppt.
+                    </li>
+                    <li>
+                        Wenn mit <code>at=</code> eine Startzeit angegeben ist,
+                        zu dem Zeitpunkt 
+                        <scheduler_element name="run_time"/> oder <scheduler_element name="schedule"/>
+                        keine Start zulassen, 
+                        dann verschiebt der Scheduler den Start bis zur nächsten Periode.
+                    </li>
+                    <li>
+                        Daraus ergibt sich, dass <code>at="now"</code> wie <code>at="period"</code> wirkt.
+                    </li>
+                </ul>
+                <p>
+                    <code>force="yes"</code>:
+                </p>
+                <ul>
+                    <li>
+                        Der Job wird sofort entstoppt (falls er gestoppt ist)
+                    </li>
+                    <li>
+                        Eine mit <code>at=</code> angegebene Startzeit nimmt keine Rücksicht auf
+                        <scheduler_element name="run_time"/> oder <scheduler_element name="schedule"/>,
+                        die Task wird also auch zu dem Zeitpunkt gestartet, wenn keine Periode vorliegt.
+                    </li>
+                </ul>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="web_service" type="name">
+            <description>
+                <p>
+                    Wenn die Task ausgeführt worden ist,
+                    wird sie mit einem Stylesheet transformiert und einem Web-Dienst übergeben.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="web_service"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    
+    <xml_child_elements>
+        <xml_child_element name="params">
+        <xml_child_element name="environment"/>
+        
+            <description>
+                <h3 style="margin-top: 1em">Verwendung von &lt;copy_params></h3>
+                <p>
+                    Wenn <code>&lt;start_job></code> in <scheduler_element name="job" child="commands"/> steht,
+                    können hier 
+                </p>
+                <ul>
+                    <li>
+                        die Parameter der beendeten Task mit <scheduler_element name="copy_params" attribute="from" value="task"/>
+                    </li>
+                    <li>
+                        die Parameter des ausgeführten Auftrags mit
+                        <scheduler_element name="copy_params" attribute="from" value="order"/>
+                    </li>
+                </ul>
+                <p>
+                    übernommen werden.
+                </p>
+            </description>
+
+            <example>
+                <pre>&lt;<a href="job.xml">job</a> name="…">
+    …      
+    &lt;<a href="commands.xml">commands</a> on_exit_code="…">
+        &lt;start_job job="…">
+            &lt;<a href="params.xml">params</a>>
+                &lt;<a href="copy_params.xml">copy_params</a> from="task"/>
+            &lt;/params>
+        &lt;start_job/>
+    &lt;commands>
+&lt;job></pre>
+            </example>
+        </xml_child_element>
+    </xml_child_elements>
+
+    <xml_answer element="ok" element2="task"/>
+
+
+    <example>
+        <pre>&lt;start_job job="mein_job" at="now">
+    &lt;params>
+        &lt;param name="anzahl" value="100"/>
+    &lt;/params>
+&lt;/start_job></pre>
+    </example>
+</xml_element>

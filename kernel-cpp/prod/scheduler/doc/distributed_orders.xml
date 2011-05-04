@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+<description
+    title               = "Verteilte Aufträge"
+    base_dir            = ""
+    author              = "$Author: al $"
+    date                = "$Date: 2007-03-20 11:23:39 +0200 (Do, 05 Okt 2006) $"
+>
+
+		<h2>
+			Load Balancing mit verteilten Aufträgen
+		</h2>
+		
+		<p>
+			Ein Job Scheduler Cluster kann verwendet werden, um Aufträge auf mehreren Hosts zu verarbeiten. Dies kann zum 
+			Load Balancing genutzt werden, um Verarbeitungszeiten durch einsatz weiterer Hardware zu minimieren.
+		</p>
+		
+		<p>
+			In einem Cluster zeigen alle Job Scheduler ihre Verfügbarkeit durch das Versenden von Herzschlägen an. Alle Job Scheduler prüfen, ob die 
+			jeweils anderen Job Scheduler verfügbar sind. Stellt ein Job Scheduler fest, dass vom anderen Scheduler die Herzschläge über einen längeren Zeitraum
+			(ca. 1-2 Minuten) ausbleiben, so übernimmt dieser die Verarbeitung der angefangenen Aufträge.
+		</p>
+		
+		
+		<p>
+			Die Voraussetzungen für die Operation eines Scheduler Clusters für verteilte Aufträge
+			sind schematisch in der folgende Zeichnung abgebildet, und werden im Detail in den nächsten Abschnitt beschreiben.
+		</p>
+		
+		<img src="images/job_scheduler_distributed_orders_1.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		
+		<p>
+			Verteilte Aufträge können während ihres Weges durch die Job-Kette von verschiedenen Job Schedulern verarbeitet werden. 
+			Die Übernahme der Verarbeitung eines Auftrags in einem anderen Job-Knoten durch einen anderen Job Scheduler
+			ist schematisch in der folgende Zeichnung abgebildet:
+		</p>
+		
+		<img src="images/job_scheduler_distributed_orders_2.jpg" style="margin: 20px 0px ; border:1px solid gray;"/>
+		
+		
+		<h3>
+			Voraussetzungen für Verteilte Aufträge
+		</h3>
+		
+		<ul>
+			<li>
+				Alle Job Scheduler des Clusters verwenden die selbe Datenbank. 
+				Es werden die Datenbanksysteme Oracle, DB2, MySQL und Postgres unterstützt.
+			</li>
+			<li>
+				Alle Job Scheduler verwenden die selbe Konfigurationsdatei bzw. eine genaue Kopie.
+			</li>
+			<li>
+				Alle Job Scheduler werden mit der gleichen Scheduler-ID gestartet. 
+			</li>
+			<li>
+				Alle Job Scheduler werden mit der Option <scheduler_option name="distributed-orders"/> 
+				gestartet. 
+			</li>
+			<li>
+				Alle Job Scheduler haben Zugriff auf Resourcen, die von den Jobs der verteilten Job-Kette benötigt
+				werden (z.B. überwachte Verzeichnisse). Gemeinsam genutzte Verzeichnisse sind auf allen Systemen
+				auf den gleichen Pfad gemountet (oder verlinkt).
+			</li>
+		</ul>
+		
+		<h3>
+			Starten des Job Scheduler Clusters für verteilte Aufträge
+		</h3>
+		
+		<p>
+		Die Job Scheduler, die den Cluster bilden, werden in beliebiger Reihenfolge gestartet. 
+			Es können während der Laufzeit beliebig Scheduler entfernt oder hinzugefügt werden. Beim entfernen
+			von Job Scheduler Instanzen, sollten diese, wenn möglich, normal beendet (Terminate) werden,
+			damit sie die Möglichkeit haben, Aufträge zu beenden, die gerade verarbeitet werden.
+		</p>
+		
+		<h3>
+			Erzeugen verteilter Aufträge
+		</h3>
+		<p>
+			Verteilte Aufträge können entweder per <scheduler_element name="add_order"/> Befehl oder per Verzeichnisüberwachung
+			erzeugt werden.
+		</p>
+		
+		<h3>
+			Verteilte Aufträge durch add_order
+		</h3>
+		
+		<p>
+			Es kann entweder das XML-Kommando <scheduler_element name="add_order"/> oder die API-Funktion 
+			<scheduler_method class="Job_chain" method="add_order" java_signature="Order"/> verwendet werden.
+			Es ist dabei egal an welchen Job Scheduler das Kommando geschickt wird beziehungsweise auf welchem
+			Job Scheduler der Befehl ausgeführt wird. Der Auftrag wird dem gesamten Cluster zur Verarbeitung bereitgestellt.
+		</p>
+		
+		<h3>
+		Verteilte Dateiaufträge
+		</h3>
+		
+		<p>
+		Verteilte Dateiaufträge werden per <scheduler_element name="file_order_source"/> in einer verteilten Job-Kette
+			konfiguriert. Jeder Job Scheduler des Clusters überwacht das Verzeichnis und kann Dateiaufträge erstellen.
+			Ein Dateiauftrag wird nicht notwendigerweise von dem Job Scheduler verarbeitet, der ihn erstellt hat.
+		</p>
+		
+		<h3>
+			Standalone-Jobs in verteilten Schedulern
+		</h3>
+		<p>
+			Eigenständige Jobs, die keine Aufträge verarbeiten, werden in einem Scheduler Cluster von dem Job Scheduler ausgeführt,
+			in dem sie konfiguriert werden.
+		</p>
+	</description>

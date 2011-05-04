@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: delay_order_after_setback.xml 4061 2006-01-30 11:39:23Z jz $-->
+
+         <!--title    = "Auftrag nach Rückstellung verzögern"-->
+
+<xml_element name     = "delay_order_after_setback"
+             title    = "Delay Order after Setback"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-06-06 16:52:45 +0200 (Mi, 06 Jun 2007) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="setback_count" type="integer">
+            <description>
+                <p>
+                    The number of successive setbacks occurring for an order.
+                    Different delays can be set for each setback - 
+                    e.g. 1st setback, 1 second; 2nd setback, 10 seconds; etc.
+                <!--Für die 1., 2. usw. aufeinanderfolgende Rückstellung desselben Auftrags
+                    können verschiedene Fristen eingestellt werden.-->
+                    <br/>
+                    Specifies the number of sebacks after which an XML element applies.
+                <!--Gibt an, ab der wievielten Rückstellung
+                    des Auftrags dieses XML-Element gilt.-->
+                    <br/>
+                    For example, where <code>setback_count=5</code>,
+                    the element applies after the 5th setback.
+                    <br/>
+                <!--Z.B. bei <code>setback_count=5</code>
+                    gilt das Element erst ab der 5. Rückstellung.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="delay" type="seconds|HH:MM|HH:MM:SS">
+            <description>
+                <p>
+                    The period an order waits after a setback before being restarted in a job.
+                <!--Frist für die Rückstellung.
+                    Nach Ablauf der Frist kommt der Auftrag erneut in diesem Job zu Ausführung.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="is_maximum" type="yes|no" initial="no">
+            <description>
+                <p>
+                    <code>setback_count=</code> specifies the maximum number of sequential setbacks allowed.
+                    A further setback occurring after this number of setbacks has been reached 
+                    (<scheduler_method class="Order" method="setback"/>)
+                    causes the Job Scheduler to give the order the error state
+                    <scheduler_method class="Job_chain_node" property="error_state"/>.
+                <!--Attribut <code>setback_count=</code> gibt die maximale Anzahl aufeinanderfolgender Rückstellungen an.
+                    Bei einer weiteren Rückstellung (<scheduler_method class="Order" method="setback"/>)
+                    versetzt der Scheduler den Auftrag in den Fehlerzustand <scheduler_method class="Job_chain_node" property="error_state"/>.-->
+                </p>
+                <p>
+                    See <scheduler_method class="Job" property="max_order_setbacks"/>.
+                <!--Siehe <scheduler_method class="Job" property="max_order_setbacks"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <description>
+        <p>
+            See <scheduler_method class="Job" property="delay_order_after_setback"/>,
+            <scheduler_method class="Job" property="max_order_setbacks"/>
+            and <scheduler_method class="Order" method="setback"/>.
+        <!--Siehe <scheduler_method class="Job" property="delay_order_after_setback"/>,
+            <scheduler_method class="Job" property="max_order_setbacks"/>
+            und <scheduler_method class="Order" method="setback"/>.-->
+        </p>
+    </description>
+
+    <example>
+<pre><![CDATA[
+    <delay_order_after_setback setback_count="1" is_maximum="no" delay="00:10"/>
+    <delay_order_after_setback setback_count="5" is_maximum="no" delay="00:30"/>
+    <delay_order_after_setback setback_count="10" is_maximum="yes" />
+]]></pre>
+
+		<li>- after the 1st attempt is failed the job will be executed again after 10min.</li>
+		<li>- after the 5th attempt is failed the job will be executed again after 30min.</li>
+		<li>- after the 10th attempt the job will run one time again and goes into the error state if it fails.</li>
+		</example>
+
+</xml_element>

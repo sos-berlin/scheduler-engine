@@ -1,0 +1,33 @@
+OPERATION op = 'I'? 'INSERT' 
+        : op = 'U'? 'UPDATE' 
+        : op = 'S'? 'STORE' 
+        : op = 'D'? 'DELETE' 
+        :           ''
+INTO ...
+( feld, ... )
+SELECT feld, ...
+FROM 'fs:isam.datei' [DELETE] [ERROR error_flag = 'E']
+WHERE ...
+
+
+Schlüsselwort DELETE in FROM-Klausel löscht jeden gelesenen Satz,
+wenn er erfolgreich in die Ausgabedatei gespeichert werden konnte (nicht bei Join).
+
+ERROR feld = value gibt an, wie fehlerhafte Sätze markiert werden sollen. 
+Tritt beim Markieren eines fehlerhaften Satzes ein Fehler auf, wird die Replikation abgebrochen.
+
+
+
+
+Lesen mit Löschen nach erfolgreicher Bearbeitung (MOVE)
+
+Rapid: Dateityp: getdel
+Merkt sich den Schlüssel jedes gelesenen Satzes in einer SAM-Datei 
+(die ersten hundert in einer Speicherdatei)
+und löscht sie bei COMMIT oder bei CLOSE NORMAL.
+
+ODER:
+Entsprechender Dateityp in C, Dateityp 'delete' in Rapid, der @PUTs als @DELs interpretiert,
+damit diese geblockt übertragen werden können.
+Dateityp delete reicht Transaktionsaufrufe durch.
+

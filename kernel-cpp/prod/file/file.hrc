@@ -1,0 +1,43 @@
+// file.hrc 
+// Drucken && Preview
+
+#define DLG_PREVIEW             1000
+#define DLG_PREVIEW_800_600     1001
+#define DLG_PREVIEW_640_480     1002
+#define DLG_PREVIEW_AUTO        1003
+
+
+#define DP_BOX                  1
+#define DP_VSCROLL              2
+#define DP_HSCROLL              3
+#define DP_ZOOMIN               4
+#define DP_ZOOMOUT              5
+#define DP_NORMALPAGE           6
+#define DP_FULLPAGE             7
+#define DP_DOUBLEPAGE           8
+#define DP_PREVPAGE             9
+#define DP_NEXTPAGE             10
+#define DP_CANCEL               11
+#define DP_PRINT_PB             12
+#define DP_SETUP_PB             13
+#define DP_PRINT_DIRECT_PB      14
+
+#define DP_TOOLBOX              20
+
+#define ABORT_DLG               1001
+#define ABORT_DLG_CANCEL_PB     1
+#define ABORT_DLG_PAGES_TEXT    2
+#define ABORT_DLG_PRINT_TEXT    3
+
+// FRMPREV Stuff
+
+#define FRMPREV_MENU            1000
+#define FRMPREV_FILE            1
+#define FRMPREV_PREVIEW         2
+#define FRMPREV_QUIT            3
+
+
+// HelpIds (testeshalber)
+
+#define DP_ZOOMIN_HLP		    200
+#define DP_ZOOMOUT_HLP		    300

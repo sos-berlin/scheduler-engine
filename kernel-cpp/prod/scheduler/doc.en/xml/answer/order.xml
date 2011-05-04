@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: order.xml,v 1.4 2004/09/07 19:16:49 jz Exp $-->
+
+<!--         title         = "Auftrag"-->
+
+<xml_element name          = "order" 
+             title         = "Order"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-02-07 08:39:58 +0100 (Di, 07 Feb 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="answer"/>
+        <xml_parent_element name="order_queue"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="order" type="id" title="Order identifier">
+    <!--<xml_attribute name="order" type="id" title="Auftragskennung">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="id" java_signature="java.lang.String" access="write"/>
+                <!--Siehe <scheduler_method class="Order" property="id" java_signature="java.lang.String" access="write"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="title" type="text" title="Title">
+    <!--<xml_attribute name="title" type="text" title="Titel">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="title" java_signature="java.lang.String" access="write"/>
+                <!--Siehe <scheduler_method class="Order" property="title" java_signature="java.lang.String" access="write"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="state" type="text" title="State">
+    <!--<xml_attribute name="state" type="text" title="Zustand">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="state" java_signature="java.lang.String" access="write"/>
+                <!--Siehe <scheduler_method class="Order" property="state" java_signature="java.lang.String" access="write"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="job_chain" type="name" title="Job chain name">
+    <!--<xml_attribute name="job_chain" type="name" title="Name der Jobkette">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order"/>
+                <!--Siehe <scheduler_method class="Job_chain" method="add_order" java_signature="sos.spooler.Order"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="job" type="name" title="Job">
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="job"/>
+                <!--Siehe <scheduler_method class="Order" property="job"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="task" type="id" title="Current task identifier">
+    <!--<xml_attribute name="task" type="id" title="Kennung der Task, die den Auftrag gerade ausführt">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm" title="Task start Time">
+    <!--<xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm" title="Seit wann die Task den Auftrag ausführt">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+        
+        
+        <xml_attribute name="state_text" type="text" title="State text">
+    <!--<xml_attribute name="state_text" type="text" title="Zustandstext">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="state_text"/>.
+                <!--Siehe <scheduler_method class="Order" property="state_text"/>.-->
+                </p>
+            </description>    
+        </xml_attribute>
+        
+        <xml_attribute name="priority" type="number" title="Priority">
+    <!--<xml_attribute name="priority" type="zahl" title="Priorität">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="priority"/>.
+                <!--Siehe <scheduler_method class="Order" property="priority"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="created" type="yyyy-mm-dd hh:mm:ss.mmm" title="Point in time when an order is created">
+    <!--<xml_attribute name="created" type="yyyy-mm-dd hh:mm:ss.mmm" title="Wann der Auftrag erzeugt worden ist">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="log_file" type="file name" title="Name of the protocol file">
+    <!--<xml_attribute name="log_file" type="dateiname" title="Name der Protokolldatei">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="setback" type="hh:mm:ss.mmm" title="Point in time when an order is to be cancelled">
+    <!--<xml_attribute name="setback" type="hh:mm:ss.mmm" title="Wann der Auftrag zurückgestellt worden ist">-->
+            <description>
+                <p>
+                    <!--
+                    Siehe <scheduler_method class="Job" property="delay_order_after_setback" java_signature="int,int" access="write"/>.
+                    -->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Next starting time">
+    <!--<xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Nächster Startzeitpunkt">-->
+            <description>
+                <p>
+                    Should this attribute not be specified, then the order will be carried out as soon as possible.
+                <!--Wenn das Attribut fehlt, wird der Auftrag so bald wie möglich ausgeführt.-->
+                    <!--
+                    Siehe <scheduler_method class="Job" property="delay_order_after_setback" java_signature="int,int" access="write"/>.
+                    -->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="web_service" type="name" title="Name of the assigned Web Service"/>
+    <!--<xml_attribute name="web_service" type="name" title="Name des zugeordneten Web-Dienstes"/>-->
+        
+    </xml_attributes>
+    
+    <xml_child_elements>
+        <xml_child_element name="log"/>
+        <xml_child_element name="run_time"/>
+        <xml_child_element name="payload"  directory="xml/"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

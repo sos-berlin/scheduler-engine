@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="visible=yes" order="yes">
+                <script language="javascript">
+                    //
+                </script>
+            </job>
+
+            <job name="visible=no" order="yes" visible="no">
+                <script language="javascript">
+                    //
+                </script>
+            </job>
+
+            <job name="visible=never" order="yes" visible="never">
+                <script language="javascript">
+                    //
+                </script>
+            </job>
+
+            <job name="run">
+                <script language="javascript">
+                    //
+                </script>
+                <commands on_exit_code="0">
+                    <add_order job_chain="visible=yes" id="1" replace="yes"/>
+                    <add_order job_chain="visible=no" id="1" replace="yes"/>
+                    <add_order job_chain="visible=never" id="1" replace="yes"/>
+                </commands>
+            </job>
+        </jobs>
+
+        <job_chains>
+            <job_chain name="visible=yes" orders_recoverable="no">
+                <job_chain_node state="yes"   job="visible=yes"/>
+                <job_chain_node state="no"    job="visible=no"/>
+                <job_chain_node state="never" job="visible=never"/>
+            </job_chain>
+
+            <job_chain name="visible=no" visible="no" orders_recoverable="no">
+                <job_chain_node state="yes"   job="visible=yes"/>
+                <job_chain_node state="no"    job="visible=no"/>
+                <job_chain_node state="never" job="visible=never"/>
+            </job_chain>
+
+            <job_chain name="visible=never" visible="never" orders_recoverable="no">
+                <job_chain_node state="yes"   job="visible=yes"/>
+                <job_chain_node state="no"    job="visible=no"/>
+                <job_chain_node state="never" job="visible=never"/>
+            </job_chain>
+        </job_chains>
+    </config>
+</spooler>

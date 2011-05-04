@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: weekdays.xml,v 1.6 2004/09/06 07:53:28 jz Exp $-->
+
+<!--         title    = "Perioden für bestimmte Wochentage"-->
+
+<xml_element name     = "weekdays" 
+             title    = "Operating Periods for Weekdays"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-10-24 17:45:14 +0200 (Di, 24 Okt 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="run_time">
+        </xml_parent_element>
+    </xml_parent_elements>
+    
+
+    <xml_child_elements>
+        <xml_child_element name="day" multiple="yes">
+            <description>
+                <p>
+                    Defines the weekday.
+                <!--Bestimmt den Wochentag.-->
+                </p>
+                <p>
+                    <code>&lt;day day="1"></code> for Monday to<br/>
+                    <code>&lt;day day="7"></code> for Sunday.<br/>
+                    <code>&lt;day day="0"></code> is also interpreted as Sunday.
+                <!--<code>&lt;day day="1"></code> für Montag bis<br/>
+                    <code>&lt;day day="7"></code> für Sonntag.<br/>
+                    <code>&lt;day day="0"></code> wird auch als Sonntag interpretiert.-->
+                </p>
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+    
+    
+    
+    <description>
+        <p>
+            Sets the operating period for particular weekdays.
+        <!--Setzt die Perioden für bestimmten Wochentage fest.-->
+        </p>
+    </description>
+    
+    <behavior_with_xml_element element="base" complete="yes"/>
+    
+    <example>
+        <pre>&lt;weekdays>
+    &lt;day day="1">
+        &lt;period begin="10:00" end="12:00"/>
+    &lt;/day>
+    &lt;day day="2">
+        &lt;period begin="08:00" end="12:00"/>
+        &lt;period begin="15:00" end="18:00"/>
+    &lt;/day>
+&lt;/weekdays></pre>
+
+        <p>
+            Defines Mondays 10:00 to 12:00 and
+            Tuesdays 08:00 to 12:00 and 15:00 to 18:00 as being operating periods.
+        <!--Setzt die Laufzeit fest für Montags 10:00 bis 12:00 und
+            Dienstags 08:00 bis 12:00 und 15:00 bis 18:00.-->
+        </p>
+    </example>
+    
+</xml_element>

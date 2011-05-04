@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class max_processes="10"/>
+        </process_classes>
+        
+        <locks>
+            <lock name="Georgien" max_non_exclusive="2"/>
+            <lock name="Venezuela"  />
+            <lock name="Bulgarien"  />
+        </locks>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+var locks = spooler.locks;
+var lock = locks.create_lock();
+lock.name = "Island";
+lock.max_non_exclusive = 10;
+spooler_log.info( "lock.name=" + lock.name );
+spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive );
+locks.add_lock( lock );
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="A" tasks="2">
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{
+    spooler.job( "B" ).execute_command( "stop" );
+    
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+
+            </job>
+
+            
+            <job name="B">
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela"/>
+                <lock.use lock="Bulgarien"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+            </job>
+
+            
+            <job name="C">
+                <lock.use lock="Venezuela"/>
+                <lock.use lock="Georgien" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+            </job>
+
+
+            <job name="D">
+                <lock.use lock="Georgien"/>
+                <lock.use lock="Venezuela" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler.job( "A" ).start();
+
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+            </job>
+            
+            
+            <job name="E">
+                <lock.use lock="Georgien" exclusive="no"/>
+                <lock.use lock="Bulgarien" exclusive="no"/>
+
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    hostware.sleep( 10 );
+    spooler_job.remove();
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+            </job>
+
+            
+            <job name="java">
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Locks locks = spooler.locks();
+        
+        try
+        {
+            locks.lock( "Gibt's nicht" );
+            spooler_log.error( "spooler_lock( \"Gibt's nicht\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+        
+        Lock lock = locks.lock( "Georgien" );
+        spooler_log.info( "lock.name=" + lock.name() );
+        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
+        
+        lock = locks.create_lock();
+        lock.set_name( "anders" );
+        lock.set_name( "neu" );
+        
+        lock.set_max_non_exclusive( 10 );
+        spooler_log.info( "lock.name=" + lock.name() );
+        spooler_log.info( "lock.max_non_exclusive=" + lock.max_non_exclusive() );
+        locks.add_lock( lock );
+        
+        try
+        {
+            lock.set_name( "anders" );
+            spooler_log.error( "lock.set_name( \"anders\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+
+        locks.lock( "neu" );
+        
+        String xml = spooler.execute_xml( "<job name='neu'><lock.use lock='neu'/><script language='javascript'>spooler_log.info( 'NEU' );</script><run_time once='yes'/></job>" );
+        spooler_log.info( xml );
+        
+        xml = spooler.execute_xml( "<lock name='Usbekistan'/>" );
+        spooler_log.info( xml );
+        
+        lock.remove();
+        
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <run_time once="yes" repeat="10"/>
+            </job>
+        </jobs>
+
+        
+        <commands>
+            <lock name="Kirgisien"/>
+            <!--start_job job="A"/>
+            <start_job job="B"/>
+            <start_job job="C"/>
+            <start_job job="D"/>
+            <start_job job="E"/>
+            <start_job job="java"/-->
+        </commands>
+    </config>
+</spooler>

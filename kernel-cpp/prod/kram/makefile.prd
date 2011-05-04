@@ -1,0 +1,183 @@
+prod         = kram
+
+DEP_PRODUCTS = kram file fs rapid e370 
+
+SRC_DEPENDS=kram.src
+
+#!ifdef SYSTEM_WIN
+#DEP_PRODUCTS = $(DEP_PRODUCTS) e370
+#!endif
+
+
+# Alle C-Module:
+# alle Module mit TPL-Dateien nach oben gezogen (wg. make) js 21.12.95
+# Reihenfolge wichtig: sosarray -> sosfield 
+
+objects = \
+ sosarray.$(OBJSUFFIX)\
+ sosfield.$(OBJSUFFIX)\
+ sosfld2.$(OBJSUFFIX)\
+ a2a.$(OBJSUFFIX)\
+ assert.$(OBJSUFFIX)\
+ ebc2iso.$(OBJSUFFIX)\
+ iso2ebc.$(OBJSUFFIX)\
+ itoa.$(OBJSUFFIX)\
+ area.$(OBJSUFFIX)\
+ charset.$(OBJSUFFIX)\
+ chkarray.$(OBJSUFFIX)\
+ cobfield.$(OBJSUFFIX)\
+ ddeobj.$(OBJSUFFIX)\
+ decimal.$(OBJSUFFIX)\
+ delphi.$(OBJSUFFIX)\
+ dynobj.$(OBJSUFFIX)\
+ e2a.$(OBJSUFFIX)\
+ ebcdic.$(OBJSUFFIX)\
+ ebcdifld.$(OBJSUFFIX)\
+ exp10.$(OBJSUFFIX)\
+ frmfield.$(OBJSUFFIX)\
+ licence.$(OBJSUFFIX)\
+ log.$(OBJSUFFIX)\
+ logwin.$(OBJSUFFIX)\
+ msec.$(OBJSUFFIX)\
+ nullasgn.$(OBJSUFFIX)\
+ optional.$(OBJSUFFIX)\
+ pointer.$(OBJSUFFIX)\
+ set.$(OBJSUFFIX)\
+ sleep.$(OBJSUFFIX)\
+ sosalloc.$(OBJSUFFIX)\
+ sosbeep.$(OBJSUFFIX)\
+ sosblock.$(OBJSUFFIX)\
+ sosclien.$(OBJSUFFIX)\
+ sosctype.$(OBJSUFFIX)\
+ sosdate.$(OBJSUFFIX)\
+ sosdll.$(OBJSUFFIX)\
+ sosdde.$(OBJSUFFIX)\
+ sosdumcl.$(OBJSUFFIX)\
+ soserror.$(OBJSUFFIX)\
+ sosfact.$(OBJSUFFIX)\
+ sosfiltr.$(OBJSUFFIX)\
+ sosfunc.$(OBJSUFFIX)\
+ soslimt2.$(OBJSUFFIX)\
+ soslimtx.$(OBJSUFFIX)\
+ soslist.$(OBJSUFFIX)\
+ sosmain0.$(OBJSUFFIX)\
+ sosmsg.$(OBJSUFFIX)\
+ sosobj.$(OBJSUFFIX)\
+ sosobjba.$(OBJSUFFIX)\
+ sosopt.$(OBJSUFFIX)\
+ sosprof.$(OBJSUFFIX)\
+ sosprog.$(OBJSUFFIX)\
+ sosset.$(OBJSUFFIX)\
+ sossock.$(OBJSUFFIX)\
+ sossql1.$(OBJSUFFIX)\
+ sossql2.$(OBJSUFFIX)\
+ sossql2a.$(OBJSUFFIX)\
+ sossql3.$(OBJSUFFIX)\
+ sossql4.$(OBJSUFFIX)\
+ sossqlfl.$(OBJSUFFIX)\
+ sossqlfn.$(OBJSUFFIX)\
+ sosstat.$(OBJSUFFIX)\
+ sosstrea.$(OBJSUFFIX)\
+ sosstrg0.$(OBJSUFFIX)\
+ sosstrng.$(OBJSUFFIX)\
+ sosmswin.$(OBJSUFFIX)\
+ sossv.$(OBJSUFFIX)\
+ sossv2.$(OBJSUFFIX)\
+ sostimer.$(OBJSUFFIX)\
+ sosuser.$(OBJSUFFIX)\
+ soswin.$(OBJSUFFIX)\
+ sosxml.$(OBJSUFFIX)\
+ sqlutil.$(OBJSUFFIX)\
+ sqlfield.$(OBJSUFFIX)\
+ stdfield.$(OBJSUFFIX)\
+ strlwr.$(OBJSUFFIX)\
+ strupr.$(OBJSUFFIX)\
+ subrange.$(OBJSUFFIX)\
+ svstring.$(OBJSUFFIX)\
+ sysdep.$(OBJSUFFIX)\
+ tabucase.$(OBJSUFFIX)\
+ truncsp.$(OBJSUFFIX)\
+ type.$(OBJSUFFIX)\
+ typereg.$(OBJSUFFIX)\
+ xception.$(OBJSUFFIX)\
+ xlat.$(OBJSUFFIX)\
+ xlatgerm.$(OBJSUFFIX)
+
+# temporaär entfernt (js 2.6.95) sossv.$(OBJSUFFIX)\
+
+public_libs:: soswnmai.o
+
+soswnmai.$(OBJSUFFIX): soswnmai.cxx
+
+# Assembler-Module sind vom Zielsystem abhdnging:
+
+!ifdef SYSTEM_DOS
+
+objects =\
+ bitchk.obj\
+ bitscan1.obj\
+ bitscn10.obj\
+ bitset.obj\
+ tbascebc.obj\
+ tbebcasc.obj\
+ xlat_asm.obj\
+ $(objects)
+
+!endif
+
+!ifdef SYSTEM_WIN
+
+CFLAGS = $(CFLAGS) -It:\ms\odbcsdk\include
+
+objects =\
+ bitchk.obj\
+ bitscan1.obj\
+ bitscn10.obj\
+ bitset.obj\
+ xlat_asm.obj\
+ $(objects)
+
+!endif
+
+
+
+!ifdef SYSTEM_WIN
+
+sosdde.exe: sosddeap.obj soswnmai.obj
+ $(LINK) /Twe /v /P $(LFLAGS) @&&|
+ /L.;$(ENTW_DIR:/=\\)\sys\$(SYSTEM)\lib;$(LIBPATH:/=\\)                     \
+ c0wl.obj sosddeap.obj soswnmai.obj
+ $&.exe
+
+ $(DEP_PRODUCTS) import mathwl cwl
+ $(SOURCE_DIR:/=\\)\$&.def
+ $&.res
+ ;
+|
+ buildsym $&.exe
+ #$(RC) $&.res $&.exe
+
+
+!endif
+
+
+!ifdef SYSTEM_UNIX
+exe:: soscat$(EXESUFFIX)
+
+soscat.$(OBJSUFFIX): soscat.cxx
+
+soscat$(EXESUFFIX): $@.$(OBJSUFFIX)
+
+sossql: sossql.o sossql.d sossql2.o sossql2.d sossql3.o sossql3.d sqlfield.o sqlfield.d \
+        soswnmai.o soswnmai.d sosingre.d sosingre.o \
+        libkram.a libfile.a librapid.a libfs.a libsosingre.a
+        $(CC) -ptv $(CFLAGS) -Qoption ld "-m,-dy,-Bdynamic" \
+              -o ../bin/sossql \
+              sossql.o sossql2.o sossql3.o soswnmai.o sosingre.o \
+              $(VERBOSE) $(INCLUDES) $(TEMPLATES) \
+              $(LIBPATH) \
+              -lsosingre $(SOS_LIBS) $(SOS_LIBS) $(RW_LIBS) $(INGRES_LIBS) $(NET_LIBS) \
+              > ../bin/sossql.map || ( cat ../bin/sossql.map && false )
+
+
+!endif

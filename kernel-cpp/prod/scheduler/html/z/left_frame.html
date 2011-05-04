@@ -1,0 +1,312 @@
+<!-- $Id$ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+    <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+    <title>Scheduler</title>
+
+    <style type="text/css">
+        @import "scheduler.css";
+    </style>
+</head>
+
+<body>
+
+<span id="stylesheet_output"></span>
+
+<script type="text/javascript" src="scheduler.js" ></script>
+<script type="text/javascript" src="browser_dependencies.js"></script>
+<!--script defer="true" type="text/javascript" src="translation_de.js"></script-->
+<script type="text/javascript" src="popup_menu.js"></script>
+
+<script language="javascript"><!--
+//--------------------------------------------------------------------------------------------const
+
+var _max_orders = 10;
+
+//----------------------------------------------------------------------------------------------var
+
+// Die Variablen enthalten die Versionnummer (numerisch, z.B. 5.5) des Browsers, oder 0.
+var ie       = 0;   // Microsoft Internet Explorer
+var netscape = 0;   // Netscape
+var firefox  = 0;   // Mozilla Firefox
+var opera    = 0;   // Opera
+
+var _stylesheet;
+var _translation_table;
+var _response;
+var _timer;
+var _scheduler;
+var _show_card = "job_chains";
+var _first_call = true;
+var _checkbox_states = new Object();
+var update_seconds           = 5;
+
+_checkbox_states[ "show_order_jobs_checkbox"     ] = true;
+_checkbox_states[ "show_job_chain_jobs_checkbox" ] = true;
+//var _update_periodically = false;
+
+//-------------------------------------------------------------------------------------------onload
+
+function do_onload()
+{
+    _stylesheet = new Stylesheet( "scheduler.xslt" );
+
+    window.parent.document.title = "Scheduler " + document.location.host;
+    
+    if( typeof init_translation_table != "undefined" )
+    {
+        _translation_table = new Object();
+        init_translation_table( _translation_table );
+        
+        // Auch für großgeschriebene Wörter:
+        for( word in _translation_table )  _translation_table[ word.substring.substring( 0, 1 ).toUpper() + word.substring( 1 ) ];
+    }
+    
+    _scheduler = new Scheduler();
+    repeat_update( false, true );
+    if( document.getElementById( "update_periodically_checkbox" ) )  repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, true );
+    scheduler_init();
+}
+
+//-----------------------------------------------------------------------------------------onunload
+
+function do_onunload()
+{
+    if( _scheduler )  _scheduler.close();
+}
+
+//------------------------------------------------------------update_periodically_checkbox__onclick
+
+function update_periodically_checkbox__onclick()
+{
+    save_checkbox_state( "update_periodically_checkbox" );
+    reset_error();
+    repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, 
+                   document.getElementById( "update_periodically_checkbox" ).checked );
+}
+
+//------------------------------------------------------------------------------------repeat_update
+
+function repeat_update( repeat, call_update )
+{
+    reset_error();
+    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
+    
+    try
+    {
+        if( call_update )
+        {
+            if( document.getElementById( "update_periodically_checkbox" ) )
+                document.getElementById( "update_periodically_checkbox" ).checked = false;
+            update();
+        }
+    }
+    catch( x )
+    {   
+        repeat = false;
+
+        if( typeof x == "object" )
+        {
+            if( x.number == DE_E_CANNOT_CONNECT 
+             || x.number == DE_E_RESOURCE_NOT_FOUND )  repeat = true;       // Nur ie liefert diese Fehlercodes in x.number
+        }
+        
+        handle_exception( x );
+    }    
+
+    var checkbox = document.getElementById( "update_periodically_checkbox" )
+    if( checkbox )  checkbox.checked = repeat? true : false;  // Im Fehlerfall ausschalten
+
+    if( repeat )  set_update_timer();
+}
+
+//---------------------------------------------------------------------------------set_update_timer
+
+function set_update_timer()
+{
+    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
+    _timer = window.setTimeout( "repeat_update(true,true)", update_seconds * 1000, "JavaScript" );
+}
+
+//--------------------------------------------------------------------------------update_jobs_frame
+
+function update_jobs_frame()
+{
+    var what       = "";
+    var max_orders = 0;
+    
+    if( _checkbox_states.show_job_chain_orders_checkbox || window.parent.details_frame._job_chain_element )
+    {
+        what = "job_chain_orders order_source_files blacklist";
+        max_orders = window.parent.details_frame._job_chain_element? 100 : _max_orders;
+    }
+
+    if( _show_card == "cluster" || _first_call )  what += " cluster";
+    if( _show_card == "remote_schedulers"      )  what += " remote_schedulers";
+    if( _show_card == "job_chains"             )  what += " job_chains";
+    
+    what += " schedules";
+
+    var commands = "<show_state what='" + what + "' max_orders='" + max_orders + "'/>";
+    
+    if( _show_card == "calendar" )
+    {
+        var before = new Date();
+        if( before.getMonth() < 11 )  before.setMonth( before.getMonth() + 1 );
+                                else  { before.setMonth( 0 );  before.setFullYear( before.getFullYear() + 1 ); }
+        var day = 24*3600*1000;
+        var before = xslt_datetime( new Date( Math.floor( ( before.getTime() ) / day ) * day + before.getTimezoneOffset() * 60*1000 + 1*day ) );
+        commands += "<show_calendar what='orders' before='" + before + "' limit='10000'/>";
+    }
+    
+    _response = _scheduler.execute( "<commands>" + commands + "</commands>" );
+    
+    modify_response( _response );
+    
+    if( _first_call  &&  _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" ) == "waiting_for_activation" )  
+    {
+        _show_card = "cluster";
+        if( window.parent.details_frame._details_frame_loaded )  window.parent.details_frame.hide();
+    }
+
+        
+    var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
+    document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
+    
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( _response );
+    _scheduler._time_log.log( "left.innerHTML" );
+
+    if( _translation_table )
+    {    
+        var span_elements = document.body.getElementsByTagName( "span" );
+        for( var i = 0; i < span_elements.length; i++ )
+        {
+            var span_element = span_elements[i];
+            if( span_element.getAttribute( "className" ) == "translate" )
+            {
+                var translation = _translation_table[ span_element.innerText ];
+                if( translation )  span_element.innerText = translation, spanElement.removeAttribute( "className" );
+            }
+        }
+        _scheduler._time_log.log( "translation" );
+    }
+
+    _first_call = false;
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update()
+{
+    reset_error();
+    _scheduler._time_log = new Time_log;
+    
+    call_error_checked( update_both );
+
+    if( _timer != undefined )  set_update_timer();
+}
+
+//--------------------------------------------------------------------------------------update_both
+
+function update_both()
+{
+    update_jobs_frame();
+
+    if( window.parent._details_frame_loaded )
+    {
+        window.parent.details_frame.update();
+    }
+}
+
+//----------------------------------------------------------------------------------------show_card
+
+function show_card( what )
+{
+    if( what != _show_card )
+    {
+        if( what == "process_classes" 
+         || what == "remote_schedulers"
+         || what == "cluster"           )
+        {
+            if( window.parent._details_frame_loaded )  window.parent.details_frame.hide();
+            //window.parent.details_frame.clear();
+            
+            //_saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+            //window.parent.left_and_right_frameset.cols = "100%, 0%";
+        }
+        //else
+        //if( _saved_frameset_cols != undefined )
+        {
+            //window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            //_saved_frameset_cols = undefined;
+        }
+    
+        _show_card = what;
+    }
+    
+    update();
+}
+
+//--------------------------------------------------------------------------------show_task_details
+
+function show_task_details( job_path, task_id )
+{
+    var job_element  = _response.selectSingleNode( ".//job[@path='" + job_path + "']" );
+    var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
+
+    update_jobs_frame();
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_task_details( job_element, task_element );
+}
+
+//---------------------------------------------------------------------------------show_job_details
+
+function show_job_details( job_path, job_chain_path )
+{
+    var job_element  = _response.selectSingleNode( ".//job[@path='" + job_path + "']" );
+
+    /*
+    if( job_chain_name )    // <task> und <order> mit job_chain != job_chain_name löschen
+    {
+        var alien_nodes = job_element.selectNodes( "tasks/task                   [ order/@job_chain != '" + job_chain_name + "' ] | " +
+                                                   "tasks/task/order_queue/order [ @job_chain != '" + job_chain_name + "' ] " );
+        if( alien_nodes )
+        {
+            for( var i = alien_nodes.length - 1; i >= 0; i-- )
+            {
+                var alien_node = alien_nodes[i];
+                alert(alien_node.xml);
+                alien_node.parentNode.removeChild( alien_node );
+            }
+        }
+    }
+    */
+
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_job_details( job_element, job_chain_path );
+    update_jobs_frame();
+}
+
+//---------------------------------------------------------------------------show_job_chain_details
+
+function show_job_chain_details( job_chain_path )
+{
+    var job_chain_element = _response.selectSingleNode( ".//job_chain[@path='" + job_chain_path + "']" );
+
+    if( window.parent._details_frame_loaded )  window.parent.details_frame.show_job_chain_details( job_chain_element );
+    update();
+}
+
+//-------------------------------------------------------------------------------------------------
+--></script>
+
+
+<script defer="true" type="text/javascript" for="window" event="onload"  > do_onload();   </script>
+<script defer="true" type="text/javascript" for="window" event="onunload"> do_onunload(); </script>
+
+
+</body>
+
+</html>

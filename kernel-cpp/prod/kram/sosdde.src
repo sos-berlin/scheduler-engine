@@ -1,0 +1,8 @@
+/* StarView ressource file */
+#pragma CHARSET_ANSI
+#include "sosdde.hrc"
+
+Icon ICON_SOSDDE {
+	FILE = "sosdde.ico";
+};
+

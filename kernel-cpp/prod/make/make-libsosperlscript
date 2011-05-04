@@ -1,0 +1,8 @@
+#! /bin/bash
+# $Id$
+
+. make/make-all.include
+
+
+do_make zschimmer $BIN_DIR/libsosperlscript.so
+

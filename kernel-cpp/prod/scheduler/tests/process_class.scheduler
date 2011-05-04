@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <process_classes>
+            <process_class name="Istanbul"/>
+            <process_class name="Tiflis"  max_processes="1"/>
+            <process_class name="Caracas" remote_scheduler="sos:6360"/>
+        </process_classes>
+        
+        <script language="JavaScript">
+            <![CDATA[
+
+var process_classes = spooler.process_classes;
+var process_class = process_classes.create_process_class();
+process_class.name = "Reykjavik";
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+process_class.max_processes = 7;
+if( process_class.max_processes != 7 )  spooler_log.error( "process_class.max_processes != 7" );
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+spooler_log.info( "process_class.name=" + process_class.name );
+
+spooler_log.info( "process_class.max_processes=" + process_class.max_processes );
+process_classes.add_process_class( process_class );
+
+//process_classes.process_class( "Istanbul" ).remove();
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="A" process_class="Istanbul">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{
+    return false;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+
+            
+
+            
+            
+            <job name="java" process_class="Tiflis">
+
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        spooler_log.info( "spooler_job.process_class.name=" + spooler_job.process_class().name() );
+        
+        Process_classes process_classes = spooler.process_classes();
+        
+        try
+        {
+            process_classes.process_class( "Gibt's nicht" );
+            spooler_log.error( "spooler_classes.process_class( \"Gibt's nicht\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+        
+        Process_class process_class = process_classes.process_class( "Caracas" );
+        spooler_log.info( "process_class.name=" + process_class.name() );
+        spooler_log.info( "process_class.max_processes=" + process_class.max_processes() );
+        spooler_log.info( "process_class.remote_scheduler=" + process_class.remote_scheduler() );
+        
+        process_class = process_classes.create_process_class();
+        process_class.set_name( "neu" );
+        process_class.set_name( "neu" );
+        
+        process_class.set_max_processes( 10 );
+        process_class.set_remote_scheduler( "sos:7777" );
+        spooler_log.info( "process_class.name=" + process_class.name() );
+        spooler_log.info( "process_class.max_processes=" + process_class.max_processes() );
+        process_classes.add_process_class( process_class );
+        
+        try
+        {
+            process_class.set_name( "anders" );
+            spooler_log.error( "process_class.set_name( \"anders\" )  versagt" );
+        }
+        catch( Exception x ) { spooler_log.info( "OK: " + x ); }
+
+        process_classes.process_class( "neu" );
+        
+        String xml = spooler.execute_xml( "<job name='neu' process_class='neu'><script language='javascript'>spooler_log.info( 'NEU' );</script><run_time once='yes'/></job>" );
+        spooler_log.info( xml );
+        
+        
+        process_classes.process_class( "Tiflis" ).set_max_processes( 1 );
+        process_classes.process_class( "Tiflis" ).set_max_processes( 0 );
+        
+        String remote_scheduler = "localhost:9999";
+        process_classes.process_class( "Tiflis" ).set_remote_scheduler( remote_scheduler );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  " + remote_scheduler );
+        spooler_log.info( spooler.execute_xml( "<process_class replace='no' name='Tiflis' max_processes='0'/>" ) );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  " + remote_scheduler );
+        spooler_log.info( spooler.execute_xml( "<process_class name='Tiflis' max_processes='0'/>" ) );
+        spooler_log.info( process_classes.process_class( "Tiflis" ).remote_scheduler() + " ==  \"\""  );
+        spooler_log.info( spooler.execute_xml( "<process_class.remove process_class='Caracas'/>" ) );
+        //process_classes.process_class( "Caracas" ).remove();
+        
+        
+        
+        process_class = process_classes.create_process_class();
+        process_class.set_name( "Tiflis" );
+        process_class.set_remote_scheduler( "sos:5555" );
+        
+        try
+        {
+            process_classes.add_process_class( process_class );
+            spooler_log.error( "add_process_classes haette scheitern sollen" );
+        }
+        catch( Exception x )
+        {
+            spooler_log.info( "OK: " + x );
+        }
+        
+        spooler_log.info( "Tiflis.remote_scheduler=" + process_classes.process_class( "Tiflis" ).remote_scheduler() );
+        process_classes.process_class( "Tiflis" ).remove();
+        process_classes.add_process_class( process_class );
+        spooler_log.info( "Tiflis.remote_scheduler=" + process_classes.process_class( "Tiflis" ).remote_scheduler() );
+        
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+
+        
+        <commands>
+            <process_class name="Caracas" replace="yes"/>
+        </commands>
+    </config>
+</spooler>

@@ -1,0 +1,23 @@
+#! /bin/bash
+# $Id$
+
+. make/make-all.include
+
+
+do_make libxml2             liblibxml2.a                                        || exit
+do_make zschimmer           libzschimmer.a                                      || exit
+do_make kram                libkram.a                 $BIN_DIR/sos.mail.jar     || exit
+do_make file                libfile.a                                           || exit
+do_make fs                  libfs.a                                             || exit
+do_make zschimmer/rtf       librtf.a                                            || exit
+do_make document_processor  libdocument_processor.a                             || exit
+
+
+                    do_make file                $BIN_DIR/hostcopy
+                    do_make hostole             $BIN_DIR/libhostole.so
+[ $with_java ]  &&  do_make hostjava            $BIN_DIR/libhostjava.so       $BIN_DIR/sos.hostware.jar
+[ $with_java ]  &&  do_make kram                $BIN_DIR/sos.mail.jar
+[ $with_perl ]  &&  do_make zschimmer           $BIN_DIR/libsosperlscript.so
+[ $with_php  ]  &&  do_make hostphp             $BIN_DIR/libhostphp-4.2.1.so
+                    do_make scheduler           $BIN_DIR/sos.spooler.jar      $BIN_DIR/scheduler
+

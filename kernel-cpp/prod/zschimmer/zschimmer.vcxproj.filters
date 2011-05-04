@@ -1,0 +1,404 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quellcodedateien">
+      <UniqueIdentifier>{4cbcfeac-0f98-43aa-b453-f5ee423d59a2}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Quellcodedateien\rtf">
+      <UniqueIdentifier>{72a37400-72d7-4bef-b00a-901f635b2f8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quellcodedateien\xml">
+      <UniqueIdentifier>{d8eb550a-c46e-4b56-a338-f79eedd6d3cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quellcodedateien\com">
+      <UniqueIdentifier>{a54c374d-0f52-4e7d-9bdf-7649160a9775}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quellcodedateien\java">
+      <UniqueIdentifier>{12041630-2fe2-4efb-8ca6-c1fea5916fb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quellcodedateien\windows">
+      <UniqueIdentifier>{c8f437f2-45cf-4c0e-820a-0aaad110a51e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quellcodedateien\posix">
+      <UniqueIdentifier>{e88dbc47-1a86-45a9-9621-9c720f3ecacf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header-Dateien">
+      <UniqueIdentifier>{a2bf5192-28f3-4d21-a22f-1f32ebe6f2f3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="argv.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="async.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="async_event.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="async_io.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="async_socket.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="base64.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="charset.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="charset_messages.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="check_compiler.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="com_remote_messages.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="directory_lister.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="embedded_files.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="file.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="file_path.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="immutable_string.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="loaded_module.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="log_categories.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory_allocator.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="message.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="mutex.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="pipe_collector.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="reference.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="regex_class.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="string_list.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="string_stream.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="system_command.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="threads.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="threads_base.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="xml.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_gzip.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_io.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_mail.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_md5.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_process.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_signals.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_sockets.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="z_sql.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="zschimmer.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="rtf\rtf.cxx">
+      <Filter>Quellcodedateien\rtf</Filter>
+    </ClCompile>
+    <ClCompile Include="rtf\rtf_doc.cxx">
+      <Filter>Quellcodedateien\rtf</Filter>
+    </ClCompile>
+    <ClCompile Include="rtf\rtf_parser.cxx">
+      <Filter>Quellcodedateien\rtf</Filter>
+    </ClCompile>
+    <ClCompile Include="xml_end_finder.cxx">
+      <Filter>Quellcodedateien\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml_libxml2.cxx">
+      <Filter>Quellcodedateien\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml_msxml.cxx">
+      <Filter>Quellcodedateien\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xslt_libxslt.cxx">
+      <Filter>Quellcodedateien\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="com_remote.cxx">
+      <Filter>Quellcodedateien\com</Filter>
+    </ClCompile>
+    <ClCompile Include="scripting_engine.cxx">
+      <Filter>Quellcodedateien\com</Filter>
+    </ClCompile>
+    <ClCompile Include="z_com.cxx">
+      <Filter>Quellcodedateien\com</Filter>
+    </ClCompile>
+    <ClCompile Include="z_com_server.cxx">
+      <Filter>Quellcodedateien\com</Filter>
+    </ClCompile>
+    <ClCompile Include="z_com_server_register.cxx">
+      <Filter>Quellcodedateien\com</Filter>
+    </ClCompile>
+    <ClCompile Include="Has_proxy.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="java.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="java2.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="java_com.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="java_jvm.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="Proxy_class.cxx">
+      <Filter>Quellcodedateien\java</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_directory.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_event.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_mutex.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_process.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_registry.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_service.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_system_information.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_thread.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="z_windows_window.cxx">
+      <Filter>Quellcodedateien\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="async.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="async_io.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="async_socket.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="base.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="base64.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="com_remote.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="directory_lister.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="dom_libxml.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="event_base.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="file.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Has_java_proxy.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="rtf\headers.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="immutable_string.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="java.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="java2.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="java_com.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Java_proxy_class.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="loaded_module.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="log_categories.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory_allocator.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="message.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="mutex.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="mutex_base.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="pipe_collector.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="regex_class.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="rtf\rtf.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="rtf\rtf_doc.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="rtf\rtf_parser.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\sax.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="string_list.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="string_stream.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="system.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_base.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="threads_base.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xml.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xml_libxml2.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="xslt_libxslt.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_com.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_gzip.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_io.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_java.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_md5.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_posix_mutex.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_sql.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_time.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_windows.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="z_windows_mutex.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="zschimmer.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="lazy.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="javaproxy.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="java.odl">
+      <Filter>Quellcodedateien</Filter>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="charset_messages.xml" />
+    <CustomBuild Include="com_remote_messages.xml" />
+  </ItemGroup>
+</Project>

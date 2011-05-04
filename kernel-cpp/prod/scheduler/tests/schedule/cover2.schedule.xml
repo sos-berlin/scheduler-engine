@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<schedule
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+    
+    substitute = "file"
+    valid_from = "2008-04-28 02:00:00"
+    valid_to   = "2008-04-28 11:09:00"
+>
+    
+    <period repeat="30"/>
+    
+</schedule>

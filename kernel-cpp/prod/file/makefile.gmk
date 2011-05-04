@@ -1,0 +1,3 @@
+# file/linux.mak
+
+INCLUDES  = -I.. -I../../kram -I/usr/sv/inc

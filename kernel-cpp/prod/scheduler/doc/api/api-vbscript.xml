@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-vbscript.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "api"
+    base_dir             = "../"
+    title                = "Programmschnittstelle (API) für VBScript"
+>
+
+Sorry, you need a browser which can process XML files with XSLT stylesheets.
+
+</api.class>

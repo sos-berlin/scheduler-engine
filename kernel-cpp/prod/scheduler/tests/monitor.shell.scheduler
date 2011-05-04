@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <!--process_classes ignore="yes"/-->
+        
+        <script language="javascript"><![CDATA[
+        
+//        
+        
+        ]]></script>
+
+        
+        <jobs>
+            <job name="shell" order="yes" stop_on_error="no">
+                <script language="shell">
+                    <![CDATA[
+@echo off                
+echo Auftragspameter=%SCHEDULER_PARAM_AUFTRAGSPARAMETER% 
+echo Auftragspameter=$SCHEDULER_PARAM_AUFTRAGSPARAMETER
+echo javascript=%SCHEDULER_PARAM_JAVASCRIPT%
+echo javascript=$SCHEDULER_PARAM_JAVASCRIPT
+echo java=%SCHEDULER_PARAM_JAVA%
+echo java=$SCHEDULER_PARAM_JAVA
+
+echo shell_param=aus dem Shell-Job >>%SCHEDULER_RETURN_VALUES%
+exit 3
+        
+                ]]></script>
+
+                <monitor ordering="3">
+                    <script language="javascript">
+                            <![CDATA[ 
+
+spooler_log.info( "MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR MONITOR " );
+                        
+function spooler_task_before() 
+{
+    spooler_log.info( "SPOOLER_TASK_BEFORE" );   
+    return true;
+}
+
+function spooler_task_after() 
+{
+    spooler_log.info( "SPOOLER_TASK_AFTER" );
+    spooler_log.info( "exit_code=" + spooler_task.exit_code );
+}
+
+function spooler_process_before() 
+{
+    spooler_log.info( "SPOOLER_PROCESS_BEFORE" );
+    spooler_task.order.params.set_var( "javascript", "***Javascript***" );
+    return true;
+}
+
+function spooler_process_after( return_value ) 
+{
+    spooler_log.info( "SPOOLER_PROCESS_AFTER( " + return_value + " ) shell_param=" + spooler_task.order.params.value( "shell_param" ) );
+    spooler_log.info( "exit_code=" + spooler_task.exit_code );
+    return !return_value;
+}
+
+
+                    ]]></script>
+                </monitor>
+
+                <monitor name="java" ordering="2">
+                    <script java_class="spooler_job.My_monitor">
+                        <![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class My_monitor  extends sos.spooler.Monitor_impl
+{   
+    public boolean spooler_task_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_TASK_BEFORE" );
+        spooler_task.order().params().set_var( "java", "***Java spooler_task_before***" );
+        return true;
+    }
+
+    public void spooler_task_after()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_TASK_AFTER" );
+    }
+
+    public boolean spooler_process_before()  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_BEFORE" );
+        spooler_task.order().params().set_var( "java", "***Java spooler_process_before***" );
+        return true;
+    }
+
+    public boolean spooler_process_after( boolean return_value )  throws Exception
+    {
+        spooler_log.info( "JAVA SPOOLER_PROCESS_AFTER( " + return_value + " )" );
+        return !return_value;
+    }
+}
+                ]]>
+                    </script>
+                </monitor> 
+
+            </job>
+
+            <job name="zwei" order="yes">
+                <script language="javascript">
+                    spooler_log.info( "ZWEI" );
+                </script>
+            </job>
+            
+        </jobs>
+
+
+        <job_chains>
+            <job_chain name="monitor.shell.scheduler">
+                <job_chain_node state="1" job="shell" error_state="ERROR"/>
+                <job_chain_node state="2" job="zwei"/>
+                <job_chain_node state="ende"/>
+                <job_chain_node state="ERROR"/>
+            </job_chain>
+        </job_chains>
+
+
+        <commands>
+            <add_order id="1" job_chain="monitor.shell.scheduler" replace="yes">
+                <params>
+                    <param name="Auftragsparameter" value="Inhalt"/>
+                </params>
+            </add_order>
+        </commands>
+    </config>
+</spooler>

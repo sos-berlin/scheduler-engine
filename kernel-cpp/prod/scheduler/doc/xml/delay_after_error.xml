@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "delay_after_error"
+             title    = "Job nach Fehler verzögern"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="error_count" type="integer">
+            <description>
+                <p>
+                    Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="delay" type="seconds|HH:MM|HH:MM:SS|stop">
+            <description>
+                <p>
+                    Frist, nach der der Job wiederholt wird.
+                </p>
+                <p>
+                    <code>delay="stop"</code> oder <code>delay="STOP"</code> lässt den Job bei dieser Anzahl aufeinanderfolgender Fehler stoppen.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <description>
+        <p>
+            Siehe <scheduler_method class="Job" property="delay_after_error"/>.
+        </p>
+    </description>
+
+    <example>
+            <pre>&lt;job …>
+    &lt;script …>…&lt;/script>            
+    &lt;delay_after_error error_count= "2" delay="10"    />   &lt;!-- 10 Sekunden -->
+    &lt;delay_after_error error_count= "5" delay="00:01" />   &lt;!-- Eine Minute -->
+    &lt;delay_after_error error_count="10" delay="24:00" />   &lt;!-- Ein Tag -->
+    &lt;delay_after_error error_count="20" delay="STOP"  />
+&lt;/job></pre>
+
+        <p>
+            Nach einem Fehler wiederholt der Scheduler den Job sofort.<br/>
+            Nach dem zweiten bis zum vierten Fehler verzögert der Scheduler den Job um 10 Sekunden,<br/>
+            nach dem fünften bis zum neunten Fehler um eine Minute,<br/>
+            nach dem zehnten bis zum neunzehnten um 24 Stunden, <br/>
+            nach dem zwanzigsten aufeinanderfolgenden Fehler schließlich stoppt der Job.
+        </p>
+    </example>
+
+</xml_element>
