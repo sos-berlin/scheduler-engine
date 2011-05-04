@@ -28,7 +28,7 @@
         <module>cplusplus</module>
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
-        <!-- <module>kernel-cpp</module> -->
+        <module>kernel-cpp</module>
         <module>kernel-cpp-test</module>
         <module>playground</module>
         <module>jar</module>
