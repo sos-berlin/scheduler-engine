@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "file", "file\file.vcproj", "{5B3CA6E0-DC6C-4F07-B475-6C86E538D7BF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fs", "fs\fs.vcproj", "{0B06FFB7-86C9-4721-A177-BAC872992375}"
