@@ -23,6 +23,16 @@ function spooler_process() {
                 ]]></script>
                 <run_time once="no"/>
             </job>
+
+            <job name="job.3" order="yes" stop_on_error="no" tasks="5">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    spooler_task.delay_spooler_process = 1
+    return true;
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
         </jobs>
 
 
@@ -30,6 +40,7 @@ function spooler_process() {
             <job_chain name="myJobChain" max_orders="3">
                 <job_chain_node     state="state.1" job="job.1"/>
                 <job_chain_node     state="state.2" job="job.2"/>
+                <job_chain_node     state="state.3" job="job.3"/>
                 <job_chain_node.end state="state.end"/>
             </job_chain>
         </job_chains>
