@@ -59,7 +59,7 @@ LIBS += -lgcc -lz -lm -lc
 #LINK_FLAGS += $(LINK_STATIC)
 
 INCLUDES += -I$(PROD_DIR)/LINKS
-INCLUDES += -I$(PROD_DIR)/LINKS/java/include 
+INCLUDES += -I$(JAVA_HOME)/include 
 
 
 ifeq ($(OS),HP-UX)

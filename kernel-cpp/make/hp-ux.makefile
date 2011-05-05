@@ -10,7 +10,8 @@ include $(PROD_DIR)/make/gnu.makefile
 #INCLUDES += -I/export/home/sos/jz/j2sdk/include
 #INCLUDES += -I/export/home/sos/jz/j2sdk/include/solaris
 
-INCLUDES += -I$(PROD_DIR)/LINKS/java/include -I$(PROD_DIR)/LINKS/java/include/hp-ux
+#INCLUDES += -I$(PROD_DIR)/LINKS/java/include -I$(PROD_DIR)/LINKS/java/include/hp-ux
+INCLUDES += -I$(JAVA_HOME)/include/hp-ux
 
 #CFLAGS += -Wuninitialized
 CFLAGS += -fno-strict-aliasing

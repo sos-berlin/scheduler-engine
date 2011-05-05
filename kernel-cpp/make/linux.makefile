@@ -23,7 +23,7 @@ CFLAGS += $(if $(shell test -e /usr/include/ansidecl.h && echo 1),,-DMAKE_UBUNTU
 LINK_FLAGS += -m32
 
 
-INCLUDES += -I$(PROD_DIR)/LINKS/java/include/linux
+INCLUDES += -I$(JAVA_HOME)/include/linux
 
 # LINKS/include kann auf Suse 8.0 /usr/include verweisen, damit beim Ablauf nicht die neueste glibc verlangt wird.
 INCLUDES += $(if $(shell test -e $(PROD_DIR)/LINKS/include && echo 1),-I$(PROD_DIR)/LINKS/include -I$(PROD_DIR)/LINKS/include/linux,)
