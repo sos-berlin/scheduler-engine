@@ -83,7 +83,7 @@ namespace mail
 struct Hostware_version
 {
                                 Hostware_version        ( const string& version )                   { *this = version; }
-                                Hostware_version        ( int major, int minor, int count, int )    : _major(major), _minor(minor), _count(count) {}
+                                Hostware_version        ( int major, int minor, int count, int = 0 )    : _major(major), _minor(minor), _count(count) {}
 
     Hostware_version&           operator =              ( const string& version );
                                 operator string         () const;

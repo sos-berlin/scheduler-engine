@@ -71,6 +71,11 @@ function cmd_Cygwin_compile() {
     visualStudio_compile
 }
 
+#function cmd_Cygwin_generateSources() {
+#    mkdir -p target/cpp  || exit
+#    cat mavenSettings.h | sed /'${project.version}'/
+#}
+
 function visualStudio_clean() {
     [ -n "$vcbuild" ]  &&  "$vcbuild" /clean scheduler.sln  &&  "$vcbuild" /clean scheduler.sln
     [ -n "$msbuild" ]  &&  msbuild /target:clean scheduler-vs2010.sln

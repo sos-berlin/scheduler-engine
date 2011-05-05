@@ -44,7 +44,7 @@
 #   define VER_NAME_STR VER_PRODUCTNAME_STR
 #endif
 
-#if !defined VER_FILEVERSION
+#if !defined VER_FILEVERSION && defined VER_PRODUCTVERSION
 #    define VER_FILEVERSION VER_PRODUCTVERSION
 #endif
 
