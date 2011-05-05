@@ -44,7 +44,7 @@
 				Optimization="4"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../prod;..\libxml2\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
+				AdditionalIncludeDirectories="..;..\libxml2\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				StringPooling="true"
 				MinimalRebuild="true"
@@ -133,7 +133,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="../../prod;..\libxml2\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
+				AdditionalIncludeDirectories="..;..\libxml2\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"

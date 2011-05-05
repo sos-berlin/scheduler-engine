@@ -8,9 +8,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fdlibm", "js\src\fdlibm\fdl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scripting_engine", "scripting_engine\scripting_engine.vcxproj", "{CB328962-5E3D-4335-B549-55ED23867E90}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zschimmer", "..\prod\zschimmer\zschimmer.vcxproj", "{F4BA4DE3-330B-4929-B880-74B912464AE6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zschimmer", "zschimmer\zschimmer.vcxproj", "{F4BA4DE3-330B-4929-B880-74B912464AE6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "regexp", "..\prod\3rd_party\regexp\regexp.vcxproj", "{D2A07AB6-A18A-49B4-9B34-8DA638EDA3C4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "regexp", "3rd_party\regexp\regexp.vcxproj", "{D2A07AB6-A18A-49B4-9B34-8DA638EDA3C4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main", "scripting_engine\main.vcxproj", "{2A85574C-4AF9-4DDB-96D6-1C3F06F5EE44}"
 EndProject
