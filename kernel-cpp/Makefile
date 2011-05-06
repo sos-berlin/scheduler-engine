@@ -120,10 +120,10 @@ perl:      $(BIN_DIR)/libsosperlscript.so
 perlscript: $(BIN_DIR)/libsosperlscript.so
 
 spidermonkey: libxml2.a libxslt.a libzschimmer.a
-	mkdir -p scripting_engine/Release
-	$(MAKE)  -C scripting_engine/Release  -f ../Makefile
 	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src/fdlibm  -f Makefile.ref
 	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src         -f Makefile.ref
+	mkdir -p scripting_engine/Release
+	$(MAKE)  -C scripting_engine/Release  -f ../Makefile
 
 
 
