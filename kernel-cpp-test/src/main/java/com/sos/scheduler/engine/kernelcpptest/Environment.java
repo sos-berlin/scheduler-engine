@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.kernelcpptest;
 
-import com.google.common.base.Joiner;
-import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import org.apache.log4j.Logger;
 import static org.apache.commons.io.FileUtils.*;
 import static com.sos.scheduler.engine.kernelcpptest.OperatingSystemHelper.*;
 
@@ -32,6 +31,7 @@ public class Environment {
         }
         throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
     }
+
     
     private static String bin() {
         return isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
