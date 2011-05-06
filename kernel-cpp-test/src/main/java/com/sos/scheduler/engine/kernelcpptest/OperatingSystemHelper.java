@@ -64,7 +64,7 @@ public abstract class OperatingSystemHelper {
     public static String concatFileAndPathChain(File f, String pathChain) {
         String abs = f.getAbsolutePath();
         String[] b = pathChain.split(File.pathSeparator);
-        for (int i = 0; i < b.length; i++)  if (b[i].equals(f.toString()))  b[i] = null;
+        for (int i = 0; i < b.length; i++)  if (b[i].isEmpty() || b[i].equals(abs.toString()))  b[i] = null;
         return Joiner.on(File.pathSeparatorChar).skipNulls().join(concat(abs, b));
     }
 }

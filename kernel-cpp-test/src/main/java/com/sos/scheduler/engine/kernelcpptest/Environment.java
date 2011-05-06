@@ -119,15 +119,17 @@ public class Environment {
             "-ini=" + factoryIniFile.getPath(),
             "-log-dir=" + logDirectory.getPath(),
             "-log=" + new File(logDirectory, "scheduler.log").getPath(),
-            "-java-events",
-            directory.getPath() };
+            "-java-events" };
 
         if (OperatingSystemHelper.isUnix) {
             // Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann
-            String p = nullToEmpty(System.getenv(OperatingSystemHelper.singleton.getDynamicLibraryEnvironmentVariableName()));
-            result = concat("-env=" + concatFileAndPathChain(schedulerBinDirectory(), p), result);
-        }
+            String varName = OperatingSystemHelper.singleton.getDynamicLibraryEnvironmentVariableName();
+            String p = nullToEmpty(System.getenv(varName));
+	    String arg = "-env=" + varName + "=" + concatFileAndPathChain(schedulerBinDirectory(), p);
+            result = concat(result, arg);
+	}
 
+        result = concat(result, directory.getPath());
         return result;
     }
 
