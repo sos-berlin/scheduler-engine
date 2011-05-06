@@ -128,7 +128,7 @@ SHIP_INCS     := $(addprefix $(SHIP_DIST)/include/, $(SHIP_INCS))
 
 SHIP_BINS      = js
 ifdef JS_LIVECONNECT
-  SHIP_BINS   += lcshell
+#2011-05-05 Zschimmer  SHIP_BINS   += lcshell
 endif
 ifeq ($(OS_ARCH), WINNT)
   SHIP_BINS   := $(addsuffix .exe, $(SHIP_BINS))

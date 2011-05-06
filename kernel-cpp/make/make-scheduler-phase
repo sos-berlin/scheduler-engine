@@ -96,18 +96,11 @@ function msbuild() {
 #---------------------------------------------------------------------------------------------Linux
 
 function cmd_Linux_clean() {
-    # Nicht getestet! Verwendet sos-release auch das Verzeichnis Release? Sollte nicht gelöscht werden.
-    #searchAndDestroySubDirectory Release
-    #searchAndDestroySubDirectory Debug
-    #rm -rf bin/*
-    #rm -rf bind/*
     make clean  || exit
 }
 
 function cmd_Linux_compile() {
-    # Nicht getestet!
-    make/generate-revision.h   || exit
-    make scheduler
+    make scheduler spidermonkey  || exit
 }
 
 function searchAndDestroySubDirectory() {

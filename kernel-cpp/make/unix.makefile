@@ -21,8 +21,7 @@ INCLUDES  += $(foreach p,$(wildcard $(PROD_DIR)/LINKS/include.*),-I$p)
 
 LIBPATH   = $(SOS_LIBPATH) $(SV_LIBPATH) $(INGRES_LIBPATH) $(ORACLE_LIBPATH)
 
-SOS_LIBS     = $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/../prod/$(p)/$(O_DIR)/lib$(notdir $p).a)
-EBO_LIBS     = -L$(PROD_DIR)/misc/lib/ebo -lctleasy -lsvb -lkatfunc -lctree -ldberror -ldbclnt -ldbsock -lleatools /home/joacim/kunden/sos/e/prod/misc/lib/ebo/lipcsock.a -ltools -lconfig -lfileio -lcproc -lgterm
+SOS_LIBS     = $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(notdir $p).a)
 LIBS         = $(C_LIBS)
 
 #PERL_DIR = /usr/local/lib/perl5/5.6.1/i686-linux/CORE

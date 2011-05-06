@@ -13,7 +13,6 @@ subdirs="$subdirs prod/javaproxy"
 subdirs="$subdirs prod/kram"
 subdirs="$subdirs prod/make"
 subdirs="$subdirs prod/Makefile"
-subdirs="$subdirs prod/revision.h"
 subdirs="$subdirs prod/scheduler"
 subdirs="$subdirs prod/zschimmer"
 subdirs="$subdirs spidermonkey"
@@ -54,8 +53,7 @@ module=$(basename `pwd`)
 archive=$tmp/scheduler.tar.bz2
 
 
-make/generate-revision.h
-( cd ../spidermonkey  &&  ( [ -e make ] || ln -s ../prod/make . )  &&  make/generate-revision.h )
+( cd ../spidermonkey  &&  ( [ -e make ] || ln -s ../prod/make . ) )
 
 echo $subdirs werden nach $tmp kopiert ...
 ( cd `pwd -P`/..  &&  rsync -a  --keep-dirlinks --relative --cvs-exclude $exclude --delete --force --delete-excluded $rsync_options  $subdirs  $tmp/scheduler )  || exit

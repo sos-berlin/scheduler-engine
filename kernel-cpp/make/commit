@@ -1,5 +1,0 @@
-#! /bin/bash
-
-svn commit -m "$1"  &&
-svn update  &&  make/generate-revision.h
-

@@ -142,28 +142,28 @@ endif
 ifdef USE_MSVC
 LIBRARY = $(OBJDIR)/jsj.lib
 SHARED_LIBRARY = $(OBJDIR)/jsj.dll
-PROGRAM = $(OBJDIR)/lcshell.exe
+#2011-05-05 Zschimmer  PROGRAM = $(OBJDIR)/lcshell.exe
 else
 LIBRARY = $(OBJDIR)/libjsj.a
 SHARED_LIBRARY = $(OBJDIR)/libjsj.$(SO_SUFFIX)
-PROGRAM = $(OBJDIR)/lcshell
+#2011-05-05 Zschimmer  PROGRAM = $(OBJDIR)/lcshell
 endif
 
 include $(DEPTH)/rules.mk
 
-ifdef USE_MSVC
-$(OBJDIR)/$(PROG_FILE)_lc.obj: ../$(PROG_FILE).c
-	@$(MAKE_OBJDIR)
-	$(CC) -Fo$@ -c $(CFLAGS) -DLIVECONNECT ../$(PROG_FILE).c
-
-$(PROGRAM): $(OBJDIR)/$(PROG_FILE)_lc.obj $(OBJDIR)/jsj_simpleapi.obj $(LIBRARY)
-	link.exe -out:"$@" $(EXE_LINK_FLAGS) ../$(OBJDIR)/js32.lib $(OTHER_LIBS) $?
-else
-$(OBJDIR)/$(PROG_FILE).o: ../$(PROG_FILE).c
-	@$(MAKE_OBJDIR)
-	$(CC) -o $@ -c $(CFLAGS) -DLIVECONNECT ../$(PROG_FILE).c
-
-$(PROGRAM): $(OBJDIR)/$(PROG_FILE).o $(OBJDIR)/jsj_simpleapi.o
-	@$(MAKE_OBJDIR)
-	#Zschimmer 2008-04-08  Brauchen wir nicht: $(CC) -o $@ $(CFLAGS) $+ $(LIBRARY) ../$(OBJDIR)/libjs.a $(LDFLAGS) $(OTHER_LIBS)
-endif
+#2011-05-05 Zschimmer  ifdef USE_MSVC
+#2011-05-05 Zschimmer  $(OBJDIR)/$(PROG_FILE)_lc.obj: ../$(PROG_FILE).c
+#2011-05-05 Zschimmer  	@$(MAKE_OBJDIR)
+#2011-05-05 Zschimmer  	$(CC) -Fo$@ -c $(CFLAGS) -DLIVECONNECT ../$(PROG_FILE).c
+#2011-05-05 Zschimmer  
+#2011-05-05 Zschimmer  $(PROGRAM): $(OBJDIR)/$(PROG_FILE)_lc.obj $(OBJDIR)/jsj_simpleapi.obj $(LIBRARY)
+#2011-05-05 Zschimmer  	link.exe -out:"$@" $(EXE_LINK_FLAGS) ../$(OBJDIR)/js32.lib $(OTHER_LIBS) $?
+#2011-05-05 Zschimmer  else
+#2011-05-05 Zschimmer  $(OBJDIR)/$(PROG_FILE).o: ../$(PROG_FILE).c
+#2011-05-05 Zschimmer  	@$(MAKE_OBJDIR)
+#2011-05-05 Zschimmer  	$(CC) -o $@ -c $(CFLAGS) -DLIVECONNECT ../$(PROG_FILE).c
+#2011-05-05 Zschimmer  
+#2011-05-05 Zschimmer  $(PROGRAM): $(OBJDIR)/$(PROG_FILE).o $(OBJDIR)/jsj_simpleapi.o
+#2011-05-05 Zschimmer  	@$(MAKE_OBJDIR)
+#2011-05-05 Zschimmer  	#Zschimmer 2008-04-08  Brauchen wir nicht: $(CC) -o $@ $(CFLAGS) $+ $(LIBRARY) ../$(OBJDIR)/libjs.a $(LDFLAGS) $(OTHER_LIBS)
+#2011-05-05 Zschimmer  endif

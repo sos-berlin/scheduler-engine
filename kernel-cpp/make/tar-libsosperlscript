@@ -12,7 +12,6 @@ files="$files prod/zschimmer/*.h"
 #files="$files prod/zschimmer/filename.h"
 files="$files prod/make/make-libsosperlscript"
 files="$files prod/make/"
-files="$files prod/revision.h"
 
 exclude=""
 exclude="$exclude  --exclude .svn"
@@ -31,8 +30,6 @@ mkdir "$tmp/$name"
 module=$(basename `pwd`)
 archive=$tmp/$name.tar.bz2
 
-
-make/generate-revision.h
 
 #echo $files werden nach $tmp kopiert ...
 ( cd `pwd -P`/..  &&  rsync -av  --keep-dirlinks --relative --cvs-exclude $exclude --delete --force --delete-excluded $rsync_options  $files  $tmp/$name )

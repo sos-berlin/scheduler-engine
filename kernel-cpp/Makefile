@@ -13,6 +13,10 @@ endif
 
 CDPATH=
 
+# Fuer Spidermonekey:
+JDK=$(JAVA_HOME)
+export O_DIR
+
 WITH_JAVA=1
 WITH_PHP=1
 WITH_PERL=1
@@ -74,17 +78,18 @@ all:: hostphp
 endif
 
 all:: $(BIN_DIR)/libsosperlscript.so
+all:: spidermonkey
+all:: scripting_engine_
 	
 
 clean:
 	rm -fr */{Debug,Release} */*/{Debug,Release} */*/{Debug,Release} */*/*/{Debug,Release}
-	rm -fr `find .  -name "*.class"  -o -name "*.o"  -o -name "*.a"  -o -name "*.d"  -print`
-
+	rm -fr `find .  -name "*.class"  -o -name "*.o"  -o -name "lib*.a"  -o -name "*.d"  -print`
+	-BUILD_OPT=1 JS_LIVECONNECT=1  $(MAKE)  -C js/src  -f Makefile.ref  clean
+	-$(MAKE)  -C spidermonkey/Release  -f ../Makefile  clean
 
 common:
 	for f in .dispatch.*.pid; do [ -f $f ] && rm -v $f; done
-
-
 
 $(BIN_DIR):
 	mkdir $BIN_DIR
@@ -113,6 +118,12 @@ perl:      $(BIN_DIR)/libsosperlscript.so
 #javascript: $(BIN_DIR)/libspidermonkey.so $(BIN_DIR)/javascript
 
 perlscript: $(BIN_DIR)/libsosperlscript.so
+
+spidermonkey: libxml2.a libxslt.a libzschimmer.a
+	mkdir -p scripting_engine/Release
+	$(MAKE)  -C scripting_engine/Release  -f ../Makefile
+	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src/fdlibm  -f Makefile.ref
+	CFLAGS=-fPIC BUILD_OPT=1 JS_LIVECONNECT=1  JDK=$(JDK)  $(MAKE)  -C js/src         -f Makefile.ref
 
 
 
@@ -154,7 +165,6 @@ $(BIN_DIR)/sos.hostware.jar:
 
 $(BIN_DIR)/sos.spooler.jar:
 	@make/make scheduler $(BIN_DIR)/sos.spooler.jar
-
 
 
 hostware:: libxml2.a
