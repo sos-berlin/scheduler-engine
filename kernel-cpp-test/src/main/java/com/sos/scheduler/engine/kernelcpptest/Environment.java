@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import org.apache.log4j.Logger;
 import static org.apache.commons.io.FileUtils.*;
+import static com.google.common.base.Strings.*;
+import static com.google.common.collect.ObjectArrays.*;
 import static com.sos.scheduler.engine.kernelcpptest.OperatingSystemHelper.*;
 
 
@@ -46,7 +48,7 @@ public class Environment {
             factoryIniFile = new File(directory, "factory.ini");
             logDirectory = new File(directory, "log");
             prepareConfigurationFiles();
-            addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
+            //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
         }
         catch(IOException x) { throw new RuntimeException(x); }
     }
@@ -112,13 +114,21 @@ public class Environment {
 
 
     public String[] standardArgs() {
-        return new String[]{
+        String[] result = new String[]{
             schedulerExeFile.getPath(),
             "-ini=" + factoryIniFile.getPath(),
             "-log-dir=" + logDirectory.getPath(),
             "-log=" + new File(logDirectory, "scheduler.log").getPath(),
             "-java-events",
             directory.getPath() };
+
+        if (OperatingSystemHelper.isUnix) {
+            // Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann
+            String p = nullToEmpty(System.getenv(OperatingSystemHelper.singleton.getDynamicLibraryEnvironmentVariableName()));
+            result = concat("-env=" + concatFileAndPathChain(schedulerBinDirectory(), p), result);
+        }
+
+        return result;
     }
 
 
