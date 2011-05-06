@@ -1,9 +1,12 @@
 package com.sos.scheduler.engine.kernelcpptest;
 
+import com.google.common.base.Joiner;
+import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import static org.apache.commons.io.FileUtils.*;
+import static com.sos.scheduler.engine.kernelcpptest.OperatingSystemHelper.*;
 
 
 public class Environment {
@@ -12,6 +15,7 @@ public class Environment {
     private static final OperatingSystemHelper os = OperatingSystemHelper.singleton;
     private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
     private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
+    private static final Logger logger = Logger.getLogger(Environment.class);
 
     final File directory;
     final File factoryIniFile;
@@ -30,7 +34,7 @@ public class Environment {
     }
     
     private static String bin() {
-        return OperatingSystemHelper.isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
+        return isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
           : "bin";
     }
 
@@ -42,6 +46,7 @@ public class Environment {
             factoryIniFile = new File(directory, "factory.ini");
             logDirectory = new File(directory, "log");
             prepareConfigurationFiles();
+            addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
         }
         catch(IOException x) { throw new RuntimeException(x); }
     }
@@ -61,7 +66,17 @@ public class Environment {
         System.load(schedulerModuleFile.getPath());
     }
 
+    
+    private static void addSchedulerPathToJavaLibraryPath() {
+        prependJavaLibraryPath(schedulerBinDirectory());
+    }
 
+
+    private static File schedulerBinDirectory() {
+        return schedulerModuleFile.getAbsoluteFile().getParentFile();
+    }
+
+    
     private void copyResource(String name) {
         copyResource(name, null);
     }
@@ -78,13 +93,13 @@ public class Environment {
     }
 
 
-    private boolean copyResourceOptional(String name, File destination) {
+    private boolean copyResourceOptional(String name, File destinationOrNull) {
         try {
-            if (destination == null)  destination = new File(directory, name);
+            File dest = destinationOrNull != null? destinationOrNull : new File(directory, name);
             URL url = resourceClass().getResource(name);
             boolean exists = url != null;
             if (exists)
-                copyURLToFile(url, destination);
+                copyURLToFile(url, dest);
             return exists;
         }
         catch(IOException x) { throw new RuntimeException(x); }
@@ -102,7 +117,7 @@ public class Environment {
             "-ini=" + factoryIniFile.getPath(),
             "-log-dir=" + logDirectory.getPath(),
             "-log=" + new File(logDirectory, "scheduler.log").getPath(),
-	    "-java-events",
+            "-java-events",
             directory.getPath() };
     }
 
