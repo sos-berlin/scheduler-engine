@@ -57,6 +57,14 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <distributionManagement>
+        <repository>
+            <id>sos-internal</id>
+            <name>SOS Internal Repository</name>
+            <url>http://archiva.sos:8080/archiva/repository/internal</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.8.1</scala.version>

@@ -49,41 +49,58 @@ fi
 
 function main() {
     os=`uname -o`  || exit
-    [ "$os" == 'GNU/Linux' ] && os="Linux" 
+    [ "$os" == 'Cygwin' ] && os="windows"
+    [ "$os" == 'GNU/Linux' ] && os="linux"
+    cmd_generic_${cmd}
     cmd_${os}_${cmd}   || exit
+}
+
+#-------------------------------------------------------------------------------------------Generic
+
+function cmd_generic_clean() {
+    :
+}
+
+function cmd_generic_compile() {
+    o=`if [ "$os" == "windows" ]; then echo $os; else echo unix; fi`
+    cp -p src/main/assembly/assembly-$o.xml target/assembly.xml  || exit
 }
 
 #-------------------------------------------------------------------------------------------Windows
 
-function cmd_Cygwin_clean() {
-    cmd_Cygwin_cleanWithRm
-    visualStudio_clean
+function cmd_windows_clean() {
+    cmd_windows_cleanWithRm
+    visualStudio_clean scheduler
+    visualStudio_clean spidermonkey
 }
 
-function cmd_Cygwin_cleanWithRm() {
+function cmd_windows_cleanWithRm() {
     # Weil "vcbuild.exe /clean" nicht immer löschen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
     searchAndDestroySubDirectory Release
     searchAndDestroySubDirectory Debug
     rm -rf {bin,bind,ipch}/*
 }
 
-function cmd_Cygwin_compile() {
-    visualStudio_compile
+function cmd_windows_compile() {
+    visualStudio_compile scheduler
+    visualStudio_compile spidermonkey
 }
 
-#function cmd_Cygwin_generateSources() {
+#function cmd_windows_generateSources() {
 #    mkdir -p target/cpp  || exit
 #    cat mavenSettings.h | sed /'${project.version}'/
 #}
 
 function visualStudio_clean() {
-    [ -n "$vcbuild" ]  &&  "$vcbuild" /clean scheduler.sln  &&  "$vcbuild" /clean scheduler.sln
-    [ -n "$msbuild" ]  &&  msbuild /target:clean scheduler-vs2010.sln
+    package=$1
+    [ -n "$vcbuild" ]  &&  "$vcbuild" /clean $package.sln  &&  "$vcbuild" /clean $package.sln
+    [ -n "$msbuild" ]  &&  msbuild /target:clean $package-vs2010.sln
 }
 
 function visualStudio_compile() {
-    [ -n "$vcbuild" ]  &&  "$vcbuild" scheduler.sln
-    [ -n "$msbuild" ]  &&  msbuild scheduler-vs2010.sln
+    package=$1
+    [ -n "$vcbuild" ]  &&  "$vcbuild" $package.sln
+    [ -n "$msbuild" ]  &&  msbuild $package-vs2010.sln
 }
 
 function msbuild() {
@@ -95,11 +112,11 @@ function msbuild() {
 
 #---------------------------------------------------------------------------------------------Linux
 
-function cmd_Linux_clean() {
+function cmd_linux_clean() {
     make clean  || exit
 }
 
-function cmd_Linux_compile() {
+function cmd_linux_compile() {
     make scheduler spidermonkey  || exit
 }
 
