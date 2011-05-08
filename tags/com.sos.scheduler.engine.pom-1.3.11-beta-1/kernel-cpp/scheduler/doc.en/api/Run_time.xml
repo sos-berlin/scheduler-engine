@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!-- $Id: Run_time.xml 3943 2005-09-25 18:33:33Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Run_time"
+    object_name = "run_time"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-08-19 16:24:54 +0200 (Di, 19 Aug 2008) $"
+>
+
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="schedule" access="read">
+        <com>
+            <com.result>
+                <com.type class="Schedule"/>
+            </com.result>
+        </com>
+
+        <title>
+            <code>&lt;schedule></code>
+        </title>
+
+        <description>
+            <p>
+            </p>
+        </description>
+
+        <!--messages>
+        <message level="error" code="SCHEDULER-352"/>
+    </messages-->
+
+    </property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml" access="write">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                XML document as a string
+            <!--XML-Dokument als String-->
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        <code>&lt;run_time></code>
+    </title>
+
+    <description>
+        <p>
+            Discards the current setting and resets <code>Run_time</code>.
+        <!--Verwirft die bisherige Einstellung und setzt <code>Run_time</code> neu.-->
+        </p>
+    </description>
+
+ <!--messages>
+        <message level="error" code="SCHEDULER-352"/>
+    </messages-->
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>Managing Time Slots and Starting Times</title>
+<!--
+<title>Laufzeit</title>-->
+
+<description>
+    <p>
+        See <scheduler_element name="run_time"/>,
+    <!--Siehe <scheduler_element name="run_time"/>,-->
+        <scheduler_method class="Order"/>.
+        <scheduler_method class="Schedule"/>.
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<example programming_language="javascript">
+    <pre>var order = spooler_task.order;
+
+// Repeat order daily at 15:00
+order.run_time.xml = "&lt;run_time>&lt;period single_start='15:00'/>&lt;/run_time>";</pre>
+</example>
+
+</api.class>

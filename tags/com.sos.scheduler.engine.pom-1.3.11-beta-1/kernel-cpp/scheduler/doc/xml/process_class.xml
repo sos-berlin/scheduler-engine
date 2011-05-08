@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "process_class"
+             title    = "Prozessklasse"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <description>
+        <p>
+            Definiert oder ändert eine Prozessklasse.
+        </p>
+        <p>
+            Siehe auch <scheduler_element name="process_class.remove"/>.
+        </p>
+    </description>
+
+    <xml_parent_elements>
+        <xml_parent_element name="process_classes">
+        </xml_parent_element>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute setting="spooler_id"/>
+
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Name der Prozessklasse. Wenn das Attribut fehlt oder leer (<code>""</code>) ist,
+                    dann wird die Default-Prozessklasse geändert.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="job"/>, Attribut <code>process_class=</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="max_processes" type="zahl" initial="30">
+            <description>
+                <p>
+                    Begrenzt die Zahl der Prozesse.
+                </p>
+                <p>
+                    Manche Betriebsysteme limitieren die Zahl der Prozesse, die der Scheduler starten darf.
+                    Es sollten nicht mehr Prozesse konfiguriert werden als das Betriebssystem erlaubt.
+                </p>
+                <p>
+                    Für Microsoft Windows Betriebssysteme gilt derzeit eine Beschränkung von max. 30
+                    für die parallele Ausführung zugelassenen Prozessen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="remote_scheduler" type="host:port" title="Ausführung der Tasks auf entferntem Rechner">
+            <description>
+                <p>
+                    Bestimmt den entfernten Scheduler,
+                    auf dem die Tasks dieser Prozessklasse ausgeführt werden sollen,
+                    durch Hostnamen oder IP-Nummer und TCP-Port
+                    (s. <scheduler_element name="config" attribute="tcp_port"/>).
+                </p>
+                <p>
+                    Der entfernte Scheduler muss den Zugriff mit
+                    <scheduler_element name="allowed_host" attribute="level" value="all"/> erlauben.
+                </p>
+                <p>
+                    Die ausgeführten Tasks kommunizieren über die API mit dem steuernden Scheduler.
+                    Dabei gibt es einige Besonderheiten:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_element name="include"/> innerhalb von <scheduler_element name="script"/> wird vom Task-Prozess ausgeführt.
+                        Die einzuschließende Datei wird also vom Rechner, der die Task ausführt, gelesen.
+                    </li>
+                    <li>
+                        <scheduler_method class="Subprocess" property="timeout"/> und 
+                        <scheduler_method class="Task" object="spooler_task" method="add_pid"/> wirken nicht.
+                        Der Scheduler kann entfernte Subprozesse, deren Frist abgelaufen ist, nicht abbrechen.
+                    </li>
+                    <li>
+                        <scheduler_method class="Log" method="log_file"/> wird,
+                        wie fast alle Methoden, auf dem Rechner des Schedulers ausgeführt,
+                        greift also auf die Dateien des dortigen Dateisystems zu.
+                    </li>
+                </ul>
+                <p>
+                    Einige Einstellungen werden vom entfernten statt vom eigenen Scheduler übernommen:
+                </p>
+                <ul>
+                    <li>
+                        <scheduler_ini_entry file="sos.ini" section="java" entry="javac"/>
+                    </li>
+                    <li>
+                        <scheduler_ini_entry file="factory.ini" section="spooler" entry="tmp"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="java_options"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="java_class_path"/>
+                    </li>
+                    <li>
+                        <scheduler_element name="config" attribute="include_path"/>
+                    </li>
+                </ul>
+                
+            </description>
+
+            <messages>
+                <message level="info" code="SCHEDULER-848"/>
+                <message level="warn" code="SCHEDULER-849"/>
+                <message level="warn" code="SCHEDULER-850"/>
+            </messages>
+        </xml_attribute>
+
+        <xml_attribute name="replace" type="yes|no" initial="yes">
+            <description>
+                <p>
+                    <code>replace="yes"</code> ersetzt die vorhandene Prozessklasse.
+                </p>
+                <p>
+                    <code>replace="no"</code> ändert nur die gesetzten Attribute der Prozessklasse.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <behavior_with_xml_element element="base" complete="yes"/>
+</xml_element>

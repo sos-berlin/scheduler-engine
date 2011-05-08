@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+Targets für Dialogeingaben
+-->
+<project name="targets.dialog" basedir=".">
+
+	<property name="settings.antroot" value="../scheduler.ant" />
+
+	<!-- 
+	setup subversion environment for ant
+	-->
+	<target name="-dia.setup">
+
+		<path id="dia.ant.lib.dir">
+			<fileset dir="${settings.antroot}/ext">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+		<taskdef resource="dialog-task.properties"
+		         classpathref="dia.ant.lib.dir"
+		/>
+
+	</target>
+
+	<!-- 
+	Eingabe von release-Informationen\\
+	Folgenden Informationen können eingegeben werden:\\
+	* major-version\\
+	* minor-version\\
+	* subversion\\
+	\\
+	Der gesamte Versionstring wird auf die property .:dia.in.version:. geschrieben (major.minor.sub).
+	-->
+	<target name="-dia.release" depends="-dia.setup">
+		<dialog dialogtitle="release information for ${ant.project.name}">
+			<textfield property="dia.in.major"
+			           defaultvalue="1"
+			           label="major version: "
+			           required="true"
+			           size="20"
+			/>
+			<textfield property="dia.in.minor"
+			           defaultvalue="00"
+			           label="minor version: "
+			           required="true"
+			           size="20"
+			/>
+			<textfield property="dia.in.subversion"
+			           defaultvalue="000"
+			           label="subversion: "
+			           required="true"
+			           size="20"
+			/>
+		</dialog>
+		<property name="dia.in.project" value="${ant.project.name}" />
+		<property name="dia.in.version"
+		          value="${dia.in.major}.${dia.in.minor}.${dia.in.subversion}"
+		/>
+	</target>
+
+	<!--
+	Eingabe des Projektnamens
+	-->
+	<target name="-dia.project" depends="-dia.setup">
+		<dialog dialogtitle="project">
+			<textfield property="dia.in.project"
+			           label="projectname: "
+			           required="true"
+			           size="20"
+			/>
+		</dialog>
+		<property name="dia.in.project" value="${dia.in.project}" />
+	</target>
+
+	<!--
+	Eingabe eines Message-Textes
+	-->
+	<target name="-dia.message" depends="-dia.setup">
+		<dialog dialogtitle="message text for repository">
+			<textfield property="dia.in.message"
+			           label="message: "
+			           required="true"
+			           size="20"
+			/>
+		</dialog>
+		<property name="dia.in.message" value="${dia.in.message}" />
+	</target>
+
+
+</project>
+

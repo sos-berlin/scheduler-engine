@@ -1,0 +1,9 @@
+Bedingter Breakpoint setzen
+
+group_name[0] == 's' && group_name[1] == 'm' && group_name[2] == 't' && group_name[3] == 'p' 
+
+entry_name[0] == 's' && entry_name[1] == 'm' && entry_name[2] == 't' && entry_name[3] == 'p'
+
+group_name[0] == 'k'
+
+group_name[0] == 's' /* spooler oder smtp */  || group_name[0] == 'm' // mail

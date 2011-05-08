@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id: Web_service_request-java.xml 4126 2006-03-01 11:01:29Z jz $ -->
+
+<?xml-stylesheet href="api-java.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Web_service_request"
+    base_dir             = "../"
+/>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order>
+
+    <!-- Testfall b (Sonderfall)
+         Nächster Start nach Ende der zweiten Periode. Beide Perioden abgelaufen!
+         Zwei Perioden definiert, nahtlos oder nicht nahtlos
+    		 Erwartetes Ergebnis: Start sofort und zu Beginn der ersten Periode
+    		 Tatsächliches Ergebnis: Wie erwartes. OK
+    --> 
+    
+    <run_time let_run="no">
+        <period repeat="05:00:00"
+                begin="09:00"
+                end="12:20"/> 
+  
+         <period repeat="05:00:00"
+                begin="12:54:00"
+                end="13:00:00"/>  
+    </run_time>
+</order>

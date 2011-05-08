@@ -1,0 +1,5 @@
+// sosodbcv.rc
+
+#include "sosodbc_version.h"
+#include "../kram/sosvers.rc"
+

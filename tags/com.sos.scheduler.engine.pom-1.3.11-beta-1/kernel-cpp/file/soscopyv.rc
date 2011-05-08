@@ -1,0 +1,5 @@
+// soscopyv.rc
+
+#include "hostcopy_version.h"
+#include "../kram/sosvers.rc"
+

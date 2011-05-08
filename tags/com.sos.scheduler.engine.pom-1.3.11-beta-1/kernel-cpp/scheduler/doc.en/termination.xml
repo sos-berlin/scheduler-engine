@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: termination.xml 3303 2005-01-11 23:22:22Z jz $-->
+
+<description 
+    title    = "Terminating the Job Scheduler" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $"
+>
+
+
+    <h2>Correct Stopping</h2>
+<!--<h2>Ordentliches Beenden</h2>-->
+    <p>
+        The Job Scheduler stops when all jobs have come to an end.
+    <!--Der Scheduler beendet sich erst, wenn kein Job mehr läuft.-->
+    </p>
+    <p>
+        See <scheduler_method class="Spooler" method="terminate"/>
+        and <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+    </p>
+
+
+    <h2>Correct Stopping with a Time Limit</h2>
+<!--<h2>Ordentliches Beenden mit Frist</h2>-->
+    <p>
+        A time limit may be specified within which the Job Scheduler must stop.
+        Should tasks still be running at the end of this time limit, 
+        because for example they remain too long in the 
+        <scheduler_method class="Job_impl" method="spooler_process"/>
+        then the Job Scheduler terminates all processes still running.
+    <!--Sie können zum Beenden eine Frist angeben.
+        Wenn nach Ablauf der First noch Tasks laufen,
+        weil sie in z.B. <scheduler_method class="Job_impl" method="spooler_process"/> zu lange verharren,
+        bricht der Scheduler alle noch laufenden Prozesse ab.-->
+    </p>
+    <p>
+        However the Job Scheduler first sends out an e-mail listing the tasks being terminated.
+    <!--Zuvor verschickt er eine eMail mit dem Hinweis auf Tasks, die abgebrochen werden.-->
+    </p>
+    <p>
+        The Job Scheduler then waits a maximum 30 seconds for the tasks to terminate 
+        (this usually takes place immediately)
+        before stopping itself.
+    <!--Er wartet dann längstens 30s aufs Ende der Tasks (normalerweise gelingt der Abbruch sofort)
+        und beendet sich dann.-->
+    </p>
+    <p>
+        See <scheduler_method class="Spooler" method="terminate"/>
+        and <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.
+    <!--Siehe <scheduler_method class="Spooler" method="terminate"/>
+        und <scheduler_element name="modify_spooler" attribute="cmd" value="terminate"/>.-->
+    </p>
+
+
+    <h2>Termination</h2>
+<!--<h2>Abbruch</h2>-->
+    <p>
+        The Job Scheduler breaks off all processes (including the foreign processes registered with add_pid()) immediately.
+        (Unix: <code>kill -s KILL</code>, Windows: <code>TerminateProcess()</code>). 
+        The Job Scheduler then shuts itself down.
+    <!--Der Scheduler bricht allen Prozesse (einschließlich der mit add_pid() registrierten fremden Prozesse) sofort ab
+        (Unix: <code>kill -s KILL</code>, Windows: <code>TerminateProcess()</code>). 
+        Dann bricht er sich selbst ab.-->
+    </p>
+    <p>
+        Advantage: The termination is immediate.
+    <!--Vorteil: Der Abbruch wirkt sofort.-->
+    </p>
+    <p>
+        Disadvantage: the software, in particular the jobs, do not have the possibility to react. 
+        This means, for example, that temporary files cannot be deleted.
+    <!--Nachteil: Sie Software, insbesondere die Jobs können nicht darauf reagieren. 
+        Z.B. können temporäre Dateien nicht gelöscht werden.-->
+    </p>
+</description>

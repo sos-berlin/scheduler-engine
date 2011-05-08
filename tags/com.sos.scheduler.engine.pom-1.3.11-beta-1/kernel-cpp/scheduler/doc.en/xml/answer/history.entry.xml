@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: history.entry.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
+
+<!--         title         = "Eintrag in der Task-Historie"-->
+
+<xml_element name          = "history.entry" 
+             title         = "Entry in the Task History"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="history"/>
+    </xml_parent_elements>
+    
+
+    <xml_attributes>
+        <xml_attribute name="task" type="number" title="Task id"/>
+    <!--<xml_attribute name="task" type="zahl" title="Task-Id"/>-->
+        
+        <xml_attribute name="id" type="number" title="Task id (out of date)">
+    <!--<xml_attribute name="id" type="zahl" title="Task-Id (veraltet)">-->
+            <description>
+                <p>
+                    Use the attribute <code>task=</code>.
+                <!--Verwenden sie das Attribut <code>task=</code>.-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="spooler_id" type="name" title="Scheduler id">
+    <!--<xml_attribute name="spooler_id" type="name" title="Scheduler-Id">-->
+            <description>
+                <p>
+                    The Job Scheduler id (or <code>"-"</code>, should the scheduler not have an id).
+                <!--Kennung des Schedulers oder <code>"-"</code>, wenn der Scheduler keine Kennung hat.-->
+                <!--<scheduler_comment>Das sollte in "" geändert werden.</scheduler_comment>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="job_name" type="name" title="Job name"/>
+    <!--<xml_attribute name="job_name" type="name" title="Jobname"/>-->
+        
+        <xml_attribute name="start_time" type="yyyy-mm-dd hh:mm:ss" title="The task start time"/>
+    <!--<xml_attribute name="start_time" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Starts der Task"/>-->
+        
+        <xml_attribute name="end_time"   type="yyyy-mm-dd hh:mm:ss" title="The task end time"/>
+    <!--<xml_attribute name="end_time"   type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Endes der Task"/>-->
+        
+        <xml_attribute name="cause" type="cause" title="The Reason for the start">
+    <!--<xml_attribute name="cause" type="cause" title="Grund des Starts">-->
+            <description>
+                <p>
+                    See <scheduler_element directory="xml/answer/" name="task" attribute="cause"/>
+                <!--Siehe <scheduler_element directory="xml/answer/" name="task" attribute="cause"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="steps" type="number" title="Number of job steps"/>
+    <!--<xml_attribute name="steps" type="zahl" title="number der Jobschritte"/>-->
+        
+        <xml_attribute name="error" type="0|1" title="&quot;1&quot; for a job error"/>
+    <!--<xml_attribute name="error" type="0|1" title="&quot;1&quot; bei einem Jobfehler"/>-->
+        
+        <xml_attribute name="error_code" type="text" title="Error code">
+    <!--<xml_attribute name="error_code" type="text" title="Fehlercode"/>-->
+            <description>
+                <p>
+                    The <scheduler_element name="ERROR" directory="xml/answer/"/>
+                    element will be returned instead of this attribute within 
+                    <scheduler_element name="job" directory="xml/answer/"/>.
+                <!--Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
+                    wird anstelle dieses Attributs das Element 
+                    <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="error_text" type="text" title="Error code with error text">
+    <!--<xml_attribute name="error_text" type="text" title="Fehlercode mit Fehlertext"/>-->
+            <description>
+                <p>
+                    The <scheduler_element name="ERROR" directory="xml/answer/"/>
+                    element will be returned instead of this attribute within 
+                    <scheduler_element name="job" directory="xml/answer/"/>.
+                <!--Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
+                    wird anstelle dieses Attributs das Element 
+                    <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+    
+    <xml_child_elements>
+        <xml_child_element name="ERROR"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+            The History is read from the database.
+        <!--Die Histore wird aus der Datenbank gelesen.-->
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

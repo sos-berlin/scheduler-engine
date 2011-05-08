@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job_chain title="job chain stops all orders on one order error">
+	<job_chain_node state="start" job="sf3763279" next_state="success" error_state="error" on_error="suspend"/>  
+	<job_chain_node state="success"/>  
+	<job_chain_node state="error"/>
+</job_chain> 

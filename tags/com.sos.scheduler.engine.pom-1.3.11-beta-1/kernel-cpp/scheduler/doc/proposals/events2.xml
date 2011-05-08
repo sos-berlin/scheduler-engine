@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<events title    = "Ereignisse"
+        base_dir = ""
+        parent_page         = "index.xml"
+        author   = "$Author$"
+        date     = "$Date$">
+
+    <description>
+        <scheduler_keyword keyword="Ereignisse"/>
+        <p>
+            Der Scheduler kann bei bestimmten Ereignissen eMails verschicken.
+        </p>
+        <p>
+
+        </p>
+    </description>
+
+
+    <event name="scheduler_started">
+        <description>
+            <p>
+                Das Scheduler-Skript ist ausgeführt worden
+                (freistehende Anweisungen und <scheduler_method class="Job_impl" method="spooler_init" />)
+                und hat eine Fehlermeldung mit <scheduler_method class="Log" method="error" java_signature="String" />
+                ausgegeben.
+            </p>
+            <p>
+                Eine Exception führt nicht zu diesem Ereignis.
+                Stattdessen führt sie zur Beendigung des Schedulers.
+                Siehe Ereignis scheduler_fatal_error.
+
+********************************************************************************************
+
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Enthält die Fehlermeldung des Scheduler-Skripts
+                    (s. <scheduler_method class="Log" method="error" java_signature="String" />).
+                </p>
+            </description>
+        </event.error>
+
+    </event>
+
+
+    <event name="scheduler_fatal_error">
+        <description>
+            <p>
+                Der Scheduler wird wegen eines Fehlers beendet.
+                Das kann eine Exception im Scheduler-Skript, ein Datenbankfehler oder ein internes Problem sein.
+            </p>
+            <p>
+                Eine Exception führt nicht zu diesem Ereignis.
+                Stattdessen führt sie zur Beendigung des Schedulers.
+                Siehe Ereignis XXXXXXXXXXXXXXXX.
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Enthält den Grund der Beendigung.
+                </p>
+            </description>
+        </event.error>
+
+    </event>
+
+
+    <event name="job_error">
+        <description>
+            <p>
+                Beim Start eines Jobs ist ein (interner) Fehler aufgetreten.
+                Der Job wird gestoppt.
+            </p>
+        </description>
+
+        <event.error/>
+
+    </event>
+
+
+    <event name="task_ended">
+        <description>
+            <p>
+                Eine Task hat sich beendet und der Versand einer eMail ist angefordert worden.
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Wenn die Task mit einem Fehler (einer Exception) beendet worden ist,
+                    steht hier die Fehlermeldung.
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+    <event name="disk_full">
+        <description>
+            <p>
+                Eine Protokolldatei kann nicht fortgeschrieben werden,
+                weil nicht genügend Plattenplatz zur Verfügung steht.
+            </p>
+            <p>
+                Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Fehlermeldung des Betriebssystems.
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+    <event name="database_error">
+        <description>
+            <p>
+                Die Datenbank hat einen Fehler gemeldet.
+            </p>
+            <p>
+                Mit <code>&lt;modify_spooler cmd="continue"></code> kann der Scheduler fortgesetzt werden.
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                    Fehlermeldung der Datenbank.
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+
+
+    <event name="task_start_error">
+        <description>
+            <p>
+            </p>
+            <p>
+            </p>
+        </description>
+
+        <event.error>
+            <description>
+                <p>
+                </p>
+            </description>
+        </event.error>>
+
+    </event>
+
+
+</events>

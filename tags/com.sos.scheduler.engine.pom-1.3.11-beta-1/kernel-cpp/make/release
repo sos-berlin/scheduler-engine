@@ -1,0 +1,400 @@
+#! /usr/bin/perl -W
+
+# $Id: release 4397 2006-07-29 09:00:33Z jz $
+
+# Hier keine Kennungen ablegen, die Quelle wird veröffentlicht.
+
+
+#--------------------------------------------------------------------------------------------------
+
+our $module_dir           = `pwd`;      chop $module_dir;
+our $os                   = `uname`;    chop $os;         # Linux/SunOS
+our $os_dir;                                              # win32/linux32/solaris32;
+
+#--------------------------------------------------------------------------------------------------
+
+$remote_ssh_port      = '22'  unless defined( $remote_ssh_port );
+
+our $module               = `basename $module_dir`;      chop $module;
+our $release_dir          = "Release";                    # Nur lokal, unter $module_dir: Verzeichnis, dessen Inhalt zur SOS exportiert wird.
+our $archive_dir          = 'Archive';
+our $rsync_options        = '--delete --exclude=CVS --exclude=LINKS --exclude _vti_cnf --exclude .svn --delete-excluded ';
+our $rsync_remote_options = "-e 'ssh -p $remote_ssh_port'  -z --delete --exclude '*.map.gz' ";
+our %group_destinations;
+our $tar_path;
+
+#--------------------------------------------------------------------------------------------------
+
+my $compressor        = system( "/bin/bash -c 'lzma --version </dev/null &>/dev/null'" ) == 0? "lzma" : "bzip2";
+my $compressed_suffix = $compressor eq "lzma"? ".lzma" : ".bz2";
+
+#--------------------------------------------------------------------------------------------------
+
+our $group_name = shift;
+$group_name = ""  if !$group_name;
+
+if( $group_name eq ""  ||  $group_name eq "scheduler" )
+{
+    add_group( 'scheduler', version_of_file( 'scheduler/version.h' ) );
+    add_file ( 'scheduler', 'bin/scheduler'                  );
+    run_cmd( "$compressor --keep --force bin/scheduler.debug-info" );
+    add_file ( 'scheduler', "bin/scheduler.debug-info$compressed_suffix" );
+    add_file ( 'scheduler', 'bin/sos.spooler.jar'            );
+    add_file ( 'scheduler', 'bin/setuid'                     );
+    add_file ( 'scheduler', 'scheduler/scheduler.xsd'        );
+   #add_file ( 'scheduler', 'scheduler/doc'                  );
+    add_file ( 'scheduler', 'scheduler/RELEASE.TXT'          );
+}
+
+if( $group_name eq ""  ||  $group_name eq "hostware" )
+{
+    add_group( 'hostware' , version_of_file( 'kram/version.h' ) );
+    add_file ( 'hostware' , 'bin/sos.mail.jar'               );
+    add_file ( 'hostware' , 'bin/hostcopy'                   )           if $os eq "Linux"  ||  $os eq "SunOS";
+    add_file ( 'hostware' , 'bin/libhostole.so'              );
+    add_file ( 'hostware' , 'hostole/RELEASE.TXT'            );
+   #add_group( 'hostphp' , version_of_file( 'kram/version.h'  ) );
+
+    if( $os eq "Linux" )
+    {
+        add_file ( 'hostware' , 'bin/libhostphp.so'              );         # Das ist ein Link auf libhostphp-4.2.1.so
+        add_file ( 'hostware' , 'bin/libhostphp-4.2.1.so'        );
+        add_file ( 'hostware' , 'hostphp/hostphp.inc'            );
+        add_file ( 'hostware' , 'hostphp/hostware_file.inc'      );
+        add_file ( 'hostware' , 'hostphp/hostware_dynobj.inc'    );
+    }
+}
+
+if( $group_name eq ""  ||  $group_name eq "hostjava" )
+{
+    add_group( 'hostjava' , version_of_file( 'kram/version.h'  ) );
+    add_file ( 'hostjava' , 'bin/sos.hostware.jar'           );
+    add_file ( 'hostjava' , 'hostjava/RELEASE.TXT'           );
+    add_file ( 'hostjava' , 'bin/libhostjava.so'             );
+}
+
+if( $group_name eq ""  ||  $group_name eq "perlscript" )
+{
+    add_group( 'perlscript', version_of_file( 'zschimmer/perl_scripting_engine_version.h'  ) );
+    add_file ( 'perlscript', 'bin/libsosperlscript.so'        );
+}
+
+if( $group_name eq ""  ||  $group_name eq "spidermonkey" )
+{
+    add_group( 'spidermonkey', version_of_file( '../spidermonkey/scripting_engine/version.h'  ) );
+    add_file ( 'spidermonkey', '../spidermonkey/bin/libspidermonkey.so' );
+    add_file ( 'spidermonkey', '../spidermonkey/bin/javascript' );
+}
+
+#-------------------------------------------------------------------------------------------release
+
+sub release
+{
+    print "\n";
+
+    set_os();
+    call_chdir( $module_dir );
+    
+    finish_local();
+
+    #tar();
+
+    #run_cmd( "ssh $remote_host 'cd prod  &&  cvs -q update'" );
+}
+
+#--------------------------------------------------------------------------------------------set_os
+
+sub set_os
+{
+    if( $os eq "Linux" )
+    {
+        $os_dir = "linux32" ;      # Intel-kompatibler 32bit-Prozessor (ab Pentium, s. make/linux.makefile)
+    }
+    elsif( $os eq "SunOS" )
+    {
+        $os_dir = "solaris32";     # Alle Sparcs, 32bit (Intel würde heißen: solaris-intel32)
+    }
+    elsif( $os eq "HP-UX" )
+    {
+        $os_dir = "hpux32";        #
+    }
+    elsif( $os eq "AIX" )
+    {
+        $os_dir = "aix32";
+    }
+    else
+    {
+        die "Unbekanntes Betriebssystem $os";
+    }
+}
+
+#--------------------------------------------------------------------------------------finish_local
+
+sub finish_local()
+{
+    call_chdir( $release_dir );
+
+    while( ( my $group_name, my $destination ) = each( %group_destinations ) )
+    {
+        run_cmd( "rm -f        $group_name" );
+        run_cmd( "ln -s        $archive_dir/$destination $group_name" );
+        run_cmd( "find         $archive_dir/$destination  -type f  -exec chmod a+r,go-w  {} \\;  -o  -type d  -exec chmod a+rx,go-w {} \\;" );
+        print "\n";
+    }
+
+    call_chdir( $module_dir );
+}
+
+#--------------------------------------------------------------------------------------remove_local
+
+#sub remove_local()
+#{
+#    call_chdir( $release_dir );
+#
+#    while( ( my $group_name, my $destination ) = each( %group_destinations ) )
+#    {
+#        run_cmd( "rm -f        $group_name" );
+#        run_cmd( "rm -rf       $archive_dir/$destination" );
+#        print "\n";
+#    }
+#
+#    call_chdir( $module_dir );
+#}
+
+#------------------------------------------------------------------------------------release_remote
+
+sub release_remote
+{
+    my $remote_directory = shift;
+
+    {
+        my ( $remote_host, $remote_dir ) = split /:/, $remote_directory, 2;
+        if( !defined( $remote_dir ) ) { $remote_dir = $remote_host; $remote_host = ""; }
+        my $remote_cmds = "cd $remote_dir/$os_dir; ";
+        
+# kopiert die letzte übertragene Version als aktuelle, damit rsync nur die Differenzen 
+# übertragen muß.        
+        while( ( my $group_name, my $destination ) = each( %group_destinations ) )
+        {
+            $remote_cmds .= "~/bin/prepare_archive_version $group_name " . filename_of_path( $destination ) . '; ';
+        }
+        
+        if( $remote_host ne "" )  { run_cmd( "ssh -p $remote_ssh_port $remote_host '$remote_cmds'" ); }
+                            else  { run_cmd( "$remote_cmds" ); }
+        print "\n";
+    }
+
+
+    call_chdir( "$module_dir/$release_dir" );
+    {
+        my $dirs = '';
+        
+        while( ( my $group_name, my $destination ) = each( %group_destinations ) )
+        {
+            $dirs .= "$group_name $archive_dir/$destination ";
+        }
+       
+        if( $dirs )
+        { 
+            run_cmd( "rsync -a --relative --hard-links $rsync_remote_options $dirs", "$remote_directory/$os_dir" );
+        }
+        else
+        {
+            print STDERR "NICHTS FREIZUGEBEN!\n";
+        }
+
+        print "\n";
+    }
+    call_chdir( $module_dir );
+}
+
+#-----------------------------------------------------------------------------release_remote_tarred
+
+sub release_remote_tarred()
+{
+    my $remote_directory = shift;
+    
+    my $dirs  = "";
+    #my $index = "";
+
+
+    while( ( my $group_name, my $destination ) = each( %group_destinations ) )
+    {
+        call_chdir( "$module_dir/$release_dir/$archive_dir/$destination" );
+        
+        my $tar_path = "$destination-$os_dir.tar";    
+        mkdir( "$remote_directory/$os_dir/Archive/$group_name" );
+        run_cmd( "tar cf - * | bzip2 >$remote_directory/$os_dir/Archive/$tar_path.bz2" );
+        run_cmd( "ln -nsf Archive/$tar_path.bz2 $remote_directory/$os_dir/$group_name.tar.bz2" );
+        mkdir( "$remote_directory/$os_dir/$group_name" );
+        run_cmd( "rsync --exclude=RELEASE.TXT  * $remote_directory/$os_dir/$group_name/" );
+        print "\n";
+        #$dirs .= "$archive_dir/$destination $group_name ";
+        #$index .= "$destination\n";
+
+        call_chdir( "$module_dir" );
+    }
+    
+
+    #chop $index;
+    #run_cmd( "echo '$index' >INDEX" );
+    #print "\n";
+
+    #$tar_path = "$module_dir/$release_dir/$module-$os_dir.tar";    
+    #$tar_path = "$destination-$os_dir.tar";    
+    #run_cmd( "tar cf -  $dirs | bzip2 >$remote_directory/$os_dir/$module/$tar_path.bz2" );
+    #run_cmd( "tar cf -  $dirs | lzma  >$remote_directory/$tar_path.lzma" );
+
+    #unlink( "INDEX" );
+
+    print "\n";
+}
+
+#-----------------------------------------------------------------------------------------add_group
+
+sub add_group
+{
+    my ( $group_name, $version ) = @_;
+    my %group;
+    
+    #$group_versions{$group_name} = $version;
+    $group_destinations{$group_name} = make_destination( $group_name, $version );
+    print $group_destinations{$group_name} . "\n";
+}
+
+#------------------------------------------------------------------------------------------add_file
+
+sub add_file
+{
+    my ( $group_name, $rel_path, $new_path ) = @_;
+
+    my $destination = $group_destinations{$group_name};
+    my $dest        = "$release_dir/$archive_dir/$destination";
+    
+    if( ! $new_path )
+    {
+        run_cmd( "rsync -a $rsync_options$rel_path", $dest );
+    }
+    else
+    {
+        run_cmd( "rsync -a $rsync_options$rel_path", "$dest/$new_path" );
+    }
+}
+
+#----------------------------------------------------------------------------------make_destination
+
+sub make_destination
+{
+    my( $group_name, $version ) = @_;
+    
+    my $destination = make_filename_with_version( "$group_name/$group_name*", $version );
+
+    run_cmd( "rm -rf $release_dir/$archive_dir/$group_name" );    # Alte Versionen löschen
+
+    mkdir( "$release_dir" );
+    mkdir( "$release_dir/$archive_dir" );
+    mkdir( "$release_dir/$archive_dir/$group_name" );
+    mkdir( "$release_dir/$archive_dir/$destination" );
+
+    #run_cmd( "rm -rf $release_dir/$archive_dir/$group_name" );
+    
+    return $destination;
+}
+
+#-----------------------------------------------------------------------------------version_of_file
+
+sub version_of_file
+{
+    my( $path ) = @_;
+    
+    my $line = `grep '#define VER_PRODUCTVERSION_STR' $path`;
+    chop $line;
+    $line =~ /((\d+\.)+\d+)/   or die "Version nicht erkennbar: $path: $line";
+    my $version = $1;
+
+    # $version hat jetzt drei Zahlen: 11.22.33
+
+
+    # Die vierte Zahl ist die Revisionsnummer. Die entnehmen wir revision.h.
+    
+    $line = `grep '#define VER_REVISION' revision.h`;
+    chop $line;
+    $line =~ /(\d+)/   or die "Die Revision in revision.h ist nicht erkennbar: $line";
+    my $revision = $1;
+
+
+    $line = `grep '#define VER_DATE' revision.h`;
+    chop $line;
+    $line  =~ /(\d\d\d\d-\d\d-\d\d)/   or die "Das Datum in revision.h ist nicht erkennbar: $line";
+    my $date = $1;
+
+    
+    return "$version.$revision  $date";
+}
+
+#------------------------------------------------------------------------make_filename_with_version
+
+sub make_filename_with_version
+{
+    my( $path, $product_version ) = @_;
+    
+    $product_version =~ /((\d|\.)*).*(\d\d\d\d-\d\d-\d\d)/  or  die "Version $product_version nicht erkennbar";
+    
+    $version = $1;
+    $date    = $3;
+
+    $path =~ /^([^*]*)\*([^*]*)$/  or die 'Dateiname nicht zerlegbar';
+
+    $prefix = $1;
+    $suffix = $2;
+    
+    return "$prefix-$version-$date$suffix";
+}
+
+#-------------------------------------------------------------------------------------------run_cmd
+
+sub run_cmd
+{
+    my( $cmd_begin, $cmd_rest ) = @_;
+    
+    my $blanks = ' ' x 100;   # Zum Ausrichten
+    my $cmd = $cmd_rest? $cmd_begin . ( length( $cmd_begin ) < length( $blanks )? substr( $blanks, length( $cmd_begin ) ) : " " ). $cmd_rest
+                       : $cmd_begin;
+    print "$cmd\n";
+
+    my $ret = system( $cmd );
+    if( $ret != 0 ) { die "Fehler bei $cmd"; }
+}
+
+#----------------------------------------------------------------------------------------call_chdir
+
+sub call_chdir
+{
+    my( $path ) = @_;
+
+    chdir( $path )  or die "FEHLER bei chdir(\"$path\")";
+}
+
+#---------------------------------------------------------------------------------directory_of_path
+
+sub directory_of_path
+{
+    my( $path ) = @_;
+    
+    $path =~ /^(.*)\/[^\/]*$/  or die "Dateiname $path nicht zerlegbar";
+    
+    return $1;
+}
+
+#----------------------------------------------------------------------------------filename_of_path
+
+sub filename_of_path
+{
+    my( $path ) = @_;
+    
+    $path =~ /\/([^\/]*)$/   or die "Dateiname $path nicht zerlegbar";
+    
+    return $1;
+}
+
+#-------------------------------------------------------------------------------------------------

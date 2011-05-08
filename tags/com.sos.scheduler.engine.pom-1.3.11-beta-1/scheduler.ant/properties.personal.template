@@ -1,0 +1,19 @@
+# hier die persönlichen einstellungen des users
+personal.scheduler.devel.root=c:/scheduler/scheduler.src.release/prod
+personal.scheduler.devel.windows.compiler=C:/Program Files/Microsoft Visual Studio 9.0/VC
+personal.temp.dir=c:/temp
+
+# -----------------------------------------------------------------------------------------------------------
+# persönliche remote Einstellungen für das deploy
+# -----------------------------------------------------------------------------------------------------------
+remote.user=<userid>
+remote.keyfile=<fullname of private key file (.ppk)>
+remote.password=<password>
+
+# -----------------------------------------------------------------------------------------------------------
+# Einstellungen für das repository
+# -----------------------------------------------------------------------------------------------------------
+svn.user=<userid>
+svn.password=<password>
+
+

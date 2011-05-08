@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: commands.xml 4340 2006-06-06 19:46:51Z jz $-->
+
+<xml_element name          = "commands"
+             title         = "XML Commands"
+             base_dir      = "../"
+             parent_page   = "../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2008-10-21 12:10:59 +0200 (Di, 21 Okt 2008) $">
+
+    <xml_parent_elements>
+        <xml_parent_element directory="xml/" name="config">
+            <description>
+                <p>
+                    The Job Scheduler carries out commands after the configuration has been loaded
+                    and before Scheduler scripts are executed.
+                <!--Der Scheduler führt die Kommandos nach dem Laden der Konfiguration
+                    und vor dem Scheduler-Skript aus.-->
+                    <code>&lt;commands></code> from the <scheduler_element name="base"/> configurations
+                    are executed first.
+                <!--Die <code>&lt;commands></code> aus den <scheduler_element name="base"/>-Konfigurationen
+                    werden zuerst ausgeführt.-->
+                </p>
+                <p>
+                    The Job Scheduler will be stopped in the event of an error.
+                <!--Ein Fehler beendet den Scheduler.-->
+                </p>
+            </description>
+        </xml_parent_element>
+
+        <xml_parent_element directory="xml/" name="job">
+            <description>
+                <p>
+                    The Job Scheduler executes commands after a task has been completed.
+                    Note that for some commands, the parameters of a task which has just ended
+                    or (in particular situations) the parameters of the last order carried out,
+                    can be handed over using <scheduler_element name="copy_params"/>.
+                <!--Der Scheduler führt die Kommandos aus, wenn eine Task sich beendet.
+                    Für manche Kommandos lassen sich die Parameter der beendeten Task 
+                    oder (unter bestimmten Bedingungen) des zuletzt ausgeführten Auftrags
+                    mit <scheduler_element name="copy_params"/> übernehmen.-->
+                </p>
+                <p>
+                    A job will be stopped should an error occur (however see <scheduler_element name="delay_after_error"/>).
+                <!--Ein Fehler stoppt den Job (siehe aber <scheduler_element name="delay_after_error"/>).-->
+                </p>
+            </description>
+        </xml_parent_element>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="on_exit_code" type="exitcodes">
+            <description>
+                <p>
+                    This attribute is mandatory within <scheduler_element name="job"/> - 
+                    it cannot be used anywhere else.
+                <!--Innerhalb von <scheduler_element name="job"/> ist dieses Attribut Pflicht,
+                    woanders kann es nicht verwendet werden.-->
+                </p>
+                <p>
+                    Defines the exit codes which are to cause the commands listed here to be carried out.
+                    The following values can be specified here:
+                <!--Gibt die Exit-Codes an, die zur Ausführung der hier aufgeführten Kommandos führen sollen.
+                    Als Wert kann angegeben werden:-->
+                </p>
+                <ul>
+                    <li>
+                        a list of exit codes, separated by blanks.
+                    <!--Eine Liste von Exit-Codes, die einzelnen Zahlen durch Blanks getrennt.-->
+                    </li>
+                    <li>
+                        <code>on_exit_code="success"</code> is the same as <code>on_exit_code="0"</code>.
+                    <!--<code>on_exit_code="success"</code> ist dasselbe wie <code>on_exit_code="0"</code>.-->
+                    </li>
+                    <li>
+                        <code>on_exit_code="error"</code> is valid for all exit codes with the exception of 0 
+                        and the exit codes already specified in other
+                        <scheduler_element name="commands" attribute="exit_code"/>.
+                    <!--<code>on_exit_code="error"</code> gilt für alle Exit-Codes außer 0 und außer der bereits in 
+                        anderen <scheduler_element name="commands" attribute="exit_code"/> angegeben Exit-Codes.-->
+                    </li>
+                    <li>
+                        Only for Unix systems: 
+                        A task ending with a signal 
+                        (either caused by the operating system command <code>kill</code> or a program error)
+                        has an exit code with the negative signal value.
+                        For example, for <code>kill</code> this would be -15.
+                    <!--Nur Unix: 
+                        Eine mit Signal beendete Task (durch <code>kill</code> oder Programmfehler) hat
+                        einen Exit-Code mit dem negativen Wert des Signals.
+                        Bei dem Betriebssystem-Kommando <code>kill</code> auf die Task wäre das -15.-->
+                    </li>
+                    <li>
+                        The following signal names may be used:
+                    <!--Die Signalnamen können angegeben werden:-->
+                        <code>SIGHUP</code>,
+                        <code>SIGINT</code>,
+                        <code>SIGQUIT</code>,
+                        <code>SIGILL</code>,
+                        <code>SIGTRAP</code>,
+                        <code>SIGABRT</code>,
+                        <code>SIGIOT</code>,
+                        <code>SIGBUS</code>,
+                        <code>SIGFPE</code>,
+                        <code>SIGKILL</code>,
+                        <code>SIGUSR1</code>,
+                        <code>SIGSEGV</code>,
+                        <code>SIGUSR2</code>,
+                        <code>SIGPIPE</code>,
+                        <code>SIGALRM</code>,
+                        <code>SIGTERM</code>,
+                        <code>SIGSTKFLT</code>,
+                        <code>SIGCHLD</code>,
+                        <code>SIGCONT</code>,
+                        <code>SIGSTOP</code>,
+                        <code>SIGTSTP</code>,
+                        <code>SIGTTIN</code>,
+                        <code>SIGTTOU</code>,
+                        <code>SIGURG</code>,
+                        <code>SIGXCPU</code>,
+                        <code>SIGXFSZ</code>,
+                        <code>SIGVTALRM</code>,
+                        <code>SIGPROF</code>,
+                        <code>SIGWINCH</code>,
+                        <code>SIGPOLL</code>,
+                        <code>SIGIO</code>,
+                        <code>SIGPWR</code> and
+                        <code>SIGSYS</code>.
+                        Signal names which are not recognised by the operating system are ignored and a warning is given out.
+                    <!--Signal-Namen, die das Betriebsystem nicht kennt, werden mit Warnung ignoriert.-->
+                    </li>
+                </ul>
+                <p>
+                    See also <scheduler_element name="job" attribute="ignore_signals"/>.
+                <!--Siehe auch <scheduler_element name="job" attribute="ignore_signals"/>.-->
+                </p>
+            </description>
+            
+            <example>
+                <pre>on_exit_code="0"
+on_exit_code="1 2 3 99"
+on_exit_code="error"
+on_exit_code="SIGTERM SIGKILL"</pre>
+            </example>
+            
+            <messages>
+                <!-- Beim Scheduler-Start: -->
+                <message code="SCHEDULER-324" level="error"/>
+                <message code="SCHEDULER-325" level="error"/>
+                <message code="SCHEDULER-326" level="error"/>
+                <!-- Während der Ausführung: -->
+                <message code="SCHEDULER-328" level="info"/>
+                <message code="SCHEDULER-327" level="error"/>
+                <message code="SCHEDULER-337" level="warn"/>
+            </messages>
+        </xml_attribute>
+    </xml_attributes>
+    
+    <xml_child_elements>
+        <xml_child_element directory="xml/" name="add_jobs" multiple="yes"/>
+        <xml_child_element directory="xml/" name="add_order" multiple="yes"/>
+        <xml_child_element directory="xml/" name="modify_job" multiple="yes"/>
+        <xml_child_element directory="xml/" name="modify_order" multiple="yes"/>
+        <xml_child_element directory="xml/" name="modify_spooler" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.reset" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.set" multiple="yes"/>
+        <xml_child_element directory="xml/" name="scheduler_log.log_categories.show" multiple="yes"/>
+        <xml_child_element directory="xml/" name="show_history" multiple="yes"/>
+        <xml_child_element directory="xml/" name="show_job" multiple="yes"/>
+        <xml_child_element directory="xml/" name="show_jobs" multiple="yes"/>
+        <xml_child_element directory="xml/" name="show_job_chains" multiple="yes"/>
+        <xml_child_element directory="xml/" name="show_state" multiple="yes"/>
+        <xml_child_element directory="xml/" name="start_job" multiple="yes"/>
+        <xml_child_element directory="xml/" name="terminate" multiple="yes"/>
+    </xml_child_elements>
+
+
+    <description>
+        <p>
+            This element allows a series of commands to be grouped together.
+            The starting point for these commands then depends upon the relevant parent elements.
+        <!--Das Element fasst eine Folge von Kommandos zusammen.
+            Wann die Kommandos ausgeführt werden, 
+            hängt vom Eltern-Element ab.-->
+        </p>
+    </description>
+
+    <messages>
+        <message code="SCHEDULER-965" level="info">
+            <description>
+                Each executable command will be logged.
+            <!--Jedes auszuführende Kommando wird protokolliert.-->
+            </description>
+        </message>
+        
+        <message code="SCHEDULER-966" level="info">
+            <description>
+                The command response, when available.
+            <!--Die Antwort des Kommandos, wenn vorhanden-->
+            </description>
+        </message>
+    </messages>
+
+</xml_element>

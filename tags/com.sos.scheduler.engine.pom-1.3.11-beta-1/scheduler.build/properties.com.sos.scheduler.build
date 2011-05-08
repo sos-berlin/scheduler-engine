@@ -1,0 +1,35 @@
+#Wed Jul 14 14:35:07 CEST 2010
+
+global.javaproxy.jarfile=../scheduler.ant/ext/com.sos.cplusplus.generator.jar
+global.javaproxy.mainclass=com.sos.cplusplus.generator.Main
+global.javaproxy.output.folder=${personal.scheduler.devel.root}
+global.cppproxy.output.folder=../cplusplus.proxy.generated/src
+global.tempdir=temp
+
+# -----------------------------------------------------------------------------------------------------------
+# perl scripte für das prebuild
+# -----------------------------------------------------------------------------------------------------------
+perl.script.embeddedfiles=../zschimmer/files_to_c++.pl
+perl.script.keywordtoxml=../scheduler_keyword_to_xml.pl
+
+# -----------------------------------------------------------------------------------------------------------
+# Einstellungen für das repository
+# -----------------------------------------------------------------------------------------------------------
+# diese Einstellungen im persönlichen file
+# global.svn.user=
+# global.svn.password=
+global.svn.devel=http\://subversion.sos/svn/jz
+
+# PROD # global.svn.release=http\://subversion.sos/svn/jz/releases
+global.svn.release=http\://subversion.sos/svn/jz/testsvn
+
+# -----------------------------------------------------------------------------------------------------------
+# remote Einstellungen für das deploy
+# -----------------------------------------------------------------------------------------------------------
+# diese Einstellungen im persönlichen file
+# remote.user=
+remote.server=monk.sos
+remote.localdir=${settings.sources}/bin
+
+# PROD # remote.remotedir=/home/ss/to_sos/win32/Archive
+remote.remotedir=/home/ss/scheduler/test/win32/Archive

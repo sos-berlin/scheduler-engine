@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+<spooler>
+    <config main_scheduler="lillerud:6310" port="6360">
+
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        
+        <process_classes/>
+        
+        
+        <jobs>
+
+            <job name="javascript" tasks="2">
+                <script language="JavaScript"><![CDATA[
+
+spooler.terminate( 10 );
+new ActiveXObject( "hostware.global" ).sleep( 130 );
+//while(1)  spooler_log.info( "Hallo" );
+
+                ]]></script>
+
+                <run_time once="yes" />
+            </job>
+
+            <job name="java">
+                <script java_class="spooler_job.Test"><![CDATA[
+
+package spooler_job;
+
+import sos.spooler.*;
+
+public class Test extends sos.spooler.Job_impl
+{
+    public boolean spooler_process()  throws Exception
+    {     
+        spooler.terminate_and_restart( 4 );
+        //Thread.sleep( 100*1000 );
+        while(true)  spooler_log.info( "Hallo" );
+        //return false;
+    }
+}        
+
+                ]]></script>
+
+                <run_time once="yes"/>
+            </job>
+
+            <job name="javascript2" tasks="2">
+                <script language="JavaScript"><![CDATA[
+
+//spooler.terminate( 10 );
+new ActiveXObject( "hostware.global" ).sleep( 130 );
+
+                ]]></script>
+
+                <run_time once="no" />
+            </job>
+
+        </jobs>
+    </config>
+</spooler>

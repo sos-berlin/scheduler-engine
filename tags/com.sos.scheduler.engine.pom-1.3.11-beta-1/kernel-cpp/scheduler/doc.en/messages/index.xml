@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<scheduler_all_messages 
+    title    = "Messages"
+    base_dir = "../"
+>
+    <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
+    <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
+
+    <scheduler_messages path="scheduler_messages.xml"/>
+    <scheduler_messages path="com_remote_messages.xml"/>
+    <scheduler_messages path="charset_messages.xml"/>
+
+
+</scheduler_all_messages>
+    

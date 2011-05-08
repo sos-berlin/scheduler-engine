@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: modify_order.xml,v 1.5 2004/09/07 06:25:36 jz Exp $-->
+
+<xml_element name     = "modify_order" 
+             title    = ""
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-04-18 11:57:22 +0200 (Fr, 18 Apr 2008) $">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="job_chain" type="state">
+            <description>
+                <p>
+                    The order job chain.
+                <!--Die Jobkette, in der sich der Auftrag befindet.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="order" type="id">
+            <description>
+                <p>
+                    The order identifier (alphanumerical).
+                <!--(<i>This attribute may not be called <code>id</code> - this is a reserved word in XML.</i>)-->
+                <!--Die Kennung des Auftrags (alphanumerisch).
+                    (<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="state" type="state">
+            <description>
+                <p>
+                    Changes the state of an order and thereby its position in a job chain.
+                    Use of this attribute causes any setbacks
+                    (<scheduler_method class="Order" method="setback"/>) made to be cancelled.
+                <!--Ändert den Zustand des Auftrags und damit die Position in der Jobkette.
+                    Eine Rückstellung (<scheduler_method class="Order" method="setback"/>)
+                    wird zurückgenommen.-->
+                </p>
+                <p>
+                    See also <scheduler_method class="Order" property="state"/>
+                <!--Siehe auch <scheduler_method class="Order" property="state"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="title" type="title">
+            <description>
+                <p>
+                    Changes the order title
+                <!--Ändert Title des Auftrags-->
+                </p>
+                <p>
+                    See also <scheduler_method class="Order" property="title"/>
+                <!--Siehe auch <scheduler_method class="Order" property="title"/>-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="setback" type="no">
+            <description>
+                <p>
+                    Is effective after an order has been setback using
+                    <scheduler_method class="Order" method="setback"/>.
+                    This command ends all delays set using 
+                    <scheduler_element name="delay_order_after_setback"/>, 
+                    so that the order may be immediately executed.
+                    Note that the counter used to note how often an order has been setback
+                    remains unchanged.
+                <!--Wirksam, nach der Auftrag mit
+                    <scheduler_method class="Order" method="setback"/>
+                    zurückgestellt worden ist.
+                    Das Kommando beendet die mit <scheduler_element name="delay_order_after_setback"/>
+                    eingestellte Verzögerung, 
+                    so dass der Auftrag sofort ausgeführt werden kann.
+                    Der Zähler, wie oft der Auftrag zurückgestellt worden ist, bleibt unverändert.-->
+                </p>
+                <p>
+                    See also <scheduler_method class="Order" method="setback"/> and
+                <!--Siehe auch <scheduler_method class="Order" method="setback"/> und-->
+                    <scheduler_element name="delay_order_after_setback"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="priority" type="number">
+    <!--<xml_attribute name="priority" type="zahl">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="suspended" type="yes|no">
+            <description>
+                <p>
+                    Suspends or restarts the execution of an order -
+                    see <scheduler_method class="Order" property="suspended"/>.
+                <!--Setzt den Auftrag aus oder setzt ihn fort, 
+                    siehe <scheduler_method class="Order" property="suspended"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="at" type="timestamp" itle="Order Start Time">
+    <!--<xml_attribute name="at" type="timestamp" itle="Startzeit des Auftrags">-->
+            <description>
+                <p>
+                    <code>"now"</code>,
+                    <code>"yyyy-mm-dd HH:MM</code>[<code>:SS</code>]<code>"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> and
+                    <code>"now + SECONDS"</code>
+                    can be used.
+                <!--<code>"now"</code>,
+                    <code>"yyyy-mm-dd HH:MM</code>[<code>:SS</code>]<code>"</code>,
+                    <code>"now + HH:MM</code>[<code>:SS</code>]<code>"</code> und
+                    <code>"now + SECONDS"</code>
+                    sind möglich.-->
+                </p>
+                <p>
+                    Changes the next start time of a waiting order,
+                <!--Ändert den nächsten Startzeitpunkt eines wartendenen Auftrags,-->
+                </p>
+                <ul>
+                    <li>
+                        whose
+                        <scheduler_method class="Order" property="run_time"/> 
+                        has not been reached, or
+                    <!--dessen
+                        <scheduler_method class="Order" property="run_time"/> 
+                        noch nicht erreicht ist, oder-->
+                    </li>
+                    <li>
+                        which has been setback using 
+                        <scheduler_method class="Order" method="setback"/>.
+                    <!--der mit <scheduler_method class="Order" method="setback"/>
+                        zurückgestellt worden ist.-->
+                    </li>
+                </ul>
+                <p>
+                    <code>at="now"</code> restarts an order which has been waiting because of
+                    <scheduler_method class="Order" property="run_time"/>
+                    or 
+                    <scheduler_method class="Order" method="setback"/>.
+                <!--<code>at="now"</code> setzt einen wegen 
+                    <scheduler_method class="Order" property="run_time"/>
+                    oder 
+                    <scheduler_method class="Order" method="setback"/>
+                    wartenden Auftrag fort.-->
+                </p>
+                <p>
+                    See also <scheduler_element name="add_order" attribute="at"/> 
+                    and <scheduler_method class="Order" property="at"/>.
+                <!--Siehe auch <scheduler_element name="add_order" attribute="at"/> und <scheduler_method class="Order" property="at"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end_state" type="text" title="State before which the order should be successfully completed and should leave the job chain">
+    <!--<xml_attribute name="end_state" type="text" title="Zustand, vor dessen erfolgreichen Verlassen der Auftrag enden soll">-->
+            <description>
+                <p>
+                    See <scheduler_method class="Order" property="end_state"/>.
+                <!--Wie <scheduler_method class="Order" property="end_state"/>.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <xml_child_elements>
+        <xml_child_element name="params"/>
+        <xml_child_element name="xml_payload"/>
+        <xml_child_element name="run_time"/>
+    </xml_child_elements>
+
+    <xml_answer element="ok"/>
+
+
+    <example>
+        <pre>
+    &lt;modify_order job_chain="my_job_chain" order="42" priority="1"/>
+<!--&lt;modify_order job_chain="meine_jobkette" order="42" priority="1"/>-->
+        </pre>
+    </example>
+</xml_element>    

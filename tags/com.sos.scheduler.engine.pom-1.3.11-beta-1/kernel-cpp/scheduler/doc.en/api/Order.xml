@@ -1,0 +1,1052 @@
+﻿<?xml version="1.0"?>
+<!-- $Id: Order.xml 5035 2007-05-09 15:18:03Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Order"
+    object_name = "order"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-05-27 19:00:15 +0200 (Di, 27 Mai 2008) $"
+>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="id">
+    <com>
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        Order Identification
+    <!--Kennung des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            Every order has an identifier.
+            This identifier must be unique within a job chain or job order queue.
+            It should also correspond to the data being processed.
+            Normally database record keys are used.
+        <!--Jeder Auftrag hat eine
+            (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige)
+            Kennung.
+            Diese Kennung sollte den zu verarbeitenden Daten entsprechen.
+            Üblicherweise wird der Schlüssel eines Datenbanksatzes verwendet.-->
+
+        </p>
+        <p>
+            When an <code>id</code> is not set, then the Job Scheduler automatically allocates one using
+            <scheduler_method class="Job_chain" method="add_order"/>.
+        <!--Wenn Sie die <code>id</code> nicht setzen, vergibt
+            <scheduler_method class="Job_chain" method="add_order"/> eine Kennung.-->
+
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="title">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+            Optionally a title can be allocated to an order that will show up in the HTML interface
+            and in the logs.
+        <!--Wenn Sie die <code>id</code> nicht setzen, vergibt
+            <scheduler_method class="Job_chain" method="add_order"/> eine Kennung.-->
+
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="priority">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+
+    <title>
+        Orders with a higher priority are processed first
+    <!--Aufträge mit höherer Priorität werden zuerst verarbeitet-->
+
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="job_chain" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain"/>
+        </com.result>
+
+        <description>
+            <api.null/>, when the order is not in a job chain.
+        <!--<api.null/>, wenn der Auftrag nicht in einer Jobkette ist.-->
+
+        </description>
+    </com>
+
+    <title>
+        The job chain containing an order
+    <!--Jobkette, in der der Auftrag enthalten ist-->
+
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="job_chain_node" access="read">
+    <com>
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+
+        <description>
+            <api.null/>, when the order is not in a job chain.
+        <!--<api.null/>, wenn der Auftrag nicht in einer Jobkette ist.-->
+
+        </description>
+    </com>
+
+    <title>
+        The job chain nodes which correspond with the order state
+    <!--Jobkettenknoten, der dem Zustand des Auftrags entspricht-->
+
+    </title>
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="state">
+    <com>
+        <com.result>
+            <com.type type="VARIANT"/>
+        </com.result>
+    </com>
+
+    <title>
+        The order state
+    <!--Zustand des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            When an order is in a job chain,
+            then its state must correspond with one of the states of the job chain.
+        <!--Wenn der Auftrag in einer Jobkette ist,
+            muss der Zustand in der Jobkette vorhanden sein.-->
+
+        </p>
+        <p>
+            Whilst an order is being processed by a job
+            the following state, as defined in the job chain 
+            (<scheduler_element name="job_chain_node" attribute="next_state"/>) 
+             has no effect.
+        <!--Wenn der Auftrag gerade von einem Job ausgeführt wird,
+            wird der in der Jobkette festgelegte Folgezustand
+            (<scheduler_element name="job_chain_node" attribute="next_state"/>)
+            wirkungslos.-->
+            Similarly, the return values from
+            <scheduler_method class="Job_impl" method="spooler_process"/> and
+            <scheduler_method class="Monitor_impl" method="spooler_process_after"/>
+            are meaningless.
+        <!--Die Rückgabewerte von
+            <scheduler_method class="Job_impl" method="spooler_process"/> und
+            <scheduler_method class="Monitor_impl" method="spooler_process_after"/>
+            sind ohne Bedeutung.-->
+            This means that with <scheduler_method class="Order" property="state"/> the following state for a job can be set as required.
+        <!--Mit <scheduler_method class="Order" property="state"/> kann also ein Job den Folgezustand frei bestimmen.-->
+        </p>
+        <p>
+            An order is added to the job order queue which is corresponding to its state.
+            See <scheduler_element name="job_chain_node"/>.
+        <!--Der Auftrag wird in die Auftragswarteschlange des Jobs eingereiht,
+            der dem Zustand zugeordnet ist
+            (s. <scheduler_element name="job_chain_node"/>).-->
+            
+            The execution by this job will be delayed until 
+            the job currently carrying out the order has been completed.
+        <!--Die Ausführung durch diesen Job wird solange verzögert, 
+            bis der jetzt ausführende Job den Auftrag ausgeführt hat.-->
+
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="state_text">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        Free text for the order state
+    <!--Freier Text für den Zustand des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            This text is shown on the HTML interface.
+        <!--Der Text wird auf der HTML-Oberfläche gezeigt.-->
+        </p>
+        <p>
+            For non-API jobs the Job Scheduler fills this field with the first line from stdout, 
+            up to a maximum of 100 characters.
+        <!--Für Nicht-API-Jobs füllt der Scheduler dieses Feld mit der ersten Zeile von stdout, max. 100 Zeichen.-->
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="payload">
+    <com>
+        <com.result name="payload">
+            <com.type type="VARIANT">
+                <com.type class="Variable_set"/>
+                <com.type type="BSTR"/>
+                <com.type type="int"/>
+                <com.type type="…"/>
+            </com.type>
+            <description>
+                May be a string or a <scheduler_method class="Variable_set"/>.
+            <!--Kann ein String oder ein <scheduler_method class="Variable_set"/> sein.-->
+
+            </description>
+        </com.result>
+    </com>
+
+    <!--
+    <com access="putref">
+        <com.result>
+            <com.type type="IUnknown*"/>
+        </com.result>
+    </com>
+    -->
+
+    <java access="write">
+        <java.parameter name="payload">
+            <java.type type="Object"/>
+        </java.parameter>
+    </java>
+
+    <java access="read">
+        <java.result>
+            <java.type type="Object"/>
+        </java.result>
+    </java>
+
+    <title>
+        Load - an order parameter.
+    <!--Nutzlast, also Parameter des Auftrags.-->
+
+    </title>
+
+    <description>
+        <p>
+            Instead of this property, the use of <scheduler_method class="Order" property="params"/> is recommended,
+            which corresponds to <code>(Variable_set)order.payload</code>.
+        <!--Statt dieser Eigenschaft wird die Verwendung von <scheduler_method class="Order" property="params"/> empfohlen
+            (was <code>(Variable_set)order.payload</code> entspricht).-->
+
+        </p>
+        <p>
+            In addition to <scheduler_method class="Order" property="id"/> which identifies an order,
+            this field can be used for other information.
+        <!--Neben der Auftragskennung <scheduler_method class="Order" property="id"/>,
+            die den Auftrag identifiziert,
+            können Sie hier zusätzliche Angaben machen.-->
+
+        </p>
+        <p>
+            See
+            <scheduler_method class="Order" property="params"/> and
+        <!--Siehe
+            <scheduler_method class="Order" property="params"/> und-->
+
+            <scheduler_method class="Order" property="xml_payload"/>.
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="payload_is_type">
+    <com>
+        <com.parameter name="type_name">
+            <com.type type="BSTR"/>
+
+            <description>
+                <code>"Spooler.Variable_set"</code>,
+                <code>"Hostware.Dyn_obj"</code> or
+            <!--<code>"Hostware.Dyn_obj"</code> oder-->
+
+                <code>"Hostware.Record"</code>.
+            </description>
+        </com.parameter>
+
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+
+    <title>
+        Checks the payload COM-Type
+    <!--Prüft den COM-Typ der Nutzlast-->
+
+    </title>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="setback">
+    <com/>
+
+    <title>
+        Delays an order back for a period of time
+    <!--Stellt den Auftrag eine Zeitlang zurück-->
+
+    </title>
+
+    <description>
+        <p>
+            An order will be delayed and repeated after the period of time specified in either
+            <scheduler_element name="delay_order_after_setback"/> or
+            <scheduler_method class="Job" property="delay_order_after_setback"/>.
+            When the job is repeated, only the <scheduler_method class="Job_impl" method="spooler_process"/> job function is repeated.
+            If the <code>order.setback()</code> function is called from <code>spooler_process()</code>, 
+            then the retrun value from <code>spooler_process()</code> will have no effect.
+        <!--Der Auftrag wird zurückgestellt und nach der mit 
+            <scheduler_element name="delay_order_after_setback"/> oder
+            <scheduler_method class="Job" property="delay_order_after_setback"/> 
+            eingestellten Frist wiederholt-->.
+<!-- fs 2007-06-06 ... -->
+        <!--Bei einer Wiederholung wird nur die Funktion <scheduler_method class="Job_impl" method="spooler_process"/> des Jobs wiederholt.
+            Wenn in <code>spooler_process()</code> die Funktion <code>order.setback()</code> aufgerufen wurde, bleibt der Rückgabewert von <code>spooler_process()</code> ohne Wirkung.-->
+<!-- ... fs 2007-06-06 -->
+<!-- original: -->
+        <!--Die Rückgabe von <scheduler_method class="Job_impl" method="spooler_process"/> bleibt ohne Wirkung.-->
+        </p>
+        <p>
+            An order counts the number of times this method is called in sequence.
+            This count is then used by <scheduler_element name="delay_order_after_setback"/>.
+            It is set to 0, when <scheduler_method class="Job_impl" method="spooler_process"/>
+            is completed without <scheduler_element name="delay_order_after_setback"/> being called.
+            All counters are set to 0 when the Job Scheduler is started.
+        <!--Der Auftrag zählt aufeinander folgende Aufrufe dieser Methode,
+            was von <scheduler_element name="delay_order_after_setback"/>
+            berücksichtigt wird.
+            Der Zähler wird auf 0 gestellt, wenn <scheduler_method class="Job_impl" method="spooler_process"/>
+            ohne diesen Aufruf zu Ende ausgeführt worden ist.
+            Beim Start des Schedulers sind alle Zähler 0.-->
+
+        </p>
+        <p>
+            The <scheduler_element name="modify_order" attribute="at" value="now"/> command
+            causes a blocked order to start immediately.
+        <!--Das Kommando
+            <scheduler_element name="modify_order" attribute="at" value="now"/> 
+            lässt einen zugestellten Auftrag sofort anlaufen.-->
+
+        </p>
+    </description>
+
+    <messages>
+        <message code="SCHEDULER-157" level="error"/>
+        <message code="SCHEDULER-163" level="error"/>
+        <message code="SCHEDULER-187" level="error"/>
+        <message code="SCHEDULER-188" level="error"/>
+        <message code="SCHEDULER-946" level="info"/>
+        <message code="SCHEDULER-947" level="warn"/>
+    </messages>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="run_time" access="read">
+    <com>
+        <com.result>
+            <com.type class="Run_time"/>
+        </com.result>
+    </com>
+
+    <title>
+        <code>&lt;run_time></code> is used to periodically repeat an order
+    <!--<code>&lt;run_time></code> zur periodischen Wiederholung des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            See <scheduler_element name="run_time"/>.
+        <!--Siehe <scheduler_element name="run_time"/>.-->
+        </p>
+        <p>
+            The <scheduler_element name="modify_order" attribute="at" value="now"/> command
+            causes an order which is waiting because of <code>run_time</code> to start immediately.
+        <!--Das Kommando
+            <scheduler_element name="modify_order" attribute="at" value="now"/>
+            lässt einen wegen <code>run_time</code> wartenden Auftrag sofort anlaufen.-->
+        </p>
+    </description>
+
+    <messages>
+        <message level="error" code="SCHEDULER-397"/>
+    </messages>
+
+    <example programming_language="javascript">
+        <pre><![CDATA[order.run_time.xml = "<run_time><at at='2006-05-23 11:43:00'/></run_time>";]]></pre>
+    </example>
+
+    <example programming_language="perl">
+        <pre><![CDATA[$order->run_time->LetProperty( "xml", "<run_time><at at='2006-05-23 11:43:00'/></run_time>" );]]></pre>
+    </example>
+    $order->run_time->LetProperty( 'xml', '<run_time><period repeat="10"/>
+    </run_time>' );
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<method name="remove_from_job_chain">
+    <com/>
+
+    <title>
+    </title>
+
+    <description>
+        <p>
+            Note that when an order has just been started by a task, 
+            then the <scheduler_method class="Order" property="job_chain"/> property
+            will still return the job chain from which the order has just been removed, 
+            using this call,
+            even when <code>"remove_from_job_chain"</code> has been carried out.
+        <!--Wenn der Auftrag gerade von einer Task ausgeführt wird,
+            liefert die Eigenschaft <scheduler_method class="Order" property="job_chain"/>
+            weiterhin die Jobkette,
+            aus der der Auftrag mit diesem Aufruf entfernt worden ist.-->
+            
+            It is only when the execution has been ended that this method returns <api.null/>.
+            (other than when the order has just been added to a job chain).
+            This ensures that the job_chain property remains stable whilst a task is being executed.
+        <!--Erst wenn die Ausführung beendet ist, liefert die Eigenschaft <api.null/>
+            (außer der Auftrag ist wieder in eine Jobkette eingetragen worden).
+            Damit bleibt die Eigenschaft job_chain während der Ausführung durch die Task stabil.-->
+
+        </p>
+    </description>
+</method>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="string_next_start_time" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                <code>"yyyy-mm-dd HH:MM:SS.MMM"</code> or
+                <code>"now"</code> or
+            <!--<code>"yyyy-mm-dd HH:MM:SS.MMM"</code> oder
+                <code>"now"</code> oder-->
+
+                <code>"never"</code>.
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        The next start time of an order when <code>&lt;run_time></code> is being used
+    <!--Nächste Startzeit des Auftrags bei Verwendung von <code>&lt;run_time></code>-->
+
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service"/>
+        </com.result>
+    </com>
+
+    <title>
+        The web service to which an order has been allocated
+    <!--Der Webdienst, der dem Auftrag zugeordnet ist-->
+
+    </title>
+    
+    <description>
+        <p>
+            When an order has not been allocated to a web service,
+            then this call returns the <scheduler_message code="SCHEDULER-240"/> error.
+        <!--Wenn der Auftrag keinem Webdienst zugeordnet ist, 
+            liefert der Aufruf den Fehler <scheduler_message code="SCHEDULER-240"/>.-->
+
+        </p>
+        <p>
+            See also <scheduler_method class="Order" property="web_service_or_null"/>.
+        <!--Siehe auch <scheduler_method class="Order" property="web_service_or_null"/>.-->
+
+        </p>
+    </description>
+    
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service_or_null" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service"/>
+        </com.result>
+    </com>
+
+    <title>
+        The web service to which an order has been allocated, or <api.null/>.
+    <!--Der Web-Dienst, der dem Auftrag zugeordnet ist, oder <api.null/>.-->
+
+    </title>
+    
+    <description>
+        <p>
+            See also <scheduler_method class="Order" property="web_service"/>.
+        <!--Siehe auch <scheduler_method class="Order" property="web_service"/>.-->
+
+        </p>
+    </description>
+    
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service_operation" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service_operation"/>
+        </com.result>
+    </com>
+
+    <title>
+        The web service operation to which an order has been allocated
+    <!--Die Web-Dienst-Operation, die dem Auftrag zugeordnet ist-->
+
+    </title>
+    
+    <description>
+        <p>
+            See 
+        <!--Siehe -->
+
+            <scheduler_element name="web_service"/>,
+            <scheduler_method class="Web_service_operation"/> and
+        <!--<scheduler_method class="Web_service_operation"/> und-->
+
+            <scheduler_method class="Order" property="web_service_operation_or_null"/>,
+        </p>
+    </description>
+
+    <example programming_language="java">
+        <pre>public boolean spooler_process()  throws Exception
+{
+    Order                 order                 = spooler_task.order();
+    Web_service_operation web_service_operation = order.web_service_operation();
+    Web_service_request   request               = web_service_operation.request();
+
+    // Decode request data
+    String request_string = new String( request.binary_content(), request.charset_name() );
+    
+    
+    process request_string ...;
+    
+    
+    String                response_string = "This is my response";
+    String                charset_name    = "UTF-8";
+    ByteArrayOutputStream byos            = new ByteArrayOutputStream();
+    
+    // Encode response data
+    Writer writer = new OutputStreamWriter( byos, charset_name );
+    writer.write( response_string );
+    writer.close();
+
+    // Respond
+    Web_service_response response = web_service_operation.response();
+
+    response.set_content_type( "text/plain" );
+    response.set_charset_name( charset_name );
+    response.set_binary_content( byos.toByteArray() );
+    response.send();
+
+    // Web service operation has finished
+
+    return true;
+}</pre>
+    </example>
+
+    <messages>
+        <message code="SCHEDULER-246" level="error"/>
+    </messages>
+
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="web_service_operation_or_null" access="read">
+    <com>
+        <com.result>
+            <com.type class="Web_service_operation"/>
+        </com.result>
+    </com>
+
+    <title>
+        The web service operation to which an order has been allocated, or <api.null/>
+    <!--Die Web-Dienst-Operation, die dem Auftrag zugeordnet ist, oder <api.null/>-->
+
+    </title>
+    
+    <description>
+        <p>
+            See 
+        <!--Siehe -->
+
+            <scheduler_method class="Order" property="web_service_operation"/>,
+            <scheduler_method class="Web_service_operation"/> and
+        <!--<scheduler_method class="Web_service_operation"/> und-->
+
+            <scheduler_element name="web_service"/>.
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+
+            <description>
+                See <scheduler_element directory="xml/answer/" name="order"/>
+            <!--Siehe <scheduler_element directory="xml/answer/" name="order"/>-->
+
+            </description>
+        </com.result>
+    </com>
+
+    <title>
+        Order in XML: &lt;order>...&lt;/order>
+    <!--Auftrag in XML: &lt;order>...&lt;/order>-->
+
+    </title>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="xml_payload">
+    <com>
+        <com.result name="xml">
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        XML payload - an order parameter.
+    <!--XML-Nutzlast, also Parameter des Auftrags.-->
+
+    </title>
+
+    <description>
+        <p>
+            This property can include an XML document (in addition to the 
+            <scheduler_method class="Order" property="params"/> property).
+        <!--Zusätzlich zur Eigenschaft <scheduler_method class="Order" property="params"/> 
+            kann diese Eigenschaft ein XML-Dokument aufnehmen.-->
+
+        </p>
+        <p>
+            <scheduler_element name="xml_payload"/> contains the XML document root element 
+            (instead of it being in <code>#PCDATA</code> coded form).
+        <!--<scheduler_element name="xml_payload"/> enthält das Wurzelelement des XML-Dokuments 
+            (statt in <code>#PCDATA</code>-codierter Form).-->
+
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="params">
+    <com>
+        <com.result>
+            <com.type class="Variable_set"/>
+        </com.result>
+    </com>
+
+    <title>
+        The order parameters
+    <!--Parameter des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            <code>params</code> is held in <scheduler_method class="Order" property="payload"/>, 
+            the latter cannot, therefore, be used together with <code>params</code>.
+        <!--<code>params</code> wird in <scheduler_method class="Order" property="payload"/> gehalten, 
+            letzteres kann also nicht zusammen mit <code>params</code> verwendet werden.-->
+        </p>
+        <p>
+            See <scheduler_element name="add_order" child="params"/>.
+        <!--Siehe <scheduler_element name="add_order" child="params"/>.-->
+
+        </p>
+    </description>
+</property>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<property name="at" access="write">
+    <com>
+        <com.result>
+            <com.type type="VARIANT">
+                <com.type type="BSTR"/>
+                <com.type type="DATE"/>
+            </com.type>
+        </com.result>
+    </com>
+
+    <title>
+        The order start time
+    <!--Start-Zeitpunkt des Auftrags-->
+
+    </title>
+
+    <description>
+        <p>
+            Used to set the start time before an order is added to an order queue.
+            The following can be specified as a string:
+        <!--Setzt den Start-Zeitpunkt bevor der Auftrag in eine Auftragswarteschlange eingereiht wird.
+            Als String kann angegeben werden:-->
+
+        </p>
+        <ul>
+            <li>
+                <code>"now"</code>
+            </li>
+            <li>
+                <code>"<i>yyyy</i>-<i>mm</i>-<i>dd</i> <i>HH</i>:<i>MM</i>[:<i>SS</i>]"</code>
+            </li>
+            <li>
+                <code>"now + <i>HH</i>:<i>MM</i>[:<i>SS</i>]"</code>
+            </li>
+            <li>
+                <code>"now + <i>seconds</i>"</code>
+            </li>
+        </ul>
+        <p>
+            This setting changes start times set by 
+            <scheduler_method class="Order" property="run_time"/> 
+            or
+            <scheduler_method class="Order" method="setback"/>.
+        <!--Die Einstellung ändert die von 
+            <scheduler_method class="Order" property="run_time"/> 
+            oder
+            <scheduler_method class="Order" method="setback"/>
+            vorgegebene Startzeit.-->
+        </p>
+        <p>
+            See <scheduler_element name="add_order" attribute="at"/>.
+        <!--Siehe <scheduler_element name="add_order" attribute="at"/>.-->
+
+        </p>
+    </description>
+
+    <example programming_language="javascript">
+        <pre>order.at = "now+65";
+spooler.job_chain( "my_job_chain" ).add_order( order );</pre>
+    </example>
+
+    <example programming_language="java">
+        <pre>order.set_at( "now+60" );                                      // set_at( String )
+order.set_at( new Date( new Date().getTime() + 60 * 1000 ) );  // set_at( java.util.Date )
+spooler.job_chain( "my_job_chain" ).add_order( order );</pre>
+    </example>
+
+    <example programming_language="perl">
+        <pre>$order->LetProperty( 'at', "now+60" );
+$spooler->job_chain( "my_job_chain" )->add_order( $order );</pre>
+    </example>
+
+    <messages>
+        <message code="SCHEDULER-217" level="error"/>
+    </messages>
+</property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="suspended">
+        <com>
+            <com.result>
+                <com.type type="bool"/>
+            </com.result>        
+        </com>
+
+        <title>
+            Suspended order
+        <!--Ausgesetzer Auftrag-->
+
+        </title>
+
+        <description>
+            <p>
+                A suspended order will not be executed.
+            <!--Ein ausgesetzter Auftrag wird nicht ausgeführt.-->
+
+            </p>
+            <p>
+                When an order is being carried out by a task when it is suspended,
+                then the <scheduler_method class="Job_impl" method="spooler_process"/>
+                step will be completed and the order allocated the successor state before being suspended.
+            <!--Wenn der Auftrag gerade von einer Task ausgeführt wird, 
+                wird der Schritt (<scheduler_method class="Job_impl" method="spooler_process"/>) noch
+                zu Ende ausgeführt und der Auftrag nach den gewohnten Regeln in den Folgezustand versetzt,
+                bevor er tatsächlich ausgesetzt wird.-->
+
+            </p>
+            <p>
+                This means that an order can be set to an end state, 
+                which stops it from being removed.
+                The Job Scheduler can remove such an order only when it is not suspended
+                 - i.e. <code>order.suspended=false</code>).
+            <!--Damit kann ein Auftrag in einen Endzustand ausgesetzt werden,
+                womit verhindet wird, dass er entfernt wird.
+                Erst wenn die Aussetzung eines solchen Auftrags aufgehoben wird,
+                (<code>order.suspended=false</code>),
+                entfernt der Scheduler den Auftrag.-->
+
+            </p>
+            <p>
+                A suspended order with the end state can be allocated a different state corresponding to a job
+                node in the job chain. This is effected by using <scheduler_method class="Order" property="state"/>.
+                In this case the order remains suspended.
+            <!--Ein ausgesetzter Auftrag im Endzustand kann mit 
+                <scheduler_method class="Order" property="state"/> in einen Zustand versetzt werden,
+                der einem Job zugeordnet ist.
+                Der Auftrag bleibt dennoch ausgesetzt.-->
+
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="log" access="read">
+        <com>
+            <com.result>
+                <com.type class="Log"/>
+            </com.result>
+        </com>
+
+        <title>
+            Order log
+        <!--Auftragsprotokoll-->
+        </title>
+
+        <description>
+        </description>
+
+        <example>
+            <pre>spooler_task.order.log.info( "Only for order log, not for task log" );
+spooler_log.info( "For both order log and task log" );</pre>
+        </example>
+
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="end_state">
+        <com>
+            <com.result>
+                <com.type type="VARIANT"/>
+            </com.result>
+        </com>
+
+        <title>
+            The state that should be reached when an order has been successfully completed
+        <!--Zustand, vor dessen erfolgreichen Verlassen der Auftrag enden soll-->
+        </title>
+
+        <description>
+            <p>
+                When an order has its own <code>end_state</code> other than <code>""</code>
+                then it is considered to be completed after the job allocated to this end state has been completed
+                and before the order otherwise leaves this state
+                (see <scheduler_element name="job_chain_node"/>
+                for example to continue to another job which usually comprises a part of the job chain).
+            <!--Wenn ein Auftrag einen eigenen End-Zustand hat (<code>end_state</code> ungleich <code>""</code>),
+                endet der Auftrag, bevor er diesen Zustand erfolgreich verlassen würde,
+                also nach Ausführung des dem End-Zustand zugeordneten Jobs
+                (siehe <scheduler_element name="job_chain_node"/>).-->
+            </p>
+            <p>
+                The state specified has to reference a valid state of a job node in the job chain.
+            <!--Der Zustand muss in der Jobkette bekannt sein.-->
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<title>
+    Order
+<!--Auftrag-->
+</title>
+
+
+<description>
+    <p>
+        See <a href="../order.xml">Orders</a>,
+    <!--Siehe <a href="../order.xml">Aufträge</a>,-->
+        <scheduler_method class="Spooler" method="create_order"/>,
+        <scheduler_method class="Job_chain" method="add_order"/>,
+        <scheduler_method class="Task" property="order"/>.
+    </p>
+
+    <h3>File order</h3>
+<!--<h3>Dateiauftrag</h3>-->
+    <p>
+        A file order is an order with for which the <code>scheduler_file_path</code> parameter has been set:
+        <scheduler_method class="Order" object="order" property="params"/><code>.<scheduler_method class="Variable_set" object="" method="value" value='"scheduler_file_path"'/>.</code>
+    <!--Ein Dateiauftrag ist ein Auftrag mit dem Parameter <code>scheduler_file_path</code>:
+        <scheduler_method class="Order" object="order" property="params"/><code>.<scheduler_method class="Variable_set" object="" method="value" value='"scheduler_file_path"'/>.</code>-->
+    </p>
+    <p>
+        See <scheduler_a href="../file_orders.xml" quote="yes"/>.
+    <!--Siehe <scheduler_a href="../file_orders.xml" quote="yes"/>.-->
+    </p>
+</description>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+		<example programming_language="javascript" title="An Order with a simple Payload">
+<!--<example programming_language="javascript" title="Auftrag mit einfacher Nutzlast">-->
+    <pre>// Create order:
+{
+    var order = spooler.create_order();
+    order.id         = 1234;
+    order.title      = "This is my order";
+    order.state_text = "This is my state text";
+    order.payload    = "This is my payload";
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+}
+...
+
+// Process order:
+function spooler_process()
+{
+    var order = spooler_task.order;
+    spooler_log.info( "order.payload=" + order.payload );
+    return true;
+}</pre>
+</example>
+
+
+		<example programming_language="javascript" title="Creating an Order with a Variable_set as a Payload">
+<!--<example programming_language="javascript" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">-->
+    <pre>// Create order:
+{
+    var variable_set = spooler.create_variable_set();
+    variable_set.value( "param_one" ) = "11111";
+    variable_set.value( "param_two" ) = "22222";
+
+    var order = spooler.create_order();
+    order.id      = 1234;
+    order.payload = variable_set;
+    spooler.job_chain( "my_job_chain" ).add_order( order );
+}
+...
+
+// Process order:
+function spooler_process()
+{
+    var order = spooler_task.order;
+    var variable_set = order.payload;
+    spooler_log.info( "param_one=" + variable_set.value( "param_one" ) );
+    spooler_log.info( "param_two=" + variable_set.value( "param_two" ) );
+    return true;
+}</pre>
+
+</example>
+
+
+		<example programming_language="perl" title="An Order with a simple Payload">
+<!--<example programming_language="perl" title="Auftrag mit einfacher Nutzlast">-->
+    <pre>// Create order:
+{
+    my $order = $spooler->create_order();
+    $order->LetProperty( 'id'        , 1234 );
+    $order->LetProperty( 'title'     , 'This is my order' );
+    $order->LetProperty( 'state_text', 'This is my state text' );
+    $order->LetProperty( 'payload'   , 'This is my payload' );
+    $spooler->job_chain( 'my_job_chain' )->add_order( $order );
+}
+...
+
+// Process order:
+sub spooler_process()
+{
+    my $order = $spooler_task->order;
+    $spooler_log->info( 'order.payload=" + $order->payload );
+    return 1;
+}</pre>
+</example>
+
+
+		<example programming_language="perl" title="Creating an Order with a Variable_set as a Payload">
+<!--<example programming_language="perl" title="Erzeugen eines Auftrags mit Variable_set als Nutzlast">-->
+    <pre>// Create order:
+{
+    my $variable_set = $spooler->create_variable_set();
+    $variable_set->set_var( 'param_one', 111 );
+    $variable_set->set_var( 'param_two', 222 );
+
+    my $order = $spooler->create_order();
+    $order->LetProperty( 'id'     , 1234 );
+    $order->LetProperty( 'payload', $variable_set );
+    $spooler->job_chain( 'my_job_chain' )->add_order( $order );
+}
+...
+
+// Process order:
+sub spooler_process()
+{
+    my $order = $spooler_task->order;
+    my $variable_set = $order->payload;
+    $spooler_log->info( 'param_one=' . $variable_set->value( 'param_one' ) );
+    $spooler_log->info( 'param_two=' . $variable_set->value( 'param_two' ) );
+    return 1;
+}</pre>
+
+</example>
+
+
+</api.class>

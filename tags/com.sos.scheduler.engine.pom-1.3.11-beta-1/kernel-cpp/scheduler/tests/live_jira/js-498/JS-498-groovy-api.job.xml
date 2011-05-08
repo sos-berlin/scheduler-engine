@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob groovy"
+     order="yes">
+    <description>
+        <![CDATA[
+        <h2>running a groovy script (<a href="http://groovy.codehaus.org/">http://groovy.codehaus.org/</a>)</h2>
+        <p>
+        This job provides a groovy sample for the javax.script API.
+        </p>
+        ]]>
+    </description>
+    <script language="javax.script:groovy">
+        <![CDATA[
+public cnt;
+
+public boolean spooler_init() {
+  cnt = 0;
+  logger.info("START of Test ------------------------------------------------");
+  logger.info("spooler_init is called by " + spooler_job.name() );
+  return true;
+}
+
+public boolean spooler_process() {
+  if (cnt < 5) {
+    cnt++;
+    logger.info("spooler_process: iteration no " +  cnt);
+    return true;
+  }
+  return false;
+}
+
+public boolean spooler_exit() {
+  logger.info("END of Test --------------------------------------------------");
+  return true;
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>

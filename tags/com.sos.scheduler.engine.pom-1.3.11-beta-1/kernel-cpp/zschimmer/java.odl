@@ -1,0 +1,164 @@
+// $Id$
+
+// Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
+
+[
+    uuid        ( feee4700-6c1b-11d8-8103-000476ee8afb ),
+  //helpstring  ( "" ),
+    lcid        ( 0x0000 ),
+    version     ( 1.0 )
+]
+library zschimmer_java
+{
+    importlib("STDOLE32.TLB");
+
+    //--------------------------------------------------------------------------Has_java_class_name
+
+    [
+        uuid       ( feee4701-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ihas_java_class_name : IUnknown
+    {
+        [propget]
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );
+
+        // Nicht für Invoke():
+        const char*             const_java_class_name       ();
+
+
+        // Soll das Java-Objekt der Eigentümer dieses COM-Objekts sein?
+        // Andernfalls entfernt der Scheduler das Java-Objekt am Ende eines Aufrufs (z.B. spooler_process()).
+        //[propget]
+        //HRESULT                 Java_object_is_owner        ( [out,retval] VARIANT_BOOL* );
+    }
+
+    //---------------------------------------------------------------------------------------------
+}
+
+/*
+Ein paar freie GUIDs:
+
+feee4708-6c1b-11d8-8103-000476ee8afb
+feee4709-6c1b-11d8-8103-000476ee8afb
+feee470a-6c1b-11d8-8103-000476ee8afb
+feee470b-6c1b-11d8-8103-000476ee8afb
+feee470c-6c1b-11d8-8103-000476ee8afb
+feee470d-6c1b-11d8-8103-000476ee8afb
+feee470e-6c1b-11d8-8103-000476ee8afb
+feee470f-6c1b-11d8-8103-000476ee8afb
+feee4710-6c1b-11d8-8103-000476ee8afb
+feee4711-6c1b-11d8-8103-000476ee8afb
+feee4712-6c1b-11d8-8103-000476ee8afb
+feee4713-6c1b-11d8-8103-000476ee8afb
+feee4714-6c1b-11d8-8103-000476ee8afb
+feee4715-6c1b-11d8-8103-000476ee8afb
+feee4716-6c1b-11d8-8103-000476ee8afb
+feee4717-6c1b-11d8-8103-000476ee8afb
+feee4718-6c1b-11d8-8103-000476ee8afb
+feee4719-6c1b-11d8-8103-000476ee8afb
+feee471a-6c1b-11d8-8103-000476ee8afb
+feee471b-6c1b-11d8-8103-000476ee8afb
+feee471c-6c1b-11d8-8103-000476ee8afb
+feee471d-6c1b-11d8-8103-000476ee8afb
+feee471e-6c1b-11d8-8103-000476ee8afb
+feee471f-6c1b-11d8-8103-000476ee8afb
+feee4720-6c1b-11d8-8103-000476ee8afb
+feee4721-6c1b-11d8-8103-000476ee8afb
+feee4722-6c1b-11d8-8103-000476ee8afb
+feee4723-6c1b-11d8-8103-000476ee8afb
+feee4724-6c1b-11d8-8103-000476ee8afb
+feee4725-6c1b-11d8-8103-000476ee8afb
+feee4726-6c1b-11d8-8103-000476ee8afb
+feee4727-6c1b-11d8-8103-000476ee8afb
+feee4728-6c1b-11d8-8103-000476ee8afb
+feee4729-6c1b-11d8-8103-000476ee8afb
+feee472a-6c1b-11d8-8103-000476ee8afb
+feee472b-6c1b-11d8-8103-000476ee8afb
+feee472c-6c1b-11d8-8103-000476ee8afb
+feee472d-6c1b-11d8-8103-000476ee8afb
+feee472e-6c1b-11d8-8103-000476ee8afb
+feee472f-6c1b-11d8-8103-000476ee8afb
+feee4730-6c1b-11d8-8103-000476ee8afb
+feee4731-6c1b-11d8-8103-000476ee8afb
+feee4732-6c1b-11d8-8103-000476ee8afb
+feee4733-6c1b-11d8-8103-000476ee8afb
+feee4734-6c1b-11d8-8103-000476ee8afb
+feee4735-6c1b-11d8-8103-000476ee8afb
+feee4736-6c1b-11d8-8103-000476ee8afb
+feee4737-6c1b-11d8-8103-000476ee8afb
+feee4738-6c1b-11d8-8103-000476ee8afb
+feee4739-6c1b-11d8-8103-000476ee8afb
+feee473a-6c1b-11d8-8103-000476ee8afb
+feee473b-6c1b-11d8-8103-000476ee8afb
+feee473c-6c1b-11d8-8103-000476ee8afb
+feee473d-6c1b-11d8-8103-000476ee8afb
+feee473e-6c1b-11d8-8103-000476ee8afb
+feee473f-6c1b-11d8-8103-000476ee8afb
+feee4740-6c1b-11d8-8103-000476ee8afb
+feee4741-6c1b-11d8-8103-000476ee8afb
+feee4742-6c1b-11d8-8103-000476ee8afb
+feee4743-6c1b-11d8-8103-000476ee8afb
+feee4744-6c1b-11d8-8103-000476ee8afb
+feee4745-6c1b-11d8-8103-000476ee8afb
+feee4746-6c1b-11d8-8103-000476ee8afb
+feee4747-6c1b-11d8-8103-000476ee8afb
+feee4748-6c1b-11d8-8103-000476ee8afb
+feee4749-6c1b-11d8-8103-000476ee8afb
+feee474a-6c1b-11d8-8103-000476ee8afb
+feee474b-6c1b-11d8-8103-000476ee8afb
+feee474c-6c1b-11d8-8103-000476ee8afb
+feee474d-6c1b-11d8-8103-000476ee8afb
+feee474e-6c1b-11d8-8103-000476ee8afb
+feee474f-6c1b-11d8-8103-000476ee8afb
+feee4750-6c1b-11d8-8103-000476ee8afb
+feee4751-6c1b-11d8-8103-000476ee8afb
+feee4752-6c1b-11d8-8103-000476ee8afb
+feee4753-6c1b-11d8-8103-000476ee8afb
+feee4754-6c1b-11d8-8103-000476ee8afb
+feee4755-6c1b-11d8-8103-000476ee8afb
+feee4756-6c1b-11d8-8103-000476ee8afb
+feee4757-6c1b-11d8-8103-000476ee8afb
+feee4758-6c1b-11d8-8103-000476ee8afb
+feee4759-6c1b-11d8-8103-000476ee8afb
+feee475a-6c1b-11d8-8103-000476ee8afb
+feee475b-6c1b-11d8-8103-000476ee8afb
+feee475c-6c1b-11d8-8103-000476ee8afb
+feee475d-6c1b-11d8-8103-000476ee8afb
+feee475e-6c1b-11d8-8103-000476ee8afb
+feee475f-6c1b-11d8-8103-000476ee8afb
+feee4760-6c1b-11d8-8103-000476ee8afb
+feee4761-6c1b-11d8-8103-000476ee8afb
+feee4762-6c1b-11d8-8103-000476ee8afb
+feee4763-6c1b-11d8-8103-000476ee8afb
+feee4764-6c1b-11d8-8103-000476ee8afb
+feee4765-6c1b-11d8-8103-000476ee8afb
+feee4766-6c1b-11d8-8103-000476ee8afb
+feee4767-6c1b-11d8-8103-000476ee8afb
+feee4768-6c1b-11d8-8103-000476ee8afb
+feee4769-6c1b-11d8-8103-000476ee8afb
+feee476a-6c1b-11d8-8103-000476ee8afb
+feee476b-6c1b-11d8-8103-000476ee8afb
+feee476c-6c1b-11d8-8103-000476ee8afb
+feee476d-6c1b-11d8-8103-000476ee8afb
+feee476e-6c1b-11d8-8103-000476ee8afb
+feee476f-6c1b-11d8-8103-000476ee8afb
+feee4770-6c1b-11d8-8103-000476ee8afb
+feee4771-6c1b-11d8-8103-000476ee8afb
+feee4772-6c1b-11d8-8103-000476ee8afb
+feee4773-6c1b-11d8-8103-000476ee8afb
+feee4774-6c1b-11d8-8103-000476ee8afb
+feee4775-6c1b-11d8-8103-000476ee8afb
+feee4776-6c1b-11d8-8103-000476ee8afb
+feee4777-6c1b-11d8-8103-000476ee8afb
+feee4778-6c1b-11d8-8103-000476ee8afb
+feee4779-6c1b-11d8-8103-000476ee8afb
+feee477a-6c1b-11d8-8103-000476ee8afb
+feee477b-6c1b-11d8-8103-000476ee8afb
+feee477c-6c1b-11d8-8103-000476ee8afb
+feee477d-6c1b-11d8-8103-000476ee8afb
+feee477e-6c1b-11d8-8103-000476ee8afb
+feee477f-6c1b-11d8-8103-000476ee8afb
+
+*/

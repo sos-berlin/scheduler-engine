@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+<CompilerOptions>
+	<Tool Name="VCCLCompilerTool"  Element="Optimization">
+		<Convert Value="0" Option="/Od" Text="Deaktiviert" />
+		<Convert Value="1" Option="/O1" Text="Grösse minimieren" />
+		<Convert Value="2" Option="/O2" Text="Geschwindigkeit maximieren" />
+		<Convert Value="3" Option="/Ox" Text="Komplette Optimierung" />
+		<Convert Value="4" Option="" Text="Benutzerdefiniert" />
+	</Tool>
+</CompilerOptions>

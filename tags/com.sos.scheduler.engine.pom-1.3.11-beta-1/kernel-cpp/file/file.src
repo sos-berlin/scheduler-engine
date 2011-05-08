@@ -1,0 +1,467 @@
+/* StarView ressource file */
+#pragma CHARSET_ANSI
+#include "file.hrc"
+ModalDialog DLG_PREVIEW {
+    OutputSize = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 0, 0 );
+    Size = MAP_PIXEL( 1020, 756 );
+    Text = "Preview";
+    Moveable = TRUE;
+    MinAble = TRUE;
+    Control DP_BOX {
+            Border = TRUE;
+            Pos = MAP_PIXEL( 3, 0 );
+            Size = MAP_PIXEL( 898, 736 );
+        };
+    ScrollBar DP_VSCROLL {
+            Pos = MAP_PIXEL( 899, 0 );
+            Size = MAP_PIXEL( 20, 734 );
+            TabStop = TRUE;
+            VScroll = TRUE;
+        };
+    ScrollBar DP_HSCROLL {
+            Pos = MAP_PIXEL( 0, 736 );
+            Size = MAP_PIXEL( 901, 20 );
+            TabStop = TRUE;
+            HScroll = TRUE;
+        };
+    PushButton DP_ZOOMIN {
+            OutputFont = Font ,257;
+            Pos = MAP_PIXEL( 940, 10 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "+";
+            TabStop = TRUE;
+        };
+    PushButton DP_ZOOMOUT {
+            OutputFont = Font ,257;
+            Pos = MAP_PIXEL( 940, 40 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "--";
+            TabStop = TRUE;
+        };
+    PushButton DP_NORMALPAGE {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 80 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "100~%";
+            TabStop = TRUE;
+        };
+    PushButton DP_FULLPAGE {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 110 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Seite";
+            TabStop = TRUE;
+        };
+    PushButton DP_DOUBLEPAGE {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 140 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~2-seitig";
+            TabStop = TRUE;
+        };
+    PushButton DP_PRINT_PB {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 180 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Drucken";
+            TabStop = TRUE;
+        };
+    PushButton DP_SETUP_PB {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 210 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Einrichten";
+            TabStop = TRUE;
+        };
+    PushButton DP_PREVPAGE {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 660 );
+            Size = MAP_PIXEL( 35, 24 );
+            Text = "~<<";
+            TabStop = TRUE;
+        };
+    PushButton DP_NEXTPAGE {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 975, 660 );
+            Size = MAP_PIXEL( 35, 24 );
+            Text = "~>>";
+            TabStop = TRUE;
+        };
+    CancelButton DP_CANCEL {
+            OutputFont = Font ,256;
+            Pos = MAP_PIXEL( 940, 700 );
+            Size = MAP_PIXEL( 70, 24 );
+            TabStop = TRUE;
+            Text = "~Schliessen";
+        };
+};
+ModalDialog DLG_PREVIEW_800_600 {
+    OutputSize = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 0, 0 );
+    Size = MAP_PIXEL( 800, 590 );
+    Text = "Preview";
+    Moveable = TRUE;
+    MinAble = TRUE;
+    Control DP_BOX {
+            Border = TRUE;
+            Pos = MAP_PIXEL( 0, 1 );
+            Size = MAP_PIXEL( 680, 560 );
+        };
+    ScrollBar DP_VSCROLL {
+            Pos = MAP_PIXEL( 680, 1 );
+            Size = MAP_PIXEL( 19, 560 );
+            TabStop = TRUE;
+            VScroll = TRUE;
+        };
+    ScrollBar DP_HSCROLL {
+            Pos = MAP_PIXEL( -1, 560 );
+            Size = MAP_PIXEL( 700, 20 );
+            TabStop = TRUE;
+            HScroll = TRUE;
+        };
+    PushButton DP_ZOOMIN {
+            Pos = MAP_PIXEL( 710, 4 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "+";
+            TabStop = TRUE;
+        };
+    PushButton DP_ZOOMOUT {
+            Pos = MAP_PIXEL( 710, 34 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "-";
+            TabStop = TRUE;
+        };
+    PushButton DP_NORMALPAGE {
+            Pos = MAP_PIXEL( 710, 68 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "100~%";
+            TabStop = TRUE;
+        };
+    PushButton DP_FULLPAGE {
+            Pos = MAP_PIXEL( 710, 99 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "~Seite";
+            TabStop = TRUE;
+        };
+    PushButton DP_DOUBLEPAGE {
+            Pos = MAP_PIXEL( 710, 137 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "~2-seitig";
+            TabStop = TRUE;
+        };
+    PushButton DP_PREVPAGE {
+            Pos = MAP_PIXEL( 710, 505 );
+            Size = MAP_PIXEL( 40, 24 );
+            Text = "~<<";
+            TabStop = TRUE;
+        };
+    PushButton DP_NEXTPAGE {
+            Pos = MAP_PIXEL( 750, 505 );
+            Size = MAP_PIXEL( 40, 24 );
+            Text = "~>>";
+            TabStop = TRUE;
+        };
+    PushButton DP_PRINT_PB {
+            Pos = MAP_PIXEL( 710, 205 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "~Drucken";
+            TabStop = TRUE;
+        };
+    PushButton DP_SETUP_PB {
+            Pos = MAP_PIXEL( 710, 233 );
+            Size = MAP_PIXEL( 80, 24 );
+            Text = "~Einrichten";
+            TabStop = TRUE;
+        };
+    CancelButton DP_CANCEL {
+            Pos = MAP_PIXEL( 710, 535 );
+            Size = MAP_PIXEL( 80, 24 );
+            TabStop = TRUE;
+            Text = "Schliessen";
+        };
+};
+ModalDialog DLG_PREVIEW_640_480 {
+    OutputSize = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 0, 0 );
+    Size = MAP_PIXEL( 640, 480 );
+    Text = "Preview";
+    Moveable = TRUE;
+    MinAble = TRUE;
+    Control DP_BOX {
+            Border = TRUE;
+            Pos = MAP_PIXEL( 0, 1 );
+            Size = MAP_PIXEL( 547, 462 );
+        };
+    ScrollBar DP_VSCROLL {
+            Pos = MAP_PIXEL( 547, 1 );
+            Size = MAP_PIXEL( 18, 462 );
+            TabStop = TRUE;
+            VScroll = TRUE;
+        };
+    ScrollBar DP_HSCROLL {
+            Pos = MAP_PIXEL( -4, 463 );
+            Size = MAP_PIXEL( 568, 20 );
+            TabStop = TRUE;
+            HScroll = TRUE;
+        };
+    PushButton DP_ZOOMIN {
+            Pos = MAP_PIXEL( 570, 5 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "+";
+            TabStop = TRUE;
+        };
+    PushButton DP_ZOOMOUT {
+            Pos = MAP_PIXEL( 570, 35 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "-";
+            TabStop = TRUE;
+        };
+    PushButton DP_NORMALPAGE {
+            Pos = MAP_PIXEL( 570, 69 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "100~%";
+            TabStop = TRUE;
+        };
+    PushButton DP_FULLPAGE {
+            Pos = MAP_PIXEL( 570, 100 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Seite";
+            TabStop = TRUE;
+        };
+    PushButton DP_DOUBLEPAGE {
+            Pos = MAP_PIXEL( 570, 138 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~2-seitig";
+            TabStop = TRUE;
+        };
+    PushButton DP_PREVPAGE {
+            Pos = MAP_PIXEL( 570, 424 );
+            Size = MAP_PIXEL( 35, 24 );
+            Text = "~<<";
+            TabStop = TRUE;
+        };
+    PushButton DP_NEXTPAGE {
+            Pos = MAP_PIXEL( 605, 424 );
+            Size = MAP_PIXEL( 35, 24 );
+            Text = "~>>";
+            TabStop = TRUE;
+        };
+    PushButton DP_PRINT_PB {
+            Pos = MAP_PIXEL( 570, 208 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Drucken";
+            TabStop = TRUE;
+        };
+    PushButton DP_SETUP_PB {
+            Pos = MAP_PIXEL( 570, 234 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Einrichten";
+            TabStop = TRUE;
+        };
+    CancelButton DP_CANCEL {
+            Pos = MAP_PIXEL( 570, 453 );
+            Size = MAP_PIXEL( 70, 24 );
+            TabStop = TRUE;
+            Text = "~Schliessen";
+        };
+};
+ModelessDialog DLG_PREVIEW {
+    OutputSize = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 0, -3 );
+    Size = MAP_PIXEL( 891, 622 );
+    Text = "Preview";
+    Moveable = TRUE;
+    MinAble = TRUE;
+    Control DP_BOX {
+            Border = TRUE;
+            Pos = MAP_PIXEL( 2, 0 );
+            Size = MAP_PIXEL( 775, 603 );
+        };
+    ScrollBar DP_VSCROLL {
+            Pos = MAP_PIXEL( 775, 0 );
+            Size = MAP_PIXEL( 19, 601 );
+            TabStop = TRUE;
+            VScroll = TRUE;
+        };
+    ScrollBar DP_HSCROLL {
+            Pos = MAP_PIXEL( 2, 603 );
+            Size = MAP_PIXEL( 774, 20 );
+            TabStop = TRUE;
+            HScroll = TRUE;
+        };
+    PushButton DP_ZOOMIN {
+            Pos = MAP_PIXEL( 812, 11 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "+";
+            TabStop = TRUE;
+        };
+    PushButton DP_ZOOMOUT {
+            Pos = MAP_PIXEL( 810, 42 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "-";
+            TabStop = TRUE;
+        };
+    PushButton DP_NORMALPAGE {
+            Pos = MAP_PIXEL( 812, 76 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "100~%";
+            TabStop = TRUE;
+        };
+    PushButton DP_FULLPAGE {
+            Pos = MAP_PIXEL( 812, 107 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Seite";
+            TabStop = TRUE;
+        };
+    PushButton DP_DOUBLEPAGE {
+            Pos = MAP_PIXEL( 812, 145 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~2-seitig";
+            TabStop = TRUE;
+        };
+    PushButton DP_PREVPAGE {
+            Pos = MAP_PIXEL( 807, 546 );
+            Size = MAP_PIXEL( 75, 23 );
+            Text = "~<<";
+            TabStop = TRUE;
+        };
+    PushButton DP_NEXTPAGE {
+            Pos = MAP_PIXEL( 809, 514 );
+            Size = MAP_PIXEL( 72, 23 );
+            Text = "~>>";
+            TabStop = TRUE;
+        };
+    PushButton DP_PRINT_PB {
+            Pos = MAP_PIXEL( 814, 215 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Drucken";
+            TabStop = TRUE;
+        };
+    PushButton DP_SETUP_PB {
+            Pos = MAP_PIXEL( 814, 250 );
+            Size = MAP_PIXEL( 70, 24 );
+            Text = "~Einrichten";
+            TabStop = TRUE;
+        };
+    CancelButton DP_CANCEL {
+            Pos = MAP_PIXEL( 807, 579 );
+            Size = MAP_PIXEL( 75, 21 );
+            TabStop = TRUE;
+            Text = "~Schliessen";
+        };
+};
+ModelessDialog ABORT_DLG {
+    Hide = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 142, 94 );
+    Size = MAP_PIXEL( 270, 166 );
+    Text = "Frame Dokument wird gedruckt ...";
+    Moveable = TRUE;
+    Closeable = TRUE;
+    FixedText ABORT_DLG_PRINT_TEXT {
+            Pos = MAP_PIXEL( 12, 24 );
+            Size = MAP_PIXEL( 236, 20 );
+            Left = TRUE;
+        };
+    FixedText ABORT_DLG_PAGES_TEXT {
+            Pos = MAP_PIXEL( 12, 50 );
+            Size = MAP_PIXEL( 235, 23 );
+            Left = TRUE;
+        };
+    CancelButton ABORT_DLG_CANCEL_PB {
+            Pos = MAP_PIXEL( 88, 89 );
+            Size = MAP_PIXEL( 70, 20 );
+            TabStop = TRUE;
+        };
+};
+Font 256 {
+    Weight = WEIGHT_BOLD;
+    Charset = CHARSET_ANSI;
+    HEIGHT = 12;
+    Text = "Arial";
+};
+Font 257 {
+    Weight = WEIGHT_BOLD;
+    Charset = CHARSET_ANSI;
+    Text = "Arial";
+};
+Menu FRMPREV_MENU {
+    ItemList = {
+    MenuItem  {
+            Identifier = FRMPREV_FILE;
+            Text = "~Datei";
+            SubMenu = Menu  {
+                ItemList = {
+                MenuItem  {
+                        Identifier = FRMPREV_PREVIEW;
+                        Text = "~Öffnen";
+                    };
+                MenuItem  {
+                        Separator = TRUE;
+                    };
+                MenuItem  {
+                        Identifier = FRMPREV_QUIT;
+                        Text = "~Beenden";
+                    };
+                };
+            };
+        };
+    };
+};
+ModalDialog DLG_PREVIEW_AUTO {
+    OutputSize = TRUE;
+    SVLook = TRUE;
+    Pos = MAP_PIXEL( 0, 0 );
+    Size = MAP_PIXEL( 1020, 756 );
+    Text = "Preview";
+    Moveable = TRUE;
+    MinAble = TRUE;
+    Control DP_BOX {
+            Border = TRUE;
+            Pos = MAP_PIXEL( 3, 0 );
+            Size = MAP_PIXEL( 898, 736 );
+        };
+    ScrollBar DP_VSCROLL {
+            Pos = MAP_PIXEL( 899, 0 );
+            Size = MAP_PIXEL( 20, 734 );
+            TabStop = TRUE;
+            VScroll = TRUE;
+        };
+    ScrollBar DP_HSCROLL {
+            Pos = MAP_PIXEL( 0, 736 );
+            Size = MAP_PIXEL( 901, 20 );
+            TabStop = TRUE;
+            HScroll = TRUE;
+        };
+
+    ToolBox DP_TOOLBOX {
+        Border = TRUE;
+        SVLook = TRUE;
+        Align      = BOXALIGN_TOP;
+        ButtonType = BUTTON_TEXT;
+        Pos = MAP_APPFONT( 0, 0 );
+        Size = MAP_APPFONT( 307, 15 );
+        Scroll = TRUE;
+        ItemList = {
+                        ToolBoxItem  {
+                                        Identifier = DP_CANCEL;
+                                        Text = "~Beenden";
+                                        HelpText = "Preview beenden";
+                                };
+                        ToolBoxItem  {
+                                        Type = TOOLBOXITEM_SEPARATOR;
+                                };
+                        ToolBoxItem  {
+                                        Identifier = DP_PRINT_PB;
+                                        Text = "~Drucken";
+                                        HelpText = "Dokument drucken";
+                                };
+        };
+    };
+};
+

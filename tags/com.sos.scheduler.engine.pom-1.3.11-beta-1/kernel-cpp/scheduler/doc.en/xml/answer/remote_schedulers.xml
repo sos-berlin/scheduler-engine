@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: remote_schedulers.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name          = "remote_schedulers" 
+             title         = "Registered Job Schedulers"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "state.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-01-31 12:42:37 +0100 (Di, 31 Jan 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="state"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="count" type="number" title="Number of registered Job Schedulers">
+    <!--<xml_attribute name="count" type="number" title="Anzahl der registrierten Scheduler">-->
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="connected" type="number" title="Number of connected Job Schedulers">
+    <!--<xml_attribute name="connected" type="number" title="Anzahl der gerade verbundenen Scheduler">-->
+            <description>
+                <p>
+                    Schedulers which are no longer connected remain registered, but are no longer counted here.
+                <!--Nicht mehr verbundene Scheduler bleiben im Register, werden aber hier nicht gezählt.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+    
+    <xml_child_elements>
+        <xml_child_element name="remote_scheduler"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+</xml_element>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Verzeichnisüberwachung mit Aufträgen"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    
+
+    <!--p>
+        Einem auftragsgesteuerten <scheduler_element name="process"/>-Job
+        kann der Dateipfad mit den neuen XML-Element <code>&lt;copy_param></code>
+        (analog <scheduler_element name="copy_params"/>) übergeben werden:
+    </p>
+
+    <pre>&lt;job name="<i>my_external_job</i>" order="yes">
+    &lt;process file="<i>/home/me/my_external_job.sh</i> params="some parameters">
+        &lt;environment>
+            &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+            &lt;copy_param name="MY_PATH" from="order" from_name="scheduler.file.path"/>
+            …
+        &lt;/environment>
+    &lt;/process>
+&lt;/job></pre>
+
+    <p>
+        Dem Job steht dann die Umgebungsvariable <code>MY_PATH</code> zur Verfügung.
+    </p-->
+
+
+
+    <!--
+    <p>
+        Wie in
+        "<a href="process_order.xml">Auftragsgesteuerte &lt;process>-Jobs</a>" 
+        beschrieben,
+        können einem auftragsgesteuerten <scheduler_element name="process"/>-Job 
+        die Auftragsparameter so übergeben werden:
+    </p>
+
+    <pre>&lt;job name="<i>my_external_job</i>" order="yes">
+    &lt;process file="<i>/home/me/my_external_job.sh</i> params="some parameters">
+        &lt;environment>
+            &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+            &lt;copy_params prefix="scheduler_order_" from="order"/>
+        &lt;/environment>
+    &lt;/process>
+&lt;/job></pre>
+
+    <p>
+        Dem Job stehen dann die Umgebungsvariablen
+    </p>
+    <ul>
+        <li>
+            <code>scheduler_order_scheduler_file__name</code>,
+        </li>
+
+        <li>
+            <code>scheduler_order_scheduler_file__path</code> und
+        </li>
+        <li>
+            <code>scheduler_order_scheduler_file__directory</code>
+        </li>
+    </ul>
+    <p>
+        zur Verfügung (der Punkt wird ersetzt zu "<code>__</code>").
+    </p>
+
+    <p>
+        <i>Diese Namen sind schrecklich lang.
+        Sollten wir besondere, kürzere Namen nehmen?</i>
+        Wir könnten die Variablen einzeln übergeben und dann umbenennen:
+    </p>
+    <pre>&lt;environment>
+    &lt;variable name="<i>name</i>" value="<i>value</i>"/>
+    &lt;variable name="MY_PATH" from="order" from_name="scheduler.file.path"/>
+&lt;/environment></pre>
+    <p>
+        Dem Job steht dann die Umgebungsvariable <code>MY_PATH</code> zur Verfügung.
+    </p>
+    -->
+    
+
+    <h3>Optional: Reihenfolge der Dateien</h3>
+    <p>
+        Alphabetisch (Ordnung durch binären Vergleich der Dateinamen),
+        nach Erstellungsdatum,...
+    </p>
+
+
+    <h2>Zukünftige Erweiterungen</h2>
+
+
+    <h3>Beschränkung auf Dateien, die sich exklusiv zum Lesen öffnen lassen</h3>
+    <pre>&lt;file_order_source directory="…" check_open="yes"/></pre>
+    <p>
+        Mit dieser Einstellung übergibt der Scheduler eine Datei nur, 
+        wenn sie sich zum Lesen öffnen lässt.
+        Wenn der Versuch fehlschlägt, ist anzunehmen, dass die Datei noch beschrieben wird.
+        Der Scheduler ignoriert die Datei dann und geht zur nächsten über.
+        (<i>Klären, ob das auch für Unix gilt!)</i>
+    </p>
+
+    
+    <h2>Dateien programmiert hinzufügen mit add_file()</h2>
+    
+    <p>
+        Wenn die Auswahl der zu Aufträgen führenden Dateien programmierbar sein soll, z.B. weil die Kriterien komplexer sind,
+        kann dieser Aufruf verwendet werden:
+        </p>
+    <pre>spooler.job_chain( "<i>my_job_chain</i>" ).add_file( <i>path</i> );</pre>
+    <p>
+        Der Aufruf erzeugt einen Auftrag, der mit einer Datei verbunden ist.
+        <i>path</i> wird die Kennung <scheduler_method class="Order" property="id"/>.
+        Der Aufruf liefert false, wenn bereits ein Auftrag mit derselben Kennung vorhanden ist.
+        Das kann dann so verwendet werden:
+    </p>
+    <pre>var dir = new <i>My_special_directory_reader</i>( … );
+
+while( dir.has_next_path() )
+{
+    var is_new = job_chain.add_file( dir.read_next_path() );
+    if( is_new )  break;
+}</pre>
+
+    
+
+    <h3>Job als Auftragsquelle</h3>
+    <p>
+        Hier ein Vorschlag, wie ein Job, der Aufträge erzeugt,
+        vom Scheduler bei Bedarf aufgerufen wird:
+        "<a href="order_source.xml">Programmierte Auftragsquellen</a>".
+    </p>
+
+</description>

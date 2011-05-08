@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--             job_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\com.sos.scheduler.jar" -->
+<!-- class_path="C:\Programme\scheduler\lib\*.jar;C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\com.sos.scheduler.core.jar"  -->
+                                 
+<job title="js540 (Java Class Path class_path am Job)" java_options="-Xmx258m" >
+    <script java_class="test.SimpleJavaAPIJob"
+    				java_class_path="C:\Users\rb\Documents\cpp_projekte\scheduler_src_head\prod\_jar\testjob.jar"
+            language="java"
+            />
+    <run_time/>
+</job>
+
+<!-- 
+Reihenfolge der Aufrufe
+
+Com_remote_module_instance_server::Construct
+	- Z_NEW( Java_module_instance)
+Com_remote_module_instance_server::Begin
+Com_remote_module_instance_server::Call ("spooler_open")
+Com_remote_module_instance_server::Step
+	- Module_instance::step__end
+	- Module_instance::call_if_exists ("spooler_process")
+		+  Java_module_instance::call("spooler_process")
+Com_remote_module_instance_server::End
+Com_remote_module_instance_server::Call (spooler_on_success)
+Com_remote_module_instance_server::Call (spooler_exit)
+ 
+
+-->

@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Andreas Pueschel (APL Software GmbH) -->
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: job.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
+
+<xml_element name          = "job"
+             title         = "Job"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-04-16 09:58:13 +0200 (Mo, 16 Apr 2007) $">
+
+
+	<xml_parent_elements>
+		<xml_parent_element name="jobs"/>
+		<xml_parent_element name="answer"/>
+	</xml_parent_elements>
+	
+	<xml_attributes>
+		<xml_attribute name="job" type="name" title="Job name"/>
+<!--<xml_attribute name="job" type="name" title="Jobname"/>-->
+
+		<xml_attribute name="state" type="name" title="State">
+<!--<xml_attribute name="state" type="name" title="Zustand">-->
+
+			<description>
+				<table cellspacing="0" cellpadding="0">
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="none"/>
+							<code>state="none"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            The initial status of a job as the Job Scheduler starts.
+                        <!--Der anfängliche Status des Jobs beim Start des Schedulers.-->
+						</td>
+					</tr>
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="stopping"/>
+							<code>state="stopping"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            The job has been stopped and not all tasks have ended.
+                        <!--Wenn der Job gestoppt wird und noch nicht alle Tasks beendet sind.-->
+						</td>
+					</tr>
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="stopped"/>
+							<code>state="stopped"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            The job has been stopped and all tasks have ended.
+                        <!--Der Job ist gestoppt und alle Tasks sind beendet.-->
+						</td>
+					</tr>
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="read_error"/>
+							<code>state="read_error"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            The status when <scheduler_element name="script"/> cannot be read.
+                        <!--Wenn <scheduler_element name="script"/> nicht gelesen werden konnte.-->
+						</td>
+					</tr>
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="pending"/>
+							<code>state="pending"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            No task is running.
+                        <!--Keine Task läuft.-->
+						</td>
+					</tr>
+					<tr>
+						<td valign="baseline" style="padding-top: 1ex">
+							<scheduler_keyword keyword="running"/>
+							<code>state="running"</code>
+						</td>
+						<td valign="baseline" style="padding-top: 1ex; padding-left: 2ex">
+                            At least one task is running.
+                        <!--Wenigstens eine Task läuft.-->
+						</td>
+					</tr>
+				</table>
+			</description>
+		</xml_attribute>
+		<xml_attribute name="waiting_for_process" type="yes|no" initial="no" title="When a job is waiting for a process">
+			<!--<xml_attribute name="waiting_for_process" type="yes|no" initial="no" title="Wenn der Job auf einen Prozess wartet">-->
+			<description>
+				<p>
+                    This occurs when a job attempts to start a task but the process class is not large enough.
+                <!--Das ist der Fall, wenn der Job eine Task starten will,
+                    aber die Prozessklasse nicht genügend groß ist.-->
+				</p>
+				<p>
+                    See <scheduler_element name="job" attribute="process_class"/>.
+                <!--Siehe <scheduler_element name="job" attribute="process_class"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+		<xml_attribute name="all_steps" type="number" title="The number of job steps for all tasks"/>
+		<xml_attribute name="all_tasks" type="number" title="The number of tasks already started"/>
+		<xml_attribute name="state_text" type="text" title="The properties of job.state_text">
+			<!--<xml_attribute name="all_steps"  type="zahl" title="Zahl der Jobschritte aller Tasks"/>
+        <xml_attribute name="all_tasks"  type="zahl" title="Zahl aller bisher gestarteten Tasks"/>
+        <xml_attribute name="state_text" type="text" title="Eigenschaft Job.state_text">-->
+			<description>
+				<p>
+                    See <scheduler_method class="Job" property="state_text" java_signature="String" access="write"/>.
+                <!--Siehe <scheduler_method class="Job" property="state_text" java_signature="String" access="write"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+		<xml_attribute name="log_file" type="dateiname" title="The name of the protocol file"/>
+		<!--<xml_attribute name="log_file" type="dateiname" title="Dateiname des Protokolls"/>-->
+		<xml_attribute name="order" type="yes|no" initial="no" title="For order controlled jobs">
+			<!--<xml_attribute name="order" type="yes|no" initial="no" title="Bei auftragsgesteuertem Job">-->
+			<description>
+				<p>
+                    See <scheduler_element name="job" attribute="order"/>.
+                <!--Siehe <scheduler_element name="job" attribute="order"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+		<xml_attribute name="tasks" type="number" title="Maximum number of tasks allowed">
+			<!--<xml_attribute name="tasks" type="zahl" title="Anzahl der zugelassenen Tasks">-->
+			<description>
+				<p>
+                    See <scheduler_element name="job" attribute="tasks"/>.
+                <!--Siehe <scheduler_element name="job" attribute="tasks"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+		<xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Next planned start time">
+<!--<xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit"/>-->
+        <!--TEXT AUSKOMMENTIERT - SEE MAIL JZ 16.03.2006 18:56 -->
+        <!--In order to determine the next start time, the Job Scheduler checks the next hundred periods,
+            until it finds a period with <code>single_start</code> or <code>repeat</code>.-->
+        <!--Zur Ermittlung der nächsten Startzeit prüft der Scheduler die nächsten hundert Perioden,
+            bis er eine Periode mit <code>single_start</code> oder <code>repeat</code> erreicht.-->
+		</xml_attribute>
+		<xml_attribute name="delay_after_error" type="yyyy-mm-dd hh:mm:ss.mmm" title="delay_after_error takes effect after an error"/>
+		<!--<xml_attribute name="delay_after_error" type="yyyy-mm-dd hh:mm:ss.mmm" title="delay_after_error ist nach einem Fehler wirksam" />-->
+		<xml_attribute name="in_period" type="yes|no" title="When a &lt;period&gt; is valid"/>
+		<!--<xml_attribute name="in_period" type="yes|no" title="Wenn gerade eine &lt;period&gt; wirksam ist" />-->
+		<xml_attribute name="has_description" type="yes" title="yes, when a job has a &lt;description&gt;"/>
+		<!--<xml_attribute name="has_description" type="yes" title="yes, wenn der Job eine &lt;description&gt; hat"/>-->
+		<xml_attribute name="remove" type="yes" title="yes, when a job is removed">
+			<!--<xml_attribute name="remove" type="yes" title="yes, wenn der Job entfernt wird">-->
+			<description>
+				<p>
+                    See <scheduler_element name="modify_job" attribute="cmd" value="remove"/>.
+                <!--Siehe <scheduler_element name="modify_job" attribute="cmd" value="remove"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+		
+		<xml_attribute name="temporary" type="yes" title="yes, when a job is temporary">
+			<description>
+				<p>
+                    See <scheduler_element name="job" attribute="temporary" value="yes"/>.
+                <!--Siehe <scheduler_element name="job" attribute="temporary" value="yes"/>.-->
+				</p>
+			</description>
+		</xml_attribute>
+
+    <xml_attribute name="enabled" type="yes|no" initial="yes" title="Disable a Job." >
+        <description>
+            <p>
+                See <scheduler_element name="job" attribute="enabled" value="yes"/>.
+            </p>
+        </description>            
+    </xml_attribute>
+        
+	</xml_attributes>
+
+	<xml_child_elements>
+
+		<xml_child_element name="tasks"/>
+
+        <xml_child_element name="description">
+            <description>
+                <p>
+                    Only when <scheduler_element name="show_job" attribute="what" value="description"/> is set.
+                <!--Nur wenn <scheduler_element name="show_job" attribute="what" value="description"/> angegeben worden ist.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="commands" directory="xml/">
+            <description>
+                <p>
+                    Only when <scheduler_element name="show_job" attribute="what" value="job_commands"/> is set.
+                <!--Nur wenn <scheduler_element name="show_job" attribute="what" value="job_commands"/> angegeben worden ist.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element directory="xml/" name="params">
+            <description>
+                <p>
+                    Only when <scheduler_element name="show_job" attribute="what" value="job_params"/> is set.
+                <!--Nur wenn <scheduler_element name="show_job" attribute="what" value="job_params"/> angegeben worden ist.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+				<xml_child_element name="lock.requestor"/>
+				<xml_child_element name="queued_tasks"/>
+						<xml_child_element name="history"/>
+				<xml_child_element name="order_queue"/>
+				<xml_child_element name="ERROR"/>
+
+		</xml_child_elements>
+
+	<description>
+    <p>
+    </p>
+	</description>
+	<example>
+		<pre>
+        </pre>
+	</example>
+</xml_element>

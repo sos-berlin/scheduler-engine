@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: modify_order.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name     = "remove_order" 
+             title    = ""
+             category = "Command"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-06-06 20:03:24 +0200 (Di, 06 Jun 2006) $">
+
+
+    <description>
+        <p>
+            Removes an order from the job chain.
+            Note that a job which is in the process of carrying out an order will not be affected by this command.
+        <!--Entfernt einen Auftrag aus einer Jobkette.
+            Ein gerade den Auftrag ausführender Job bleibt unbeinflusst.-->
+        </p>
+        <p>
+            The command uses the <scheduler_method class="Order" method="remove_from_job_chain"/> method.
+        <!--Das Kommando nutzt die Methode <scheduler_method class="Order" method="remove_from_job_chain"/>.-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="job_chain" type="name">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="order" type="id">
+            <description>
+                <p>
+                    The (alphanumerical) order identifier.
+                <!--Die Kennung des Auftrags (alphanumerisch).-->
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+
+    <xml_answer element="ok"/>
+    
+    
+    <example>
+        <pre>
+&lt;remove_order job_chain="my_jobchain" order="42" />
+<!--&lt;remove_order job_chain="meine_jobkette" order="42" />-->
+        </pre>
+    </example>
+</xml_element>    

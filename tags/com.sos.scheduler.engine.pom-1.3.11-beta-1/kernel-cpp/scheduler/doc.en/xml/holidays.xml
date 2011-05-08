@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: holidays.xml,v 1.5 2004/09/06 07:53:27 jz Exp $-->
+
+<!--         title    = "Feiertage"-->
+
+<xml_element name     = "holidays" 
+             title    = "Holidays"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-07-07 15:12:55 +0200 (Mo, 07 Jul 2008) $">
+
+    <xml_parent_elements>
+
+        <xml_parent_element name="config">
+            <description>
+                The holiday settings for all jobs.
+            <!--Zur Einstellung der Feiertage für alle Jobs.-->
+            </description>
+        </xml_parent_element>
+
+        <xml_parent_element name="run_time">
+            <description>
+                The holiday settings for a job.
+            <!--Zur Einstellung der Feiertage für einen Job.-->
+            </description>
+        </xml_parent_element>
+
+    </xml_parent_elements>
+
+    <xml_child_elements>
+
+        <xml_child_element name="weekdays">
+            <description>
+                Specifies days of the week - e.g. Saturday and Sunday - as holidays.
+                Empty <scheduler_element name="day"/> elements are specified as child elements.
+            <!--Legt Wochentage als Feiertage fest, zum Beispiel Samstag und Sonntag.
+                Als Kind-Elemente werden leere <scheduler_element name="day"/> angegeben.-->
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="holiday">
+            <description>
+                This element will be repeated every holiday.
+            <!--Für jeden Feiertag wird dieses Element wiederholt.-->
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="include">
+            <description>
+                Allows the Job Scheduler to use a file containing holiday information.
+                An XML document with the <scheduler_element name="holidays"/> root element is expected.
+                Should the path to the file not be specified absolutely, 
+                then the Job Scheduler will assume that the path is relative to the XML configuration file
+                (<scheduler_option name="config"/>).
+           <!--Lässt den Scheduler eine Datei mit Feiertagen verwenden.
+                Erwartet wird ein XML-Dokument mit dem Wurzelement <scheduler_element name="holidays"/>.
+                Wenn der Pfad der Datei nicht absolut ist, geht der Scheduler vom Verzeichnis der XML-Konfigurationsdatei aus
+                (<scheduler_option name="config"/>).-->
+            </description>
+        </xml_child_element>
+
+    </xml_child_elements>
+    
+    <description>
+        <code>&lt;holidays></code> defines the days on which the Job Scheduler should not run a job.
+    <!--<code>&lt;holidays></code> führt die Feiertage auf, an denen der Scheduler einen Job nicht laufen lassen soll.-->
+    </description>
+    
+    <example>
+        <pre>
+&lt;holidays>
+    &lt;holiday date="2004-12-24"/>
+    &lt;holiday date="2004-12-25"/>
+    &lt;holiday date="2004-12-26"/>
+    &lt;holiday date="2004-12-31"/>
+    &lt;include file="holidays-2007.xml"/>
+    &lt;include file="holidays-2008.xml"/>
+&lt;/holidays>
+        </pre>
+    </example>
+    
+</xml_element>

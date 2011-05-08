@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Spooler_program"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+<method name="Spooler_program">
+    <java>
+        <java.parameter name="parameter">
+            <com.type type="BSTR" array="true"/>
+        </java.parameter>
+
+        <java.result>
+            <java.result type="int"/>
+        </java.result>
+    </java>
+    
+    <description>
+        
+    </description>
+</method>
+
+<method name="main">
+    <java>
+        <java.parameter name="parameter">
+            <com.type type="BSTR" array="true"/>
+        </java.parameter>
+    </java>
+</method>
+
+<title>
+    Für den Java-Debugger
+</title>
+
+<description>
+    <scheduler_keyword keyword="Debugger"/>
+    <scheduler_keyword keyword="Eclipse"/>
+    
+    <p>
+        Startet den Scheduler über Java, 
+        so dass in Java geschriebene Jobs debuggt werden können (z.B. mit Eclipse).
+        Zu den Methoden siehe <a href="../javadoc/sos/spooler/Spooler_program.html">Javadoc</a>.
+    </p>
+    <p>
+        Der Scheduler wird als Windows-Applikation, nicht als Konsol-Programm gestartet. 
+        Ausgaben nach <code>stderr</code> gehen verloren.
+        <scheduler_option name="log-dir" value="*stderr"/> liefert keine Ausgabe.
+    </p>
+    <p>
+        Siehe <a href="../command_line.xml">Kommandozeile</a>.
+    </p>
+</description>
+
+<example>
+    <pre><span style="color: lightgrey">C:\></span>java -Djava.library.path=… -classpath …\sos.spooler.jar sos.spooler.Spooler_program configuration.scheduler -log-dir=c:\tmp\scheduler</pre>
+    
+    Mit <code>-Djava.library.path=…</code> geben Sie das Verzeichnis der <code>scheduler.dll</code> an, wenn es nicht bereits in <code>%PATH%</code> aufgeführt ist.
+</example>
+
+</api.class>

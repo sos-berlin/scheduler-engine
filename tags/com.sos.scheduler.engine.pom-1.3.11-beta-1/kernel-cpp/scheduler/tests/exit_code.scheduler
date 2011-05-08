@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config port="6360">
+        <security ignore_unknown_hosts="yes">
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes/>
+
+        <script language="javascript">
+            <![CDATA[
+{
+    // <copy_params> außerhalb von <commands on_exit_code="">:
+    
+    var cmd = "<start_job job='javascript'><params><copy_params from='task'/></params></start_job>";
+    var result = spooler.execute_xml( cmd );
+    
+    if( result.match( "\\<ERROR" ) )  spooler_log.info( "Ok: " + cmd + " ==> " + result );
+                                else  spooler_log.error( "Das sollte einen Fehler liefern: " + cmd + " ==> " + result );
+}
+
+
+function start_job( job_name, exit_code )
+{
+    var params = spooler.create_variable_set();
+    params.value( "exit_code" ) = "" + exit_code;
+    params.value( "a"         ) = "aaa";
+    spooler.job( job_name ).start( params );
+}
+
+start_job( "shell"     , "" );
+start_job( "javascript", "" );
+start_job( "javascript", 0 );
+start_job( "javascript", 1 );
+start_job( "javascript", 2 );
+start_job( "javascript", 3 );
+start_job( "javascript", "error" );   // Zum Schluss, weil der Job stoppt
+start_job( "java"      , 9 );
+            
+        ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="shell" timeout="1" ignore_signals="SIGINT SIGHUP 7">
+                <process file="/tmp/test.cmd"/>
+                
+                <commands on_exit_code="success">
+                    <show_state/>
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SUCCESS"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden) $PATH"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="error">
+                    <start_job job="following" at="  now  ">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                </commands>
+            </job>
+
+            <job name="javascript">
+                <script language="JavaScript">
+                    <![CDATA[
+
+new ActiveXObject( "hostware.global" ).sleep( 10 );
+
+spooler_log.info( 'order=' + ( spooler_job.order_queue? "yes" : "no" ) );
+
+var initial_exit_code = spooler_task.exit_code;
+
+var wished_exit_code = spooler_task.params( "exit_code" );
+
+switch( wished_exit_code )
+{
+    case "": 
+        break;
+        
+    case "error": 
+        spooler_log.error( "Ein Fehler" );
+        break;
+        
+    default: 
+    spooler_task.exit_code = wished_exit_code;
+}
+
+spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code=" + wished_exit_code + "  exit_code=" + spooler_task.exit_code );
+
+                    ]]>
+                </script>
+
+                <commands on_exit_code="success">
+                    <!-- Kommentar -->
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SUCCESS"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden) $PATH"/>
+                            <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                    <!--start_job job="gibsnich"/-->
+                </commands>
+
+                <commands on_exit_code="error">
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="3 7">
+                    <add_order job_chain="exit_code.scheduler" at="now">
+                        <params>
+                            <param name="param" value="3 7"/>
+                            <copy_params from="task"/>
+                            <param name="a"     value="aaa vom Auftrag"/>
+                        </params>
+                    </add_order>
+                </commands>
+            </job>
+
+
+            <job name="java">
+                <script java_class="spooler_job.My_job">
+                    <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        int    initial_exit_code = spooler_task.exit_code();
+        String wished_exit_code  = spooler_task.params().value( "exit_code" );
+
+        if( wished_exit_code.equals( "" ) )
+        {
+        }
+        else
+        if( wished_exit_code.equals( "error" ) )
+        {
+            spooler_log.error( "Ein Fehler" );
+        }
+        else
+        {
+            spooler_log.info( "wished_exit_code=\"" + wished_exit_code + "\"" );
+            spooler_task.set_exit_code( Integer.parseInt( wished_exit_code ) );
+        }
+
+        spooler_log.info( "initial_exit_code=" + initial_exit_code + "  wished_exit_code=" + wished_exit_code + "  exit_code=" + spooler_task.exit_code() );
+
+        return false;
+    }
+}
+                ]]>
+                </script>
+
+                <commands on_exit_code="9">
+                    <show_state/>
+                </commands>
+            </job>
+
+            
+            <job name="following">
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( "param=" + spooler_task.params( "param" ) + "   a=" + spooler_task.params( "a" ) );
+
+                    ]]>
+                </script>
+            </job>
+
+
+            <job name="order" order="yes">
+                <script language="JavaScript">
+                    <![CDATA[
+
+spooler_log.info( 'order=' + ( spooler_job.order_queue? "yes" : "no" ) );
+
+function spooler_process()
+{
+    spooler_log.info( "param=" + spooler_task.order.params( "param" ) + "   a=" + spooler_task.order.params( "a" ) );
+    spooler_task.end();
+    return true;
+}
+
+                    ]]>
+                </script>
+
+                <commands on_exit_code="success">
+                    <!-- Kommentar -->
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="SUCCESS"/>
+                            <param name="a"     value="aaa (sollte überschrieben werden)"/>
+                            <copy_params from="order"/>
+                            <param name="mein_parameter" value="mein Wert"/>
+                            <param name="mein_parameter2" value="mein Wert2"/>
+                            <copy_params from="task"/>
+                        </params>
+                    </start_job>
+                </commands>
+
+                <commands on_exit_code="error">
+                    <!-- Kommentar -->
+                    <start_job job="following">
+                        <params>
+                            <param name="param" value="ERROR"/>
+                            <copy_params from="order"/>
+                        </params>
+                    </start_job>
+                </commands>
+            </job>
+
+        </jobs>
+
+        <job_chains>
+            <job_chain name="exit_code.scheduler">
+                <job_chain_node state="begin" job="order"/>
+                <job_chain_node state="finished"/>
+            </job_chain>
+        </job_chains>
+    </config>
+</spooler>

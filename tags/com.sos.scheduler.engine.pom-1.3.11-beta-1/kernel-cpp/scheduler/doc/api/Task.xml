@@ -1,0 +1,1104 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Task"
+    object_name = "spooler_task"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="add_pid">
+        <title>
+            Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt
+        </title>
+
+        <com>
+            <com.parameter name="pid">
+                <com.type type="int"/>
+            </com.parameter>
+
+            <com.parameter name="timeout" optional="true">
+                <com.type type="VARIANT">
+                    <com.type type="BSTR"/>
+                    <com.type type="double"/>
+                    <com.type type="int"/>
+                </com.type>
+            </com.parameter>
+        </com>
+
+        <java>
+            <java.parameter name="pid">
+                <com.type type="int"/>
+            </java.parameter>
+        </java>
+
+        <java>
+            <java.parameter name="pid">
+                 <com.type type="int"/>
+                 <title>Die Kennung des Prozesses</title>
+            </java.parameter>
+
+            <java.parameter name="timeout_seconds">
+                <com.type type="double"/>
+                <title>Die Frist für den Prozess</title>
+                <description>
+                    <p>
+                        Der Scheduler bricht den Prozess nach der angegebenen Zeit ab, sollte er noch laufen.
+                    </p>
+                </description>
+            </java.parameter>
+        </java>
+
+        <description>
+            <p>
+                Mit dem Aufruf kann die Laufzeit von abhängigen Prozessen eingeschränkt werden.
+                Bei Task-Ende bricht der Scheduler noch laufende abhängigen Prozesse in jedem Fall ab.
+            </p>
+            <p>
+                Wenn der Scheduler einen Prozess abbricht, gibt es einen Eintrag ins Protokoll.
+                Die Task erfährt davon nichts.
+            </p>
+            <p>
+                Der Aufruf <scheduler_element name="kill_task"/> bricht alle mit <code>add_pid()</code> bekannt gemachten Prozesse ab.
+            </p>
+            <p>
+                Unter Unix kann eine Prozessgruppen-Id als negative pid übergeben werden.
+                Ein <code>kill</code> bricht dann die ganze Prozessgruppe ab.
+            </p>
+            <p>
+                Bei Ausführung auf einem entfernten Rechner mit <scheduler_element name="process_class" attribute="remote_scheduler"/>
+                wirkt die Frist nicht.
+            </p>
+        </description>
+        
+        <messages>
+            <message level="warn" code="SCHEDULER-849"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="remove_pid">
+        <com>
+            <com.parameter name="pid">
+                <com.type type="int"/>
+                <title>
+                    Kennung der Task, die nicht länger überwacht werden soll.
+                </title>
+            </com.parameter>
+        </com>
+
+        <title>
+            Gegenstück zu <code>add_pid()</code>
+        </title>
+
+        <description>
+            <p>
+                Es gibt keinen Fehler, wenn die Pid nicht mit <scheduler_method class="Task" name="remove_pid"/> hinzugefügt worden ist.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Task" method="add_pid"/>.
+            </p>
+        </description>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="call_me_again_when_locks_available">
+        <com>
+        </com>
+        
+        <title>
+            Wiederholt spooler_open() oder spooler_process(), sobald Sperren verfügbar
+        </title>
+
+        <description>
+            <p>
+                Veranlasst den Scheduler, 
+                nach erfolglosem
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/> oder
+                <scheduler_method class="Task" object="spooler_task" method="try_hold_lock_non_exclusive"/>
+                den Aufruf von
+                <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                <scheduler_method class="Job_impl" method="spooler_process"/>
+                zu wiederholen, sobald die angeforderten Sperren verfügbar sind.
+                Der Scheduler wiederholt dann den Aufruf mit gehaltenen Sperren,
+                so dass die erstgenannten Aufrufe Erfolg haben werden.
+            </p>
+            <p>
+                Nach dem Aufruf hat der Rückgabewert von
+                <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                <scheduler_method class="Job_impl" method="spooler_process"/>
+                (<code>true</code>/<code>false</code>) keine Wirkung.
+                Einen Auftrag 
+                <scheduler_method class="Task" object="spooler_task" property="order"/>
+                belässt der Scheduler in seinem Zustand.
+            </p>
+        </description>
+
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="create_subprocess">
+        <title>
+            Start eines überwachten Subprozesses
+        </title>
+
+        <com>
+            <com.parameter name="filename_and_arguments" optional="true">
+                <com.type type="VARIANT">
+                    <com.type type="BSTR"/>
+                    <com.type type="BSTR" array="true"/>
+                </com.type>
+            </com.parameter>
+
+            <com.result>
+                <com.type class="Subprocess" interface="Isubprocess"/>
+            </com.result>
+        </com>
+
+        <java>
+            <java.result>
+                <com.type class="Subprocess"/>
+            </java.result>
+        </java>
+
+        <java>
+            <java.parameter name="command_line">
+                 <com.type type="BSTR"/>
+            </java.parameter>
+
+            <java.result>
+                <com.type class="Subprocess"/>
+            </java.result>
+        </java>
+
+        <java>
+            <java.parameter name="filename_and_arguments">
+                <com.type type="BSTR" array="true"/>
+            </java.parameter>
+
+            <java.result>
+                <com.type class="Subprocess"/>
+            </java.result>
+        </java>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="changed_directories" access="read">
+        <com>
+            <com.result name="directories">
+                <com.type type="BSTR"/>
+
+                <description>
+                    <p>
+                        Die Verzeichnisnamen sind durch Semikolon getrennt.
+                    </p>
+                    <p>
+                        <code>""</code>, wenn kein Verzeichnis geändert ist.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Die Verzeichnisse, deren Änderung den Start der Task veranlasst haben
+        </title>
+
+        <description>
+            <p>
+                Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>,
+                <scheduler_method class="Task" property="trigger_files"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="warn" code="SCHEDULER-976"/>
+        </messages>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="end">
+        <com>
+        </com>
+
+        <title>
+            Beendet die Task
+        </title>
+
+        <description>
+            <p>
+                Der Scheduler ruft nicht mehr <scheduler_method class="Job_impl" method="spooler_process"/> auf.
+                Statt dessen ruft er <scheduler_method class="Job_impl" method="spooler_close"/> auf.
+            </p>
+            <p>
+                Der Aufruf kann verwendet werden,
+                um beim Task-Ende den Versand des Task-Protokolls zu veranlassen,
+                siehe <scheduler_method class="Log"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="info" code="SCHEDULER-815"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="delay_spooler_process" access="write">
+        <com>
+            <com.result name="seconds_or_hhmm_ss">
+                <com.type type="VARIANT">
+                    <com.type type="BSTR"/>
+                    <com.type type="double"/>
+                    <com.type type="int"/>
+                </com.type>
+            </com.result>
+        </com>
+
+        <java>
+            <java.result>
+                <com.type type="double"/>
+            </java.result>
+        </java>
+
+        <java>
+            <java.result name="hhmm_ss">
+                <com.type type="BSTR"/>
+            </java.result>
+        </java>
+
+        <title>
+            Verzögert den nächsten Aufruf von <code>spooler_process()</code>
+        </title>
+        
+        <description>
+            <p>
+                Wirkt nur in <scheduler_method class="Job_impl" method="spooler_process"/>.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="error">
+        <com access="write">
+            <com.result>
+                <com.type type="VARIANT">
+                    <com.type type="BSTR"/>
+                    <!--com.type accepted_type="Ierror"/-->
+                </com.type>
+            </com.result>
+        </com>
+
+        <com access="read">
+            <com.result>
+                <com.type class="Error" interface="Ierror"/>
+            </com.result>
+        </com>
+
+        <java access="write">
+            <java.result>
+                <com.type type="BSTR"/>
+            </java.result>
+        </java>
+
+        <java access="read">
+            <java.result>
+                <com.type class="Error"/>
+            </java.result>
+        </java>
+
+        <title>
+            Setzt einen Fehler und stoppt den Job
+        </title>
+
+        <description>
+            <p>
+                Der lesende Aufruf liefert den letzten Fehler dieser Task.
+                Wenn kein Fehler vorliegt, wird ein <scheduler_method class="Error"/>-Objekt zurückgeliefert,
+                dessen Eigenschaft <code>is_error </code> <code>false</code> liefert.
+            </p>
+            <p>
+                Sie können eine Fehlermeldung auch mit
+                <scheduler_method class="Log" object="spooler_log" method="error"/> ins Task-Protokoll schreiben.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="exit_code">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Exit-Code
+        </title>
+
+        <description>
+            <p>
+                Der Exit-Code ist anfänglich 0 und 
+                wird bei einem Fehler auf 1 gesetzt.
+                Das ist, wenn der Scheduler eine Zeile mit <code>[ERROR]</code> ins Task-Protokoll schreibt:
+            </p>
+            <ul>
+                <li>
+                    Aufruf von <scheduler_method class="Log" object="spooler_log" method="error"/>
+                </li>
+                <li>
+                    Setzen von <scheduler_method class="Task" object="spooler_task" property="error"/>
+                </li>
+                <li>
+                    Das Skript liefert eine Exception.
+                </li>
+            </ul>
+            <p>
+                Der Job kann anschließend, z.B. in <scheduler_method class="Job_impl" method="spooler_on_error"/>,
+                den <scheduler_method class="Task" object="spooler_task" property="exit_code"/> neu setzen.
+            </p>
+            <p>
+                Der Exit-Code des (Betriebssystem-)Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen,
+                im Gegensatz zu Jobs mit <scheduler_element name="process"/> oder
+                <scheduler_element name="script" attribute="language" value="shell"/>.
+            </p>
+            <!--ul>
+                <li>
+                    Jobs mit <scheduler_element name="process"/> oder 
+                    <scheduler_element name="script" attribute="language" value="shell"/>:
+                    Der Exit-Code des Prozesses ist der Exit-Code der (Scheduler-)Task.
+                    Wenn der Prozess mit Signal endet (nur Unix), wird der negative Wert des Signals zum Exit-Code.
+                </li>
+                <li>
+                    Andere Jobs, also solche, die Zugriff auf die API haben:
+                    Der Exit-Codes des Prozesses, der die Task ausführt, ist ohne Belang und wird nicht übernommen.
+                </li>
+            </ul-->
+            <!--p>
+                Wenn der Prozess der Task endet mit Exit-Code ungleich 0 (Fehler <scheduler_message code="SCHEDULER-280"/>).
+                Der Scheduler setzt <scheduler_method class="Task" object="spooler_task" property="exit_code"/><code>=1</code>.
+                Das ist unter Windows der Fall, wenn der Prozess mit
+                <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/terminateprocess.asp"><code>TerminateProcess(,</code><i class="small">exitcode</i><code>)</code></a>
+                abgebrochen wird.
+            </p-->
+            <!--p>
+                Außerdem setzt der Scheduler den Exit-Code, wenn der Prozess, in dem die Task läuft, mit Fehler endet.
+            </p-->
+            <!--ul>
+                <li>
+                    Nur Unix: Wenn der Prozess mit einem Signal endet, übernimmt der Scheduler den negativen Wert des Signals als Exit-Code.
+                </li>
+                <!- -li>
+                    <!- -Wenn der Prozess mit einem Exit-Code ungleich 0 ist, übernimmt der Scheduler den Exit-Code.- ->
+                    Der Exit-Code des Prozesses einer API-Task wird dagegen nicht übernommen, sondern nur mit <scheduler_message code="SCHEDULER-280"/> protokolliert.
+                    Das ist unter Windows der Fall, wenn der Prozess mit
+                    <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/terminateprocess.asp"><code>TerminateProcess(,</code><i class="small">exitcode</i><code>)</code></a>
+                    abgebrochen wird.
+                </li- ->
+                <!- -li>
+                    Der Exit-Code einer Nicht-API-Task 
+                    (<scheduler_element name="process"/> oder <scheduler_element name="script" language="shell"/>, 
+                    wo diese Methode allerdings nicht benutzt werden kann) wird übernommen,
+                    wenn er nicht 0 ist.
+                </li- ->
+            </ul-->
+            <p>
+                Der Exit-Code entscheidet über die anschließend auszuführenden Kommandos.
+                Siehe hierzu <code>&lt;job></code><scheduler_element name="commands" attribute="on_exit_code"/>.
+            </p>
+            <p>
+                Der Exit-Code hat keinen Einfluss darauf, ob der Job gestoppt wird
+                (eine Fehlermeldung der Task lässt den Job stoppen).
+            </p>
+            <!--p>
+                Für Tasks ohne API siehe <scheduler_element name="process"/>.
+            </p-->
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_log.error( "This call of spooler_log.error() sets the exit code to 1" );
+spooler_task.exit_code = 0;   // Reset the exit code</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="history_field" access="write">
+        <com>
+            <com.parameter name="name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.result name="value">
+                <com.type type="VARIANT"/>
+            </com.result>
+        </com>
+
+        <title>
+            Ein Feld in der Task-Historie
+        </title>
+
+        <description>
+            Die Datenbanktabelle (s. <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_history_table"/>
+            muss eine Spalte mit dem Namen haben
+            und diese Spalte muss in der Datei
+            <scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/>
+            deklariert sein.
+        </description>
+        
+        <example programming_language="javascript">
+            <pre>spooler_task.history_field( "extra" ) = 4711;</pre>
+        </example>
+
+        <example programming_language="perl">
+            <pre>$spooler_task->LetProperty( 'history_field', 'extra', 4711 );</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="id" access="read">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Die Task-Kennung
+        </title>
+
+        <description>
+            <p>
+                Jede Task hat eine Scheduler-weit eindeutige numerische Kennung.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="job" access="read">
+        <com>
+            <com.result>
+                <com.type class="Job" interface="Ijob"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Job, zu dem die Task gehört
+        </title>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="params" access="read">
+        <com>
+            <com.result>
+                <com.type class="Variable_set"/>
+                <description>
+                    <code>!= </code><api.null/>
+                </description>
+            </com.result>
+
+        </com>
+
+        <title>
+            Die Parameter der Task
+        </title>
+
+        <description>
+            <p>
+                Eine Task kann Parameter haben.
+                Die Parameter können gesetzt werden mit
+            </p>
+            <ul>
+                <li>
+                    In der Konfigurationsdatei im Element <scheduler_element name="job"/> mit <scheduler_element name="params"/>,
+                </li>
+                <li>
+                    <scheduler_method class="Job" method="start"/> und
+                </li>
+                <li>
+                    <scheduler_element name="start_job"/>.
+                </li>
+            </ul>
+        </description>
+
+
+        <example programming_language="java">
+            <pre>String value = spooler_task.params().var( "parameter3" );</pre>
+        </example>
+
+        <example programming_language="java">
+        <pre>Variable_set parameters = spooler_task.params();
+if( parameters.count() > 0 )  spooler_log.info( "Parameters given" );
+
+String value1 = parameters.var( "parameter1" );   // "", wenn die Variable nicht vorhanden ist
+String value2 = parameters.var( "parameter2" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>var value = spooler_task.params.value( "parameter3" );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>var parameters = spooler_task.params;
+if( parameters.count > 0 )  spooler_log.info( "Parameters given" );
+
+var value1 = parameters.value( "parameter1" );
+var value2 = parameters.value( "parameter2" );</pre>
+        </example>
+
+        <example programming_language="perl">
+            <pre>my $value = $spooler_task->params->var( "parameter3" );
+
+my $parameters = $spooler_task->params;
+my $value1 = $parameters->var( "parameter1" );
+my $value2 = $parameters->var( "parameter2" );</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="priority">
+        <com>
+            <com.result>
+                <com.type type="int"/>
+            </com.result>
+        </com>
+
+        <title>
+            Priorität der laufenden Task
+        </title>
+
+        <description>
+            <p>
+                Unix: Die höchste Priorität ist -20, die niedrigste 20.
+                Üblicherweise kann die Priorität nur gesenkt, nicht erhöht werden.
+            </p>
+            <p>
+                Windows kennt die Prioritätsklassen
+                4 <code>"idle"</code>,
+                6 <code>"below_normal"</code>,
+                8 <code>"normal"</code>,
+                10 <code>"above_normal"</code> und
+                13 <code>"high"</code>
+                (andere Werte werden abgerundet).
+                Siehe auch <scheduler_method class="Task" property="priority_class"/>.
+            </p>
+            <p>
+                Wenn die Priorität nicht gesetzt werden kann, führt das nicht zu einem Fehler.
+            </p>
+            <p>
+                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
+            </p>
+            <p>
+                Die Priorität kann betriebsystem-unabhängig eingestellt werden mit
+                <scheduler_method class="Task" property="priority_class"/>.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_task.priority = +5;    // Unix: Priorität etwas verschlechtern</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="priority_class">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <title>
+            Prioritätsklasse der laufenden Task
+        </title>
+
+        <description>
+            <p>
+                Gesetzt werden können folgende Prioritätsklassen, die verschiedenen Prioritäten unter Windows und Unix entsprechen:
+            </p>
+            
+            <table cellspacing="0" cellpadding="0" style="margin-top: 1em; margin-left: 3ex">
+                <tr>
+                    <td style="border-bottom: black 1pt solid">Prioritätsklasse</td>
+                    <td style="border-bottom: black 1pt solid; padding-left: 2ex">Windows</td>
+                    <td style="border-bottom: black 1pt solid; padding-left: 2ex">Unix</td>
+                </tr>
+                <tr>
+                    <td><code>"idle"</code></td>
+                    <td style="padding-left: 2ex; text-align: right">4</td>
+                    <td style="padding-left: 2ex; text-align: right">16</td>
+                </tr>
+                <tr>
+                    <td><code>"below_normal"</code></td>
+                    <td style="padding-left: 2ex; text-align: right">6</td>
+                    <td style="padding-left: 2ex; text-align: right">6</td>
+                </tr>
+                <tr>
+                    <td><code>"normal"</code></td>
+                    <td style="padding-left: 2ex; text-align: right">8</td>
+                    <td style="padding-left: 2ex; text-align: right">0</td>
+                </tr>
+                <tr>
+                    <td><code>"above_normal"</code></td>
+                    <td style="padding-left: 2ex; text-align: right">10</td>
+                    <td style="padding-left: 2ex; text-align: right">-6</td>
+                </tr>
+                <tr>
+                    <td><code>"high"</code></td>
+                    <td style="padding-left: 2ex; text-align: right">13</td>
+                    <td style="padding-left: 2ex; text-align: right">-16</td>
+                </tr>
+            </table>
+            <p>
+                Wenn die Priorität nicht gesetzt werden kann, z.B. wegen mangelnden Rechts, führt das nicht zu einem Fehler.
+                Dagegen führt das Setzen einer nicht hier aufgeführten Prioritätsklasse zu einem Fehler.
+            </p>
+            <p>
+                Ein Prozess mit hoher Priorität kann Ihren Rechner blockieren.
+            </p>
+            <p>
+                Siehe auch
+                <scheduler_method class="Task" property="priority"/>,
+                <scheduler_method class="Subprocess" property="priority_class"/> und
+                <a href="http://msdn.microsoft.com/library/en-us/dllproc/base/scheduling_priorities.asp">Microsoft® Windows® Scheduling Priorities</a>.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre>spooler_task.priority_class = "below_normal";</pre>
+        </example>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="repeat" access="write">
+        <com>
+            <com.result>
+                <com.type type="double" parameter_name="seconds"/>
+            </com.result>
+        </com>
+
+        <title>
+            Startet erneut eine Task nach der eingestellten Zeit
+        </title>
+
+        <description>
+            <p>
+                (Diese Methode gehört eigentlich in die Klasse <scheduler_method class="Job"/>.
+                Sie hat nichts mit der gerade laufenden Task zu tun.)
+            </p>
+            <p>
+                Wenn nach Ablauf der angegebenen Zeit keine Task des Jobs läuft, startet der Scheduler eine Task.
+                Dabei wird die <scheduler_element name="run_time"/> berücksichtigt.
+                <scheduler_element name="period" attribute="repeat"/> der aktuellen Periode wird vorläufig außer Kraft gesetzt.
+            </p>
+            <p>
+                <scheduler_method class="Job" property="delay_after_error"/> hat Vorrang,
+                wenn die Task einen Fehler liefert.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="order" access="read">
+        <com>
+            <com.result>
+                <com.type class="Order"/>
+                <description>
+                    <api.null/>, wenn kein Auftrag vorliegt.
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Der zu verarbeitende Auftrag
+        </title>
+
+        <example programming_language="java">
+            <pre>Order order = spooler_task.order();
+
+spooler_log.info( "order.id=" + order.id() + ", order.title=" + order.title() );</pre>
+        </example>
+
+        <example programming_language="javascript">
+            <pre>var order = spooler_task.order;
+
+spooler_log.info( "order.id=" + order.id + ", order.title=" + order.title );</pre>
+        </example>
+
+        <example programming_language="perl">
+            <pre>my $order = spooler_task.order();
+
+$spooler_log->info( 'order.id=' . $order->id . ', order.title=' . $order->title );</pre>
+        </example>
+
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="stdout_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        <code>""</code>, wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Der Pfadname der <code>stdout</code>-Ausgabe der Task
+        </title>
+
+        <description>
+            <p>
+                Der Text in <code>stdout</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="stdout_text" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        <code>""</code>, wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Der bisher vom Prozess der Task nach <code>stdout</code> geschriebene Text
+        </title>
+
+        <description>
+            <p>
+                Der Text in <code>stdout</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="stderr_path" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        <code>""</code>, wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Der Pfadname der <code>stderr</code>-Ausgabe der Task
+        </title>
+
+        <description>
+            <p>
+                Der Text in <code>stderr</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="stderr_text" access="read">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+                <description>
+                    <p>
+                        <code>""</code>, wenn die Task nicht in einem separaten Prozess <scheduler_element name="process_classes"/> läuft.
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Der bisher vom Prozess der Task nach <code>stderr</code> geschriebene Text
+        </title>
+
+        <description>
+            <p>
+                Der Text in <code>stderr</code> wird derzeit im Zeichensatz ISO-8859-1 interpretiert.
+            </p>
+        </description>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="trigger_files" access="read">
+        <com>
+            <com.result name="file paths">
+                <com.type type="BSTR"/>
+
+                <description>
+                    <p>
+                        Die Dateipfade durch Semikolon getrennt.
+                    </p>
+                    <p>
+                        <code>""</code> sonst
+                    </p>
+                </description>
+            </com.result>
+        </com>
+
+        <title>
+            Pfade der Dateien in mit regex überwachten Verzeichnissen
+        </title>
+
+        <description>
+            <p>
+                Liefert die Pfade der Dateien aus überwachten Verzeichnissen
+                (<scheduler_method class="Job" method="start_when_directory_changed"/> oder 
+                <scheduler_element name="start_when_directory_changed"/>)
+                zum Zeitpunkt des Starts der Task.
+                Nur die Verzeichnisse, für die ein Regulärer Ausdruck (<code>regex</code>) angegeben ist,
+                werden berücksichtigt.
+            </p>
+            <p>
+                Die Pfade werden aus dem Verzeichnispfad, wie er in
+                <scheduler_method class="Job" method="start_when_directory_changed"/> oder
+                <scheduler_element name="start_when_directory_changed"/>
+                angegeben ist und dem Dateinamen zusammengesetzt.
+            </p>
+            <p>
+                Nicht-API-Jobs (<scheduler_element name="process"/> und <scheduler_element name="script" attribute="language" value="shell"/>)
+                steht der Inhalt von
+                <scheduler_method class="Task" property="trigger_files"/>
+                in der Umgebungsvariablen <code>SCHEDULER_TASK_TRIGGER_FILES</code> zur Verfügung.
+            </p>
+            <p>
+                Siehe <scheduler_method class="Job" method="start_when_directory_changed"/>,
+                <scheduler_method class="Task" method="changed_directories"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="warn" code="SCHEDULER-975"/>
+        </messages>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="try_hold_lock">
+        <title>
+            Versucht, eine Sperre zu halten
+        </title>
+
+        <com>
+            <com.result name="success">
+                <com.type type="boolean"/>
+                <description>
+                    <code>true</code>, wenn die Task die Sperre hält.
+                </description>
+            </com.result>
+            
+            <com.parameter name="lock_path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+
+        <description>
+            <p>
+                <code>try_lock_hold()</code> versucht, die angegebene Sperre (<scheduler_method class="Lock"/>) zu halten,
+                und kann aufgerufen werden
+            </p>
+            <ul>
+                <li>
+                    in <scheduler_method class="Job_impl" method="spooler_open"/>:
+                    die Sperre wird für die Task gehalten und erst nach Beendigung freigegeben,
+                </li>
+                <li>
+                    in <scheduler_method class="Job_impl" method="spooler_process"/>:
+                    die Sperre wird für nur für diesen Jobschritt gehalten und
+                    nach dessen Beendigung freigegeben, also beim Verlassen von <code>spooler_process()</code>.
+                </li>
+            </ul>
+            <p>
+                Wenn die Sperre nicht verfügbar ist, ein Aufruf also <code>false</code> liefert,
+                kann entweder
+            </p>
+            <ul>
+                <li>
+                    mit <scheduler_method class="Task" object="spooler_task" method="call_me_again_when_locks_available"/>
+                    der Scheduler veranlasst werden, den Aufruf
+                    <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                    <scheduler_method class="Job_impl" method="spooler_process"/>
+                    zu wiederholen, 
+                    sobald die Sperren verfügbar sind, oder
+                </li>
+                <li>
+                    <scheduler_method class="Job_impl" method="spooler_open"/> bzw.
+                    <scheduler_method class="Job_impl" method="spooler_process"/>
+                    ohne vorgenannten Aufruf mit <code>false</code> beendet werden, 
+                    mit der üblichen Wirkung,
+                </li>
+                <li>
+                    aber nicht mit <code>true</code> beendet werden,
+                    das wird als Fehler angesehen 
+                    und führt zur Warnung <scheduler_message code="SCHEDULER-469"/>.
+                </li>
+            </ul>
+            <p>
+                Siehe auch <scheduler_element name="lock.use"/>.
+            </p>
+        </description>
+
+        <example programming_language="javascript">
+            <pre><![CDATA[function spooler_process() 
+{
+    var result = false;
+    
+    if( spooler_task.try_hold_lock( "Georgien" )  &&
+        spooler_task.try_hold_lock_non_exlusive( "Venezuela" ) )
+    {
+        // Task is holding the two locks. Insert processing code here.
+        result = ...
+    }
+    else
+    {
+        spooler_task.call_me_again_when_locks_available();
+    }
+    
+    return result;
+}]]></pre>
+        </example>
+        
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+            <message level="warn"  code="SCHEDULER-469"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="try_hold_lock_non_exclusive">
+        <title>
+            Versucht, eine Sperre nicht-exklusiv zu halten
+        </title>
+
+        <com>
+            <com.result name="success">
+                <com.type type="boolean"/>
+                <description>
+                    <code>true</code>, wenn die Task die Sperre hält.
+                </description>
+            </com.result>
+
+            <com.parameter name="lock_path">
+                <com.type type="BSTR"/>
+            </com.parameter>
+        </com>
+
+        <description>
+            <p>
+                Es gelten dieselben Bedingungen wie für <scheduler_method class="Task" object="spooler_task" method="try_hold_lock"/>.
+            </p>
+            <p>
+                Siehe auch <scheduler_element name="lock.use" attribute="exclusive" value="no"/>.
+            </p>
+        </description>
+
+        <messages>
+            <message level="error" code="SCHEDULER-468"/>
+            <message level="warn"  code="SCHEDULER-469"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Webdienst, der der Task zugeordnet ist
+        </title>
+        
+        <description>
+            <p>
+                Wenn die Task keinem Webdienst zugeordnet ist, 
+                liefert der Aufruf eine Exception.
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Task" property="web_service_or_null"/>.
+            </p>
+        </description>
+        
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="web_service_or_null" access="read">
+        <com>
+            <com.result>
+                <com.type class="Web_service"/>
+            </com.result>
+        </com>
+
+        <title>
+            Der Webdienst, der der Task zugeordnet ist, oder <api.null/>.
+        </title>
+        
+        <description>
+            <p>
+                Siehe auch <scheduler_method class="Task" property="web_service"/>.
+            </p>
+        </description>
+        
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+            Eine Task ist eine laufende Instanz eines Jobs.
+        </p>
+        <p>
+            Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
+        </p>
+    </description>
+
+    <description programming_language="java">
+        <p>
+            Implementiert wird eine Task mit <scheduler_method class="Job_impl"/>.
+        </p>
+    </description>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+</api.class>

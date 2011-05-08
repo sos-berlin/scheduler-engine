@@ -1,0 +1,12 @@
+<holidays xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+>
+    <holiday date="2008-03-21"/>
+    <holiday date="2008-03-24"/>
+    <holiday date="2008-05-01"/>
+    <holiday date="2008-05-12"/>
+    <holiday date="2008-10-01"/>
+    <holiday date="2008-12-24"/>
+    <holiday date="2008-12-25"/>
+    <holiday date="2008-12-26"/>
+    <holiday date="2008-12-31"/>
+</holidays>

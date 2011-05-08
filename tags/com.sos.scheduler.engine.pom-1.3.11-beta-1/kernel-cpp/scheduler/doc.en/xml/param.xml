@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: param.xml,v 1.3 2004/09/06 07:53:28 jz Exp $-->
+
+<!--         title    = "Ein Parameter"-->
+
+<xml_element name     = "param" 
+             title    = "Single Parameters"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-07-08 10:14:29 +0200 (Di, 08 Jul 2008) $">
+
+    <description>
+        <p>
+            See <scheduler_element name="params" />.
+        <!--Siehe <scheduler_element name="params" />.-->
+        </p>
+        <p>
+            Defines the individual parameters for the Job Scheduler, a job or an order.
+            Parameters can be overwritten and extended whilst a job or order is being executed.
+        <!--Bestimmt einen einzelnen Parameter für den Scheduler, einen Job oder für einen Auftrag.
+            Die Parameter können zur Laufzeit überschrieben und erweitert werden.-->
+        </p>
+        <p>
+            Job Scheduler parameters can be called using the 
+            <scheduler_method class="Spooler" object="spooler" method="variables"/> method.
+        <!--Scheduler-Parameter können mit der Methode <scheduler_method class="Spooler" object="spooler" method="variables"/> abgerufen werden.-->
+        </p>
+        <p>
+            Job parameters can be called using the <scheduler_method class="Task" method="params" /> method.
+        <!--Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.-->
+        </p>
+        <p>
+            The parameters of an order can be called using the <scheduler_method class="Order" method="params" /> method.
+        <!--Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="params" /> abgerufen werden.-->
+        </p>
+        <p>
+            See also the <scheduler_method class="Variable_set" /> class.
+        <!--Siehe auch die Klasse <scheduler_method class="Variable_set" />.-->
+        </p>
+    </description>
+
+    <xml_parent_elements>
+        <xml_parent_element name="params">
+        </xml_parent_element>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="name" title="Unique Name"/>
+    <!--<xml_attribute name="name" title="Eindeutiger Name"/>-->
+        <xml_attribute name="value"/>
+    </xml_attributes>
+        
+    
+    <behavior_with_xml_element element="base" complete_attribute="name"/>
+    
+</xml_element>

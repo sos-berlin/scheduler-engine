@@ -1,0 +1,45 @@
+$Id$
+
+VERSION 1.5.6006  2005-01-11
+------------------------------------------------
+
+spooler_job.delay_after_error(1) = 3   funktioniert jetzt.
+
+
+
+VERSION 1.5.6009  2005-03-08
+------------------------------------------------
+
+Javascript-Date kann an COM übergeben werden und wird nach Variant-Date gewandelt.
+Für die Konvertierung wird die lokale Zeit verwendet (Variant-Date kennt keine Zeitzone).
+
+Microsofts JScript scheint hier Text zu übergeben, das wäre also eine Inkompatibilität.
+
+
+
+new ActiveXObject( "hostware.File" ) ist möglich, auch unter Linux.
+
+
+
+NEUES PROGRAMM JAVASCRIPT:
+
+javascript -include=DATEINAME
+           -script="SCRIPT"
+           DATEINAME | -
+           -i | -interactive
+           
+DATEINAME bezeichnet eine Javascript-Datei.
+-include und -script können wiederholt werden.
+Die Option - lässt javascript von stdin lesen.
+-interactive führt im Dialog einzelne Anweisungen aus (zum Testen).
+
+javascript ganz ohne jeden Parameter liest von stdin. Wenn stdin ein Terminal ist, mit -interactive.
+
+
+
+VERSION 1.5.6010  2005-04-04
+--------------------------------
+
+Absturz bei Konvertierung von double behoben.
+
+           

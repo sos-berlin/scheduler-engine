@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- $Id: Error.xml 3921 2005-09-20 18:30:46Z jz $ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Error"
+    object_name = "error"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-01-31 12:42:37 +0100 (Di, 31 Jan 2006) $"
+>
+
+<property name="is_error" access="read">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+
+    <title>
+        <code>true</code>, should an error have occurred
+    <!--<code>true</code>, wenn ein Fehler vorliegt-->
+    </title>
+
+</property>
+
+
+<property name="code" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The error code
+    <!--Der Fehlercode-->
+    </title>
+</property>
+
+
+<property name="text" access="read">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        The error text (with error code)
+    <!--Fehlertext (mit Fehlercode)-->
+    </title>
+</property>
+
+</api.class>

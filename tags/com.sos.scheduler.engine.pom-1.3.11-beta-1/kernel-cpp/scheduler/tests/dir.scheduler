@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config 
+        main_scheduler="lillerud.zschimmer:6310"
+        port="6360"
+    >
+
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        
+        <process_classes/>
+
+        <!--script language="javascript">
+    <![CDATA[
+
+for( var i = 1; i <= 100; i++ )
+{
+    spooler.execute_xml( 
+            '<job name="shell' + i + '">' + 
+                '<process file="/tmp/test.cmd"/>' +
+                '<start_when_directory_changed directory="/tmp/z/' + i + '" regex="."/>' +
+                '<start_when_directory_changed directory="/tmp/z/' + i + '/z" regex="."/>' +
+            '</job>' 
+      );
+}
+        
+        
+        ]]></script-->
+
+        <jobs>
+
+            <job name="shell">
+                <params>
+                    <param name="ZWEI" value="dwa"/>
+                </params>
+                <process file="/tmp/test.cmd" param="trigger_files=${SCHEDULER_TASK_TRIGGER_FILES} $TEST $ZWEI">
+                    <environment>
+                        <variable name="TEST" value="test"/>
+                    </environment>
+                </process>
+                <start_when_directory_changed directory="/tmp/z/" regex="."/>
+            </job>
+
+            <!--
+        <job name="java">
+
+            <script java_class="spooler_job.Test">
+
+<![CDATA[
+
+package spooler_job;
+                     
+import java.util.*;                     
+import sos.spooler.*;
+
+public class Test extends sos.spooler.Job_impl
+{
+    LinkedList directories;
+    
+    public boolean spooler_init()
+    {
+        spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
+
+        String[] watched_directories = { "/tmp/1", "/tmp/2" };
+        String[] changed_directories = spooler_task.changed_directories().length() > 0? java.util.regex.Pattern.compile( ";" ).split( spooler_task.changed_directories() )
+                                                                                      : new String[0];
+        
+        directories = new LinkedList();
+                                  
+        for( int i = 0; i < watched_directories.length; i++ )
+        {                   
+            boolean signaled = false;
+            
+            for( int j = 0; j < changed_directories.length; j++ )
+            {
+                if( changed_directories[j].equals( watched_directories[i] ) )  { signaled = true; break; }
+            }
+            
+            if( signaled  ||  changed_directories.length == 0 )
+            {
+                spooler_job.start_when_directory_changed( watched_directories[i] );
+                directories.add( watched_directories[i] );
+            }
+        }
+        
+        //spooler_job.start_when_directory_changed( "/tmp" );
+        //spooler_job.start_when_directory_changed( "/" );
+        
+        return true;
+    }
+        
+
+    public boolean spooler_process()
+    {     
+        for( Iterator it = directories.listIterator(); it.hasNext(); )
+        {
+            spooler_log.info( "directory=" + (String)it.next() );
+        }
+        
+        return false;
+    }
+}
+
+]]>
+            </script>
+
+            <run_time once="no"/>
+        </job>
+-->        
+
+
+        <job name="import">
+
+               <script java_class="spooler_job.Import"><![CDATA[
+
+                    package spooler_job;
+                                         
+                    import java.io.File;
+                    import sos.spooler.*;
+
+                    public class Import  extends sos.spooler.Job_impl
+                    {
+                        String[]  paths;
+                        int       index;
+
+
+                        public boolean spooler_open()
+                        {
+                            spooler_log.info( "changed_directories=" + spooler_task.changed_directories() );
+                            spooler_log.info( "trigger_files=" + spooler_task.trigger_files() );
+
+                            paths = spooler_task.trigger_files().split( ";" );
+                            index = 0;
+                            return index < paths.length;
+                        }
+                            
+
+                        public boolean spooler_process()
+                        {     
+                            File file = new File( paths[ index++ ] );
+                            spooler_log.info( "Processing file " + file );
+                            file.delete();
+                            return index < paths.length;
+                        }
+                    }
+                ]]></script>
+
+                                                         
+            
+            <start_when_directory_changed directory="/tmp/outbound.dbkk" regex="^.*(\.pdf|\.xml)$"/>
+
+            <delay_after_error error_count="1" delay="30"/>            
+
+            <run_time/>
+        </job>
+
+        <job name="import2">
+            <script language="javascript">
+    <![CDATA[ 
+
+function spooler_init()
+{
+    spooler_log.info( "changed_directories=" + spooler_task.changed_directories );
+    
+    try
+    {
+        spooler_job.start_when_directory_changed( "/tmp/1", "a*" );
+    }
+    catch( x ) 
+    { 
+        spooler_log.warn( "" + x );  
+        return false; 
+    }
+    
+    return true;
+}
+
+function spooler_process()
+{
+    spooler_log.info( "SPOOLER_PROCESS" );
+    return false;
+}
+            
+            ]]></script>
+            <run_time once="yes"/>
+        </job>
+
+    </jobs>
+
+  </config>
+</spooler>

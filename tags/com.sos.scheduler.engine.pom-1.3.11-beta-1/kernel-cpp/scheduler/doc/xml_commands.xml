@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+
+<!--$Id$-->
+
+<xml_commands
+    title    = "XML-Kommandos"
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$"
+>
+    <description>
+        <p>
+            Die Kommandos können über TCP (z.B. telnet), über HTTP
+            und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send-cmd"/>
+            gegeben werden.
+        </p>
+
+        <p>&#160;</p>
+    </description>
+
+    <scheduler_commands>
+        <scheduler_command name="add_jobs"             answer="ok"/>
+        <scheduler_command name="add_order"            answer="ok"            answer2="order"/>
+        <scheduler_command name="job_chain.modify"     answer="ok"/>
+        <scheduler_command name="job_chain_node.modify" answer="ok"/>
+        <scheduler_command name="kill_task"            answer="ok"/>
+        <scheduler_command name="licence.use"          answer="ok"/>
+        <scheduler_command name="lock"                 answer="ok"/>
+        <scheduler_command name="lock.remove"          answer="ok"/>
+        <scheduler_command name="modify_job"           answer="ok"/>
+        <scheduler_command name="modify_hot_folder"    answer="ok"/>
+        <scheduler_command name="modify_order"         answer="ok"/>
+        <scheduler_command name="modify_spooler"       answer="ok"/>
+        <scheduler_command name="param"                answer="ok"/>
+        <scheduler_command name="param.get"            answer="param"/>
+        <scheduler_command name="params"               answer="ok"/>
+        <scheduler_command name="params.get"           answer="params"/>
+        <scheduler_command name="process_class"        answer="ok"/>
+        <scheduler_command name="process_class.remove" answer="ok"/>
+        <scheduler_command name="remove_job_chain"     answer="ok"/>
+        <scheduler_command name="remove_order"         answer="ok"/>
+        <scheduler_command name="schedule.remove"      answer="ok"/>
+        <scheduler_command name="scheduler_log.log_categories.reset" answer="ok"/>
+        <scheduler_command name="scheduler_log.log_categories.set"   answer="ok"/>
+        <scheduler_command name="scheduler_log.log_categories.show"  answer="log_categories"/>
+        <scheduler_command name="show_calendar"        answer="calendar"/>
+        <scheduler_command name="show_history"         answer="history"/>
+        <scheduler_command name="show_job"             answer="job"/>
+        <scheduler_command name="show_jobs"            answer="jobs"/>
+        <scheduler_command name="show_job_chain"       answer="job_chain"/>
+        <scheduler_command name="show_job_chains"      answer="job_chains"/>
+        <scheduler_command name="show_order"           answer="order"/>
+        <scheduler_command name="show_state"           answer="state"/>
+        <scheduler_command name="show_task"            answer="task"/>
+        <scheduler_command name="start_job"            answer="ok"            answer2="task"/>
+        <scheduler_command name="terminate"            answer="ok"/>
+    </scheduler_commands>
+
+</xml_commands>

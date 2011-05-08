@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: supervisor.xml 4594 2006-11-21 12:55:07Z jz $-->
+
+         <!--title    = "Angaben zum Supervisor"-->
+
+<xml_element name     = "supervisor"
+             title    = "Specification of the supervisor"
+             category = "Configuration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-11-21 13:55:07 +0100 (Di, 21 Nov 2006) $">
+
+
+    <description>
+        <p style="color: red">— In Progress —</p>
+        <p>
+            Specifies the events, to be reported by <scheduler_element name="get_events"/>.
+            Events can be selected for:
+        <!--Wählt die Ereignisse aus, die von <scheduler_element name="get_events"/> gemeldet werden sollen.
+            Ausgewählt werden können mit mehreren-->
+        </p>
+        <ul>
+            <li>
+                <code>&lt;select_event job="…"/></code> individual jobs (otherwise all jobs)
+            <!--<code>&lt;select_event job="…"/></code> einzelne Jobs (sonst alle Jobs)-->
+            </li>
+            <li>
+                <code>&lt;select_event event_type="…"/></code> individual event types (otherwise all event types)
+            <!--<code>&lt;select_event event_type="…"/></code> einzelne Ereignistypen (sonst alle Ereignistypen)-->
+            </li>
+            <li>
+                <code>&lt;select_event scheduler_id="…"/></code> individual Job Scheduler (otherwise all Job Schedulers)
+            <!--<code>&lt;select_event scheduler_id="…"/></code> einzelne Scheduler (sonst alle Scheduler)-->
+            </li>
+        </ul>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="supervisor"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+
+        <xml_attribute name="proxy" type="host:port">
+            <description>
+                <p>
+                    
+                    Specifies the computer name (or IP address) and TCP port number of the Job Scheduler,
+                    which should take on the self-supervision role and function as proxy for the
+                    other Job Schedulers.
+                <!--Gibt mit Rechnernamen (oder IP-Adresse) und TCP-Portnummer den Scheduler an,
+                    der die eigene Supervisor-Funktion zusätzlich annehmen soll und 
+                    als Stellvertreter angesprochen werden kann.-->
+                </p>
+                <p>
+                    Other Job Schedulers, which register themselves with this supervisory Job Scheduler using
+                    <scheduler_element name="config" attribute="supervisor"/>,
+                    are provided with the list of proxies.
+                <!--Andere Scheduler, die sich an diesen Scheduler (den Supervisor) mit
+                    <scheduler_element name="config" attribute="supervisor"/> anschließen,
+                    bekommen die Liste der Stellvertreter.-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+    </xml_child_elements>
+
+</xml_element>

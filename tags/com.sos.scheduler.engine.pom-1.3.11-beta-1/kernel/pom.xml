@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine.pom</artifactId>
+        <version>1.3.11-beta-1</version>
+    </parent>
+    
+    <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+
+    <name>${project.artifactId}</name>
+    <inceptionYear>2010</inceptionYear>
+    <description>Java-Klassen für den Scheduler-Kern</description>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.build.sourceDirectory}</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/maven.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.util</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.JSHelper</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>saxon</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- Für MemoryLeakReport -->
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- for testing the script API in com.sos.scheduler.engine.kernel.scripting -->
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>1.5.6</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

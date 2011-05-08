@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="variable_substitution.xsl" type="text/xsl"?>
+
+
+<!--$Id$-->
+
+<variable_substitution
+    title    = "Einstellungen, die den Abruf von Umgebungsvariablen mit ${…} erlauben"
+    base_dir = ""
+    author   = "$Author$"
+    date     = "$Date$"
+>
+
+    <description>
+        <p>
+            In manchen XML-Attributen und <code>.ini</code>-Dateieinträgen können
+            Umgebungsvariablen mit der Syntax <code>${</code><i>name</i><code>}</code> abgerufen werden.
+            Die Kurzform <code>$</code><i>name</i> ist auch möglich, wenn auf dem Variablennamen ein Sonderzeichen 
+            (außer dem Unterstrich _) folgt.
+        </p>
+        <p>
+            Das Zeichen »<code>$</code>« bleibt stehen,
+            wenn kein »<code>{</code>« oder Buchstabe folgt.
+            Ebenso, wenn ein »<code>\</code>« vorangestellt ist: »<code>\$</code>« liefert »<code>$</code>«.
+        </p>
+        <p>
+            Es gelten die Werte der Umgebungsvariablen vom Start des Schedulers.
+        </p>
+        <p>
+            Variablen können auch programmiert ersetzt werden mit 
+            <scheduler_method class="Variable_set" method="substitute"/>.
+        </p>
+        <!--p>
+            Innerhalb mancher XML-Kommandos (z.B. <scheduler_element name="start_job"/>)
+            werden außer den Umgebungsvariablen auch die Task-Parameter ersetzt. 
+            Siehe die jeweilige Beschreibung.
+        </p-->
+
+        <scheduler_example>
+            <pre># File factory.ini
+[java]            
+class_path = ${SCHEDULER_HOME}/lib/sos.spooler.jar
+class_path = $SCHEDULER_HOME/lib/sos.spooler.jar
+class_path = \\otherhost\C$\lib\classes.jar
+
+&lt;params>
+    &lt;param name="txt_file_regex" value="\.txt$"/>
+&lt;/params></pre>
+        </scheduler_example>
+    </description>
+
+</variable_substitution>

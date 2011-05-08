@@ -1,0 +1,27 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+     
+     order="yes" 
+     tasks="1"
+>
+    
+    <script java_class="spooler_job.My_job">
+        <![CDATA[
+package spooler_job;
+import sos.spooler.*;
+import java.util.Date;
+
+public class My_job  extends sos.spooler.Job_impl
+{   
+    public boolean spooler_process()  throws Exception
+    {
+        Order order = spooler_task.order();
+        spooler_log.info( "ORDER_ID=" + order.id() );
+        return true;
+    }
+}
+                ]]>
+    </script>
+    
+    <run_time/>
+</job>
+

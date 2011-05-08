@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id: Run_time-vbscript.xml 3920 2005-09-20 13:57:40Z jz $ -->
+
+<?xml-stylesheet href="api-vbscript.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Run_time"
+    base_dir             = "../"
+/>

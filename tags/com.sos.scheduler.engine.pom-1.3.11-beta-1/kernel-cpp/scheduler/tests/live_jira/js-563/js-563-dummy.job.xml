@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="dummy job"
+     order="yes"
+     stop_on_error="no">
+    <script language="javascript">
+        <![CDATA[
+spooler_process() {
+  spooler_log.info("js-563-dummy reached");
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>

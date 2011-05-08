@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <jobs>
+            <job name="edno" order="yes">
+                <script language="javascript">
+                    <![CDATA[
+    
+function spooler_process()
+{
+    var a = new Array();
+    for( var i = 0; i < 10000; i++ ) a[i] = "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+    spooler_log.info( "123" + a.join( "" ) );    
+    return true;
+}
+
+                ]]></script>
+
+                <run_time once="no"/>
+            </job>
+
+            <job name="dwa" order="yes">
+                <script language="javascript">
+                    <![CDATA[
+    
+function spooler_process()
+{
+    return true;
+}
+
+                ]]>
+                </script>
+
+                <run_time once="no"/>
+            </job>
+        </jobs>
+
+
+        <job_chains>
+            <job_chain name="order.log">
+                <job_chain_node     state="edno" job="edno"/>
+                <job_chain_node     state="dwa"  job="dwa"/>
+                <job_chain_node.end state="slut"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="order.log" id="1"/>
+        </commands>
+    </config>
+</spooler>

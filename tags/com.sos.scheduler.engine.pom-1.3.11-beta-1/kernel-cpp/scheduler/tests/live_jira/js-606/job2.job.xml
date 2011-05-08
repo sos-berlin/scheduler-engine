@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes"
+     stop_on_error="no">
+    <params>
+        <param name="job2param1"
+               value="1"/>
+    </params>
+    <script language="javascript">
+        <![CDATA[
+function spooler_process(){
+	spooler_log.info ("Job Name:" + spooler_job.name);
+
+	var task_parameters = spooler_task.params;
+	spooler_log.info ("Task Parameter job2param1:" + task_parameters.value( "job2param1" ));
+
+	var order = spooler_task.order;
+	var order_parameters = order.params;
+	spooler_log.info ("Order Parameter param1:" + order_parameters.value("param1"));	
+	spooler_log.info ("Order Parameter param_neu:" + order_parameters.value("param_neu"));
+
+	return true;
+}
+        ]]>
+    </script>
+    <run_time/>
+</job>

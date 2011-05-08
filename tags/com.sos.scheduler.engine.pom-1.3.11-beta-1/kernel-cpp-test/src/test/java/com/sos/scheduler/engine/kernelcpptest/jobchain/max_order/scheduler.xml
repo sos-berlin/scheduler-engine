@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <jobs>
+            <job name="job.1" order="yes" stop_on_error="no" tasks="5">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    spooler_task.delay_spooler_process = 1
+    return true;
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="job.2" order="yes" stop_on_error="no" tasks="5">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    spooler_task.delay_spooler_process = 1
+    return true;
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
+
+            <job name="job.3" order="yes" stop_on_error="no" tasks="5">
+                <script language="javascript"><![CDATA[
+function spooler_process() {
+    spooler_task.delay_spooler_process = 1
+    return true;
+}
+                ]]></script>
+                <run_time once="no"/>
+            </job>
+        </jobs>
+
+
+        <job_chains>
+            <job_chain name="myJobChain" max_orders="3">
+                <job_chain_node     state="state.1" job="job.1"/>
+                <job_chain_node     state="state.2" job="job.2"/>
+                <job_chain_node     state="state.3" job="job.3"/>
+                <job_chain_node.end state="state.end"/>
+            </job_chain>
+        </job_chains>
+
+        <commands>
+            <add_order job_chain="myJobChain" id="id.1"/>
+            <add_order job_chain="myJobChain" id="id.2"/>
+            <add_order job_chain="myJobChain" id="id.3"/>
+            <add_order job_chain="myJobChain" id="id.4"/>
+            <add_order job_chain="myJobChain" id="id.5"/>
+            <add_order job_chain="myJobChain" id="id.6"/>
+            <add_order job_chain="myJobChain" id="id.7"/>
+            <add_order job_chain="myJobChain" id="id.8"/>
+            <add_order job_chain="myJobChain" id="id.9"/>
+        </commands>
+    </config>
+</spooler>

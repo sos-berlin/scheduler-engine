@@ -1,0 +1,23 @@
+/*
+** DRVLOCAL.RC -- ODBC Setup resources that are localized.
+**
+** (C) Copyright 1991-1994 By Microsoft Corp.
+*/
+
+#include <drvsetup.h>
+
+
+// Strings -----------------------------------------------------------------
+STRINGTABLE 
+{
+ IDS_FRAMETITLE, "hostODBC Installation - SOS GmbH"
+ IDS_BADODBCI, "Setup is unable to install ODBC.\n\n%s is either empty or missing."
+ IDS_BADODBC, "Setup is unable to create data sources.\n\n%s is either empty or missing."
+ IDS_BADDS, "Setup was unable to create the %s data source."
+ IDS_BADINST, "Setup was unable to install the ODBC drivers."
+ IDS_BADOPT, "Invalid option on command line.  Usage:\nsetup [/auto]"
+ IDS_WIN32S, "Setup cannot install 32-bit drivers under Win32s."
+}
+
+//	Localize the file description
+//#define VER_FILEDESC_STR		"hostODBC Installation - SOS GmbH\0"

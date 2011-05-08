@@ -1,0 +1,47 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Developer Studio generated include file.
+// Used by sosodbci.rc
+//
+#define ID_LISTBOX                      100
+#define IDC_EDIT1                       101
+#define IDC_EDIT2                       102
+#define IDC_GROUPBOX1                   105
+#define IDC_DSNAME                      400
+#define IDC_DSNAMETEXT                  401
+#define IDC_DESC                        404
+#define IDC_SELECT                      405
+#define IDC_TRANS_NAME                  406
+#define IDC_SERVER                      407
+#define IDC_CATALOG                     408
+#define IDC_PROFILE                     409
+#define IDC_COBOL                       410
+#define IDC_ANY                         411
+#define IDC_COBOLFILE                   412
+#define IDC_BS2NAME                     413
+#define IDC_IP                          414
+#define IDC_PORT                        415
+#define IDC_INIFILE                     416
+#define IDC_INISECTION                  417
+#define IDC_INISECTION_TEXT             418
+#define IDC_INIFILE_TEXT                419
+#define IDC_COBOLFILE_TEXT              420
+#define IDC_BS2NAME_TEXT                421
+#define IDC_IP_TEXT                     422
+#define IDC_PORT_TEXT                   423
+#define IDS_MSGTITLE                    500
+#define IDS_BADDSN                      501
+#define CONFIGDSN                       1001
+#define CONFIGDEFAULT                   1002
+#define EDRIVERCONNECT                  1003
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_3D_CONTROLS                     1
+#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: process_classes.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
+
+<!--         title         = "Prozessklassen"-->
+
+<xml_element name          = "process_classes" 
+             title         = "Process Classes"
+             category      = "Answer"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-09-25 20:33:33 +0200 (So, 25 Sep 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="answer"/>
+    </xml_parent_elements>
+    
+    
+    <xml_child_elements>
+        <xml_child_element name="process_class" multiple="yes"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

@@ -1,0 +1,69 @@
+#! /bin/bash
+# $Id$
+
+archive=scheduler.tar.bz2
+
+subdirs=""
+subdirs="$subdirs prod/3rd_party/libxml2"
+subdirs="$subdirs prod/3rd_party/libxslt"
+subdirs="$subdirs prod/3rd_party/regexp"
+subdirs="$subdirs prod/file"
+subdirs="$subdirs prod/fs"
+subdirs="$subdirs prod/javaproxy"
+subdirs="$subdirs prod/kram"
+subdirs="$subdirs prod/make"
+subdirs="$subdirs prod/Makefile"
+subdirs="$subdirs prod/scheduler"
+subdirs="$subdirs prod/zschimmer"
+subdirs="$subdirs spidermonkey"
+
+case "$1" in
+    -with-hostjava)
+        # subdirs="$subdirs prod/document_processor"
+        subdirs="$subdirs prod/hostjava"
+				subdirs="$subdirs prod/hostole"
+        ;;
+
+    *)
+	if [ -n "$1" ]; then
+            echo Nur -with-hostjava möglich
+            exit 1
+        fi
+esac
+
+
+exclude=""
+exclude="$exclude  --exclude .svn"
+exclude="$exclude  --exclude Release"
+exclude="$exclude  --exclude Debug"
+exclude="$exclude  --exclude tests"
+exclude="$exclude  --exclude /Makefile"
+exclude="$exclude  --exclude Linux_All_OPT.OBJ"
+exclude="$exclude  --exclude Linux_All_DBG.OBJ"
+exclude="$exclude  --exclude '*.class'"
+
+
+[ `whoami` == "root" ]  &&  echo "Skript darf wegen 'rm -rf' nicht als root laufen, zu gefährlich!" && exit 1
+
+tmp=/tmp/`whoami`/scheduler-source
+[ -d "$tmp" ] || mkdir -p "$tmp" || exit
+rm -rf "$tmp/scheduler/*"
+
+module=$(basename `pwd`)
+archive=$tmp/scheduler.tar.bz2
+
+
+( cd ../spidermonkey  &&  ( [ -e make ] || ln -s ../prod/make . ) )
+
+echo $subdirs werden nach $tmp kopiert ...
+( cd `pwd -P`/..  &&  rsync -a  --keep-dirlinks --relative --cvs-exclude $exclude --delete --force --delete-excluded $rsync_options  $subdirs  $tmp/scheduler )  || exit
+
+mkdir -p $tmp/scheduler/  || exit
+cp -p INSTALL.SCHEDULER $tmp/scheduler/INSTALL  || exit
+rm -rf $tmp/scheduler/$module/LINKS  &&  mkdir $tmp/scheduler/$module/LINKS  || exit
+
+rm -rf $tmp/scheduler/spidermonkey/LINKS  &&  ln -s ../prod/LINKS $tmp/scheduler/spidermonkey/  || exit
+
+
+echo "tar prod >$archive ..."
+tar cf - -C $tmp  `for s in $subdirs; do  echo scheduler/$s; done` |  bzip2 >$archive  &&  rm -rf $tmp/$module $tmp/spidermonkey  &&  ls -l $archive  || exit

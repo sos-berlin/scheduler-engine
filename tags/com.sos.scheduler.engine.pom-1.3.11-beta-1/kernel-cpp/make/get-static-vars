@@ -1,0 +1,21 @@
+#! /usr/bin/perl -w
+
+$line = <>;
+while( !eof() )
+{
+    if( $line =~ /^ *\.data/ )
+    {
+        print $line;
+        $line = <>;
+        while( !eof() )
+        {
+            last if $line =~ /^ *\./;
+            print $line; 
+            $line = <>;
+        }
+    }
+    else
+    {
+        $line = <>;
+    }
+}

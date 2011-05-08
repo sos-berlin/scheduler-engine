@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config port="6360">
+        <base file="base.scheduler"/>
+
+        <jobs>
+
+            <job name="javascript">
+                <script language="JavaScript">
+                    <![CDATA[
+
+var subprocess = spooler_task.create_subprocess();
+subprocess.start( "cmd.exe /c sleep 60" );
+spooler.terminate( 0, true );
+
+                ]]>
+                </script>
+
+                <run_time/>
+            </job>
+
+        </jobs>
+
+        <commands>
+            <start_job job="javascript"/>
+        </commands>
+    </config>
+</spooler>

@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "s:/prod/scheduler/scheduler.xsd"
+>
+    <config tcp_port="6360">
+
+        <!--base file="$SCHEDULER_TEST/base.scheduler"/-->
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+
+        <process_classes>
+            <process_class name="remote" remote_scheduler="localhost:6360" max_processes="50"/>
+        </process_classes>
+
+        <script language="JavaScript">
+            <![CDATA[
+
+spooler_log.info( "START" );
+
+            ]]>
+        </script>
+
+
+        <jobs>
+
+            <job name="local">
+                <script language="JavaScript">
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "HIER" );
+    var subprocess = spooler_task.create_subprocess( "hostname" );
+    subprocess.wait_for_termination();
+    return false;
+}
+
+                ]]>
+                </script>
+
+            </job>
+
+            
+            <job name="remote" tasks="50" process_class="remote">
+                <script language="JavaScript">
+
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    var hostware = new ActiveXObject( "hostware.global" );
+    spooler_log.info( "DORT" );
+
+    spooler_log.info( "spooler.directory    = " + spooler.directory );
+    spooler_log.info( "spooler.log_dir      = " + spooler.log_dir );
+    spooler_log.info( "spooler.include_path = " + spooler.include_path );
+    spooler_log.info( "spooler.ini_path     = " + spooler.ini_path );
+
+    hostware.open( "-out *stdout" ).put_line( "STDOUT STDOUT STDOUT STDOUT STDOUT STDOUT " );
+    hostware.open( "-out *stderr" ).put_line( "STDERR STDERR STDERR STDERR STDERR STDERR " );
+    
+    spooler_log.info( spooler_task.stdout_path() + ": " + spooler_task.stdout_text() );
+    spooler_log.info( spooler_task.stderr_path() + ": " + spooler_task.stderr_text() );
+    var subprocess = spooler_task.create_subprocess();
+
+    subprocess.timeout = 12;
+
+    subprocess.start( "/bin/sh -c 'ls -l'" );
+    //subprocess.start( "cmd.exe /c \"echo CMD.EXE \"" );
+    subprocess.wait_for_termination();
+    
+    //hostware.sleep( 15 );
+
+    //var subprocess = spooler_task.create_subprocess( "cmd.exe /c \"hostname >c:\\tmp\\1.txt\"" );
+    //subprocess.wait_for_termination();
+    //spooler_log.info( "c:/tmp/1.txt: " + hostware.file_as_string( "c:/tmp/1.txt" ) );
+    
+    spooler_job.start();
+
+    return false;
+}
+                ]]></script>
+
+            </job>
+
+
+
+            <job name="remote_order" process_class="remote" order="yes">
+                <script language="JavaScript">
+
+                    <![CDATA[
+
+function spooler_process() 
+{               
+    spooler_log.info( "REMOTE_ORDER" );
+    return false;
+}
+                ]]>
+                </script>
+
+            </job>
+
+
+            <job name="remote_shell" process_class="remote">
+                <script language="shell">
+                    <![CDATA[
+echo Hallo!                
+                ]]>
+                </script>
+                <run_time once="yes"/>
+            </job>
+            
+        </jobs>
+
+        <job_chains>
+            <job_chain name="remote_task.scheduler">
+                <job_chain_node state="1" job="remote_order"/>
+            </job_chain>
+        </job_chains>
+        
+        <commands>
+            <start_job job="remote"/>
+            <add_order job_chain="remote_task.scheduler" title="Wir haben einen Auftrag1"/>
+        </commands>
+    </config>
+</spooler>

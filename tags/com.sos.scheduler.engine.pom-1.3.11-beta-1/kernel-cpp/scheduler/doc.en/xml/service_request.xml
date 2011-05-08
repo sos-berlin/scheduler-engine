@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: service_request.xml 4069 2006-01-30 18:50:11Z jz $-->
+
+<xml_element name     = "service_request"
+             title    = "Web-Dienst-Anforderung"
+             base_dir = "../"
+             parent_page = "../xml_commands.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-01-30 19:50:11 +0100 (Mo, 30 Jan 2006) $">
+
+    <xml_attributes>
+        <xml_attribute name="url" type="url">
+            <description>
+                <p>
+                    The Web Service URL
+                <!--URL des Web-Dienstes-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+    
+    
+    <xml_child_elements>
+
+        <xml_child_element name="web_service">
+            <description>
+                <p>
+                    Only when <code>&lt;service_request></code> 
+                    is the entry for the style sheet from
+                    <scheduler_element name="web_service" attribute="request_xslt_stylesheet"/>
+                    ist.
+                <!--Nur, wenn <code>&lt;service_request></code> die Eingabe
+                    für das Stylesheet aus 
+                    <scheduler_element name="web_service" attribute="request_xslt_stylesheet"/>
+                    ist.-->
+                </p>
+            </description>
+        </xml_child_element>
+
+        <xml_child_element name="content">
+            <description>
+                <p>
+                    Contains a single XML element (together with inner elements) sent by the Web Service.
+                <!--Enthält genau ein XML-Element (mit inneren Elementen),
+                    das dem Web-Dienst geschickt wird.-->
+                </p>
+            </description>
+        </xml_child_element>
+    
+    </xml_child_elements>
+    
+    
+    <example>
+        <pre>&lt;service_request url="http://host.company.com:80/web_service">
+    &lt;content>
+        &lt;my_request>
+            …
+        &lt;/my_request>
+    &lt;/content>
+&lt;/service_request></pre>
+    </example>
+    
+    
+    <description>
+        <p>
+            <code>&lt;service_request></code> tritt an zwei Stellen auf:
+            <ul>
+                <li>
+                    Als Eingabe einer XLST-Transformation mit <scheduler_element name="web_service" attribute="request_xslt_stylesheet"/>.
+                </li>
+                <li>
+                    Als Ergebnis einer XLST-Transformation mit <scheduler_element name="web_service" attribute="forward_xslt_stylesheet"/>.
+                </li>
+            </ul>
+        </p>
+    </description>
+
+</xml_element>

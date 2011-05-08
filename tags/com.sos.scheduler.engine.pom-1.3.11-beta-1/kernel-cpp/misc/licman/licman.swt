@@ -1,0 +1,70 @@
+[Setup Wizard Template]
+TemplateDate=04.02.98 19:18:27
+
+[Projekt und Optionen auswählen]
+txtProjFile=k:\e\prod\misc\licman\licman.vbp
+chkProjRebuild=0
+optBldSetup=True
+chkIncludeDEP=1
+optInternet=False
+optDEPOnly=False
+
+[Distributionsmethode]
+optFloppyTarg=False
+optSingleDirTarg=False
+optMultDirTarg=True
+
+[Mehrere Verzeichnisse]
+cboFloppyDrives=0
+cboFloppyDriveSize=0
+txtDirTarget=j:\e\setup\licman\
+
+[Internet-Paket]
+optRemoteSite=False
+optLocalSite=False
+txtLocalSite=
+
+[Datenzugriff]
+chkUseJet=1
+chkUseODBC=0
+Isam0=
+
+[ActiveX-Server-Komponenten]
+File1="C:\PROGRA~1\apex\TDBG5\xarray32.ocx",False,32763,False,False,,,0,False,False
+File2="s:\WINDOWS\XARRAY32.OCX",True,32760,False,False,,,0,False,False
+File3="s:\WINDOWS\RICHTX32.OCX",True,32760,False,False,,,0,False,False
+File4="S:\WINDOWS\COMDLG32.OCX",True,32760,False,False,,,0,False,False
+File5="s:\windows\tdbg5.ocx",True,32760,True,False,,,0,False,False
+File6=
+
+[Abhängigkeiten bestätigen]
+File1="C:\WINNT\System32\comdlg32.ocx",False,32764
+File2="C:\WINNT\System32\richtx32.ocx",False,32764
+File3="C:\PROGRA~1\APEX\TDBG5\TDBG5.OCX",False,32764
+File4="C:\WINNT\System32\MSFLXGRD.OCX",False,32764
+File5=
+
+[Gemeinsam genutzte ActiveX-Anwendung]
+optDeployApplication=True
+optDeployShared=False
+optRemoteServer1=False
+optRemoteServer0=False
+
+[Datei-Info]
+File1="C:\WINNT\System32\VB5DE.dll",True,"$(WinSysPath)",,False
+File2="C:\WINNT\System32\MSVBVM50.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File3="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\StdOle2.tlb",True,"$(WinSysPathSysFile)",$(TLBRegister),False
+File4="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OleAut32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File5="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\OlePro32.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File6="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\AsycFilt.dll",True,"$(WinSysPathSysFile)",,False
+File7="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\Ctl3d32.dll",True,"$(WinSysPathSysFile)",,False
+File8="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\ComCat.dll",True,"$(WinSysPathSysFile)",$(DLLSelfRegister),False
+File9="s:\WINDOWS\XARRAY32.OCX",True,"$(WinSysPath)",$(DLLSelfRegister),False
+File10="s:\WINDOWS\RICHTX32.OCX",True,"$(WinSysPath)",$(DLLSelfRegister),False
+File11="C:\WINNT\System32\RchTxDE.dll",True,"$(WinSysPath)",,False
+File12="C:\Programme\DevStudio\VB\SETUPKIT\KITFIL32\SYS32\RichEd32.dll",True,"$(WinSysPathSysFile)",,False
+File13="S:\WINDOWS\COMDLG32.OCX",True,"$(WinSysPath)",$(DLLSelfRegister),False
+File14="C:\WINNT\System32\CmDlgDE.dll",True,"$(WinSysPath)",,False
+File15="s:\windows\tdbg5.ocx",True,"$(WinSysPath)",$(DLLSelfRegister),True
+File16="c:\bin\licman.exe",True,"$(AppPath)",,False
+File17="c:\bin\licman.DEP",True,"$(AppPath)",,False

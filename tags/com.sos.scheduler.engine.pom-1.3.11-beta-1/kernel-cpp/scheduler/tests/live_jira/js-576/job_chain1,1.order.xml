@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order>
+    <params>
+        <param name="parm1"
+               value="1"/>
+
+
+        <param name="parm2"
+               value="2"/>
+    </params>
+    <run_time schedule="schedule1"/>
+</order>

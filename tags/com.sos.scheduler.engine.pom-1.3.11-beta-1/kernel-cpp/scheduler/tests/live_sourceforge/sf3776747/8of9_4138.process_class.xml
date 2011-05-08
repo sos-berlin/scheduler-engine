@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process_class max_processes="10"
+               remote_scheduler="8of9.sos:4138"/>

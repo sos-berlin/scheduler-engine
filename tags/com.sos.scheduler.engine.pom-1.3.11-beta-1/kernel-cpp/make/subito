@@ -1,0 +1,18 @@
+#! /bin/bash
+
+here=/home/joacim/prod/
+there=XXX@www.XXXXXXXXXX.de:jz/prod/
+
+case "$1" in
+    to)
+        a="$here"
+        b="$there"
+        ;;
+
+    from)
+        a="$there"
+        b="$here"
+        ;;
+esac
+
+rsync -avzu -e ssh --rsync-path=usr/local/bin/rsync --exclude=bin/ --exclude=Debug/ --exclude=Release/ --exclude=LINKS/ --exclude=bind/ --exclude="*.o" --exclude="*.a" --exclude="*.so" --exclude="*.d" --exclude="*.dll" --exclude="*.tlb" --exclude="*.log" --exclude=core  $a $b

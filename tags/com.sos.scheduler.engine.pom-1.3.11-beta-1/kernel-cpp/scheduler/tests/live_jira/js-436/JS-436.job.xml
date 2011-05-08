@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+Zum Testen dieses Jobs ist er innerhalb der letzten Minute vor Periodenende zu starten  Ggf. muß die Periode
+angepasst werden.
+-->
+<job title="js-436: Job does not repeat schedule if job ends outside a given time-range">
+	<script language="shell"><![CDATA[
+	echo waiting for 60 seconds
+	sleep 60
+	dir c:\temp
+	]]></script>
+	<run_time>
+	<period begin = "10:00" end = "10:17" repeat = "30"/>
+	<!-- <period begin = "13:49" end = "12:55" repeat = "1800"/> -->
+	</run_time>
+</job> 
+
+<!-- Beispiele
+
+Periode: 10:00 - 10:17
+Start: 10:16:51
+Ende: 10:17:52 (nach Periodenende)
+Ergebnis: Es wird keine neue Task um 10:00:00 eingeplant
+
+
+-->

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<job enabled="yes" title="job2 for chain js-644"
+     stop_on_error="no"
+     order="yes">
+   <script language="javascript">
+        <![CDATA[
+var hostware = new ActiveXObject("hostware.global");
+
+function spooler_process() {
+ 	spooler_log.info( spooler_task.order.id + ": " + spooler_task.order.title + " - task gestartet" );
+ 	hostware.sleep(2);
+}
+        ]]>
+   </script>
+</job>

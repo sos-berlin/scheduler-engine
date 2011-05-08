@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-javascript.xsl" type="text/xsl"?>
+
+
+<api.class
+    name                 = "Task"
+    base_dir             = "../"
+/>

@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: sos_ini.xml 3303 2005-01-11 23:22:22Z jz $-->
+
+<ini file     = "sos.ini"
+     title    = "sos.ini"
+     base_dir = ""
+     author   = "$Author: ts $"
+     date     = "$Date: 2007-06-28 12:02:06 +0200 (Do, 28 Jun 2007) $">
+
+    <ini_sections>
+        <ini_section name="java"/>
+        <ini_section name="licence"/>
+        <ini_section name="mail"/>
+    </ini_sections>
+    
+    <description>
+        <scheduler_keyword keyword="sos.ini"/>
+        
+        <p>
+            The SOS licence keys are written in the <code>sos.ini</code> file. 
+        </p>
+        <p>
+            Further, general settings for Java or e-mail are made here.
+            Java settings can also be made in the 
+            <a href="factory_ini_java.xml"><code>factory.ini</code> file, in the <code>[java]</code></a> section.
+       <!--In der Datei sos.ini wird der SOS-Lizenzschlüssel eingetragen. 
+            <br/><br/>
+            Außerdem können hier allgemeine Einstellungen für Java oder Mail stehen.
+            Einstellungen für Java sind auch in der Datei 
+            <a href="factory_ini_java.xml"><code>factory.ini</code>, Abschnitt <code>[java]</code></a> möglich.-->
+        </p>
+        
+        <p>
+            When calling the Job Scheduler from the command line, 
+            the path to the file can be specified using the <scheduler_option name="sos.ini"/> option. 
+            For example,
+        <!--Beim Aufruf des Schedulers können Sie den Pfad dieser Datei mit der Option <scheduler_option name="sos.ini"/> angeben, z.B.:-->
+            <pre>…<i>scheduler installation path</i>…\bin\scheduler.exe -sos.ini=C:/Programme/scheduler/config/sos.ini</pre>
+        </p>
+        <p>
+          During installation of the Job Scheduler, the <code>sos.ini</code> file is written to the
+          <pre>…<i>scheduler installation path</i>…\config</pre> directory.
+          Calls using the Job Scheduler start script automatically set this path corrrectly.
+      <!--Bei der Installation durch den Scheduler-Setup wird die Datei sos.ini im Verzeichnis
+          <pre>…<i>scheduler installation path</i>…\config</pre>
+          abgelegt. Aufrufe über das Startskript setzen den Pfad automatisch richtig.-->
+        </p>
+        <p>
+          Should settings in the <code>sos.ini</code> file also be used in other products from the SOS GmbH.,
+          then this file can be saved centrally.
+        </p>
+        <p>
+          Should the <code>sos.ini</code> file not be specified when starting the Job Scheduler, 
+          then the Scheduler will attempt to find it by looking according to the following criteria:
+      <!--Sollen Einstellungen aus sos.ini neben dem Scheduler auch für andere SOS-Produkte gelten, kann diese Ini-Datei zentral abgelegt werden.
+          <br/><br/>
+          Falls beim Scheduler-Aufruf der Pfad zur Datei sos.ini nicht angegeben wird, gelten folgende Vorgaben:-->
+        </p>
+        <!--p>
+            The path of this file can be changed using the <scheduler_option name="sos.ini"/> option.
+            Den Pfad dieser Datei können Sie einstellen (vorrangige Einstellungen zuerst):
+        </p>
+        <ul>
+            <li>
+                Unter Windows in der Registrierung:
+                <code>HKEY_LOCAL_MACHINE\Software\SOS Software</code>, Eintrag <code>sos.ini</code>.
+            </li>
+            <li style="color: grey">
+                Wegen ewiger Kompatibilität leider auch: Unter Windows in der Registrierung:
+                <code>HKEY_LOCAL_MACHINE\Software\SOS Software\sos.ini</code>, Eintrag <code>(Standard)</code> oder <code>""</code>.
+            </li>
+            <li>
+                Mit der Option <scheduler_option name="sos.ini"/>
+            </li>
+            <li>
+                Mit der Umgebungsvariablen <code>SOS_INI</code>
+            </li>
+            <li>
+                Unter Windows, wenn der Pfad nicht eingestellt ist, wird "<code>sos.ini</code>" verwendet, 
+                was Windows das Auffinden der Datei überlässt.
+            </li>
+        </ul-->
+    </description>
+</ini>

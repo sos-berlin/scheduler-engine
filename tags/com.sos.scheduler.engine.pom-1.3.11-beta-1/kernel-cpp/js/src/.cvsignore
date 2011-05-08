@@ -1,0 +1,10 @@
+*.plg
+Release
+jsautocfg.h
+*.ncb
+.svn
+*.pdb
+Debug
+jscpucfg
+*.opt
+Makefile

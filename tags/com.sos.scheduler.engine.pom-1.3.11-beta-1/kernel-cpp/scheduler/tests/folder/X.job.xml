@@ -1,0 +1,22 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
+
+     order="yes"
+>
+    
+    <script language="JavaScript">
+        <![CDATA[
+
+function spooler_process() 
+{               
+    //spooler_log.info( spooler_task.order.title );
+    spooler_log.info( "spooler.configuration_directory='" + spooler.configuration_directory + "'" );
+  //spooler_log.info( "spooler_job.folder_path='"         + spooler_job.folder_path + "'" );
+    spooler_log.info( "spooler_job.configuration_directory='" + spooler_job.configuration_directory + "'" );
+    
+    return false;
+}
+
+    ]]>
+    </script>
+
+</job>

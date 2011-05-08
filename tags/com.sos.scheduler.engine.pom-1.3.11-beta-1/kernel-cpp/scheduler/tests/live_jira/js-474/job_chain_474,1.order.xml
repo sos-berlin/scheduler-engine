@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- 
+
+Ergebnis: 
+
+12:00 ist der nächste Zeitpunkt. Aber die Order ignoriert diese Periode, weil keine repeat enthält. Deshalb kein Start
+Nach einem Start einer Order, wird aber korrekt 13:53 als nächster Startpunkt ermittelt, weil Order::next_start_time bei handle end state einen anderen Algorithmus durchläuft 
+als beim Start eine Order oder bei Änderung der Konfigurationsdatei
+first_call = true, false ist nicht so ideal!
+
+Besser wäre es solche Elemente bei einer Order-Runtime zu verbieten
+
+        <date date="2010-09-21">
+            <period begin="12:00"
+                    end="17:00"/>
+        </date>
+        
+        
+Einige interessante Funktionen         
+        Inlay::next_period_of_same_day
+        Period::is_coming
+				Period::set_dom
+
+--> 
+
+<order>
+    <run_time let_run="no"
+              begin="08:00"
+              end="18:00">
+        
+        <period repeat="00:05:00"/>
+
+
+        <date date="2010-09-20">
+            <period single_start="14:55"/>
+        </date>
+
+
+ <!--       <date date="2010-09-21">
+            <period begin="12:00"
+                    end="17:00"/>
+        </date>
+  -->      
+        
+
+
+        <weekdays>
+            <day day="1">
+                <period single_start="13:54"/>
+            </day>
+        </weekdays>
+
+
+        <monthdays>
+            <day day="21">
+                <period single_start="13:53"/>
+            </day>
+
+            <weekday day="mon"
+                     which="3">
+                <period repeat="00:10:00"
+                        begin="10:00:00"
+                        end="15:52:00"/>
+            </weekday>
+        </monthdays>
+    </run_time>
+</order>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<description
+    title               = "Erweiterung der Klasse Subprozesse"
+    base_dir            = "../"
+    parent_page         = "index.xml"
+    author              = "$Author$"
+    date                = "$Date$"
+>
+    <ul>
+        <li>
+            <code>Subprocess.stdout_text</code> und <code>.stderr_text</code>:
+            Die Ausgaben werden landen nicht mehr in <scheduler_method class="Task" property="stdout_text"/>,
+            sondern in eigenen Eigenschaften.
+            Damit kann die Ausgabe einer Task gezielt gelesen werden.
+            Um die Kompatibilität zu wahren, müsste das einschaltbar sein.
+        </li>
+        <li>
+            <code>Task.system()</code>
+            übergibt einen Kommandzeile oder ein <code>argv</code>-Array an einen neuen Prozess,
+            wartet dessen Ende ab und liefert als Ergebnis den Exit-Code 
+            (negativ oder Exception bei Abbruch mit Signal).
+            <code>stdout</code> und <code>stderr</code> werden ins Task-Protokoll geschrieben.
+            Zweiter Parameter für optinale Frist.
+        </li>
+        <li>
+            Vielleicht auch einen Aufruf, der als Rückgabewert <code>stdout</code> liefert:
+            <pre>name = spooler_task.stdout_from_system( "whoami" );</pre>
+        </li>
+        <li>
+            <code>system()</code> sollte die Kommandozeile auswerten wie unter Perl, 
+            also Dateiumleitung, Pipe-Zeichen etc. 
+            (Perl ruft <code>/bin/sh</code>, wenn bestimmte Zeichen in der Kommandozeile vorkommen).
+        </li>
+    </ul>
+
+</description>

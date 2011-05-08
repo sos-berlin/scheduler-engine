@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name          = "log"
+             title         = "Protokoll"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author$"
+             date          = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+        <xml_parent_element name="task"/>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="level" type="log_level" title="Mindest-Level, ab dem Ausgaben durchgelassen werden">
+            <description>
+                <p>
+                    Siehe
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="highest_level" type="log_level" title="Das höchste bisher benutzte Level"/>
+        <xml_attribute name="last_error" type="string" title="Letzter Ausgabe des Levels error"/>
+        <xml_attribute name="last_warning" type="string" title="Letzter Ausgabe des Levels warn"/>
+
+        <xml_attribute name="mail_on_error" type="boolean">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_error"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_on_warning" type="boolean">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_warning"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_on_success" type="boolean">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_success"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_on_process" type="integer">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_process"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="smtp" type="name">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_from" type="email_adresse">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_from"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_to" type="email_adresse">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_to"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_cc" type="email_adresse">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_cc"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_bcc" type="email_adresse">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_bcc"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="mail_subject" type="email_subject">
+            <description>
+                <p>
+                    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_subject"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <description>
+        <p>
+            Der Inhalt von <code>&lt;log></code> ist das Protokoll (wenn mit <code>what="log"</code> bestellt).
+        </p>
+    </description>
+
+</xml_element>

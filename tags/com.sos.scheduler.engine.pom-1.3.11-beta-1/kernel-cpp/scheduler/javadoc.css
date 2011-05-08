@@ -1,0 +1,27 @@
+/* Javadoc style sheet */
+/* $Id$ */
+
+/* Define colors, fonts and other style attributes here to override the defaults  */
+
+/* Page background color */
+body { background-color: #FFFFFF }
+
+/* Table colors */
+.TableSummaryHeadingColor    { background: #CCCCFF } /* Dark blue */
+.TableInheritedHeadingColor  { background: #EEEEFF } /* Light blue */
+.TableRowColor               { background: #FFFFFF } /* White */
+
+
+/* Font used in left-hand frame lists */
+.FrameTitleFont   { font-size: normal; font-family: sans-serif }
+.FrameHeadingFont { font-size: normal; font-family: sans-serif }
+.FrameItemFont    { font-size: normal; font-family: sans-serif }
+
+body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
+span         { font-size: 10pt; }
+th           { font-size: 10pt; }
+td           { font-size: 10pt; }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0 }
+
+code         { font-size: 10pt; }
+pre          { margin-top: 0; }

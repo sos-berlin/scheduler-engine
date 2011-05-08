@@ -1,0 +1,111 @@
+/* StarView ressource file */
+#pragma CHARSET_ANSI
+#include "sosctrl.hrc"
+#include "kram.hrc"
+Window res_wait_msg_box_dialog {
+	Border = TRUE;
+	Pos = MAP_APPFONT( 0, 0 );
+	Size = MAP_APPFONT( 40, 13 );
+	Text = "Window";
+	CancelButton 255 {
+			Pos = MAP_APPFONT( 0, 0 );
+			Size = MAP_APPFONT( 41, 13 );
+			TabStop = TRUE;
+		};
+};
+ModelessDialog 666 {
+	OutputSize = TRUE;
+	Pos = MAP_APPFONT( 0, 0 );
+	Size = MAP_APPFONT( 109, 21 );
+	Text = "warten ...";
+	Moveable = TRUE;
+	Closeable = TRUE;
+	Window 1 {
+			Border = TRUE;
+			Pos = MAP_APPFONT( 46, 22 );
+			Size = MAP_APPFONT( 50, 50 );
+			Text = "Window";
+		};
+	CancelButton 1 {
+			Pos = MAP_APPFONT( 0, 0 );
+			Size = MAP_APPFONT( 44, 12 );
+			TabStop = TRUE;
+		};
+};
+ModelessDialog 667 {
+	OutputSize = TRUE;
+	SVLook = TRUE;
+	Pos = MAP_APPFONT( 1, 1 );
+	Size = MAP_APPFONT( 213, 63 );
+	Text = "Meldung";
+	Moveable = TRUE;
+	Closeable = TRUE;
+	FixedText 1 {
+			Pos = MAP_APPFONT( 7, 6 );
+			Size = MAP_APPFONT( 198, 48 );
+		};
+	FixedText 2 {
+			Pos = MAP_APPFONT( 9, 16 );
+			Size = MAP_APPFONT( 194, 10 );
+			Text = "...";
+		};
+	FixedBitmap 1 {
+			Border = TRUE;
+			Pos = MAP_APPFONT( 16, 30 );
+			Size = MAP_APPFONT( 30, 30 );
+		};
+	CancelButton 1 {
+			Pos = MAP_APPFONT( 92, 44 );
+			Size = MAP_APPFONT( 40, 12 );
+			TabStop = TRUE;
+		};
+};
+ModelessDialog FONT_DIALOG {
+	SVLook = TRUE;
+	Pos = MAP_APPFONT( 154, 89 );
+	Size = MAP_APPFONT( 197, 86 );
+	Text = "Font Auswahl";
+	Moveable = TRUE;
+	Closeable = TRUE;
+	OKButton FONT_DIALOG_OK {
+			Pos = MAP_APPFONT( 149, 34 );
+			Size = MAP_APPFONT( 40, 12 );
+			TabStop = TRUE;
+			DefButton = TRUE;
+		};
+	CancelButton FONT_DIALOG_CANCEL {
+			Pos = MAP_APPFONT( 149, 53 );
+			Size = MAP_APPFONT( 40, 12 );
+			TabStop = TRUE;
+		};
+	FixedText FONT_DIALOG_FONT {
+			Pos = MAP_APPFONT( 6, 4 );
+			Size = MAP_APPFONT( 40, 10 );
+			Text = "~Font:";
+			Left = TRUE;
+		};
+	ListBox FONT_DIALOG_FONT {
+			Border = TRUE;
+			Pos = MAP_APPFONT( 6, 13 );
+			Size = MAP_APPFONT( 104, 52 );
+			TabStop = TRUE;
+		};
+	FixedText FONT_DIALOG_SIZE {
+			Pos = MAP_APPFONT( 114, 4 );
+			Size = MAP_APPFONT( 40, 10 );
+			Text = "~Größe:";
+			Left = TRUE;
+		};
+	ListBox FONT_DIALOG_SIZE {
+			Border = TRUE;
+			Pos = MAP_APPFONT( 114, 13 );
+			Size = MAP_APPFONT( 29, 52 );
+			TabStop = TRUE;
+		};
+	CheckBox FONT_DIALOG_FETT {
+			Pos = MAP_APPFONT( 149, 16 );
+			Size = MAP_APPFONT( 40, 12 );
+			Text = "~Fett";
+			TabStop = TRUE;
+		};
+};

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!--$Id: CHANGES.xml 4985 2007-04-19 14:54:41Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Process_classes"
+    object_name = "process_classs"
+    base_dir    = "../"
+    author      = "$Author: jz $"
+    date        = "$Date: 2007-01-23 22:30:13 +0100 (Di, 23 Jan 2007) $"
+>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="add_process_class">
+        <com/>
+
+        <title>
+            Fügt dem Scheduler eine Prozessklasse hinzu
+        </title>
+      
+        <messages>
+            <message level="error" code="SCHEDULER-416"/>
+            <message level="error" code="SCHEDULER-422"/>
+        </messages>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <method name="create_process_class">
+        <com>
+            <com.result>
+                <com.type class="Process_class"/>
+            </com.result>
+        </com>
+
+        <title>Legt eine neue Prozesklasse ein</title>
+
+        <description>
+            <p>
+                Liefert eine neues <scheduler_method class="Process_class"/>.
+                Diese Prozessklasse kann 
+                mit <scheduler_method class="Process_classes" method="add_process_class"/>
+                dem Scheduler hinzugefügt werden.
+            </p>
+        </description>
+    </method>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="process_class" access="read">
+        <com>
+            <com.parameter name="process_class_name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.result>
+                <com.type class="Process_class"/>
+            </com.result>
+        </com>
+        
+        <title>
+            Liefert eine Prozessklasse
+        </title>
+        
+        <description>
+            Wenn die Prozessklasse nicht bekannt ist, wird eine Exception geliefert.
+        </description>
+
+        <messages>
+            <message level="error" code="SCHEDULER-161"/>
+        </messages>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <property name="process_class_or_null" access="read">
+        <com>
+            <com.parameter name="process_class_name">
+                <com.type type="BSTR"/>
+            </com.parameter>
+
+            <com.result>
+                <com.type class="Process_class"/>
+                <description>
+                    <api.null/>, wenn die Prozessklasse nicht bekannt ist.
+                </description>
+            </com.result>
+        </com>
+        
+        <title>
+            Liefert eine Prozessklasse
+        </title>
+    </property>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+</api.class>

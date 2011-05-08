@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<order>
+
+    <!-- Testfall e:  
+         Nächster Start nach Periodenende 
+    		 Perioden sind nahtlos und haben selbes repeat
+    		 Erwartes Ergebnis: Start sofort und zu repeat 
+    		 Tatsächliches Ergebnis: Wie erwartet. OK
+    --> 
+    
+    <run_time let_run="no">
+        <period repeat="00:10:00"
+                begin="09:00"
+                end="11:55"/>
+                
+        <period repeat="00:10:00"
+                begin="11:55"
+                end="14:00"/>
+                                
+    </run_time>
+
+
+</order>

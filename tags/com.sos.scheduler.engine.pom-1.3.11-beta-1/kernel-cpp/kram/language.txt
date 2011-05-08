@@ -1,0 +1,62 @@
+prim_id;sub_id;deutsch;englisch
+  1;;Arabisch;Arabic
+  2;;Bulgarisch;Bulgarian
+  3;;Katalanisch;Catalan
+  4;;Chinesisch;Chinese
+  4;1;Chinesisch (Traditionell);Chinese (Traditional)
+  4;2;Chinesisch (Vereinfacht);Chinese (Simplified) 
+  5;;Tschechisch;Czech
+  6;;Dänisch;Danish
+  7;;Deutsch;German
+  7;1;Deutsch;German
+  7;2;Deutsch (Schweiz);German (Swiss)
+  7;3;Deutsch (Österreich);German (Austrian)
+  8;;Griechisch;Greek
+  9;;Englisch;English
+  9;1;Englisch (USA);English (USA)
+  9;2;Englisch (Großbritanien);English (UK)
+  9;3;Englisch (Australien);English (Australian)
+  9;4;Englisch (Kanada);English (Canadian)
+  9;5;Englisch (Neu-Seeland);English (New Zealand)
+  9;6;Englisch (Irland);English (Irish)
+ 10;;Spanisch;Spanish
+ 10;1;Spanisch;Spanish
+ 10;2;Spanisch (Mexiko);Spanish (Mexican)
+ 10;3;Spanisch (Modern);Spanish (Modern)
+ 11;;Finnisch;Finnish
+ 12;;Französisch;French
+ 12;;Französisch (Belgien);French (Belgian)
+ 12;;Französisch (Kanada);French (Canadian)
+ 12;;Französisch (Schweiz);French (Swiss)
+ 13;;Hebräisch;Hebrew
+ 13;;Niederländisch;Dutch
+ 13;1;Niederländisch;Dutch
+ 13;2;Flämisch (Belgien);Dutch (Beligian)
+ 14;;Ungarisch;Hungarian
+ 15;;Isländisch;Icelandic
+ 16;;Italienisch;Italian
+ 16;1;Italienisch;Italian
+ 16;2;Italienisch (Schweiz);Italian (Swiss)
+ 17;;Japanisch;Japanese
+ 18;;Koreanisch;Korean
+ 20;;Norwegisch;Norwegian
+ 20;1;Norwegisch (Bokmål);Norwegian (Bokmal)
+ 20;2;Norwegisch (Nynorsk);Norwegian (Nynorsk)
+ 21;;Polnisch;Polish
+ 21;;Bahasa;Bahasa
+ 22;;Portugiesisch;Portuguese
+ 22;1;Portugiesisch (Basilien);Portuguese (Brazilian)
+ 22;2;Portugiesisch;Portuguese
+ 23;;Rätoromanisch;Rhaeto roman
+ 24;;Rumänisch;Romanian
+ 25;;Russisch;Russian
+ 26;;Serbokroatisch;Serbo croatian
+ 26;1;Serbokroatisch (Kroatien);Croato-Serbian (Latin)
+ 26;2;Serbokroatisch (Serbien);Serbo-Croatian (Cyrillic)
+ 27;;Slovakisch;Slovak
+ 28;;Albanisch;Albanian
+ 29;;Schwedisch;Swedish
+ 30;;Thai;Thai
+ 31;;Türkisch;Turkish
+ 32;;Urdu;Urdu
+

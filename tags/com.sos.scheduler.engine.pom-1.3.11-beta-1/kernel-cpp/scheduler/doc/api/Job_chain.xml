@@ -1,0 +1,412 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+
+<?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
+
+
+<api.class
+    name        = "Job_chain"
+    object_name = "job_chain"
+    base_dir    = "../"
+    author      = "$Author$"
+    date        = "$Date$"
+>
+
+
+<property name="name">
+    <com>
+        <com.result>
+            <com.type type="BSTR"/>
+        </com.result>
+    </com>
+
+    <title>
+        Name der Jobkette
+    </title>
+
+    <example programming_language="java">
+        <pre>Job_chain job_chain = spooler.create_job_chain();
+job_chain.set_name( "Jobkette" );</pre>
+    </example>
+
+    <example programming_language="javascript">
+        <pre>var job_chain = spooler.create_job_chain();
+job_chain.name = "Jobkette";</pre>
+    </example>
+</property>
+
+
+
+<property name="order_count" access="read">
+    <com>
+        <com.result>
+            <com.type type="int"/>
+        </com.result>
+    </com>
+
+    <title>
+        Anzahl der Aufträge in der Jobkette
+    </title>
+</property>
+
+
+
+<method name="add_job">
+    <com>
+        <com.parameter name="job_name">
+            <com.type type="BSTR"/>
+        </com.parameter>
+
+        <com.parameter name="input_state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+
+        <com.parameter name="output_state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+
+        <com.parameter name="error_state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Erweitert die Jobkette um einen Job
+    </title>
+</method>
+
+
+<method name="add_end_state">
+    <com>
+        <com.parameter name="state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Fügt der Jobkette einen Endknoten hinzu
+    </title>
+
+    <description>
+        <p>
+            Diesem Knoten ist kein Job zugeordnet.
+            Ein Auftrag, der einen Endknoten erreicht, hat die Jobkette durchlaufen und wird vom Scheduler aus ihr entfernt.
+        </p>
+    </description>
+</method>
+
+
+<method name="add_order">
+    <com>
+        <com.parameter name="order_or_payload">
+            <com.type type="VARIANT">
+                <com.type class="Order"/>
+                <com.type type="BSTR"/>
+            </com.type>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Order"/>
+        </com.result>
+    </com>
+
+    <java>
+        <java.parameter name="order">
+            <com.type class="Order"/>
+        </java.parameter>
+    </java>
+
+    <title>
+        Gibt einen Auftrag in die Jobkette
+    </title>
+
+    <description>
+        <p>
+            Wenn der Auftrag in einer anderen Jobkette enthalten ist, entfernt der Scheduler ihn daraus.
+        </p>
+        <p>
+            Der Auftrag wird in die Auftragswarteschlange des Jobs, der seinem Zustand entspricht,
+            gemäß seiner Priorität eingeordnet.
+        </p>
+        <p>
+            Die Jobkette mit muss <scheduler_element name="job_chain"/> oder 
+            <scheduler_method class="Spooler" method="add_job_chain"/>
+            dem Scheduler bekannt gemacht worden sein.
+        </p>
+        <p>
+            Wenn die Jobkette bereits einen Auftrag mit gleicher <scheduler_method class="Order" property="id"/>
+            enthält,
+            wird eine Exception mit Fehlercode <scheduler_message code="SCHEDULER-186"/> geliefert.
+            Siehe aber <scheduler_method class="Job_chain" method="add_or_replace_order"/>.
+        </p>
+    </description>
+
+    <!--example programming_language="perl">
+        <pre><![CDATA[# The Scheduler/Perl interface under Unix does not accept objects as parameters, 
+# so we implement our own add_order().
+        
+my $job_chain_name = 'my_job_chain';
+my $order_id       = '123';
+my $order_title    = 'My title';
+my %params;
+$params{'input'} = 'input value';
+$params{'other'} = 'another value';
+
+add_order( $job_chain_name, $order_id, $order_title, \%params );
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-add_order
+
+sub add_order
+{
+    my $job_chain   = shift;
+    my $order_id    = shift;
+    my $order_title = shift;
+    my $params      = shift;
+
+    my $order_xml = "<?xml version='1.0'?>";
+    $order_xml .= "<add_order";
+    $order_xml .= xml_attribute( 'job_chain', $job_chain );
+    $order_xml .= xml_attribute( 'id'       , $order_id )     if $order_id;
+    $order_xml .= xml_attribute( 'title'    , $order_title )  if $order_title;
+    $order_xml .= ">";
+
+    $order_xml .= "<params>";
+    
+    while( ( my $name, my $value ) = each( %$params ) )
+    {
+        $order_xml .= "<param" . xml_attribute( 'name', $name ) . xml_attribute( 'value', $value ) . "/>";
+    }
+    
+    $order_xml .= "</params>";
+    $order_xml .= "</add_order>";
+
+    execute_xml( $order_xml );
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-execute_xml
+# Excecute XML command and die on error
+
+sub execute_xml
+{
+    my $xml = shift;
+    
+    my $result_xml = $spooler->execute_xml( $xml );
+    
+    if( $result_xml =~ /<ERROR/ )
+    {
+        $spooler_log->error( "Error in XML command $xml" );
+        $spooler_log->error( $result_xml );
+        die $result_xml;
+    }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-xml_attribute
+# xml_attribut( 'name', 'value' ) returns ' name="value"'
+
+sub xml_attribute
+{
+    my $name  = shift;
+    my $value = shift;
+
+    return ""  unless $value;
+    
+    $value =~ s/&/&amp;/g;
+    $value =~ s/</&lt;/g;
+    $value =~ s/>/&gt;/g;
+    $value =~ s/"/&quot;/g;
+    
+    return " $name=\"$value\"";
+}]]></pre>
+    </example-->
+</method>
+
+
+<property name="node" access="read">
+    <com>
+        <com.parameter name="state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Job_chain_node"/>
+        </com.result>
+    </com>
+
+    <title>
+        Der Jobkettenknoten zum angegebenen Zustand
+    </title>
+</property>
+
+
+<property name="order_queue" access="read">
+    <com>
+        <com.parameter name="state">
+            <com.type type="VARIANT"/>
+        </com.parameter>
+
+        <com.result>
+            <com.type class="Order_queue"/>
+        </com.result>
+    </com>
+
+    <title>
+        <code>= node(state).job().order_queue()</code>
+    </title>
+
+    <description>
+        Liefert die Auftragswarteschlange des Jobs, der dem angegebenen Zustand zugeordnet ist.
+    </description>
+</property>
+
+
+<method name="add_or_replace_order">
+    <com>
+        <com.parameter>
+            <com.type class="Order"/>
+        </com.parameter>
+    </com>
+
+    <title>
+        Gibt einen Auftrag in die Jobkette und ersetzt ggfs. einen mit gleicher Kennung
+    </title>
+
+    <description>
+        <p>
+            Hat die Jobkette bereits einen Auftrag mit gleicher Kennung, dann wird dieser ersetzt.
+            Genauer: Er wird aus der Jobkette entfernt, und der neue Auftrag wird hinzugefügt.
+        </p>
+        <p>
+            Solange eine Task den vorhandenen Auftrag ausführt,
+            sind im Scheduler zwei Aufträge mit gleicher Kennung vorhanden.
+            Allerdings ist der vorhandene Auftrag aus der Jobkette und aus der Datenbank bereits entfernt.
+            Er ist nur noch für die Task nutzbar und verschwindet nach der Ausführung.
+        </p>
+        <p>
+            In diesem Fall wartet der Scheduler die Ausführung des neuen Auftrags ab,
+            bis die Ausführung des alten Auftrags beendet ist.
+        </p>
+        <p>
+            Siehe <scheduler_method class="Job_chain" method="add_order"/> und
+            <scheduler_method class="Order" method="remove_from_job_chain"/>
+        </p>
+    </description>
+</method>
+
+    
+<method name="remove">
+    <com>
+    </com>
+
+    <title>
+        Entfernt die Jobkette
+    </title>
+
+    <description>
+        <p>
+            Wenn gerade Aufträge der Jobkette verarbeitet werden (in <scheduler_method class="Job_impl" method="spooler_process"/>),
+            dann entfernt der Scheduler die Jobkette, sobald der letzte Auftrag verarbeitet worden ist.
+        </p>
+        <p>
+            Die Aufträge bleiben in der Datenbank erhalten.
+            Wenn später eine Jobkette mit gleichen Namen hinzugefügt wird (<scheduler_method class="Spooler" method="add_job_chain"/>),
+            dann lädt der Scheduler diese Aufträge erneut. 
+            Die Zustände der Aufträge müssen in der erneuerten Jobkette vorhanden sein. 
+        </p>
+    </description>
+    
+    <messages>
+        <message level="info"  code="SCHEDULER-873"/>
+        <message level="info"  code="SCHEDULER-874"/>
+    </messages>
+</method>
+
+
+<property name="orders_recoverable">
+    <com>
+        <com.result>
+            <com.type type="bool"/>
+        </com.result>
+    </com>
+
+    <description>
+        <p>
+            Siehe <scheduler_element name="job_chain" attribute="orders_recoverable"/>.
+        </p>
+    </description>
+</property>
+
+
+    <property name="title" title="Der Title der Jobkette">
+        <com>
+            <com.result>
+                <com.type type="BSTR"/>
+            </com.result>
+        </com>
+
+        <description>
+            <p>
+                Siehe <scheduler_element name="job_chain" attribute="title"/>.
+            </p>
+        </description>
+    </property>
+    
+<title>
+    Jobkette zur Auftragsverarbeitung
+</title>
+
+<description>
+    <p>
+        Eine Jobkette (Job_chain) ist eine Kette von Jobs (Jobkettenknoten oder Stellen).
+        Diese Kette wird von Aufträgen (<scheduler_method class="Order"/>) durchlaufen.
+    </p>
+    <p>
+        Jeder Stelle in der Jobkette ist ein Zustand und ein Job zugeordnet.
+        Wenn ein Auftrag der Jobkette hinzugefügt wird, setzt der Scheduler ihn an die seinem Zustand entsprechende Stelle.
+        Der dieser Stelle zugeordnete Job führt den Auftrag aus.
+    </p>
+    <p>
+        Jede Stelle hat außerdem einen Folgezustand und einen Fehlerzustand.
+        Nach der Verarbeitung eines Auftrags durch einen Jobschritt ändert der Scheduler den Zustand des Auftrags.
+        Wenn der Jobschritt (spooler_process) true liefert, stellt der Scheduler den Folgezustand,
+        sonst den Fehlerzustand ein.
+        Der Auftrag rutscht damit an eine andere Stelle der Jobkette, die dem neuen Zustand zugeordnet ist.
+
+        Das gilt nicht, wenn der Zustand während der Ausführung mit
+        <scheduler_method class="Order" property="state"/> verändert worden ist.
+    </p>
+    <p>
+        Sie erzeugen eine Jobkette mit <scheduler_method class="Spooler" method="create_job_chain"/>,
+        füllen sie mit <scheduler_method class="Job_chain" method="add_job"/>
+        und <scheduler_method class="Job_chain" method="add_end_state"/>
+        und machen sie schließlich mit <scheduler_method class="Spooler" method="add_job_chain"/>
+        bekannt.
+    </p>
+    <p>
+        Jeder Knoten ist eindeutig einem Zustand zugeordnet.
+        Für jeden Zustand muss genau einmal <scheduler_method class="Job_chain" method="add_job"/>
+        oder <scheduler_method class="Job_chain" method="add_end_state"/> aufgerufen werden.
+    </p>
+</description>
+
+
+<example programming_language="java">
+    <pre>Job_chain my_job_chain = spooler.create_job_chain();
+my_job_chain.set_name( "Jobkette" );
+my_job_chain.add_job( "job_100", 100,  200, 999 );
+my_job_chain.add_job( "job_200", 200, 1000, 999 );
+my_job_chain.add_end_state(  999 );
+my_job_chain.add_end_state( 1000 );
+spooler.add_job_chain( my_job_chain );</pre>
+</example>
+
+<example programming_language="javascript">
+    <pre>var my_job_chain = spooler.create_job_chain();
+my_job_chain.name = "Jobkette";
+my_job_chain.add_job( "job_100", 100,  200, 999 );
+my_job_chain.add_job( "job_200", 200, 1000, 999 );
+my_job_chain.add_end_state(  999 );
+my_job_chain.add_end_state( 1000 );
+spooler.add_job_chain( my_job_chain );</pre>
+</example>
+
+</api.class>

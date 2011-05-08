@@ -1,0 +1,39 @@
+#! /bin/bash
+# $Id: make-all 3350 2005-02-02 15:00:32Z jz $
+
+
+[ -z $O_DIR   ] && export O_DIR=Release
+[ -z $BIN_DIR ] && export BIN_DIR=`/bin/pwd`/bin
+
+[ -d $BIN_DIR ]  ||  mkdir $BIN_DIR  ||  exit
+
+unset CDPATH
+
+if [ -z "$MAKE_JOBS" ]; then MAKE_JOBS=1; fi
+
+with_java=1
+with_php=1
+with_perl=1
+
+#[ "`uname`" == "Linux"   ]  &&  
+[ "`uname`" == "Solaris" ]  &&  with_php=0
+[ "`uname`" == "HP-UX"   ]  &&  with_php=0
+
+
+
+function do_make()
+{
+    directory=$1
+    shift
+    what="$*"
+
+    (
+        cd $directory  && \
+        ( [ -e $O_DIR ]  ||  mkdir $O_DIR )  && \
+        ( [ -e $O_DIR/Makefile ]  || ln -s ../Makefile $O_DIR/Makefile )  && \
+        cd $O_DIR  &&  make --jobs=$MAKE_JOBS --no-print-directory $what
+    )
+}
+
+
+for f in .dispatch.*.pid; do [ -f $f ] && rm -v $f; done

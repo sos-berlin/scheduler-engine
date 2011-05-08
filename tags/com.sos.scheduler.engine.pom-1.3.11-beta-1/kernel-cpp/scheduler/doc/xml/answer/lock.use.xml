@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: state.xml 4367 2006-06-19 07:57:00Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+
+<xml_element name          = "lock.use"
+             title         = "Sperre"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-06-19 09:57:00 +0200 (Mo, 19 Jun 2006) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="lock.requestor"/>
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="lock" title="Pfad der Sperre"/>
+        <xml_attribute name="exclusive" type="yes|no"/>
+        <xml_attribute name="is_available" type="yes|no" title="Sperre ist angefordert und verfügbar"/>
+        <xml_attribute name="is_missing" type="yes|no" title="Sperre ist unbekannt"/>
+    </xml_attributes>
+
+    <description>
+        <p>
+           Siehe <scheduler_element name="lock.use"/>.
+        </p>
+    </description>
+
+</xml_element>

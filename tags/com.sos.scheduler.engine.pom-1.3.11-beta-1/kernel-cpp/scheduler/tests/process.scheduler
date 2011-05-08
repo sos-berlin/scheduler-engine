@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "http://www.zschimmer.com/2006/scheduler.xsd"
+>
+    <config>
+        <base file="$SCHEDULER_TEST/base.scheduler"/>
+
+        <script language="javascript">
+            <![CDATA[
+
+if(0)
+{
+    var params = spooler.create_variable_set();
+    params.value( "EINS" ) = "1";
+    params.value( "ZWEI" ) = "2";
+    params.value( "HOME" ) = "Heimat";
+    spooler.job( "process" ).start( params );
+}
+else
+{
+    var order = spooler.create_order();
+    order.id = 1;
+    order.title = "Wir haben einen Auftrag";
+    spooler.job_chain( "process.scheduler" ).add_or_replace_order( order );
+}
+
+        ]]></script>                   
+
+
+        <jobs>
+            <job name="process" title="Aufruf von /tmp/test.cmd" order="yes" stop_on_error="no">
+                
+                <process 
+                    file="/tmp/test.cmd" 
+                    param="Mein Parameter 'ab' &quot;ab&quot; &quot;'&quot; \ $ {} () EINS=$EINS ZWEI=$ZWEI HOME=$HOME LOG=$LOG PATH=$PATH"
+                >
+                    <environment>
+                        <variable name="var1" value="111"/>
+                        <variable name="PATH" value="$PATH;***"/>
+                        <variable name="PATH" value="$PATH;222"/>
+                        <variable name="SHARE" value="\\HOST\C$"/>
+                        <variable name="SHARE" value="\\HOST\C$\DIR"/>
+                        <variable name="REGEX" value="A$"/>
+                        <variable name="REGEX" value="A$|X"/>
+                        <!--Nur Windows: variable name="var.mit.punkt0" value="Eine Variable mit Punkt"/>
+                        <variable name="var.mit.punkt" value="${var.mit.punkt} Eine Variable mit Punkt"/-->
+                    </environment>
+                </process>
+                
+                <run_time/>
+            </job>
+        </jobs>
+
+        <job_chains>
+            <job_chain name="process.scheduler" orders_recoverable="no">
+                <job_chain_node     state="1" job="process" next_state="NEXT_STATE" error_state="ERROR_STATE"/>
+                <job_chain_node.end state="NEXT_STATE"/>
+                <job_chain_node.end state="ERROR_STATE"/>
+            </job_chain>
+        </job_chains>
+    </config>
+</spooler>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id$-->
+
+<xml_element name     = "period"
+             title    = "Periode"
+             category = "Konfiguration"
+             base_dir = "../"
+             parent_page = "../konfiguration.xml"
+             author   = "$Author$"
+             date     = "$Date$">
+
+    <xml_parent_elements>
+        <xml_parent_element name="run_time">
+        </xml_parent_element>
+    </xml_parent_elements>
+
+
+    <xml_attributes>
+        <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
+            <description>
+                <p>
+                    Ab dieser Uhrzeit darf der Job laufen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" type="hh:mm[:ss]" initial="24:00">
+            <description>
+                <p>
+                    Um diese Zeit endet die Periode.
+                    Wenn dann <code>let_run="no"</code> gesetzt ist und keine weitere Periode gilt,
+                    beendet der Scheduler laufende Tasks (durch Aufruf von <code>spooler_close()</code>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="repeat" type="hh:mm[:ss] oder sekunden">
+            <description>
+                <p>
+                    Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
+                    Nach Jobende soll der Scheduler den Job nach ablauf der angegebenen Zeit erneut starten,
+                    soweit die <code>&lt;run_time></code> das zulässt.
+                    Die Wiederholung kann im Format <i>hh:mm</i> oder <i>hh:mm:ss</i> oder in Sekunden angegeben werden.
+                </p>
+
+                <p>Kann nicht mit dem Attribut <code>single_start=</code> kombiniert werden.</p>
+
+                <p>
+                    Bei <code>repeat="0"</code> wird der Job nicht wiederholt (default).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="absolute_repeat" type="hh:mm[:ss] | seconds">
+            <description>
+                <p>
+                    Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
+                    Danach wird er zu den Zeitpunkten gestartet, 
+                    die sich aus den Vielfachen von <code>absolute_repeat</code> nach <code>begin</code> errechnen.
+                    Die Wiederholung kann im Format <i>hh:mm</i> oder <i>hh:mm:ss</i> oder in Sekunden angegeben werden.
+                </p>
+
+                <p>
+                    Kann nicht mit dem Attribut <code>single_start=</code> kombiniert werden.
+                </p>
+
+                <scheduler_example>
+                    <pre>&lt;period begin="13:00" end="15:00" absolute_repeat="00:30"/></pre>
+                    <p>
+                        lässt den Job um 13:00, 13:30, 14:00 und 14:30 starten.
+                    </p>
+                </scheduler_example>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="single_start" type="hh:mm[:ss]">
+            <description>
+                <p>
+                    Der Job soll zu der angegebenen Uhrzeit starten.
+                </p>
+                <p>
+                    Nicht zusammen mit den Attributen <code>begin=</code>, <code>end=</code> und <code>repeat=</code> zu verwenden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="let_run" type="yes_no">
+            <description>
+                <p>
+                    Das Attribut kann nur für Jobs, nicht für Aufträge angegeben werden.
+                    Für auftragsgesteuerte Jobs sollte Einstellung <code>let_run="no"</code> eingestellt werden.
+                </p>
+                <p>
+                    <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
+                    auch wenn die <code>&lt;run_time></code> das eigentlich nicht mehr zulässt.
+                </p>
+                <p>
+                    Bei <code>let_run="no"</code> beendet der Scheduler die Task
+                    (ruft also nicht mehr spooler_process, sondern spooler_close auf),
+                    sobald die <code>&lt;run_time></code> nicht mehr gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="when_holiday" title="Umgang mit Feiertagen">
+            <description>
+                <p>
+                    Normalerweise wird eine Periode, die auf einen Feiertag 
+                    <scheduler_element name="holidays"/>
+                    fällt, unterdrückt.
+                    Aber es gibt noch weitere Möglichkeiten.
+                </p>
+                
+                <p>
+                    <code>when_holiday="suppress"</code>
+                </p>
+                <p class="list_text">
+                    Voreinstellung.
+                    Wenn die Periode auf einen Feiertag fällt, wird sie unterdrückt.
+                </p>
+
+                <p>
+                    <code>when_holiday="ignore_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie nicht unterdrückt.
+                </p>
+                
+                <p>
+                    <code>when_holiday="previous_non_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie auf den vorangehenden Nicht-Feiertag verschoben.
+                </p>
+
+                <p>
+                    <code>when_holiday="next_non_holiday"</code>
+                </p>
+                <p class="list_text">
+                    Wenn die Periode auf einen Feiertag fällt, wird sie auf den nachfolgenden Nicht-Feiertag verschoben.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <description>
+        <p>
+            Eine Periode gibt an, wann ein Job laufen darf. Sie kann einen Zeitraum innerhalb eines Tages umfassen
+            (Attribute <code>begin</code> und <code>end</code>) oder einen Zeitpunkt (Attribut <code>single_start</code>).
+        </p>
+    </description>
+
+</xml_element>

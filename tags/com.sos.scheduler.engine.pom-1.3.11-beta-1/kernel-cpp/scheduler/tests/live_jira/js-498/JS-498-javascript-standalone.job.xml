@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="Testjob (javascript)"
+     order="no">
+    <script language="javax.script:javascript">
+        <![CDATA[
+  var filename = "c:/temp/myFile.txt";
+  var file = Packages.java.io.File(filename);
+  if ( file.exists() ) {
+     file["delete"]();	// because delete is reserved in javascript
+	   logger.info( "file " + filename + " deleted succesfully." );
+	} else {
+	   logger.info( "file " + filename + " does not exist." );
+	}   
+        ]]>
+    </script>
+    <run_time/>
+</job>
