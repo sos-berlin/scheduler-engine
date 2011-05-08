@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.pom</artifactId>
-        <version>1.3.11-SNAPSHOT</version>
+        <version>1.3.11-beta-1</version>
     </parent>
     
     <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
@@ -72,23 +72,23 @@
                         <phase>compile</phase>
                         <configuration>
                             <tasks>
-                                <property name="compile_classpath" refid="maven.compile.classpath"/>
-                                <property name="runtime_classpath" refid="maven.runtime.classpath"/>
-                                <property name="test_classpath" refid="maven.test.classpath"/>
-                                <property name="plugin_classpath" refid="maven.plugin.classpath"/>
+                                <property name="compile_classpath" refid="maven.compile.classpath" />
+                                <property name="runtime_classpath" refid="maven.runtime.classpath" />
+                                <property name="test_classpath" refid="maven.test.classpath" />
+                                <property name="plugin_classpath" refid="maven.plugin.classpath" />
 
-                                <echo message="compile classpath: ${compile_classpath}"/>
-                                <echo message="runtime classpath: ${runtime_classpath}"/>
-                                <echo message="test classpath:    ${test_classpath}"/>
-                                <echo message="plugin classpath:  ${plugin_classpath}"/>
+                                <echo message="compile classpath: ${compile_classpath}" />
+                                <echo message="runtime classpath: ${runtime_classpath}" />
+                                <echo message="test classpath: ${test_classpath}" />
+                                <echo message="plugin classpath: ${plugin_classpath}" />
 
-                                <property name="M2_REPO" location="${user.home}/.m2/repository"/>  <!- - ${settings.localRepository} - ->
-                                <property name="javaproxy.java.output.dir" location="${project.build.sourceDirectory}"/>
-                                <property name="cplusplusgenerator.jar" location="${M2_REPO}/com/sos/scheduler/kernel/com.sos.scheduler.engine.cplusplus.generator/2.1.1-SNAPSHOT/com.sos.scheduler.engine.cplusplus.generator-2.1.1-SNAPSHOT-jar-with-dependencies.jar"/>
+                                <property name="M2_REPO" location="${user.home}/.m2/repository" />  <!- - ${settings.localRepository} - ->
+                                <property name="javaproxy.java.output.dir" location="${project.build.sourceDirectory}" />
+                                <property name="cplusplusgenerator.jar" location="${M2_REPO}/com/sos/scheduler/kernel/com.sos.scheduler.engine.cplusplus.generator/2.1.1-SNAPSHOT/com.sos.scheduler.engine.cplusplus.generator-2.1.1-SNAPSHOT-jar-with-dependencies.jar" />
                                 <- -property name="cplusplusgenerator.jar" location="${com.sos.scheduler.engine.com:com.sos.scheduler.engine.cplusplus.generator:jar-with-dependencies.jar"/- ->
-                                <property name="cplusplusgenerator.mainclass" value="${project.groupId}.cplusplus.generator.Main"/>
+                                <property name="cplusplusgenerator.mainclass" value="${project.groupId}.cplusplus.generator.Main" />
 
-                                <ant antfile="${basedir}/build.xml"/>
+                                <ant antfile="${basedir}/build.xml" />
                             </tasks>
                         </configuration>
                         <goals>

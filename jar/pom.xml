@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.pom</artifactId>
-        <version>1.3.11-SNAPSHOT</version>
+        <version>1.3.11-beta-1</version>
     </parent>
     
     <artifactId>com.sos.scheduler.engine.jar</artifactId>
@@ -44,9 +44,9 @@
                         <phase>install</phase>
                         <configuration>
                             <tasks>
-                                <property name="runtime.classpath" refid="maven.runtime.classpath"/>
-                                <property name="project.name" value="${project.artifactId}"/>
-                                <ant target="build" inheritRefs="true"/>
+                                <property name="runtime.classpath" refid="maven.runtime.classpath" />
+                                <property name="project.name" value="${project.artifactId}" />
+                                <ant target="build" inheritRefs="true" />
                             </tasks>
                         </configuration>
                         <goals>
