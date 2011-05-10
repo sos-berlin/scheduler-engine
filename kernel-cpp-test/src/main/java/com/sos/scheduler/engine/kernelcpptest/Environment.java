@@ -21,6 +21,7 @@ public class Environment {
     private static final Logger logger = Logger.getLogger(Environment.class);
 
     final File directory;
+    final File sosIniFile;
     final File factoryIniFile;
     private final Object mainObject;
     private final File logDirectory;
@@ -47,6 +48,7 @@ public class Environment {
         try {
             this.mainObject = mainObject;
             directory = File.createTempFile("sos", ".tmp");
+            sosIniFile = new File(directory, "sos.ini");
             factoryIniFile = new File(directory, "factory.ini");
             logDirectory = new File(directory, "log");
             prepareConfigurationFiles();
@@ -62,7 +64,8 @@ public class Environment {
         directory.mkdir();
         logDirectory.mkdir();
         copyResource("scheduler.xml");
-        copyResourceOptional("factory.ini", factoryIniFile);
+        copyResource("sos.ini", sosIniFile);
+        copyResource("factory.ini", factoryIniFile);
     }
 
 
@@ -86,25 +89,15 @@ public class Environment {
     }
 
 
-    private void copyResource(String name, File destination) {
-        boolean exists = copyResourceOptional(name, destination);
-        if (!exists)  throw new IllegalStateException("Resource '" + name + "' is missing in package " + resourceClass().getPackage().getName());
-    }
-
-    
-    private void copyResourceOptional(String name) {
-        copyResourceOptional(name, null);
-    }
-
-
-    private boolean copyResourceOptional(String name, File destinationOrNull) {
+    private void copyResource(String name, File destinationOrNull) {
         try {
             File dest = destinationOrNull != null? destinationOrNull : new File(directory, name);
             URL url = resourceClass().getResource(name);
-            boolean exists = url != null;
-            if (exists)
-                copyURLToFile(url, dest);
-            return exists;
+            if (url == null) {
+                url = Environment.class.getResource(name);
+                if (url == null)  throw new RuntimeException("Resource '" + name + "' is missing");
+            }
+            copyURLToFile(url, dest);
         }
         catch(IOException x) { throw new RuntimeException(x); }
     }
@@ -118,7 +111,8 @@ public class Environment {
     public String[] standardArgs() {
         List<String> result = new ArrayList<String>(Arrays.asList(
             schedulerExeFile.getPath(),
-            "-ini=" + factoryIniFile.getPath(),
+            "-sos.ini=" + sosIniFile.getAbsolutePath(),  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
+            "-ini=" + factoryIniFile.getAbsolutePath(),  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
             "-log-dir=" + logDirectory.getPath(),
             "-log=" + new File(logDirectory, "scheduler.log").getPath(),
             "-java-events"));
@@ -129,7 +123,7 @@ public class Environment {
             String p = nullToEmpty(System.getenv(varName));
             String arg = "-env=" + varName + "=" + concatFileAndPathChain(schedulerBinDirectory(), p);
             result.add(arg);
-	}
+        }
 
         result.add(directory.getPath());
         return result.toArray(new String[0]);

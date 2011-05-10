@@ -10,7 +10,8 @@
 
 namespace sos 
 {
-    int sos_main( int argc, char** argv );
+    //int sos_main( int argc, char** argv );
+    int process_sos_ini_in_argc_argv(int argc, char** argv);
 }
 
 
@@ -63,14 +64,14 @@ JNIEXPORT int JNICALL Java_com_sos_scheduler_engine_kernel_main_CppScheduler_run
         int count = jenv->GetArrayLength( jargs );
         argv = new char*[ count ];
 
-        for( int i = 0; i < count; i++ )
-        {
+        for( int i = 0; i < count; i++ ) {
             jobject jparam = jenv->GetObjectArrayElement( jargs, i );
             string arg = env.string_from_jstring( (jstring)jparam );
             argv[i] = new char[ arg.length() + 1 ];
             strcpy( argv[i], arg.c_str() );
             argc++;
         }
+        argc = sos::process_sos_ini_in_argc_argv(argc, argv);
 
         result = sos::spooler_main(argc, argv, env.string_from_jstring(argument_line_jstr), java_main_context);
     }
@@ -114,8 +115,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
 
         argv = new char*[ count ];
 
-        for( int i = 0; i < count; i++ )
-        {
+        for( int i = 0; i < count; i++ ) {
             jobject jparam = jenv->GetObjectArrayElement( jparams, i );
             string arg = env.string_from_jstring( (jstring)jparam );
             argv[i] = new char[ arg.length() + 1 ];
@@ -123,6 +123,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv
           //fprintf(stderr,"%d: %s\n", i, argv[i]);
             argc++;
         }
+        argc = sos::process_sos_ini_in_argc_argv(argc, argv);
 
         int ret = sos::spooler_main( argc, argv, "" );
     }

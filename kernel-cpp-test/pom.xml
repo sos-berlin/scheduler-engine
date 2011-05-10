@@ -15,6 +15,26 @@
     <description>Test des Schedulers (eigenes Projekt, getrennt vom Zusammenbau des Schedulers)</description>
 
     <build>
+        <resources>
+            <resource>
+                <!-- Standard Wiederholen -->
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>${project.build.sourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>src/test/scala</directory>
+                <excludes>
+                    <exclude>**/*.scala</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <testResources>
             <testResource>
                 <!-- Standard Wiederholen -->

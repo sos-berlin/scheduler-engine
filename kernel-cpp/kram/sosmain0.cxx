@@ -46,6 +46,24 @@ int DebugHook( int, char* szOutMessage, int* retval )
 }
 
 #endif
+//---------------------------------------------------------------------process_sos_ini_in_argc_argv
+
+int process_sos_ini_in_argc_argv(int argc, char** argv) {
+    for( int i = 1; i < argc; i++ ) {  // -sos.ini=FILENAME ?
+        const char* p = argv[ i ];
+
+        if( strncmp( p, "-sos.ini=", 9 ) == 0 ) {
+            //if( !strchr( p + 9, ' ' ) )                     // Nicht bei "-sos.ini=filename bla ...", Blanks im Dateinamen nicht erlaubt
+            if( p[9] == '"'  &&  p[ strlen( p ) - 1 ] == '"' ) {
+                set_sos_ini_filename( string( p + 10, strlen( p + 10 ) - 1 ) );
+            } else {
+                set_sos_ini_filename( p + 9 );
+            }
+        }
+    }
+    return argc;
+}
+
 //----------------------------------------------------------------------------------------sos_main0
 
 int sos_main0( int argc, char** argv )
@@ -81,25 +99,7 @@ int sos_main0( int argc, char** argv )
             set_log_category_default( "memory_leak_check", true );
         #endif
 
-
-        for( int i = 1; i < argc; i++ )   // -sos.ini=FILENAME ?
-        {
-            const char* p = argv[ i ];
-
-            if( strncmp( p, "-sos.ini=", 9 ) == 0 ) 
-            {
-                //if( !strchr( p + 9, ' ' ) )                     // Nicht bei "-sos.ini=filename bla ...", Blanks im Dateinamen nicht erlaubt
-                if( p[9] == '"'  &&  p[ strlen( p ) - 1 ] == '"' )
-                {
-                    set_sos_ini_filename( string( p + 10, strlen( p + 10 ) - 1 ) );
-                }
-                else
-                {
-                    set_sos_ini_filename( p + 9 );
-                }
-            }
-        }
-
+        argc = process_sos_ini_in_argc_argv(argc, argv);
         rc = sos_main( argc, argv );
 
         #if defined SYSTEM_WIN && defined _DEBUG
