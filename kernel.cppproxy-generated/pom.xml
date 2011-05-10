@@ -57,7 +57,7 @@
                     <dependency>
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                        <version>1.3.11-beta-2</version>
+                        <version>1.3.11-beta-3-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -80,6 +80,7 @@
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

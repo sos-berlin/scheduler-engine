@@ -106,7 +106,7 @@ function visualStudio_compile() {
 function msbuild() {
     # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
     for c in Release Debug; do :
-        "$msbuild" /property:Configuration=$c $*
+        "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $*
     done
 }
 

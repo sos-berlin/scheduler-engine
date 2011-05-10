@@ -16,7 +16,12 @@ class Generator(cppOutputDirectory: Option[File], javaOutputDirectory: Option[Fi
 
     private val (javaModules, jniModules) = {
         val modulePairs = interfaces.toList sortBy { _.getName } map { new CppProxyModulePair(_) }
-        modulePairs unzip { a => (a.javaModule, a.jniModule)}
+        val result = modulePairs unzip { a => (a.javaModule, a.jniModule) }
+        val anyPackageName = {
+            val anyInterface = interfaces.headOption getOrElse { throw new RuntimeException("No java interface for C++ proxy given") }
+            anyInterface.getPackage.getName
+        }
+        (new JavadocJavaModule(anyPackageName) :: result._1, result._2)
     }
 
     def apply() { 
