@@ -1,16 +1,0 @@
-#! /bin/bash
-
-#if grep -q "" $* > /dev/null; then
-
-    while [ "$1" != "" ]; do
-        if grep -s -q "" $1 > /dev/null; then 
-           echo $1
-           sed "s///" <$1 >$1~delcr  &&  cp -f $1~delcr $1  &&  rm -f $1~delcr
-           #mv $1 $1~delcr && 
-           #sed "s///" < $1~delcr > $1 && 
-           #rm -f $1~delcr
-        fi
-
-        shift
-    done
-#fi

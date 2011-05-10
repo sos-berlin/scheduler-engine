@@ -1,4 +1,0 @@
-// $Id$
-
-#include "hostjava_version.h"
-#include "../kram/sosvers.rc"

@@ -1,3 +1,0 @@
-// $Id$
-
-#define SCRIPT_OBJECT_DISPID 0x7FB36D01

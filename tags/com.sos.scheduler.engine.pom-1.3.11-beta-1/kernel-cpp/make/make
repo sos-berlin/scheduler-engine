@@ -1,7 +1,0 @@
-#! /bin/bash
-# $Id: make-all 3350 2005-02-02 15:00:32Z jz $
-
-
-. make/make-all.include
-
-do_make $*

@@ -1,8 +1,0 @@
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/prod/scheduler/scheduler.xsd"
-           
->
-    
-    <job_chain_node.job_chain state="CCC" job_chain="job_chain.nested.C"/>
-    <job_chain_node.job_chain state="EEE" job_chain="job_chain.nested.E"/>
-    
-</job_chain>

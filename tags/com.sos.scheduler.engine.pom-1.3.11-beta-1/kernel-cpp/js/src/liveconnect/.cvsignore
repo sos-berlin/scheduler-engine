@@ -1,8 +1,0 @@
-*.plg
-Release
-*.ncb
-.svn
-*.pdb
-Debug
-*.opt
-Makefile
