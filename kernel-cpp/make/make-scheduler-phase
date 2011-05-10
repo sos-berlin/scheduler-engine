@@ -18,6 +18,13 @@ inWindows=$(if [ `uname -o` == "Cygwin" ]; then echo 1; else echo ""; fi)
 vcbuild=""
 msbuild=""
 
+if [ -z "$MAKE_JOBS" ]; then :
+    MAKE_JOBS=`cat /proc/cpuinfo | grep -w '^processor'|wc -l`
+    [ $MAKE_JOBS -le 0 ]  &&  MAKE_JOBS=1
+    [ $MAKE_JOBS -gt 8 ]  &&  MAKE_JOBS=8
+    export MAKE_JOBS
+fi
+
 if [ $inWindows ]; then \
     if [ "$SCHEDULER_VISUAL_STUDIO_VERSION" == "10" ]; then :
         if [ -z "${WINDOWS_NET_SDK_HOME}" ]; then :
