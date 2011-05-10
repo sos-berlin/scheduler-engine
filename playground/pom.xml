@@ -10,6 +10,7 @@
 
     <modules>
         <module>mq</module>
+        <module>zschimmer</module>
     </modules>
 
     <artifactId>com.sos.scheduler.engine.playground</artifactId>

@@ -61,42 +61,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            
-            <!--plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <configuration>
-                            <tasks>
-                                <property name="compile_classpath" refid="maven.compile.classpath" />
-                                <property name="runtime_classpath" refid="maven.runtime.classpath" />
-                                <property name="test_classpath" refid="maven.test.classpath" />
-                                <property name="plugin_classpath" refid="maven.plugin.classpath" />
-
-                                <echo message="compile classpath: ${compile_classpath}" />
-                                <echo message="runtime classpath: ${runtime_classpath}" />
-                                <echo message="test classpath: ${test_classpath}" />
-                                <echo message="plugin classpath: ${plugin_classpath}" />
-
-                                <property name="M2_REPO" location="${user.home}/.m2/repository" />  <!- - ${settings.localRepository} - ->
-                                <property name="javaproxy.java.output.dir" location="${project.build.sourceDirectory}" />
-                                <property name="cplusplusgenerator.jar" location="${M2_REPO}/com/sos/scheduler/kernel/com.sos.scheduler.engine.cplusplus.generator/2.1.1-SNAPSHOT/com.sos.scheduler.engine.cplusplus.generator-2.1.1-SNAPSHOT-jar-with-dependencies.jar" />
-                                <- -property name="cplusplusgenerator.jar" location="${com.sos.scheduler.engine.com:com.sos.scheduler.engine.cplusplus.generator:jar-with-dependencies.jar"/- ->
-                                <property name="cplusplusgenerator.mainclass" value="${project.groupId}.cplusplus.generator.Main" />
-
-                                <ant antfile="${basedir}/build.xml" />
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin-->
         </plugins>
     </build>
 
