@@ -32,7 +32,7 @@ if [ $inWindows ]; then \
             exit 1
         fi
         msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
-        echo 'Compiling with Visual Studio 2010 (not for release in 2011, Scheduler is not runnable on Windows 2000)'
+        echo 'Using Visual Studio 2010 (not for release in 2011, Scheduler is not runnable on Windows 2000)'
         if [ ! -f "$msbuild" ]; then 
             echo "Missing msbuild.exe: $msbuild"
             exit 1
@@ -44,7 +44,7 @@ if [ $inWindows ]; then \
             exit 1
         fi
         vcbuild=$(cygpath "${VISUAL_STUDIO_2008_HOME}")/VC/vcpackages/vcbuild.exe
-        echo Compiling with Visual Studio 2008
+        echo Using Visual Studio 2008
         if [ ! -f "$vcbuild" ]; then 
             echo "Missing vcbuild.exe: $vcbuild"
             exit 1
@@ -69,28 +69,27 @@ function cmd_generic_clean() {
 }
 
 function cmd_generic_compile() {
-    o=`if [ "$os" == "windows" ]; then echo $os; else echo unix; fi`
-    cp -p src/main/assembly/assembly-$o.xml target/assembly.xml  || exit
+    :
 }
 
 #-------------------------------------------------------------------------------------------Windows
 
 function cmd_windows_clean() {
-    cmd_windows_cleanWithRm
-    visualStudio_clean scheduler
-    visualStudio_clean spidermonkey
+    cmd_windows_cleanWithRm  || exit
+    visualStudio_clean scheduler  || exit
+    visualStudio_clean spidermonkey  || exit
 }
 
 function cmd_windows_cleanWithRm() {
     # Weil "vcbuild.exe /clean" nicht immer löschen kann (Fehlermeldung PRJ0008), siehe http://msdn.microsoft.com/en-us/library/hk8k8k4h%28v=vs.80%29.aspx
-    searchAndDestroySubDirectory Release
-    searchAndDestroySubDirectory Debug
-    rm -rf {bin,bind,ipch}/*
+    searchAndDestroySubDirectory Release  || exit
+    searchAndDestroySubDirectory Debug  || exit
+    rm -rf {bin,bind,ipch}/*  || exit
 }
 
 function cmd_windows_compile() {
-    visualStudio_compile scheduler
-    visualStudio_compile spidermonkey
+    visualStudio_compile scheduler  || exit
+    visualStudio_compile spidermonkey  || exit
 }
 
 #function cmd_windows_generateSources() {
@@ -100,20 +99,20 @@ function cmd_windows_compile() {
 
 function visualStudio_clean() {
     package=$1
-    [ -n "$vcbuild" ]  &&  "$vcbuild" /clean $package.sln  &&  "$vcbuild" /clean $package.sln
-    [ -n "$msbuild" ]  &&  msbuild /target:clean $package-vs2010.sln
+    if [ -n "$vcbuild" ]; then "$vcbuild" /clean $package.sln  || exit; fi
+    if [ -n "$msbuild" ]; then msbuild /target:clean $package-vs2010.sln  || exit; fi
 }
 
 function visualStudio_compile() {
     package=$1
-    [ -n "$vcbuild" ]  &&  "$vcbuild" $package.sln
-    [ -n "$msbuild" ]  &&  msbuild $package-vs2010.sln
+    if [ -n "$vcbuild" ]; then "$vcbuild" $package.sln  || exit; fi
+    if [ -n "$msbuild" ]; then  msbuild $package-vs2010.sln  || exit; fi
 }
 
 function msbuild() {
     # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
     for c in Release Debug; do :
-        "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $*
+        "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $* || exit
     done
 }
 
