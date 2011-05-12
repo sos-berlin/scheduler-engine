@@ -135,6 +135,8 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     public String getHttpUrl() { return spoolerC.http_url(); }
 
     public int getTcpPort() { return spoolerC.tcp_port(); }
+    public String getHostname() { return spoolerC.hostname(); }
+    public String getHostnameLong() { return spoolerC.hostname_complete(); }
 
     public void callCppAndDoNothing() { spoolerC.tcp_port(); }
 

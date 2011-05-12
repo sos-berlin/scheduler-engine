@@ -4,9 +4,9 @@
 
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
-#include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
 #include "com__sos__scheduler__engine__kernel__Platform.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__OrderC.h"
+#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderId.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderState.h"
 #include "java__lang__String.h"
@@ -20,6 +20,7 @@ struct Order__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_Platform_2Lcom_sos_scheduler_engine_kernel_cppproxy_OrderC_2__method;
     ::zschimmer::javabridge::Method const _getEndState____method;
+    ::zschimmer::javabridge::Method const _getFilePath____method;
     ::zschimmer::javabridge::Method const _getId____method;
     ::zschimmer::javabridge::Method const _getState____method;
     ::zschimmer::javabridge::Method const _getTitle____method;
@@ -36,6 +37,7 @@ Order__class::Order__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor__Lcom_sos_scheduler_engine_kernel_Platform_2Lcom_sos_scheduler_engine_kernel_cppproxy_OrderC_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/Platform;Lcom/sos/scheduler/engine/kernel/cppproxy/OrderC;)V")
     ,_getEndState____method(this, "getEndState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
+    ,_getFilePath____method(this, "getFilePath", "()V")
     ,_getId____method(this, "getId", "()Lcom/sos/scheduler/engine/kernel/order/OrderId;")
     ,_getState____method(this, "getState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_getTitle____method(this, "getTitle", "()Ljava/lang/String;")
@@ -78,6 +80,12 @@ Order::~Order() { assign_(NULL); }
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
     result.steal_local_ref(cls->_getEndState____method.jobject_call(get_jobject(), parameter_list));
     return result;
+}
+
+void Order::getFilePath() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Order__class* cls = _class.get();
+    cls->_getFilePath____method.call(get_jobject(), parameter_list);
 }
 
 ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId Order::getId() {

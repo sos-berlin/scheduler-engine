@@ -450,6 +450,32 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     private static native boolean has_exclusiveness__native(long cppReference);
 
 
+    @Override public java.lang.String hostname() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return hostname__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String hostname__native(long cppReference);
+
+
+    @Override public java.lang.String hostname_complete() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return hostname_complete__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String hostname_complete__native(long cppReference);
+
+
     @Override public java.lang.String http_url() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

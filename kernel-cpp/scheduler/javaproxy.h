@@ -22,7 +22,7 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderId.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangeEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__scripting__APIModuleInstance.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__util__StringValue.h"
 #include "../javaproxy/com__sos__scheduler__engine__cplusplus__runtime__Sister.h"

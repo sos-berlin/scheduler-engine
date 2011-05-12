@@ -1,21 +1,16 @@
 package com.sos.scheduler.engine.kernel.folder;
 
-import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
-import com.sos.scheduler.engine.kernel.Platform;
-import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
+import com.sos.scheduler.engine.kernel.Platform;
 
 
 @ForCpp
-abstract public class FileBased<T extends FileBased<T,CPPPROXY>, CPPPROXY extends CppProxyWithSister<T>> 
+abstract public class FileBased 
   extends AbstractHasPlatform implements Sister
 {
-    private final CPPPROXY cppProxy;
-
-
-    protected FileBased(Platform p, CPPPROXY proxy) {
+    protected FileBased(Platform p) {
         super(p);
-        cppProxy = proxy;
     }
 }

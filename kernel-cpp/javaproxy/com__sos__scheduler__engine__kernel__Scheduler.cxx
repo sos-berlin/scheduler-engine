@@ -23,6 +23,8 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _callCppAndDoNothing____method;
     ::zschimmer::javabridge::Method const _executeXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
+    ::zschimmer::javabridge::Method const _getHostname____method;
+    ::zschimmer::javabridge::Method const _getHostnameLong____method;
     ::zschimmer::javabridge::Method const _getHttpUrl____method;
     ::zschimmer::javabridge::Method const _getMainContext____method;
     ::zschimmer::javabridge::Method const _getPlatform____method;
@@ -48,6 +50,8 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_callCppAndDoNothing____method(this, "callCppAndDoNothing", "()V")
     ,_executeXml__Ljava_lang_String_2__method(this, "executeXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
+    ,_getHostname____method(this, "getHostname", "()Ljava/lang/String;")
+    ,_getHostnameLong____method(this, "getHostnameLong", "()Ljava/lang/String;")
     ,_getHttpUrl____method(this, "getHttpUrl", "()Ljava/lang/String;")
     ,_getMainContext____method(this, "getMainContext", "()Ljava/lang/Object;")
     ,_getPlatform____method(this, "getPlatform", "()Lcom/sos/scheduler/engine/kernel/Platform;")
@@ -111,6 +115,22 @@ void Scheduler::callCppAndDoNothing() {
     Scheduler__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem result;
     result.steal_local_ref(cls->_getEventSubsystem____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String Scheduler::getHostname() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getHostname____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String Scheduler::getHostnameLong() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getHostnameLong____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

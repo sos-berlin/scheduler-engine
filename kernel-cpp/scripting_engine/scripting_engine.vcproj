@@ -38,6 +38,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
 				OutputDirectory="$(IntDir)/"
 				HeaderFileName="$(IntDir)/$(InputName)_h.h"
 			/>
@@ -132,6 +133,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
 				OutputDirectory="$(IntDir)/"
 				HeaderFileName="$(IntDir)/$(InputName)_h.h"
 			/>
@@ -243,7 +245,7 @@
 					Name="VCMIDLTool"
 					WarningLevel="3"
 					WarnAsError="true"
-					TypeLibraryName="$(TargetName).tlb"
+					TypeLibraryName="$(ProjectName).tlb"
 					HeaderFileName="$(InputName)_h.h"
 					EnableErrorChecks="2"
 					ErrorCheckAllocations="true"
@@ -261,7 +263,7 @@
 					Name="VCMIDLTool"
 					WarningLevel="3"
 					WarnAsError="true"
-					TypeLibraryName="$(TargetName).tlb"
+					TypeLibraryName="$(ProjectName).tlb"
 					HeaderFileName="$(InputName)_h.h"
 					EnableErrorChecks="2"
 					ErrorCheckAllocations="true"

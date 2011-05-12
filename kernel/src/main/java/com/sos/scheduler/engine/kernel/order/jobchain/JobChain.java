@@ -10,12 +10,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import java.util.List;
 
 
-public class JobChain extends FileBased<JobChain,Job_chainC> {
+public class JobChain extends FileBased {
     private final Job_chainC jobChainC;
 
 
     public JobChain(Platform platform, Job_chainC jobChainC) {
-        super(platform, jobChainC);
+        super(platform);
         this.jobChainC = jobChainC;
     }
 

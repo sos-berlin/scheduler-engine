@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 import com.sos.scheduler.engine.kernel.order.Order;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangeEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,12 +37,12 @@ public class Monitor implements EventSubscriber {
 
 
     @Override public void onEvent(Event e) throws IOException {
-        if (e instanceof OrderStateChangeEvent)
-            processOrderStateChangeEvent((OrderStateChangeEvent)e);
+        if (e instanceof OrderStateChangedEvent)
+            processOrderStateChangeEvent((OrderStateChangedEvent)e);
     }
 
 
-    private void processOrderStateChangeEvent(OrderStateChangeEvent e) throws IOException {
+    private void processOrderStateChangeEvent(OrderStateChangedEvent e) throws IOException {
         Order order = e.getObject();
         JobChain jobChain = order.jobChainOrNull();
         if (jobChain != null) {

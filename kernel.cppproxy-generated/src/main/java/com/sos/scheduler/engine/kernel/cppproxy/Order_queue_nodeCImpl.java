@@ -9,6 +9,32 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return error_node__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
+
+
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return next_node__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_queueC order_queue() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

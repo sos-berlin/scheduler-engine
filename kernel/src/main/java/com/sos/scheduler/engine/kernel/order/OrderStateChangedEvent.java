@@ -25,11 +25,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStateChangeEvent extends OrderEvent {
+public class OrderStateChangedEvent extends OrderEvent {
+	
     private final OrderState previousState;
 
     
-    public OrderStateChangeEvent(Order order, OrderState previousState) {
+    public OrderStateChangedEvent(Order order, OrderState previousState) {
         super(order);
         this.previousState = previousState;
     }

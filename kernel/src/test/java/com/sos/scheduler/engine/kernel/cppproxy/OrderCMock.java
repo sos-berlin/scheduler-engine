@@ -10,6 +10,7 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC
     private String state = "TESTORDER-STATE";
     private String title =" TESTORDER-TITLE";
     private String endState = "";
+    private String filePath = "TESTORDER-PATH";
 
     @Override public boolean cppReferenceIsValid() { return true; }
 
@@ -28,4 +29,8 @@ public class OrderCMock extends CppProxyImpl<Order> implements OrderC
     @Override public String string_end_state() { return endState; }
 
     @Override public String title() { return title; }
+
+	@Override
+	public String file_path() {	return filePath; };
+	
 }

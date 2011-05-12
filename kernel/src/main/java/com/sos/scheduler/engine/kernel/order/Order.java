@@ -4,13 +4,14 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.*;
 import com.sos.scheduler.engine.kernel.cppproxy.Job_chainC;
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC;
+import com.sos.scheduler.engine.kernel.folder.FileBased;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 @ForCpp
-public class Order extends AbstractHasPlatform implements Sister {
+public class Order extends FileBased implements Sister {
     private final OrderC orderC;
 
     public Order(Platform platform, OrderC orderC) {
@@ -27,6 +28,8 @@ public class Order extends AbstractHasPlatform implements Sister {
     public OrderState getState() { return new OrderState(orderC.string_state()); }
 
     public void setEndState(OrderState s) { orderC.set_end_state(s.string()); }
+
+    public void getFilePath() { orderC.file_path(); }
 
     public OrderState getEndState() { return new OrderState(orderC.string_end_state()); }
 

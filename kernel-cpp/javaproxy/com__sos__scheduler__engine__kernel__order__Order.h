@@ -6,13 +6,14 @@
 #define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDER_H_
 
 #include "com__sos__scheduler__engine__kernel__AbstractHasPlatform.h"
+#include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct OrderC; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderId; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct AbstractHasPlatform; }}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -22,7 +23,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct Order__class;
 
-struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com::sos::scheduler::engine::kernel::AbstractHasPlatform {
+struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased {
     static Order new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Platform >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::OrderC >& p1);
 
     Order(jobject = NULL);
@@ -46,11 +47,12 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< Order >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::AbstractHasPlatform::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased::set_jobject(jo);
     }
   public:
 
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
+    void getFilePath();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
     ::javaproxy::java::lang::String getTitle();

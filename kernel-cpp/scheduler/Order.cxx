@@ -5,11 +5,11 @@
 
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__Order.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderState.h"
-#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangeEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.h"
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateJ;
-typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangeEvent OrderStateChangeEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangedEvent OrderStateChangedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderFinishedEvent OrderFinishedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent OrderTouchedEventJ;
 
@@ -2056,7 +2056,7 @@ void Order::set_state2( const State& order_state, bool is_error_state )
 
         if (is_in_job_chain())
         {
-            report_event( OrderStateChangeEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
+            report_event( OrderStateChangedEventJ::new_instance(java_sister(), OrderStateJ::new_instance(previous_state.as_string())) );
 
             Scheduler_event event ( evt_order_state_changed, log_info, this );
             _spooler->report_event( &event );

@@ -1780,6 +1780,7 @@ void File_based::remove_now()
     on_remove_now();
     typed_folder()->remove_file_based( this );
     subsystem()->dependencies()->announce_requisite_removed( this ); 
+    //SS: report_event( new folder_removed_event ... ()
 }
 
 //-------------------------------------------------------------------------------File_based::remove
@@ -1966,6 +1967,7 @@ File_based* File_based::replace_now()
         // this ist ungültig
     }
 
+    //SS: replacement->report_event_replace ... (weil "this" ungültig)
     new_file_based->activate();
     return new_file_based;
 }

@@ -9,6 +9,19 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
         setSister(sisterType.sister(this, context));
     }
 
+    @Override public java.lang.String file_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return file_path__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String file_path__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
