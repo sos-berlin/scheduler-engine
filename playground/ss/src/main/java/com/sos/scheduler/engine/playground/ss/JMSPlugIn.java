@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangeEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
@@ -96,7 +96,7 @@ public class JMSPlugIn implements PlugIn, EventSubscriber {
         
         // for test purposes only for the selected events
         //TODO execution for all events
-      if (e instanceof OrderStateChangeEvent || e instanceof OrderTouchedEvent) {
+      if (e instanceof OrderStateChangedEvent || e instanceof OrderTouchedEvent) {
 	        JSEvent ev = objFactory.createEvent(e);
 	        System.out.println( "publish event (" + n + "):\n" + ev.marshal() );
 	        m.setText( ev.marshal() );									// provides the event as XML
@@ -106,8 +106,8 @@ public class JMSPlugIn implements PlugIn, EventSubscriber {
     }
         
     private String getEventName(Event e) {
-        if (e instanceof OrderStateChangeEvent) {
-        	return "OrderStateChangeEvent";
+        if (e instanceof OrderStateChangedEvent) {
+        	return "OrderStateChangedEvent";
         }
         if (e instanceof OrderTouchedEvent) {
         	return "OrderTouchedEvent";

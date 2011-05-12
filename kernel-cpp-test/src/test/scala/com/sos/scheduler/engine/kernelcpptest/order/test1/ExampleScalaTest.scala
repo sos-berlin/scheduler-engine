@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernelcpptest.order.test1
 
 import com.sos.scheduler.engine.kernel.order.OrderEvent
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent
-import com.sos.scheduler.engine.kernel.order.OrderStateChangeEvent
+import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent
 import com.sos.scheduler.engine.kernel.util.Time
 import com.sos.scheduler.engine.kernelcpptest._
@@ -23,8 +23,8 @@ class ExampleScalaTest extends ScalaSchedulerTest {
 
         @Override protected def runEventThread() {
             expectEvent(eventTimeout) { case e: OrderTouchedEvent     => e.getOrder.getState == "state.1" }
-            expectEvent(eventTimeout) { case e: OrderStateChangeEvent => e.getOrder.getState == "state.2" }
-            expectEvent(eventTimeout) { case e: OrderStateChangeEvent => e.getOrder.getState == "state.end" }
+            expectEvent(eventTimeout) { case e: OrderStateChangedEvent => e.getOrder.getState == "state.2" }
+            expectEvent(eventTimeout) { case e: OrderStateChangedEvent => e.getOrder.getState == "state.end" }
             expectEvent(eventTimeout) { case e: OrderFinishedEvent    => e.getOrder.getState == "state.end" }
         }
     }
