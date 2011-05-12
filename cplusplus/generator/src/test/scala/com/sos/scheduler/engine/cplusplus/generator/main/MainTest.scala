@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.cplusplus.generator.main
 import com.sos.scheduler.engine.cplusplus.generator.Configuration._
 import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 import java.io.File
-import org.junit.Test
+import org.junit._
 import org.junit.Assert._
 import scala.collection.JavaConversions._
 import Main._
@@ -16,15 +16,6 @@ class MainTest {
     
     private val cppOutputDirectory = new File(tmp, "proxy.c++")
     private val javaOutputDirectory = new File(tmp, "proxy.java")
-    private val cppProxyClassNames = List(
-        "com.sos.scheduler.engine.kernel.cppproxy.SpoolerC",
-        "com.sos.scheduler.engine.kernel.Scheduler")
-
-    cppOutputDirectory.mkdir()
-    new File(cppOutputDirectory, cppSubdirectory).mkdir()
-    javaOutputDirectory.mkdir()
-    cppProxyClassNames foreach { a => new File(javaOutputDirectory, a.replace('.', '/')).getParentFile.mkdirs() }
-    new File(cppOutputDirectory,"scheduler").mkdir()
 
 //    @Test def testA() {
 //        val urls = classOf[MainTest].getClassLoader.getResources("com/sos/scheduler/kernel/core/cppproxy").toList
@@ -44,7 +35,17 @@ class MainTest {
         assert(!isClassName("a."))
     }
 
-    @Test def testMain {
+    // @Ignore, weil unser Maven-Artefakt unabhängig von com.sos.scheduler.engine.kernel geworden ist. Der Test sollte also auch davon unabhängig sein.
+    @Ignore @Test def testMain {
+        val cppProxyClassNames = List(
+            "com.sos.scheduler.engine.kernel.cppproxy.SpoolerC",
+            "com.sos.scheduler.engine.kernel.Scheduler")
+        cppOutputDirectory.mkdir()
+        new File(cppOutputDirectory, cppSubdirectory).mkdir()
+        javaOutputDirectory.mkdir()
+        cppProxyClassNames foreach { a => new File(javaOutputDirectory, a.replace('.', '/')).getParentFile.mkdirs() }
+        new File(cppOutputDirectory,"scheduler").mkdir()
+
         new Main(Array(
             //"-deep",
             "-c++-output-directory=" + cppOutputDirectory,

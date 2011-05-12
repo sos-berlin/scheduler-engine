@@ -12,10 +12,88 @@
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>C++-Klassen für den Scheduler-Kern. Zunächst nur Generierung der Java-Proxys für C++</description>
+    <description>C++-Code der Scheduler-Engine</description>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <assemblyFile>src/main/assembly/assembly-windows.xml</assemblyFile>
+                <operatingSystem>windows</operatingSystem>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <assemblyFile>src/main/assembly/assembly-unix.xml</assemblyFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>linux</operatingSystem>
+            </properties>
+        </profile>
+        <profile>
+            <id>hpux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>HP UX</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>hpux</operatingSystem>
+            </properties>
+        </profile>
+        <profile>
+            <id>solaris</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Solaris</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>solaris</operatingSystem>
+            </properties>
+        </profile>
+        <profile>
+            <id>UNNKNOWN-OPERATING-SYSTEM</id>
+            <activation>
+                <activeByDefault/>
+            </activation>
+            <properties>
+                <assemblyFile>src/main/assembly/assembly--UNKNOWN-OPERATING-SYSTEM--.xml</assemblyFile>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <classifier>${operatingSystem}-${os.arch}</classifier>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -31,10 +109,6 @@
                         <configuration>
                             <includeProjectDependencies>false</includeProjectDependencies>
                             <includePluginDependencies>true</includePluginDependencies>
-                            <executableDependency>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                            </executableDependency>
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
                             <arguments>
                                 <argument>-c++-output-directory=${basedir}</argument>
@@ -51,7 +125,12 @@
                         Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                        <version>1.3.11-beta-3-SNAPSHOT</version>
+                        <version>${cppJavaBridgeVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+                        <version>${project.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -119,7 +198,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-5</version>
+                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>package-all</id>
@@ -129,8 +208,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <!-- Die Datei wird von make/make-scheduler-phase aus src/main/assembly/ kopiert, abhängig vom Betriebssystem. -->
-                                <descriptor>target/assembly.xml</descriptor>
+                                <descriptor>${assemblyFile}</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

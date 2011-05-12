@@ -51,8 +51,14 @@ class Main(args: Array[String])
 
 /** Exception nicht nach stderr aus und gibt keinen Exit code zurück (s. MainWithExitCode). */
 object Main {
+    def applicationName = "C++/Java-Bridge"
+
     def main(args: Array[String]) {
-        new Main(args).apply()
+//        try
+            new Main(args).apply()
+//        catch {
+//            case x: Exception => throw new RuntimeException(applicationName + ": " + x, x)
+//        }
     }
 
     def isClassName(x: String) = {

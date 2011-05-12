@@ -38,12 +38,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../bind\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\bind\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../bin\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">spidermonkey</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">spidermonkey</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -69,7 +71,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)spidermonkey.dll</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName).dll</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>spidermonkey.def</ModuleDefinitionFile>
       <DelayLoadDLLs>advapi32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
@@ -106,7 +108,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)spidermonkey.dll</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName).dll</OutputFile>
       <ModuleDefinitionFile>spidermonkey.def</ModuleDefinitionFile>
       <DelayLoadDLLs>advapi32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -134,34 +136,11 @@
     <None Include="spidermonkey.def" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="spidermonkey.odl">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">3</WarningLevel>
-      <WarnAsError Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</WarnAsError>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(TargetName).tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename)_h.h</HeaderFileName>
-      <EnableErrorChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">All</EnableErrorChecks>
-      <ErrorCheckAllocations Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ErrorCheckAllocations>
-      <ErrorCheckBounds Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ErrorCheckBounds>
-      <ErrorCheckEnumRange Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ErrorCheckEnumRange>
-      <ErrorCheckRefPointers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ErrorCheckRefPointers>
-      <ErrorCheckStubData Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ErrorCheckStubData>
-      <ValidateAllParameters Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ValidateAllParameters>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">3</WarningLevel>
-      <WarnAsError Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WarnAsError>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(TargetName).tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename)_h.h</HeaderFileName>
-      <EnableErrorChecks Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">All</EnableErrorChecks>
-      <ErrorCheckAllocations Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ErrorCheckAllocations>
-      <ErrorCheckBounds Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ErrorCheckBounds>
-      <ErrorCheckEnumRange Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ErrorCheckEnumRange>
-      <ErrorCheckRefPointers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ErrorCheckRefPointers>
-      <ErrorCheckStubData Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ErrorCheckStubData>
-      <ValidateAllParameters Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ValidateAllParameters>
-    </Midl>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="spidermonkey.rc">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">0x0407</Culture>
+      <Culture Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">0x0407</Culture>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

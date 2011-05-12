@@ -31,11 +31,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="spidermonkey.odl">
-      <Filter>Quelldateien</Filter>
-    </Midl>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="spidermonkey.rc" />
   </ItemGroup>
 </Project>

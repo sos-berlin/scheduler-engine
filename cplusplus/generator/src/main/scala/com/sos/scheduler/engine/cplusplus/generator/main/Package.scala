@@ -9,9 +9,20 @@ import Package._
 case class Package(name: String)
 {
     def relevantClasses = {
-        val result = classesOfPackage(name) filter classIsRelevant
-        require(result.nonEmpty, "Package '" + name + "' contains no relevant class")
+        val allClasses = classesOfPackage(name)
+        require(allClasses.nonEmpty, "Package '" + name + "' is empty")
+        val result = allClasses filter classIsRelevant
+        require(result.nonEmpty, "Package '" + name + "' contains no relevant class:\n" + info(allClasses))
         result
+    }
+
+    private def info(classes: Iterable[Class[_]]) = {
+        def f(c: Class[_]) = c.getName +
+                " isInterface=" + c.isInterface +
+                " inheritsCppProxy=" + classOf[CppProxy].isAssignableFrom(c) +
+                " cppProxyPackage=" + (c.getPackage() != classOf[CppProxy].getPackage) +
+                " @ForCpp=" + classIsForCpp(c)
+        classes map f mkString "\n"
     }
 }
 
@@ -19,7 +30,7 @@ case class Package(name: String)
 object Package {
     private def classIsRelevant(c: Class[_]) = classIsCppProxy(c) || classIsForCpp(c)
 
-    private def classIsCppProxy(c: Class[_]) = c.isInterface()  &&  classOf[CppProxy].isAssignableFrom(c)  &&
+    private def classIsCppProxy(c: Class[_]) = c.isInterface  &&  classOf[CppProxy].isAssignableFrom(c)  &&
         c.getPackage() != classOf[CppProxy].getPackage
 
     private def classIsForCpp(c: Class[_]) = c.getAnnotation(classOf[ForCpp]) != null

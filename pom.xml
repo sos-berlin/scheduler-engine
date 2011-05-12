@@ -12,7 +12,7 @@
     <inceptionYear>2010</inceptionYear>
 
     <modules>
-        <module>cplusplus</module>
+        <!--module>cplusplus</module  C++/Java-Generator ist abgekoppelt und separat zu bauen.-->
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp</module>
@@ -51,7 +51,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.8.1</scala.version>
-        <scheduler.javaCppProxyPackage>com.sos.scheduler.engine</scheduler.javaCppProxyPackage>
+        <scheduler.javaCppProxyPackage>com.sos.scheduler.engine.kernel</scheduler.javaCppProxyPackage>
+        <cppJavaBridgeVersion>1.3.11-beta-3-SNAPSHOT</cppJavaBridgeVersion>
         <sos.subversion.url>http://subversion.sos/svn/sos/scheduler/engine</sos.subversion.url>
     </properties>
 
@@ -65,13 +66,13 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                <version>1.3.11-beta-3-SNAPSHOT</version>
+                <version>${cppJavaBridgeVersion}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
-                <version>1.3.11-beta-3-SNAPSHOT</version>
+                <version>${cppJavaBridgeVersion}</version>
             </dependency>
 
             <dependency>

@@ -1,9 +1,9 @@
 // $Id$
 
 #ifdef _DEBUG
-1                       TYPELIB MOVEABLE PURE   "debug\\scripting_engine.tlb"  // Bis Visual Studio 2008: "debug\\spidermonkey.tlb"
+1                       TYPELIB MOVEABLE PURE   "debug\\scripting_engine_tlb.tlb"  // Bis Visual Studio 2008: "debug\\spidermonkey.tlb"
 #else
-1                       TYPELIB MOVEABLE PURE   "release\\scripting_engine.tlb"     // Bis Visual Studio 2008: "release\\spidermonkey.tlb"
+1                       TYPELIB MOVEABLE PURE   "release\\scripting_engine_tlb.tlb"     // Bis Visual Studio 2008: "release\\spidermonkey.tlb"
 #endif
 
 #include "version.h"

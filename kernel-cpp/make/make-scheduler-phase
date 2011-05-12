@@ -26,18 +26,7 @@ if [ -z "$MAKE_JOBS" ]; then :
 fi
 
 if [ $inWindows ]; then \
-    if [ "$SCHEDULER_VISUAL_STUDIO_VERSION" == "10" ]; then :
-        if [ -z "${WINDOWS_NET_SDK_HOME}" ]; then :
-            echo 'ERROR: Missing environment variable WINDOWS_NET_SDK_HOME with installation directory of Windows SDK and msbuild.exe (for example "%windir%\Microsoft.NET\Framework\v4.0.30319")'
-            exit 1
-        fi
-        msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
-        echo 'Using Visual Studio 2010 (not for release in 2011, Scheduler is not runnable on Windows 2000)'
-        if [ ! -f "$msbuild" ]; then 
-            echo "Missing msbuild.exe: $msbuild"
-            exit 1
-        fi
-    else :
+    if [ "$SCHEDULER_VISUAL_STUDIO_VERSION" == "9" ]; then :
         # Sobald wir nicht mehr für Windows 2000 compilieren müssen, können wir Visual Studio 2010 nutzen.
         if test -z "${VISUAL_STUDIO_2008_HOME}"; then :
             echo 'ERROR: Missing environment variable VISUAL_STUDIO_2008_HOME with installation directory of Visual Studio 2008 (for example "c:\Program Files\Microsoft\Visual Studio 9.0")'
@@ -47,6 +36,17 @@ if [ $inWindows ]; then \
         echo Using Visual Studio 2008
         if [ ! -f "$vcbuild" ]; then 
             echo "Missing vcbuild.exe: $vcbuild"
+            exit 1
+        fi
+    else :
+        if [ -z "${WINDOWS_NET_SDK_HOME}" ]; then :
+            echo 'ERROR: Missing environment variable WINDOWS_NET_SDK_HOME with installation directory of Windows SDK and msbuild.exe (for example "%windir%\Microsoft.NET\Framework\v4.0.30319")'
+            exit 1
+        fi
+        msbuild=$(cygpath "${WINDOWS_NET_SDK_HOME}")/msbuild.exe
+        echo 'Using Visual Studio 2010 (not for release in 2011, Scheduler is not runnable on Windows 2000)'
+        if [ ! -f "$msbuild" ]; then 
+            echo "Missing msbuild.exe: $msbuild"
             exit 1
         fi
     fi
@@ -99,13 +99,13 @@ function cmd_windows_compile() {
 
 function visualStudio_clean() {
     package=$1
-    if [ -n "$vcbuild" ]; then "$vcbuild" /clean $package.sln  || exit; fi
+    if [ -n "$vcbuild" ]; then vcbuild /clean $package.sln  || exit; fi
     if [ -n "$msbuild" ]; then msbuild /target:clean $package-vs2010.sln  || exit; fi
 }
 
 function visualStudio_compile() {
     package=$1
-    if [ -n "$vcbuild" ]; then "$vcbuild" $package.sln  || exit; fi
+    if [ -n "$vcbuild" ]; then  vcbuild $package.sln  || exit; fi
     if [ -n "$msbuild" ]; then  msbuild $package-vs2010.sln  || exit; fi
 }
 
@@ -113,6 +113,13 @@ function msbuild() {
     # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
     for c in Release Debug; do :
         "$msbuild" /m:$NUMBER_OF_PROCESSORS /property:Configuration=$c $* || exit
+    done
+}
+
+function vcbuild() {
+    # Zuerst Release bauen, weil Debug auf release/spooler.tlb zurückgreift. Sonst: spooler.rc(6): error RC2135: file not found: release\spooler.tlb [C:\sos\scheduler\engine\kernel-cpp\scheduler\scheduler_main.vcxproj]
+    for c in "Release|Win32" "Debug|Win32"; do :
+        "$vcbuild" /M$NUMBER_OF_PROCESSORS $* "$c" || exit
     done
 }
 

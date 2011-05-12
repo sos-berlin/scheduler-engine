@@ -79,7 +79,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
-            <version>${project.version}</version>
+            <version>${cppJavaBridgeVersion}</version>
         </dependency>
 
         <dependency>
