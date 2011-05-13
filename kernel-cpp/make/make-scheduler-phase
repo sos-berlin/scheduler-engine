@@ -18,7 +18,7 @@ inWindows=$(if [ `uname -o` == "Cygwin" ]; then echo 1; else echo ""; fi)
 vcbuild=""
 msbuild=""
 
-if [ "${PWD/ /_}" != "$PWD" ]; then echo Der Verzeichnispfad darf kein Blank enthalten (vielleicht ist es ein Jenkins-Job mit Blank im Namen?); exit 1; fi
+if [ "${PWD/ /_}" != "$PWD" ]; then echo "Der Verzeichnispfad darf kein Blank enthalten (vielleicht ist es ein Jenkins-Job mit Blank im Namen?)"; exit 1; fi
 
 
 if [ -z "$MAKE_JOBS" ]; then :
