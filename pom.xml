@@ -21,6 +21,7 @@ Der C++/Java-Generator (cplusplus/) ist separat zu bauen oder mit der Option -Pc
     <inceptionYear>2010</inceptionYear>
 
     <modules>
+        <module>parent</module>
         <module>kernel</module>
         <module>kernel.cppproxy-generated</module>
         <module>kernel-cpp</module>
