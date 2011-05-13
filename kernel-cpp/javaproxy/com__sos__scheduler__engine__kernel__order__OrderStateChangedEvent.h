@@ -2,8 +2,8 @@
 
 #include "_precompiled.h"
 
-#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTATECHANGEEVENT_H_
-#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTATECHANGEEVENT_H_
+#ifndef _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTATECHANGEDEVENT_H_
+#define _JAVAPROXY_COM_SOS_SCHEDULER_ENGINE_KERNEL_ORDER_ORDERSTATECHANGEDEVENT_H_
 
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
@@ -20,32 +20,32 @@ namespace javaproxy { namespace java { namespace lang { struct String; }}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
 
 
-struct OrderStateChangeEvent__class;
+struct OrderStateChangedEvent__class;
 
-struct OrderStateChangeEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangeEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
-    static OrderStateChangeEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1);
+struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
+    static OrderStateChangedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1);
 
-    OrderStateChangeEvent(jobject = NULL);
+    OrderStateChangedEvent(jobject = NULL);
 
-    OrderStateChangeEvent(const OrderStateChangeEvent&);
+    OrderStateChangedEvent(const OrderStateChangedEvent&);
 
     #ifdef Z_HAS_MOVE_CONSTRUCTOR
-        OrderStateChangeEvent(OrderStateChangeEvent&&);
+        OrderStateChangedEvent(OrderStateChangedEvent&&);
     #endif
 
-    ~OrderStateChangeEvent();
+    ~OrderStateChangedEvent();
 
-    OrderStateChangeEvent& operator=(jobject jo) { assign_(jo); return *this; }
-    OrderStateChangeEvent& operator=(const OrderStateChangeEvent& o) { assign_(o.get_jobject()); return *this; }
+    OrderStateChangedEvent& operator=(jobject jo) { assign_(jo); return *this; }
+    OrderStateChangedEvent& operator=(const OrderStateChangedEvent& o) { assign_(o.get_jobject()); return *this; }
     #ifdef Z_HAS_MOVE_CONSTRUCTOR
-        OrderStateChangeEvent& operator=(OrderStateChangeEvent&& o) { set_jobject(o.get_jobject()); o.set_jobject(NULL); return *this; }
+        OrderStateChangedEvent& operator=(OrderStateChangedEvent&& o) { set_jobject(o.get_jobject()); o.set_jobject(NULL); return *this; }
     #endif
 
-    jobject get_jobject() const { return ::zschimmer::javabridge::proxy_jobject< OrderStateChangeEvent >::get_jobject(); }
+    jobject get_jobject() const { return ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >::get_jobject(); }
 
   protected:
     void set_jobject(jobject jo) {
-        ::zschimmer::javabridge::proxy_jobject< OrderStateChangeEvent >::set_jobject(jo);
+        ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >::set_jobject(jo);
         ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent::set_jobject(jo);
     }
   public:
@@ -59,7 +59,7 @@ struct OrderStateChangeEvent : ::zschimmer::javabridge::proxy_jobject< OrderStat
 
 
   private:
-    struct Lazy_class : ::zschimmer::abstract_lazy<OrderStateChangeEvent__class*> {
+    struct Lazy_class : ::zschimmer::abstract_lazy<OrderStateChangedEvent__class*> {
         void initialize();
     };
 

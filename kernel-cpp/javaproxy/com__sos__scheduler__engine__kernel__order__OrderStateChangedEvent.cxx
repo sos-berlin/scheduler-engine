@@ -2,7 +2,7 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__kernel__order__OrderStateChangeEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderState.h"
@@ -10,79 +10,79 @@
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
 
-struct OrderStateChangeEvent__class : ::zschimmer::javabridge::Class
+struct OrderStateChangedEvent__class : ::zschimmer::javabridge::Class
 {
-    OrderStateChangeEvent__class(const string& class_name);
-   ~OrderStateChangeEvent__class();
+    OrderStateChangedEvent__class(const string& class_name);
+   ~OrderStateChangedEvent__class();
 
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method;
     ::zschimmer::javabridge::Method const _getPreviousState____method;
     ::zschimmer::javabridge::Method const _toString____method;
 
-    static const ::zschimmer::javabridge::class_factory< OrderStateChangeEvent__class > class_factory;
+    static const ::zschimmer::javabridge::class_factory< OrderStateChangedEvent__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< OrderStateChangeEvent__class > OrderStateChangeEvent__class::class_factory ("com.sos.scheduler.engine.kernel.order.OrderStateChangeEvent");
+const ::zschimmer::javabridge::class_factory< OrderStateChangedEvent__class > OrderStateChangedEvent__class::class_factory ("com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent");
 
-OrderStateChangeEvent__class::OrderStateChangeEvent__class(const string& class_name) :
+OrderStateChangedEvent__class::OrderStateChangedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;Lcom/sos/scheduler/engine/kernel/order/OrderState;)V")
     ,_getPreviousState____method(this, "getPreviousState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
-OrderStateChangeEvent__class::~OrderStateChangeEvent__class() {}
+OrderStateChangedEvent__class::~OrderStateChangedEvent__class() {}
 
 
 
-OrderStateChangeEvent OrderStateChangeEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1) {
-    OrderStateChangeEvent result;
+OrderStateChangedEvent OrderStateChangedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1) {
+    OrderStateChangedEvent result;
     result.java_object_allocate_();
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
-    OrderStateChangeEvent__class* cls = result._class.get();
+    OrderStateChangedEvent__class* cls = result._class.get();
     cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 
 
-OrderStateChangeEvent::OrderStateChangeEvent(jobject jo) { if (jo) assign_(jo); }
+OrderStateChangedEvent::OrderStateChangedEvent(jobject jo) { if (jo) assign_(jo); }
 
-OrderStateChangeEvent::OrderStateChangeEvent(const OrderStateChangeEvent& o) { assign_(o.get_jobject()); }
+OrderStateChangedEvent::OrderStateChangedEvent(const OrderStateChangedEvent& o) { assign_(o.get_jobject()); }
 
 #ifdef Z_HAS_MOVE_CONSTRUCTOR
-    OrderStateChangeEvent::OrderStateChangeEvent(OrderStateChangeEvent&& o) { set_jobject(o.get_jobject());  o.set_jobject(NULL); }
+    OrderStateChangedEvent::OrderStateChangedEvent(OrderStateChangedEvent&& o) { set_jobject(o.get_jobject());  o.set_jobject(NULL); }
 #endif
 
-OrderStateChangeEvent::~OrderStateChangeEvent() { assign_(NULL); }
+OrderStateChangedEvent::~OrderStateChangedEvent() { assign_(NULL); }
 
 
 
 
-::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateChangeEvent::getPreviousState() {
+::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateChangedEvent::getPreviousState() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStateChangeEvent__class* cls = _class.get();
+    OrderStateChangedEvent__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState result;
     result.steal_local_ref(cls->_getPreviousState____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
-::javaproxy::java::lang::String OrderStateChangeEvent::toString() {
+::javaproxy::java::lang::String OrderStateChangedEvent::toString() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderStateChangeEvent__class* cls = _class.get();
+    OrderStateChangedEvent__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_toString____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
 
-::zschimmer::javabridge::Class* OrderStateChangeEvent::java_object_class_() { return _class.get(); }
+::zschimmer::javabridge::Class* OrderStateChangedEvent::java_object_class_() { return _class.get(); }
 
-::zschimmer::javabridge::Class* OrderStateChangeEvent::java_class_() { return OrderStateChangeEvent__class::class_factory.clas(); }
+::zschimmer::javabridge::Class* OrderStateChangedEvent::java_class_() { return OrderStateChangedEvent__class::class_factory.clas(); }
 
 
-void OrderStateChangeEvent::Lazy_class::initialize() {
-    _value = OrderStateChangeEvent__class::class_factory.clas();
+void OrderStateChangedEvent::Lazy_class::initialize() {
+    _value = OrderStateChangedEvent__class::class_factory.clas();
 }
 
 
