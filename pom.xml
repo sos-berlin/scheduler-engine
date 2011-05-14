@@ -37,7 +37,7 @@
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagBase>http://subversion.sos/svn/sos/scheduler/engine-releases</tagBase>
-                    <!--tagNameFormat>{1}</tagNameFormat-->   <!-- {0} ist ${project.artifactId}, {1} ist ${project.version} -->
+                    <tagNameFormat>{1}</tagNameFormat>   <!-- {0} ist ${project.artifactId}, {1} ist ${project.version} -->
                 </configuration>
             </plugin>
         </plugins>
