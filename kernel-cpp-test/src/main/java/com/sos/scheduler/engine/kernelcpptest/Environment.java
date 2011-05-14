@@ -134,7 +134,9 @@ public class Environment {
         try {
             if (directory != null)
                 deleteDirectory(directory);
+        } catch(IOException x) { 
+            logger.error(x); 
+            //throw new RuntimeException(x); 
         }
-        catch(IOException x) { throw new RuntimeException(x); }
     }
 }
