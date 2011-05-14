@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3-SNAPSHOT</version>
+        <version>1.3.11-beta-3</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
@@ -105,7 +105,7 @@
         <profile>
             <id>UNNKNOWN-OPERATING-SYSTEM</id>
             <activation>
-                <activeByDefault/>
+                <activeByDefault />
             </activation>
             <properties>
                 <assemblyFile>src/main/assembly/os--UNKNOWN-OPERATING-SYSTEM--.xml</assemblyFile>
