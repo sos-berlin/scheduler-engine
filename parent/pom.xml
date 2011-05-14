@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>com.sos.scheduler.engine.parent</artifactId>
-    <version>1.3.11-beta-3c</version>
+    <version>1.3.11-beta-3d-SNAPSHOT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
     
@@ -359,9 +359,9 @@
     </issueManagement-->
 
     <scm>
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/com.sos.scheduler.engine-1.3.11-beta-3c/com.sos.scheduler.engine-1.3.11-beta-3</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/com.sos.scheduler.engine-1.3.11-beta-3c/com.sos.scheduler.engine-1.3.11-beta-3</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine/com.sos.scheduler.engine-1.3.11-beta-3c/com.sos.scheduler.engine-1.3.11-beta-3</url>
+        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
+        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
+        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
     </scm>
 
     <distributionManagement>
