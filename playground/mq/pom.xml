@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.playground</artifactId>
-        <version>1.3.11-beta-3d</version>
+        <version>1.3.11-beta-3e-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.playground.mq</artifactId>
