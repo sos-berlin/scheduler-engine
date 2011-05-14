@@ -33,10 +33,12 @@
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
