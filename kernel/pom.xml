@@ -5,14 +5,14 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3c</version>
+        <version>1.3.11-beta-3c-SNAPSHOT</version>
     </parent>
     
     <artifactId>com.sos.scheduler.engine.kernel</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>Java-Klassen fÃ¼r den Scheduler-Kern</description>
+    <description>Java-Klassen fÃƒÂ¼r den Scheduler-Kern</description>
 
     <build>
         <resources>
@@ -104,7 +104,7 @@
         </dependency>
 
         <dependency>
-            <!-- FÃ¼r MemoryLeakReport -->
+            <!-- FÃƒÂ¼r MemoryLeakReport -->
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>

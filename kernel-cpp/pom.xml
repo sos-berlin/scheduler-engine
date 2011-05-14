@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3c</version>
+        <version>1.3.11-beta-3c-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
@@ -110,7 +110,7 @@
                         <artifactId>maven-deploy-plugin</artifactId>
                         <configuration>
                             <skip>false</skip>
-                            <!-- Voreinstellt ist für dieses Artefakt true, also kein Deploy. -->
+                            <!-- Voreinstellt ist fÃ¼r dieses Artefakt true, also kein Deploy. -->
                         </configuration>
                     </plugin>
                 </plugins>
@@ -147,8 +147,8 @@
 
                 <dependencies>
                     <dependency>
-                        <!-- Das wird auch bei clean verlangt, obwohl es nur für generate-sources gebraucht wird. 
-                        Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
+                        <!-- Das wird auch bei clean verlangt, obwohl es nur fÃ¼r generate-sources gebraucht wird. 
+                        Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. LÃ¶sung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
                         <version>${cplusplusVersion}</version>
@@ -245,7 +245,7 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                    <!-- Wird betriebssystem-abhängig ausgeliefert, siehe Profil deploy -->
+                    <!-- Wird betriebssystem-abhÃ¤ngig ausgeliefert, siehe Profil deploy -->
                 </configuration>
             </plugin>
         </plugins>
