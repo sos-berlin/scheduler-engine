@@ -323,7 +323,7 @@
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagBase>http://subversion.sos/svn/sos/scheduler/engine-releases</tagBase>
-                    <tag>${project.version}</tag>
+                    <tagNameFormat>{1}</tagNameFormat>   <!-- {0} ist ${project.artifactId}, {1} ist ${project.version} -->
                 </configuration>
             </plugin>
 
@@ -341,6 +341,15 @@
                 </configuration>
             </plugin-->
         </plugins>
+        
+        <pluginManagement>
+            <plugins>
+                <plugin>                
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>     
+            </plugins>
+        </pluginManagement>
     </build>
 
     <!--issueManagement>
