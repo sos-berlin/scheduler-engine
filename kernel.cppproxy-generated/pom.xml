@@ -5,14 +5,14 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3c</version>
+        <version>1.3.11-beta-3d-SNAPSHOT</version>
     </parent>
     
     <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>Generierte C++-Proxys fÃ¼r Java</description>
+    <description>Generierte C++-Proxys fÃƒÂ¼r Java</description>
 
     <build>
         <plugins>
