@@ -35,8 +35,8 @@
                     <skip>true</skip>
                     <!- - Wird im Artefakt jar zusammengefasst, das freigegeben wird - ->
                 </configuration>
-            </plugin>
-        </plugins-->
+            </plugin-->
+        </plugins>
     </build>
 
     <dependencies>
