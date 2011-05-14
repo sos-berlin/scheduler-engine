@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>com.sos.scheduler.engine.parent</artifactId>
-    <version>1.3.11-beta-3b</version>
+    <version>1.3.11-beta-3c-SNAPSHOT</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
     
@@ -104,17 +104,17 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                <version>1.3.11-beta-3b</version>
+                <version>1.3.11-beta-3c-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
-                <version>1.3.11-beta-3b</version>
+                <version>1.3.11-beta-3c-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
-                <version>1.3.11-beta-3b</version>
+                <version>1.3.11-beta-3c-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -349,9 +349,9 @@
     </issueManagement-->
 
     <scm>
-        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/1.3.11-beta-3b-SNAPSHOT</connection>
-        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/1.3.11-beta-3b-SNAPSHOT</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine/1.3.11-beta-3b-SNAPSHOT</url>
+        <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine/com.sos.scheduler.engine-1.3.11-beta-3</connection>
+        <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine-releases/com.sos.scheduler.engine-1.3.11-beta-3</developerConnection>
+        <url>http://subversion.sos/svn/sos/scheduler/engine/com.sos.scheduler.engine-1.3.11-beta-3</url>
     </scm>
 
     <distributionManagement>
