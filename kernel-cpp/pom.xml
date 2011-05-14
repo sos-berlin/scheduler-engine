@@ -151,12 +151,12 @@
                         Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                        <version>1.3.11-beta-3b-SNAPSHOT</version>
+                        <version>${cplusplusVersion}</version>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
                         <artifactId>com.sos.scheduler.engine.kernel</artifactId>
-                        <version>1.3.11-beta-3b-SNAPSHOT</version>
+                        <version>${cplusplusVersion}</version>
                     </dependency>
                 </dependencies>
             </plugin>
