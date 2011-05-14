@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3a-SNAPSHOT</version>
+        <version>1.3.11-beta-3a</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
@@ -146,12 +146,12 @@
                         Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. LÃ¶sung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                        <version>${cppJavaBridgeVersion}</version>
+                        <version>1.3.11-beta-3a-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
                         <artifactId>com.sos.scheduler.engine.kernel</artifactId>
-                        <version>${project.version}</version>
+                        <version>1.3.11-beta-3a-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </plugin>

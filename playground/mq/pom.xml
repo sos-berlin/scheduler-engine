@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.playground</artifactId>
-        <version>1.3.11-beta-3a-SNAPSHOT</version>
+        <version>1.3.11-beta-3a</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.playground.mq</artifactId>
@@ -33,12 +33,12 @@
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.kernel</artifactId>
-            <version>1.3.11-beta-3a-SNAPSHOT</version>
+            <version>1.3.11-beta-3a</version>
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
-            <version>1.3.11-beta-3a-SNAPSHOT</version>
+            <version>1.3.11-beta-3a</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
