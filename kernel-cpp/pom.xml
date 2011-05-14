@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.11-beta-3</version>
+        <version>1.3.11-beta-3-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
@@ -23,9 +23,16 @@
                 </os>
             </activation>
             <properties>
-                <assemblyFile>src/main/assembly/assembly-windows.xml</assemblyFile>
+                <assemblyFile>src/main/assembly/os-windows.xml</assemblyFile>
                 <operatingSystem>windows</operatingSystem>
             </properties>
+            <distributionManagement>
+                <repository>
+                    <id>sos-os-windows-x86</id>
+                    <name>SOS Windows Repository (Intel x86 32bit)</name>
+                    <url>http://archiva.sos:8080/archiva/repository/os-windows-x86</url>
+                </repository>
+            </distributionManagement>
         </profile>
         <profile>
             <id>unix</id>
@@ -35,7 +42,7 @@
                 </os>
             </activation>
             <properties>
-                <assemblyFile>src/main/assembly/assembly-unix.xml</assemblyFile>
+                <assemblyFile>src/main/assembly/os-unix.xml</assemblyFile>
             </properties>
         </profile>
         <profile>
@@ -49,6 +56,13 @@
             <properties>
                 <operatingSystem>linux</operatingSystem>
             </properties>
+            <distributionManagement>
+                <repository>
+                    <id>sos-os-linux-x86</id>
+                    <name>SOS Linux Repository (Intel x86 32bit)</name>
+                    <url>http://archiva.sos:8080/archiva/repository/os-linux-x86</url>
+                </repository>
+            </distributionManagement>
         </profile>
         <profile>
             <id>hpux</id>
@@ -61,6 +75,13 @@
             <properties>
                 <operatingSystem>hpux</operatingSystem>
             </properties>
+            <distributionManagement>
+                <repository>
+                    <id>sos-os-hpux</id>
+                    <name>SOS HP-UX Repository</name>
+                    <url>http://archiva.sos:8080/archiva/repository/os-hpux</url>
+                </repository>
+            </distributionManagement>
         </profile>
         <profile>
             <id>solaris</id>
@@ -73,27 +94,27 @@
             <properties>
                 <operatingSystem>solaris</operatingSystem>
             </properties>
+            <distributionManagement>
+                <repository>
+                    <id>sos-os-solaris</id>
+                    <name>SOS Solaris Repository</name>
+                    <url>http://archiva.sos:8080/archiva/repository/os-solaris</url>
+                </repository>
+            </distributionManagement>
         </profile>
         <profile>
             <id>UNNKNOWN-OPERATING-SYSTEM</id>
             <activation>
-                <activeByDefault />
+                <activeByDefault/>
             </activation>
             <properties>
-                <assemblyFile>src/main/assembly/assembly--UNKNOWN-OPERATING-SYSTEM--.xml</assemblyFile>
+                <assemblyFile>src/main/assembly/os--UNKNOWN-OPERATING-SYSTEM--.xml</assemblyFile>
             </properties>
         </profile>
     </profiles>
 
     <build>
         <plugins>
-            <!--plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <classifier>${operatingSystem}-${os.arch}</classifier>
-                </configuration>
-            </plugin-->
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
