@@ -1,10 +1,14 @@
 package com.sos.scheduler.engine.playground.ss;
 
 import java.util.Properties;
-import javax.jms.*;
+import javax.jms.Topic;
+import javax.jms.TopicConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komplex für public
@@ -13,10 +17,10 @@ public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komp
     public static final String topicConnectionFactoryName = "TopicCF";
     public static final String topicName = "com.sos.scheduler.engine.Event";   // + hostName + portNumber in Url-Notation tcp://host:4444
     public static final String vmProviderUrl = "vm:" + brokerName; //tcp://localhost:61616";
+    public static final String persistenceDirectory = "active-mq-data";
 
     public final TopicConnectionFactory topicConnectionFactory;
     public final Topic topic;
-
 
     private Configuration(TopicConnectionFactory cf, Topic t) {
         topicConnectionFactory = cf;
@@ -30,14 +34,15 @@ public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komp
 
     
     public static Configuration newInstance(String providerUrl) {
-        try {
+    	try {
+    		Logger logger = LoggerFactory.getLogger(Configuration.class);
             InitialContext c = new InitialContext(jmsProperties(providerUrl));  // Datei jndi.jmsProperties
             TopicConnectionFactory cf = (TopicConnectionFactory)c.lookup(topicConnectionFactoryName);
             Topic topic = (Topic)c.lookup(topicName);
+            logger.debug("try to connect with provider " + providerUrl);
             return new Configuration(cf, topic);
         } catch (NamingException x) { throw new RuntimeException(x); }
     }
-
 
     private static Properties jmsProperties(String providerUrl) {
         Properties result = new Properties();

@@ -2,9 +2,15 @@ package com.sos.scheduler.engine.playground.ss;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 //import java.io.IOException;
 import javax.jms.*;
 //import org.apache.activemq.broker.BrokerService;
+
+import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.store.kahadaptor.KahaPersistenceAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 class Connector implements Closeable {
@@ -18,7 +24,8 @@ class Connector implements Closeable {
     private final Topic topic;
     private final TopicSession session;
     private final TopicPublisher publisher;
-
+    
+	private static final Logger logger = LoggerFactory.getLogger(Connector.class);
 
     Connector(Configuration c) {
         try {
@@ -115,7 +122,39 @@ class Connector implements Closeable {
     }
 
 
-    static Connector newInstance(String providerUrl) {
+    static Connector newInstance(String providerUrl, String persistenceDirectory) {
+
+//    	try {
+//    		if (providerUrl.startsWith("vm:"))
+//    			startActiveMqBroker(providerUrl, persistenceDirectory);
+//    		
+//		} catch (Exception e) {
+//			logger.error("error starting ActiveMq broker: " + e.getMessage() );
+//			e.printStackTrace();
+//		}
+		
         return new Connector(Configuration.newInstance(providerUrl));
+    }
+
+    private static void startActiveMqBroker(String providerUrl, String persistenceDirectory) throws Exception {
+    	
+		logger.error("persistence directory for ActiveMQ broker is " + persistenceDirectory );
+        BrokerService broker = new BrokerService();
+        broker.setUseJmx(true);
+        broker.setPersistent(true);
+        
+        KahaPersistenceAdapter persistenceAdapter = new KahaPersistenceAdapter();
+        persistenceAdapter.setDirectory(new File(persistenceDirectory + "/kaha"));
+        broker.setDataDirectoryFile(new File(persistenceDirectory + "/data"));
+        broker.setTmpDataDirectory(new File(persistenceDirectory + "/temp"));
+        persistenceAdapter.setMaxDataFileLength(500L*1024*1024);
+       
+        try {
+            broker.setPersistenceAdapter(persistenceAdapter);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } 
+        broker.addConnector(providerUrl);
+        broker.start();
     }
 }

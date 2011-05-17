@@ -9,9 +9,9 @@
             <plugin java_class="com.sos.scheduler.engine.playground.ss.JMSEventPlugIn">
                 <plugin.config>
                     <jms>
-                        <!--connection providerUrl="vm:localhost"/-->
+                        <connection providerUrl="vm:localhost" persistenceDirectory="c:/temp/amq" />
+                        <!-- connection providerUrl="tcp://localhost:61616"/-->
                         <!--connection providerUrl="vm:com.sos.scheduler"/-->
-                        <connection providerUrl="tcp://localhost:61616"/>
                         <!--brokerService name="com.sos.scheduler">
                             <connector url="tcp://localhost:63102"/>
                         </brokerService-->
