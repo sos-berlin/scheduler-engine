@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Targets für das Projekt scheduler.ant -->
-<project name="com.sos.scheduler.ant" basedir=".">
-
-	<import file="../scheduler.ant/targets.global.xml" />
-
-</project>
