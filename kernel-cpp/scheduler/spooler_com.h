@@ -144,7 +144,8 @@ struct Com_variable: spooler_com::Ivariable,
 struct Com_variable_set: spooler_com::Ivariable_set, 
                          spooler_com::Ihas_java_class_name, 
                          Sos_ole_object,
-                         zschimmer::Get_string_by_name_interface
+                         zschimmer::Get_string_by_name_interface,
+                         javabridge::has_proxy<Com_variable_set>
 {
                                 Com_variable_set            ();
                                 Com_variable_set            ( const xml::Element_ptr&, const string& variable_element_name = "param" );

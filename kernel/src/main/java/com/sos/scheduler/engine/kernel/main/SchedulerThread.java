@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 /** Der Scheduler in einem eigenen Thread. */
 public class SchedulerThread extends Thread implements SchedulerController {
+    //TODO Thread auslagern, um nicht zwei Interfaces zu haben. Dann kann getSchedulerState() wieder getState() heißen.
     private static final Logger logger = Logger.getLogger(SchedulerThread.class);
 
     private final CppScheduler cppScheduler = new CppScheduler();
@@ -106,6 +107,11 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
+    @Override public SchedulerState getSchedulerState() {
+        return coOp.getState();
+    }
+
+
     @Override public void run() {
         int exitCode = -1;
         Throwable t = null;
@@ -161,66 +167,6 @@ public class SchedulerThread extends Thread implements SchedulerController {
         catch (Throwable x) {
             //boolean debugOnly = e instanceof TerminatedEvent  &&  x instanceof UnexpectedTerminatedEventException;
             throwableMailbox.setIfFirst(x); //, debugOnly? Level.DEBUG : Level.ERROR);
-        }
-    }
-
-
-    private enum State { starting, running, closed, terminated };
-
-    
-    class CoOp {
-        private final AtomicReference<Scheduler> schedulerAtom = new AtomicReference<Scheduler>();
-        private final Object schedulerAtomLock = new Object();
-        private volatile boolean terminateSchedulerWhenPossible = false;
-        private volatile State state = State.starting;
-
-        void onSchedulerStarted(Scheduler scheduler) {
-            boolean callTerminate = false;
-            synchronized (schedulerAtomLock) {
-                schedulerAtom.set(scheduler);
-                state = state.running;
-                schedulerAtomLock.notify();
-                callTerminate = terminateSchedulerWhenPossible;
-            }
-            if (callTerminate)  scheduler.terminate();
-        }
-
-        void onSchedulerClosed() {
-            synchronized (schedulerAtomLock) {
-                state = State.closed;
-                schedulerAtom.set(null);
-                schedulerAtomLock.notify();
-            }
-        }
-
-        void onTerminated() {
-            synchronized (schedulerAtomLock) {
-                state = state.terminated;
-                schedulerAtomLock.notify();
-            }
-        }
-
-        Scheduler waitWhileSchedulerIsStarting() throws InterruptedException {
-            Scheduler result = null;
-            synchronized (schedulerAtomLock) {
-                while (state == State.starting)
-                    schedulerAtomLock.wait();
-                result = schedulerAtom.get();
-            }
-            return result;
-        }
-
-        void terminate() {
-            Scheduler scheduler = null;
-            synchronized (schedulerAtomLock) {
-                scheduler = schedulerAtom.get();
-                if (scheduler == null)  terminateSchedulerWhenPossible = true;
-            }
-            if (scheduler != null)  scheduler.terminate();
-        }
-
-        Scheduler getScheduler() {
-            return schedulerAtom.get();
         }
     }
 }

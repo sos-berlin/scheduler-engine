@@ -13,7 +13,7 @@ public class Job extends AbstractHasPlatform implements Sister {
     private final JobC jobC;
 
     
-    Job(Platform platform, JobC jobC) {
+    private Job(Platform platform, JobC jobC) {
         super(platform);
         this.jobC = jobC;
     }

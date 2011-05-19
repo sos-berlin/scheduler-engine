@@ -7,20 +7,20 @@ import static com.google.common.base.Strings.*;
 import static com.google.common.collect.ObjectArrays.*;
 
 
-public abstract class OperatingSystemHelper {
+public abstract class OperatingSystem {
     public static final String name = System.getProperty("os.name");
     public static final boolean isWindows = name.startsWith("Windows");
     public static final boolean isUnix = !isWindows;
-    public static final OperatingSystemHelper singleton = isWindows? new WindowsHelper() : new UnixHelper();
+    public static final OperatingSystem singleton = isWindows? new Windows() : new Unix();
     public static final String javaLibraryPathPropertyName = "java.library.path";
-    private static final Logger logger = Logger.getLogger(OperatingSystemHelper.class);
+    private static final Logger logger = Logger.getLogger(OperatingSystem.class);
     
     public abstract String makeModuleFilename(String name);
     public abstract String makeExecutableFilename(String name);
     public abstract String getDynamicLibraryEnvironmentVariableName();
     
 
-    public static class WindowsHelper extends OperatingSystemHelper {
+    public static class Windows extends OperatingSystem {
         @Override public String makeModuleFilename(String name) {
             return name + ".dll";
         }
@@ -35,7 +35,7 @@ public abstract class OperatingSystemHelper {
     }
     
 
-    public static class UnixHelper extends OperatingSystemHelper {
+    public static class Unix extends OperatingSystem {
         @Override public String makeModuleFilename(String name) {
             File file = new File(name);
             return new File(file.getParent(), "lib" + file.getName() + ".so").getPath();

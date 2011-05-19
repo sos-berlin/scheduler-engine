@@ -15,6 +15,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderId; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct VariableSet; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -54,6 +55,7 @@ struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getEndState();
     void getFilePath();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId getId();
+    ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getParameters();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState getState();
     ::javaproxy::java::lang::String getTitle();
     void onCppProxyInvalidated();

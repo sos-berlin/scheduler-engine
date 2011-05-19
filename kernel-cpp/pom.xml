@@ -110,7 +110,7 @@
                         <artifactId>maven-deploy-plugin</artifactId>
                         <configuration>
                             <skip>false</skip>
-                            <!-- Voreinstellt ist fÃƒÂ¼r dieses Artefakt true, also kein Deploy. -->
+                            <!-- Voreinstellt ist für dieses Artefakt true, also kein Deploy. -->
                         </configuration>
                     </plugin>
                 </plugins>
@@ -245,7 +245,7 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
-                    <!-- Wird betriebssystem-abhÃƒÂ¤ngig ausgeliefert, siehe Profil deploy -->
+                    <!-- Wird betriebssystem-abhängig ausgeliefert, siehe Profil deploy -->
                 </configuration>
             </plugin>
         </plugins>

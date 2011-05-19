@@ -5,16 +5,16 @@ import java.io.File;
 import org.junit.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static com.sos.scheduler.engine.kernelcpptest.OperatingSystemHelper.*;
+import static com.sos.scheduler.engine.kernelcpptest.OperatingSystem.*;
 
 
-public class OperatingSystemHelperTest {
+public class OperatingSystemTest {
     @Test public void testMakeModuleFilename() {
-        assertThat(OperatingSystemHelper.singleton.makeModuleFilename("xx"), isWindows? equalTo("xx.dll") : equalTo("libxx.so"));
+        assertThat(OperatingSystem.singleton.makeModuleFilename("xx"), isWindows? equalTo("xx.dll") : equalTo("libxx.so"));
     }
 
     @Test public void testMakeExecutableFilename() {
-        assertThat(OperatingSystemHelper.singleton.makeExecutableFilename("xx"), isWindows? equalTo("xx.exe") : equalTo("xx"));
+        assertThat(OperatingSystem.singleton.makeExecutableFilename("xx"), isWindows? equalTo("xx.exe") : equalTo("xx"));
     }
 
     @Test public void testPrependJavaLibraryPath() {

@@ -35,6 +35,19 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain__native(long cppReference);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return params__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
+
+
     @Override public void set_end_state(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

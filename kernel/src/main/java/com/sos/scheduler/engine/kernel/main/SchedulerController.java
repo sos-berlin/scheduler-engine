@@ -18,5 +18,6 @@ public interface SchedulerController {
     void terminateAfterException(Throwable x);
     void terminateAndWait();
     int getExitCode();
+    SchedulerState getSchedulerState();
     //Scheduler getScheduler();
 }

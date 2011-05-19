@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.kernel.order.Order;
-import com.sos.scheduler.engine.kernel.order.jobchain.Node;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 
@@ -20,4 +19,5 @@ public interface OrderC extends CppProxyWithSister<Order>
     void set_end_state(String order_state);
     String string_end_state();
     String title();
+    Variable_setC params();
 }

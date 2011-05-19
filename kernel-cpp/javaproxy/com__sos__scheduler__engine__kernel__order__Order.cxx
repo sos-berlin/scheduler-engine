@@ -5,6 +5,7 @@
 #include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "com__sos__scheduler__engine__kernel__Platform.h"
+#include "com__sos__scheduler__engine__kernel__VariableSet.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__OrderC.h"
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderId.h"
@@ -22,6 +23,7 @@ struct Order__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _getEndState____method;
     ::zschimmer::javabridge::Method const _getFilePath____method;
     ::zschimmer::javabridge::Method const _getId____method;
+    ::zschimmer::javabridge::Method const _getParameters____method;
     ::zschimmer::javabridge::Method const _getState____method;
     ::zschimmer::javabridge::Method const _getTitle____method;
     ::zschimmer::javabridge::Method const _onCppProxyInvalidated____method;
@@ -39,6 +41,7 @@ Order__class::Order__class(const string& class_name) :
     ,_getEndState____method(this, "getEndState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_getFilePath____method(this, "getFilePath", "()V")
     ,_getId____method(this, "getId", "()Lcom/sos/scheduler/engine/kernel/order/OrderId;")
+    ,_getParameters____method(this, "getParameters", "()Lcom/sos/scheduler/engine/kernel/VariableSet;")
     ,_getState____method(this, "getState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_getTitle____method(this, "getTitle", "()Ljava/lang/String;")
     ,_onCppProxyInvalidated____method(this, "onCppProxyInvalidated", "()V")
@@ -93,6 +96,14 @@ void Order::getFilePath() {
     Order__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderId result;
     result.steal_local_ref(cls->_getId____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::com::sos::scheduler::engine::kernel::VariableSet Order::getParameters() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Order__class* cls = _class.get();
+    ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet result;
+    result.steal_local_ref(cls->_getParameters____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

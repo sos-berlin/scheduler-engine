@@ -6,6 +6,7 @@ jni_cppproxy_objects=\
  jni__sos__scheduler__Job_subsystem.o\
  jni__sos__scheduler__Prefix_log.o\
  jni__sos__scheduler__Spooler.o\
+ jni__sos__scheduler__com_objects__Com_variable_set.o\
  jni__sos__scheduler__order__Job_chain.o\
  jni__sos__scheduler__order__Order.o\
  jni__sos__scheduler__order__Order_queue.o\

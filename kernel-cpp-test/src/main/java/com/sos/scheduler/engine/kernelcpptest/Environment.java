@@ -9,20 +9,19 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 import static org.apache.commons.io.FileUtils.*;
 import static com.google.common.base.Strings.*;
-import static com.sos.scheduler.engine.kernelcpptest.OperatingSystemHelper.*;
+import static com.sos.scheduler.engine.kernelcpptest.OperatingSystem.*;
 
 
 public class Environment {
     private static final String kernelCppDirName = "kernel-cpp";
     private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
-    private static final OperatingSystemHelper os = OperatingSystemHelper.singleton;
+    private static final OperatingSystem os = OperatingSystem.singleton;
     private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
     private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
+    private static final List<String> defaultFiles = Arrays.asList("scheduler.xml", "factory.ini", "sos.ini");
     private static final Logger logger = Logger.getLogger(Environment.class);
 
-    final File directory;
-    final File sosIniFile;
-    final File factoryIniFile;
+    private final File directory;
     private final Object mainObject;
     private final File logDirectory;
 
@@ -48,8 +47,6 @@ public class Environment {
         try {
             this.mainObject = mainObject;
             directory = File.createTempFile("sos", ".tmp");
-            sosIniFile = new File(directory, "sos.ini");
-            factoryIniFile = new File(directory, "factory.ini");
             logDirectory = new File(directory, "log");
             prepareConfigurationFiles();
             //addSchedulerPathToJavaLibraryPath();    // Für libspidermonkey.so
@@ -63,9 +60,7 @@ public class Environment {
         directory.delete();
         directory.mkdir();
         logDirectory.mkdir();
-        copyResource("scheduler.xml");
-        copyResource("sos.ini", sosIniFile);
-        copyResource("factory.ini", factoryIniFile);
+        copyResources();
     }
 
 
@@ -84,6 +79,24 @@ public class Environment {
     }
 
     
+    private void copyResources() {
+        copyDefaultResource();
+        copyOtherResources();
+    }
+
+
+    private void copyDefaultResource() {
+        for (String n: defaultFiles)  copyResource(n);
+    }
+
+    
+    private void copyOtherResources() {
+        //TODO Wie die Resourcen eines Package auflisten?
+        //class.getResource(packageName), file: und jar: unterscheiden, dann direkten Zugriff auf Dateien oder Jar-Elemente.
+        //C++/Java-Brücke kann Jar-Elemente auflisten
+    }
+    
+
     private void copyResource(String name) {
         copyResource(name, null);
     }
@@ -111,15 +124,15 @@ public class Environment {
     public String[] standardArgs() {
         List<String> result = new ArrayList<String>(Arrays.asList(
             schedulerExeFile.getPath(),
-            "-sos.ini=" + sosIniFile.getAbsolutePath(),  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
-            "-ini=" + factoryIniFile.getAbsolutePath(),  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
+            "-sos.ini=" + new File(directory, "sos.ini").getAbsolutePath(),  // Warum getAbsolutePath? "sos.ini" könnte Windows die sos.ini unter c:\windows finden lassen
+            "-ini=" + new File(directory, "factory.ini").getAbsolutePath(),  // Warum getAbsolutePath? "factory.ini" könnte Windows die factory.ini unter c:\windows finden lassen
             "-log-dir=" + logDirectory.getPath(),
             "-log=" + new File(logDirectory, "scheduler.log").getPath(),
             "-java-events"));
 
-        if (OperatingSystemHelper.isUnix) {
+        if (OperatingSystem.isUnix) {
             // Damit der Scheduler die libspidermonkey.so aus seinem Programmverzeichnis laden kann
-            String varName = OperatingSystemHelper.singleton.getDynamicLibraryEnvironmentVariableName();
+            String varName = OperatingSystem.singleton.getDynamicLibraryEnvironmentVariableName();
             String p = nullToEmpty(System.getenv(varName));
             String arg = "-env=" + varName + "=" + concatFileAndPathChain(schedulerBinDirectory(), p);
             result.add(arg);

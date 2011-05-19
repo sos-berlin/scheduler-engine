@@ -37,7 +37,7 @@ public abstract class SchedulerTest {
 
     public void runScheduler(Time timeout, String... args) {
         startScheduler(args);
-        scheduler = waitUntilSchedulerIsRunning();
+        waitUntilSchedulerIsRunning();
         waitForTermination(timeout);
     }
 
@@ -55,8 +55,16 @@ public abstract class SchedulerTest {
     }
 
 
-    public Scheduler waitUntilSchedulerIsRunning() {
-        return schedulerController.waitUntilSchedulerIsRunning();
+    public void waitUntilSchedulerIsRunning() {
+        scheduler = schedulerController.waitUntilSchedulerIsRunning();
+    }
+
+
+    public Scheduler getScheduler() {
+        if (scheduler == null)
+            waitUntilSchedulerIsRunning();
+        assert scheduler != null;
+        return scheduler;
     }
 
 
