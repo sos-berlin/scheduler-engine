@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s:/scheduler/kernel/core-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+    
+        <commands>
+<!--
+            <modify_job cmd="stop" job="myTestJob" />
+            <modify_order job_chain="js-602" order="id.original" end_state="200"/>
+            <add_order job_chain="js-602" id="id.state200"/>
+            <modify_order job_chain="js-602" order="id.state200" end_state=""/>
+            <add_order job_chain="js-602" id="id.original2"/>
+-->            
+        </commands>
+    </config>
+</spooler>

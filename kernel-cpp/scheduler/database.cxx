@@ -1054,7 +1054,7 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
 
             S create_table;
             create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
-            if( dbms_kind() == dbms_mysql )  create_table << " Type=InnoDB";
+            if( dbms_kind() == dbms_mysql )  create_table << " Type=InnoDB";    // ab Version 5.0: Engine=innodb, ab 5.5. funktioniert Type=InnoDB nicht mehr
 
             ta->execute( create_table, Z_FUNCTION );
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="myTestJob" enabled="true">
+    <script language="shell">
+        <![CDATA[
+echo "Hello world"
+        ]]>
+    </script>
+    <run_time>
+        <period single_start="10:00"/>
+    </run_time>
+</job>

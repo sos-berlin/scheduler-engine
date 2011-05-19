@@ -1944,11 +1944,10 @@ bool Job::execute_state_cmd()
                                         }
                                         else
                                         {
-                                            set_state( s_pending );
+                                            if (state_cmd == sc_unstop) set_state( s_pending );
                                             check_min_tasks( "job has been unstopped" );
                                             set_next_start_time( Time::now() );
-                                            if(state_cmd == sc_enable)  // JS-551
-                                                _enabled = true;        // JS-551
+                                            if(state_cmd == sc_enable) _enabled = true;        // JS-551
                                             something_done = true;
                                         }
                                     }
@@ -2254,7 +2253,7 @@ void Job::database_record_store()
                     update[ "path"              ] = path().without_slash();
 
                     if( next_start_time != _db_next_start_time )  update[ "next_start_time" ] = next_start_time.is_never()? sql::Value() : next_start_time.as_string();
-                    update[ "stopped"         ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
+					update[ "stopped" ] = _is_permanently_stopped;      // Bei insert _immer_ stopped schreiben, ist not null
 
                     ta.store( update, Z_FUNCTION );
                     ta.commit( Z_FUNCTION );
@@ -2295,7 +2294,7 @@ void Job::database_record_load( Read_transaction* ta )
 {
     assert( file_based_state() == File_based::s_initialized );
 
-    // lesen aus Tabelle scheduler_jobs
+// lesen aus Tabelle scheduler_jobs
     Any_file result_set = ta->open_result_set
     ( 
         S() << "select `stopped`, `next_start_time`"
