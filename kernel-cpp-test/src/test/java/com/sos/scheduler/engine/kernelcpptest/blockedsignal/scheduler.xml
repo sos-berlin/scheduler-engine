@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+>
+    <config>
+        <jobs>
+            <job name="blockedSignal">
+                <script language="shell"><![CDATA[
+#! /bin/bash
+(sleep 30 && exit 1)&
+a=$!
+(sleep 30 && exit 1)&
+b=$!
+sleep 3
+kill -15 $a $b
+wait $a || exit
+wait $b || exit
+                ]]></script>
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>
