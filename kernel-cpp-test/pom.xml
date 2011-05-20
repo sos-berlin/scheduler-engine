@@ -21,14 +21,14 @@
                 <directory>${basedir}/src/main/resources</directory>
             </resource>
             <resource>
-                <!-- Resourcen kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nnen neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼bernommen. -->
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>${project.build.sourceDirectory}</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
             </resource>
             <resource>
-                <!-- Resourcen kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nnen neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼bernommen. -->
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>src/test/scala</directory>
                 <excludes>
                     <exclude>**/*.scala</exclude>
@@ -41,14 +41,14 @@
                 <directory>${basedir}/src/test/resources</directory>
             </testResource>
             <testResource>
-                <!-- Resourcen kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nnen neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼bernommen. -->
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>${project.build.testSourceDirectory}</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
             </testResource>
             <testResource>
-                <!-- Resourcen kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nnen neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼bernommen. -->
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
                 <directory>src/test/scala</directory>
                 <excludes>
                     <exclude>**/*.scala</exclude>

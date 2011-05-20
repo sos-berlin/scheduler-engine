@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernelcpptest.blockedsignal;
 
+import java.io.File;
+import com.google.common.base.Splitter;
 import com.sos.scheduler.engine.kernelcpptest.OperatingSystem;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
@@ -15,6 +17,13 @@ public class UnixBlockedSignalTest extends SchedulerTest {
     private static final Logger logger = Logger.getLogger(UnixBlockedSignalTest.class);
     private static final Time myTimeout = Time.of(30+5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
 
+
+    @Test public void x() {
+        String p = System.getProperty("java.class.path");
+        System.err.println("java.class.path=" + p);
+        for (String s: Splitter.on(File.pathSeparatorChar).split(p))  System.err.println("  " + s);
+    }
+    
 
     @Ignore @Test public void test() throws Exception {
         if (OperatingSystem.isUnix) {   // Sollte der Windows-Scheduler die Cygwin-bash starten, wenn das Skript mit "#! /bin/bash" beginnt?

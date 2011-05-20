@@ -13,10 +13,10 @@ class ShowStateStressTest extends SchedulerTest {
     
     private val sleepTime = 0
     
-    @Test def test1 {
+    @Ignore @Test def test1 {
         startScheduler("-e", "-log-level=warn")
-        val scheduler = waitUntilSchedulerIsRunning()
-        closingFinally(new Connection(new InetSocketAddress("localhost", scheduler.getTcpPort))) { connection =>
+        waitUntilSchedulerIsRunning()
+        closingFinally(new Connection(new InetSocketAddress("localhost", getScheduler.getTcpPort))) { connection =>
             1 to 1000 foreach { i => connection.sendAndReceive(emptyCommand) }
         }
     }

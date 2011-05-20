@@ -15,37 +15,40 @@ public abstract class OperatingSystem {
     public static final String javaLibraryPathPropertyName = "java.library.path";
     private static final Logger logger = Logger.getLogger(OperatingSystem.class);
     
-    public abstract String makeModuleFilename(String name);
+    public String makeModuleFilename(String name) {
+        return System.mapLibraryName(name);
+    }
+    
     public abstract String makeExecutableFilename(String name);
     public abstract String getDynamicLibraryEnvironmentVariableName();
     
 
     public static class Windows extends OperatingSystem {
-        @Override public String makeModuleFilename(String name) {
-            return name + ".dll";
-        }
+//        @Override public String makeModuleFilename(String name) {
+//            return name + ".dll";
+//        }
 
-        @Override public String makeExecutableFilename(String name) {
+        @Override public final String makeExecutableFilename(String name) {
             return name + ".exe";
         }
 
-        @Override public String getDynamicLibraryEnvironmentVariableName() {
+        @Override public final String getDynamicLibraryEnvironmentVariableName() {
             return "PATH";
         }
     }
     
 
     public static class Unix extends OperatingSystem {
-        @Override public String makeModuleFilename(String name) {
-            File file = new File(name);
-            return new File(file.getParent(), "lib" + file.getName() + ".so").getPath();
-        }
+//        @Override public String makeModuleFilename(String name) {
+//            File file = new File(name);
+//            return new File(file.getParent(), "lib" + file.getName() + ".so").getPath();
+//        }
 
-        @Override public String makeExecutableFilename(String name) {
+        @Override public final String makeExecutableFilename(String name) {
             return name;
         }
 
-        @Override public String getDynamicLibraryEnvironmentVariableName() {
+        @Override public final String getDynamicLibraryEnvironmentVariableName() {
             return "LD_LIBRARY_PATH";
         }
     }
