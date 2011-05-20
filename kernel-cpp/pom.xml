@@ -16,93 +16,6 @@
 
     <profiles>
         <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <assemblyFile>src/main/assembly/os-windows.xml</assemblyFile>
-                <operatingSystem>windows</operatingSystem>
-            </properties>
-            <distributionManagement>
-                <repository>
-                    <id>sos-os-windows-x86</id>
-                    <name>SOS Windows Repository (Intel x86 32bit)</name>
-                    <url>http://archiva.sos:8080/archiva/repository/os-windows-x86</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>unix</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <properties>
-                <assemblyFile>src/main/assembly/os-unix.xml</assemblyFile>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>Linux</name>
-                </os>
-            </activation>
-            <properties>
-                <operatingSystem>linux</operatingSystem>
-            </properties>
-            <distributionManagement>
-                <repository>
-                    <id>sos-os-linux-x86</id>
-                    <name>SOS Linux Repository (Intel x86 32bit)</name>
-                    <url>http://archiva.sos:8080/archiva/repository/os-linux-x86</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>hpux</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>HP UX</name>
-                </os>
-            </activation>
-            <properties>
-                <operatingSystem>hpux</operatingSystem>
-            </properties>
-            <distributionManagement>
-                <repository>
-                    <id>sos-os-hpux</id>
-                    <name>SOS HP-UX Repository</name>
-                    <url>http://archiva.sos:8080/archiva/repository/os-hpux</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>solaris</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>Solaris</name>
-                </os>
-            </activation>
-            <properties>
-                <operatingSystem>solaris</operatingSystem>
-            </properties>
-            <distributionManagement>
-                <repository>
-                    <id>sos-os-solaris</id>
-                    <name>SOS Solaris Repository</name>
-                    <url>http://archiva.sos:8080/archiva/repository/os-solaris</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
             <id>deploy</id>
             <build>
                 <plugins>
@@ -223,6 +136,14 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <classifier>${osArch}</classifier>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2.1</version>
                 <executions>
@@ -233,8 +154,9 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <classifier>${osArch}</classifier>
                             <descriptors>
-                                <descriptor>${assemblyFile}</descriptor>
+                                <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -250,4 +172,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <!--distributionManagement>
+        <repository>
+            <id>sos-os-${osArch}</id>
+            <name>SOS Windows Repository (${osArch})</name>
+            <url>http://archiva.sos:8080/archiva/repository/os-${osArch}</url>
+        </repository>
+    </distributionManagement!-->
+
 </project>

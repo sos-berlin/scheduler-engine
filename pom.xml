@@ -54,8 +54,8 @@
             <!-- Hier die nächste Version einstellen. Freigabe mit: mvn -Prelease release:prepare release:perform -->
             <id>release</id>
             <properties>
-                <releaseVersion>1.3.11-beta-3g</releaseVersion> <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
-                <developmentVersion>1.3.11-beta-3h-SNAPSHOT</developmentVersion>
+                <releaseVersion>1.3.11-beta-3h</releaseVersion> <!-- Normalerweise ${project.version} ohne -SNAPSHOT -->
+                <developmentVersion>1.3.11-beta-3i-SNAPSHOT</developmentVersion>
                 <tag>engine-${releaseVersion}</tag>
             </properties>
         </profile>

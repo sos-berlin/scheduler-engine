@@ -43,6 +43,71 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>windows</operatingSystem>
+                <osArch>windows-${os.arch}</osArch>
+                <osFamily>windows</osFamily>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <osFamily>unix</osFamily>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>linux</operatingSystem>
+                <osArch>linux-${os.arch}</osArch>
+            </properties>
+        </profile>
+        <profile>
+            <id>hpux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>HP UX</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>hpux</operatingSystem>
+                <osArch>hpux-itanium</osArch>
+            </properties>
+        </profile>
+        <profile>
+            <id>solaris</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Solaris</name>
+                </os>
+            </activation>
+            <properties>
+                <operatingSystem>solaris</operatingSystem>
+                <osArch>solaris-${os.arch}</osArch>
+            </properties>
+        </profile>
     </profiles>
 
     <prerequisites>
