@@ -18,6 +18,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main", "scripting_engine\main.vcxproj", "{2A85574C-4AF9-4DDB-96D6-1C3F06F5EE44}"
 	ProjectSection(ProjectDependencies) = postProject
 		{722C292E-1F82-4ACC-950A-451291E25500} = {722C292E-1F82-4ACC-950A-451291E25500}
+		{CB328962-5E3D-4335-B549-55ED23867E90} = {CB328962-5E3D-4335-B549-55ED23867E90}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scripting_engine_tlb", "scripting_engine\scripting_engine_tlb.vcxproj", "{722C292E-1F82-4ACC-950A-451291E25500}"
