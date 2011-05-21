@@ -15,8 +15,9 @@ public abstract class OperatingSystem {
     public static final String javaLibraryPathPropertyName = "java.library.path";
     private static final Logger logger = Logger.getLogger(OperatingSystem.class);
     
-    public String makeModuleFilename(String name) {
-        return System.mapLibraryName(name);
+    public final String makeModuleFilename(String path) {
+        File file = new File(path);
+        return new File(file.getParent(), System.mapLibraryName(file.getName())).getPath();
     }
     
     public abstract String makeExecutableFilename(String name);
