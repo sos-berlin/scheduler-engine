@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.jira.js647;
+package com.sos.scheduler.engine.kernelcpptest.jira.js674;
 
 import com.sos.scheduler.engine.kernelcpptest.OperatingSystem;
 import com.sos.scheduler.engine.kernel.event.Event;
