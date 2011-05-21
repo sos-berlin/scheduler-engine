@@ -60,11 +60,12 @@
 
                 <dependencies>
                     <dependency>
-                        <!-- Das wird auch bei clean verlangt, obwohl es nur fÃƒÂ¼r generate-sources gebraucht wird. 
-                        Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. LÃƒÂ¶sung: mvn clean install. -->
+                        <!-- Das wird auch bei clean verlangt, obwohl es nur für generate-sources gebraucht wird.
+                        Erstmaliges mvn clean auf Module kann deshalb fehlschlagen. Lösung: mvn clean install. -->
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
                         <version>${cplusplusVersion}</version>
+                        <scope>compile</scope>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>

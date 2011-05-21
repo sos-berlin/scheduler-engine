@@ -51,6 +51,7 @@
                         <groupId>com.sos.scheduler.engine</groupId>
                         <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
                         <version>${cplusplusVersion}</version>
+                        <scope>compile</scope>
                     </dependency>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
