@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine.parent</artifactId>
-        <version>1.3.11-beta-3k</version>
+        <version>1.3.11-beta-3m-SNAPSHOT</version>
         <relativePath>parent</relativePath>
     </parent>
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>com.sos.scheduler.engine</artifactId>
-    <version>1.3.11-beta-3k</version>
+    <version>1.3.11-beta-3m-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
