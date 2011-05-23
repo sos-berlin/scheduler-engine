@@ -80,26 +80,6 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>filter-assembly</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <!-- Maven unter Jenkins/Linux ersetzt <id>${osArch}</id> nicht. Deshalb so. -->
-                                    <directory>src/main/assembly</directory>
-                                    <includes>
-                                        <include>os-${osFamily}.xml</include>
-                                    </includes>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             
@@ -159,7 +139,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>${project.build.directory}/os-${osFamily}.xml</descriptor>
+                                <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
