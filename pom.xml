@@ -46,7 +46,7 @@
     <scm>
         <connection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</connection>
         <developerConnection>scm:svn:http://subversion.sos/svn/sos/scheduler/engine</developerConnection>
-        <url>http://subversion.sos/svn/sos/scheduler/engine</url>
+        <url>http://subversion.sos/svn/sos/scheduler/engine-releases</url>
     </scm>
 
     <profiles>
@@ -59,14 +59,5 @@
                 <tag>engine-${releaseVersion}</tag>
             </properties>
         </profile>
-        
-        <!--profile>
-            <!- -description>Die Module der Engine.
-        Der C++/Java-Generator (cplusplus/) ist separat zu bauen oder mit der Option -Pcomplete.</description- ->
-            <id>complete</id>
-            <modules>
-                <module>cplusplus</module>
-            </modules>
-        </profile-->
     </profiles>
 </project>
