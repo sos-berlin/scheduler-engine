@@ -14,23 +14,6 @@
     <inceptionYear>2010</inceptionYear>
     <description>C++-Code der Scheduler-Engine</description>
 
-    <profiles>
-        <profile>
-            <id>deploy</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <configuration>
-                            <skip>false</skip>
-                            <!-- Voreinstellt ist für dieses Artefakt true, also kein Deploy. -->
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
             <plugin>
@@ -85,7 +68,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>target/cpp</outputDirectory>
+                            <outputDirectory>${project.build.directory}/cpp</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>.</directory>
@@ -155,21 +138,12 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <classifier>${osArch}</classifier>
                             <descriptors>
                                 <descriptor>src/main/assembly/os-${osFamily}.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                    <!-- Wird betriebssystem-abhängig ausgeliefert, siehe Profil deploy -->
-                </configuration>
             </plugin>
         </plugins>
     </build>

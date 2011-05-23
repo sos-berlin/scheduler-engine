@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-    <id>windows</id>
+    <id>${osArch}</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -11,7 +11,18 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>scheduler.exe</include>
+                <include>scheduler.exe.map</include>
+                <include>scheduler.exe.pdb</include>
                 <include>spidermonkey.dll</include>
+                <include>spidermonkey.dll.map</include>
+                <include>spidermonkey.dll.pdb</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>scheduler</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>scheduler.xsd</include>
             </includes>
         </fileSet>
     </fileSets>
