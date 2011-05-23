@@ -4,7 +4,7 @@
 
     <groupId>com.sos.scheduler.engine</groupId>
     <artifactId>com.sos.scheduler.engine.parent</artifactId>
-    <version>1.3.11-beta-3n-SNAPSHOT</version>
+    <version>1.3.11-beta-3n</version>
 
     <description>Parent-Pom der Scheduler-Engine mit den allgemeinen Einstellungen</description>
     
@@ -168,17 +168,17 @@
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.generator</artifactId>
-                <version>1.3.11-beta-3n-SNAPSHOT</version>
+                <version>1.3.11-beta-3n</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
-                <version>1.3.11-beta-3n-SNAPSHOT</version>
+                <version>1.3.11-beta-3n</version>
             </dependency>
             <dependency>
                 <groupId>com.sos.scheduler.engine</groupId>
                 <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
-                <version>1.3.11-beta-3n-SNAPSHOT</version>
+                <version>1.3.11-beta-3n</version>
             </dependency>
 
             <dependency>
