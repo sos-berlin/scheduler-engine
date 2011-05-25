@@ -3,13 +3,13 @@ package com.sos.scheduler.engine.kernelcpptest.order.test1;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.main.event.EventThread;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.kernelcpptest.JavascriptEventPredicateEngine;
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.JavascriptEventPredicateEngine;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import org.junit.Test;
 
 
 public class ExampleWithJavascriptTest extends SchedulerTest {
-    private static final Time eventTimeout = Time.of(3);
+    private static final Time eventTimeout = Time.of(10);
 
     @Test public void test() throws Exception {
         strictSubscribeEvents(new MyEventThread());

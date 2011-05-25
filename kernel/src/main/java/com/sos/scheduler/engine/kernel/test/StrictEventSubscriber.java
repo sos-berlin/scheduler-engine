@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest;
+package com.sos.scheduler.engine.kernel.test;
 
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
@@ -10,7 +10,8 @@ import org.apache.log4j.Logger;
 
 /** Beendet bei einer Exception oder einem ErrorLogEvent den Scheduler. */
 public class StrictEventSubscriber implements EventSubscriber {
-    private static final Logger logger = Logger.getLogger(StrictEventSubscriber.class);
+    @SuppressWarnings("unused")
+	private static final Logger logger = Logger.getLogger(StrictEventSubscriber.class);
 
     private SchedulerController schedulerController = null;
     private final EventSubscriber eventSubscriber;

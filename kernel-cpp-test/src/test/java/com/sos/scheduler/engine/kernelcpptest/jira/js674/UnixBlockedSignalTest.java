@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernelcpptest.jira.js674;
 
-import com.sos.scheduler.engine.kernelcpptest.OperatingSystem;
+import com.sos.scheduler.engine.kernel.test.OperatingSystem;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import org.apache.log4j.*;
 import org.junit.*;
 

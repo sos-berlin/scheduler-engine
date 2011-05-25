@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernelcpptest.stress.showstate
 
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest
+import com.sos.scheduler.engine.kernel.test.SchedulerTest
 import com.sos.scheduler.engine.cplusplus.scalautil.io.Util._
 import java.io._
 import java.net._

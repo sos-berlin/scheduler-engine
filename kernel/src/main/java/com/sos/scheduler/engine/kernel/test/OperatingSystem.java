@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest;
+package com.sos.scheduler.engine.kernel.test;
 
 import com.google.common.base.Joiner;
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest;
+package com.sos.scheduler.engine.kernel.test;
 
 import javax.script.ScriptEngineManager;
 

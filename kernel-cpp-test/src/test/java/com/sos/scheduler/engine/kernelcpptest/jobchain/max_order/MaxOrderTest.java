@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import org.apache.log4j.*;
 import org.junit.Test;
 import static java.lang.Math.max;

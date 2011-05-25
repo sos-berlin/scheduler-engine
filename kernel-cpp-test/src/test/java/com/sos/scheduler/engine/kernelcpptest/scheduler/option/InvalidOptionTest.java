@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernelcpptest.scheduler.option;
 
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import org.apache.log4j.*;
 import org.junit.*;
 import static org.junit.Assert.*;

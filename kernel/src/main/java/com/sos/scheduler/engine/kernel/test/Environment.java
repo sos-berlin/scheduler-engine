@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest;
+package com.sos.scheduler.engine.kernel.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 import static org.apache.commons.io.FileUtils.*;
 import static com.google.common.base.Strings.*;
-import static com.sos.scheduler.engine.kernelcpptest.OperatingSystem.*;
+import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
 
 
 public class Environment {
@@ -27,7 +27,7 @@ public class Environment {
 
 
     private static File kernelCppDir() {
-        File dir = new File("..");
+        File dir = new File(".");
         while (dir.exists()) {
             File result = new File(dir, kernelCppDirName);
             if (result.exists()) return result;
@@ -69,9 +69,9 @@ public class Environment {
     }
 
     
-    private static void addSchedulerPathToJavaLibraryPath() {
-        prependJavaLibraryPath(schedulerBinDirectory());
-    }
+//    private static void addSchedulerPathToJavaLibraryPath() {
+//        prependJavaLibraryPath(schedulerBinDirectory());
+//    }
 
 
     private static File schedulerBinDirectory() {

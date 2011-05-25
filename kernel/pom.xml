@@ -21,11 +21,16 @@
             </resource>
             <resource>
                 <directory>${project.build.sourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+<!-- 
                 <filtering>true</filtering>
                 <includes>
                     <include>**/maven.properties</include>
                 </includes>
-            </resource>
+ -->
+             </resource>
         </resources>
         
         <plugins>
@@ -73,7 +78,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>
-            <scope>test</scope>
         </dependency>
         
         <dependency>
@@ -121,5 +125,17 @@
             <version>1.5.6</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>com.google.guava</groupId>
+        	<artifactId>guava</artifactId>
+        </dependency>
+        
+	    <dependency>
+	        <groupId>commons-io</groupId>
+	        <artifactId>commons-io</artifactId>
+	        <version>1.4</version>
+	    </dependency>
+        
     </dependencies>
 </project>

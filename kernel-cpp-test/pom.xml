@@ -15,6 +15,27 @@
     <description>Test des Schedulers (eigenes Projekt, getrennt vom Zusammenbau des Schedulers)</description>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                <!--
+                    <systemProperties>
+                        <property>
+                            <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
+                            <name>java.io.tmpdir</name>
+                            <value>${basedir}/target/temp</value>
+                        </property>
+                    </systemProperties>
+                    -->
+                  <!-- jiraex contains test cases for unresolved jira issues -->  
+				          <excludes>
+				            <exclude>com/sos/scheduler/engine/kernelcpptest/jiraex/**.java</exclude>
+				          </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
         <resources>
             <resource>
                 <!-- Standard Wiederholen -->
@@ -58,6 +79,7 @@
     </build>
 
     <dependencies>
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.scheduler.engine.kernel</artifactId>
@@ -75,6 +97,26 @@
             <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
             <version>${project.version}</version>
             <classifier>${osArch}</classifier>
+        </dependency>
+
+        <dependency>
+        	<groupId>${project.groupId}</groupId>
+        	<artifactId>com.sos.scheduler.engine.plugins</artifactId>
+        	<version>${project.version}</version>
+        	<scope>compile</scope>
+        </dependency>
+
+        <dependency>
+        	<groupId>${project.groupId}</groupId>
+        	<artifactId>com.sos.scheduler.model</artifactId>
+        	<version>${project.version}</version>
+        	<scope>compile</scope>
+        </dependency>
+    
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.VirtualFileSystem</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
@@ -116,9 +158,23 @@
         </dependency>
 
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <scope>test</scope>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        
+        <dependency>
+        	<groupId>com.sos.scheduler.engine</groupId>
+        	<artifactId>com.sos.scheduler.engine.plugins</artifactId>
+        	<version>1.3.11-beta-3p-SNAPSHOT</version>
+        	<type>jar</type>
+        	<scope>test</scope>
         </dependency>
     </dependencies>
 </project>
