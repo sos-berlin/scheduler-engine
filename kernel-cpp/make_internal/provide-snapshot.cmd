@@ -15,8 +15,8 @@ copy %source_dir%\bind\scheduler.dll %target_dir%\scheduler.dll
 @rem echo copy %source_dir%\bind\scheduler.exe to %target_dir%\scheduler_dll.exe
 copy %source_dir%\bind\scheduler.exe %target_dir%\scheduler_dll.exe
 
-@rem echo copy %jar_dir%\com.sos.scheduler.engine.jar to %target_dir%\sos.spooler.jar
-copy %jar_dir%\com.sos.scheduler.engine.jar %target_dir%\sos.spooler.jar
+@rem echo copy %jar_dir%\com.sos.scheduler.engine-complete.jar to %target_dir%\sos.spooler.jar
+copy %jar_dir%\com.sos.scheduler.engine-complete.jar %target_dir%\sos.spooler.jar
 
 rem echo copy %source_dir%\scheduler\scheduler.xsd to %target_dir%\scheduler.xsd
 copy %source_dir%\scheduler\scheduler.xsd %target_dir%\scheduler.xsd
