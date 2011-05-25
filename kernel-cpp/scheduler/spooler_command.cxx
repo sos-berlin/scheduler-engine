@@ -1387,7 +1387,9 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order->db_update( Order::update_anyway, &ta );
         }
 
+		order->fire_event_if_finished();
         ta.commit( Z_FUNCTION );
+
     }
     catch( exception& x ) { ta.reopen_database_after_error( zschimmer::Xc( "SCHEDULER-360", _spooler->db()->_orders_tablename, x ), Z_FUNCTION ); }
 

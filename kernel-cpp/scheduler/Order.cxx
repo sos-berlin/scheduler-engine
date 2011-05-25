@@ -2190,6 +2190,10 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
         }
 
         db_delete( update_and_release_occupation, outer_transaction );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
+
+		// wird beim order remove aufgerufen und sollte evtl. ein eigenes event sein
+		fire_event_if_finished();
+
     }
 
     assert( !_is_db_occupied );
@@ -2514,15 +2518,22 @@ void Order::postprocessing( Postprocessing_mode postprocessing_mode )
     postprocessing2( last_job );
 }
 
+//--------------------------------------------------------------------------Order::fire_event_if_finished
+
+void Order::fire_event_if_finished()
+{
+    // Endzustand erreicht. 
+    if( finished() ) {
+	    report_event( OrderFinishedEventJ::new_instance(java_sister()) );
+	}
+}
+
 //--------------------------------------------------------------------------Order::handle_end_state
 
 void Order::handle_end_state()
 {
     // Endzustand erreicht. 
     // Möglicherweise nur der Endzustand in einer verschachtelten Jobkette. Dann beachten wir die übergeordnete Jobkette.
-
-    report_event( OrderFinishedEventJ::new_instance(java_sister()) );
-
     bool is_real_end_state = false;
 
 
@@ -2734,6 +2745,8 @@ void Order::postprocessing2( Job* last_job )
         }
         catch( exception& x )  { _log->error( x.what() ); }
     }
+	
+	fire_event_if_finished();
 
 
     if( _job_chain )  // 2008-03-07  &&  _is_in_database )

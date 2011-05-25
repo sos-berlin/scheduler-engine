@@ -256,6 +256,7 @@ struct Order : Com_order,
     enum Postprocessing_mode { post_success, post_error, post_keep_state };
     void                        postprocessing          ( Postprocessing_mode );                    // Verarbeitung nach spooler_process()
     void                        processing_error        ();
+	void                        fire_event_if_finished  ();
     void                        handle_end_state        ();
     bool                        handle_end_state_of_nested_job_chain();
     void                        handle_end_state_repeat_order( const Time& );
