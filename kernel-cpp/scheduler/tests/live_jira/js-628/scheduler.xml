@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+  <config   java_options="-Xmx257m">
+    <base file="$SCHEDULER_TEST/../../base.scheduler"/>
+
+<!--
+		<jobs>
+		</jobs>
+
+		<job_chains>
+		</job_chains>
+
+		<commands>
+			<add_order job_chain="js628_chain" id="js628_chain" />
+		</commands>
+-->		
+		
+	</config>
+</spooler>

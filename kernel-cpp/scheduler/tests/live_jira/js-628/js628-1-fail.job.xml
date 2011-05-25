@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+			<job order="yes" title="failed for JS628" stop_on_error="no" name="js628-1-fail">
+				<script language="javascript">
+                <![CDATA[
+function spooler_process(){
+   return true;
+}
+                ]]>
+				</script>
+				<monitor name="process0" ordering="0">
+					<script language="javascript">
+                    <![CDATA[
+<!-- if spooler_process_before results false, the jobchin should be failed -->                    
+function spooler_process_before(){
+   return false;
+}
+                    ]]>
+					</script>
+				</monitor>
+				<run_time />
+			</job>

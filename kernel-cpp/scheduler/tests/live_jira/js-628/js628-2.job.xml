@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+			<job title="job2 for JS628" order="yes" stop_on_error="no" name="js628-2">
+				<params />
+				<script language="shell">
+                <![CDATA[
+echo js628-2
+                ]]>
+				</script>
+				<run_time />
+			</job>
