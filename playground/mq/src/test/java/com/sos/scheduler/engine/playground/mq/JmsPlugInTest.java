@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.playground.mq;
 
-import com.sos.scheduler.engine.kernelcpptest.SchedulerTest;
+import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
