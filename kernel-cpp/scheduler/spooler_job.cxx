@@ -1944,7 +1944,7 @@ bool Job::execute_state_cmd()
                                         }
                                         else
                                         {
-                                            if (state_cmd == sc_unstop) set_state( s_pending );
+                                            if (state_cmd == sc_unstop) set_state( s_pending );  // JS-671
                                             check_min_tasks( "job has been unstopped" );
                                             set_next_start_time( Time::now() );
                                             if(state_cmd == sc_enable) _enabled = true;        // JS-551
