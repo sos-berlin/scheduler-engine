@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine</artifactId>
+        <version>1.3.11-beta-3p-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>com.sos.scheduler.engine.plugins</artifactId>
+
+    <name>${project.artifactId}</name>
+    <inceptionYear>2011</inceptionYear>
+    <description>plugins of the scheduler kernel.</description>
+
+    <build>
+    <!-- 
+     -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+				          <includes>
+				            <!--
+				            Dieser Test führt zu einem Fehler, wenn er mit den Tests unten zusammen ausgeführt wird.
+				            Läuft er alleine, funktioniert's. 
+				            <include>**/ConnectorTest.java</include>  
+				            -->
+				            <include>**/JmsEventFilterTest.java</include>
+				            <include>**/JmsOrderEventsTest.java</include>
+				          </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+        <testResources>
+            <testResource>
+                <!-- Standard Wiederholen -->
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>${project.build.testSourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <!-- mvn install:install-file -Dfile=C:\Users\schaedi\eclipse\lib\com.sos.VirtualFileSystem.jar -DgroupId=com.sos -DartifactId=com.sos.VirtualFileSystem -Dversion=1.0 -Dpackaging=jar -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.VirtualFileSystem</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+	        <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>${project.groupId}</groupId>
+        	<artifactId>com.sos.scheduler.model</artifactId>
+        	<version>${project.version}</version>
+        	<scope>compile</scope>
+        </dependency>
+    </dependencies>
+  </project>
