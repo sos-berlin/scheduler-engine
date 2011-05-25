@@ -166,6 +166,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/spidermonkey.dll"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile="spidermonkey.def"
 				DelayLoadDLLs="advapi32.dll"
 				GenerateDebugInformation="true"
@@ -234,46 +235,6 @@
 		<File
 			RelativePath=".\spidermonkey.def"
 			>
-		</File>
-		<File
-			RelativePath=".\spidermonkey.odl"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCMIDLTool"
-					WarningLevel="3"
-					WarnAsError="true"
-					TypeLibraryName="$(ProjectName).tlb"
-					HeaderFileName="$(InputName)_h.h"
-					EnableErrorChecks="2"
-					ErrorCheckAllocations="true"
-					ErrorCheckBounds="true"
-					ErrorCheckEnumRange="true"
-					ErrorCheckRefPointers="true"
-					ErrorCheckStubData="true"
-					ValidateParameters="true"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCMIDLTool"
-					WarningLevel="3"
-					WarnAsError="true"
-					TypeLibraryName="$(ProjectName).tlb"
-					HeaderFileName="$(InputName)_h.h"
-					EnableErrorChecks="2"
-					ErrorCheckAllocations="true"
-					ErrorCheckBounds="true"
-					ErrorCheckEnumRange="true"
-					ErrorCheckRefPointers="true"
-					ErrorCheckStubData="true"
-					ValidateParameters="true"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath=".\spidermonkey.rc"
