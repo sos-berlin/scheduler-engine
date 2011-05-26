@@ -46,17 +46,15 @@
 
     <dependencies>
         <dependency>
-            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.util.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.util -Dversion=1.0 -Dpackaging=jar -->
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.util</artifactId>
-            <version>1.0</version>
+            <version>1.6</version>
         </dependency>
 
         <dependency>
-            <!-- mvn install:install-file -Dfile=J:\E\java\lib\com.sos.JSHelper.jar -DgroupId=com.sos.scheduler.engine -DartifactId=com.sos.JSHelper -Dversion=1.0 -Dpackaging=jar -->
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.JSHelper</artifactId>
-            <version>1.0</version>
+            <version>1.6</version>
         </dependency>
         
         <dependency>

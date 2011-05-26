@@ -51,10 +51,14 @@
 
     <dependencies>
         <dependency>
-            <!-- mvn install:install-file -Dfile=C:\Users\schaedi\eclipse\lib\com.sos.VirtualFileSystem.jar -DgroupId=com.sos -DartifactId=com.sos.VirtualFileSystem -Dversion=1.0 -Dpackaging=jar -->
             <groupId>${project.groupId}</groupId>
             <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>1.0</version>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.JobSchedulerLocalization</artifactId>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -93,8 +97,8 @@
         </dependency>
         <dependency>
         	<groupId>${project.groupId}</groupId>
-        	<artifactId>com.sos.scheduler.model</artifactId>
-        	<version>${project.version}</version>
+        	<artifactId>com.sos.SOSJobSchedulerModel</artifactId>
+        	<version>1.6</version>
         	<scope>compile</scope>
         </dependency>
     </dependencies>
