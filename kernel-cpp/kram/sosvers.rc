@@ -21,7 +21,7 @@
 
 #include <winver.h>  // einige #defines
 
-#define SOS_COPYRIGHT "Copyright ©1988-2006 Software- und Organisations-Service GmbH"
+#define SOS_COPYRIGHT "Copyright ©1988-2011 Software- und Organisations-Service GmbH"
 
 
 // DEFAULTS:
