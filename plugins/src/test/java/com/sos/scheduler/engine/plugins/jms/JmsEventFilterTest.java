@@ -71,7 +71,7 @@ public class JmsEventFilterTest extends SchedulerTest {
 
 
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'OrderTouchedEvent'";
+        String messageSelector = "eventName = 'EventOrderTouched'";
         boolean noLocal = false;
     	logger.info("createSubscriber with filter: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -80,7 +80,7 @@ public class JmsEventFilterTest extends SchedulerTest {
     
     @Test public void test() throws Exception {
         runScheduler(schedulerTimeout, "-e");
-        assertEvent("OrderTouchedEvent",2);
+        assertEvent("EventOrderTouched",2);
         assertEquals("total number of events",2,resultQueue.size());
     }
     
@@ -109,14 +109,14 @@ public class JmsEventFilterTest extends SchedulerTest {
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
             	logger.info("subscribe " + ev.getName());
             	logger.debug(xmlContent);
-                if (ev.getOrderTouchedEvent() != null) {
-                	logger.info(">>>>> order " + ev.getOrderTouchedEvent().getOrder().getId() + " touched");
+                if (ev.getEventOrderTouched() != null) {
+                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
                 }
-                if (ev.getOrderStateChangedEvent() != null) {
-                	logger.info(">>>>> order " + ev.getOrderStateChangedEvent().getOrder().getId() + " goes to state " + ev.getOrderStateChangedEvent().getState() + " (previous State: " + ev.getOrderStateChangedEvent().getPreviousState() + ")");
+                if (ev.getEventOrderStateChanged() != null) {
+                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
                 }
-                if (ev.getOrderFinishedEvent() != null) {
-                	logger.info(">>>>> order " + ev.getOrderFinishedEvent().getOrder().getId() + " finished.");
+                if (ev.getEventOrderFinished() != null) {
+                	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.

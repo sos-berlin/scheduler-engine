@@ -2,6 +2,8 @@ package com.sos.scheduler.engine.plugins.jms;
 
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
+import java.util.Properties;
+
 import javax.jms.Message;
 import javax.jms.TextMessage;
 import org.apache.log4j.Logger;
@@ -133,7 +135,8 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 		if (e instanceof OrderStateChangedEvent
 				|| e instanceof OrderTouchedEvent
 				|| e instanceof OrderFinishedEvent) {
-			JSEvent ev = objFactory.createEvent(e);
+//			JSEvent ev = objFactory.createEvent(e);
+			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
 			logger.info("publish event " + ev.getName());
 			logger.debug(ev.marshal());
 			m.setText(ev.marshal());
@@ -154,7 +157,7 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 	private void setEventProperties(Message m, JSEvent ev) throws Exception {
 		
 		JMSMessageHelper eh = new JMSMessageHelper(m);
-		eh.setJMSHeaderProperties(JSEvent.defaultEventProperties());
+		eh.setJMSHeaderProperties(JMSMessageHelper.defaultEventProperties());
 		
 		m.setStringProperty("eventName", ev.getName()); // for filtering
 		

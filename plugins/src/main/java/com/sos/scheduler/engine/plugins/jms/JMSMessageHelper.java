@@ -69,5 +69,11 @@ public class JMSMessageHelper {
 	    	logger.error("error invoking method " + searchMethod + "(" + propertyValue + "): - " + e.getMessage());
     	}
     }
+
+	public static Properties defaultEventProperties() {
+		Properties result = new Properties();
+		result.put("JMSPriority", 20);
+		return result;
+	}
     
 }
