@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.jms.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
-import com.sos.scheduler.model.events.OrderFinishedEvent;
+import com.sos.scheduler.model.events.EventOrderFinished;
 
 
 /**
@@ -112,7 +112,7 @@ public class JS628 extends SchedulerTest {
      * @throws JMSException
      */
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'OrderFinishedEvent'";
+        String messageSelector = "eventName = 'EventOrderFinished'";
         boolean noLocal = false;
         logger.debug("eventFilter is: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -130,8 +130,8 @@ public class JS628 extends SchedulerTest {
     public void test() throws Exception {
         runScheduler(schedulerTimeout, "-e");
         assertState("success",1);										// one order has to end with 'success'
-        assertState("error",1);											// one order has to end with 'error'
-        assertEquals("total number of events",2,resultQueue.size());	// totaly 2 OrderFinishedEvents
+        assertState("error",3);											// three order has to end with 'error'
+        assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents
     }
     
     private void assertState(String stateName, int exceptedHits) {
@@ -156,9 +156,9 @@ public class JS628 extends SchedulerTest {
                 TextMessage textMessage = (TextMessage) message;
                 String xmlContent = textMessage.getText();
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-               	assertNotNull(ev.getOrderFinishedEvent());
+               	assertNotNull(ev.getEventOrderFinished());
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                OrderFinishedEvent ov = ev.getOrderFinishedEvent();
+                EventOrderFinished ov = ev.getEventOrderFinished();
                 textMessage.acknowledge();
                 result = ov.getOrder().getState();
                 logger.info("order " + ov.getOrder().getId() + " ended with state " + ov.getOrder().getState() );
