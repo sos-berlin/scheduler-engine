@@ -1078,7 +1078,7 @@ Variant Module_instance::step__end()
                 result = false;
             }
 
-            result = _monitor_instances.spooler_process_after( result );
+	        if( check_result( result ) ) result = _monitor_instances.spooler_process_after( result );
         }
     }
 

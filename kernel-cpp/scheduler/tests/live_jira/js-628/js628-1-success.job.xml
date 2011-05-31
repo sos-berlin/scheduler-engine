@@ -3,6 +3,7 @@
 				<script language="javascript">
                 <![CDATA[
 function spooler_process(){
+   spooler_log.info("spooler_process");
    return false;
 }
                 ]]>
@@ -12,7 +13,8 @@ function spooler_process(){
                     <![CDATA[
 <!-- if spooler_process_before results true, the jobchin should be ended normally -->                    
 function spooler_process_before(){
-   return true;
+   spooler_log.info("process_before");
+   return false;
 }
                     ]]>
 					</script>
