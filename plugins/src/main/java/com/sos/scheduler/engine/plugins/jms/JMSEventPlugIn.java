@@ -136,13 +136,12 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 				|| e instanceof OrderTouchedEvent
 				|| e instanceof OrderFinishedEvent) {
 //			JSEvent ev = objFactory.createEvent(e);
-            throw new Error("Klasse JMSEventAdapter fehlt. Gruß, Zschimmer");
-//			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
-//			logger.info("publish event " + ev.getName());
-//			logger.debug(ev.marshal());
-//			m.setText(ev.marshal());
-//			setEventProperties(m, ev);
-//			connector.publish(m); // publish the text message (xml)
+			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
+			logger.info("publish event " + ev.getName());
+			logger.debug(ev.marshal());
+			m.setText(ev.marshal());
+			setEventProperties(m, ev);
+			connector.publish(m); // publish the text message (xml)
 		}
 	}
 
