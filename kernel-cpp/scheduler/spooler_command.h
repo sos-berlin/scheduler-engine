@@ -270,6 +270,7 @@ struct Command_processor
     xml::Document_ptr           dom_from_xml                ( const string& xml_text );
     void                        execute_commands            ( const xml::Element_ptr& );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_command_in_java     ( const xml::Element_ptr& );
     void                        begin_answer                ();
     void                        append_error_to_answer      ( const exception& );
     void                        append_error_to_answer      ( const Xc& );

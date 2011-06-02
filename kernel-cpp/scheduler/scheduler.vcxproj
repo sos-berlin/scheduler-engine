@@ -316,7 +316,7 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" /></ItemGroup>
+  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" /><ClCompile Include="jni__sos__scheduler__Database.cxx" /></ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />

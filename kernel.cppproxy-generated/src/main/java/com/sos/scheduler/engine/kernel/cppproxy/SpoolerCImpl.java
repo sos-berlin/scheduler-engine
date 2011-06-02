@@ -294,6 +294,19 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     private static native void cmd_terminate_and_restart__native(long cppReference, int p0);
 
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.DatabaseC db() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return db__native(cppReference());
+        }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.DatabaseC db__native(long cppReference);
+
+
     @Override public java.lang.String db_cluster_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {

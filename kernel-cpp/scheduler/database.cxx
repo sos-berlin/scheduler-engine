@@ -466,6 +466,7 @@ Database::Database( Spooler* spooler )
 :
     Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
+    //javabridge::has_proxy<Database>(spooler),
     _lock("Database"),
     _database_descriptor( z::sql::flag_uppercase_names | z::sql::flag_quote_names | z::sql::flag_dont_quote_table_names ),
     _jobs_table           ( &_database_descriptor, "scheduler_jobs"           , "spooler_id,cluster_member_id,path" ),

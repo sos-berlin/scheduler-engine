@@ -10,6 +10,7 @@ using namespace ::zschimmer;
 using namespace ::zschimmer::javabridge;
 
 void register_native_classes(){ 
+    has_proxy< ::sos::scheduler::Database >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Job >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Job_subsystem >::register_cpp_proxy_class_in_java();
     has_proxy< ::sos::scheduler::Prefix_log >::register_cpp_proxy_class_in_java();

@@ -4,10 +4,18 @@ import com.sos.scheduler.engine.kernel.SchedulerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -22,6 +30,14 @@ import org.xml.sax.SAXException;
 
 public class XmlUtils {
     private XmlUtils() {}
+
+
+    public static Document newDocument() {
+        try {
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        }
+        catch (ParserConfigurationException x) { throw new RuntimeException(x); }
+    }
 
 
     public static Document loadXml(InputStream in) {
@@ -44,13 +60,29 @@ public class XmlUtils {
     }
 
 
+    public static String toXml(Node n) {
+        StringWriter w = new StringWriter();
+        writeXmlTo(n, w);
+        return w.toString();
+    }
+
+
+    public static void writeXmlTo(Node n, Writer w) {
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty("omit-xml-declaration", "false");
+            transformer.transform(new DOMSource(n), new StreamResult(w));
+        } catch (TransformerException x) { throw new RuntimeException(x); }
+    }
+
+
     public static boolean booleanXmlAttribute(Element xmlElement, String attributeName, boolean defaultValue) {
         String value = xmlElement.getAttribute(attributeName);
         if (value.equals("true" ))  return true;
         if (value.equals("false"))  return false;
         if (value.equals("1"    ))  return true;
         if (value.equals("0"    ))  return false;
-        if (value.isEmpty() )  return defaultValue;
+        if (value.isEmpty())  return defaultValue;
         throw new SchedulerException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
     }
 
@@ -83,7 +115,7 @@ public class XmlUtils {
     }
 
 
-    public static List<Element> elementsXPath(Node baseNode, String xpathExpression) {
+    public static Collection<Element> elementsXPath(Node baseNode, String xpathExpression) {
         try {
             XPath xpath  = XPathFactory.newInstance().newXPath();
             return listFromNodeList((NodeList)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODESET));

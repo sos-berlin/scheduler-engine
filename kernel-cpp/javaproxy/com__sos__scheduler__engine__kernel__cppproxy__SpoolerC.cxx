@@ -3,6 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
+#include "com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Job_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Order_subsystemC.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__Prefix_logC.h"

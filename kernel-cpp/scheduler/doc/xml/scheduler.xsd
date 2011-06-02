@@ -146,6 +146,15 @@
         <xsd:attribute name="java_class" type="String"/>
     </xsd:complexType>
 
+    <xsd:element name="plugin.command">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="plugin_class" type="String"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="cluster_member_command">
         <xsd:complexType>
             <xsd:choice>
@@ -177,6 +186,7 @@
             <xsd:element ref="job_chain.modify"/>
             <xsd:element ref="job_chain_node.modify"/>
             <xsd:element name="order" type="order"/>
+            <xsd:element ref="plugin.command"/>
             <xsd:element name="process_class" type="process_class"/>
             <xsd:element name="process_class.remove" type="process_class.remove"/>
             <xsd:element ref="register_remote_scheduler"/>

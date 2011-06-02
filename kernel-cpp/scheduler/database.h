@@ -52,7 +52,7 @@ enum Database_lock_syntax
 
 //-----------------------------------------------------------------------------------------Database
 
-struct Database : Object, Scheduler_object //Subsystem
+struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Subsystem
 {
                                 Database                ( Spooler* );
 
@@ -97,6 +97,7 @@ struct Database : Object, Scheduler_object //Subsystem
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
+    string                      job_history_tablename   () const                                    { return _job_history_tablename; }
 
 
     Fill_zero                  _zero_;

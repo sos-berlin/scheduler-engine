@@ -133,7 +133,7 @@ public interface SpoolerC extends CppProxyWithSister<Scheduler> {
 
 //    Folder*                     root_folder                 ()                                  { return _folder_subsystem->root_folder(); }
 //
-//    Database*                   db                          ()                                  { return _db; }
+    DatabaseC db();
 //    sql::Database_descriptor*   database_descriptor         ()                                  { return db()->database_descriptor(); }
 //
     String java_work_dir();

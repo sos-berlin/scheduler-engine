@@ -240,7 +240,7 @@
     <ClCompile Include="..\kram\sosmain.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
+  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__Database.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
       <Filter>Quellcodedateien</Filter>

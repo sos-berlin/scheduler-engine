@@ -6,6 +6,7 @@
 #include "com__sos__scheduler__engine__cplusplus__runtime__Sister.h"
 #include "com__sos__scheduler__engine__kernel__Platform.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
+#include "com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.h"
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
 #include "com__sos__scheduler__engine__kernel__log__PrefixLog.h"
 #include "com__sos__scheduler__engine__kernel__main__MainContext.h"
@@ -22,6 +23,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_kernel_main_MainContext_2__method;
     ::zschimmer::javabridge::Method const _callCppAndDoNothing____method;
     ::zschimmer::javabridge::Method const _executeXml__Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const _getDatabaseSubsystem____method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _getHostname____method;
     ::zschimmer::javabridge::Method const _getHostnameLong____method;
@@ -30,6 +32,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _getPlatform____method;
     ::zschimmer::javabridge::Method const _getTcpPort____method;
     ::zschimmer::javabridge::Method const _getVersion____method;
+    ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
     ::zschimmer::javabridge::Method const _log____method;
     ::zschimmer::javabridge::Method const _onActivate____method;
     ::zschimmer::javabridge::Method const _onClose____method;
@@ -49,6 +52,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_kernel_main_MainContext_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/kernel/main/MainContext;)V")
     ,_callCppAndDoNothing____method(this, "callCppAndDoNothing", "()V")
     ,_executeXml__Ljava_lang_String_2__method(this, "executeXml", "(Ljava/lang/String;)Ljava/lang/String;")
+    ,_getDatabaseSubsystem____method(this, "getDatabaseSubsystem", "()Lcom/sos/scheduler/engine/kernel/database/DatabaseSubsystem;")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_getHostname____method(this, "getHostname", "()Ljava/lang/String;")
     ,_getHostnameLong____method(this, "getHostnameLong", "()Ljava/lang/String;")
@@ -57,6 +61,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_getPlatform____method(this, "getPlatform", "()Lcom/sos/scheduler/engine/kernel/Platform;")
     ,_getTcpPort____method(this, "getTcpPort", "()I")
     ,_getVersion____method(this, "getVersion", "()Ljava/lang/String;")
+    ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
     ,_log____method(this, "log", "()Lcom/sos/scheduler/engine/kernel/log/PrefixLog;")
     ,_onActivate____method(this, "onActivate", "()V")
     ,_onClose____method(this, "onClose", "()V")
@@ -107,6 +112,14 @@ void Scheduler::callCppAndDoNothing() {
     Scheduler__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_executeXml__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::com::sos::scheduler::engine::kernel::database::DatabaseSubsystem Scheduler::getDatabaseSubsystem() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::com::sos::scheduler::engine::kernel::database::DatabaseSubsystem result;
+    result.steal_local_ref(cls->_getDatabaseSubsystem____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 
@@ -169,6 +182,15 @@ jint Scheduler::getTcpPort() {
     Scheduler__class* cls = _class.get();
     ::javaproxy::java::lang::String result;
     result.steal_local_ref(cls->_getVersion____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String Scheduler::javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_javaExecuteXml__Ljava_lang_String_2__method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

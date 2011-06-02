@@ -2,10 +2,11 @@ package com.sos.scheduler.engine.kernel.job;
 
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
 
 
-public class JobSubsystem extends AbstractHasPlatform {
+public class JobSubsystem extends AbstractHasPlatform implements Subsystem {
     private final Job_subsystemC job_subsystemC;
     
     

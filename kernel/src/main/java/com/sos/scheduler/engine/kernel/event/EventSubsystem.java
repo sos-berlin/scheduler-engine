@@ -8,7 +8,7 @@ import org.apache.log4j.*;
 
 
 @ForCpp
-public class EventSubsystem extends AbstractHasPlatform
+public class EventSubsystem extends AbstractHasPlatform implements Subsystem
 {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 

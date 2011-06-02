@@ -7,6 +7,7 @@
 
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct DatabaseC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Job_subsystemC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Order_subsystemC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct Prefix_logC; }}}}}}}

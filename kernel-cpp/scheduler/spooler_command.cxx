@@ -1670,16 +1670,21 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
-    // if( _spooler->_zschimmer_mode && element.nodeName_is( "get_events"  ) )  result = execute_get_events( element );
-    if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );
+    if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );   // Nicht offiziell, nur Test
     else
-    {
-        z::throw_xc( "SCHEDULER-105", element.nodeName() );
-    }
+        result = execute_command_in_java(element);
 
     if( result )  _answer.documentElement().firstChild().appendChild( result );
 
     return result;
+}
+
+//-------------------------------------------------------Command_processor::execute_command_in_java
+
+xml::Element_ptr Command_processor::execute_command_in_java(const xml::Element_ptr& element) {
+    string result = _spooler->schedulerJ().javaExecuteXml(element.xml());;
+    if (result == "UNKNOWN_COMMAND")  z::throw_xc("SCHEDULER-105", element.nodeName());   //Provisorisch, bis Java ordentliche Scheduler-Exceptions liefert
+    return result == ""? NULL : _answer.clone(xml::Document_ptr(result).documentElement());
 }
 
 //------------------------------------------------------------------------------------xml_as_string

@@ -155,6 +155,15 @@ const char file_scheduler_xsd[] =
     "<xsd:attribute name=\"java_class\" type=\"String\"/>\n"
     "</xsd:complexType>\n"
     "\n"
+    "<xsd:element name=\"plugin.command\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:sequence>\n"
+    "<xsd:any processContents=\"lax\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>\n"
+    "</xsd:sequence>\n"
+    "<xsd:attribute name=\"plugin_class\" type=\"String\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
     "<xsd:element name=\"cluster_member_command\">\n"
     "<xsd:complexType>\n"
     "<xsd:choice>\n"
@@ -186,6 +195,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"job_chain.modify\"/>\n"
     "<xsd:element ref=\"job_chain_node.modify\"/>\n"
     "<xsd:element name=\"order\" type=\"order\"/>\n"
+    "<xsd:element ref=\"plugin.command\"/>\n"
     "<xsd:element name=\"process_class\" type=\"process_class\"/>\n"
     "<xsd:element name=\"process_class.remove\" type=\"process_class.remove\"/>\n"
     "<xsd:element ref=\"register_remote_scheduler\"/>\n"
@@ -2042,7 +2052,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1305053450 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1307032759 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1305053447 },
     { NULL, NULL, 0 }
 };

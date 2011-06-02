@@ -1,16 +1,18 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.sos.scheduler.engine.kernel.command.Result;
+import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.xmlQuoted;
 
 
-class PlugInAdapter implements PlugIn {
+class PluginAdapter implements PlugIn {
     private final PlugIn plugIn;
     private final String name;
     private final PrefixLog log;
 
 
-    PlugInAdapter(PlugIn plugIn, String name, PrefixLog log) {
+    PluginAdapter(PlugIn plugIn, String name, PrefixLog log) {
         this.plugIn = plugIn;
         this.name = name;
         this.log = log;
@@ -51,6 +53,12 @@ class PlugInAdapter implements PlugIn {
         } catch (Exception x) {
             logThrowable(x);
         }
+    }
+
+
+    public PlugInCommandResult executeCommand(PlugInCommandCommand c) {
+        if (!(plugIn instanceof CommandPlugin3))  throw new SchedulerException("Plugin is not a " + CommandPlugin3.class.getSimpleName());
+        return ((CommandPlugin3)plugIn).executeCommand(c);
     }
 
 

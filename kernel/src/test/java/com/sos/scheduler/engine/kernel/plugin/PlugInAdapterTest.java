@@ -10,8 +10,8 @@ import static org.hamcrest.Matchers.*;
 
 public class PlugInAdapterTest {
     private final Platform platform = PlatformMock.newInstance();
-    private final PlugInAdapter plugInAdapter = new PlugInAdapter(new PlugInMock(), "plugInMock", platform.log());
-    private final PlugInAdapter errorPlugInAdapter = new PlugInAdapter(new ErrorPlugInMock(), "errorPlugInMock", platform.log());
+    private final PluginAdapter plugInAdapter = new PluginAdapter(new PlugInMock(), "plugInMock", platform.log());
+    private final PluginAdapter errorPlugInAdapter = new PluginAdapter(new ErrorPlugInMock(), "errorPlugInMock", platform.log());
 
 
     @Test public void testActivate() {

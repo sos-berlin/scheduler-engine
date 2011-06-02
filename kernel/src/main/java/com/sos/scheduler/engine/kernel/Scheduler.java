@@ -1,5 +1,10 @@
 package com.sos.scheduler.engine.kernel;
 
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import com.sos.scheduler.engine.kernel.command.CommandSuite;
+import java.util.ArrayList;
+import java.util.List;
+import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
 import com.sos.scheduler.engine.kernel.job.JobSubsystem;
@@ -14,6 +19,8 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.command.HasCommandSuite;
+import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
@@ -28,12 +35,15 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     private final MainContext mainContext;
     private final Platform platform;
     private final PrefixLog log;
+    private MavenProperties mavenProperties = new MavenProperties(getClass());
     private LogSubsystem logSubsystem;
+    private DatabaseSubsystem databaseSubsystem;
     private PlugInSubsystem plugInSubsystem;
     private JobSubsystem jobSubsystem;
     private OrderSubsystem orderSubsystem;
     private EventSubsystem eventSubsystem;
-    private MavenProperties mavenProperties = new MavenProperties(getClass());
+    private List<Subsystem> subsystems = new ArrayList<Subsystem>();
+    private CommandSubsystem commandSubsystem;
     private Monitor monitor;
     private boolean threadInitiallyLocked = false;
     
@@ -94,11 +104,30 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
 
     private void addSubsystems(Element configElement) {
         logSubsystem = new LogSubsystem(new SchedulerLog(spoolerC));
+        subsystems.add(logSubsystem);
+
+        databaseSubsystem = new DatabaseSubsystem(spoolerC.db());
+        subsystems.add(databaseSubsystem);
+
         eventSubsystem = new EventSubsystem(platform);
+        subsystems.add(eventSubsystem);
+
         jobSubsystem = new JobSubsystem(platform, spoolerC.job_subsystem());
+        subsystems.add(jobSubsystem);
+
         orderSubsystem = new OrderSubsystem(platform, spoolerC.order_subsystem());
+        subsystems.add(orderSubsystem);
+
         plugInSubsystem = new PlugInSubsystem(this);
         plugInSubsystem.load(configElement);
+        subsystems.add(plugInSubsystem);
+
+        List<CommandSuite> commandSuites = new ArrayList<CommandSuite>();
+        for (Subsystem s: subsystems)
+            if (s instanceof HasCommandSuite)
+                commandSuites.add(((HasCommandSuite)s).getCommandSuite());
+        commandSubsystem = new CommandSubsystem(commandSuites);
+        subsystems.add(commandSubsystem);
     }
 
     
@@ -126,8 +155,19 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
     public String executeXml(String xml) {
         return spoolerC.execute_xml(xml);
     }
-    
+
+    /** Nur für C++, zur Ausführung eines Kommandos in Java */
+    public String javaExecuteXml(String xml) {
+        try {
+            return commandSubsystem.executeXml(xml);
+        } catch (UnknownCommandException x) {
+            log.warn(x.toString());
+            return "UNKNOWN_COMMAND";   // Siehe command_error.cxx, für ordentliche Meldung SCHEDULER-105, bis Java die selbst liefert kann.
+        }
+    }
+
     public Object getMainContext() { return mainContext; }
+    public DatabaseSubsystem getDatabaseSubsystem() { return databaseSubsystem; }
     public EventSubsystem getEventSubsystem() { return eventSubsystem; }
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }
     public OrderSubsystem getOrderSubsystem() { return orderSubsystem; }

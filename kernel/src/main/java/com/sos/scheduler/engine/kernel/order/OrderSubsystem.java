@@ -3,13 +3,14 @@ package com.sos.scheduler.engine.kernel.order;
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
+import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import java.util.Collection;
 
 //TODO Aufteilen in JobChainSubsystem und OrderSubsystem?
 
-public class OrderSubsystem extends AbstractHasPlatform
+public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
 {
     private final Order_subsystemC order_subsystemC;
 

@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.kernel.log;
 
+import com.sos.scheduler.engine.kernel.Subsystem;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 
 
-public class LogSubsystem {
+public class LogSubsystem implements Subsystem {
     private static final Logger logger = Logger.getLogger(LogSubsystem.class);
 
     private final Appender appender;
