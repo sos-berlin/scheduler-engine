@@ -113,7 +113,7 @@ public class JmsEventFilterTest extends SchedulerTest {
                 	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
                 }
                 if (ev.getEventOrderStateChanged() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
+                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
                 }
                 if (ev.getEventOrderFinished() != null) {
                 	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
