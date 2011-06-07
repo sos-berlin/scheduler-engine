@@ -25,7 +25,7 @@ extends JavaModule {
         def constructor = {
             val sisterCode =
                 if (interface.getFields exists { _.getName == "sisterType" })
-                    "        requireContext(context);\n" +
+                  //"        requireContext(context);\n" +
                     "        setSister(sisterType.sister(this, context));\n"
                 else
                     "        requireContextIsNull(context);\n"

@@ -21,22 +21,37 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
     }
 
 
-    @Override public final void setSister(SISTER o) { sister = o; }
+    @Override public final void setSister(SISTER o) {
+        sister = o;
+    }
+
 
     @Override public final SISTER getSister() {
-        if (sister == null)  throw new NullPointerException("Has no sister object: " + this);
+        if (sister == null)
+            throw new NullPointerException("Has no sister object: " + this);
         return sister;
     }
 
-    @Override public final boolean hasSister() { return sister != null; }
-
-
-    protected void requireContext(Sister context) {
-        if (context == null)  throw new RuntimeException("Missing Sister context in " + getClass().getName());
+    @Override public final boolean hasSister() { 
+        return sister != null;
     }
 
 
+//    Variable_setC zum Beispiel hat eine kontextfreie Schwester.
+//    protected void requireContext(Sister context) {
+//        if (context == null)  throw new RuntimeException("Missing Sister context in " + getClass().getName());
+//    }
+
+
     protected void requireContextIsNull(Sister context) {
-        if (context != null)  throw new RuntimeException("Sister context != null, but interface has no sisterType, in " + getClass().getName());
+        if (context != null)
+            throw new RuntimeException("Sister context != null, but interface has no sisterType, in " + getClass().getName());
+    }
+
+
+    public static class CppProxyInvalidated extends RuntimeException {
+        public CppProxyInvalidated(Class<?> c) {
+            super("C++ code has return a temporary, immediately destructed object (was a " + c.getName());
+        }
     }
 }
