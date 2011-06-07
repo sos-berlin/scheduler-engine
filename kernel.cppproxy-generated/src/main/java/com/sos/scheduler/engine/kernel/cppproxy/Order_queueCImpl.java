@@ -5,7 +5,6 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.OrderQueue> implements com.sos.scheduler.engine.kernel.cppproxy.Order_queueC {
 
     private Order_queueCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContext(context);
         setSister(sisterType.sister(this, context));
     }
 
@@ -25,7 +24,8 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
     @Override public boolean is_distributed_order_requested(long p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_distributed_order_requested__native(cppReference(), p0);
+            boolean result = is_distributed_order_requested__native(cppReference(), p0);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -38,7 +38,8 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
     @Override public int java_order_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return java_order_count__native(cppReference());
+            int result = java_order_count__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

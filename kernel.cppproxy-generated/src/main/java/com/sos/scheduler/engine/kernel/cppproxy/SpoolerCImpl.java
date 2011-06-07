@@ -141,7 +141,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean cluster_is_active() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return cluster_is_active__native(cppReference());
+            boolean result = cluster_is_active__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -154,7 +155,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String cluster_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return cluster_member_id__native(cppReference());
+            java.lang.String result = cluster_member_id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -297,7 +301,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public com.sos.scheduler.engine.kernel.cppproxy.DatabaseC db() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return db__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.DatabaseC result = db__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.DatabaseC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.DatabaseC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -310,7 +317,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String db_cluster_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return db_cluster_member_id__native(cppReference());
+            java.lang.String result = db_cluster_member_id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -323,7 +333,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String db_distributed_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return db_distributed_member_id__native(cppReference());
+            java.lang.String result = db_distributed_member_id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -349,7 +362,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String directory() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return directory__native(cppReference());
+            java.lang.String result = directory__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -362,7 +378,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String distributed_member_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return distributed_member_id__native(cppReference());
+            java.lang.String result = distributed_member_id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -427,7 +446,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String execute_xml(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return execute_xml__native(cppReference(), p0);
+            java.lang.String result = execute_xml__native(cppReference(), p0);
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -440,7 +462,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean has_any_task() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return has_any_task__native(cppReference());
+            boolean result = has_any_task__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -453,7 +476,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean has_exclusiveness() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return has_exclusiveness__native(cppReference());
+            boolean result = has_exclusiveness__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -466,7 +490,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String hostname() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return hostname__native(cppReference());
+            java.lang.String result = hostname__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -479,7 +506,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String hostname_complete() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return hostname_complete__native(cppReference());
+            java.lang.String result = hostname_complete__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -492,7 +522,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String http_url() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return http_url__native(cppReference());
+            java.lang.String result = http_url__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -505,7 +538,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return id__native(cppReference());
+            java.lang.String result = id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -518,7 +554,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String id_for_db() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return id_for_db__native(cppReference());
+            java.lang.String result = id_for_db__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -531,7 +570,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String include_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return include_path__native(cppReference());
+            java.lang.String result = include_path__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -544,7 +586,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean is_cluster() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_cluster__native(cppReference());
+            boolean result = is_cluster__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -557,7 +600,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean is_machine_suspendable() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_machine_suspendable__native(cppReference());
+            boolean result = is_machine_suspendable__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -570,7 +614,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean is_service() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_service__native(cppReference());
+            boolean result = is_service__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -583,7 +628,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean is_termination_state_cmd() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return is_termination_state_cmd__native(cppReference());
+            boolean result = is_termination_state_cmd__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -596,7 +642,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String java_work_dir() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return java_work_dir__native(cppReference());
+            java.lang.String result = java_work_dir__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -609,7 +658,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return job_subsystem__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC result = job_subsystem__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -622,7 +674,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem_or_null() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return job_subsystem_or_null__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC result = job_subsystem_or_null__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -661,7 +716,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return log__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC result = log__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -674,7 +732,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String log_directory() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return log_directory__native(cppReference());
+            java.lang.String result = log_directory__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -700,7 +761,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return name__native(cppReference());
+            java.lang.String result = name__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -713,7 +777,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean name_is_valid(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return name_is_valid__native(cppReference(), p0);
+            boolean result = name_is_valid__native(cppReference(), p0);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -739,7 +804,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC order_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return order_subsystem__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC result = order_subsystem__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -752,7 +820,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean orders_are_distributed() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return orders_are_distributed__native(cppReference());
+            boolean result = orders_are_distributed__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -765,7 +834,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String param() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return param__native(cppReference());
+            java.lang.String result = param__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -882,7 +954,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public boolean signaled() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return signaled__native(cppReference());
+            boolean result = signaled__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -908,7 +981,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String state_name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return state_name__native(cppReference());
+            java.lang.String result = state_name__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -934,7 +1010,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String string_need_db() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_need_db__native(cppReference());
+            java.lang.String result = string_need_db__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -960,7 +1039,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public int tcp_port() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return tcp_port__native(cppReference());
+            int result = tcp_port__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -973,7 +1053,10 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public java.lang.String temp_dir() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return temp_dir__native(cppReference());
+            java.lang.String result = temp_dir__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -986,7 +1069,8 @@ class SpoolerCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyIm
     @Override public int udp_port() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return udp_port__native(cppReference());
+            int result = udp_port__native(cppReference());
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

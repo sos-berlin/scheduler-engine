@@ -5,14 +5,16 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 class Job_chainCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.JobChain> implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
 
     private Job_chainCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContext(context);
         setSister(sisterType.sister(this, context));
     }
 
     @Override public java.util.List java_nodes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return java_nodes__native(cppReference());
+            java.util.List result = java_nodes__native(cppReference());
+            if (!java.util.List.class.isInstance(result))
+                throw new CppProxyInvalidated(java.util.List.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -25,7 +27,10 @@ class Job_chainCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxy
     @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return name__native(cppReference());
+            java.lang.String result = name__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -38,7 +43,10 @@ class Job_chainCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxy
     @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return order__native(cppReference(), p0);
+            com.sos.scheduler.engine.kernel.cppproxy.OrderC result = order__native(cppReference(), p0);
+            if (!com.sos.scheduler.engine.kernel.cppproxy.OrderC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.OrderC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

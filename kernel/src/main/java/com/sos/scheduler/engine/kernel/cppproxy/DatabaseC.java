@@ -8,6 +8,5 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.CppClass;
 public interface DatabaseC extends CppProxy {
     //Database.Type sisterType = new Database.Type();
 
-    String db_name();       // Mit Kennwort
-    String job_history_tablename();
+    Variable_setC properties(); // Mit "password"
 }

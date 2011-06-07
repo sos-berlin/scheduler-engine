@@ -5,14 +5,16 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 class Variable_setCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.VariableSet> implements com.sos.scheduler.engine.kernel.cppproxy.Variable_setC {
 
     private Variable_setCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContext(context);
         setSister(sisterType.sister(this, context));
     }
 
     @Override public java.lang.String get_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return get_string__native(cppReference(), p0);
+            java.lang.String result = get_string__native(cppReference(), p0);
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

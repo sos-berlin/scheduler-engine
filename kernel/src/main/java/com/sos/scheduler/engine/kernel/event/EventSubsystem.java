@@ -8,8 +8,7 @@ import org.apache.log4j.*;
 
 
 @ForCpp
-public class EventSubsystem extends AbstractHasPlatform implements Subsystem
-{
+public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     private static final Logger logger = Logger.getLogger(EventSubsystem.class);
 
     private final Collection<EventSubscriber> subscribers = new HashSet<EventSubscriber>();
@@ -21,25 +20,44 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem
     }
 
 
-    public void report(Event e) {
+    public final void report(Event e) {
         reportEventNesting++;   // Kann Rekursiv aufgerufen werden.
         try {
             publishEvent(e);
-        } catch (Exception x) { log().error(getClass().getSimpleName() + ".report(" + e.getClass().getName() + "): " + x); }
+        } catch(RecursiveEventException x) {
+            // Kein log().error(), sonst gibt es wieder eine Rekursion
+            logger.error(getClass().getSimpleName() + ".report(" + e.getClass().getName() + "): " + x);
+        }
         finally { reportEventNesting--; }
     }
 
     
     private void publishEvent(Event e) {
-        if (reportEventNesting > 1)  throw new SchedulerException("Recursive reportEvent() " + e);
+        if (reportEventNesting > 1)  throw new RecursiveEventException(e);  // Das sollte natürlich nicht vorkommen ...
         for (EventSubscriber s: subscribers)
             try { s.onEvent(e); }
-            catch (Exception x) { log().error(s + ": " + x.toString()); }
+            catch (Exception x) { log().error(s + ": " + x); }
     }
 
 
-    public void subscribe(EventSubscriber x) { subscribers.add(x); }
-    public void unsubscribe(EventSubscriber x) { subscribers.remove(x); }
+    public final void subscribe(EventSubscriber x) {
+        subscribers.add(x);
+    }
+
     
-    @Override public String toString() { return getClass().getSimpleName(); }
+    public final void unsubscribe(EventSubscriber x) { 
+        subscribers.remove(x);
+    }
+
+
+    @Override public String toString() { 
+        return getClass().getSimpleName();
+    }
+
+
+    private static class RecursiveEventException extends SchedulerException {
+        private RecursiveEventException(Event e) {
+            super("Recursive publishing of events: " + e);
+        }
+    }
 }

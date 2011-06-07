@@ -9,11 +9,11 @@ import java.util.List;
 
 public class CommandSuite {
     private final ImmutableCollection<CommandExecutor> executors;
-    private final ImmutableCollection<XmlCommandParser> parsers;
+    private final ImmutableCollection<CommandXmlParser> parsers;
     private final ImmutableCollection<ResultXmlizer> resultXmlizer;
 
 
-    public CommandSuite(Iterable<CommandExecutor> executors, Iterable<XmlCommandParser> parsers,
+    public CommandSuite(Iterable<CommandExecutor> executors, Iterable<CommandXmlParser> parsers,
             Iterable<ResultXmlizer> resultXmlizers) {
         this.executors =  ImmutableList.copyOf(executors);
         this.parsers = ImmutableList.copyOf(parsers);
@@ -21,7 +21,7 @@ public class CommandSuite {
     }
 
 
-    public CommandSuite(CommandExecutor[] executors, XmlCommandParser[] parsers, ResultXmlizer[] resultXmlizers) {
+    public CommandSuite(CommandExecutor[] executors, CommandXmlParser[] parsers, ResultXmlizer[] resultXmlizers) {
         this(Arrays.asList(executors), Arrays.asList(parsers), Arrays.asList(resultXmlizers));
     }
 
@@ -30,7 +30,7 @@ public class CommandSuite {
         return executors;
     }
 
-    public ImmutableCollection<XmlCommandParser> getParsers() {
+    public ImmutableCollection<CommandXmlParser> getParsers() {
         return parsers;
     }
 
@@ -41,7 +41,7 @@ public class CommandSuite {
 
     public static CommandSuite of(Iterable<CommandSuite> suites ) {
         List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
-        List<XmlCommandParser> parsers = new ArrayList<XmlCommandParser>();
+        List<CommandXmlParser> parsers = new ArrayList<CommandXmlParser>();
         List<ResultXmlizer> xmlizers = new ArrayList<ResultXmlizer>();
         for (CommandSuite s: suites) {
             executors.addAll(s.getExecutors());

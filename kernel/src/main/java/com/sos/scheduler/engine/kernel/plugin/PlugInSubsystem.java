@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.command.CommandExecutor;
 import com.sos.scheduler.engine.kernel.command.CommandSuite;
 import com.sos.scheduler.engine.kernel.command.HasCommandSuite;
 import com.sos.scheduler.engine.kernel.command.ResultXmlizer;
-import com.sos.scheduler.engine.kernel.command.XmlCommandParser;
+import com.sos.scheduler.engine.kernel.command.CommandXmlParser;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +24,8 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
     private final CommandSuite commandSuite = new CommandSuite(
         new CommandExecutor[]{ new PlugInCommandExecutor(this) },
-        new XmlCommandParser[]{ new PlugInCommandParser() },
-        new ResultXmlizer[]{ new PlugInResultXmlizer() });
+        new CommandXmlParser[]{ new PlugInCommandCommandXmlParser() },
+        new ResultXmlizer[]{ new PlugInCommandResultXmlizer() });
 
     
     public PlugInSubsystem(Scheduler scheduler) {
@@ -85,8 +85,8 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    public XmlCommandParser getXmlCommandParser() {
-        return new PlugInCommandParser();
+    public CommandXmlParser getXmlCommandParser() {
+        return new PlugInCommandCommandXmlParser();
     }
 
 

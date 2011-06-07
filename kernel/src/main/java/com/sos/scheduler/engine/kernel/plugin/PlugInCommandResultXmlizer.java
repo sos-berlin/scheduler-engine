@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.kernel.command.ResultXmlizer;
 import org.w3c.dom.Element;
 
 
-public class PlugInResultXmlizer implements ResultXmlizer {
+public class PlugInCommandResultXmlizer implements ResultXmlizer {
     @Override public Class<? extends Result> getResultClass() {
         return PlugInCommandResult.class;
     }

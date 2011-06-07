@@ -5,14 +5,16 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode> implements com.sos.scheduler.engine.kernel.cppproxy.Order_queue_nodeC {
 
     private Order_queue_nodeCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContext(context);
         setSister(sisterType.sister(this, context));
     }
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return error_node__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.NodeC result = error_node__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.NodeC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.NodeC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -25,7 +27,10 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return next_node__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.NodeC result = next_node__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.NodeC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.NodeC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -38,7 +43,10 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_queueC order_queue() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return order_queue__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Order_queueC result = order_queue__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Order_queueC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Order_queueC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -51,7 +59,10 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     @Override public java.lang.String string_error_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_error_state__native(cppReference());
+            java.lang.String result = string_error_state__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -64,7 +75,10 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     @Override public java.lang.String string_next_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_next_state__native(cppReference());
+            java.lang.String result = string_next_state__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -77,7 +91,10 @@ class Order_queue_nodeCImpl extends com.sos.scheduler.engine.cplusplus.runtime.C
     @Override public java.lang.String string_order_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_order_state__native(cppReference());
+            java.lang.String result = string_order_state__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

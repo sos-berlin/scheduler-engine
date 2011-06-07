@@ -81,6 +81,8 @@ struct Sos_database_session : Sos_self_deleting
     string                      convert_secondsdiff     ( const char**, const char* p_end );
     virtual string              translate               ( const string& word );
     virtual string              translate_limit         ( const string& stmt, int limit );
+    typedef ::stdext::hash_map<string,string> Properties;
+    virtual Properties          properties();
 
   protected:
     void                        transaction_begun       ();

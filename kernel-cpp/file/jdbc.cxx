@@ -118,6 +118,7 @@ struct Jdbc_session : Sos_database_session
     string                      name                    ()                                      { return "jdbc"; }
     string                      modify_oracle_thin_stmt ( const string& );
     void                       _open_postprocessing     ();
+    ::stdext::hash_map<string,string> Jdbc_session::properties();
 
     Jdbc_static*                static_ptr              ()                                      { return (Jdbc_static*)_static; }
 
@@ -144,7 +145,7 @@ struct Jdbc_static : Sos_database_static
 
     Jdbc_static*                static_ptr               ()                                     { return this; }
 
-    ptr<javabridge::Vm>              _java_vm;
+    ptr<javabridge::Vm>        _java_vm;
     Class                      _class_class;
     Class                      _driver_manager_class;
 };
@@ -470,13 +471,22 @@ void Jdbc_session::_open( Sos_database_file* db_file )
 
 }
 
+//-------------------------------------------------------------------------Jdbc_session::properties
+
+Sos_database_session::Properties Jdbc_session::properties() {
+    Properties result = Sos_database_session::properties();
+    result["jdbc.driverClass"] = _driver_class_name;
+    result["jdbc.driverName"] = _driver_name;
+    return result;
+}
+
 //-----------------------------------------------------------------------------Jdbc_session::_close
 
 void Jdbc_session::_close( Close_mode )
 {
     if( _jdbc_statement )  
     {
-	    Local_frame local_frame ( 10 );
+        Local_frame local_frame ( 10 );
 
         try
         {
@@ -490,7 +500,7 @@ void Jdbc_session::_close( Close_mode )
 
     if( _jdbc_connection )
     {
-	    Local_frame local_frame ( 10 );
+        Local_frame local_frame ( 10 );
 
         try 
         {

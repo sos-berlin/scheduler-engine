@@ -5,14 +5,16 @@ package com.sos.scheduler.engine.kernel.cppproxy;
 class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.Order> implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
 
     private OrderCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
-        requireContext(context);
         setSister(sisterType.sister(this, context));
     }
 
     @Override public java.lang.String file_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return file_path__native(cppReference());
+            java.lang.String result = file_path__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -25,7 +27,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return job_chain__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Job_chainC result = job_chain__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -38,7 +43,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return params__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = params__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -77,7 +85,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public java.lang.String string_end_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_end_state__native(cppReference());
+            java.lang.String result = string_end_state__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -90,7 +101,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public java.lang.String string_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_id__native(cppReference());
+            java.lang.String result = string_id__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -103,7 +117,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public java.lang.String string_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return string_state__native(cppReference());
+            java.lang.String result = string_state__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -116,7 +133,10 @@ class OrderCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl
     @Override public java.lang.String title() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return title__native(cppReference());
+            java.lang.String result = title__native(cppReference());
+            if (!java.lang.String.class.isInstance(result))
+                throw new CppProxyInvalidated(java.lang.String.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

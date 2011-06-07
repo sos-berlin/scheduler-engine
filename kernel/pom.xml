@@ -79,6 +79,16 @@
         </dependency>
         
         <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
@@ -106,7 +116,12 @@
         </dependency>
 
         <dependency>
-            <!-- FÃƒÆ’Ã‚Â¼r MemoryLeakReport -->
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        
+        <dependency>
+            <!-- Für MemoryLeakReport -->
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>

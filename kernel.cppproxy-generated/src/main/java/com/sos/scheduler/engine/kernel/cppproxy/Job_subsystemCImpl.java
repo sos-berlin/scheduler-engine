@@ -11,7 +11,10 @@ class Job_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppP
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return job_by_string__native(cppReference(), p0);
+            com.sos.scheduler.engine.kernel.cppproxy.JobC result = job_by_string__native(cppReference(), p0);
+            if (!com.sos.scheduler.engine.kernel.cppproxy.JobC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.JobC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -24,7 +27,10 @@ class Job_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppP
     @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return job_by_string_or_null__native(cppReference(), p0);
+            com.sos.scheduler.engine.kernel.cppproxy.JobC result = job_by_string_or_null__native(cppReference(), p0);
+            if (!com.sos.scheduler.engine.kernel.cppproxy.JobC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.JobC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

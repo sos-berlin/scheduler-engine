@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.kernel.command;
 
 import com.google.common.collect.ImmutableMap;
-import com.sos.scheduler.engine.kernel.SchedulerException;
 
 
 public class DispatchingCommandExecutor implements CommandExecutor {

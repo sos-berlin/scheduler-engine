@@ -15,11 +15,19 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
     }
 
 
-    @Override public void onCppProxyInvalidated() {}
+    @Override public void onCppProxyInvalidated() {
+    }
 
 
-    public final String get(String name) { 
+    public final String get(String name) {
         return cppProxy.get_string(name);
+    }
+
+
+    public final String getStrictly(String name) {
+        String result = get(name);
+        if (result == null)  throw new SchedulerException("Missing parameter '" + name + "'");
+        return result;
     }
 
 

@@ -53,7 +53,7 @@ public class Order extends FileBased implements Sister {
 
 
     public final VariableSet getParameters() {
-        return Variable_setC.sisterType.sister(cppProxy.params(), (Sister)null);
+        return cppProxy.params().getSister();
     }
     
     

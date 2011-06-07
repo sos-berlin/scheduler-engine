@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 import com.sos.scheduler.engine.kernel.command.Command;
-import com.sos.scheduler.engine.kernel.command.PrefixXmlCommandParser;
+import com.sos.scheduler.engine.kernel.command.PrefixCommandXmlParser;
 import org.w3c.dom.Element;
 
 
-public class PlugInCommandParser extends PrefixXmlCommandParser {
-    public PlugInCommandParser() {
+public class PlugInCommandCommandXmlParser extends PrefixCommandXmlParser {
+    public PlugInCommandCommandXmlParser() {
         super("plugin.");
     }
 

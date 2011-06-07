@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.command;
 
-public abstract class SingleXmlCommandParser implements XmlCommandParser {
+public abstract class SingleCommandXmlParser implements CommandXmlParser {
     private final String commandName;
 
 
-    public SingleXmlCommandParser(String commandName) {
+    public SingleCommandXmlParser(String commandName) {
         this.commandName = commandName;
     }
 

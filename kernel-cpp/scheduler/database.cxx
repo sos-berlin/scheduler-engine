@@ -523,6 +523,21 @@ Transaction* Database::transaction()
 //    set_subsystem_state( subsys_active );
 //}
 
+//-----------------------------------------------------------------------------Database::properties
+
+ptr<Com_variable_set> Database::properties() {
+    if (!_properties) {
+        ptr<Com_variable_set> result = new Com_variable_set();
+        if (Sos_database_session* s = _db.sos_database_session_or_null()) {
+            Sos_database_session::Properties  p = s->properties();
+            Z_FOR_EACH(Sos_database_session::Properties, p, it)
+                result->set_var(it->first, it->second);
+        }
+        _properties = result;
+    }
+    return _properties;     // Für Java verankern, damit C++-Proxy nicht sofort stirbt
+}
+
 //-----------------------------------------------------------------------------------Database::open
 
 void Database::open( const string& db_name )

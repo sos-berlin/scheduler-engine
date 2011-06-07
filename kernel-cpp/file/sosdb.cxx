@@ -406,6 +406,16 @@ void Sos_database_session::open( Sos_database_file* first_file )
     if( !empty( _first_cmds ) )  execute_direct( c_str( _first_cmds ) );
 }
 
+//-------------------------------------------------------------Sos_database_session::properties
+
+Sos_database_session::Properties Sos_database_session::properties() {
+    Properties result;
+    result["user"] = _user;
+    result["password"] = _password;
+    result["path"] = _db_name;
+    return result;
+}
+
 //------------------------------------------------------Sos_database_session::check_transaction
 
 void Sos_database_session::check_transaction()

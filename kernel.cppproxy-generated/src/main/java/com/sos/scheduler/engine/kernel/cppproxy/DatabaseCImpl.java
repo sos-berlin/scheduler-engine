@@ -8,30 +8,20 @@ class DatabaseCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyI
         requireContextIsNull(context);
     }
 
-    @Override public java.lang.String db_name() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            return db_name__native(cppReference());
+            com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = properties__native(cppReference());
+            if (!com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class.isInstance(result))
+                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class);
+            return result;
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
         }
     }
 
-    private static native java.lang.String db_name__native(long cppReference);
-
-
-    @Override public java.lang.String job_history_tablename() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
-        try {
-            return job_history_tablename__native(cppReference());
-        }
-        finally {
-            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
-        }
-    }
-
-    private static native java.lang.String job_history_tablename__native(long cppReference);
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties__native(long cppReference);
 
 
 }

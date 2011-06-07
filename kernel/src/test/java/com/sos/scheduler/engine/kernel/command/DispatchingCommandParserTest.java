@@ -15,21 +15,21 @@ public class DispatchingCommandParserTest {
 
 
     private static DispatchingXmlCommandParser dispatchingCommandParser() {
-        XmlCommandParser[] parsers = {Parser1.singleton, Parser2.singleton};
+        CommandXmlParser[] parsers = {ACommandXmlParser.singleton, BCommandXmlParser.singleton};
         return new DispatchingXmlCommandParser(Arrays.asList(parsers));
     }
 
 
     @Test public void testParse_1() {
-        Command result = parser.parse(loadXml("<command1 value1='VALUE 1'/>").getDocumentElement());
-        Command1 c = (Command1)result;
+        Command result = parser.parse(loadXml("<a value1='VALUE 1'/>").getDocumentElement());
+        ACommand c = (ACommand)result;
         assertThat(c.value, equalTo("VALUE 1"));
     }
 
 
     @Test public void testExecuteXml_2() {
-        Command result = parser.parse(loadXml("<command2 value2='VALUE 2'/>").getDocumentElement());
-        Command2 c = (Command2)result;
+        Command result = parser.parse(loadXml("<b value2='VALUE 2'/>").getDocumentElement());
+        BCommand c = (BCommand)result;
         assertThat(c.value, equalTo("VALUE 2"));
     }
 }

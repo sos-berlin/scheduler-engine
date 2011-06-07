@@ -17,41 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
-static jstring JNICALL db_1name(JNIEnv* jenv, jobject, jlong cppReference)
+static jobject JNICALL properties(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
     try {
-        ::sos::scheduler::Database* o_ = has_proxy< ::sos::scheduler::Database >::of_cpp_reference(cppReference,"::sos::scheduler::Database::db_name()");
-        return env.jstring_from_string(o_->db_name());
+        ::sos::scheduler::Database* o_ = has_proxy< ::sos::scheduler::Database >::of_cpp_reference(cppReference,"::sos::scheduler::Database::properties()");
+        return Has_proxy::jobject_of(o_->properties());
     }
     catch(const exception& x) {
         env.set_java_exception(x);
-        return jstring();
-    }
-}
-
-}}}}}}}
-
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
-
-static jstring JNICALL job_1history_1tablename(JNIEnv* jenv, jobject, jlong cppReference)
-{
-    Env env = jenv;
-    try {
-        ::sos::scheduler::Database* o_ = has_proxy< ::sos::scheduler::Database >::of_cpp_reference(cppReference,"::sos::scheduler::Database::job_history_tablename()");
-        return env.jstring_from_string(o_->job_history_tablename());
-    }
-    catch(const exception& x) {
-        env.set_java_exception(x);
-        return jstring();
+        return jobject();
     }
 }
 
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
-    { (char*)"db_name__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::db_1name },
-    { (char*)"job_history_tablename__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1history_1tablename }
+    { (char*)"properties__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::properties }
 };
 
 namespace zschimmer { namespace javabridge { 
@@ -59,7 +41,7 @@ namespace zschimmer { namespace javabridge {
     template<> void has_proxy< ::sos::scheduler::Database >::register_cpp_proxy_class_in_java() {
         Env env;
         Class* cls = has_proxy< ::sos::scheduler::Database >::proxy_class_factory.clas();
-        int ret = env->RegisterNatives(*cls, native_methods, 2);
+        int ret = env->RegisterNatives(*cls, native_methods, 1);
         if (ret < 0)  env.throw_java("RegisterNatives");
     }
 

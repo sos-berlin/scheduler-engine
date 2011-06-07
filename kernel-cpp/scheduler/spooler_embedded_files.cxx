@@ -8,12 +8,12 @@
 
 const char file_scheduler_xsd[] = 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<!-- $Id: scheduler.xsd 14216 2011-04-20 10:31:15Z jz $ -->\n"
+    "<!-- $Id: scheduler.xsd 14543 2011-06-02 20:29:12Z jz $ -->\n"
     "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n"
     "<!-- <xsd:key> nicht verwenden, libxslt kann das nicht: \"Internal error: xmlSchemaAreValuesEqual, failed to compare the values.\" -->\n"
     "<xsd:annotation>\n"
     "<xsd:documentation xml:lang=\"de\">\n"
-    "$Id: scheduler.xsd 14216 2011-04-20 10:31:15Z jz $\n"
+    "$Id: scheduler.xsd 14543 2011-06-02 20:29:12Z jz $\n"
     "Schema f\xc3" "\xbc" "r die Scheduler-Konfiguration,\n"
     "s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html\n"
     "</xsd:documentation>\n"
@@ -2052,7 +2052,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1307032759 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1307046557 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1305053447 },
     { NULL, NULL, 0 }
 };

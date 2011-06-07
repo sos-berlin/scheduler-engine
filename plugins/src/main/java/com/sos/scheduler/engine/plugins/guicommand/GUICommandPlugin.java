@@ -1,23 +1,22 @@
 package com.sos.scheduler.engine.plugins.guicommand;
 
-import java.util.Collection;
-import com.sos.scheduler.engine.kernel.database.DatabaseConfiguration;
-import java.sql.ResultSetMetaData;
-import org.w3c.dom.Document;
-import java.sql.ResultSet;
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
-import com.sos.scheduler.engine.kernel.SchedulerException;
+import java.util.List;
+import javax.persistence.TypedQuery;
+import javax.persistence.EntityManager;
 import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.plugin.PlugIn;
-import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
+import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.command.InvalidCommandException;
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import com.sos.scheduler.engine.kernel.database.entity.TaskHistoryEntity;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.plugin.CommandPlugin3;
+import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInCommandCommand;
 import com.sos.scheduler.engine.kernel.plugin.PlugInCommandResult;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
 import java.sql.SQLException;
+import java.util.Collection;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
@@ -25,34 +24,30 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 //TODO SQL gegen alle möglichen Datenbanktypen prüfen (vielleicht JPA oder JPQL verwenden?
 //TODO Ergebnis könnte sehr groß sein. C++ kopiert XML-Elemente mit clone(). Am besten auf TCP streamen.
 public class GUICommandPlugin extends AbstractPlugin implements CommandPlugin3 {
-    private final DatabaseConfiguration dbConfig;
-    private Connection connection = null;
+    private final DatabaseSubsystem databaseSubsystem;
 
 
-    GUICommandPlugin(DatabaseConfiguration config) {
-        this.dbConfig = config;
+    GUICommandPlugin(DatabaseSubsystem db) {
+        this.databaseSubsystem = db;
     }
 
 
     @Override public final void close() {
-        try {
-            if (connection != null)  connection.close();
-        } catch (SQLException x) { throw new SchedulerException(x); }
     }
 
     
     @Override public final PlugInCommandResult executeCommand(PlugInCommandCommand c) {
         Element result;
         Collection<Element> childElements = elementsXPath(c.getElement(), "*");
-        if (childElements.size() != 1)  throw new SchedulerException("Invalid command " + c.getName());
+        if (childElements.size() != 1)  throw new InvalidCommandException(c);
         Element element = childElements.iterator().next();
-        if (element.getNodeName().equals("showTaskHistory"))
+        if (element.getNodeName().equals("showTaskHistory"))    //TODO Als Command implementieren
             result = executeShowTaskHistory(element);
         else
         if (element.getNodeName().equals("test"))
             result = executeTest(element);
         else
-            throw new SchedulerException("Invalid command " + c.getName());
+            throw new InvalidCommandException(c);
         return new PlugInCommandResult(result);
     }
 
@@ -60,35 +55,33 @@ public class GUICommandPlugin extends AbstractPlugin implements CommandPlugin3 {
     private Element executeShowTaskHistory(Element element) {
         try {
             Document doc = newDocument();
-            String sql = "select * from \"" + dbConfig.getTaskHistoryTablename() + "\"";
+            String sql = "select t from " + TaskHistoryEntity.class.getSimpleName() + " t";
             return xmlFromSqlQuery(doc, sql);
         } catch (SQLException x) { throw new SchedulerException(x); }
     }
 
 
     private Element xmlFromSqlQuery(Document doc, String sql) throws SQLException {
-        PreparedStatement stmt = getConnection().prepareStatement(sql);
-        try {
-            ResultSet resultSet = stmt.executeQuery();
-            return xmlFromResultSet(doc, resultSet);
-        } finally {
-            stmt.close();
-        }
+        EntityManager em = databaseSubsystem.getEntityManager();
+        TypedQuery<TaskHistoryEntity> q = em.createQuery(sql, TaskHistoryEntity.class);
+        List<TaskHistoryEntity> resultSet = q.getResultList();
+        return xmlFromTaskHistoryEntities(doc, resultSet);
     }
 
 
-    private Element xmlFromResultSet(Document doc, ResultSet resultSet) throws SQLException {
+    private Element xmlFromTaskHistoryEntities(Document doc, List<TaskHistoryEntity> entities) {
         Element result = doc.createElement("myResult");
-        ResultSetMetaData meta = resultSet.getMetaData();
-        while (resultSet.next()) {
-            Element e = doc.createElement("row");
-            result.appendChild(e);
-            for (int i = 1; i <= meta.getColumnCount(); i++) {
-                String s = resultSet.getString(i);
-                if (!resultSet.wasNull())
-                    e.setAttribute(meta.getColumnName(i), s);
-            }
-        }
+        for (TaskHistoryEntity e: entities)
+            result.appendChild(elementOfTaskHistoryEntity(doc, e));
+        return result;
+    }
+
+
+    private Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntity e) {
+        Element result = doc.createElement("row");
+        result.setAttribute("clusterMemberId", e.getClusterMemberId());
+        result.setAttribute("spoolerId", e.getSpoolerId());
+        result.setAttribute("job", e.getJobName());
         return result;
     }
 
@@ -98,20 +91,10 @@ public class GUICommandPlugin extends AbstractPlugin implements CommandPlugin3 {
     }
 
 
-    private Connection getConnection() {
-        try {
-            if (connection == null)
-                connection = DriverManager.getConnection(dbConfig.getUrl()); //, userName, password);
-            return connection;
-        } catch (SQLException x) { throw new SchedulerException(x); }
-    }
-
-
 	public static PlugInFactory factory() {
     	return new PlugInFactory() {
             @Override public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
-                DatabaseSubsystem db = scheduler.getDatabaseSubsystem();
-            	return new GUICommandPlugin(db.getConfiguration());
+            	return new GUICommandPlugin(scheduler.getDatabaseSubsystem());
             }
         };
     }

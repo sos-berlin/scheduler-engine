@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.kernel.command;
 
 
-class Result2 implements Result {
+class BResult implements Result {
     String value;
 
 
-    Result2(String v) {
+    BResult(String v) {
         value = v;
     }
 }

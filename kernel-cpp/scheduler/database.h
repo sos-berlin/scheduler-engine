@@ -87,6 +87,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }
     string                      dbms_name               ()                                          { return _db.dbms_name(); }
+    ptr<Com_variable_set>       properties              ();                                         // Mit "password"
     Database_lock_syntax        lock_syntax             ();
     void                        try_reopen_after_error  ( const exception&, const string& function, bool wait_endless = false );
   //void                        run_create_table_script ();
@@ -97,7 +98,6 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     void                        rename_column           ( Transaction*, const string& table_name, const string& column_name, const string& new_column_name, const string& type );
 
     time_t                      reopen_time             () const                                    { return _reopen_time; }
-    string                      job_history_tablename   () const                                    { return _job_history_tablename; }
 
 
     Fill_zero                  _zero_;
@@ -138,6 +138,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
 
     string                     _db_name;
     Any_file                   _db;
+    ptr<Com_variable_set>      _properties;
     string                     _error;
   //Any_file                   _job_id_update;
   //Any_file                   _job_id_select;
