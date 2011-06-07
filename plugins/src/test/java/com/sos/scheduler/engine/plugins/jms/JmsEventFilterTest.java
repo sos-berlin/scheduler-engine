@@ -109,18 +109,19 @@ public class JmsEventFilterTest extends SchedulerTest {
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
             	logger.info("subscribe " + ev.getName());
             	logger.debug(xmlContent);
-                if (ev.getEventOrderTouched() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
-                }
-                if (ev.getEventOrderStateChanged() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
-                }
-                if (ev.getEventOrderFinished() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
-                }
-                textMessage.acknowledge();
-                assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                result = ev.getName();
+throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
+//                if (ev.getEventOrderTouched() != null) {
+//                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
+//                }
+//                if (ev.getEventOrderStateChanged() != null) {
+//                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
+//                }
+//                if (ev.getEventOrderFinished() != null) {
+//                	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
+//                }
+//                textMessage.acknowledge();
+//                assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
+//                result = ev.getName();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
