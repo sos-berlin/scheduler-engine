@@ -118,7 +118,7 @@ struct Jdbc_session : Sos_database_session
     string                      name                    ()                                      { return "jdbc"; }
     string                      modify_oracle_thin_stmt ( const string& );
     void                       _open_postprocessing     ();
-    ::stdext::hash_map<string,string> Jdbc_session::properties();
+    ::stdext::hash_map<string,string> properties        ();
 
     Jdbc_static*                static_ptr              ()                                      { return (Jdbc_static*)_static; }
 
