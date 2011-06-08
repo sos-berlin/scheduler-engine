@@ -15,25 +15,30 @@
     <description>plugins of the scheduler kernel.</description>
 
     <build>
-    <!-- 
-     -->
-        <plugins>
+        <!--plugins> 
+            Gelöscht, weil nur die beiden inkludierten Tests ausgeführt werden, sonst keine. 2011-06-08 zschimmmer
+            Besser ist, den störenden Test zu exkludieren.
+            Noch besser ist, den störenden Test im Quellcode mit @Ignore zu versehen. Das wird in Sonar gezeigt.
+            Welcher Fehler tritt eigentlich auf?
+
+            Bitte diesen Kommentar so bald wie möglich löschen. Zschimmer
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
 				          <includes>
-				            <!--
+				            <!- -
 				            Dieser Test führt zu einem Fehler, wenn er mit den Tests unten zusammen ausgeführt wird.
 				            Läuft er alleine, funktioniert's. 
 				            <include>**/ConnectorTest.java</include>  
-				            -->
+				            - ->
 				            <include>**/JmsEventFilterTest.java</include>
 				            <include>**/JmsOrderEventsTest.java</include>
 				          </includes>
                 </configuration>
             </plugin>
-        </plugins>
+        </plugins-->
         <testResources>
             <testResource>
                 <!-- Standard Wiederholen -->
