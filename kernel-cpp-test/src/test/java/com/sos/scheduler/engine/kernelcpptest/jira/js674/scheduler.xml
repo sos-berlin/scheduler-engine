@@ -9,9 +9,9 @@
                 <script language="shell"><![CDATA[
 #! /bin/bash
 (sleep 10 && exit 1)&
-sleep 1
-kill -15 %1
-wait %1
+pid=$!
+(sleep 1 && kill -15 $pid)
+wait $pid
 rc=$?
 expectedRc=$((128+15))  # Exitcode nach kill 15
 if [ $rc -eq $expectedRc ]; then :
