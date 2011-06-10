@@ -2316,11 +2316,11 @@
             </text>
         </message>
 
-        <!--message code="SCHEDULER-376">
+        <message code="SCHEDULER-376">
             <text xml:lang="en">
-                <title>A distributed, non-exclusive Scheduler enables only order controlled jobs</title>
+                <title>For a distributed order, this operation is not possible</title>
             </text>
-        </message-->
+        </message>
 
         <message code="SCHEDULER-377">
             <text xml:lang="en">

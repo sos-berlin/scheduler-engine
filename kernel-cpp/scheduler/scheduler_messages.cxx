@@ -231,6 +231,7 @@ Message_code_text scheduler_messages[] =
     { "SCHEDULER-373", "UNEXPECTED DEACTIVATION BY SCHEDULER MEMBER $1" },
     { "SCHEDULER-374", "In $1, state '$2' has no job" },
     { "SCHEDULER-375", "Order is distributed and therefore does not support operation '$1'" },
+    { "SCHEDULER-376", "For a distributed order, this operation is not possible" },
     { "SCHEDULER-377", "After own late heart beat, Scheduler member '$1' has taken exclusiveness" },
     { "SCHEDULER-378", "After own late heart beat, this Scheduler has been deactivated and                  the occupied orders have been freed by Scheduler member '$1'" },
     { "SCHEDULER-379", "$1 is occupied by Scheduler member '$2'" },
