@@ -2,13 +2,14 @@ package com.sos.scheduler.engine.plugins.jms;
 
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
-import java.util.Properties;
-
 import javax.jms.Message;
 import javax.jms.TextMessage;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
+
 import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
@@ -135,13 +136,17 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 		if (e instanceof OrderStateChangedEvent
 				|| e instanceof OrderTouchedEvent
 				|| e instanceof OrderFinishedEvent) {
-//			JSEvent ev = objFactory.createEvent(e);
-			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
-			logger.info("publish event " + ev.getName());
-			logger.debug(ev.marshal());
-			m.setText(ev.marshal());
-			setEventProperties(m, ev);
-			connector.publish(m); // publish the text message (xml)
+			try {
+//				JSEvent ev = objFactory.createEvent(e);
+				JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
+				logger.info("publish event " + ev.getName());
+				logger.debug(ev.marshal());
+				m.setText(ev.marshal());
+				setEventProperties(m, ev);
+				connector.publish(m); // publish the text message (xml)
+			} catch(SchedulerException ev) {
+				throw new SchedulerException(ev);
+			}
 		}
 	}
 

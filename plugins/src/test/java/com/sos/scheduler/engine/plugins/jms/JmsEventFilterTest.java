@@ -33,7 +33,7 @@ public class JmsEventFilterTest extends SchedulerTest {
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(10);
+    private static final Time schedulerTimeout = Time.of(20);
     private static Configuration conf;
 
     private static Logger logger;
@@ -78,23 +78,15 @@ public class JmsEventFilterTest extends SchedulerTest {
     }
 
     
-    @Test public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-e");
-        assertEvent("EventOrderTouched",2);
-        assertEquals("total number of events",2,resultQueue.size());
+    @Test
+    public void test() throws Exception {
+    	try {
+	        runScheduler(schedulerTimeout, "-e");
+	        assertEquals("EventOrderTouched",2,resultQueue.size());
+		} finally {
+			topicSubscriber.close();
+		}
     }
-    
-    private void assertEvent(String eventName, int exceptedEvents) {
-    	Iterator<String> it = resultQueue.iterator();
-    	int cnt = 0;
-    	while (it.hasNext()) {
-    		String e = it.next();
-    		if(e.equals(eventName)) cnt++;
-    	}
-        assertEquals(eventName,exceptedEvents,cnt);
-    }
-
-
     
     private class MyListener implements javax.jms.MessageListener {
 
@@ -109,19 +101,14 @@ public class JmsEventFilterTest extends SchedulerTest {
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
             	logger.info("subscribe " + ev.getName());
             	logger.debug(xmlContent);
-throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
-//                if (ev.getEventOrderTouched() != null) {
-//                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
-//                }
-//                if (ev.getEventOrderStateChanged() != null) {
-//                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
-//                }
-//                if (ev.getEventOrderFinished() != null) {
-//                	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
-//                }
-//                textMessage.acknowledge();
-//                assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-//                result = ev.getName();
+//throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
+                if (ev.getEventOrderTouched() != null) {
+                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
+                }
+                textMessage.acknowledge();
+                assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
+                assertEquals(ev.getName(), "EventOrderTouched" );
+                result = ev.getEventOrderTouched().getOrder().getId();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {

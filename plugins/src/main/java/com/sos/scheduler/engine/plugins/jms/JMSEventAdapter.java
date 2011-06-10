@@ -15,8 +15,8 @@ public class JMSEventAdapter {
 	
 	private static String eventName;
 
-    @Deprecated // Nicht übersetzbar, Zschimmer 2011-06-07
-	public static JSEvent createEvent(final SchedulerObjectFactory objFactory, final Event event) {
+    // @Deprecated // Nicht übersetzbar, Zschimmer 2011-06-07
+	public static JSEvent createEvent(final SchedulerObjectFactory objFactory, final Event event) throws SchedulerException {
 
 		eventName = event.getClass().getName().replace(event.getClass().getPackage().getName() + ".", "");
 		boolean flgFound = false;
@@ -25,29 +25,29 @@ public class JMSEventAdapter {
 
 			OrderEvent kernelEvent = (OrderEvent)event;
 
-            throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + JMSEventAdapter.class.getClass());
-//			if (event instanceof OrderTouchedEvent) {
-//				ev = objFactory.createEvent("EventOrderTouched");
-//				EventOrderTouched oe = ev.getEventOrderTouched();
-//				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
-//				flgFound = true;
-//			}
-//
-//			if (event instanceof OrderStateChangedEvent) {
-//				ev = objFactory.createEvent("EventOrderStateChanged");
-//				EventOrderStateChanged oe = ev.getEventOrderStateChanged();
-//				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
-//				OrderStateChangedEvent orderStateEvent = (OrderStateChangedEvent)event;
-//				oe.setPreviousState( orderStateEvent.getPreviousState().toString() );
-//				flgFound = true;
-//			}
-//
-//			if (event instanceof OrderFinishedEvent) {
-//				ev = objFactory.createEvent("EventOrderFinished");
-//				EventOrderFinished oe = ev.getEventOrderFinished();
-//				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
-//				flgFound = true;
-//			}
+//            throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + JMSEventAdapter.class.getClass());
+			if (event instanceof OrderTouchedEvent) {
+				ev = objFactory.createEvent("EventOrderTouched");
+				EventOrderTouched oe = ev.getEventOrderTouched();
+				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
+				flgFound = true;
+			}
+
+			if (event instanceof OrderStateChangedEvent) {
+				ev = objFactory.createEvent("EventOrderStateChanged");
+				EventOrderStateChanged oe = ev.getEventOrderStateChanged();
+				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
+				OrderStateChangedEvent orderStateEvent = (OrderStateChangedEvent)event;
+				oe.setPreviousState( orderStateEvent.getPreviousState().toString() );
+				flgFound = true;
+			}
+
+			if (event instanceof OrderFinishedEvent) {
+				ev = objFactory.createEvent("EventOrderFinished");
+				EventOrderFinished oe = ev.getEventOrderFinished();
+				oe.setOrder( JMSOrderAdapter.createEventOrder(kernelEvent.getOrder()) );
+				flgFound = true;
+			}
 			
 		}
 		
