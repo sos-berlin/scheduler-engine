@@ -5,14 +5,10 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import org.apache.log4j.Logger;
 
 
 /** Beendet bei einer Exception oder einem ErrorLogEvent den Scheduler. */
 public class StrictEventSubscriber implements EventSubscriber {
-    @SuppressWarnings("unused")
-	private static final Logger logger = Logger.getLogger(StrictEventSubscriber.class);
-
     private SchedulerController schedulerController = null;
     private final EventSubscriber eventSubscriber;
 
@@ -22,7 +18,7 @@ public class StrictEventSubscriber implements EventSubscriber {
     }
 
     
-    @Override public void onEvent(Event e) {
+    @Override public final void onEvent(Event e) {
         try {
             if (e instanceof SchedulerReadyEvent)     // The very first event
                 schedulerController = ((SchedulerReadyEvent)e).getSchedulerController();

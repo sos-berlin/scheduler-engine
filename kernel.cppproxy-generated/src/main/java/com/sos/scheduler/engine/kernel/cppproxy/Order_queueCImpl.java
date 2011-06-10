@@ -10,7 +10,7 @@ final class Order_queueCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final void close() {
+    @Override public void close() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             close__native(cppReference());
@@ -23,7 +23,7 @@ final class Order_queueCImpl
     private static native void close__native(long cppReference);
 
 
-    @Override public final boolean is_distributed_order_requested(long p0) {
+    @Override public boolean is_distributed_order_requested(long p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return is_distributed_order_requested__native(cppReference(), p0);
@@ -36,7 +36,7 @@ final class Order_queueCImpl
     private static native boolean is_distributed_order_requested__native(long cppReference, long p0);
 
 
-    @Override public final int java_order_count() {
+    @Override public int java_order_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return java_order_count__native(cppReference());

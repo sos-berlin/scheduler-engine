@@ -15,7 +15,7 @@ public class EventClassPredicate implements EventPredicate {
     }
 
 
-    @Override public String toString() {
+    @Override public final String toString() {
         return eventClass.toString();
     }
 }

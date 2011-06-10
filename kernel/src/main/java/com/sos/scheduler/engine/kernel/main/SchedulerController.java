@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.kernel.util.Time;
 
 
 public interface SchedulerController {
-    public static final Time terminationTimeout = Time.of(10);
+    Time terminationTimeout = Time.of(10);
 
     void loadModule();
     void subscribeEvents(EventSubscriber s);
@@ -19,5 +19,4 @@ public interface SchedulerController {
     void terminateAndWait();
     int getExitCode();
     SchedulerState getSchedulerState();
-    //Scheduler getScheduler();
 }

@@ -12,9 +12,9 @@ public final class PrefixLog implements SchedulerLogger {
         this.cppProxy = cppProxy;
     }
     
-    @Override public final void info(String s) { cppProxy.info(s); }
-    @Override public final void warn(String s) { cppProxy.warn(s); }
-    @Override public final void error(String s) { cppProxy.error(s); }
-    public final void debug3(String s) { cppProxy.debug3(s); }
-    @Override public final void debug(String s) { debug3(s); }
+    @Override public void info(String s) { cppProxy.info(s); }
+    @Override public void warn(String s) { cppProxy.warn(s); }
+    @Override public void error(String s) { cppProxy.error(s); }
+    public void debug3(String s) { cppProxy.debug3(s); }
+    @Override public void debug(String s) { debug3(s); }
 }

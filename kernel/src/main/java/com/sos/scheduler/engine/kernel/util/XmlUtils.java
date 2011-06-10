@@ -140,7 +140,7 @@ public final class XmlUtils {
     }
 
 
-    public static ArrayList<Element> childElements(Element element) {
+    public static List<Element> childElements(Element element) {
         NodeList children = element.getChildNodes();
         ArrayList<Element> result = new ArrayList<Element>(children.getLength());
         for (int i = 0; i < children.getLength(); i++) {

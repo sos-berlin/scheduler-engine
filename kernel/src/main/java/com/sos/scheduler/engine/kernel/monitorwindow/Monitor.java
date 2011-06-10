@@ -68,10 +68,10 @@ public class Monitor implements EventSubscriber {
 
 
     private void showNode(Node node) throws IOException {
-        output.write(node.orderState().getString());
+        output.write(node.getOrderState().getString());
         if (node instanceof OrderQueueNode) {
             OrderQueueNode n = (OrderQueueNode)node;
-            output.write("(" + n.orderQueue().size() + " orders)");
+            output.write("(" + n.getOrderQueue().size() + " orders)");
         }
         output.write("  ");
     }

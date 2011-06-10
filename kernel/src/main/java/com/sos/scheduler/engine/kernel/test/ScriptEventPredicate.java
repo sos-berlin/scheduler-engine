@@ -18,12 +18,12 @@ public class ScriptEventPredicate implements EventPredicate {
     }
 
 
-    @Override public boolean apply(Event e) {
+    @Override public final boolean apply(Event e) {
         return eventClass.isAssignableFrom(e.getClass())  &&  context.matches(e, expression);
     }
 
 
-    @Override public String toString() {
+    @Override public final String toString() {
         return eventClass.getSimpleName() + "(" + expression + ")";
     }
 }

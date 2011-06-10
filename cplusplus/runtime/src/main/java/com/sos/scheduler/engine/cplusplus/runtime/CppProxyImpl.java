@@ -7,15 +7,20 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
     private SISTER sister = null;
 
 
-    protected final long cppReference() { return cppReference; }
-    @Override public boolean cppReferenceIsValid() { return cppReference != 0; }
+    protected final long cppReference() {
+        return cppReference;
+    }
+
+    
+    @Override public boolean cppReferenceIsValid() { 
+        return cppReference != 0;
+    }
 
     
     /** Nur für JNI zugänglich. Wird vom C++-Destruktor ~Has_proxy aufgerufen. */
     @SuppressWarnings("unused")
     private void invalidateCppReference() {
         cppReference = 0;
-
         if (sister != null)
             sister.onCppProxyInvalidated();
     }
@@ -43,7 +48,7 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
 //    }
 
 
-    protected void requireContextIsNull(Sister context) {
+    protected final void requireContextIsNull(Sister context) {
         if (context != null)
             throw new RuntimeException("Sister context != null, but interface has no sisterType, in " + getClass().getName());
     }
@@ -51,14 +56,14 @@ public class CppProxyImpl<SISTER extends Sister> implements CppProxyWithSister<S
 
     /* Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt,
      * dann haben wir nur ein (zerstörtes) Ding der Klasse Object. */
-    protected void checkIsNotReleased(Class<?> clas, Object o) {
+    protected final void checkIsNotReleased(Class<?> clas, Object o) {
         if (!clas.isInstance(o))
             throw new CppProxyInvalidated(clas);
     }
 
     
-    public static class CppProxyInvalidated extends RuntimeException {
-        public CppProxyInvalidated(Class<?> c) {
+    private static class CppProxyInvalidated extends RuntimeException {
+        private CppProxyInvalidated(Class<?> c) {
             super("C++ code has return a temporary, immediately destructed object (was a " + c.getName());
         }
     }

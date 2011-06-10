@@ -10,7 +10,7 @@ final class Prefix_logCImpl
         requireContextIsNull(context);
     }
 
-    @Override public final void debug3(java.lang.String p0) {
+    @Override public void debug3(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             debug3__native(cppReference(), p0);
@@ -23,7 +23,7 @@ final class Prefix_logCImpl
     private static native void debug3__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final void error(java.lang.String p0) {
+    @Override public void error(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             error__native(cppReference(), p0);
@@ -36,7 +36,7 @@ final class Prefix_logCImpl
     private static native void error__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final void info(java.lang.String p0) {
+    @Override public void info(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             info__native(cppReference(), p0);
@@ -49,7 +49,7 @@ final class Prefix_logCImpl
     private static native void info__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final void warn(java.lang.String p0) {
+    @Override public void warn(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             warn__native(cppReference(), p0);

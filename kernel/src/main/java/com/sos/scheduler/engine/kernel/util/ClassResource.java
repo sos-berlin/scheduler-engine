@@ -32,7 +32,7 @@ public class ClassResource /*implements InputSupplier<InputStream>*/ {
     }
 
 
-    @Override public String toString() {
+    @Override public final String toString() {
         return "Java resource " + getPath();
     }
 }

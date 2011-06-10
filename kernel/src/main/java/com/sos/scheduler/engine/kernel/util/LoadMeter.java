@@ -125,7 +125,7 @@ public class LoadMeter {
     }
 
 
-    @Override public String toString() {
+    @Override public final String toString() {
         return "average load last " + stringFromMillis(periodDuration) + ": " + stringPercent(loadOfLastPeriods(1)) +
             ", last " + stringFromMillis(periodDuration * maxNumberOfPeriods) +": " + stringPercent(loadOfLastPeriods(maxNumberOfPeriods));
     }

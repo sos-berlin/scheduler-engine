@@ -10,7 +10,7 @@ final class Order_subsystemCImpl
         requireContextIsNull(context);
     }
 
-    @Override public final int finished_orders_count() {
+    @Override public int finished_orders_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             return finished_orders_count__native(cppReference());
@@ -23,7 +23,7 @@ final class Order_subsystemCImpl
     private static native int finished_orders_count__native(long cppReference);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
+    @Override public com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.order.jobchain.JobChain result = java_file_based_or_null__native(cppReference(), p0);
@@ -38,7 +38,7 @@ final class Order_subsystemCImpl
     private static native com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final java.util.ArrayList java_file_baseds() {
+    @Override public java.util.ArrayList java_file_baseds() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.util.ArrayList result = java_file_baseds__native(cppReference());

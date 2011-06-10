@@ -26,7 +26,7 @@ public class ThreadLock {
     }
 
 
-    static class SimpleLock {
+    private static class SimpleLock {
         private final ReentrantLock lock = new ReentrantLock();
 
         void lock() {
@@ -46,7 +46,7 @@ public class ThreadLock {
     }
 
 
-    static class LoggingLock extends SimpleLock {
+    private static final class LoggingLock extends SimpleLock {
         private final CallersData callersData = new CallersData();
 
         @Override void lock() {
@@ -65,7 +65,7 @@ public class ThreadLock {
             callersData.forget();
         }
 
-        static class CallersData {
+        private class CallersData {
             private volatile Thread lockingThread = null;
             private volatile Exception lockingStackTrace = null;
         

@@ -13,12 +13,10 @@ import static java.util.Arrays.asList;
 
 
 public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin {
-    private final DatabaseSubsystem databaseSubsystem;
     private final CommandHandler[] commandHandlers;
 
 
-    DatabaseQueryPlugin(DatabaseSubsystem db) {
-        this.databaseSubsystem = db;
+    DatabaseQueryPlugin(DatabaseSubsystem databaseSubsystem) {
         commandHandlers = new CommandHandler[]{
             new ShowTaskHistoryCommandExecutor(databaseSubsystem),
             ShowTaskHistoryCommandXmlParser.singleton,
@@ -26,7 +24,7 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
     }
 
 
-    @Override public Collection<CommandHandler> getCommandHandlers() {
+    @Override public final Collection<CommandHandler> getCommandHandlers() {
         return asList(commandHandlers);
     }
 

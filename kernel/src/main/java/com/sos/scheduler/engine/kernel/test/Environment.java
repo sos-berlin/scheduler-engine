@@ -12,7 +12,7 @@ import static com.google.common.base.Strings.*;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
 
 
-public class Environment {
+public final class Environment {
     private static final String kernelCppDirName = "kernel-cpp";
     private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
     private static final OperatingSystem os = OperatingSystem.singleton;

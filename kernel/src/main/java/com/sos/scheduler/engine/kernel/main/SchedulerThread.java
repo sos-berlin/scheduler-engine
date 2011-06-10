@@ -10,14 +10,11 @@ import com.sos.scheduler.engine.kernel.main.event.SchedulerReadyEvent;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.log4j.Logger;
 
 
 /** Der Scheduler in einem eigenen Thread. */
 public class SchedulerThread extends Thread implements SchedulerController {
     //TODO Thread auslagern, um nicht zwei Interfaces zu haben. Dann kann getSchedulerState() wieder getState() heißen.
-    private static final Logger logger = Logger.getLogger(SchedulerThread.class);
-
     private final CppScheduler cppScheduler = new CppScheduler();
     private final CoOp coOp = new CoOp();
     private final AtomicReference<Integer> exitCodeAtom = new AtomicReference<Integer>();
@@ -36,7 +33,7 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
-    @Override public void subscribeEvents(EventSubscriber s) {
+    @Override public final void subscribeEvents(EventSubscriber s) {
         assert s != null;
         eventSubscriber = s;
     }

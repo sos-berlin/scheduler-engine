@@ -17,18 +17,18 @@ public class Node extends AbstractHasPlatform implements Sister {
     private final NodeCI nodeC;
 
 
-    public Node(Platform platform, NodeCI nodeC) {
+    Node(Platform platform, NodeCI nodeC) {
         super(platform);
         this.nodeC = nodeC;
     }
 
 
-    @Override public void onCppProxyInvalidated() {}
+    @Override public final void onCppProxyInvalidated() {}
 
 
-    public OrderState orderState() { return OrderState.of(nodeC.string_order_state()); }
-    public OrderState nextState() { return OrderState.of(nodeC.string_next_state()); }
-    public OrderState errorState() { return OrderState.of(nodeC.string_error_state()); }
+    public final OrderState getOrderState() { return OrderState.of(nodeC.string_order_state()); }
+    public final OrderState getNextState() { return OrderState.of(nodeC.string_next_state()); }
+    public final OrderState getErrorState() { return OrderState.of(nodeC.string_error_state()); }
 
 
     public static class Type implements SisterType<Node, NodeC> {

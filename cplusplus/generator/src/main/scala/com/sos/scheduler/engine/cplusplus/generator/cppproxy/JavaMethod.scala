@@ -12,7 +12,7 @@ class JavaMethod(m: ProcedureSignature) {
 
     def javaImplementation = {
         val declaration =
-            "    @Override public final " +
+            "    @Override public " +
             m.returnType.getName + " " +
             m.name +
             inParentheses(javaParameterDeclarations)

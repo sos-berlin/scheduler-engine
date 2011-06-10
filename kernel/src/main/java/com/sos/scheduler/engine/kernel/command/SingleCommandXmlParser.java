@@ -11,7 +11,7 @@ public abstract class SingleCommandXmlParser implements CommandXmlParser {
     }
 
     
-    public String getCommandName() {
+    public final String getCommandName() {
         return commandName;
     }
 }

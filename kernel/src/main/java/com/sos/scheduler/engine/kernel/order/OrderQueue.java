@@ -11,12 +11,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
  * @author Zschimmer.sos
  */
 public class OrderQueue extends AbstractHasPlatform implements Sister {  // Iterable<Order>
-    private Order_queueC order_queueC;
+    private Order_queueC cppProxy;
 
 
-    public OrderQueue(Platform platform, Order_queueC a) {
+    public OrderQueue(Platform platform, Order_queueC cppProxy) {
         super(platform);
-        this.order_queueC = a;
+        this.cppProxy = cppProxy;
     }
 
 
@@ -24,7 +24,7 @@ public class OrderQueue extends AbstractHasPlatform implements Sister {  // Iter
 
     
     public final int size()  {
-        return order_queueC.java_order_count();
+        return cppProxy.java_order_count();
     }
 
 

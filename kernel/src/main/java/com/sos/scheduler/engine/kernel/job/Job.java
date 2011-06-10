@@ -10,12 +10,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 @ForCpp
 public final class Job extends AbstractHasPlatform implements Sister {
-    private final JobC cppproxy;
+    private final JobC cppProxy;
 
     
     private Job(Platform platform, JobC jobC) {
         super(platform);
-        this.cppproxy = jobC;
+        this.cppProxy = jobC;
     }
 
 
@@ -23,12 +23,12 @@ public final class Job extends AbstractHasPlatform implements Sister {
 
 
     public String getName() {
-        return cppproxy.name();
+        return cppProxy.name();
     }
 
 
     public String getPath() {
-        return cppproxy.path();
+        return cppProxy.path();
     }
 
 

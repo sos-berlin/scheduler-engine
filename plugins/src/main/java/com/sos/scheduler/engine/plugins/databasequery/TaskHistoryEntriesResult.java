@@ -14,7 +14,7 @@ public class TaskHistoryEntriesResult implements Result {
     }
 
 
-    public Collection<TaskHistoryEntity> getTaskHistoryEntries() {
+    public final Collection<TaskHistoryEntity> getTaskHistoryEntries() {
         return entities;
     }
 }

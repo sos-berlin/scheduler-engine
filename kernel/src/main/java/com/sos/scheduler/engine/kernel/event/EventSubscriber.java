@@ -11,7 +11,7 @@ public interface EventSubscriber {
     void onEvent(Event e) throws Exception;
 
 
-    static final EventSubscriber empty = new EventSubscriber() {
+    EventSubscriber empty = new EventSubscriber() {
         @Override public void onEvent(Event e) {}
     };
 }

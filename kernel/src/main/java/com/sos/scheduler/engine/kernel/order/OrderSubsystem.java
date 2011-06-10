@@ -12,21 +12,21 @@ import java.util.Collection;
 
 public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
 {
-    private final Order_subsystemC cppproxy;
+    private final Order_subsystemC cppProxy;
 
 
     public OrderSubsystem(Platform platform, Order_subsystemC cppproxy) {
         super(platform);
-        this.cppproxy = cppproxy;
+        this.cppProxy = cppproxy;
     }
 
 
     public final Collection<JobChain> jobChains() {
-        return cppproxy.java_file_baseds();
+        return cppProxy.java_file_baseds();
     }
 
     
     public final JobChain jobChain(AbsolutePath path) {
-        return cppproxy.java_file_based_or_null(path.toString());
+        return cppProxy.java_file_based_or_null(path.toString());
     }
 }

@@ -9,7 +9,6 @@ import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.VariableSet;
-import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
 
 
 @ForCpp

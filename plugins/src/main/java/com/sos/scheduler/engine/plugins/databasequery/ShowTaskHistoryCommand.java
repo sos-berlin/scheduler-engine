@@ -9,7 +9,7 @@ public class ShowTaskHistoryCommand implements Command {
     }
 
 
-    @Override public String getName() {
+    @Override public final String getName() {
         return "show_task_history";
     }
 }

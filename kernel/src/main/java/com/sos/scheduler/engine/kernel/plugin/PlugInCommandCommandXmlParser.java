@@ -34,7 +34,7 @@ class PlugInCommandCommandXmlParser extends SingleCommandXmlParser {
     }
 
 
-    static class NotASingleSubcommandException extends SchedulerException {
+    static final class NotASingleSubcommandException extends SchedulerException {
         private NotASingleSubcommandException(String cmdName) {
             super("Command " + cmdName + " has not exactly one subcommand");
         }

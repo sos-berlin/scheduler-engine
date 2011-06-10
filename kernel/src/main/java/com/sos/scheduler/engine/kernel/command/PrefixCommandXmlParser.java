@@ -13,7 +13,7 @@ public abstract class PrefixCommandXmlParser implements CommandXmlParser {
     }
 
 
-    public String getCommandPrefix() {
+    public final String getCommandPrefix() {
         return prefix;
     }
 }

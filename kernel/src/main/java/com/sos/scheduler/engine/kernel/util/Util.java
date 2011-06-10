@@ -30,7 +30,7 @@ public final class Util {
     }
 
 
-    private static class WrappedThrowable extends RuntimeException {
+    private static final class WrappedThrowable extends RuntimeException {
         private WrappedThrowable(Throwable t) {
             super(t);
         }

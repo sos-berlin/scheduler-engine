@@ -10,7 +10,7 @@ final class JobCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final java.lang.String name() {
+    @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = name__native(cppReference());
@@ -25,7 +25,7 @@ final class JobCImpl
     private static native java.lang.String name__native(long cppReference);
 
 
-    @Override public final java.lang.String path() {
+    @Override public java.lang.String path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = path__native(cppReference());

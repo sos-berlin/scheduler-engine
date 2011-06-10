@@ -14,12 +14,12 @@ public final class LogSubsystem implements Subsystem {
     }
 
 
-    public final void close() {
+    public void close() {
         Logger.getRootLogger().removeAppender(appender);
     }
 
 
-    public final void activate() {
+    public void activate() {
         Logger.getRootLogger().addAppender(appender);
     }
 }

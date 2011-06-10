@@ -10,7 +10,7 @@ final class Job_subsystemCImpl
         requireContextIsNull(context);
     }
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string(java.lang.String p0) {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.JobC result = job_by_string__native(cppReference(), p0);
@@ -25,7 +25,7 @@ final class Job_subsystemCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string_or_null(java.lang.String p0) {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.JobC job_by_string_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.JobC result = job_by_string_or_null__native(cppReference(), p0);

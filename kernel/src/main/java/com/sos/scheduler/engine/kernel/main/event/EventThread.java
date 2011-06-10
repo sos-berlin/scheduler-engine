@@ -136,7 +136,7 @@ public abstract class EventThread extends Thread implements EventSubscriber {
             if (!p.apply(e)) throw UnexpectedEventException.of(e, p, expectEventCount);
             if (e instanceof ExceptionEvent) {
                 ExceptionEvent xe = (ExceptionEvent)e;
-                throw new SchedulerException("Error while polling event: " + xe.exception(), xe.exception() );
+                throw new SchedulerException("Error while polling event: " + xe.getException(), xe.getException() );
             }
 
             //logger.info("Expected event: " + e);

@@ -10,7 +10,7 @@ final class DatabaseCImpl
         requireContextIsNull(context);
     }
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = properties__native(cppReference());

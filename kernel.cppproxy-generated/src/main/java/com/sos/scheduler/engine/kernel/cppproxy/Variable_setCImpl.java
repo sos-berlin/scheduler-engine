@@ -10,7 +10,7 @@ final class Variable_setCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final java.lang.String get_string(java.lang.String p0) {
+    @Override public java.lang.String get_string(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = get_string__native(cppReference(), p0);
@@ -25,7 +25,7 @@ final class Variable_setCImpl
     private static native java.lang.String get_string__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final void set_var(java.lang.String p0, java.lang.String p1) {
+    @Override public void set_var(java.lang.String p0, java.lang.String p1) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             set_var__native(cppReference(), p0, p1);

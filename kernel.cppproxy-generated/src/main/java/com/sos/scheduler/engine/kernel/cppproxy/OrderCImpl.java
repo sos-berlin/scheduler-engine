@@ -10,7 +10,7 @@ final class OrderCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final java.lang.String file_path() {
+    @Override public java.lang.String file_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = file_path__native(cppReference());
@@ -25,7 +25,7 @@ final class OrderCImpl
     private static native java.lang.String file_path__native(long cppReference);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Job_chainC result = job_chain__native(cppReference());
@@ -40,7 +40,7 @@ final class OrderCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_chainC job_chain__native(long cppReference);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = params__native(cppReference());
@@ -55,7 +55,7 @@ final class OrderCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
 
 
-    @Override public final void set_end_state(java.lang.String p0) {
+    @Override public void set_end_state(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             set_end_state__native(cppReference(), p0);
@@ -68,7 +68,7 @@ final class OrderCImpl
     private static native void set_end_state__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final void set_id(java.lang.String p0) {
+    @Override public void set_id(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             set_id__native(cppReference(), p0);
@@ -81,7 +81,7 @@ final class OrderCImpl
     private static native void set_id__native(long cppReference, java.lang.String p0);
 
 
-    @Override public final java.lang.String string_end_state() {
+    @Override public java.lang.String string_end_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_end_state__native(cppReference());
@@ -96,7 +96,7 @@ final class OrderCImpl
     private static native java.lang.String string_end_state__native(long cppReference);
 
 
-    @Override public final java.lang.String string_id() {
+    @Override public java.lang.String string_id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_id__native(cppReference());
@@ -111,7 +111,7 @@ final class OrderCImpl
     private static native java.lang.String string_id__native(long cppReference);
 
 
-    @Override public final java.lang.String string_state() {
+    @Override public java.lang.String string_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_state__native(cppReference());
@@ -126,7 +126,7 @@ final class OrderCImpl
     private static native java.lang.String string_state__native(long cppReference);
 
 
-    @Override public final java.lang.String title() {
+    @Override public java.lang.String title() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = title__native(cppReference());

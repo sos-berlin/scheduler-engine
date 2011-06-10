@@ -14,7 +14,7 @@ public class ShowTaskHistoryCommandXmlParser extends SingleCommandXmlParser {
     }
     
     
-    @Override public Command parse(Element e) {
+    @Override public final Command parse(Element e) {
         return new ShowTaskHistoryCommand();
     }
 }

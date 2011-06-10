@@ -10,7 +10,7 @@ final class Job_chainCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final java.util.List java_nodes() {
+    @Override public java.util.List java_nodes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.util.List result = java_nodes__native(cppReference());
@@ -25,7 +25,7 @@ final class Job_chainCImpl
     private static native java.util.List java_nodes__native(long cppReference);
 
 
-    @Override public final java.lang.String name() {
+    @Override public java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = name__native(cppReference());
@@ -40,7 +40,7 @@ final class Job_chainCImpl
     private static native java.lang.String name__native(long cppReference);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.OrderC order(java.lang.String p0) {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.OrderC result = order__native(cppReference(), p0);

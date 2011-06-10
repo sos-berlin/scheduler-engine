@@ -12,7 +12,7 @@ public class CommandSubsystem implements Subsystem {
     }
 
     
-    public String executeXml(String xml) {
+    public final String executeXml(String xml) {
         return commandDispatcher.executeXml(xml);
     }
 }

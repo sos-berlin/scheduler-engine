@@ -10,7 +10,7 @@ final class NodeCImpl
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.NodeC result = error_node__native(cppReference());
@@ -25,7 +25,7 @@ final class NodeCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC error_node__native(long cppReference);
 
 
-    @Override public final com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.NodeC result = next_node__native(cppReference());
@@ -40,7 +40,7 @@ final class NodeCImpl
     private static native com.sos.scheduler.engine.kernel.cppproxy.NodeC next_node__native(long cppReference);
 
 
-    @Override public final java.lang.String string_error_state() {
+    @Override public java.lang.String string_error_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_error_state__native(cppReference());
@@ -55,7 +55,7 @@ final class NodeCImpl
     private static native java.lang.String string_error_state__native(long cppReference);
 
 
-    @Override public final java.lang.String string_next_state() {
+    @Override public java.lang.String string_next_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_next_state__native(cppReference());
@@ -70,7 +70,7 @@ final class NodeCImpl
     private static native java.lang.String string_next_state__native(long cppReference);
 
 
-    @Override public final java.lang.String string_order_state() {
+    @Override public java.lang.String string_order_state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = string_order_state__native(cppReference());

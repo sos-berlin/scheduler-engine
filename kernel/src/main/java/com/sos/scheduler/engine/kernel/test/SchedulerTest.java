@@ -25,17 +25,17 @@ public abstract class SchedulerTest {
     }
 
 
-    public void strictSubscribeEvents() {
+    public final void strictSubscribeEvents() {
         strictSubscribeEvents(EventSubscriber.empty);
     }
 
 
-    public void strictSubscribeEvents(EventSubscriber s) {
+    public final void strictSubscribeEvents(EventSubscriber s) {
         schedulerController.subscribeEvents(new StrictEventSubscriber(s));
     }
 
 
-    public void runScheduler(Time timeout, String... args) {
+    public final void runScheduler(Time timeout, String... args) {
         startScheduler(args);
         waitUntilSchedulerIsRunning();
         waitForTermination(timeout);
@@ -47,7 +47,7 @@ public abstract class SchedulerTest {
 //    }
 
 
-    public void startScheduler(String... args) {
+    public final void startScheduler(String... args) {
         ArrayList<String> allArgs = new ArrayList<String>();
         allArgs.addAll(Arrays.asList(env.standardArgs()));
         allArgs.addAll(Arrays.asList(args));
@@ -55,12 +55,12 @@ public abstract class SchedulerTest {
     }
 
 
-    public void waitUntilSchedulerIsRunning() {
+    public final void waitUntilSchedulerIsRunning() {
         scheduler = schedulerController.waitUntilSchedulerIsRunning();
     }
 
 
-    public Scheduler getScheduler() {
+    public final Scheduler getScheduler() {
         if (scheduler == null)
             waitUntilSchedulerIsRunning();
         assert scheduler != null;
@@ -68,12 +68,12 @@ public abstract class SchedulerTest {
     }
 
 
-    public void waitForTermination(Time timeout) {
+    public final void waitForTermination(Time timeout) {
         schedulerController.waitForTermination(timeout);
     }
 
 
-    @After public void terminateAndCleanUp() throws Throwable {
+    @After public final void terminateAndCleanUp() throws Throwable {
         try {
             schedulerController.terminateAndWait();
         }

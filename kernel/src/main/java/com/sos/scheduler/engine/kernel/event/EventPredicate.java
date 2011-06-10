@@ -5,7 +5,7 @@ public interface EventPredicate {
     boolean apply(Event e);
 
 
-    static final EventPredicate alwaysTrue = new EventPredicate() {
+    EventPredicate alwaysTrue = new EventPredicate() {
         @Override public boolean apply(Event e) { return true; }
     };
 }
