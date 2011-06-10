@@ -22,7 +22,7 @@ if [ $rc -eq $expectedRc ]; then :
 fi
                 ]]></script>
                 <run_time once="yes"/>
-		<commands on_exit_code="success"> 
+                <commands on_exit_code="success">
                     <!-- Solange wir TerminatedTaskEvent nicht haben -->
                     <terminate/>
                 </commands>
