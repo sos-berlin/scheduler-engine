@@ -2,17 +2,18 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister> implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC {
-
+final class Order_subsystemCImpl
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
+   implements com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC
+{
     private Order_subsystemCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
 
-    @Override public int finished_orders_count() {
+    @Override public final int finished_orders_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            int result = finished_orders_count__native(cppReference());
-            return result;
+            return finished_orders_count__native(cppReference());
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -22,12 +23,11 @@ class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.Cp
     private static native int finished_orders_count__native(long cppReference);
 
 
-    @Override public com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
+    @Override public final com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.order.jobchain.JobChain result = java_file_based_or_null__native(cppReference(), p0);
-            if (!com.sos.scheduler.engine.kernel.order.jobchain.JobChain.class.isInstance(result))
-                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.order.jobchain.JobChain.class);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.JobChain.class, result);
             return result;
         }
         finally {
@@ -38,12 +38,11 @@ class Order_subsystemCImpl extends com.sos.scheduler.engine.cplusplus.runtime.Cp
     private static native com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null__native(long cppReference, java.lang.String p0);
 
 
-    @Override public java.util.ArrayList java_file_baseds() {
+    @Override public final java.util.ArrayList java_file_baseds() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.util.ArrayList result = java_file_baseds__native(cppReference());
-            if (!java.util.ArrayList.class.isInstance(result))
-                throw new CppProxyInvalidated(java.util.ArrayList.class);
+            checkIsNotReleased(java.util.ArrayList.class, result);
             return result;
         }
         finally {

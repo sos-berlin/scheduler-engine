@@ -25,7 +25,7 @@ public class Rendezvous<ARG,RESULT> {
     private volatile boolean closed = false;
 
 
-    public void closeServing() {
+    public final void closeServing() {
         assertIsServingThread();
         try {
             if (argumentQueue.peek() != null)   // Greift nicht immer, dafür müsste die Abfrage synchronisiert werden.
@@ -45,7 +45,7 @@ public class Rendezvous<ARG,RESULT> {
     }
 
     
-    public void beginServing() {
+    public final void beginServing() {
         servingThread = Thread.currentThread();
     }
 
@@ -55,14 +55,14 @@ public class Rendezvous<ARG,RESULT> {
     }
 
 
-    public RESULT call(ARG o) {
+    public final RESULT call(ARG o) {
         asyncCall(o);
         return awaitResult();
     }
 
 
     /** Danach syncResult() aufrufen, bis der Aufruf nicht NULL liefert **/
-    public void asyncCall(ARG o) {
+    public final void asyncCall(ARG o) {
         try {
             assertIsNotClosed();
             argumentQueue.put(o);
@@ -71,12 +71,12 @@ public class Rendezvous<ARG,RESULT> {
     }
 
 
-    public RESULT awaitResult() {
+    public final RESULT awaitResult() {
         return awaitResult(Time.eternal);
     }
 
     /** Wenn awaitResult() NULL liefert, den Aufruf wiederholen! */
-    public RESULT awaitResult(Time t) {
+    public final RESULT awaitResult(Time t) {
         try {
             Return r = returnQueue.poll(t.value, t.unit);
             if (r == null)
@@ -91,7 +91,7 @@ public class Rendezvous<ARG,RESULT> {
 
 
     /** Am Ende immer leave aufrufen! */
-    public ARG enter() {
+    public final ARG enter() {
         return enter(Time.eternal);
     }
 
@@ -115,7 +115,7 @@ public class Rendezvous<ARG,RESULT> {
     }
 
 
-    public void leaveException(Throwable t) {
+    public final void leaveException(Throwable t) {
         RuntimeException x = t instanceof RuntimeException? (RuntimeException)t : new RuntimeException(t);
         leave(new Return(x));
     }
@@ -137,7 +137,7 @@ public class Rendezvous<ARG,RESULT> {
     }
 
 
-    public boolean isInRendezvous() {
+    public final boolean isInRendezvous() {
         return inRendezvous;
     }
 

@@ -28,7 +28,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 
-public class XmlUtils {
+public final class XmlUtils {
     private XmlUtils() {}
 
 
@@ -36,7 +36,7 @@ public class XmlUtils {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         }
-        catch (ParserConfigurationException x) { throw new RuntimeException(x); }
+        catch (ParserConfigurationException x) { throw new XmlException(x); }
     }
 
 
@@ -44,9 +44,9 @@ public class XmlUtils {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
         }
-        catch (IOException x) { throw new RuntimeException(x); }
-        catch (ParserConfigurationException x) { throw new RuntimeException(x); }
-        catch (SAXException x) { throw new RuntimeException(x); }
+        catch (IOException x) { throw new XmlException(x); }
+        catch (ParserConfigurationException x) { throw new XmlException(x); }
+        catch (SAXException x) { throw new XmlException(x); }
     }
 
 
@@ -54,9 +54,9 @@ public class XmlUtils {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
         }
-        catch (IOException x) { throw new RuntimeException(x); }
-        catch (ParserConfigurationException x) { throw new RuntimeException(x); }
-        catch (SAXException x) { throw new RuntimeException(x); }
+        catch (IOException x) { throw new XmlException(x); }
+        catch (ParserConfigurationException x) { throw new XmlException(x); }
+        catch (SAXException x) { throw new XmlException(x); }
     }
 
 
@@ -72,7 +72,7 @@ public class XmlUtils {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty("omit-xml-declaration", "false");
             transformer.transform(new DOMSource(n), new StreamResult(w));
-        } catch (TransformerException x) { throw new RuntimeException(x); }
+        } catch (TransformerException x) { throw new XmlException(x); }
     }
 
 
@@ -102,7 +102,7 @@ public class XmlUtils {
 
     public static Element elementXPath(Node baseNode, String xpathExpression) {
         Element result = elementXPathOrNull(baseNode, xpathExpression);
-        if (result == null)  throw new RuntimeException("XPath liefert kein Element: " + xpathExpression);
+        if (result == null)  throw new XmlException("XPath liefert kein Element: " + xpathExpression);
         return result;
     }
 
@@ -111,7 +111,7 @@ public class XmlUtils {
         try {
             XPath xpath  = XPathFactory.newInstance().newXPath();
             return (Element)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODE);
-        } catch (XPathExpressionException x) { throw new RuntimeException(x); }
+        } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
 
@@ -119,7 +119,7 @@ public class XmlUtils {
         try {
             XPath xpath  = XPathFactory.newInstance().newXPath();
             return listFromNodeList((NodeList)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
-        } catch (XPathExpressionException x) { throw new RuntimeException(x); }
+        } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
 
@@ -136,7 +136,7 @@ public class XmlUtils {
             String result = (String)xpath.evaluate(xpathExpression, baseNode, XPathConstants.STRING);
             if (result == null)  result = deflt;
             return result;
-        } catch (XPathExpressionException x) { throw new RuntimeException(x); }
+        } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
 
@@ -156,7 +156,7 @@ public class XmlUtils {
         try {
             XPath xpath = XPathFactory.newInstance().newXPath();
             return (NodeList)xpath.evaluate( xpathExpression, baseNode, XPathConstants.NODESET );
-        } catch (XPathExpressionException x) { throw new RuntimeException( x ); }   // Programmfehler
+        } catch (XPathExpressionException x) { throw new XmlException( x ); }   // Programmfehler
     }
 
 
@@ -174,5 +174,16 @@ public class XmlUtils {
         }
 
         return "\"" + result + "\"";
+    }
+
+
+    private static final class XmlException extends RuntimeException {
+        private XmlException(Exception x) {
+            super(x);
+        }
+
+        private XmlException(String s) {
+            super(s);
+        }
     }
 }

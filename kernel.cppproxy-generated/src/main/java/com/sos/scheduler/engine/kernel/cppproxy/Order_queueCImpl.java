@@ -2,13 +2,15 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.OrderQueue> implements com.sos.scheduler.engine.kernel.cppproxy.Order_queueC {
-
+final class Order_queueCImpl
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.order.OrderQueue>
+   implements com.sos.scheduler.engine.kernel.cppproxy.Order_queueC
+{
     private Order_queueCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public void close() {
+    @Override public final void close() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             close__native(cppReference());
@@ -21,11 +23,10 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
     private static native void close__native(long cppReference);
 
 
-    @Override public boolean is_distributed_order_requested(long p0) {
+    @Override public final boolean is_distributed_order_requested(long p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            boolean result = is_distributed_order_requested__native(cppReference(), p0);
-            return result;
+            return is_distributed_order_requested__native(cppReference(), p0);
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
@@ -35,11 +36,10 @@ class Order_queueCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppPro
     private static native boolean is_distributed_order_requested__native(long cppReference, long p0);
 
 
-    @Override public int java_order_count() {
+    @Override public final int java_order_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            int result = java_order_count__native(cppReference());
-            return result;
+            return java_order_count__native(cppReference());
         }
         finally {
             com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();

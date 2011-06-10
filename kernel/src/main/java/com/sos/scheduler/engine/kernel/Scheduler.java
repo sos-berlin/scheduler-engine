@@ -27,7 +27,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 
 @ForCpp
-public class Scheduler implements HasPlatform, Sister { // extends SchedulerObject
+public final class Scheduler implements HasPlatform, Sister { // extends SchedulerObject
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SpoolerC spoolerC;
@@ -63,8 +63,13 @@ public class Scheduler implements HasPlatform, Sister { // extends SchedulerObje
 
     // HasPlatform
 
-    @Override public Platform getPlatform() { return platform; }
-    @Override public PrefixLog log() { return log; }
+    @Override public Platform getPlatform() {
+        return platform;
+    }
+
+    @Override public PrefixLog log() {
+        return log;
+    }
 
     
     // Sister
@@ -147,12 +152,12 @@ public class Scheduler implements HasPlatform, Sister { // extends SchedulerObje
     }
 
 
-    public final void threadLock() {
+    public void threadLock() {
         CppProxy.threadLock.lock();
     }
 
 
-    public final void threadUnlock() {
+    public void threadUnlock() {
         CppProxy.threadLock.unlock();
     }
 
@@ -186,7 +191,7 @@ public class Scheduler implements HasPlatform, Sister { // extends SchedulerObje
 
     /** @param text Sollte auf \n enden */
     public void writeToSchedulerLog(LogCategory category, String text) {
-        spoolerC.write_to_scheduler_log(category.string(), text);
+        spoolerC.write_to_scheduler_log(category.getString(), text);
     }
 
     public String getVersion() {

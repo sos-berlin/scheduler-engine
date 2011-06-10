@@ -19,7 +19,7 @@ public abstract class GenericResultXmlizer<R extends Result> implements ResultXm
 
 
     @SuppressWarnings("unchecked")
-    @Override final public Element toElement(Result r) {
+    @Override public final Element toElement(Result r) {
         assert resultClass.isInstance(r);
         return doToElement((R)r);
     }

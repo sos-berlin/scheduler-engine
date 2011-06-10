@@ -23,7 +23,7 @@ public class ObjectEvent<T extends SchedulerObject> extends AbstractEvent {
 
 
     /** Das Objekt kann bereits weg sein, dann gibt es den Fehler Z-JAVA-111. */
-    @Override public T getObject() {
+    @Override public final T getObject() {
         return object;
     }
 }

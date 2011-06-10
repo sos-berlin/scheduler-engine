@@ -18,7 +18,8 @@ public class ShowTaskHistoryCommandExecutor extends GenericCommandExecutor<ShowT
     }
 
 
-    @Override protected TaskHistoryEntriesResult doExecute(ShowTaskHistoryCommand c) {
+    @Override protected final TaskHistoryEntriesResult doExecute(ShowTaskHistoryCommand c) {
+        //TODO Ergebnis könnte sehr groß sein. Und C++ kopiert XML-Elemente mit clone().
         String sql = "select t from " + TaskHistoryEntity.class.getSimpleName() + " t";
         EntityManager em = db.getEntityManager();
         TypedQuery<TaskHistoryEntity> q = em.createQuery(sql, TaskHistoryEntity.class);

@@ -26,8 +26,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  */
 @ForCpp
 public class OrderStateChangedEvent extends OrderEvent {
-	
-    private final OrderState previousState;
+	private final OrderState previousState;
 
     
     public OrderStateChangedEvent(Order order, OrderState previousState) {
@@ -36,8 +35,12 @@ public class OrderStateChangedEvent extends OrderEvent {
     }
 
 
-    public OrderState getPreviousState() { return previousState; }
+    public final OrderState getPreviousState() { 
+        return previousState;
+    }
 
 
-    @Override public String toString() { return super.toString() + ", previousState=" + previousState; }
+    @Override public final String toString() {
+        return super.toString() + ", previousState=" + previousState;
+    }
 }

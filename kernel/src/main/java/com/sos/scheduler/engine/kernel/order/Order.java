@@ -13,11 +13,11 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
 
 
 @ForCpp
-public class Order extends FileBased implements Sister {
+public final class Order extends FileBased implements Sister {
     private final OrderC cppProxy;
 
     
-    public Order(Platform platform, OrderC cppProxy) {
+    Order(Platform platform, OrderC cppProxy) {
         super(platform);
         this.cppProxy = cppProxy;
     }
@@ -26,17 +26,29 @@ public class Order extends FileBased implements Sister {
     @Override public void onCppProxyInvalidated() {}
 
 
-    public OrderId getId() { return new OrderId(cppProxy.string_id()); }
+    public OrderId getId() {
+        return new OrderId(cppProxy.string_id());
+    }
 
-    public OrderState getState() { return new OrderState(cppProxy.string_state()); }
+    public OrderState getState() {
+        return new OrderState(cppProxy.string_state());
+    }
 
-    public void setEndState(OrderState s) { cppProxy.set_end_state(s.string()); }
+    public void setEndState(OrderState s) {
+        cppProxy.set_end_state(s.getString());
+    }
 
-    public void getFilePath() { cppProxy.file_path(); }
+    public void getFilePath() {
+        cppProxy.file_path();
+    }
 
-    public OrderState getEndState() { return new OrderState(cppProxy.string_end_state()); }
+    public OrderState getEndState() {
+        return new OrderState(cppProxy.string_end_state());
+    }
 
-    public String getTitle() { return cppProxy.title(); }
+    public String getTitle() {
+        return cppProxy.title();
+    }
 
     
     public JobChain jobChain() {
@@ -47,17 +59,17 @@ public class Order extends FileBased implements Sister {
 
 
     public JobChain jobChainOrNull() {
-        Job_chainC job_chainC = cppProxy.job_chain();
-        return job_chainC == null? null : job_chainC.getSister();
+        Job_chainC jobChainC = cppProxy.job_chain();
+        return jobChainC == null? null : jobChainC.getSister();
     }
 
 
-    public final VariableSet getParameters() {
+    public VariableSet getParameters() {
         return cppProxy.params().getSister();
     }
     
     
-    @Override public String toString() { 
+    @Override public String toString() {
         String result = getClass().getSimpleName();
         if (cppProxy.cppReferenceIsValid())  result += " " + getId().toString();
         return result;

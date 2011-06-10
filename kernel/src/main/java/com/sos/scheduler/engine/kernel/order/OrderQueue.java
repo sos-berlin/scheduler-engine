@@ -20,13 +20,17 @@ public class OrderQueue extends AbstractHasPlatform implements Sister {  // Iter
     }
 
 
-    @Override public void onCppProxyInvalidated() {}
+    @Override public final void onCppProxyInvalidated() {}
 
     
-    public int size()  { return order_queueC.java_order_count(); }
+    public final int size()  {
+        return order_queueC.java_order_count();
+    }
 
 
     public static class Type implements SisterType<OrderQueue, Order_queueC> {
-        @Override public OrderQueue sister(Order_queueC proxy, Sister context) { return new OrderQueue(Platform.of(context), proxy); }
+        @Override public final OrderQueue sister(Order_queueC proxy, Sister context) { 
+            return new OrderQueue(Platform.of(context), proxy);
+        }
     }
 }

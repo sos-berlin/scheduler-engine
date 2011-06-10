@@ -11,16 +11,16 @@ public class OrderQueueNode extends Node {
     private final Order_queue_nodeC order_queue_nodeC;
 
 
-    public OrderQueueNode(Platform platform, Order_queue_nodeC nodeC) {
+    private OrderQueueNode(Platform platform, Order_queue_nodeC nodeC) {
         super(platform, nodeC);
         this.order_queue_nodeC = nodeC;
     }
 
 
-    public OrderQueue orderQueue() { return order_queue_nodeC.order_queue().getSister(); }
+    public final OrderQueue orderQueue() { return order_queue_nodeC.order_queue().getSister(); }
 
 
     public static class Type implements SisterType<OrderQueueNode, Order_queue_nodeC> {
-        @Override public OrderQueueNode sister(Order_queue_nodeC proxy, Sister context) { return new OrderQueueNode(Platform.of(context), proxy); }
+        @Override public final OrderQueueNode sister(Order_queue_nodeC proxy, Sister context) { return new OrderQueueNode(Platform.of(context), proxy); }
     }
 }

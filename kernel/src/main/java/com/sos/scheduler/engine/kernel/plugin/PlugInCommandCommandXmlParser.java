@@ -3,7 +3,6 @@ package com.sos.scheduler.engine.kernel.plugin;
 import com.sos.scheduler.engine.kernel.command.SingleCommandXmlParser;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.command.Command;
-import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import java.util.Collection;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
@@ -19,7 +18,7 @@ class PlugInCommandCommandXmlParser extends SingleCommandXmlParser {
     }
 
 
-    @Override public Command parse(Element e) {
+    @Override public final Command parse(Element e) {
         String className = e.getAttribute("plugin_class");
         CommandPluginAdapter a = subsystem.commandPluginByClassName(className);
         Command subcommand = a.getCommandDispatcher().parse(singleSubcommandElement(e));
@@ -36,7 +35,7 @@ class PlugInCommandCommandXmlParser extends SingleCommandXmlParser {
 
 
     static class NotASingleSubcommandException extends SchedulerException {
-        public NotASingleSubcommandException(String cmdName) {
+        private NotASingleSubcommandException(String cmdName) {
             super("Command " + cmdName + " has not exactly one subcommand");
         }
     }

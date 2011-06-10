@@ -12,7 +12,7 @@ public class SchedulerLog {
     }
 
     
-    public void write(LogCategory logCategory, String text) {
-        spoolerC.write_to_scheduler_log(logCategory.string(), text);
+    public final void write(LogCategory logCategory, String text) {
+        spoolerC.write_to_scheduler_log(logCategory.getString(), text);
     }
 }

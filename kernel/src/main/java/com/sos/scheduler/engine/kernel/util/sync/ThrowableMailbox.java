@@ -12,30 +12,30 @@ public class ThrowableMailbox<T extends Throwable> {
     private final AtomicReference<T> throwableAtom = new AtomicReference<T>();
     
     
-    public void setIfFirst(T o) {
+    public final void setIfFirst(T o) {
         setIfFirst(o, Level.ERROR);
     }
 
 
-    public void setIfFirst(T o, Level logLevel) {
+    public final void setIfFirst(T o, Level logLevel) {
         boolean isFirst = throwableAtom.compareAndSet(null, o);
         if (!isFirst  &&  logger.isEnabledFor(logLevel)) logger.log(logLevel, "Second exception ignored: " + o, o);
     }
 
 
-    public void throwIfSet() throws T {
+    public final void throwIfSet() throws T {
         T o = get();
         if (o != null)  throw o;
     }
 
 
-    public void throwUncheckedIfSet() {
+    public final void throwUncheckedIfSet() {
         T o = get();
         if (o != null)  throwUnchecked(o);
     }
 
 
-    public T get() {
+    public final T get() {
         return throwableAtom.getAndSet(null);
     }
 }

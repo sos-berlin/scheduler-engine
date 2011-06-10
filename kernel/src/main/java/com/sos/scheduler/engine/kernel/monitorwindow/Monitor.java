@@ -25,18 +25,18 @@ public class Monitor implements EventSubscriber {
     }
 
 
-    public void close() {
+    public final void close() {
         scheduler.getEventSubsystem().unsubscribe(this);
     }
 
 
-    public void activate() {
+    public final void activate() {
         scheduler.getEventSubsystem().subscribe(this);
         showJobChains();
     }
 
 
-    @Override public void onEvent(Event e) throws IOException {
+    @Override public final void onEvent(Event e) throws IOException {
         if (e instanceof OrderStateChangedEvent)
             processOrderStateChangeEvent((OrderStateChangedEvent)e);
     }
@@ -59,8 +59,8 @@ public class Monitor implements EventSubscriber {
 
     private void showJobChain(JobChain jobChain) {
         try {
-            output.write("***Monitor*** " + jobChain.name() + ": " );
-            for (Node node: jobChain.nodes())  showNode(node);
+            output.write("***Monitor*** " + jobChain.getName() + ": " );
+            for (Node node: jobChain.getNodes())  showNode(node);
             output.write("\n");
         }
         catch (IOException x) { throw new RuntimeException(x); }
@@ -68,7 +68,7 @@ public class Monitor implements EventSubscriber {
 
 
     private void showNode(Node node) throws IOException {
-        output.write(node.orderState().string());
+        output.write(node.orderState().getString());
         if (node instanceof OrderQueueNode) {
             OrderQueueNode n = (OrderQueueNode)node;
             output.write("(" + n.orderQueue().size() + " orders)");

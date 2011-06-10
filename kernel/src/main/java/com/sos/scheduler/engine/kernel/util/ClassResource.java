@@ -15,7 +15,7 @@ public class ClassResource /*implements InputSupplier<InputStream>*/ {
     }
 
 
-    public InputStream getInputStream() {
+    public final InputStream getInputStream() {
         InputStream result = clas.getClassLoader().getResourceAsStream(getPath());
         if (result == null)  throw new RuntimeException("Java ressource '" + getPath() + "' is missing" );
         return result;
@@ -27,7 +27,7 @@ public class ClassResource /*implements InputSupplier<InputStream>*/ {
 //    }
 
 
-    public String getPath() {
+    public final String getPath() {
         return clas.getPackage().getName().replace(".", "/") + "/" + subPath;
     }
 

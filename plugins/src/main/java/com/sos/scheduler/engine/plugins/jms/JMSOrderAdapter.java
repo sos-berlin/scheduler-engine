@@ -6,7 +6,7 @@ public class JMSOrderAdapter extends Order {
 	
 	private JMSOrderAdapter(com.sos.scheduler.engine.kernel.order.Order kernelEventOrder) {
 		super();
-		setId(kernelEventOrder.getId().string());
+		setId(kernelEventOrder.getId().getString());
 		setTitle(kernelEventOrder.getTitle());
 		setState(kernelEventOrder.getState().toString());
 	}

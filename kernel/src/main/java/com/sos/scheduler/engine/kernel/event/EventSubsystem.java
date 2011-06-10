@@ -50,12 +50,12 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
     }
 
 
-    @Override public String toString() { 
+    @Override public final String toString() {
         return getClass().getSimpleName();
     }
 
 
-    private static class RecursiveEventException extends SchedulerException {
+    private static final class RecursiveEventException extends SchedulerException {
         private RecursiveEventException(Event e) {
             super("Recursive publishing of events: " + e);
         }

@@ -44,24 +44,24 @@ public class CommandDispatcher {
     }
 
 
-    public String executeXml(String xml) {
+    public final String executeXml(String xml) {
         Command command = parse(loadXml(xml).getDocumentElement());
         Result result = execute(command);
         return toXml(elementOfResult(result));
     }
 
 
-    public Result execute(Command c) {
+    public final Result execute(Command c) {
         return executor.execute(c);
     }
 
 
-    public Command parse(Element e) {
+    public final Command parse(Element e) {
         return parser.parse(e);
     }
 
 
-    public Element elementOfResult(Result r) {
+    public final Element elementOfResult(Result r) {
         return resultXmlizer.toElement(r);
     }
 }

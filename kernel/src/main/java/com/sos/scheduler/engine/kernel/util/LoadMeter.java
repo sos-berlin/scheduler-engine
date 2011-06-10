@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.util;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /** Misst die Last (volle Last: 1, Leerlauf: 0) über eine Anzahl Perioden.
  * - meter(1, now): Volllast beginnt
@@ -31,6 +32,8 @@ import java.util.ArrayList;
  * @author Joacim Zschimmer
  */
 public class LoadMeter {
+    private static final int defaultNumberOfPeriods = 10;
+    
     // Alle Zeiten in long, Millisekunden, kann aber jede andere Einheit sein. Nur toString() nimmt Millisekunden an.
     private final long periodDuration;
     private final int maxNumberOfPeriods;
@@ -49,11 +52,11 @@ public class LoadMeter {
 
 
     public LoadMeter(long period) {
-        this(period, 10);
+        this(period, defaultNumberOfPeriods);
     }
 
 
-    public void meter(int load, long now) {
+    public final void meter(int load, long now) {
         if (!(load == 0 || load == 1))  throw new IllegalArgumentException("not (load==0 || load==1)");
         long newPeriodIndex = now / periodDuration;
 
@@ -98,12 +101,12 @@ public class LoadMeter {
     }
 
 
-    public float getLoad() {
+    public final float getLoad() {
         return loadOfLastPeriods(maxNumberOfPeriods);
     }
 
 
-    public float loadOfLastPeriods(int n) {
+    public final float loadOfLastPeriods(int n) {
         if (n <= 0 || n > maxNumberOfPeriods)  throw new IllegalArgumentException();
         float a = 0;
         for (int i = 0; i < n; i++)  a += history.get(periodIndex - 1 - i);
@@ -111,11 +114,11 @@ public class LoadMeter {
     }
 
 
-    public int getNumberOfPeriods() {
+    public final int getNumberOfPeriods() {
         return maxNumberOfPeriods;
     }
     
-    public ArrayList<Float> getHistory() {
+    public final ArrayList<Float> getHistory() {
         ArrayList<Float> result = new ArrayList<Float>(maxNumberOfPeriods);
         for (int i = 0; i < maxNumberOfPeriods; i++)  result.add(history.get(periodIndex - i - 1));
         return result;
@@ -123,16 +126,23 @@ public class LoadMeter {
 
 
     @Override public String toString() {
-        int lastPeriodRatePercent = (int)(100 * loadOfLastPeriods(1));
-        int allPeriodsRatePercent = (int)(100 * loadOfLastPeriods(maxNumberOfPeriods));
+        return "average load last " + stringFromMillis(periodDuration) + ": " + stringPercent(loadOfLastPeriods(1)) +
+            ", last " + stringFromMillis(periodDuration * maxNumberOfPeriods) +": " + stringPercent(loadOfLastPeriods(maxNumberOfPeriods));
+    }
 
-        return "average load last " + (periodDuration/1000.0) + "s: " + lastPeriodRatePercent + "%" +
-            ", last " + (periodDuration * maxNumberOfPeriods)/1000 + "s: " + allPeriodsRatePercent + "%";
+
+    private String stringFromMillis(long millis) {
+        return (millis / 1000.0) + "s";
+    }
+
+
+    private String stringPercent(float a) {
+        return (int)(100 * a) + "%";
     }
 
     
     private class History {
-        private ArrayList<Float> periodLoads = new ArrayList<Float>(maxNumberOfPeriods);
+        private List<Float> periodLoads = new ArrayList<Float>(maxNumberOfPeriods);
 
         History() {
             for (int i = 0; i < maxNumberOfPeriods; i++)  periodLoads.add((float)0);

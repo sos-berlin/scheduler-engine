@@ -12,7 +12,6 @@ import org.w3c.dom.Element;
 import static java.util.Arrays.asList;
 
 
-//TODO Ergebnis könnte sehr groß sein. C++ kopiert XML-Elemente mit clone(). Am besten auf TCP streamen.
 public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin {
     private final DatabaseSubsystem databaseSubsystem;
     private final CommandHandler[] commandHandlers;

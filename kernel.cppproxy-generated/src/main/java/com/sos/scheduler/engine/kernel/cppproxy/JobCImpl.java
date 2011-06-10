@@ -2,18 +2,19 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-class JobCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job> implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
-
+final class JobCImpl
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.kernel.job.Job>
+   implements com.sos.scheduler.engine.kernel.cppproxy.JobC
+{
     private JobCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         setSister(sisterType.sister(this, context));
     }
 
-    @Override public java.lang.String name() {
+    @Override public final java.lang.String name() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = name__native(cppReference());
-            if (!java.lang.String.class.isInstance(result))
-                throw new CppProxyInvalidated(java.lang.String.class);
+            checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         finally {
@@ -24,12 +25,11 @@ class JobCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<c
     private static native java.lang.String name__native(long cppReference);
 
 
-    @Override public java.lang.String path() {
+    @Override public final java.lang.String path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             java.lang.String result = path__native(cppReference());
-            if (!java.lang.String.class.isInstance(result))
-                throw new CppProxyInvalidated(java.lang.String.class);
+            checkIsNotReleased(java.lang.String.class, result);
             return result;
         }
         finally {

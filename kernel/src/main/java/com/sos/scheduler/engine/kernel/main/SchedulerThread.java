@@ -31,7 +31,7 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
-    @Override public void loadModule() {
+    @Override public final void loadModule() {
         cppScheduler.loadModule();
     }
 
@@ -42,19 +42,19 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
-    @Override public void runScheduler(String... arguments) {
+    @Override public final void runScheduler(String... arguments) {
         startScheduler(arguments);
         waitForTermination(terminationTimeout);
     }
 
 
-    @Override public void startScheduler(String... args) {
+    @Override public final void startScheduler(String... args) {
         this.arguments = args;
         start();  // Thread läuft in run()
     }
 
 
-    @Override public Scheduler waitUntilSchedulerIsRunning() {
+    @Override public final Scheduler waitUntilSchedulerIsRunning() {
         try {
             Scheduler result = coOp.waitWhileSchedulerIsStarting();
             throwableMailbox.throwUncheckedIfSet();
@@ -67,13 +67,13 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
-    @Override public void terminateAndWait() {
+    @Override public final void terminateAndWait() {
         terminateScheduler();
         waitForTermination(Time.eternal);
     }
 
 
-    @Override public void waitForTermination(Time timeout) {
+    @Override public final void waitForTermination(Time timeout) {
         try {
             if (timeout == Time.eternal)  join();
             else timeout.unit.timedJoin(this, timeout.value);
@@ -83,36 +83,36 @@ public class SchedulerThread extends Thread implements SchedulerController {
     }
 
 
-    @Override public void terminateAfterException(Throwable x) {
+    @Override public final void terminateAfterException(Throwable x) {
         throwableMailbox.setIfFirst(x);
         terminateScheduler();
     }
 
 
-    @Override public void terminateScheduler() {
+    @Override public final void terminateScheduler() {
         coOp.terminate();
     }
 
 
-//    @Override public Scheduler getScheduler() {
+//    @Override public final Scheduler getScheduler() {
 //        Scheduler result = coOp.getScheduler();
 //        if (result == null)  throw new NullPointerException(getClass() + " scheduler is not yet running");
 //        return result;
 //    }
 
 
-    @Override public int getExitCode() {
+    @Override public final int getExitCode() {
         assert !isAlive();
         return exitCodeAtom.get();
     }
 
 
-    @Override public SchedulerState getSchedulerState() {
+    @Override public final SchedulerState getSchedulerState() {
         return coOp.getState();
     }
 
 
-    @Override public void run() {
+    @Override public final void run() {
         int exitCode = -1;
         Throwable t = null;
         try {
@@ -140,18 +140,18 @@ public class SchedulerThread extends Thread implements SchedulerController {
         private MyEventSubscriber myEventSubscriber = new MyEventSubscriber();
         private Scheduler scheduler = null;
 
-        @Override public void setScheduler(Scheduler scheduler) {
+        @Override public final void setScheduler(Scheduler scheduler) {
             coOp.onSchedulerStarted(scheduler);
             this.scheduler = scheduler;
             strictReportEvent(new SchedulerReadyEvent(SchedulerThread.this));
         }
 
-        @Override public void onSchedulerActivated() {
+        @Override public final void onSchedulerActivated() {
             scheduler.getEventSubsystem().subscribe(myEventSubscriber);
         }
         
         class MyEventSubscriber implements EventSubscriber {
-            @Override public void onEvent(Event e) throws Exception {
+            @Override public final void onEvent(Event e) throws Exception {
                 if (e instanceof SchedulerCloseEvent)
                     coOp.onSchedulerClosed();
                 eventSubscriber.onEvent(e);

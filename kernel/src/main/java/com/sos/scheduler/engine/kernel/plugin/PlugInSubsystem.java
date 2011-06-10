@@ -33,7 +33,7 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    public void load(Element root) {
+    public final void load(Element root) {
         Element plugInsElement = elementXPathOrNull(root, "config/plugins");
         if (plugInsElement != null) {
             for (Element e: elementsXPath(plugInsElement, "plugin"))  tryAddPlugIn(e);
@@ -69,17 +69,17 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    public void activate() {
+    public final void activate() {
         for (PluginAdapter p: plugIns.values())  p.tryActivate();
     }
 
 
-    public void close() {
+    public final void close() {
         for (PluginAdapter p: plugIns.values())  p.tryClose();
     }
 
 
-    CommandPluginAdapter commandPluginByClassName(String className) {
+    final CommandPluginAdapter commandPluginByClassName(String className) {
         PluginAdapter a = pluginByClassName(className);
         if (!(a instanceof CommandPluginAdapter))
             throw new SchedulerException("Plugin is not a " + CommandPlugin.class.getSimpleName());
@@ -95,7 +95,7 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    @Override public Collection<CommandHandler> getCommandHandlers() {
+    @Override public final Collection<CommandHandler> getCommandHandlers() {
         return asList(commandHandlers);
     }
 

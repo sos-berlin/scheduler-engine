@@ -22,10 +22,12 @@ public class SimpleMessage implements Message {
     }
 
     
-    @Override public String getCode() { return code; }
+    @Override public final String getCode() {
+        return code;
+    }
 
     
-    @Override public String toString() { 
+    @Override public final String toString() {
         return insertions.isEmpty()? code : code + " " + Joiner.on(", ").join(insertions);
     }
 

@@ -8,7 +8,6 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.util.sync.ThrowableMailbox;
 import java.util.*;
-import org.apache.log4j.Logger;
 import static com.sos.scheduler.engine.kernel.util.Util.*;
 
 
@@ -16,9 +15,8 @@ import static com.sos.scheduler.engine.kernel.util.Util.*;
  *
  * @author Zschimmer.sos
  */
-abstract public class EventThread extends Thread implements EventSubscriber {
+public abstract class EventThread extends Thread implements EventSubscriber {
     private static final String terminatedEventName = TerminatedEvent.class.getSimpleName();
-    private static final Logger logger = Logger.getLogger(EventThread.class);
 
     private final EventRendezvous rendezvous = new EventRendezvous();
     private final ThrowableMailbox<Throwable> throwableMailbox = new ThrowableMailbox<Throwable>();
@@ -33,18 +31,18 @@ abstract public class EventThread extends Thread implements EventSubscriber {
     }
 
 
-    public void setEventFilter(EventPredicate... p) {
+    public final void setEventFilter(EventPredicate... p) {
         setEventFilter(Arrays.asList(p));
     }
 
     
-    public void setEventFilter(Collection<EventPredicate> c) {
+    public final void setEventFilter(Collection<EventPredicate> c) {
         assert c != null;
         eventPredicates = new ArrayList<EventPredicate>(c);
     }
 
 
-    @Override public void onEvent(Event e) {
+    @Override public final void onEvent(Event e) {
         if (e instanceof SchedulerReadyEvent)
             onSchedulerThreadReady((SchedulerReadyEvent)e);
         else
@@ -116,13 +114,13 @@ abstract public class EventThread extends Thread implements EventSubscriber {
     }
 
     
-    abstract protected void runEventThread() throws Exception;
+    protected abstract void runEventThread() throws Exception;
 
     
     /**
      * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
      */
-    public void expectEvent(Time timeout, EventPredicate p) throws InterruptedException {
+    public final void expectEvent(Time timeout, EventPredicate p) throws InterruptedException {
         expectEvent(new EventExpectation(timeout, p));
     }
 
@@ -130,7 +128,7 @@ abstract public class EventThread extends Thread implements EventSubscriber {
     /**
      * @return Das nicht mehr aktuelle Event, weil der Scheduler schon weiterläuft. Die Objekte am Events sind vielleicht nicht mehr gültig.
      */
-    public void expectEvent(EventExpectation expect) {
+    public final void expectEvent(EventExpectation expect) {
         expectEventCount++;
         EventPredicate p = expect.getPredicate();
         Event e = enterEventHandling(expect.getTimeout());
@@ -170,7 +168,7 @@ abstract public class EventThread extends Thread implements EventSubscriber {
 //    }
 
 
-    public void waitForTerminatedEvent(Time timeout) throws InterruptedException {
+    public final void waitForTerminatedEvent(Time timeout) throws InterruptedException {
         while(!rendezvous.terminatedEventReceived()) {
             Event e = enterEventHandling(timeout);
             if (e == null)  throw new SchedulerException(terminatedEventName + " expected instead of timeout after " + timeout);
@@ -190,17 +188,17 @@ abstract public class EventThread extends Thread implements EventSubscriber {
     }
 
 
-    public Event enterEventHandling() {
+    public final Event enterEventHandling() {
         return enterEventHandling(Time.eternal);
     }
 
 
-    public Event enterEventHandling(Time timeout) {
+    public final Event enterEventHandling(Time timeout) {
         return rendezvous.enter(timeout);
     }
 
 
-    public void leaveEventHandling() {
+    public final void leaveEventHandling() {
         rendezvous.leave();
     }
 }

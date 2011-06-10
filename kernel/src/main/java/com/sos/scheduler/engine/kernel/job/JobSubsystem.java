@@ -6,15 +6,17 @@ import com.sos.scheduler.engine.kernel.Subsystem;
 import com.sos.scheduler.engine.kernel.cppproxy.*;
 
 
-public class JobSubsystem extends AbstractHasPlatform implements Subsystem {
-    private final Job_subsystemC job_subsystemC;
+public final class JobSubsystem extends AbstractHasPlatform implements Subsystem {
+    private final Job_subsystemC cppproxy;
     
     
-    public JobSubsystem(Platform platform, Job_subsystemC job_subsystemC) {
+    public JobSubsystem(Platform platform, Job_subsystemC cppproxy) {
         super(platform);
-        this.job_subsystemC = job_subsystemC;
+        this.cppproxy = cppproxy;
     }
     
 
-    public Job job(String absolutePath) { return job_subsystemC.job_by_string(absolutePath).getSister(); }
+    public Job job(String absolutePath) { 
+        return cppproxy.job_by_string(absolutePath).getSister();
+    }
 }

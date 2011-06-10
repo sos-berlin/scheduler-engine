@@ -7,9 +7,7 @@ import com.sos.scheduler.engine.kernel.Platform;
 
 
 @ForCpp
-abstract public class FileBased 
-  extends AbstractHasPlatform implements Sister
-{
+public abstract class FileBased extends AbstractHasPlatform implements Sister {
     protected FileBased(Platform p) {
         super(p);
     }

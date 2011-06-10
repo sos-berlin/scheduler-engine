@@ -12,7 +12,7 @@ public class SchedulerReadyEvent extends MainEvent {
     }
 
 
-    public SchedulerController getSchedulerController() {
+    public final SchedulerController getSchedulerController() {
         return schedulerController;
     }
 }

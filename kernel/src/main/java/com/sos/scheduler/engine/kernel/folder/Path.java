@@ -10,18 +10,18 @@ public class Path extends StringValue {
     }
 
 
-    public void assertIsAbsolute() {
+    public final void assertIsAbsolute() {
         if (!isAbsolute())  throw new SchedulerException("Absolute path expected: " + this);
     }
 
 
-    public void assertIsEmptyOrAbsolute() {
+    public final void assertIsEmptyOrAbsolute() {
         boolean ok = isEmpty() || isAbsolute();
         if (!ok)  throw new SchedulerException("Absolute path expected: " + this);
     }
 
 
-    public boolean isAbsolute() {
-        return string().startsWith("/");
+    public final boolean isAbsolute() {
+        return getString().startsWith("/");
     }
 }

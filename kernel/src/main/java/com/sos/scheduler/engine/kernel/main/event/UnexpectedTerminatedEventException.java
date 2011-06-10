@@ -8,7 +8,7 @@ public class UnexpectedTerminatedEventException extends UnexpectedEventException
         super(event, p, expectEventNumber);
     }
 
-    public TerminatedEvent getTerminatedEvent() {
+    public final TerminatedEvent getTerminatedEvent() {
         return (TerminatedEvent)event;
     }
 }

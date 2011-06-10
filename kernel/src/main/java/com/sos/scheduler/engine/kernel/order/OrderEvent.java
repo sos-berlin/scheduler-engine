@@ -10,7 +10,7 @@ public class OrderEvent extends ObjectEvent<Order> {
 
 
     /** Für JavaScript, das getObject() nicht sieht. */  //TODO Warum ist das so? 
-    public Order getOrder() {
+    public final Order getOrder() {
         return getObject();
     }
 }

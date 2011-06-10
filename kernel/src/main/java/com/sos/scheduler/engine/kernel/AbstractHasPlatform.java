@@ -12,15 +12,13 @@ public abstract class AbstractHasPlatform implements HasPlatform {
         this.platform = platform;
     }
 
-//    protected AbstractSchedulerObject(SpoolerC spoolerC) {
-//        this.scheduler = Scheduler.of(spoolerC);
-//    }
+    
+    @Override public final Platform getPlatform() {
+        return platform;
+    }
 
 
-    @Override public Platform getPlatform() { return platform; }
-
-
-    @Override public PrefixLog log() {
+    @Override public final PrefixLog log() {
         if (log == null)  log = platform.log();
         return log;
     }

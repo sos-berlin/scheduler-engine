@@ -8,22 +8,25 @@ import com.sos.scheduler.engine.kernel.cppproxy.*;
 import com.sos.scheduler.engine.kernel.folder.AbsolutePath;
 import java.util.Collection;
 
-//TODO Aufteilen in JobChainSubsystem und OrderSubsystem?
+//Aufteilen in JobChainSubsystem und OrderSubsystem?
 
 public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
 {
-    private final Order_subsystemC order_subsystemC;
+    private final Order_subsystemC cppproxy;
 
 
-    public OrderSubsystem(Platform platform, Order_subsystemC order_subsystemC) {
+    public OrderSubsystem(Platform platform, Order_subsystemC cppproxy) {
         super(platform);
-        this.order_subsystemC = order_subsystemC;
+        this.cppproxy = cppproxy;
     }
 
 
-    public Collection<JobChain> jobChains() { return order_subsystemC.java_file_baseds(); }
+    public final Collection<JobChain> jobChains() {
+        return cppproxy.java_file_baseds();
+    }
 
-    public JobChain jobChain(AbsolutePath path) {
-        return order_subsystemC.java_file_based_or_null(path.toString());
+    
+    public final JobChain jobChain(AbsolutePath path) {
+        return cppproxy.java_file_based_or_null(path.toString());
     }
 }

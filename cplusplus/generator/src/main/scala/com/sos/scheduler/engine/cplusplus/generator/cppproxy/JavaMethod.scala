@@ -12,25 +12,23 @@ class JavaMethod(m: ProcedureSignature) {
 
     def javaImplementation = {
         val declaration =
-            "    @Override public " +
+            "    @Override public final " +
             m.returnType.getName + " " +
             m.name +
             inParentheses(javaParameterDeclarations)
 
-        /** Wenn C++ ein temporäres Objekt liefert und also den C++-Proxy über JNI sofort wieder freigibt, dann haben wir nur ein (zerstörtes) Ding der Klasse Object. */
-        def checkDestructed =
-           ("            " + "if (!" + m.returnType.getName + ".class.isInstance(result))\n" +
-            "                throw new CppProxyInvalidated(" + m.returnType.getName + ".class);\n")
-
         val call = m.nativeJavaName + inParentheses("cppReference()" :: (m.parameters map javaCallArgument))
 
-        val code =
-            if (m.hasReturnType)
-                "            " + (m.returnType.getName + " result = ") + call + ";\n" +
-                (if (isClass(m.returnType)) checkDestructed; else "") +
+        val code = m.returnType match {
+            case t if isClass(t) =>
+                "            " + t.getName + " result = " + call + ";\n" +
+                "            " + "checkIsNotReleased(" + t.getName + ".class, result);\n" +
                 "            " + "return result;\n"
-            else
+            case t if isVoid(t) =>
                 "            " + call + ";\n"
+            case _ =>
+                "            " + "return " + call + ";\n"
+        }
 
         def threadSafeCode = {
             val threadLock = classOf[CppProxy].getName + ".threadLock"

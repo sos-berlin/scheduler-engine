@@ -4,12 +4,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
 
 
 public class CppScheduler {
-    public void loadModule() {
+    public final void loadModule() {
         System.loadLibrary("scheduler");
     }
 
     
-    public int run(String[] arguments, String argumentLine, MainContext javaMainContext) {
+    public  final int run(String[] arguments, String argumentLine, MainContext javaMainContext) {
         CppProxy.threadLock.lock();
         try {
             return runNative(arguments, argumentLine, javaMainContext);

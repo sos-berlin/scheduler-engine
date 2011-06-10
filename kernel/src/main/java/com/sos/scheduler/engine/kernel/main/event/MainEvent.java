@@ -7,4 +7,4 @@ import com.sos.scheduler.engine.kernel.event.AbstractEvent;
  *
  * @author Zschimmer.sos
  */
-abstract public class MainEvent extends AbstractEvent {}
+public abstract class MainEvent extends AbstractEvent {}

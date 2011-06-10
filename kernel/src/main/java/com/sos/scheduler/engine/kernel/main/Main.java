@@ -7,7 +7,7 @@ public class Main {
     private final SchedulerController schedulerController = new SchedulerThread();
 
 
-    public int apply(String[] args) {
+    public final int apply(String[] args) {
         schedulerController.loadModule();
         schedulerController.startScheduler(args);
         schedulerController.waitForTermination(Time.eternal);

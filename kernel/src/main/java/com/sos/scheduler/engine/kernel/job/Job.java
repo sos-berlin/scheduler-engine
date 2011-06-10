@@ -9,24 +9,30 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 @ForCpp
-public class Job extends AbstractHasPlatform implements Sister {
-    private final JobC jobC;
+public final class Job extends AbstractHasPlatform implements Sister {
+    private final JobC cppproxy;
 
     
     private Job(Platform platform, JobC jobC) {
         super(platform);
-        this.jobC = jobC;
+        this.cppproxy = jobC;
     }
 
 
     @Override public void onCppProxyInvalidated() {}
 
 
-    public String name() { return jobC.name(); }
-    public String path() { return jobC.path(); }
+    public String getName() {
+        return cppproxy.name();
+    }
+
+
+    public String getPath() {
+        return cppproxy.path();
+    }
 
 
     public static class Type implements SisterType<Job, JobC> {
-        @Override public Job sister(JobC proxy, Sister context) { return new Job(Platform.of(context), proxy); }
+        @Override public final Job sister(JobC proxy, Sister context) { return new Job(Platform.of(context), proxy); }
     }
 }

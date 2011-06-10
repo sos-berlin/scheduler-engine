@@ -5,20 +5,21 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 
 
-public class LogSubsystem implements Subsystem {
-    private static final Logger logger = Logger.getLogger(LogSubsystem.class);
-
+public final class LogSubsystem implements Subsystem {
     private final Appender appender;
+
 
     public LogSubsystem(SchedulerLog schedulerLog) {
         appender = new SchedulerLogLog4JAppender(schedulerLog);
     }
 
-    public void close() {
+
+    public final void close() {
         Logger.getRootLogger().removeAppender(appender);
     }
-    
-    public void activate() {
+
+
+    public final void activate() {
         Logger.getRootLogger().addAppender(appender);
     }
 }

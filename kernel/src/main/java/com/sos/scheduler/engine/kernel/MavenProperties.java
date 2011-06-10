@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 
-public class MavenProperties {
+public final class MavenProperties {
     private static final String resourceSimpleName = "maven.properties";
     private final Properties properties;
 

@@ -2,6 +2,7 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 /** Dummy-Modul für Javadoc, damit es nicht mangels Klasse mit öffentlichem Konstruktor abbricht. */
-public class ZZZJavadocDummy{
-    public ZZZJavadocDummy() { throw new RuntimeException("com.sos.scheduler.engine.kernel.cppproxy.ZZZJavadocDummy"); }
+
+public final class ZZZJavadocDummy{
+    public ZZZJavadocDummy() { throw new UnsupportedOperationException("com.sos.scheduler.engine.kernel.cppproxy.ZZZJavadocDummy"); }
 }

@@ -2,18 +2,19 @@
 
 package com.sos.scheduler.engine.kernel.cppproxy;
 
-class DatabaseCImpl extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister> implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC {
-
+final class DatabaseCImpl
+   extends com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl<com.sos.scheduler.engine.cplusplus.runtime.Sister>
+   implements com.sos.scheduler.engine.kernel.cppproxy.DatabaseC
+{
     private DatabaseCImpl(com.sos.scheduler.engine.cplusplus.runtime.Sister context) { // Nur für JNI zugänglich
         requireContextIsNull(context);
     }
 
-    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
+    @Override public final com.sos.scheduler.engine.kernel.cppproxy.Variable_setC properties() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
             com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = properties__native(cppReference());
-            if (!com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class.isInstance(result))
-                throw new CppProxyInvalidated(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
             return result;
         }
         finally {

@@ -15,7 +15,7 @@ public class LogEvent extends AbstractEvent {
     }
 
 
-    @Override public Message getMessage() {
+    @Override public final Message getMessage() {
         return message;
     }
 }

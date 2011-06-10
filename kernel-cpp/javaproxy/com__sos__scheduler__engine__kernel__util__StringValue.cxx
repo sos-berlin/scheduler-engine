@@ -14,9 +14,9 @@ struct StringValue__class : ::zschimmer::javabridge::Class
    ~StringValue__class();
 
     ::zschimmer::javabridge::Method const _equals__Ljava_lang_Object_2__method;
+    ::zschimmer::javabridge::Method const _getString____method;
     ::zschimmer::javabridge::Method const _hashCode____method;
     ::zschimmer::javabridge::Method const _isEmpty____method;
-    ::zschimmer::javabridge::Method const _string____method;
     ::zschimmer::javabridge::Method const _toString____method;
 
     static const ::zschimmer::javabridge::class_factory< StringValue__class > class_factory;
@@ -27,9 +27,9 @@ const ::zschimmer::javabridge::class_factory< StringValue__class > StringValue__
 StringValue__class::StringValue__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_equals__Ljava_lang_Object_2__method(this, "equals", "(Ljava/lang/Object;)Z")
+    ,_getString____method(this, "getString", "()Ljava/lang/String;")
     ,_hashCode____method(this, "hashCode", "()I")
     ,_isEmpty____method(this, "isEmpty", "()Z")
-    ,_string____method(this, "string", "()Ljava/lang/String;")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
 StringValue__class::~StringValue__class() {}
@@ -57,6 +57,14 @@ bool StringValue::equals(const ::zschimmer::javabridge::proxy_jobject< ::javapro
     return 0 != cls->_equals__Ljava_lang_Object_2__method.bool_call(get_jobject(), parameter_list);
 }
 
+::javaproxy::java::lang::String StringValue::getString() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    StringValue__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getString____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
 jint StringValue::hashCode() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     StringValue__class* cls = _class.get();
@@ -67,14 +75,6 @@ bool StringValue::isEmpty() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     StringValue__class* cls = _class.get();
     return 0 != cls->_isEmpty____method.bool_call(get_jobject(), parameter_list);
-}
-
-::javaproxy::java::lang::String StringValue::string() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    StringValue__class* cls = _class.get();
-    ::javaproxy::java::lang::String result;
-    result.steal_local_ref(cls->_string____method.jobject_call(get_jobject(), parameter_list));
-    return result;
 }
 
 ::javaproxy::java::lang::String StringValue::toString() {

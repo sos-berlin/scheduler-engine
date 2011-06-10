@@ -18,7 +18,7 @@ public class Platform {
     }
 
     
-    public PrefixLog log() { return log; }
+    public final PrefixLog log() { return log; }
 
 
     public static Platform of(Sister scheduler) {

@@ -10,7 +10,7 @@ public class EventClassPredicate implements EventPredicate {
     }
 
 
-    @Override public boolean apply(Event e) {
+    @Override public final boolean apply(Event e) {
         return eventClass.isAssignableFrom(e.getClass());
     }
 

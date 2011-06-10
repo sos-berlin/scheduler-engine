@@ -15,12 +15,12 @@ public class EventExpectation {
     }
 
 
-    public Time getTimeout() {
+    public final Time getTimeout() {
         return timeout;
     }
 
 
-    public EventPredicate getPredicate() {
+    public final EventPredicate getPredicate() {
         return predicate;
     }
 }

@@ -12,7 +12,7 @@
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    <description>Generierte C++-Proxys fÃƒÂ¼r Java</description>
+    <description>Generierte C++-Proxys für Java</description>
 
     <build>
         <plugins>

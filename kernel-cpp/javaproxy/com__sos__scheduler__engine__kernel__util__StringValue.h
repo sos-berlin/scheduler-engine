@@ -47,9 +47,9 @@ struct StringValue : ::zschimmer::javabridge::proxy_jobject< StringValue >, ::ja
   public:
 
     bool equals(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p0);
+    ::javaproxy::java::lang::String getString();
     jint hashCode();
     bool isEmpty();
-    ::javaproxy::java::lang::String string();
     ::javaproxy::java::lang::String toString();
 
     ::zschimmer::javabridge::Class* java_object_class_();

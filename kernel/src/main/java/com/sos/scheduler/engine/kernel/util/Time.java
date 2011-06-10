@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.util;
 import java.util.concurrent.TimeUnit;
 
 
-public class Time {
+public final class Time {
     public static final Time eternal = new Time(Long.MAX_VALUE, TimeUnit.DAYS);
     
     public final long value;

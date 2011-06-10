@@ -10,11 +10,9 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace cplusplus { namespace runtime { struct Sister; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct OrderC; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace folder { struct FileBased; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderId; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct VariableSet; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -25,7 +23,9 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct Order__class;
 
 struct Order : ::zschimmer::javabridge::proxy_jobject< Order >, ::javaproxy::com::sos::scheduler::engine::kernel::folder::FileBased {
-    static Order new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::Platform >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::OrderC >& p1);
+  private:
+    static Order new_instance();  // Not implemented
+  public:
 
     Order(jobject = NULL);
 

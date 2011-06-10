@@ -8,7 +8,7 @@ public class FolderEvent extends ObjectEvent<FileBased> {
         super(o);
     }
 
-    public FileBased getFolder() {
+    public final FileBased getFolder() {
         return getObject();
     }
 }

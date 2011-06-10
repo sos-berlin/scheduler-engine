@@ -10,8 +10,8 @@ class JavadocJavaModule(packageName: String) extends JavaModule {
     val name = packageName + "." + simpleName
 
     val code = "package " + packageName + ";\n" +
-        "/** Dummy-Modul für Javadoc, damit es nicht mangels Klasse mit öffentlichem Konstruktor abbricht. */\n" +
-        "public class " + simpleName + "{\n" +
-        "    public " + simpleName + "() { throw new RuntimeException(\"" + name + "\"); }\n" +
+        "/** Dummy-Modul für Javadoc, damit es nicht mangels Klasse mit öffentlichem Konstruktor abbricht. */\n\n" +
+        "public final class " + simpleName + "{\n" +
+        "    public " + simpleName + "() { throw new UnsupportedOperationException(\"" + name + "\"); }\n" +
         "}\n";
 }

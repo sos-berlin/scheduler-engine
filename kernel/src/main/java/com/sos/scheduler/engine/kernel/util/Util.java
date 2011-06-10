@@ -11,7 +11,7 @@ public final class Util {
     public static void throwUnchecked(Throwable x) {
         if (x instanceof Error)  throw (Error)x;
         if (x instanceof RuntimeException)  throw (RuntimeException)x;
-        throw new RuntimeException(x);
+        throw new WrappedThrowable(x);
     }
 
 
@@ -27,5 +27,12 @@ public final class Util {
         StringWriter s = new StringWriter();
         t.printStackTrace(new PrintWriter(s));
         return s.toString();
+    }
+
+
+    private static class WrappedThrowable extends RuntimeException {
+        private WrappedThrowable(Throwable t) {
+            super(t);
+        }
     }
 }

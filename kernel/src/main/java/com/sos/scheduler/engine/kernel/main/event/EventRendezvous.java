@@ -14,7 +14,7 @@ public class EventRendezvous extends Rendezvous<Event,Object>
     private boolean terminatedEventReceived = false;
 
 
-    public void unlockAndCall(Event e) {
+    public final void unlockAndCall(Event e) {
         CppProxy.threadLock.unlock();
         try {
             call(e);
@@ -25,7 +25,8 @@ public class EventRendezvous extends Rendezvous<Event,Object>
     }
 
 
-    @Override public Event enter(Time timeout) {
+    @Override public final Event enter(Time timeout) {
+        //TODO Sollte nicht Methode der Oberklasse überschreiben
         Event result = super.enter(timeout);
         beginTimedOut = result == null;
         if (beginTimedOut)   result = new TimeoutEvent(timeout);
@@ -34,18 +35,19 @@ public class EventRendezvous extends Rendezvous<Event,Object>
     }
 
 
-    public void leave() {
+    public final void leave() {
         leave(dummyResult);
     }
 
 
-    @Override public void leave(Object result) {
+    @Override public final void leave(Object result) {
+        //TODO Sollte nicht Methode der Oberklasse überschreiben
         if (!beginTimedOut)
             super.leave(result);
     }
 
 
-    public boolean terminatedEventReceived() {
+    public final boolean terminatedEventReceived() {
         return terminatedEventReceived;
     }
 }

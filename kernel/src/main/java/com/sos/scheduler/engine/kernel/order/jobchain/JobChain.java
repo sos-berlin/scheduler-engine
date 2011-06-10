@@ -10,11 +10,11 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 import java.util.List;
 
 
-public class JobChain extends FileBased {
+public final class JobChain extends FileBased {
     private final Job_chainC jobChainC;
 
 
-    public JobChain(Platform platform, Job_chainC jobChainC) {
+    private JobChain(Platform platform, Job_chainC jobChainC) {
         super(platform);
         this.jobChainC = jobChainC;
     }
@@ -23,15 +23,22 @@ public class JobChain extends FileBased {
     @Override public void onCppProxyInvalidated() {}
 
 
-    public String name() { return jobChainC.name(); }
-
-    public List<Node> nodes() { return jobChainC.java_nodes(); }
-
-    public Order order(OrderId id) {
-        return jobChainC.order(id.string()).getSister();
+    public String getName() { 
+        return jobChainC.name();
     }
-    
+
+
+    public List<Node> getNodes() { 
+        return jobChainC.java_nodes();
+    }
+
+
+    public Order getOrder(OrderId id) {
+        return jobChainC.order(id.getString()).getSister();
+    }
+
+
     public static class Type implements SisterType<JobChain, Job_chainC> {
-        @Override public JobChain sister(Job_chainC proxy, Sister context) { return new JobChain(Platform.of(context), proxy); }
+        @Override public final JobChain sister(Job_chainC proxy, Sister context) { return new JobChain(Platform.of(context), proxy); }
     }
 }

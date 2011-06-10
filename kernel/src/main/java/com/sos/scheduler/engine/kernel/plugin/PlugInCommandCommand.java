@@ -14,7 +14,7 @@ public class PlugInCommandCommand implements Command {
     }
 
 
-    @Override public String getName() {
+    @Override public final String getName() {
         return "plugin.command";
     }
 

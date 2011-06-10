@@ -39,9 +39,10 @@ extends JavaModule {
         val methodsString = javaMethods map { m => m.javaImplementation + "\n" + m.javaNativeDeclaration + "\n\n"} mkString ""
 
         "package " + interface.getPackage.getName + ";\n\n" +
-        "class " + simpleName +
-            " extends " + classOf[CppProxyImpl[_]].getName + "<" + sisterClass.getName + ">" +
-            " implements " + interface.getName + " {\n\n" +
+        "final class " + simpleName + "\n" +
+            "   extends " + classOf[CppProxyImpl[_]].getName + "<" + sisterClass.getName + ">\n" +
+            "   implements " + interface.getName + "\n" +
+            "{\n" +
         constructor + "\n" +
         methodsString +
         "}\n"
