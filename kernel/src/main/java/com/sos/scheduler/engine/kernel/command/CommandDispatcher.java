@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel.command;
 
+import com.sos.scheduler.engine.kernel.SchedulerException;
+import java.util.ArrayList;
+import java.util.List;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
@@ -10,32 +13,55 @@ public class CommandDispatcher {
     private final DispatchingResultXmlizer resultXmlizer;
 
 
-    public CommandDispatcher(Iterable<CommandSuite> suites) {
-        CommandSuite combinedSuite = CommandSuite.of(suites);
-        executor = new DispatchingCommandExecutor(combinedSuite.getExecutors());
-        parser = new DispatchingXmlCommandParser(combinedSuite.getParsers());
-        resultXmlizer = new DispatchingResultXmlizer(combinedSuite.getResultXmlizer());
+//    public CommandDispatcher(Iterable<CommandSuite> suites) {
+//        CommandSuite combinedSuite = CommandSuite.of(suites);
+//        executor = new DispatchingCommandExecutor(combinedSuite.getExecutors());
+//        parser = new DispatchingXmlCommandParser(combinedSuite.getParsers());
+//        resultXmlizer = new DispatchingResultXmlizer(combinedSuite.getResultXmlizer());
+//    }
+
+
+    public CommandDispatcher(Iterable<CommandHandler> handlers) {
+        List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
+        List<CommandXmlParser> parsers = new ArrayList<CommandXmlParser>();
+        List<ResultXmlizer> xmlizers = new ArrayList<ResultXmlizer>();
+        
+        for (CommandHandler handler: handlers) {
+            if (handler instanceof CommandExecutor)
+                executors.add((CommandExecutor)handler);
+            else
+            if (handler instanceof CommandXmlParser)
+                parsers.add((CommandXmlParser)handler);
+            else
+            if (handler instanceof ResultXmlizer)
+                xmlizers.add((ResultXmlizer)handler);
+            else
+                throw new SchedulerException("CommandDispatcher " + handler);
+        }
+        executor = new DispatchingCommandExecutor(executors);
+        parser = new DispatchingXmlCommandParser(parsers);
+        resultXmlizer = new DispatchingResultXmlizer(xmlizers);
     }
 
 
     public String executeXml(String xml) {
         Command command = parse(loadXml(xml).getDocumentElement());
-        Result result = executeCommand(command);
+        Result result = execute(command);
         return toXml(elementOfResult(result));
     }
 
 
-    private Result executeCommand(Command c) {
+    public Result execute(Command c) {
         return executor.execute(c);
     }
 
 
-    private Command parse(Element e) {
+    public Command parse(Element e) {
         return parser.parse(e);
     }
 
 
-    private Element elementOfResult(Result r) {
+    public Element elementOfResult(Result r) {
         return resultXmlizer.toElement(r);
     }
 }

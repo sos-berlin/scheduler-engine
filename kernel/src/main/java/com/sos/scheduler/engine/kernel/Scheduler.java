@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel;
 
+import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
-import com.sos.scheduler.engine.kernel.command.CommandSuite;
 import java.util.ArrayList;
 import java.util.List;
 import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.command.HasCommandSuite;
+import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
@@ -27,8 +27,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 
 
 @ForCpp
-public class Scheduler implements HasPlatform, Sister  // extends SchedulerObject
-{
+public class Scheduler implements HasPlatform, Sister { // extends SchedulerObject
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SpoolerC spoolerC;
@@ -122,12 +121,17 @@ public class Scheduler implements HasPlatform, Sister  // extends SchedulerObjec
         plugInSubsystem.load(configElement);
         subsystems.add(plugInSubsystem);
 
-        List<CommandSuite> commandSuites = new ArrayList<CommandSuite>();
-        for (Subsystem s: subsystems)
-            if (s instanceof HasCommandSuite)
-                commandSuites.add(((HasCommandSuite)s).getCommandSuite());
-        commandSubsystem = new CommandSubsystem(commandSuites);
+        commandSubsystem = new CommandSubsystem(getCommandHandlers(subsystems));
         subsystems.add(commandSubsystem);
+    }
+
+
+    private Iterable<CommandHandler> getCommandHandlers(Iterable<?> objects) {
+        List<CommandHandler> result = new ArrayList<CommandHandler>();
+        for (Object o: objects)
+            if (o instanceof HasCommandHandlers)
+                result.addAll(((HasCommandHandlers)o).getCommandHandlers());
+        return result;
     }
 
     

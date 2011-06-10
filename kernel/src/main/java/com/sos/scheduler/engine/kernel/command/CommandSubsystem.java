@@ -7,8 +7,8 @@ public class CommandSubsystem implements Subsystem {
     private final CommandDispatcher commandDispatcher;
 
 
-    public CommandSubsystem(Iterable<CommandSuite> commandSuites) {
-        commandDispatcher = new CommandDispatcher(commandSuites);
+    public CommandSubsystem(Iterable<CommandHandler> commandHandlers) {
+        commandDispatcher = new CommandDispatcher(commandHandlers);
     }
 
     

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd"
+>
+    <config>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.databasequery.DatabaseQueryPlugin"/>
+        </plugins>
+        <jobs>
+            <job name="test">
+                <script language="javascript">
+                    //
+                </script>
+                <run_time once="yes"/>
+            </job>
+        </jobs>
+    </config>
+</spooler>

@@ -1,31 +1,30 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
+import com.sos.scheduler.engine.kernel.command.CommandHandler;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.Subsystem;
-import com.sos.scheduler.engine.kernel.command.CommandExecutor;
-import com.sos.scheduler.engine.kernel.command.CommandSuite;
-import com.sos.scheduler.engine.kernel.command.HasCommandSuite;
-import com.sos.scheduler.engine.kernel.command.ResultXmlizer;
-import com.sos.scheduler.engine.kernel.command.CommandXmlParser;
+import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
 import static com.sos.scheduler.engine.kernel.util.Util.stackTrace;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
+import static java.util.Arrays.asList;
 
 //TODO Eigenes PrefixLog einführen
 
-public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandSuite {
+public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, HasCommandHandlers {
     private static final String staticFactoryMethodName = "factory";
     private final Scheduler scheduler;
     private final Map<String,PluginAdapter> plugIns = new HashMap<String,PluginAdapter>();
-    private final CommandSuite commandSuite = new CommandSuite(
-        new CommandExecutor[]{ new PlugInCommandExecutor(this) },
-        new CommandXmlParser[]{ new PlugInCommandCommandXmlParser() },
-        new ResultXmlizer[]{ new PlugInCommandResultXmlizer() });
+    private final CommandHandler[] commandHandlers = { 
+        new PlugInCommandExecutor(this), 
+        new PlugInCommandCommandXmlParser(this),
+        new PluginCommandResultXmlizer(this) };
 
     
     public PlugInSubsystem(Scheduler scheduler) {
@@ -52,9 +51,11 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
 
     private void tryAddPlugIn(String className, Element elementOrNull) {
         try {
-            PluginAdapter p = new PluginAdapter(newPlugIn(className, elementOrNull), className, log());
-            plugIns.put(className, p);
-            log().info(p + " added");
+            PlugIn p = newPlugIn(className, elementOrNull);
+            PluginAdapter a = p instanceof CommandPlugin? new CommandPluginAdapter((CommandPlugin)p, className, log())
+                : new PluginAdapter(p, className, log());
+            plugIns.put(className, a);
+            log().info(a + " added");
         } catch (Exception x) {
             logError(log(), "Plug-in " + className, x);
         }
@@ -78,24 +79,28 @@ public class PlugInSubsystem extends AbstractHasPlatform implements Subsystem, H
     }
 
 
-    PluginAdapter plugInByClassName(String className) {
+    CommandPluginAdapter commandPluginByClassName(String className) {
+        PluginAdapter a = pluginByClassName(className);
+        if (!(a instanceof CommandPluginAdapter))
+            throw new SchedulerException("Plugin is not a " + CommandPlugin.class.getSimpleName());
+        return (CommandPluginAdapter)a;
+    }
+
+
+    private PluginAdapter pluginByClassName(String className) {
         PluginAdapter result = plugIns.get(className);
-        if (result == null)  throw new SchedulerException("Unknown plugin '" + className + "'");
+        if (result == null)
+            throw new SchedulerException("Unknown plugin '" + className + "'");
         return result;
     }
 
 
-    public CommandXmlParser getXmlCommandParser() {
-        return new PlugInCommandCommandXmlParser();
+    @Override public Collection<CommandHandler> getCommandHandlers() {
+        return asList(commandHandlers);
     }
 
 
-    @Override public CommandSuite getCommandSuite() {
-        return commandSuite;
-    }
-
-
-    public static void logError(PrefixLog log, String plugInName, Throwable t) {
-        log.error(plugInName + ": " + t + "\n" + stackTrace(t));
+    static void logError(PrefixLog log, String pluginName, Throwable t) {
+        log.error(pluginName + ": " + t + "\n" + stackTrace(t));
     }
 }

@@ -1,19 +1,22 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 import com.sos.scheduler.engine.kernel.command.GenericCommandExecutor;
+import com.sos.scheduler.engine.kernel.command.Result;
 
 
-public class PlugInCommandExecutor extends GenericCommandExecutor<PlugInCommandCommand,PlugInCommandResult> {
-    private final PlugInSubsystem plugInSubsystem;
+class PlugInCommandExecutor extends GenericCommandExecutor<PlugInCommandCommand,PluginCommandResult> {
+    private final PlugInSubsystem subsystem;
 
 
-    PlugInCommandExecutor(PlugInSubsystem p) {
+    PlugInCommandExecutor(PlugInSubsystem subsystem) {
         super(PlugInCommandCommand.class);
-        plugInSubsystem = p;
+        this.subsystem = subsystem;
     }
 
 
-    @Override public final PlugInCommandResult doExecute(PlugInCommandCommand c) {
-        return plugInSubsystem.plugInByClassName(c.getPluginClassName()).executeCommand(c);
+    @Override public final PluginCommandResult doExecute(PlugInCommandCommand c) {
+        CommandPluginAdapter a = subsystem.commandPluginByClassName(c.getPluginClassName());
+        Result pluginResult = a.getCommandDispatcher().execute(c.getSubcommand());
+        return new PluginCommandResult(a.getPluginClassName(), pluginResult);
     }
 }

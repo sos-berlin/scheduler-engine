@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 
+/** Erleichtert die Implementierung eines Plugin. */
 public class AbstractPlugin implements PlugIn {
     @Override public void activate() {
     }

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.command;
 
 
+/** Typsichere abstrakte Implementierung von CommandExecutor. */
 public abstract class GenericCommandExecutor<C extends Command, R extends Result> implements CommandExecutor {
     private final Class<C> commandClass;
 
@@ -15,6 +16,7 @@ public abstract class GenericCommandExecutor<C extends Command, R extends Result
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override public final Result execute(Command c) {
         assert commandClass.isInstance(c);
         return doExecute((C)c);

@@ -1,64 +1,56 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
-import com.sos.scheduler.engine.kernel.command.Result;
-import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.xmlQuoted;
 
-
-class PluginAdapter implements PlugIn {
-    private final PlugIn plugIn;
+/** Die Engine spricht das Plugin über diesen Adapter an. */
+class PluginAdapter {
+    private final PlugIn plugin;
     private final String name;
     private final PrefixLog log;
 
 
-    PluginAdapter(PlugIn plugIn, String name, PrefixLog log) {
-        this.plugIn = plugIn;
+    PluginAdapter(PlugIn plugin, String name, PrefixLog log) {
+        this.plugin = plugin;
         this.name = name;
         this.log = log;
     }
 
 
-    @Override public void activate() {
-        plugIn.activate();
+    void activate() {
+        plugin.activate();
     }
 
 
-    @Override public void close() {
-        plugIn.close();
+    void close() {
+        plugin.close();
     }
 
 
-    @Override public String getXmlState() {
+    String getXmlState() {
         try {
-            return plugIn.getXmlState();
+            return plugin.getXmlState();
         } catch (Exception x) {
             return "<ERROR text=" + xmlQuoted(x.toString()) + "/>";
         }
     }
 
 
-    public void tryActivate() {
+    void tryActivate() {
         try {
-            plugIn.activate();
+            plugin.activate();
         } catch (Exception x) {
             logThrowable(x);
         }
     }
 
 
-    public void tryClose() {
+    void tryClose() {
         try {
-            plugIn.close();
+            plugin.close();
         } catch (Exception x) {
             logThrowable(x);
         }
-    }
-
-
-    public PlugInCommandResult executeCommand(PlugInCommandCommand c) {
-        if (!(plugIn instanceof CommandPlugin3))  throw new SchedulerException("Plugin is not a " + CommandPlugin3.class.getSimpleName());
-        return ((CommandPlugin3)plugIn).executeCommand(c);
     }
 
 
@@ -67,7 +59,12 @@ class PluginAdapter implements PlugIn {
     }
 
 
+    String getPluginClassName() {
+        return plugin.getClass().getName();
+    }
+
+
     @Override public String toString() {
-        return "PlugIn " + name;
+        return "Plugin " + name;
     }
 }

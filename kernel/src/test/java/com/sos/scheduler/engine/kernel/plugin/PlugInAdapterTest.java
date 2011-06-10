@@ -57,6 +57,6 @@ public class PlugInAdapterTest {
     }
 
     @Test public void testToString() {
-        assertThat(plugInAdapter.toString(), startsWith("PlugIn "));
+        assertThat(plugInAdapter.toString(), startsWith("Plugin "));
     }
 }

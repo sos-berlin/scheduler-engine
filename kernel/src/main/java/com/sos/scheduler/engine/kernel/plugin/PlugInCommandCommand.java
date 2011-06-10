@@ -1,17 +1,16 @@
 package com.sos.scheduler.engine.kernel.plugin;
 
 import com.sos.scheduler.engine.kernel.command.Command;
-import org.w3c.dom.Element;
 
 
 public class PlugInCommandCommand implements Command {
     private final String pluginClassName;
-    private final Element element;
+    private final Command subcommand;
 
 
-    public PlugInCommandCommand(String pluginClassName, Element e) {
+    public PlugInCommandCommand(String pluginClassName, Command subcommand) {
         this.pluginClassName = pluginClassName;
-        this.element = e;
+        this.subcommand = subcommand;
     }
 
 
@@ -25,7 +24,7 @@ public class PlugInCommandCommand implements Command {
     }
 
     
-    public final Element getElement() {
-        return element;
+    public final Command getSubcommand() {
+        return subcommand;
     }
 }

@@ -16,24 +16,14 @@ public class CommandDispatcherTest {
 
 
     private static CommandDispatcher commandDispatcher() {
-        Iterable<CommandSuite> commandSuites = asList(aCommandSuite(), bCommandSuite());
-        return new CommandDispatcher(commandSuites);
-    }
-
-
-    private static CommandSuite aCommandSuite() {
-        CommandExecutor[] commandExecutors = { ACommandExecutor.singleton };
-        CommandXmlParser[] commandXmlParsers = { ACommandXmlParser.singleton };
-        ResultXmlizer[] resultXmlizers = { AResultXmlizer.singleton };
-        return new CommandSuite(commandExecutors, commandXmlParsers, resultXmlizers);
-    }
-
-
-    private static CommandSuite bCommandSuite() {
-        CommandExecutor[] commandExecutors = { BCommandExecutor.singleton };
-        CommandXmlParser[] commandXmlParsers = { BCommandXmlParser.singleton };
-        ResultXmlizer[] resultXmlizers = { BResultXmlizer.singleton };
-        return new CommandSuite(commandExecutors, commandXmlParsers, resultXmlizers);
+        Iterable<CommandHandler> commandHandlers = asList(
+            ACommandExecutor.singleton,
+            ACommandXmlParser.singleton,
+            AResultXmlizer.singleton,
+            BCommandExecutor.singleton,
+            BCommandXmlParser.singleton,
+            BResultXmlizer.singleton);
+        return new CommandDispatcher(commandHandlers);
     }
 
 

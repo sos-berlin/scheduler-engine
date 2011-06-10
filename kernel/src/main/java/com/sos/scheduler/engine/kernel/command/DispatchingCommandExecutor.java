@@ -3,11 +3,11 @@ package com.sos.scheduler.engine.kernel.command;
 import com.google.common.collect.ImmutableMap;
 
 
-public class DispatchingCommandExecutor implements CommandExecutor {
+class DispatchingCommandExecutor implements CommandExecutor {
     private final ImmutableMap<Class<?>,CommandExecutor> commandExecutors;
 
     
-    public DispatchingCommandExecutor(Iterable<CommandExecutor> executors) {
+    DispatchingCommandExecutor(Iterable<CommandExecutor> executors) {
         commandExecutors = mapOfExecutors(executors);
     }
 
@@ -25,8 +25,8 @@ public class DispatchingCommandExecutor implements CommandExecutor {
 
     
     @Override public Result execute(Command c) {
-        CommandExecutor ex = commandExecutor(c.getClass());
-        return ex.execute(c);
+        CommandExecutor e = commandExecutor(c.getClass());
+        return e.execute(c);
     }
 
 

@@ -9,12 +9,12 @@ class DispatchingResultXmlizer implements ResultXmlizer {
     private final ImmutableMap<Class<?>,ResultXmlizer> resultXmlizers;
 
 
-    public DispatchingResultXmlizer(Iterable<ResultXmlizer> xmlizers) {
-        resultXmlizers = mapOfExecutors(xmlizers);
+    DispatchingResultXmlizer(Iterable<ResultXmlizer> xmlizers) {
+        resultXmlizers = mapOfXmlizers(xmlizers);
     }
 
 
-    private static ImmutableMap<Class<?>,ResultXmlizer> mapOfExecutors(Iterable<ResultXmlizer> rx) {
+    private static ImmutableMap<Class<?>,ResultXmlizer> mapOfXmlizers(Iterable<ResultXmlizer> rx) {
         ImmutableMap.Builder<Class<?>,ResultXmlizer> b = new ImmutableMap.Builder<Class<?>,ResultXmlizer>();
         for (ResultXmlizer r: rx) b.put(r.getResultClass(), r);
         return b.build();
@@ -33,7 +33,7 @@ class DispatchingResultXmlizer implements ResultXmlizer {
 
     private ResultXmlizer resultXmlizer(Class<?> clas) {
         ResultXmlizer result = resultXmlizers.get(clas);
-        if (result == null)  throw new SchedulerException("No result xmlizer for " + clas.getName());
+        if (result == null)  throw new SchedulerException("No " + ResultXmlizer.class.getName() + " for " + clas.getName());
         return result;
     }
 }
