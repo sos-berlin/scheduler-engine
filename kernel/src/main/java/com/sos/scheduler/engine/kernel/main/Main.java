@@ -16,6 +16,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         int exitCode = new Main().apply(args);
-        System.exit(exitCode);
+        System.exit(exitCode);  //NOSONAR
     }
 }

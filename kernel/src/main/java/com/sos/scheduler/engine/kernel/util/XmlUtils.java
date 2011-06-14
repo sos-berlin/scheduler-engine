@@ -78,12 +78,19 @@ public final class XmlUtils {
 
     public static boolean booleanXmlAttribute(Element xmlElement, String attributeName, boolean defaultValue) {
         String value = xmlElement.getAttribute(attributeName);
-        if (value.equals("true" ))  return true;
-        if (value.equals("false"))  return false;
-        if (value.equals("1"    ))  return true;
-        if (value.equals("0"    ))  return false;
-        if (value.isEmpty())  return defaultValue;
-        throw new SchedulerException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
+        Boolean result = booleanOrNullOf(value, defaultValue);
+        if (result == null)
+            throw new SchedulerException("Ungültiger Boolescher Wert in <" + xmlElement.getNodeName() + " " + attributeName + "=" + xmlQuoted(value) + ">");
+        return result;
+    }
+
+
+    private static Boolean booleanOrNullOf(String s, boolean deflt) {
+        return s.equals("true")? true :
+               s.equals("false")? false :
+               s.equals("1")? true :
+               s.equals("0")? false :
+               s.isEmpty()? deflt : null;
     }
 
 

@@ -8,17 +8,17 @@ import com.sos.scheduler.engine.cplusplus.runtime.SisterType;
 
 
 public class OrderQueueNode extends Node {
-    private final Order_queue_nodeC order_queue_nodeC;
+    private final Order_queue_nodeC cppProxy;
 
 
     private OrderQueueNode(Platform platform, Order_queue_nodeC nodeC) {
         super(platform, nodeC);
-        this.order_queue_nodeC = nodeC;
+        this.cppProxy = nodeC;
     }
 
 
     public final OrderQueue getOrderQueue() {
-        return order_queue_nodeC.order_queue().getSister();
+        return cppProxy.order_queue().getSister();
     }
 
 

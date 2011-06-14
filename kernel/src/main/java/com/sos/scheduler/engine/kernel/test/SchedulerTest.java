@@ -15,9 +15,9 @@ public abstract class SchedulerTest {
     public static final Time shortTimeout = Time.of(10);
     private static final Logger logger = Logger.getLogger(SchedulerTest.class);
 
-    private final Environment env = new Environment(this);
     protected final SchedulerController schedulerController;
     protected Scheduler scheduler = null;
+    private final Environment env = new Environment(this);
 
 
     public SchedulerTest() {
@@ -78,7 +78,7 @@ public abstract class SchedulerTest {
             schedulerController.terminateAndWait();
         }
         catch (Throwable x) {
-            logger.error(SchedulerTest.class.getSimpleName() + " @After: " + x, x);
+            logger.error(SchedulerTest.class.getName() + " @After: " + x, x);
             throw x;
         }
         finally {
