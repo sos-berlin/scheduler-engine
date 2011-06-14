@@ -13,8 +13,8 @@ import org.junit.*;
  *
  * @author Joacim Zschimmer
  */
-public class Js674 extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(Js674.class);
+public class Js674Test extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(Js674Test.class);
     private static final Time myTimeout = Time.of(10+5);   // Länger als der Job im Fehlerfall läuft. Siehe blockedSignal.job.xml
 
 
