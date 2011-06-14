@@ -13,6 +13,7 @@ import javax.persistence.Persistence;
 
 @ForCpp
 public class DatabaseSubsystem implements Subsystem {
+    public static final String emptyIdinDatabase = "-";
     private static final String persistenceUnitName = "schedulerEngine";
 
     private EntityManagerFactory entityManagerFactory = null;
@@ -72,6 +73,10 @@ public class DatabaseSubsystem implements Subsystem {
         return cppProxy.properties().getSister();
     }
 
+
+    public static String idForDatabase(String id) {
+        return id.isEmpty()? emptyIdinDatabase : id;
+    }
 
 //    public final Connection getConnection() {
 //        if (connection != null)  connection = openConnection();

@@ -15,6 +15,13 @@ public class ShowTaskHistoryCommandXmlParser extends SingleCommandXmlParser {
     
     
     @Override public final Command parse(Element e) {
-        return new ShowTaskHistoryCommand();
+        int limit = intAttribute(e, "limit", ShowTaskHistoryCommand.defaultLimit);
+        return new ShowTaskHistoryCommand(limit);
+    }
+
+
+    private static int intAttribute(Element e, String name, int deflt) {
+        String a = e.getAttribute(name);
+        return a.isEmpty()? deflt : Integer.parseInt(a);
     }
 }

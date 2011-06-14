@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.databasequery;
 
+import javax.persistence.EntityManager;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.command.CommandHandler;
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;
 import com.sos.scheduler.engine.kernel.plugin.CommandPlugin;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
@@ -16,9 +16,9 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
     private final CommandHandler[] commandHandlers;
 
 
-    DatabaseQueryPlugin(DatabaseSubsystem databaseSubsystem) {
+    DatabaseQueryPlugin(EntityManager em, String schedulerId, String clusterMemberId) {
         commandHandlers = new CommandHandler[]{
-            new ShowTaskHistoryCommandExecutor(databaseSubsystem),
+            new ShowTaskHistoryCommandExecutor(em, schedulerId, clusterMemberId),
             ShowTaskHistoryCommandXmlParser.singleton,
             TaskHistoryEntriesResultXmlizer.singleton };
     }
@@ -32,7 +32,8 @@ public class DatabaseQueryPlugin extends AbstractPlugin implements CommandPlugin
 	public static PlugInFactory factory() {
     	return new PlugInFactory() {
             @Override public PlugIn newInstance(Scheduler scheduler, Element plugInElement) {
-            	return new DatabaseQueryPlugin(scheduler.getDatabaseSubsystem());
+            	return new DatabaseQueryPlugin(scheduler.getDatabaseSubsystem().getEntityManager(),
+                        scheduler.getSchedulerId(), scheduler.getClusterMemberId());
             }
         };
     }

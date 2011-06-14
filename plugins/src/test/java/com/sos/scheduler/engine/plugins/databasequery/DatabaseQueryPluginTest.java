@@ -8,21 +8,23 @@ import static org.hamcrest.Matchers.*;
 
 public class DatabaseQueryPluginTest extends SchedulerTest {
     public DatabaseQueryPluginTest() throws Exception {
-        startScheduler();
+        startScheduler("-e");
         waitForTaskTermination();
     }
 
 
     private void waitForTaskTermination() throws Exception {
-        Thread.sleep(3*1000);   // TODO Besser TerminatedTaskEvent abwarten, daber das haben wir noch nicht.
+        waitUntilSchedulerIsRunning();
+        Thread.sleep(10*1000);   // TODO Besser TerminatedTaskEvent abwarten, daber das haben wir noch nicht.
     }
 
 
     @Test public void testShowTaskHistory() throws Exception {
         String result = execute("<showTaskHistory/>");
+        System.err.println(result);
         assertThat(result, containsString("</myResult>"));
         assertThat(result, containsString("<row "));
-        assertThat(result, containsString(" clusterMemberId="));
+        assertThat(result, containsString(" job="));
     }
 
 

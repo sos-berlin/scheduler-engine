@@ -27,9 +27,25 @@ public class TaskHistoryEntriesResultXmlizer extends GenericResultXmlizer<TaskHi
 
     private Element elementOfTaskHistoryEntity(Document doc, TaskHistoryEntity e) {
         Element result = doc.createElement("row");
-        result.setAttribute("clusterMemberId", e.getClusterMemberId());
-        result.setAttribute("spoolerId", e.getSpoolerId());
-        result.setAttribute("job", e.getJobName());
+        if (!e.getClusterMemberId().isEmpty())
+            result.setAttribute("clusterMemberId", e.getClusterMemberId());
+        if (!e.getSchedulerId().isEmpty())
+            result.setAttribute("schedulerId", e.getSchedulerId());
+        if (!e.getJobPath().isEmpty())
+            result.setAttribute("job", e.getJobPath());
+        if (e.getCause() != null)
+            result.setAttribute("cause", e.getCause());
+        if (e.getSteps() != null)
+            result.setAttribute("steps", e.getSteps().toString());
+        if (e.getStartTime() != null)
+            result.setAttribute("startedAt", e.getStartTime().toString());
+        if (e.getEndTime() != null)
+            result.setAttribute("endedAt", e.getEndTime().toString());
+        if (e.getErrorCode() != null)
+            result.setAttribute("errorCode", e.getErrorCode());
+        if (e.getErrorText() != null)
+            result.setAttribute("errorText", e.getErrorText());
+
         return result;
     }
 }

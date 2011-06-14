@@ -1,26 +1,27 @@
 package com.sos.scheduler.engine.kernel.database.entity;
 
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import java.util.Date;
 import javax.persistence.*;
+import static com.google.common.base.Strings.*;
+import static javax.persistence.TemporalType.*;
 
 
 @Entity
 @Table(name="SCHEDULER_HISTORY")
 public class TaskHistoryEntity {
-    @Id
-    private int id;
+    public static final String schedulerDummyJobPath = "(Spooler)";
     
-    @Column(name="spooler_id")
-    private String spoolerId;
-
-    @Column(name="cluster_member_id")
-    private String clusterMemberId;
-
-    @Column(name="job_name")
-    private String jobName;
-
-//    @Column(name="start_time")
-//    private Date startTime;
+    @Id private int id;
+    @Column(name="spooler_id") private String schedulerId;
+    @Column(name="cluster_member_id") private String clusterMemberId;
+    @Column(name="job_name") private String jobPath;
+    @Column(name="start_time") @Temporal(TIMESTAMP) private Date startTime;
+    @Column(name="end_time") @Temporal(TIMESTAMP) private Date endTime;
+    @Column(name="cause") private String cause;
+    @Column(name="steps") private Integer steps;
+    @Column(name="error_code") private String errorCode;
+    @Column(name="error_text") private String errorText;
 
 
     public int getId() {
@@ -33,39 +34,69 @@ public class TaskHistoryEntity {
     }
 
 
-    public String getSpoolerId() {
-        return spoolerId;
+    public String getSchedulerId() {
+        return schedulerId.equals(DatabaseSubsystem.emptyIdinDatabase)? "" : schedulerId;
     }
 
 
-    public void setSpoolerId(String spoolerId) {
-        this.spoolerId = spoolerId;
+    public void setSchedulerId(String schedulerID) {
+        this.schedulerId = DatabaseSubsystem.idForDatabase(schedulerID);
     }
 
 
     public String getClusterMemberId() {
-        return clusterMemberId;
+        return nullToEmpty(clusterMemberId);
     }
 
 
     public void setClusterMemberId(String clusterMemberId) {
-        this.clusterMemberId = clusterMemberId;
+        this.clusterMemberId = emptyToNull(clusterMemberId);
     }
 
 
-    public String getJobName() {
-        return jobName;
+    public String getJobPath() {
+        return jobPath.equals(schedulerDummyJobPath)? "" : "/" + jobPath;
     }
 
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
+    public void setJobPath(String p) {
+        this.jobPath = p.isEmpty()? schedulerDummyJobPath : p.replaceFirst("^/", "");
     }
 
 
     @Override public String toString() {
-        return "spoolerId=" + spoolerId +
-                " clusterMemberId=" + clusterMemberId +
-                " jobName=" + jobName;
+        return "schedulerId=" + getSchedulerId() +
+                " clusterMemberId=" + getClusterMemberId() +
+                " jobName=" + getJobPath();
+    }
+
+
+    public String getCause() {
+        return cause;
+    }
+
+
+    public Integer getSteps() {
+        return steps;
+    }
+
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+
+    public String getErrorText() {
+        return errorText;
+    }
+
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+
+    public Date getEndTime() {
+        return endTime;
     }
 }

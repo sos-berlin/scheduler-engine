@@ -4,12 +4,23 @@ import com.sos.scheduler.engine.kernel.command.Command;
 
 
 public class ShowTaskHistoryCommand implements Command {
-    public ShowTaskHistoryCommand() {
-        // Das Kommando hat (noch) keine Parameter
+    public static final int defaultLimit = 50;
+    
+    private final int limit;
+
+    
+    public ShowTaskHistoryCommand(int limit) {
+        if (limit < 1) throw new IllegalArgumentException(getClass().getName() + " limit is not >= 1");
+        this.limit = limit;
     }
 
 
     @Override public final String getName() {
         return "show_task_history";
+    }
+
+
+    public final int getLimit() {
+        return limit;
     }
 }

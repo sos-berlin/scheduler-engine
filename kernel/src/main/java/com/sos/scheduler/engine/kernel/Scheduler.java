@@ -30,7 +30,7 @@ import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
 public final class Scheduler implements HasPlatform, Sister { // extends SchedulerObject
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
-    private final SpoolerC spoolerC;
+    private final SpoolerC cppProxy;
     private final MainContext mainContext;
     private final Platform platform;
     private final PrefixLog log;
@@ -48,7 +48,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     
     
     public Scheduler(SpoolerC spoolerC, MainContext mainContext) {
-        this.spoolerC = spoolerC;
+        this.cppProxy = spoolerC;
         this.mainContext = mainContext;
         spoolerC.setSister(this);
         log = new PrefixLog(spoolerC.log());
@@ -107,19 +107,19 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
 
 
     private void addSubsystems(Element configElement) {
-        logSubsystem = new LogSubsystem(new SchedulerLog(spoolerC));
+        logSubsystem = new LogSubsystem(new SchedulerLog(cppProxy));
         subsystems.add(logSubsystem);
 
-        databaseSubsystem = new DatabaseSubsystem(spoolerC.db());
+        databaseSubsystem = new DatabaseSubsystem(cppProxy.db());
         subsystems.add(databaseSubsystem);
 
         eventSubsystem = new EventSubsystem(platform);
         subsystems.add(eventSubsystem);
 
-        jobSubsystem = new JobSubsystem(platform, spoolerC.job_subsystem());
+        jobSubsystem = new JobSubsystem(platform, cppProxy.job_subsystem());
         subsystems.add(jobSubsystem);
 
-        orderSubsystem = new OrderSubsystem(platform, spoolerC.order_subsystem());
+        orderSubsystem = new OrderSubsystem(platform, cppProxy.order_subsystem());
         subsystems.add(orderSubsystem);
 
         plugInSubsystem = new PlugInSubsystem(this);
@@ -148,7 +148,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
 
 
     public void terminate() {
-        spoolerC.cmd_terminate();
+        cppProxy.cmd_terminate();
     }
 
 
@@ -162,7 +162,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     }
 
     public String executeXml(String xml) {
-        return spoolerC.execute_xml(xml);
+        return cppProxy.execute_xml(xml);
     }
 
     /** Nur für C++, zur Ausführung eines Kommandos in Java */
@@ -181,17 +181,25 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }
     public OrderSubsystem getOrderSubsystem() { return orderSubsystem; }
 
-    public String getHttpUrl() { return spoolerC.http_url(); }
+    public String getSchedulerId() {
+        return cppProxy.id();
+    }
 
-    public int getTcpPort() { return spoolerC.tcp_port(); }
-    public String getHostname() { return spoolerC.hostname(); }
-    public String getHostnameLong() { return spoolerC.hostname_complete(); }
+    public String getClusterMemberId() {
+        return cppProxy.cluster_member_id();
+    }
+    
+    public String getHttpUrl() { return cppProxy.http_url(); }
 
-    public void callCppAndDoNothing() { spoolerC.tcp_port(); }
+    public int getTcpPort() { return cppProxy.tcp_port(); }
+    public String getHostname() { return cppProxy.hostname(); }
+    public String getHostnameLong() { return cppProxy.hostname_complete(); }
+
+    public void callCppAndDoNothing() { cppProxy.tcp_port(); }
 
     /** @param text Sollte auf \n enden */
     public void writeToSchedulerLog(LogCategory category, String text) {
-        spoolerC.write_to_scheduler_log(category.getString(), text);
+        cppProxy.write_to_scheduler_log(category.getString(), text);
     }
 
     public String getVersion() {
