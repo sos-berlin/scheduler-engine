@@ -70,7 +70,7 @@ public final class XmlUtils {
     public static void writeXmlTo(Node n, Writer w) {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty("omit-xml-declaration", "false");
+            transformer.setOutputProperty("omit-xml-declaration", "false");   //TODO Funktioniert nur mit org.jdom?
             transformer.transform(new DOMSource(n), new StreamResult(w));
         } catch (TransformerException x) { throw new XmlException(x); }
     }

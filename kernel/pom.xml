@@ -69,11 +69,6 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit-dep</artifactId>
         </dependency>
@@ -103,11 +98,6 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.saxon</groupId>
-            <artifactId>saxon</artifactId>
         </dependency>
 
         <dependency>
@@ -147,7 +137,6 @@
 	    <dependency>
 	        <groupId>commons-io</groupId>
 	        <artifactId>commons-io</artifactId>
-	        <version>1.4</version>
 	    </dependency>
         
     </dependencies>

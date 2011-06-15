@@ -20,7 +20,7 @@ public class XmlUtilsTest {
     @Test public void testToXml() {
         String xml = "<a b=\"B\">A</a>";
         Document doc = XmlUtils.loadXml(xml);
-        String result = XmlUtils.toXml(doc);
+        String result = XmlUtils.toXml(doc).replaceFirst("^<\\?.*\\?>", "");  // Manche DOM-Implementierung liefert den XML-Prolog.
         assertThat(result, equalTo(xml));
     }
 
