@@ -23,6 +23,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_kernel_main_MainContext_2__method;
     ::zschimmer::javabridge::Method const _callCppAndDoNothing____method;
     ::zschimmer::javabridge::Method const _executeXml__Ljava_lang_String_2__method;
+    ::zschimmer::javabridge::Method const _getClusterMemberId____method;
     ::zschimmer::javabridge::Method const _getDatabaseSubsystem____method;
     ::zschimmer::javabridge::Method const _getEventSubsystem____method;
     ::zschimmer::javabridge::Method const _getHostname____method;
@@ -30,6 +31,7 @@ struct Scheduler__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _getHttpUrl____method;
     ::zschimmer::javabridge::Method const _getMainContext____method;
     ::zschimmer::javabridge::Method const _getPlatform____method;
+    ::zschimmer::javabridge::Method const _getSchedulerId____method;
     ::zschimmer::javabridge::Method const _getTcpPort____method;
     ::zschimmer::javabridge::Method const _getVersion____method;
     ::zschimmer::javabridge::Method const _javaExecuteXml__Ljava_lang_String_2__method;
@@ -52,6 +54,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_SpoolerC_2Lcom_sos_scheduler_engine_kernel_main_MainContext_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/SpoolerC;Lcom/sos/scheduler/engine/kernel/main/MainContext;)V")
     ,_callCppAndDoNothing____method(this, "callCppAndDoNothing", "()V")
     ,_executeXml__Ljava_lang_String_2__method(this, "executeXml", "(Ljava/lang/String;)Ljava/lang/String;")
+    ,_getClusterMemberId____method(this, "getClusterMemberId", "()Ljava/lang/String;")
     ,_getDatabaseSubsystem____method(this, "getDatabaseSubsystem", "()Lcom/sos/scheduler/engine/kernel/database/DatabaseSubsystem;")
     ,_getEventSubsystem____method(this, "getEventSubsystem", "()Lcom/sos/scheduler/engine/kernel/event/EventSubsystem;")
     ,_getHostname____method(this, "getHostname", "()Ljava/lang/String;")
@@ -59,6 +62,7 @@ Scheduler__class::Scheduler__class(const string& class_name) :
     ,_getHttpUrl____method(this, "getHttpUrl", "()Ljava/lang/String;")
     ,_getMainContext____method(this, "getMainContext", "()Ljava/lang/Object;")
     ,_getPlatform____method(this, "getPlatform", "()Lcom/sos/scheduler/engine/kernel/Platform;")
+    ,_getSchedulerId____method(this, "getSchedulerId", "()Ljava/lang/String;")
     ,_getTcpPort____method(this, "getTcpPort", "()I")
     ,_getVersion____method(this, "getVersion", "()Ljava/lang/String;")
     ,_javaExecuteXml__Ljava_lang_String_2__method(this, "javaExecuteXml", "(Ljava/lang/String;)Ljava/lang/String;")
@@ -115,6 +119,14 @@ void Scheduler::callCppAndDoNothing() {
     return result;
 }
 
+::javaproxy::java::lang::String Scheduler::getClusterMemberId() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getClusterMemberId____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
 ::javaproxy::com::sos::scheduler::engine::kernel::database::DatabaseSubsystem Scheduler::getDatabaseSubsystem() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     Scheduler__class* cls = _class.get();
@@ -168,6 +180,14 @@ void Scheduler::callCppAndDoNothing() {
     Scheduler__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::Platform result;
     result.steal_local_ref(cls->_getPlatform____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String Scheduler::getSchedulerId() {
+    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
+    Scheduler__class* cls = _class.get();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_getSchedulerId____method.jobject_call(get_jobject(), parameter_list));
     return result;
 }
 

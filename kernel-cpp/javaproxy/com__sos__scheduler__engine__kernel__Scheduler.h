@@ -53,6 +53,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
 
     void callCppAndDoNothing();
     ::javaproxy::java::lang::String executeXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
+    ::javaproxy::java::lang::String getClusterMemberId();
     ::javaproxy::com::sos::scheduler::engine::kernel::database::DatabaseSubsystem getDatabaseSubsystem();
     ::javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem getEventSubsystem();
     ::javaproxy::java::lang::String getHostname();
@@ -60,6 +61,7 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     ::javaproxy::java::lang::String getHttpUrl();
     ::javaproxy::java::lang::Object getMainContext();
     ::javaproxy::com::sos::scheduler::engine::kernel::Platform getPlatform();
+    ::javaproxy::java::lang::String getSchedulerId();
     jint getTcpPort();
     ::javaproxy::java::lang::String getVersion();
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);

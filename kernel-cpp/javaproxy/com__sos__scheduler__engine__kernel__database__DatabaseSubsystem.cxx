@@ -18,6 +18,7 @@ struct DatabaseSubsystem__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method;
     ::zschimmer::javabridge::Method const _close____method;
     ::zschimmer::javabridge::Method const _getProperties____method;
+    ::zschimmer::javabridge::Static_method const _idForDatabase__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< DatabaseSubsystem__class > class_factory;
 };
@@ -28,7 +29,8 @@ DatabaseSubsystem__class::DatabaseSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/DatabaseC;)V")
     ,_close____method(this, "close", "()V")
-    ,_getProperties____method(this, "getProperties", "()Lcom/sos/scheduler/engine/kernel/VariableSet;"){}
+    ,_getProperties____method(this, "getProperties", "()Lcom/sos/scheduler/engine/kernel/VariableSet;")
+    ,_idForDatabase__Ljava_lang_String_2__method(this, "idForDatabase", "(Ljava/lang/String;)Ljava/lang/String;"){}
 
 DatabaseSubsystem__class::~DatabaseSubsystem__class() {}
 
@@ -69,6 +71,15 @@ void DatabaseSubsystem::close() {
     DatabaseSubsystem__class* cls = _class.get();
     ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet result;
     result.steal_local_ref(cls->_getProperties____method.jobject_call(get_jobject(), parameter_list));
+    return result;
+}
+
+::javaproxy::java::lang::String DatabaseSubsystem::idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {
+    ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
+    parameter_list._jvalues[0].l = p0.get_jobject();
+    DatabaseSubsystem__class* cls = DatabaseSubsystem__class::class_factory.clas();
+    ::javaproxy::java::lang::String result;
+    result.steal_local_ref(cls->_idForDatabase__Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 

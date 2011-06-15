@@ -48,6 +48,7 @@ struct DatabaseSubsystem : ::zschimmer::javabridge::proxy_jobject< DatabaseSubsy
 
     void close();
     ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getProperties();
+    static ::javaproxy::java::lang::String idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();
 
