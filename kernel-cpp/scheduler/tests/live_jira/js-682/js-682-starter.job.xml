@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job>
+    <script language="javascript">
+        <![CDATA[
+function spooler_process(){
+  for (i = 1; i < 10; i++)
+  {
+    var o = spooler.create_order();
+    var j = spooler.job_chain("/js-682");
+    j.add_order(o);
+  }
+  return false;
+  }
+        ]]>
+    </script>
+    <run_time>
+        <period repeat="00:10:10" begin="00:00" end="24:00"/>
+    </run_time>
+</job>

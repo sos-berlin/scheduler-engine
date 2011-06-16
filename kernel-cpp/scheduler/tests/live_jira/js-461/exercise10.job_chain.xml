@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job_chain orders_recoverable="yes"
+           visible="yes"
+           title="exercise10">
+    <job_chain_node state="state1"
+                    job="exercise10a"
+                    next_state="state2"
+                    error_state="error"/>
+    <job_chain_node state="state2"
+                    job="exercise10b"
+                    next_state="state3"
+                    error_state="error"
+                    on_error="suspend"/>
+    <job_chain_node state="state3"
+                    job="exercise10c"
+                    next_state="success"
+                    error_state="error"/>
+    <job_chain_node state="error"/>
+    <job_chain_node state="success"/>
+</job_chain>

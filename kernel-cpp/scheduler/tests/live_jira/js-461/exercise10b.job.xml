@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job title="exercise10b"
+     stop_on_error="no"
+     order="yes">
+    <script language="shell">
+        <![CDATA[
+echo value of other_param: %SCHEDULER_PARAM_OTHER_PARAM%
+exit 5
+        ]]>
+    </script>
+    <run_time/>
+</job>

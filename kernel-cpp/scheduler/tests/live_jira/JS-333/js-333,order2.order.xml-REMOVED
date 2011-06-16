@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<order title="order2 for chain js-333">
+   <run_time>
+      <period single_start="08:45"/>
+   </run_time>
+</order>

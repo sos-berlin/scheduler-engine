@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<job_chain orders_recoverable="yes" title="chain js-333">
+   
+   <job_chain_node job="js-333-job1" state="01" next_state="02" error_state="error"
+                   on_error="suspend"/>
+   <job_chain_node job="js-333-job2" state="02" next_state="success" error_state="error"
+                   on_error="suspend"/>
+   <job_chain_node.end state="success"/>
+   <job_chain_node.end state="error"/>
+</job_chain>
