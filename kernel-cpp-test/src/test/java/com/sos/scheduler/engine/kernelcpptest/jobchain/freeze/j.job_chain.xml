@@ -1,0 +1,5 @@
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd">
+    <job_chain_node state="a" job="a"/>
+    <job_chain_node state="b" job="b"/>
+    <job_chain_node state="c" job="c"/>
+</job_chain>

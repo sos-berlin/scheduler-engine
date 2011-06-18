@@ -144,7 +144,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>package-all</id>
@@ -162,6 +161,28 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>kernelcpp.clean.skip</id>
+            <!-- Das funktionniert nicht. Es soll die langwierige Neukompilierung des C++-Codes verhindern. -->
+            <activation>
+                <property>
+                    <name>kernelcpp.clean.skip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <!--distributionManagement>
         <repository>
