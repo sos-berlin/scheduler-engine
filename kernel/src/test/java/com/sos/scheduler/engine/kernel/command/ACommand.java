@@ -8,9 +8,4 @@ class ACommand implements Command {
     public ACommand(String v) {
         value = v;
     }
-
-
-    @Override public final String getName() {
-        return "a";
-    }
 }

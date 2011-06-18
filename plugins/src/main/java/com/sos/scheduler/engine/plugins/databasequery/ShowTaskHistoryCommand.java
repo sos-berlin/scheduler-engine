@@ -15,11 +15,6 @@ public class ShowTaskHistoryCommand implements Command {
     }
 
 
-    @Override public final String getName() {
-        return "show_task_history";
-    }
-
-
     public final int getLimit() {
         return limit;
     }

@@ -8,9 +8,4 @@ class BCommand implements Command {
     public BCommand(String v) {
         value = v;
     }
-
-
-    @Override public final String getName() {
-        return "b";
-    }
 }
