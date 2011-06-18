@@ -1,5 +1,5 @@
 package com.sos.scheduler.engine.kernel.command;
 
 public interface Command {
-    String getName();
+    // Offenbar brauchen wir das Interface nicht, jedes Objekt kann ein Kommando sein.
 }
