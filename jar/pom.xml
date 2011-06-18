@@ -37,51 +37,51 @@
                     </execution>
                 </executions>
             </plugin>
-						<plugin>
-			        <groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-dependency-plugin</artifactId>
-	            <configuration>
-	              <artifactItems>
-	                <artifactItem>
-	                  <groupId>${project.groupId}</groupId>
-	                  <artifactId>${project.artifactId}</artifactId>
-				            <version>${project.version}</version>
-	                  <type>jar</type>
-	                </artifactItem>
-	                <artifactItem>
-	                  <groupId>${project.groupId}</groupId>
-	                  <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
-				            <version>${project.version}</version>
-	                  <type>zip</type>
-	  			          <classifier>${osArch}</classifier>
-	                </artifactItem>
-	              </artifactItems>
-	            </configuration>
-			        <executions>
-				        <execution>
-				        	<id>copy</id>
-			            <goals>
-			              <goal>copy</goal>
-			            </goals>
-				        </execution>
-			        </executions>
-			      </plugin>
-						<plugin>
-			        <groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-dependency-plugin</artifactId>
-	            <configuration>
-	              <includeScope>runtime</includeScope>
-	            </configuration>
-			        <executions>
-				        <execution>
-				        	<id>copy-dependencies</id>
-			            <goals>
-			              <goal>copy-dependencies</goal>
-			            </goals>
-				        </execution>
-			        </executions>
-			      </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <type>jar</type>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
+                            <version>${project.version}</version>
+                            <type>zip</type>
+                            <classifier>${osArch}</classifier>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <includeScope>runtime</includeScope>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--@Stefan: kaputte pom.xml war eingecheckt. Bitte prüfen!, Joacim 2011-06-18   plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -101,14 +101,14 @@
             </plugin-->
             <!--plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-		            <configuration>
-		              <tasks>
-										<ant antfile="download4setup.xml" target="setup">
-											<property name="platform" value="${osArch}" />
-										</ant>
-		              </tasks>
-		            </configuration>
-						</plugin>
+                <configuration>
+                    <tasks>
+                        <ant antfile="download4setup.xml" target="setup">
+                            <property name="platform" value="${osArch}" />
+                        </ant>
+                    </tasks>
+                </configuration>
+            </plugin-->
         </plugins>
     </build>
     
