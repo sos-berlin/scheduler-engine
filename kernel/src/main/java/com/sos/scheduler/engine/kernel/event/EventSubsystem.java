@@ -33,7 +33,9 @@ public class EventSubsystem extends AbstractHasPlatform implements Subsystem {
 
     
     private void publishEvent(Event e) {
-        if (reportEventNesting > 1)  throw new RecursiveEventException(e);  // Das sollte natürlich nicht vorkommen ...
+        if (reportEventNesting > 1) {
+            throw new RecursiveEventException(e);  // Das sollte natürlich nicht vorkommen ...
+        }
         for (EventSubscriber s: subscribers)
             try { s.onEvent(e); }
             catch (Exception x) { log().error(s + ": " + x); }

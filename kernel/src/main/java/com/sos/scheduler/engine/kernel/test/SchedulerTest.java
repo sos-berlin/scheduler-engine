@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThread;
 import com.sos.scheduler.engine.kernel.util.Time;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.log4j.Logger;
@@ -16,12 +17,20 @@ public abstract class SchedulerTest {
     private static final Logger logger = Logger.getLogger(SchedulerTest.class);
 
     protected final SchedulerController schedulerController;
+    protected final Iterable<String> resourceNames;
     protected Scheduler scheduler = null;
-    private final Environment env = new Environment(this);
+    private final Environment env;
+
+
+    public SchedulerTest(Iterable<String> resourceNames) {
+        schedulerController = new SchedulerThread();
+        this.resourceNames = resourceNames;
+        this.env = new Environment(this, resourceNames);
+    }
 
 
     public SchedulerTest() {
-        schedulerController = new SchedulerThread();
+        this(new ArrayList<String>());
     }
 
 
@@ -84,5 +93,10 @@ public abstract class SchedulerTest {
         finally {
             env.cleanUp();
         }
+    }
+
+
+    public final File getDirectory() {
+        return env.getDirectory();
     }
 }

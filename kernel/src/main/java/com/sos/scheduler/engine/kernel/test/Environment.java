@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.kernel.test;
 
+import org.springframework.core.io.Resource;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,9 +10,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import org.apache.log4j.Logger;
-import static org.apache.commons.io.FileUtils.*;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import static com.google.common.base.Strings.*;
+import static com.google.common.io.Files.*;
 import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
+import static org.apache.commons.io.FileUtils.copyURLToFile;
+import static java.util.Arrays.asList;
 
 
 public final class Environment {
@@ -21,6 +27,7 @@ public final class Environment {
     private static final List<String> defaultFiles = Arrays.asList("scheduler.xml", "factory.ini", "sos.ini");
     private static final Logger logger = Logger.getLogger(Environment.class);
 
+    private final Iterable<String> otherResourceNames;
     private final File directory;
     private final Object mainObject;
     private final File logDirectory;
@@ -43,8 +50,9 @@ public final class Environment {
     }
 
 
-    public Environment(Object mainObject) {
+    public Environment(Object mainObject, Iterable<String> otherResourceNames) {
         try {
+            this.otherResourceNames = otherResourceNames;
             this.mainObject = mainObject;
             directory = File.createTempFile("sos", ".tmp");
             logDirectory = new File(directory, "log");
@@ -91,12 +99,29 @@ public final class Environment {
 
     
     private void copyOtherResources() {
-        //TODO Wie die Resourcen eines Package auflisten?
+        //TODO Wie die Resourcen eines Package auflisten? Mit Spring?
         //class.getResource(packageName), file: und jar: unterscheiden, dann direkten Zugriff auf Dateien oder Jar-Elemente.
         //C++/Java-Brücke kann Jar-Elemente auflisten
+        for (String n: otherResourceNames)  copyResource(n);
     }
-    
 
+
+    private List<Resource> resources() {
+        try {
+            PathMatchingResourcePatternResolver r = new PathMatchingResourcePatternResolver();
+            return asList(r.getResources(resourceDirectory() + "/*.xml"));
+        } catch (IOException x) { throw new RuntimeException(x); }
+    }
+
+
+    private String resourceDirectory() {
+        List<String> p = new ArrayList<String>();
+        for (String s: Splitter.on(resourceClass().getName()).split("."))  p.add(s);
+        p.remove(p.size() - 1);
+        return Joiner.on("/").join(p);
+    }
+
+    
     private void copyResource(String name) {
         copyResource(name, null);
     }
@@ -146,10 +171,15 @@ public final class Environment {
     public void cleanUp() {
         try {
             if (directory != null)
-                deleteDirectory(directory);
+                deleteRecursively(directory);
         } catch(IOException x) { 
             logger.error(x); 
             //throw new RuntimeException(x); 
         }
+    }
+
+
+    public final File getDirectory() {
+        return directory;
     }
 }
