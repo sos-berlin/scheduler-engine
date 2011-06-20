@@ -29,9 +29,9 @@
                         </property>
                     </systemProperties>
                     -->
-                  <!-- jiraex contains test cases for unresolved jira issues -->  
+                  <!-- excluded contains test cases not executed in the test phase (e.g. for unresolved jira issues) -->  
 				          <excludes>
-				            <exclude>com/sos/scheduler/engine/kernelcpptest/excluded/**.java</exclude>
+				            <exclude>com/sos/scheduler/engine/kernelcpptest/excluded/**/*.java</exclude>
 				          </excludes>
                 </configuration>
             </plugin>
