@@ -290,6 +290,7 @@ struct Command_processor
     xml::Element_ptr            execute_job                 ( const xml::Element_ptr& );
     xml::Element_ptr            execute_job_chain           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_job_why             ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remote_scheduler_start_remote_task( const xml::Element_ptr& );

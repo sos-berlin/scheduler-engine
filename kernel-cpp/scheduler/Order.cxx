@@ -124,6 +124,7 @@ void Order::load_record( const Absolute_path& job_chain_path, const Record& reco
     _state_text = record.as_string( "state_text" );
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
+//	_suspended  = record.as_int   ( "suspended" ) != 0;   // JS-333
 
     string initial_state = record.as_string( "initial_state" );
     if( initial_state != "" )
@@ -326,7 +327,8 @@ void Order::occupy_for_task( Task* task, const Time& now )
     _is_virgin = false;
     if( was_virgin )
     {
-        _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
+		 if ( _job_chain )   // JS-682
+			  _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
         report_event( OrderTouchedEventJ::new_instance(java_sister()) );
@@ -626,6 +628,7 @@ bool Order::db_try_insert( bool throw_exists_exception )
         insert[ "state_text"    ] = state_text()                , _state_text_modified = false;
         insert[ "priority"      ] = priority()                  , _priority_modified   = false;
         insert[ "initial_state" ] = initial_state().as_string();
+//        insert[ "suspended"     ] = _suspended;   // JS-333
 
         db_fill_stmt( &insert );
 
@@ -807,6 +810,7 @@ bool Order::db_update2( Update_option update_option, bool delet, Transaction* ou
 
             update[ "state"         ] = state_string;
             update[ "initial_state" ] = initial_state().as_string();
+//            update[ "suspended"     ] = _suspended;      // JS-333
 
             db_fill_stmt( &update );
 
@@ -959,9 +963,9 @@ void Order::close_log_and_write_history()
     _end_time = Time::now();
     _log->finish_log();
     
-    if( _job_chain  &&  db()  &&  db()->opened() ) 
+	 if( _job_chain  &&  db()  &&  db()->opened() && _history_id ) 
     {
-        for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
+		 for( Retry_nested_transaction ta ( db(), db()->transaction_or_null() ); ta.enter_loop(); ta++ ) try    // JS-461
         {
             if( _step_number )  db_update_order_step_history_record( &ta );
             db_update_order_history_record( &ta );    // Historie schreiben, aber Auftrag beibehalten
@@ -2309,7 +2313,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
 
-        if( node->is_suspending_order() )  _suspended = true;
+        if( node->is_suspending_order() )  _suspended = true;   //JS-SUS
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
 
@@ -2778,7 +2782,7 @@ void Order::set_suspended( bool suspended )
 {
     if( _suspended != suspended )
     {
-        _suspended = suspended;
+        _suspended = suspended;  // JS-SUS
         _order_xml_modified = true;
 
         if( _job_chain )

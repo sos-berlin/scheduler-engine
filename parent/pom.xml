@@ -436,6 +436,29 @@
                     <version>2.3.1</version>
                     <!-- 2011-05-24 Die voreingestellte Version installiert die pom für kernel-cpp nicht. Diese tut's. http://jira.codehaus.org/browse/MINSTALL-41 -->
                 </plugin>
+                <plugin>
+		                <artifactId>maven-antrun-plugin</artifactId>
+		                <version>1.1</version>
+									  <!-- Ant-Contrib for Special Ant Tasks (IF) -->
+										<dependencies>
+											  <dependency>
+											   <groupId>ant-contrib</groupId>
+											   <artifactId>ant-contrib</artifactId>
+											   <version>1.0b3</version>
+											   <exclusions>
+											    <exclusion>
+											     <groupId>ant</groupId>
+											     <artifactId>ant</artifactId>
+											    </exclusion>
+											   </exclusions>
+											  </dependency>
+											  <dependency>
+											   <groupId>ant</groupId>
+											   <artifactId>ant-nodeps</artifactId>
+											   <version>1.6.5</version>
+											  </dependency>
+										</dependencies>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

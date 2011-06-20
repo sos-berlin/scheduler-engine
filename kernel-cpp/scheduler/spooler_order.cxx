@@ -2056,8 +2056,10 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
-    result.setAttribute( "running_orders", number_of_touched_orders() );
-    result.setAttribute( "max_orders", _max_orders );
+	 if ( number_of_touched_orders_available() )			// JS-682
+		 result.setAttribute( "running_orders", number_of_touched_orders() );
+	 if ( is_max_orders_set() )
+			result.setAttribute( "max_orders", _max_orders );
     result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );

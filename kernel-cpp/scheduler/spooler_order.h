@@ -867,6 +867,8 @@ struct Job_chain : Com_job_chain,
     Order_subsystem_impl*       order_subsystem             () const;
 
     int                         number_of_touched_orders    () const;
+    bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
+	 bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
     Virgin_is_allowed           is_ready_for_new_order_processing() const;

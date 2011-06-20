@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.jobchain.freeze;
+package com.sos.scheduler.engine.kernelcpptest.excluded.jobchain.freeze;
 
 import java.util.List;
 import java.io.IOException;

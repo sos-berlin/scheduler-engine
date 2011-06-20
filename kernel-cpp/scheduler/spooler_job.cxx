@@ -3549,6 +3549,92 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
     return result;
 }
 
+//-----------------------------------------------------------------------------Job::dom_element_why
+
+xml::Element_ptr Job::dom_element_why( const xml::Document_ptr& document )
+{
+   xml::Element_ptr result = document.createElement( "why" );
+
+   if( _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopping_let_run )
+		result.append_new_text_element( "reason", "scheduler is stopping" );
+
+	Time            never     = Time::never;
+	Time            now       = Time::now();
+	Start_cause     cause     = cause_none;
+	ptr<Task>       task      = NULL;
+	bool            has_order = false;
+	string          log_line;
+
+    
+    task = get_task_from_queue( now );
+    if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
+        
+    if( _state == s_pending  &&  _max_tasks > 0 && now >= _next_single_start)  
+    {
+			cause = cause_period_single;
+    }
+    else
+    if( now < _next_single_start && _next_single_start != never )  
+    {
+	      result.append_new_text_element( "reason","time does not come yet");
+	 }
+	 else
+    if( is_in_period(now) )
+    {
+        if( _state == s_pending)
+        {
+				if( _max_tasks == 0 )
+				{
+			      result.append_new_text_element( "reason","no tasks allowed");
+				} else {
+	            if( _start_once )
+						cause = cause_period_once;
+		         else
+						if( now >= _next_start_time )  
+							if( _delay_until && now >= _delay_until )
+								cause = cause_delay_after_error;
+						   else
+						      result.append_new_text_element( "reason","job delayed");
+						else
+					      if (_next_start_time != never)
+								result.append_new_text_element( "reason","time does not come yet");
+				}
+        }
+
+        if ( not_ending_tasks_count() >= _max_tasks )
+			  result.append_new_text_element(  "reason","too many tasks");
+		  if (is_in_job_chain() && !is_order_controlled())
+			  result.append_new_text_element(  "reason","no order job");
+		  if (is_in_job_chain())
+			  result.append_new_text_element(  "reason","job is in job_chain");
+		  if (is_order_controlled())
+			  result.append_new_text_element(  "reason","job is order job");
+
+        // js-610 if( !cause  &&  is_order_controlled() )
+        if( is_order_controlled() && ( !cause || cause == cause_delay_after_error) )
+        {
+            has_order = request_order( now, obj_name() );
+        }
+
+    }
+
+
+    if( cause || has_order )     // Es soll also eine Task gestartet werden.
+    {
+        if( _lock_requestor )
+            if( !_lock_requestor->locks_are_available() )
+			      result.append_new_text_element( "reason","lock is unavailable");
+        if( _module->_use_process_class )
+        {
+            Process_class* process_class = _module->process_class_or_null();
+            if( !process_class )                            result.append_new_text_element( "reason","process class unavailable");
+            if( !process_class->process_available( this ) )	result.append_new_text_element( "reason","process unavailable");
+        }
+    }
+
+    return result;
+}
+
 //---------------------------------------------------------------Job::append_calendar_dom_elements
 
 void Job::append_calendar_dom_elements( const xml::Element_ptr& element, Show_calendar_options* options )

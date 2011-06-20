@@ -877,6 +877,7 @@ void Database::create_tables_when_needed()
                                 "`distributed_next_time`"       " datetime"        << null << ","     // Auftrag ist verteilt ausführbar
                                 "`occupying_cluster_member_id`" " varchar(100)"    << null << ","     // Index
                                 "`priority`"                    " integer"      " not null,"
+                                // "`suspended`"                   " boolean"         << null << ","     // JS-333
                                 "`state`"                       " varchar(100)"    << null << ","
                                 "`state_text`"                  " varchar(100)"    << null << ","
                                 "`title`"                       " varchar(200)"    << null << ","
@@ -899,6 +900,9 @@ void Database::create_tables_when_needed()
             
             if( added )
             added = add_column( &ta, _orders_tablename, "occupying_cluster_member_id", "add `occupying_cluster_member_id`" " varchar(100)" );
+
+//            if( added )    // JS-333
+//                    add_column( &ta, _orders_tablename, "suspended"                 , "add `suspended`"             " boolean" );
 
             if( added )
                     add_column( &ta, _orders_tablename, "initial_state"              , "add `initial_state`"             " varchar(100)" );
@@ -1070,7 +1074,7 @@ bool Database::create_table_when_needed( Transaction* ta, const string& tablenam
 
             S create_table;
             create_table << "CREATE TABLE " << tablename << " (" << fields << ")";
-            if( dbms_kind() == dbms_mysql )  create_table << " Type=InnoDB";    // ab Version 5.0: Engine=innodb, ab 5.5. funktioniert Type=InnoDB nicht mehr
+            if( dbms_kind() == dbms_mysql )  create_table << " ENGINE=InnoDB";    // JS-670: since Version 5.0: ENGINE=innodb, since 5.5. Type=InnoDB does not work anymore
 
             ta->execute( create_table, Z_FUNCTION );
 

@@ -83,6 +83,7 @@ struct Database : Object, javabridge::has_proxy<Database>, Scheduler_object //Su
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
     Transaction*                transaction             ();
+	 Transaction*                transaction_or_null     ()                                          { return _transaction; }
     bool                        is_in_transaction       ()                                          { return _transaction != NULL; }
     int                         record_count            ()                                          { return _db.record_count(); }
     Dbms_kind                   dbms_kind               ()                                          { return _db.dbms_kind(); }

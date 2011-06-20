@@ -486,6 +486,14 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
     return _spooler->root_folder()->job_folder()->dom_element( _answer, show );
 }
 
+//--------------------------------------------------------------Command_processor::execute_job_why
+
+xml::Element_ptr Command_processor::execute_job_why( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
+    return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> dom_element_why( _answer );
+}
+
 //----------------------------------------------------------Command_processor::execute_show_threads
 /*
 xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show )
@@ -1671,6 +1679,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "service_request"  ) )  result = execute_service_request( element );
     else
     if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );   // Nicht offiziell, nur Test
+    else
+    if( element.nodeName_is( "job.why"          ) )  result = execute_job_why( element );
     else
         result = execute_command_in_java(element);
 

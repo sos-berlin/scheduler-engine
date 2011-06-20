@@ -31,7 +31,7 @@
                     -->
                   <!-- jiraex contains test cases for unresolved jira issues -->  
 				          <excludes>
-				            <exclude>com/sos/scheduler/engine/kernelcpptest/jiraex/**.java</exclude>
+				            <exclude>com/sos/scheduler/engine/kernelcpptest/excluded/**.java</exclude>
 				          </excludes>
                 </configuration>
             </plugin>

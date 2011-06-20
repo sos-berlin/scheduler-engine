@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.kernelcpptest.jira.js628;
+package com.sos.scheduler.engine.kernelcpptest.excluded.js461;
 
 import static org.junit.Assert.*;
 import java.util.Iterator;
@@ -26,43 +26,52 @@ import com.sos.scheduler.engine.plugins.jms.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 import com.sos.scheduler.model.events.EventOrderFinished;
+import com.sos.scheduler.model.events.EventOrderStateChanged;
 
 
 /**
- * \file JS628.java
- * \brief Testcase für JS-628 
+ * \file JS461.java
+ * \brief 
  *  
- * \class JS628
- * \brief Testcase für JS-628 
+ * \class JS461
+ * \brief 
  * 
  * \details
- * This test contain four jobchains for various combinations of the result from spooler_process and
- * spooler_process_before:
- * 
- * spooler_process 		spooler_process_before 		result				job_chain
- * ================== 	======================== 	=================	=====================
- * true					false						error				js628_chain_fail_1  
- * false				false						error				js628_chain_fail_2
- * false				true						error				js628_chain_fail_3
- * true					true						success				js628_chain_success
  *
- * It should be clarify that the job ends only if the tesult of spooler_process AND spooler_process_before
- * is true.
- * 
- * The test estimate that one job_chain ends with success and three job_chains ends with a failure.
+ * \code
+  \endcode
  *
+ * \author schaedi
+ * \version 1.0 - 25.05.2011 19:07:16
+ * <div class="sos_branding">
+ *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ * </div>
+ */
+/**
+ * \file JS461.java
+ * \brief 
+ *  
+ * \class JS461
+ * \brief 
+ * 
+ * \details
+ *
+ * \code
+  \endcode
+ *
+ * \author schaedi
  * \version 1.0 - 25.05.2011 19:07:21
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
-public class JS628 extends SchedulerTest {
+public class JS461 extends SchedulerTest {
     /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(5);
+    private static final Time schedulerTimeout = Time.of(15);
     private static Configuration conf;
 
     private static Logger logger;
@@ -81,17 +90,16 @@ public class JS628 extends SchedulerTest {
     public static void setUpBeforeClass () throws Exception {
 		// this file contains appender for ActiveMQ logging
 		new Log4JHelper("src/test/resources/log4j.properties");
-		logger = LoggerFactory.getLogger(JS628.class);
+		logger = LoggerFactory.getLogger(JS461.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
     
-    public JS628() throws Exception {
+    public JS461() throws Exception {
     	
     	topicSubscriber = newTopicSubscriber();
         topicSubscriber.setMessageListener(new MyListener());
         topicConnection.start();
 
-        //TODO Connect with hostname & port from the scheduler intance
 		objFactory = new SchedulerObjectFactory("localhost", 4444);
 		objFactory.initMarshaller(com.sos.scheduler.model.events.Event.class);
     }
@@ -104,7 +112,7 @@ public class JS628 extends SchedulerTest {
      * @throws JMSException
      */
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'EventOrderFinished'";
+        String messageSelector = "eventName = 'EventOrderStateChanged'";
         boolean noLocal = false;
         logger.debug("eventFilter is: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -121,9 +129,9 @@ public class JS628 extends SchedulerTest {
     @Test 
     public void test() throws Exception {
         runScheduler(schedulerTimeout, "-e");
-        assertState("success",1);										// one order has to end with 'success'
-        assertState("error",3);											// three order has to end with 'error'
-        assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents
+//        assertState("success",1);										// one order has to end with 'success'
+//        assertState("error",3);											// three order has to end with 'error'
+//        assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents
     }
     
     private void assertState(String stateName, int exceptedHits) {
@@ -135,8 +143,6 @@ public class JS628 extends SchedulerTest {
     	}
         assertEquals("state '" + stateName + "'",exceptedHits,cnt);
     }
-
-
     
     private class MyListener implements javax.jms.MessageListener {
 
@@ -148,12 +154,17 @@ public class JS628 extends SchedulerTest {
                 TextMessage textMessage = (TextMessage) message;
                 String xmlContent = textMessage.getText();
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-               	assertNotNull(ev.getEventOrderFinished());
+               	assertNotNull(ev.getEventOrderStateChanged());
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                EventOrderFinished ov = ev.getEventOrderFinished();
+                EventOrderStateChanged ov = ev.getEventOrderStateChanged();
                 textMessage.acknowledge();
                 result = ov.getOrder().getState();
-                logger.info("order " + ov.getOrder().getId() + " ended with state " + ov.getOrder().getState() );
+                logger.info("order " + ov.getOrder().getId() + " changed to state " + ov.getOrder().getState() );
+                if (ov.getOrder().getState().toString().equals("state2")) {
+                    logger.info("setting order state to success ..." );
+                	scheduler.executeXml("<modify_order job_chain='/js-461' order='js-461-order' state='success'/>");
+                	scheduler.executeXml("<modify_order job_chain='/js-461' order='js-461-order' suspended='no'/>");
+                }
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
