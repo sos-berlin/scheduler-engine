@@ -37,7 +37,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+            <!-- plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
@@ -60,6 +60,7 @@
                 <executions>
                     <execution>
                         <id>copy</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
@@ -75,13 +76,14 @@
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <!--@Stefan: kaputte pom.xml war eingecheckt. Bitte prüfen!, Joacim 2011-06-18   plugin>
+            </plugin -->
+            <!-- includecopr und excludeScope scheinen keine Wirkung zu haben plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -98,8 +100,8 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin-->
-            <!--plugin>
+            </plugin -->
+            <!-- plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <configuration>
                     <tasks>
@@ -108,7 +110,13 @@
                         </ant>
                     </tasks>
                 </configuration>
-            </plugin-->
+                <executions>
+                    <execution>
+                        <id>prepare-setup</id>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin -->
         </plugins>
     </build>
     
