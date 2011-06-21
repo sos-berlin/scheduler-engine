@@ -94,8 +94,9 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <configuration>
                     <tasks>
-                        <ant antfile="download4setup.xml" target="setup">
+                        <ant antfile="download4setup.xml" target="setup.platform">
                            <property name="platform" value="${osArch}" />
+                           <property name="settings.localRepository" value="${settings.localRepository}" />
                         </ant>
                     </tasks>
                 </configuration>

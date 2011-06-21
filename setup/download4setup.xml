@@ -9,15 +9,34 @@
 	<property name="source.dir" value="${basedir}/target/dependency" />
 	<property name="target.dir" value="${basedir}/target/setup" />
 	
-	<fileset dir="${source.dir}" id="files.sos">
-		<include name="${package.name}*.jar"/>
+	<fileset dir="${source.dir}" id="files.config">
+		<include name="scheduler.xsd"/>
 	</fileset>
 	
-	<target name="setup" depends="-init"	description="copy all setup files for the scheduler kernel into a directory">
+	<fileset dir="${source.dir}" id="files.lib">
+		<include name="com.sos.scheduler.engine.jar*"/>
+	</fileset>
+	
+	<fileset dir="${source.dir}" id="files.jar">
+		<include name="guava*.jar"/>
+		<include name="log4j-*.jar"/>
+	</fileset>
+	
+	<fileset dir="${source.dir}" id="files.platform.bin">
+		<include name="scheduler.exe"/>
+		<include name="scheduler"/>
+		<include name="spidermonkey.dll"/>
+	</fileset>
+	
+	<fileset dir="${source.dir}" id="files.platform.lib">
+		<include name="scheduler.dll"/>
+	</fileset>
+	
+	<target name="setup" description="copy all setup files for the scheduler kernel into a directory">
 	
 		<!-- unzip the binary files into a working directory -->
-		<echo message="working for ${platform}" />
-		<unzip dest="${target.dir}\bin">
+ 		<echo message="working for ${platform}" />
+		<unzip dest="${source.dir}">
 	    <patternset>
 	        <exclude name="*.map"/>
 	        <exclude name="*.pdb"/>
@@ -28,17 +47,62 @@
 		</unzip>
 		
 		<!-- copy the sos specific jar files to the target directory and normalize theirs names -->
+		<copy todir="${target.dir}/scheduler/config">
+			<fileset refid="files.config" />
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="files.lib" />
+		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler.\1.jar"/>
+		</copy>
+		<copy todir="${target.dir}/scheduler/lib">
+			<fileset refid="files.jar" />
+		</copy>
+		
+		<!--
 		<copy todir="${target.dir}">
 			<fileset refid="files.sos" />
 			<mapper type="regexp" from="^${package.name}\.(.*)" to="\1"/>
 		</copy>
+		-->
 		
 	</target>
 
-	<target name="-init">
-		<delete dir="${target.dir}" />
-		<mkdir dir="${target.dir}" />
-		<mkdir dir="${target.dir}\bin" />
-	</target>
+	<target name="setup.platform" depends="setup"	description="platform specific setup preparation">
+
+    <echo message="${settings.localRepository}" />
+    <if>
+     <equals arg1="${platform}" arg2="windows-x86" />
+     <then>
+    		<copy todir="${target.dir}/scheduler.windows/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		<copy todir="${target.dir}/scheduler.windows/lib">
+    			<fileset refid="files.platform.lib" />
+    		</copy>
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${platform}" arg2="linux-i386" />
+     <then>
+    		<echo message="LINUX" />
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${platform}" arg2="hpux-itanium" />
+     <then>
+    		<echo message="HP-UX" />
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${platform}" arg2="solaris-" />
+     <then>
+    		<echo message="SOLARIS" />
+     </then>
+    </if>
+
+  </target>
 
 </project>
