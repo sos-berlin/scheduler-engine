@@ -8,10 +8,11 @@
         <version>1.3.12-beta-1a-SNAPSHOT</version>
     </parent>
     
-    
+    <!--
     <properties>
       <setup.version>${releaseVersion}</setup.version>
     </properties>
+    -->
     
     <artifactId>com.sos.scheduler.engine.jar</artifactId>
     <packaging>jar</packaging>
@@ -42,7 +43,8 @@
                             <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
                             <version>${setup.version}</version>
                             <type>zip</type>
-                            <classifier>${osArch}</classifier>
+<!--                            <classifier>${osArch}</classifier> -->
+                            <classifier>${setup.platform}</classifier>
                         </artifactItem>
                     </artifactItems>
                 </configuration>
@@ -95,7 +97,7 @@
                 <configuration>
                     <tasks>
                         <ant antfile="download4setup.xml" target="setup.platform">
-                           <property name="platform" value="${osArch}" />
+                           <property name="platform" value="${setup.platform}" />
                            <property name="settings.localRepository" value="${settings.localRepository}" />
                         </ant>
                     </tasks>
