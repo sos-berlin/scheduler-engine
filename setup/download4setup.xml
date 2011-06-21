@@ -85,7 +85,9 @@
     <if>
      <equals arg1="${platform}" arg2="linux-i386" />
      <then>
-    		<echo message="LINUX" />
+    		<copy todir="${target.dir}/scheduler.windows/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
      </then>
     </if>
 
