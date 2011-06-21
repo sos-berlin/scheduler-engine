@@ -85,7 +85,7 @@
     <if>
      <equals arg1="${platform}" arg2="linux-i386" />
      <then>
-    		<copy todir="${target.dir}/scheduler.windows/bin">
+    		<copy todir="${target.dir}/scheduler.linux/bin">
     			<fileset refid="files.platform.bin" />
     		</copy>
      </then>
@@ -95,6 +95,11 @@
      <equals arg1="${platform}" arg2="hpux-itanium" />
      <then>
     		<echo message="HP-UX" />
+    		<!--
+    		<copy todir="${target.dir}/scheduler.hpux-ia64-32/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		-->
      </then>
     </if>
 
@@ -102,6 +107,11 @@
      <equals arg1="${platform}" arg2="solaris-" />
      <then>
     		<echo message="SOLARIS" />
+    		<!--
+    		<copy todir="${target.dir}/scheduler.solarisx86/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		-->
      </then>
     </if>
 
