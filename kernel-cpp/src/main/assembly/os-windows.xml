@@ -19,6 +19,15 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>bind</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>scheduler.dll</include>
+                <include>scheduler.dll.map</include>
+                <include>scheduler.dll.pdb</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>scheduler</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
