@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine</artifactId>
+        <version>1.3.12-beta-1a-SNAPSHOT</version>
+    </parent>
+    
+    
+    <properties>
+      <setup.version>${releaseVersion}</setup.version>
+    </properties>
+    
+    <artifactId>com.sos.scheduler.engine.jar</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <build>
+        <finalName>${project.groupId}</finalName>
+          <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${setup.version}</version>
+                            <type>jar</type>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${setup.version}</version>
+                            <type>pom</type>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
+                            <version>${setup.version}</version>
+                            <type>zip</type>
+                            <classifier>${osArch}</classifier>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <includeScope>runtime</includeScope>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- includeScope und excludeScope scheinen keine Wirkung zu haben plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>runtime</includeScope>
+                            <excludeScope>compile</excludeScope>
+                            <prependGroupId>true</prependGroupId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <tasks>
+                        <ant antfile="download4setup.xml" target="setup">
+                           <property name="platform" value="${osArch}" />
+                        </ant>
+                    </tasks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-setup</id>
+                        <phase>install</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <!-- Artefakte, deren Jars in einem Jar zusammengefasst werden. -->
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <version>${setup.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
+            <version>${setup.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
+            <version>${setup.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+    </dependencies>
+</project>

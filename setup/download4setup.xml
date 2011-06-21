@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="SOSJobSchedulerModel" basedir=".">
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
+	
+	<!-- property name="platform" value="windows-x86" / -->
+	<property name="platform" value="linux-i386" />
+	<property name="package.name" value="com.sos.scheduler" />
+	<property name="source.dir" value="${basedir}/target/dependency" />
+	<property name="target.dir" value="${basedir}/target/setup" />
+	
+	<fileset dir="${source.dir}" id="files.sos">
+		<include name="${package.name}*.jar"/>
+	</fileset>
+	
+	<target name="setup" depends="-init"	description="copy all setup files for the scheduler kernel into a directory">
+	
+		<!-- unzip the binary files into a working directory -->
+		<echo message="working for ${platform}" />
+		<unzip dest="${target.dir}\bin">
+	    <patternset>
+	        <exclude name="*.map"/>
+	        <exclude name="*.pdb"/>
+	    </patternset>
+	    <fileset dir="${source.dir}">
+	        <include name="*${platform}.zip"/>
+	    </fileset>
+		</unzip>
+		
+		<!-- copy the sos specific jar files to the target directory and normalize theirs names -->
+		<copy todir="${target.dir}">
+			<fileset refid="files.sos" />
+			<mapper type="regexp" from="^${package.name}\.(.*)" to="\1"/>
+		</copy>
+		
+	</target>
+
+	<target name="-init">
+		<delete dir="${target.dir}" />
+		<mkdir dir="${target.dir}" />
+		<mkdir dir="${target.dir}\bin" />
+	</target>
+
+</project>
