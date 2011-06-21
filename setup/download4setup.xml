@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+\brief Prepare the necessary resources from JS kernel for setup 
+
+\details
+This buildfile provides the necessary resources of the scheduler kernel to build a setup. It based on the result of running dependency:copy and
+dependency:copy-dependencies.
+
+The main target of this build (setup.platform) is called by maven via the pom.xml in this directory. The build is not able
+to run without maven integration.
+
+\version 1.0
+\date 2011-06-21
+-->
 <project name="SOSJobSchedulerModel" basedir=".">
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
 	
-	<!-- property name="platform" value="windows-x86" / -->
-	<property name="platform" value="linux-i386" />
+
+	<property name="setup.platform" value="linux-i386" />
 	<property name="package.name" value="com.sos.scheduler" />
 	<property name="source.dir" value="${basedir}/target/dependency" />
 	<property name="target.dir" value="${basedir}/target/setup" />
@@ -31,18 +44,68 @@
 	<fileset dir="${source.dir}" id="files.platform.lib">
 		<include name="scheduler.dll"/>
 	</fileset>
+
+	<target name="setup.platform" depends="setup"	description="platform specific setup preparation">
+
+    <echo message="${settings.localRepository}" />
+    <if>
+     <equals arg1="${setup.platform}" arg2="windows-x86" />
+     <then>
+    		<copy todir="${target.dir}/scheduler.windows/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		<copy todir="${target.dir}/scheduler.windows/lib">
+    			<fileset refid="files.platform.lib" />
+    		</copy>
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${setup.platform}" arg2="linux-i386" />
+     <then>
+    		<copy todir="${target.dir}/scheduler.linux/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${setup.platform}" arg2="hpux-itanium" />
+     <then>
+    		<echo message="HP-UX" />
+    		<!--
+    		<copy todir="${target.dir}/scheduler.hpux-ia64-32/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		-->
+     </then>
+    </if>
+
+    <if>
+     <equals arg1="${setup.platform}" arg2="solaris-" />
+     <then>
+    		<echo message="SOLARIS" />
+    		<!--
+    		<copy todir="${target.dir}/scheduler.solarisx86/bin">
+    			<fileset refid="files.platform.bin" />
+    		</copy>
+    		-->
+     </then>
+    </if>
+
+  </target>
 	
 	<target name="setup" description="copy all setup files for the scheduler kernel into a directory">
 	
 		<!-- unzip the binary files into a working directory -->
- 		<echo message="working for ${platform}" />
+ 		<echo message="working for ${setup.platform}" />
 		<unzip dest="${source.dir}">
 	    <patternset>
 	        <exclude name="*.map"/>
 	        <exclude name="*.pdb"/>
 	    </patternset>
 	    <fileset dir="${source.dir}">
-	        <include name="*${platform}.zip"/>
+	        <include name="*${setup.platform}.zip"/>
 	    </fileset>
 		</unzip>
 		
@@ -66,55 +129,5 @@
 		-->
 		
 	</target>
-
-	<target name="setup.platform" depends="setup"	description="platform specific setup preparation">
-
-    <echo message="${settings.localRepository}" />
-    <if>
-     <equals arg1="${platform}" arg2="windows-x86" />
-     <then>
-    		<copy todir="${target.dir}/scheduler.windows/bin">
-    			<fileset refid="files.platform.bin" />
-    		</copy>
-    		<copy todir="${target.dir}/scheduler.windows/lib">
-    			<fileset refid="files.platform.lib" />
-    		</copy>
-     </then>
-    </if>
-
-    <if>
-     <equals arg1="${platform}" arg2="linux-i386" />
-     <then>
-    		<copy todir="${target.dir}/scheduler.linux/bin">
-    			<fileset refid="files.platform.bin" />
-    		</copy>
-     </then>
-    </if>
-
-    <if>
-     <equals arg1="${platform}" arg2="hpux-itanium" />
-     <then>
-    		<echo message="HP-UX" />
-    		<!--
-    		<copy todir="${target.dir}/scheduler.hpux-ia64-32/bin">
-    			<fileset refid="files.platform.bin" />
-    		</copy>
-    		-->
-     </then>
-    </if>
-
-    <if>
-     <equals arg1="${platform}" arg2="solaris-" />
-     <then>
-    		<echo message="SOLARIS" />
-    		<!--
-    		<copy todir="${target.dir}/scheduler.solarisx86/bin">
-    			<fileset refid="files.platform.bin" />
-    		</copy>
-    		-->
-     </then>
-    </if>
-
-  </target>
 
 </project>
