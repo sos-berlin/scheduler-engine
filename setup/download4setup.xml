@@ -35,13 +35,16 @@ to run without maven integration.
 		<include name="log4j-*.jar"/>
 	</fileset>
 	
-	<fileset dir="${source.dir}" id="files.platform.bin">
+	<fileset dir="${source.dir}" id="files.bin.windows">
 		<include name="scheduler.exe"/>
-		<include name="scheduler"/>
 		<include name="spidermonkey.dll"/>
 	</fileset>
 	
-	<fileset dir="${source.dir}" id="files.platform.lib">
+	<fileset dir="${source.dir}" id="files.bin.unix">
+		<include name="scheduler"/>
+	</fileset>
+	
+	<fileset dir="${source.dir}" id="files.lib.windows">
 		<include name="scheduler.dll"/>
 	</fileset>
 
@@ -52,10 +55,10 @@ to run without maven integration.
      <equals arg1="${setup.platform}" arg2="windows-x86" />
      <then>
     		<copy todir="${target.dir}/scheduler.windows/bin">
-    			<fileset refid="files.platform.bin" />
+    			<fileset refid="files.bin.windows" />
     		</copy>
     		<copy todir="${target.dir}/scheduler.windows/lib">
-    			<fileset refid="files.platform.lib" />
+    			<fileset refid="files.lib.windows" />
     		</copy>
      </then>
     </if>
@@ -64,7 +67,7 @@ to run without maven integration.
      <equals arg1="${setup.platform}" arg2="linux-i386" />
      <then>
     		<copy todir="${target.dir}/scheduler.linux/bin">
-    			<fileset refid="files.platform.bin" />
+    			<fileset refid="files.bin.unix" />
     		</copy>
      </then>
     </if>
@@ -75,7 +78,7 @@ to run without maven integration.
     		<echo message="HP-UX" />
     		<!--
     		<copy todir="${target.dir}/scheduler.hpux-ia64-32/bin">
-    			<fileset refid="files.platform.bin" />
+    			<fileset refid="files.bin.unix" />
     		</copy>
     		-->
      </then>
@@ -87,7 +90,7 @@ to run without maven integration.
     		<echo message="SOLARIS" />
     		<!--
     		<copy todir="${target.dir}/scheduler.solarisx86/bin">
-    			<fileset refid="files.platform.bin" />
+    			<fileset refid="files.bin.unix" />
     		</copy>
     		-->
      </then>
