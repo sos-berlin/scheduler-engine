@@ -20,7 +20,7 @@ to run without maven integration.
 	<property name="setup.platform" value="linux-i386" />
 	<property name="package.name" value="com.sos.scheduler" />
 	<property name="source.dir" value="${basedir}/target/dependency" />
-	<property name="target.dir" value="${basedir}/target/setup_${setup.version}" />
+	<property name="target.dir" value="${basedir}/target/setup" />
 	
 	<fileset dir="${source.dir}" id="files.config">
 		<include name="scheduler.xsd"/>
@@ -124,12 +124,7 @@ to run without maven integration.
 			<fileset refid="files.jar" />
 		</copy>
 		
-		<!--
-		<copy todir="${target.dir}">
-			<fileset refid="files.sos" />
-			<mapper type="regexp" from="^${package.name}\.(.*)" to="\1"/>
-		</copy>
-		-->
+		<touch file="${target.dir}/${setup.version}.txt" />
 		
 	</target>
 
