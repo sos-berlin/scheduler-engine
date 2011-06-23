@@ -25,10 +25,6 @@ public abstract class OperatingSystem {
     
 
     public static class Windows extends OperatingSystem {
-//        @Override public String makeModuleFilename(String name) {
-//            return name + ".dll";
-//        }
-
         @Override public final String makeExecutableFilename(String name) {
             return name + ".exe";
         }
@@ -40,11 +36,6 @@ public abstract class OperatingSystem {
     
 
     public static class Unix extends OperatingSystem {
-//        @Override public String makeModuleFilename(String name) {
-//            File file = new File(name);
-//            return new File(file.getParent(), "lib" + file.getName() + ".so").getPath();
-//        }
-
         @Override public final String makeExecutableFilename(String name) {
             return name;
         }
