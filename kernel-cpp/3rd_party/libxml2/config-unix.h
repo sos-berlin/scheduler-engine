@@ -252,7 +252,10 @@
 #define HAVE_VSPRINTF 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
-#define HAVE_ZLIB_H 1
+#ifdef HAVE_ZLIB_H        // JS-696
+   #undef HAVE_ZLIB_H
+#endif
+
 
 /* Define to 1 if you have the `_stat' function. */
 /* #undef HAVE__STAT */
