@@ -84,6 +84,7 @@ call prepare-setup.sh <version> to use this pom
                     <tasks>
                         <ant antfile="download4setup.xml" target="setup.platform">
                            <property name="setup.platform" value="${setup.platform}" />
+                           <property name="setup.version" value="${setup.version}" />
                            <property name="settings.localRepository" value="${settings.localRepository}" />
                         </ant>
                     </tasks>
