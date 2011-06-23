@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job order="yes">
+    <script language="shell">
+        <![CDATA[
+echo hello world
+ping -n 3 localhost
+echo other_param has the value: %scheduler_param_other_param%
+rem exit 0, weil ping machmal versagt, Zschimmer 2011-06-23
+exit 0
+        ]]>
+    </script>
+    <run_time/>
+</job>

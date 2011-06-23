@@ -118,6 +118,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
       private:
         Job*                   _job;
         Spooler* const         _spooler;
+      public:
         Queue                  _queue;
     };
 

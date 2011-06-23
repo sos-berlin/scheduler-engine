@@ -104,6 +104,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"add_jobs\"/>\n"
     "<xsd:element ref=\"add_order\"/>\n"
     "<xsd:element name=\"check_folders\" type=\"check_folders\"/>\n"
+    "<xsd:element ref=\"job.why\"/>\n"
     "<xsd:element ref=\"kill_task\"/>\n"
     "<xsd:element ref=\"modify_job\"/>\n"
     "<xsd:element ref=\"modify_order\"/>\n"
@@ -192,6 +193,7 @@ const char file_scheduler_xsd[] =
     "<xsd:element ref=\"modify_hot_folder\"/>\n"
     "<xsd:element ref=\"modify_order\"/>\n"
     "<xsd:element ref=\"modify_spooler\"/>\n"
+    "<xsd:element ref=\"job.why\"/>\n"
     "<xsd:element ref=\"job_chain.modify\"/>\n"
     "<xsd:element ref=\"job_chain_node.modify\"/>\n"
     "<xsd:element name=\"order\" type=\"order\"/>\n"
@@ -991,6 +993,12 @@ const char file_scheduler_xsd[] =
     "</xsd:simpleType>\n"
     "</xsd:attribute>\n"
     "<xsd:attribute name=\"heart_beat_warn_timeout\" type=\"xsd:positiveInteger\"/>\n"
+    "</xsd:complexType>\n"
+    "</xsd:element>\n"
+    "\n"
+    "<xsd:element name=\"job.why\">\n"
+    "<xsd:complexType>\n"
+    "<xsd:attribute name=\"job\" type=\"Path\" use=\"required\"/>\n"
     "</xsd:complexType>\n"
     "</xsd:element>\n"
     "\n"
@@ -2052,7 +2060,7 @@ namespace scheduler {
 
 static const Embedded_file embedded_files_array[] = 
 {
-    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1307046557 },
+    { "scheduler.xsd", file_scheduler_xsd, sizeof file_scheduler_xsd - 1, 1308828837 },
     { "doc.en/log_categories.xml", file_doc_en_log_categories_xml, sizeof file_doc_en_log_categories_xml - 1, 1305053447 },
     { NULL, NULL, 0 }
 };

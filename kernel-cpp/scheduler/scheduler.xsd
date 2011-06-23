@@ -95,6 +95,7 @@
                 <xsd:element ref="add_jobs"/>
                 <xsd:element ref="add_order"/>
                 <xsd:element name="check_folders" type="check_folders"/>
+                <xsd:element ref="job.why"/>
                 <xsd:element ref="kill_task"/>
                 <xsd:element ref="modify_job"/>
                 <xsd:element ref="modify_order"/>
@@ -183,6 +184,7 @@
             <xsd:element ref="modify_hot_folder"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
+            <xsd:element ref="job.why"/>
             <xsd:element ref="job_chain.modify"/>
             <xsd:element ref="job_chain_node.modify"/>
             <xsd:element name="order" type="order"/>
@@ -982,6 +984,12 @@
                 </xsd:simpleType>
             </xsd:attribute>
             <xsd:attribute name="heart_beat_warn_timeout" type="xsd:positiveInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="job.why">
+        <xsd:complexType>
+            <xsd:attribute name="job" type="Path" use="required"/>
         </xsd:complexType>
     </xsd:element>
     

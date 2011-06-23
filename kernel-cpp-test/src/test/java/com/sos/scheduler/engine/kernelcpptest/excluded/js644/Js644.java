@@ -1,8 +1,6 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.jobchain.freeze;
+package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 
-import java.util.List;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import com.google.common.base.Function;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.collect.Iterators;
@@ -12,34 +10,49 @@ import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import java.io.File;
-import java.util.Iterator;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.concat;
 import static java.util.Arrays.asList;
 
 
-public class FreezeTest extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(FreezeTest.class);
+public class Js644 extends SchedulerTest {
+    private static final Logger logger = Logger.getLogger(Js644.class);
     private static final Time orderTimeout = Time.of(10);
-    private static final List<String> jobFilenames = asList("a.job.xml", "b.job.xml", "c.job.xml");
-    private static final Iterable<String> configFilenames = concat(jobFilenames, asList("j.job_chain.xml", "j,1.order.xml"));
+    private static final List<String> jobPaths = asList("exercise10a", "exercise10b", "exercise10c");
+    private static final Collection<String> jobFilenames = transform(jobPaths, append(".job.xml"));
+    private static final Iterable<String> configFilenames = concat(jobFilenames, asList("exercise10.job_chain.xml", "exercise10,1.order.xml"));
     private static final Charset encoding = Charsets.UTF_8;
 
     private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
 
 
-    public FreezeTest() {
+    public Js644() {
         super(configFilenames);
+    }
+
+
+    private static Function<String,String> append(final String appendix) {
+        return new Function<String,String>() {
+            @Override public String apply(String a) {
+                return a + appendix;
+            }
+        };
     }
 
     
     @Test public void test() throws Exception {
         strictSubscribeEvents(new MyEventSubscriber());
         startScheduler("-e");
+        getScheduler().executeXml("<modify_job job='" + jobPaths.get(0) + "' cmd='stop'/>");
+        //for (String j: jobPaths) logger.info(getScheduler().executeXml("<job.why job='" + j + "'/>"));    //TODO Test fehlt
         Thread fileModifierThread = new FileModifierThread(getDirectory());
         fileModifierThread.start();
         try {
@@ -84,10 +97,10 @@ public class FreezeTest extends SchedulerTest {
     
     private static class FileModifier {
         private final File directory;
-        private final List<String> files;
+        private final Collection<String> files;
         private Iterator<String> iterator = Iterators.emptyIterator();
 
-        private FileModifier(File directory, List<String> files) {
+        private FileModifier(File directory, Collection<String> files) {
             this.directory = directory;
             this.files = files;
         }

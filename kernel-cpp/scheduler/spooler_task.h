@@ -121,7 +121,7 @@ struct Task : Object,
     void                        write_element_attributes    ( const xml::Element_ptr& element ) const;
 
 
-    int                         id                          ()                                      { return _id; }
+    int                         id                          () const                                { return _id; }
 
     enum End_mode { end_none = 0, end_normal, end_nice, end_kill_immediately };
     void                        cmd_end                     ( End_mode = end_normal );
@@ -191,6 +191,8 @@ struct Task : Object,
     Order*                      order                       ()                                      { return _order; }
     pid_t                       pid                         () const                                { return _module_instance? _module_instance->pid() : 0; }
     Xc_copy                     error                       ()                                      { return _error; }
+    bool                        force                       () const                                { return _force_start; }
+    const Time&                 at                          () const                                { return _start_at; }
     
 
   protected:
