@@ -35,40 +35,38 @@ to run without maven integration.
 		<include name="log4j-*.jar"/>
 	</fileset>
 	
-	<fileset dir="${source.dir}" id="files.bin.windows">
-		<include name="scheduler.exe"/>
-		<include name="spidermonkey.dll"/>
-	</fileset>
-	
-	<fileset dir="${source.dir}" id="files.bin.unix">
-		<include name="scheduler"/>
-	</fileset>
-	
-	<fileset dir="${source.dir}" id="files.lib.windows">
-		<include name="scheduler.dll"/>
-	</fileset>
+	<target name="setup.platform" depends="-init, -copy, -copy.platform"	description="platform specific setup preparation">
+    <echo message="DONE !!" />
+  </target>
 
-	<target name="setup.platform" depends="setup"	description="platform specific setup preparation">
+	<target name="-init" description="initialize the platform specific settings">
 
     <echo message="${settings.localRepository}" />
+
     <if>
      <equals arg1="${setup.platform}" arg2="windows-x86" />
      <then>
-    		<copy todir="${target.dir}/scheduler.windows/bin">
-    			<fileset refid="files.bin.windows" />
-    		</copy>
-    		<copy todir="${target.dir}/scheduler.windows/lib">
-    			<fileset refid="files.lib.windows" />
-    		</copy>
+        <property name="folder.name" value="windows" />
+      	<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+      		<include name="scheduler.exe"/>
+      		<include name="spidermonkey.dll"/>
+      	</fileset>
+      	<fileset dir="${source.dir}/${folder.name}" id="files.lib.platform">
+      		<include name="scheduler.dll"/>
+      	</fileset>
      </then>
     </if>
 
     <if>
      <equals arg1="${setup.platform}" arg2="linux-i386" />
      <then>
-    		<copy todir="${target.dir}/scheduler.linux/bin">
-    			<fileset refid="files.bin.unix" />
-    		</copy>
+        <property name="folder.name" value="linux32" />
+      	<fileset dir="${source.dir}/${folder.name}" id="files.bin.platform">
+      		<include name="scheduler"/>
+      	</fileset>
+      	<fileset dir="${source.dir}/${folder.name}" id="files.lib.platform">
+      		<include name="libspidermonkey.so"/>
+      	</fileset>
      </then>
     </if>
 
@@ -77,9 +75,7 @@ to run without maven integration.
      <then>
     		<echo message="HP-UX" />
     		<!--
-    		<copy todir="${target.dir}/scheduler.hpux-ia64-32/bin">
-    			<fileset refid="files.bin.unix" />
-    		</copy>
+        <property name="folder.name" value="hpux-ia64-32" />
     		-->
      </then>
     </if>
@@ -89,20 +85,32 @@ to run without maven integration.
      <then>
     		<echo message="SOLARIS" />
     		<!--
-    		<copy todir="${target.dir}/scheduler.solarisx86/bin">
-    			<fileset refid="files.bin.unix" />
-    		</copy>
+        <property name="folder.name" value="solarisx86" />
     		-->
      </then>
     </if>
+    <echo message="the folder name is ${folder.name}" />
+
+  </target>
+		
+	<target name="-copy.platform" description="copy the platform specific files" if="folder.name">
+
+    <echo message="the folder name is ${folder.name}" />
+		<copy todir="${target.dir}/scheduler.${folder.name}/lib">
+			<fileset refid="files.lib.platform" />
+		</copy>
+
+		<copy todir="${target.dir}/scheduler.${folder.name}/bin">
+			<fileset refid="files.bin.platform" />
+		</copy>
 
   </target>
 	
-	<target name="setup" description="copy all setup files for the scheduler kernel into a directory">
+	<target name="-copy" description="copy all setup files for the scheduler kernel into a directory">
 	
 		<!-- unzip the binary files into a working directory -->
  		<echo message="working for ${setup.platform}" />
-		<unzip dest="${source.dir}">
+		<unzip dest="${source.dir}/${folder.name}">
 	    <patternset>
 	        <exclude name="*.map"/>
 	        <exclude name="*.pdb"/>
