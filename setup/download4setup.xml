@@ -22,19 +22,6 @@ to run without maven integration.
 	<property name="source.dir" value="${basedir}/target/dependency" />
 	<property name="target.dir" value="${basedir}/target/setup" />
 	
-	<fileset dir="${source.dir}" id="files.config">
-		<include name="scheduler.xsd"/>
-	</fileset>
-	
-	<fileset dir="${source.dir}" id="files.lib">
-		<include name="com.sos.scheduler.engine.jar*"/>
-	</fileset>
-	
-	<fileset dir="${source.dir}" id="files.jar">
-		<include name="guava*.jar"/>
-		<include name="log4j-*.jar"/>
-	</fileset>
-	
 	<target name="setup.platform" depends="-init, -copy, -copy.platform"	description="platform specific setup preparation">
     <echo message="DONE !!" />
   </target>
@@ -90,6 +77,19 @@ to run without maven integration.
      </then>
     </if>
     <echo message="the folder name is ${folder.name}" />
+  	
+  	<fileset dir="${source.dir}/${folder.name}" id="files.config">
+  		<include name="scheduler.xsd"/>
+  	</fileset>
+  	
+  	<fileset dir="${source.dir}" id="files.lib">
+  		<include name="com.sos.scheduler.engine.jar*"/>
+  	</fileset>
+  	
+  	<fileset dir="${source.dir}" id="files.jar">
+  		<include name="guava*.jar"/>
+  		<include name="log4j-*.jar"/>
+  	</fileset>
 
   </target>
 		
