@@ -1305,7 +1305,7 @@ bool Node::is_ready_for_order_processing() const {
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
     xml::Element_ptr result = doc.createElement("job_chain_node");
-    result.setAttribute("state", _order_state);
+    result.setAttribute("state", _order_state.as_string());
     result.appendChild(_job_chain->why_dom_element(doc));
     if(action() != Node::act_process)  append_obstacle_element(result, "action", action_name());
     result.appendChild(_order_queue->why_dom_element(result.ownerDocument(), now));
