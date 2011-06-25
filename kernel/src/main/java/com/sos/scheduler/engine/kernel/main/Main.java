@@ -14,8 +14,16 @@ public class Main {
         return schedulerController.getExitCode();
     }
 
+    
     public static void main(String[] args) throws Exception {
         int exitCode = new Main().apply(args);
-        System.exit(exitCode);  //NOSONAR
+        if (exitCode != 0)  throw new ExitCodeException(exitCode);
+    }
+
+
+    public static class ExitCodeException extends RuntimeException {
+        public ExitCodeException(int exitCode) {
+            super("Terminated with exit code " + exitCode);
+        }
     }
 }

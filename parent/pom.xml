@@ -30,57 +30,8 @@
                     <name>EclipseLink Repository</name>
                     <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
                 </repository>
-                <!--repository>
-                    <id>maven2-repository.dev.java.net</id>
-                    <name>Java.net Repository for Maven</name>
-                    <url>http://download.java.net/maven/2/</url>
-                    <layout>default</layout>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository-->
-                <!--repository>
-                    <id>scala-tools.org</id>
-                    <name>Scala-Tools Maven2 Repository</name>
-                    <url>http://scala-tools.org/repo-releases</url>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository-->
             </repositories>
-            <!--pluginRepositories>
-                <pluginRepository>
-                    <id>scala-tools.org</id>
-                    <name>Scala-Tools Maven2 Repository</name>
-                    <url>http://scala-tools.org/repo-releases</url>
-                </pluginRepository>
-            </pluginRepositories-->
         </profile>
-        <!--profile>
-            <id>copy-dependencies</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <!- -outputDirectory>${project.build.directory}/lib</outputDirectory- ->
-                                    <includeScope>runtime</includeScope>
-                                    <excludeScope>compile</excludeScope>
-                                    <prependGroupId>true</prependGroupId>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile-->
         <profile>
             <id>windows</id>
             <activation>
@@ -383,6 +334,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.8</version>
                 <configuration>
                     <downloadSources>true</downloadSources>
                     <buildcommands>
@@ -416,6 +368,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.2.1</version>
                 </plugin>
@@ -427,37 +384,57 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.6</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3.1</version>
+                </plugin>
                 <plugin>                
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.9</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.scala-tools</groupId>
+                    <artifactId>maven-scala-plugin</artifactId>
+                    <version>2.14.1</version>
+                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>2.3.1</version>
                     <!-- 2011-05-24 Die voreingestellte Version installiert die pom für kernel-cpp nicht. Diese tut's. http://jira.codehaus.org/browse/MINSTALL-41 -->
                 </plugin>
                 <plugin>
-		                <artifactId>maven-antrun-plugin</artifactId>
-		                <version>1.1</version>
-									  <!-- Ant-Contrib for Special Ant Tasks (IF) -->
-										<dependencies>
-											  <dependency>
-											   <groupId>ant-contrib</groupId>
-											   <artifactId>ant-contrib</artifactId>
-											   <version>1.0b3</version>
-											   <exclusions>
-											    <exclusion>
-											     <groupId>ant</groupId>
-											     <artifactId>ant</artifactId>
-											    </exclusion>
-											   </exclusions>
-											  </dependency>
-											  <dependency>
-											   <groupId>ant</groupId>
-											   <artifactId>ant-nodeps</artifactId>
-											   <version>1.6.5</version>
-											  </dependency>
-										</dependencies>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.1</version>
+                    <!-- Ant-Contrib for Special Ant Tasks (IF) -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>ant-contrib</groupId>
+                            <artifactId>ant-contrib</artifactId>
+                            <version>1.0b3</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>ant</groupId>
+                                    <artifactId>ant</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                        <dependency>
+                            <groupId>ant</groupId>
+                            <artifactId>ant-nodeps</artifactId>
+                            <version>1.6.5</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -485,6 +462,7 @@
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
+                <version>2.9.1</version>
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
                 </configuration>

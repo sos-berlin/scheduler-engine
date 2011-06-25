@@ -39,7 +39,7 @@
                             <includePluginDependencies>true</includePluginDependencies>                            
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
                             <arguments>
-                                <argument>-java-output-directory=${build.sourceDirectory}</argument>
+                                <argument>-java-output-directory=${project.build.sourceDirectory}</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                             </arguments>
                         </configuration>
