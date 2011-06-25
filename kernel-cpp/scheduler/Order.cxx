@@ -229,17 +229,26 @@ bool Order::is_processable()
     if( _task )            return false;               // Schon in Verarbeitung
     if( _is_replacement )  return false;
 
-    if( _job_chain )
-    {
-        if( _job_chain->is_to_be_removed()  || 
-            _job_chain->replacement()  &&  _job_chain->replacement()->file_based_state() == File_based::s_initialized  ||
-            _job_chain->state() != Job_chain::s_active )  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
-
-        if( Node* node = job_chain_node() )
-            if( node->action() != Node::act_process )  return false;
-    }
+    if( _job_chain && !_job_chain->is_ready_for_order_processing())  return false;
+    if( Node* node = job_chain_node() )
+        if (!node->is_ready_for_order_processing())  return false;
 
     return true;
+}
+
+//---------------------------------------------------------------------------Order::why_dom_element
+
+xml::Element_ptr Order::why_dom_element(const xml::Document_ptr& doc, const Time& now) {
+    xml::Element_ptr result = doc.createElement("order");
+    result.setAttribute("id", string_id());
+    if (now < _setback) append_obstacle_element(result, "setback", _setback.xml_value());
+    if (_is_on_blacklist) append_obstacle_element(result, "on_blacklist", as_bool_string(_is_on_blacklist));
+    if (_suspended) append_obstacle_element(result, "suspended", as_bool_string(_suspended));
+    if (_task)  append_obstacle_element(result, _task->dom_element(doc, Show_what()));
+    if (_is_replacement)  append_obstacle_element(result, "is_replacement", as_bool_string(_is_replacement));
+    //Schon oben aufrufen (sonst rekursiv): if (_job_chain) result.appendChild(_job_chain->why_dom_element(doc));
+    //Schon oben aufrufen (sonst rekursiv): if (Node* node = job_chain_node()) result.appendChild(node->why_dom_element(doc, now));
+    return result;
 }
 
 //----------------------------------------------------------Order::handle_changed_processable_state

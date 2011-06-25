@@ -6,6 +6,9 @@
 namespace sos {
 namespace scheduler {
 
+const string reason_start_element_name = "start_reason";
+const string obstacle_element_name = "obstacle";
+
 //--------------------------------------------------------------------variable_set_from_environment
 
 ptr<Com_variable_set> variable_set_from_environment()
@@ -31,6 +34,22 @@ bool is_allowed_operation_while_waiting( Async_operation* op )
 
     return is_communication_operation( op ); //||
            //Das wird rekursiv und sowieso ist vielleicht die Datenbank geschlossen:  cluster::is_heartbeat_operation( op );
+}
+
+//-------------------------------------------------------------------------------------------------
+
+xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const string& attribute_name, const string& value) {
+    xml::Element_ptr result = element.append_new_element(obstacle_element_name);
+    result.setAttribute(attribute_name, value);
+    return result;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const xml::Element_ptr& obstacle_child) {
+    xml::Element_ptr result = element.append_new_element(obstacle_element_name);
+    result.appendChild(obstacle_child);
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

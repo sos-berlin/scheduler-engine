@@ -1295,6 +1295,23 @@ xml::Element_ptr Node::dom_element( const xml::Document_ptr& document, const Sho
     return element;
 }
 
+//--------------------------------------------------------------Node::is_ready_for_order_processing
+
+bool Node::is_ready_for_order_processing() const {
+    return action() == Node::act_process;
+}
+
+//----------------------------------------------------------------Order_queue_node::why_dom_element
+
+xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
+    xml::Element_ptr result = doc.createElement("job_chain_node");
+    result.setAttribute("state", _order_state);
+    result.appendChild(_job_chain->why_dom_element(doc));
+    if(action() != Node::act_process)  append_obstacle_element(result, "action", action_name());
+    result.appendChild(_order_queue->why_dom_element(result.ownerDocument(), now));
+    return result;
+}
+
 //---------------------------------------------------------------Order_queue_node::Order_queue_node
 
 Order_queue_node::Order_queue_node( Job_chain* job_chain, const Order::State& state, Node::Type type ) 
@@ -2163,6 +2180,30 @@ void Job_chain::append_calendar_dom_elements( const xml::Element_ptr& element, S
     //{
     //    Ist bereit von Order_subsystem_impl::append_calendar_dom_elements() gelesen worden
     //}
+}
+//---------------------------------------------------------Job_chain::is_ready_for_order_processing
+
+bool Job_chain::is_ready_for_order_processing() const {
+    if (is_to_be_removed())  return false;
+    if (replacement()  &&  replacement()->file_based_state() == File_based::s_initialized)  return false;
+    if (state() != Job_chain::s_active)  return false;   // Jobkette wird nicht gelöscht oder ist gestopped (s_stopped)?
+    return !_is_stopped;
+}
+
+//-----------------------------------------------------------------------Job_chain::why_dom_element
+
+xml::Element_ptr Job_chain::why_dom_element(const xml::Document_ptr& doc) const {
+    xml::Element_ptr result = doc.createElement("job_chain");
+    result.setAttribute("path", path());
+    if (is_to_be_removed())  append_obstacle_element(result, "to_be_removed", as_bool_string(true));
+    if (replacement()  &&  replacement()->file_based_state() == File_based::s_initialized)
+        append_obstacle_element(result, "replacement", replacement()->file_based_state_name());
+    if (state() != Job_chain::s_active)  append_obstacle_element(result, "state", state_name());
+    if (is_max_orders_reached()) {
+        append_obstacle_element(result, "max_orders", as_string(_max_orders))
+        .setAttribute("running_orders", number_of_touched_orders());
+    }
+    return result;
 }
 
 //---------------------------------------------------------------------------------normalized_state
@@ -3203,14 +3244,6 @@ void Job_chain::check_max_orders() const
     }
 }
 
-//---------------------------------------------------------Job_chain::is_ready_for_order_processing
-
-bool Job_chain::is_ready_for_order_processing() const
-{
-    return
-       state() == s_active  && 
-       !_is_stopped;
-}
 //-----------------------------------------------------Job_chain::is_ready_for_new_order_processing
 
 Virgin_is_allowed Job_chain::is_ready_for_new_order_processing() const
@@ -3275,7 +3308,7 @@ void Job_chain::notify_nodes()
 
 //----------------------------------------------------------------------------Job_chain::state_name
 
-string Job_chain::state_name()     // Brauchen wir eigentlich nicht mehr, ist durch file_based_state() abgedeckt
+string Job_chain::state_name() const    // Brauchen wir eigentlich nicht mehr, ist durch file_based_state() abgedeckt
 {
     switch( _state )
     {
@@ -4368,6 +4401,20 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
 
     if( result )  assert( !result->_is_distributed );
 
+    return result;
+}
+
+//---------------------------------------------------------------------Order_queue::why_dom_element
+
+xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, const Time& now) {
+    xml::Element_ptr result = doc.createElement("order_queue");
+    result.setAttribute("length", (int)_queue.size());
+    Z_FOR_EACH_CONST(Queue, _queue, it) {
+        Order* order = *it;
+        xml::Element_ptr e = result.appendChild(order->why_dom_element(doc, now));
+        if (!order->is_immediately_processable(now))
+            break;
+    }
     return result;
 }
 

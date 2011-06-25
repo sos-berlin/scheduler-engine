@@ -28,6 +28,8 @@ namespace time
 //-------------------------------------------------------------------------------------------------
 
 extern const Embedded_files            embedded_files;             // spooler_embedded_files.cxx
+extern const string reason_start_element_name;
+extern const string obstacle_element_name;
 
 //-----------------------------------------------------------------------------------------FOR_EACH
 
@@ -69,6 +71,9 @@ typedef int64                   Process_id;   // Für Process
 
 ptr<Com_variable_set>           variable_set_from_environment();
 bool                            is_allowed_operation_while_waiting( Async_operation* op );
+xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const string& attribute_name, const string& value);
+xml::Element_ptr append_obstacle_element(const xml::Element_ptr& element, const xml::Element_ptr& obstacle_child);
+inline string                   as_bool_string(bool b) { return b? "true" : "false"; }
 
 //-------------------------------------------------------------------------------------------------
 

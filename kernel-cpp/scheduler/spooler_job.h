@@ -27,6 +27,7 @@ struct Combined_job_nodes : Object
     void                        withdraw_order_requests     ();
     Time                        next_time                   ();
     Order*                      fetch_and_occupy_order      (Task* occupying_task, const Time& now, const string& cause);
+    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&);
     void                        connect_with_order_queues   ();
     void                        connect_job_node            ( job_chain::Job_node* );
     void                        disconnect_job_node         ( job_chain::Job_node* );
@@ -114,6 +115,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
         void                    move_to_new_job             ( Job* );
         Time                    next_start_time             ();
         void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
+        xml::Element_ptr        why_dom_element             (const xml::Document_ptr&, const Time& now, bool in_period);
 
       private:
         Job*                   _job;
@@ -174,7 +176,7 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     bool                        is_visible_in_xml_folder    ( const Show_what& ) const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show_what )  { return dom_element( document, show_what, (Job_chain*)NULL ); }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what&, Job_chain*  );
-    xml::Element_ptr            dom_element_why             ( const xml::Document_ptr& );
+    xml::Element_ptr            why_dom_element             ( const xml::Document_ptr& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
 

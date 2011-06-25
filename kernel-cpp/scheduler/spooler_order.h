@@ -266,6 +266,7 @@ struct Order : Com_order,
     void                    set_dom                     ( const xml::Element_ptr&, Variable_set_map* );
     void                        set_identification_attributes( const xml::Element_ptr& );
     xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log );
+    xml::Element_ptr            why_dom_element         (const xml::Document_ptr&, const Time& now);
     xml::Document_ptr           dom                     ( const Show_what& );
     void                        append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
 
@@ -550,7 +551,7 @@ struct Node : Com_job_chain_node,
     Action                      action                      () const                                { return _action; }
     string                      action_name                 () const                                { return string_from_action( _action ); }
     int                         priority                    () const                                { return _priority; }
-
+    bool                        is_ready_for_order_processing() const;
     virtual bool                is_type                     ( Type ) const                          { return false; }
 
     virtual void                set_action                  ( const string& );
@@ -623,6 +624,7 @@ struct Order_queue_node : Node, javabridge::has_proxy<Order_queue_node>
     void                        handle_changed_processable_state();
     Order*                      fetch_and_occupy_order      ( Task* occupying_task, const Time& now, const string& cause );
     bool                        is_ready_for_order_processing ();
+    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time&) const;
 
   private:
     ptr<Order_queue>           _order_queue;
@@ -787,7 +789,7 @@ struct Job_chain : Com_job_chain,
     void                        notify_nodes                ();
     void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
-    string                      state_name                  ();
+    string                      state_name                  () const;
 
     void                    set_title                       ( const string& title )                 { _title = title; }
     string                      title                       () const                                { return _title; }
@@ -868,10 +870,12 @@ struct Job_chain : Com_job_chain,
 
     int                         number_of_touched_orders    () const;
     bool                 number_of_touched_orders_available () const                                { return !is_distributed(); }
-	 bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
+    bool                        is_max_orders_set           () const                                { return _max_orders < INT_MAX; }
     bool                        is_max_orders_reached       () const;
     bool                        is_ready_for_order_processing() const;
     Virgin_is_allowed           is_ready_for_new_order_processing() const;
+    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
+    xml::Element_ptr            WriterFilter_ptr            () const;
     void                        check_max_orders            () const;
 
   private:
@@ -936,6 +940,7 @@ struct Order_queue : Com_order_queue,
     void                        close                       ();
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time& now);
 
     job_chain::Order_queue_node* order_queue_node           () const                                { return _order_queue_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }

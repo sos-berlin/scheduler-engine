@@ -491,7 +491,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 xml::Element_ptr Command_processor::execute_job_why( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
-    return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> dom_element_why( _answer );
+    return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> why_dom_element( _answer );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads

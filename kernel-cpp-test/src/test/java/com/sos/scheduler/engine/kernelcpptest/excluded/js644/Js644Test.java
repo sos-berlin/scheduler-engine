@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernelcpptest.excluded.js644;
 
-import com.google.common.base.Function;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.collect.Iterators;
@@ -16,43 +15,25 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger;
 import org.junit.Test;
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Iterables.concat;
-import static java.util.Arrays.asList;
+import static com.sos.scheduler.engine.kernelcpptest.excluded.js644.Configuration.*;
 
 
-public class Js644 extends SchedulerTest {
-    private static final Logger logger = Logger.getLogger(Js644.class);
+public class Js644Test extends SchedulerTest {
     private static final Time orderTimeout = Time.of(10);
-    private static final List<String> jobPaths = asList("exercise10a", "exercise10b", "exercise10c");
-    private static final Collection<String> jobFilenames = transform(jobPaths, append(".job.xml"));
-    private static final Iterable<String> configFilenames = concat(jobFilenames, asList("exercise10.job_chain.xml", "exercise10,1.order.xml"));
     private static final Charset encoding = Charsets.UTF_8;
 
     private final BlockingQueue<Boolean> eventReceivedQueue = new ArrayBlockingQueue<Boolean>(1);
 
 
-    public Js644() {
+    public Js644Test() {
         super(configFilenames);
     }
 
 
-    private static Function<String,String> append(final String appendix) {
-        return new Function<String,String>() {
-            @Override public String apply(String a) {
-                return a + appendix;
-            }
-        };
-    }
-
-    
     @Test public void test() throws Exception {
         strictSubscribeEvents(new MyEventSubscriber());
         startScheduler("-e");
-        getScheduler().executeXml("<modify_job job='" + jobPaths.get(0) + "' cmd='stop'/>");
-        //for (String j: jobPaths) logger.info(getScheduler().executeXml("<job.why job='" + j + "'/>"));    //TODO Test fehlt
         Thread fileModifierThread = new FileModifierThread(getDirectory());
         fileModifierThread.start();
         try {
