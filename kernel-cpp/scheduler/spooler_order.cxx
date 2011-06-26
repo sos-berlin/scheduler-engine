@@ -1305,10 +1305,10 @@ bool Node::is_ready_for_order_processing() const {
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
     xml::Element_ptr result = doc.createElement("job_chain_node");
-    result.setAttribute("state", _order_state.as_string());
-    result.appendChild(_job_chain->why_dom_element(doc));
+    result.setAttribute("order_state", _order_state.as_string());
     if(action() != Node::act_process)  append_obstacle_element(result, "action", action_name());
-    result.appendChild(_order_queue->why_dom_element(result.ownerDocument(), now));
+    result.appendChild(_job_chain->why_dom_element(doc));
+    result.appendChild(_order_queue->why_dom_element(doc, now));
     return result;
 }
 
@@ -2073,10 +2073,10 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
     fill_file_based_dom_element( result, show_what );
     result.setAttribute_optional( "title", _title );
     result.setAttribute( "orders", order_count( &ta ) );
-	 if ( number_of_touched_orders_available() )			// JS-682
-		 result.setAttribute( "running_orders", number_of_touched_orders() );
-	 if ( is_max_orders_set() )
-			result.setAttribute( "max_orders", _max_orders );
+    if ( number_of_touched_orders_available() )			// JS-682
+        result.setAttribute( "running_orders", number_of_touched_orders() );
+    if ( is_max_orders_set() )
+        result.setAttribute( "max_orders", _max_orders );
     result.setAttribute( "state" , state_name() );
     if( !is_visible() ) result.setAttribute( "visible", _visible == visible_never? "never" : "no" );
     result.setAttribute( "orders_recoverable", _orders_are_recoverable? "yes" : "no" );
@@ -2198,7 +2198,8 @@ xml::Element_ptr Job_chain::why_dom_element(const xml::Document_ptr& doc) const 
     if (is_to_be_removed())  append_obstacle_element(result, "to_be_removed", as_bool_string(true));
     if (replacement()  &&  replacement()->file_based_state() == File_based::s_initialized)
         append_obstacle_element(result, "replacement", replacement()->file_based_state_name());
-    if (state() != Job_chain::s_active)  append_obstacle_element(result, "state", state_name());
+    if (_is_stopped)  append_obstacle_element(result, "state", "stopped");
+    if (state() != s_active)  append_obstacle_element(result, "state", state_name());
     if (is_max_orders_reached()) {
         append_obstacle_element(result, "max_orders", as_string(_max_orders))
         .setAttribute("running_orders", number_of_touched_orders());

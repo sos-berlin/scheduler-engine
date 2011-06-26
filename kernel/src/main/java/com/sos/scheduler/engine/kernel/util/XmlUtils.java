@@ -116,16 +116,14 @@ public final class XmlUtils {
 
     public static Element elementXPathOrNull(Node baseNode, String xpathExpression) {
         try {
-            XPath xpath  = XPathFactory.newInstance().newXPath();
-            return (Element)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODE);
+            return (Element)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODE);
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
 
     public static Collection<Element> elementsXPath(Node baseNode, String xpathExpression) {
         try {
-            XPath xpath  = XPathFactory.newInstance().newXPath();
-            return listFromNodeList((NodeList)xpath.evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
+            return listFromNodeList((NodeList)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.NODESET));
         } catch (XPathExpressionException x) { throw new XmlException(x); }
     }
 
@@ -137,13 +135,33 @@ public final class XmlUtils {
     }
 
 
+    public static String stringXPath(Node baseNode, String xpathExpression) {
+        try {
+            String result = (String)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.STRING);
+            if (result == null)  throw new XmlException("XPath passt nicht: " + xpathExpression);
+            return result;
+        } catch (XPathExpressionException x) { throw new XmlException(x); }
+    }
+
+
     public static String stringXPath(Node baseNode, String xpathExpression, String deflt) {
         try {
-            XPath xpath  = XPathFactory.newInstance().newXPath();
-            String result = (String)xpath.evaluate(xpathExpression, baseNode, XPathConstants.STRING);
+            String result = (String)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.STRING);
             if (result == null)  result = deflt;
             return result;
         } catch (XPathExpressionException x) { throw new XmlException(x); }
+    }
+
+
+    public static boolean booleanXPath(Node baseNode, String xpathExpression) {
+        try {
+            return (Boolean)newXPath().evaluate(xpathExpression, baseNode, XPathConstants.BOOLEAN);
+        } catch (XPathExpressionException x) { throw new XmlException(x); }
+    }
+
+
+    public static XPath newXPath() {
+        return XPathFactory.newInstance().newXPath();
     }
 
 

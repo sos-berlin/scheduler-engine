@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+	<config>
+		<commands>
+            <modify_job job='c' cmd='stop'/>
+            <add_order job_chain='j' id='1'/>
+            <add_order job_chain='j' id='2'/>
+            <add_order job_chain='j' id='3'/>
+            <job_chain.modify job_chain='j' state='stopped'/>
+            <job_chain_node.modify job_chain='j' state='state-b' action='next_state'/>
+		</commands>
+	</config>
+</spooler>

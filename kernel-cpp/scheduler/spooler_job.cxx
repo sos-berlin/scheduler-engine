@@ -1731,8 +1731,8 @@ xml::Element_ptr Job::Task_queue::why_dom_element(const xml::Document_ptr& doc, 
         bool at_in_period = task->at() <= now  &&  in_period;
         if (!at_forced  &&  !at_in_period) {
             xml::Element_ptr o = append_obstacle_element(task_element, "at", task->at().xml_value());
-            o.setAttribute("force", as_string(task->force()));
-            o.setAttribute("in_period", in_period);
+            o.setAttribute("force", as_bool_string(task->force()));
+            o.setAttribute("in_period", as_bool_string(in_period));
         }
         else break;
     }
@@ -3587,7 +3587,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 //-----------------------------------------------------------------------------Job::why_dom_element
 
 xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
-    xml::Element_ptr result = doc.createElement("reasons");
+    xml::Element_ptr result = doc.createElement("job");
     Time now = Time::now();
     bool in_period = is_in_period(now);
     int not_ending_tasks_count = this->not_ending_tasks_count();
@@ -3602,9 +3602,9 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
 
     result.appendChild(_combined_job_nodes->why_dom_element(doc, now));
 
+    //boolean has_order = request_order( now, obj_name() );
     {
-        xml::Element_ptr e = result.append_new_element(reason_start_element_name);
-        e.setAttribute("only_if_order_is_ready", "true");
+        xml::Element_ptr e = result.append_new_element("if_order_is_ready");
         //e.appendChild(order->dom_element(doc, Show_what()));
         if (!is_order_controlled()) {
             xml::Element_ptr obstacle = e.append_new_element(obstacle_element_name);
@@ -3622,14 +3622,20 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     }
 
     if (!(_state == s_pending  &&  _max_tasks > 0  ||  _state == s_running  &&  _running_tasks.size() < _max_tasks)) {
-        xml::Element_ptr o = append_obstacle_element(result, "max_tasks", as_string(_max_tasks));
-        o.setAttribute("running_tasks", (int)_running_tasks.size());
-        o.setAttribute("state", state_name());
+        xml::Element_ptr o = result.append_new_element(obstacle_element_name);
+        if (_max_tasks < _running_tasks.size()) {
+            o.setAttribute("max_tasks", as_string(_max_tasks));
+            o.setAttribute("running_tasks", (int)_running_tasks.size());
+        } else
+        if (_max_tasks == 0) 
+            o.setAttribute("max_tasks", as_string(_max_tasks));
+        else
+            o.setAttribute("state", state_name());
     }
 
     if (!(!_waiting_for_process  ||  _waiting_for_process_try_again)) {
         xml::Element_ptr o = append_obstacle_element(result, "waiting_for_process", as_string(_waiting_for_process));
-        o.setAttribute("waiting_for_process_try_again", _waiting_for_process_try_again);
+        o.setAttribute("waiting_for_process_try_again", as_bool_string(_waiting_for_process_try_again));
     }
 
 
@@ -3638,10 +3644,12 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     if( _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopping_let_run )
         xml::Element_ptr obstacle = append_obstacle_element(result, "scheduler_state", _spooler->state_name());
 
-    result.appendChild(_task_queue->why_dom_element(doc, now, in_period));
-    if (ptr<Task> task = get_task_from_queue(now)) {
-        xml::Element_ptr e = result.append_new_element(reason_start_element_name);
-        e.appendChild(task->dom_element(doc, Show_what()));
+    if (!_task_queue->_queue.empty()) {
+        result.appendChild(_task_queue->why_dom_element(doc, now, in_period));
+        if (ptr<Task> task = get_task_from_queue(now)) {
+            xml::Element_ptr e = result.append_new_element(reason_start_element_name);
+            e.appendChild(task->dom_element(doc, Show_what()));
+        }
     }
 
     if (now >= _next_single_start) {
@@ -3651,23 +3659,12 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
         if (_max_tasks <= 0)  append_obstacle_element(e, "max_tasks", as_string(_max_tasks));
     }
 
-    //if (in_period) {
-    //    xml::Element_ptr e = result.append_new_element(reason_start_element_name);
-    //    e.setAttribute("in_period", in_period);
-    //}
-
-    //if (not_ending_tasks_count >= _max_tasks) {
-    //    xml::Element_ptr obstacle = result.append_new_element(obstacle_element_name);
-    //    obstacle.setAttribute("max_tasks", _max_tasks);
-    //    obstacle.setAttribute("not_ending_tasks", not_ending_tasks_count);
-    //}
-
     if (_start_once) {
         xml::Element_ptr e = result.append_new_element(reason_start_element_name);
-        e.setAttribute("once", _start_once);
+        e.setAttribute("once", as_bool_string(_start_once));
         if (!in_period) {
             xml::Element_ptr obstacle = e.append_new_element(obstacle_element_name);
-            obstacle.setAttribute("in_period", in_period);
+            obstacle.setAttribute("in_period", as_bool_string(in_period));
         }
         if (_max_tasks == 0) {
             xml::Element_ptr obstacle = e.append_new_element(obstacle_element_name);
@@ -3720,30 +3717,25 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
         }
         if (!in_period) {
             xml::Element_ptr obstacle = e.append_new_element(obstacle_element_name);
-            obstacle.setAttribute("in_period", in_period);
+            obstacle.setAttribute("in_period", as_bool_string(in_period));
         }
     }
 
-        //if( is_order_controlled() && ( !cause || cause == cause_delay_after_error) )
-        //{
-        //    has_order = request_order( now, obj_name() );
-        //}
-
     if (_lock_requestor && !_lock_requestor->locks_are_available()) {
         xml::Element_ptr obstacle = result.append_new_element(obstacle_element_name);
-        obstacle.setAttribute("locks_available", false);
+        obstacle.setAttribute("locks_available", as_bool_string(false));
     }
 
     if( _module->_use_process_class ) {
         Process_class* process_class = _module->process_class_or_null();
         if (!process_class) {
             xml::Element_ptr obstacle = result.append_new_element(obstacle_element_name);
-            obstacle.setAttribute("process_class_available", false);
+            obstacle.setAttribute("process_class_available", as_bool_string(false));
         } 
         if (!process_class->process_available(this)) {
             xml::Element_ptr obstacle = result.append_new_element(obstacle_element_name);
             obstacle.setAttribute("process_class", process_class->path());
-            obstacle.setAttribute("process_of_process_class_available", false);
+            obstacle.setAttribute("process_of_process_class_available", as_bool_string(false));
         }
     }
 
