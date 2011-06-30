@@ -241,7 +241,7 @@ bool Order::is_processable()
 xml::Element_ptr Order::why_dom_element(const xml::Document_ptr& doc, const Time& now) {
     xml::Element_ptr result = doc.createElement("order");
     result.setAttribute("id", string_id());
-    if (now < _setback) append_obstacle_element(result, "setback", _setback.xml_value());
+    if (now < _setback) append_obstacle_element(result, _setback_count == 0? "at" : "setback", _setback.xml_value());
     if (_is_on_blacklist) append_obstacle_element(result, "on_blacklist", as_bool_string(_is_on_blacklist));
     if (_suspended) append_obstacle_element(result, "suspended", as_bool_string(_suspended));
     if (_task)  append_obstacle_element(result, _task->dom_element(doc, Show_what()));

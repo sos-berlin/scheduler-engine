@@ -3576,7 +3576,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
             result.appendChild( _combined_job_nodes->dom_element( document, modified_show, which_job_chain ) );
         }
 
-        if( _error       )  append_error_element( result, _error );
+        if( _error )  append_error_element( result, _error );
 
         result.appendChild( _log->dom_element( document, show_what ) );
     }
@@ -3711,7 +3711,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     if (_min_tasks) {
         xml::Element_ptr e = result.append_new_element(reason_start_element_name);
         e.setAttribute("min_tasks", _min_tasks);
-        if (_min_tasks >= not_ending_tasks_count) {
+        if (_min_tasks < not_ending_tasks_count) {
             xml::Element_ptr obstacle = e.append_new_element(obstacle_element_name);
             obstacle.setAttribute("not_ending_tasks", not_ending_tasks_count);
         }

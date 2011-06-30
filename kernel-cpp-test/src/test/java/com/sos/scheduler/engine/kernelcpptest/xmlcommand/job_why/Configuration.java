@@ -12,7 +12,8 @@ final class Configuration {
     static final List<String> jobNames = asList("a", "b", "c", "minTasks", "maxTasks");
     static final Collection<String> jobFilenames = transform(jobNames, append(".job.xml"));
     static final String jobchainName = "j";
-    static final Iterable<String> configFilenames = concat(jobFilenames, asList(jobchainName + ".job_chain.xml", "j,1.order.xml"));
+    static final Iterable<String> configFilenames = concat(jobFilenames, 
+            asList(jobchainName + ".job_chain.xml", "j,never.order.xml"));
 
 
     private Configuration() {}
