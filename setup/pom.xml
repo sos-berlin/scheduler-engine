@@ -11,105 +11,106 @@ call prepare-setup.sh <version> to use this pom
         <version>1.3.11</version>              <!-- sollte eigentlich die mit -Dsetup.version festgelegte Version sein, funktioniert aber nicht -->
     </parent>
     
-    <!--
     <properties>
-      <setup.version>${releaseVersion}</setup.version>
+      <setup.version>${project.version}</setup.version>
+      <setup.platform>${osArch}</setup.platform>
     </properties>
-    -->
     
-    <artifactId>com.sos.scheduler.engine.jar</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>com.sos.scheduler.engine.setup</artifactId>
+    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
     <profiles>
+    
+      <!-- this profile is for preparing the setup for a given version on a given platform, e.g.
+            mvn install -Pprepare -Dversion=1.3.11 -Dplatform=windows-x86
+      -->
       <profile>
         <id>prepare</id>
-        <build>
-          <plugins>
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <artifactItems>
-                        <artifactItem>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${setup.version}</version>
-                            <type>jar</type>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${setup.version}</version>
-                            <type>pom</type>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
-                            <version>${setup.version}</version>
-                            <type>zip</type>
-                            <classifier>${setup.platform}</classifier>
-                        </artifactItem>
-                    </artifactItems>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <includeScope>runtime</includeScope>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <configuration>
-                    <tasks>
-                        <ant antfile="download4setup.xml" target="setup.platform">
-                           <property name="setup.platform" value="${setup.platform}" />
-                           <property name="setup.version" value="${setup.version}" />
-                           <property name="settings.localRepository" value="${settings.localRepository}" />
-                        </ant>
-                    </tasks>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>prepare-setup</id>
-                        <phase>install</phase>
-                    </execution>
-                </executions>
-            </plugin>
-          </plugins>
-        </build>
+        <properties>
+          <setup.version>${version}</setup.version>
+          <setup.platform>${platform}</setup.platform>
+        </properties>
       </profile>
     </profiles>
-    
+
+    <build>
+      <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <configuration>
+                <artifactItems>
+                    <artifactItem>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>com.sos.scheduler.engine.jar</artifactId>
+                        <version>${setup.version}</version>
+                        <type>jar</type>
+                    </artifactItem>
+                    <artifactItem>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>com.sos.scheduler.engine.jar</artifactId>
+                        <version>${setup.version}</version>
+                        <type>pom</type>
+                    </artifactItem>
+                    <artifactItem>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
+                        <version>${setup.version}</version>
+                        <type>zip</type>
+                        <classifier>${setup.platform}</classifier>
+                    </artifactItem>
+                </artifactItems>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>install</phase>
+                    <goals>
+                        <goal>copy</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <configuration>
+                <includeScope>runtime</includeScope>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>install</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <configuration>
+                <tasks>
+                    <ant antfile="download4setup.xml" target="setup.platform">
+                       <property name="setup.platform" value="${setup.platform}" />
+                       <property name="setup.version" value="${setup.version}" />
+                       <property name="settings.localRepository" value="${settings.localRepository}" />
+                    </ant>
+                </tasks>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>install</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+      </plugins>
+    </build>
+
     <dependencies>
         <!-- Artefakte, deren Jars in einem Jar zusammengefasst werden. -->
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
-            <version>${setup.version}</version>
-            <scope>runtime</scope>
-        </dependency>
 
         <!--
         <dependency>
@@ -121,8 +122,22 @@ call prepare-setup.sh <version> to use this pom
         -->
         
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <version>${setup.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.cplusplus.runtime</artifactId>
+            <version>${setup.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.plugins</artifactId>
             <version>${setup.version}</version>
             <scope>runtime</scope>
         </dependency>

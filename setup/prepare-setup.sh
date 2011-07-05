@@ -14,5 +14,5 @@ fi
 
 version=$1
 mvn clean
-mvn dependency:copy dependency:copy-dependencies antrun:run -Pprepare -Dsetup.version=$version -Dsetup.platform=windows-x86
-mvn dependency:copy dependency:copy-dependencies antrun:run -Pprepare -Dsetup.version=$version -Dsetup.platform=linux-i386
+mvn install -Pprepare -Dversion=$version -Dplatform=windows-x86
+mvn install -Pprepare -Dversion=$version -Dplatform=linux-i386

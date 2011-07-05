@@ -89,6 +89,9 @@ to run without maven integration.
   	<fileset dir="${source.dir}" id="files.jar">
   		<include name="guava*.jar"/>
   		<include name="log4j-*.jar"/>
+  		<include name="geronimo*.jar"/>
+  		<include name="activemq*.jar"/>
+  		<include name="slf4j*.jar"/>
   	</fileset>
 
   </target>
@@ -126,7 +129,7 @@ to run without maven integration.
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.lib" />
-		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler.\1.jar"/>
+		  <mapper type="regexp" from="^com.sos.scheduler.engine.jar-(.*)\.jar$" to="com.sos.spooler-\1.jar"/>
 		</copy>
 		<copy todir="${target.dir}/scheduler/lib">
 			<fileset refid="files.jar" />
