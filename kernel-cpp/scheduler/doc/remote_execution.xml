@@ -17,7 +17,7 @@
 
     <p>
       Jobs können auf einem entfernten Job Scheduler ausgeführt werden, wenn dieser als Agent konfiguriert ist. Nur Agenten erlauben es, remote Kommandos
-      von aufrufenden Schedulern entgegen zu nehmen. Die Lizenz für den Betrieb eines Job Scheduler Agenten ist kostenpflichtig.
+      von aufrufenden Schedulern entgegen zu nehmen.
     </p>
     
     <p>

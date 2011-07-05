@@ -9,7 +9,7 @@
 	<scheduler_keyword keyword="remote_scheduler"/>
 	<scheduler_keyword keyword="Agent"/>
 	<p>
-Jobs can be processed by a Job Scheduler running on a remote computer if it is configured as an Agent. Only Agents are able to receive and execute commands from a Main Job Scheduler. In order to run Job Schedulers with Agents commercial licences are necessary.
+Jobs can be processed by a Job Scheduler running on a remote computer if it is configured as an Agent. Only Agents are able to receive and execute commands from a Main Job Scheduler.
 <!--
       Jobs können auf einem entfernten Job Scheduler ausgeführt werden, wenn dieser als Agent konfiguriert ist. Nur Agenten erlauben es, remote Kommandos
       von aufrufenden Schedulern entgegen zu nehmen. Die Lizenz für den Betrieb eines Job Scheduler Agenten ist kostenpflichtig.
