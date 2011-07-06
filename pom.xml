@@ -27,6 +27,7 @@
         <module>kernel-cpp-test</module>
         <module>playground</module>
         <module>jar</module>
+        <module>setup</module>
     </modules>
 
     <build>
@@ -66,4 +67,5 @@
             </properties>
         </profile>
     </profiles>
+    
 </project>
