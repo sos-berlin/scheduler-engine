@@ -765,11 +765,14 @@ ptr<file::File_info> Folder_directory_lister::get()
         result = Directory_lister::get();
         if( !result )  break;
 
+        bool file_exists = result->try_call_stat();      // JS-706
+/*
 #       ifdef Z_UNIX
             bool file_exists = result->try_call_stat();
 #        else
             bool file_exists = true;        // Unter Windows hat File_info schon alle Informationen, kein stat() erforderlich
 #       endif
+*/
 
         if( file_exists )  break;
     }
