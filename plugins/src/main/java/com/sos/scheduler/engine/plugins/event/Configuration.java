@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import java.util.Properties;
 import javax.jms.Topic;
@@ -7,8 +7,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 
 public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komplex für public
@@ -35,7 +35,7 @@ public class Configuration { //public nur für JMSPlugInTest, Klasse ist zu komp
     
     public static Configuration newInstance(String providerUrl) {
     	try {
-    		Logger logger = LoggerFactory.getLogger(Configuration.class);
+    		Logger logger = Logger.getLogger(Configuration.class);
             InitialContext c = new InitialContext(jmsProperties(providerUrl));  // Datei jndi.jmsProperties
             TopicConnectionFactory cf = (TopicConnectionFactory)c.lookup(topicConnectionFactoryName);
             Topic topic = (Topic)c.lookup(topicName);

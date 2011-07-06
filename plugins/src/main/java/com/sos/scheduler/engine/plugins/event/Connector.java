@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import java.io.Closeable;
 import java.io.File;

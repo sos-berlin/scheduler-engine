@@ -1,6 +1,7 @@
-package com.sos.scheduler.engine.kernelcpptest.excluded.js461;
+package com.sos.scheduler.engine.kernelcpptest.jira.js461;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -22,56 +23,43 @@ import org.slf4j.LoggerFactory;
 import com.sos.JSHelper.Logging.Log4JHelper;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
-import com.sos.scheduler.engine.plugins.jms.Configuration;
+import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
-import com.sos.scheduler.model.events.EventOrderFinished;
-import com.sos.scheduler.model.events.EventOrderStateChanged;
-
 
 /**
  * \file JS461.java
- * \brief 
+ * \brief js-461: modify order set state to endstate 
  *  
  * \class JS461
- * \brief 
+ * \brief js-461: modify order set state to endstate 
  * 
  * \details
+ * The sample configuration contains a jobchain with three nodes. Running this test the chain starts and should be suspend at the second node
+ * (job js-461-2), because the job ends with error. The test set the state of the suspended order to "success" and resumed it.
+ * The test expects the following events fired by the scheduler:
+ * - EventOrderSuspended if the job job js-461-2 ends with error
+ * - EventOrderResumed if the order was set to suspended="no"
+ * - EventOrderFinished because the order resumed in the "success" state 
  *
  * \code
   \endcode
  *
- * \author schaedi
- * \version 1.0 - 25.05.2011 19:07:16
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-/**
- * \file JS461.java
- * \brief 
- *  
- * \class JS461
- * \brief 
- * 
- * \details
- *
- * \code
-  \endcode
- *
- * \author schaedi
+ * \author ss
  * \version 1.0 - 25.05.2011 19:07:21
  * <div class="sos_branding">
  *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
  * </div>
  */
 public class JS461 extends SchedulerTest {
-    /** Maven: mvn test -Dtest=JmsPlugInTest -DargLine=-Djms.providerUrl=tcp://localhost:61616 */
+
+	private final String ORDER = "js-461-order";
+	private final String JOB_CHAIN = "js-461";
 	
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(15);
+    private static final Time schedulerTimeout = Time.of(10);
     private static Configuration conf;
 
     private static Logger logger;
@@ -112,7 +100,7 @@ public class JS461 extends SchedulerTest {
      * @throws JMSException
      */
     private TopicSubscriber newTopicSubscriber() throws JMSException {
-        String messageSelector = "eventName = 'EventOrderStateChanged'";
+        String messageSelector = "eventName = 'EventOrderResumed' or eventName = 'EventOrderSuspended' or eventName = 'EventOrderFinished'";
         boolean noLocal = false;
         logger.debug("eventFilter is: " + messageSelector);
         return topicSession.createSubscriber(topic, messageSelector, noLocal);
@@ -129,19 +117,20 @@ public class JS461 extends SchedulerTest {
     @Test 
     public void test() throws Exception {
         runScheduler(schedulerTimeout, "-e");
-//        assertState("success",1);										// one order has to end with 'success'
-//        assertState("error",3);											// three order has to end with 'error'
-//        assertEquals("total number of events",4,resultQueue.size());	// totaly 4 OrderFinishedEvents
+        assertEvent("EventOrderSuspended",1);										// one order has to end with 'success'
+        assertEvent("EventOrderResumed",1);										// one order has to end with 'success'
+        assertEvent("EventOrderFinished",1);										// one order has to end with 'success'
+        assertEquals("total number of events",3,resultQueue.size());	// totaly 4 OrderFinishedEvents
     }
     
-    private void assertState(String stateName, int exceptedHits) {
+    private void assertEvent(String eventName, int exceptedHits) {
     	Iterator<String> it = resultQueue.iterator();
     	int cnt = 0;
     	while (it.hasNext()) {
     		String e = it.next();
-    		if(e.equals(stateName)) cnt++;
+    		if(e.equals(eventName)) cnt++;
     	}
-        assertEquals("state '" + stateName + "'",exceptedHits,cnt);
+        assertEquals("event '" + eventName + "'",exceptedHits,cnt);
     }
     
     private class MyListener implements javax.jms.MessageListener {
@@ -154,17 +143,13 @@ public class JS461 extends SchedulerTest {
                 TextMessage textMessage = (TextMessage) message;
                 String xmlContent = textMessage.getText();
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
-               	assertNotNull(ev.getEventOrderStateChanged());
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
-                EventOrderStateChanged ov = ev.getEventOrderStateChanged();
-                textMessage.acknowledge();
-                result = ov.getOrder().getState();
-                logger.info("order " + ov.getOrder().getId() + " changed to state " + ov.getOrder().getState() );
-                if (ov.getOrder().getState().toString().equals("state2")) {
-                    logger.info("setting order state to success ..." );
-                	scheduler.executeXml("<modify_order job_chain='/js-461' order='js-461-order' state='success'/>");
-                	scheduler.executeXml("<modify_order job_chain='/js-461' order='js-461-order' suspended='no'/>");
+                logger.info("CATCH EVENT: " + ev.getName());
+                if (ev.getEventOrderSuspended() != null) {
+                	scheduler.executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' state='success'/>");
+                	scheduler.executeXml("<modify_order job_chain='/" + JOB_CHAIN + "' order='" + ORDER + "' suspended='no'/>");
                 }
+                result = ev.getName();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {

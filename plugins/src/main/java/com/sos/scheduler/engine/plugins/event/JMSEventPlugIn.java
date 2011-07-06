@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
 
@@ -12,9 +12,6 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -34,59 +31,21 @@ import com.sos.scheduler.model.events.JSEvent;
  * </p>
  * </div>
  */
-/**
- * \file JMSEventPlugIn.java
- * \brief 
- *  
- * \class JMSEventPlugIn
- * \brief 
- * 
- * \details
- *
- * \code
-  \endcode
- *
- * \author schaedi
- * \version 1.0 - 17.05.2011 15:34:17
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
-/**
- * \file JMSEventPlugIn.java
- * \brief 
- *  
- * \class JMSEventPlugIn
- * \brief 
- * 
- * \details
- *
- * \code
-  \endcode
- *
- * \version 1.0 - 17.05.2011 15:34:23
- * <div class="sos_branding">
- *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
- * </div>
- */
 public class JMSEventPlugIn implements PlugIn, EventSubscriber {
+	
+	private static Logger logger = Logger.getLogger(JMSEventPlugIn.class);
+
 	private final Scheduler scheduler;
 	private final Connector connector;
 
 	private SchedulerObjectFactory objFactory;
-	private static Logger logger = Logger.getLogger(JMSEventPlugIn.class
-			.getName());
 
 	JMSEventPlugIn(Scheduler scheduler, Element plugInElement) {
 		this.scheduler = scheduler;
-		String providerUrl = stringXPath(plugInElement,
-				"jms/connection/@providerUrl", Configuration.vmProviderUrl);
-		String persistenceDir = stringXPath(plugInElement,
-				"jms/connection/@persistenceDirectory",
-				Configuration.persistenceDirectory);
+		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
+		String persistenceDir = stringXPath(plugInElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
-		scheduler.log().info(
-				getClass().getName() + ": providerUrl=" + providerUrl);
+		scheduler.log().info( getClass().getName() + ": providerUrl=" + providerUrl);
 		// TODO PlugIns sollen eigenes PrefixLog bekommen
 
 		logger.info("initializing SchedulerObjectFactory for " + scheduler.getHostname() + ":" + scheduler.getTcpPort());
@@ -121,8 +80,9 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 	 * com.sos.scheduler.engine.kernel.event.EventSubscriber#onEvent(com.sos
 	 * .scheduler.engine.kernel.event.Event)
 	 * 
-	 * \brief delivery of the events from the scheduler kernel \details Each
-	 * time an event was fired from the JobScheduler kernel this method will
+	 * \brief delivery of the events from the scheduler kernel
+	 * \details
+	 * Each time an event was fired from the JobScheduler kernel this method will
 	 * called. The JobScheduler internal event will be converted in a
 	 * represantation for the JMS and provided as TextMessage (in XML format).
 	 */
@@ -130,24 +90,17 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 	public void onEvent(Event e) throws Exception {
 
 		TextMessage m = connector.newTextMessage();
-
-		// for test purposes only for the selected events
-		// TODO execution for all events
-		if (e instanceof OrderStateChangedEvent
-				|| e instanceof OrderTouchedEvent
-				|| e instanceof OrderFinishedEvent) {
-			try {
-//				JSEvent ev = objFactory.createEvent(e);
-				JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
-				logger.info("publish event " + ev.getName());
-				logger.debug(ev.marshal());
-				m.setText(ev.marshal());
-				setEventProperties(m, ev);
-				connector.publish(m); // publish the text message (xml)
-			} catch(SchedulerException ev) {
-				throw new SchedulerException(ev);
-			}
+		try {
+			JSEvent ev = JMSEventAdapter.createEvent(objFactory, e);
+			logger.info("publish event " + ev.getName());
+			logger.debug(ev.marshal());
+			m.setText(ev.marshal());
+			setEventProperties(m, ev);
+			connector.publish(m); // publish the text message (xml)
+		} catch(SchedulerException ev) {
+			throw new SchedulerException(ev);
 		}
+
 	}
 
 	
@@ -165,7 +118,9 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 		eh.setJMSHeaderProperties(JMSMessageHelper.defaultEventProperties());
 		
 		m.setStringProperty("eventName", ev.getName()); // for filtering
-		
+		m.setStringProperty("hostname", scheduler.getHostname());
+		m.setStringProperty("port", Integer.toString(scheduler.getTcpPort()) );
+		m.setStringProperty("id", scheduler.getSchedulerId());
 	}
 
 	public static PlugInFactory factory() {

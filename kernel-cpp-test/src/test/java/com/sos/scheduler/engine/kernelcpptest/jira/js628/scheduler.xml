@@ -5,7 +5,7 @@
 		<!-- irgendwas.plugin.xml -->
 		<!-- com.sos.scheduler.engine.playground.mq.JMSPlugIn.plugin.xml -->
 		<plugins>
-            <plugin java_class="com.sos.scheduler.engine.plugins.jms.JMSEventPlugIn">
+            <plugin java_class="com.sos.scheduler.engine.plugins.event.JMSEventPlugIn">
 				<plugin.config>
 					<jms>
 						<connection providerUrl="vm:localhost"

@@ -8,10 +8,14 @@
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderFinishedEvent.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderTouchedEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderSuspendedEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderResumedEvent.h"
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderState OrderStateJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStateChangedEvent OrderStateChangedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderFinishedEvent OrderFinishedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderTouchedEvent OrderTouchedEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderSuspendedEvent OrderSuspendedEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderResumedEvent OrderResumedEventJ;
 
 namespace sos {
 namespace scheduler {
@@ -2322,7 +2326,10 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )  z::throw_xc( "SCHEDULER-438", _state );
 
-        if( node->is_suspending_order() )  _suspended = true;   //JS-SUS
+        if( node->is_suspending_order() )  {
+           _suspended = true;   
+           fire_event_suspended();
+        }
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
 
@@ -2538,6 +2545,25 @@ void Order::fire_event_if_finished()
     // Endzustand erreicht. 
     if( finished() ) {
 	    report_event( OrderFinishedEventJ::new_instance(java_sister()) );
+	}
+}
+
+//--------------------------------------------------------------------------Order::fire_event_suspended
+
+void Order::fire_event_suspended()
+{
+    if( _suspended ) {
+	    report_event( OrderSuspendedEventJ::new_instance(java_sister()) );
+	}
+}
+
+//--------------------------------------------------------------------------Order::fire_event_resumed
+
+void Order::fire_event_resumed()
+{
+    // Endzustand erreicht. 
+    if( !_suspended ) {
+	    report_event( OrderResumedEventJ::new_instance(java_sister()) );
 	}
 }
 
@@ -2791,7 +2817,7 @@ void Order::set_suspended( bool suspended )
 {
     if( _suspended != suspended )
     {
-        _suspended = suspended;  // JS-SUS
+        _suspended = suspended;
         _order_xml_modified = true;
 
         if( _job_chain )
@@ -2800,8 +2826,13 @@ void Order::set_suspended( bool suspended )
             else
             if( _is_in_order_queue )  order_queue()->reinsert_order( this );
 
-            if( _suspended )  _log->info( message_string( "SCHEDULER-991" ) );
-                        else  _log->info( message_string( "SCHEDULER-992", _setback ) );
+            if( _suspended )  {
+               _log->info( message_string( "SCHEDULER-991" ) );
+               fire_event_suspended();
+            } else {
+               _log->info( message_string( "SCHEDULER-992", _setback ) );
+               fire_event_resumed();
+            }
         }
 
         handle_changed_processable_state();

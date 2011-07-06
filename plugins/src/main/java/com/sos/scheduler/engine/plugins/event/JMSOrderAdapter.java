@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import com.sos.scheduler.model.events.Order;;
 
@@ -11,7 +11,7 @@ public class JMSOrderAdapter extends Order {
 		setState(kernelEventOrder.getState().toString());
 	}
 
-	public static JMSOrderAdapter createEventOrder(com.sos.scheduler.engine.kernel.order.Order kernelEventOrder) {
+	public static JMSOrderAdapter createInstance(com.sos.scheduler.engine.kernel.order.Order kernelEventOrder) {
 		return new JMSOrderAdapter(kernelEventOrder);
 	}
 }

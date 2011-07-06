@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import com.sos.JSHelper.Logging.Log4JHelper;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.plugins.event.Configuration;
+import com.sos.scheduler.engine.plugins.event.Connector;
 import com.sos.scheduler.model.SchedulerObjectFactory;
 import com.sos.scheduler.model.events.Event;
 

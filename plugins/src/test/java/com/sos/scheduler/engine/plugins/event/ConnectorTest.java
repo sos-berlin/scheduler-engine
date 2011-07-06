@@ -1,4 +1,4 @@
-package com.sos.scheduler.engine.plugins.jms;
+package com.sos.scheduler.engine.plugins.event;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.sos.JSHelper.Logging.Log4JHelper;
+import com.sos.scheduler.engine.plugins.event.Configuration;
+import com.sos.scheduler.engine.plugins.event.Connector;
 
 public class ConnectorTest {
 	
@@ -40,14 +42,14 @@ public class ConnectorTest {
 		connector.start();
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		try {
-			connector.close();
-		} finally {
-			// TODO Nicht löschbar: Files.deleteRecursively(tmpDir);
-		}
-	}
+//	@AfterClass
+//	public static void afterClass() throws Exception {
+//		try {
+//			connector.close();
+//		} finally {
+//			// TODO Nicht löschbar: Files.deleteRecursively(tmpDir);
+//		}
+//	}
 
 	@Test
 	public void testPublish() throws Exception {
