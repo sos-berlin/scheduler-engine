@@ -4410,11 +4410,13 @@ Order* Order_queue::first_immediately_processable_order(Virgin_is_allowed virgin
 xml::Element_ptr Order_queue::why_dom_element(const xml::Document_ptr& doc, const Time& now) {
     xml::Element_ptr result = doc.createElement("order_queue");
     result.setAttribute("length", (int)_queue.size());
+    if (_has_tip_for_new_order) result.setAttribute("has_tip_for_new_order", as_bool_string(_has_tip_for_new_order));
+    if (_next_announced_distributed_order_time <= now) 
+        result.setAttribute("next_announced_distributed_order_time ", now.xml_value());
     Z_FOR_EACH_CONST(Queue, _queue, it) {
         Order* order = *it;
         xml::Element_ptr e = result.appendChild(order->why_dom_element(doc, now));
-        if (!order->is_immediately_processable(now))
-            break;
+        //if (!order->is_immediately_processable(now))  break;
     }
     return result;
 }
