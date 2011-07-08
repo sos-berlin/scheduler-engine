@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<job title          ="Receives files by FTP"
+     tasks          ="4"
+     order          ="yes"
+     process_class  ="multi">
+
+  <description>
+    <include file="jobs/JobSchedulerFTPReceive.xml"/>
+  </description>
+
+  <params>
+    <include live_file="scheduler_sosftp_history.params.xml" />
+  </params>
+
+  <script language    ="java"
+          java_class  ="sos.scheduler.ftp.JobSchedulerFTPReceive"/>
+
+  <monitor name="import_monitor">
+    <script language    ="java"
+            java_class  ="sos.ftphistory.job.SOSFTPHistoryReceiveMonitor"/>
+  </monitor>
+
+  <delay_order_after_setback setback_count="1"
+                             is_maximum   ="no"
+                             delay        ="00:05"/>
+  <delay_order_after_setback setback_count="20"
+                             is_maximum   ="yes"/>
+</job>

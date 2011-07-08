@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<job title          = "Import SOSFTP File into Database"
+     order          = "yes"
+     tasks          = "3"
+     timeout        = "3600"
+     idle_timeout   = "300"
+     process_class  = "multi"
+     stop_on_error  = "false">
+
+  <description>
+    <include file="jobs/SOSFTPHistoryJob.xml" />
+  </description>
+
+  <params>
+    <include live_file="scheduler_sosftp_history.params.xml" />
+  </params>
+
+  <script java_class  ="sos.ftphistory.job.SOSFTPHistoryJob"
+          language    ="java"/>
+
+</job>

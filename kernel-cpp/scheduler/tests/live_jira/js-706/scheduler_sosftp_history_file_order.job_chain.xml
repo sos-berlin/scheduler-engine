@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<job_chain title="Adds a file order source">
+  <file_order_source directory="files" regex="\.csv$"/>
+  <job_chain_node state="first" job="scheduler_sosftp_import" error_state="remove"/>
+  <file_order_sink state="remove" remove="yes"/>
+</job_chain>

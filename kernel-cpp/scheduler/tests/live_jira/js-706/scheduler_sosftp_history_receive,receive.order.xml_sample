@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<order job_chain="scheduler_sosftp_history_receive" title="receive">
+  <params>
+    
+    <param name="ftp_local_dir"         value="./files"/>
+    <param name="ftp_remote_dir"        value="test/test"/>
+    <param name="ftp_host"              value="test"/>
+    <param name="ftp_protocol"          value="ftp"/>
+    <param name="ftp_password"          value="test"/>
+    <param name="ssh_auth_method"       value="password" />
+    <param name="ftp_user"              value="test"/>
+ 
+    <param name="ftp_file_spec"         value="\.csv$"/>
+    <param name="ftp_overwrite_files"   value="true"/>
+    <param name="ftp_remove_files"      value="false"/>
+    <param name="ftp_atomic_suffix"     value="~"/>
+    <param name="ftp_force_files"       value="false"/>
+
+  </params>
+  <run_time let_run="no">
+    <monthdays>
+      <day day="20">
+        <period single_start="10:00"/>
+      </day>
+    </monthdays>
+  </run_time>
+</order>

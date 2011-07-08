@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<params>
+  <param name="db_class"      value="SOSMySQLConnection"/>
+  <param name="db_driver"     value="com.mysql.jdbc.Driver"/>
+  <param name="db_url"        value="jdbc:mysql://wilma.sos:3306/scheduler"/>
+  <param name="db_user"       value="scheduler"/>
+  <param name="db_password"   value="scheduler"/>
+</params>

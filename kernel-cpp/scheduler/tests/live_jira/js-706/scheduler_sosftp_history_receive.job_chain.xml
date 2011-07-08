@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<job_chain  orders_recoverable  ="no"
+            visible             ="yes"
+            title               ="Receive files">
+
+  <job_chain_node state       ="import"
+                  job         ="scheduler_sosftp_history_receive"
+                  next_state  ="end"
+                  error_state ="error"/>
+
+  <job_chain_node.end state="end"/>
+  <job_chain_node.end state="error"/>
+</job_chain>
+
