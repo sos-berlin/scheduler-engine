@@ -111,7 +111,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/cpp</outputDirectory>
+                            <outputDirectory>generated</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/cpp</directory>
