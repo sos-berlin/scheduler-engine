@@ -3695,7 +3695,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     if (_min_tasks) {   // cause_min_task
         xml::Element_ptr e = result.append_new_element(reason_start_element_name);
         e.setAttribute("min_tasks", _min_tasks);
-        if (_min_tasks >= not_ending_tasks_count) 
+        if (not_ending_tasks_count < _min_tasks) 
             append_obstacle_element(e, "not_ending_tasks", as_string(not_ending_tasks_count));
         if (!in_period) append_obstacle_element(e, "in_period", as_bool_string(in_period));
     }
