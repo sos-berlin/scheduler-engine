@@ -1,6 +1,6 @@
 // $Id$
 
-#include "../target/cpp/mavenSettings.h"
+#include "../generated/mavenSettings.h"
 
 #define VER_COPYRIGHT           "" //"©1998 Netscape Corp., ©2000-2004 Software- und Organisations-Service GmbH"
 

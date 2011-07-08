@@ -1,6 +1,6 @@
 // $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
-#include "../target/cpp/mavenSettings.h"
+#include "../generated/mavenSettings.h"
 
 #define VER_FILEDESC_STR        "Scheduler"
 
