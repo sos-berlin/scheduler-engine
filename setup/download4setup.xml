@@ -12,7 +12,7 @@ to run without maven integration.
 \version 1.0
 \date 2011-06-21
 -->
-<project name="SOSJobSchedulerModel" basedir=".">
+<project name="com.sos.scheduler.setup.prepare" basedir=".">
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${settings.localRepository}/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
 	

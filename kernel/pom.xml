@@ -46,15 +46,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.sos</groupId>
             <artifactId>com.sos.util</artifactId>
-            <version>1.6</version>
+            <version>${sos.jars.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.sos</groupId>
             <artifactId>com.sos.JSHelper</artifactId>
-            <version>1.6</version>
+            <version>${sos.jars.version}</version>
         </dependency>
         
         <dependency>

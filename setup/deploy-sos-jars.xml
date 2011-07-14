@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+This file is for deploying the sos jar files needed for the build of the JS kernel to archiva. The pattern of the files to be deployed has to specify
+in the fileset files.jar.
+
+To specify the version to be deployed the property jar.version has to be set, e.g.
+ant -f deploy-sos-jars.xml -Djar.version=1.3.11.1189
+-->
+<project name="com.sos.scheduler.setup.deploy" basedir="." default="all">
+
+  <property environment="env"/>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${env.USERPROFILE}/.m2/repository/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
+
+	<property name="repo.url"   value="http://archiva.sos:8080/archiva/repository/sos-release" />
+	<property name="repo.id"    value="sos-release" />
+	<property name="jar.version" value="1.3.11.1189" />
+  <propertyregex property="jar.version.timestamp" input="${jar.version}" regexp="[0-9]*\.[0-9]*\.[0-9]*\.([0-9]*)" select="\1" casesensitive="false" />	
+	<property name="jar.folder" value="J:\E\java\lib_release_jar\${jar.version.timestamp}" />
+	<property name="work.dir" value="./target/lib_release_jar" />
+  
+  <!-- the jar files to be deployed -->
+	<fileset dir="${jar.folder}" id="files.jar">
+		<include name="com.sos.JSHelper*.jar"/>
+		<include name="com.sos.JobSchedulerLocalization*.jar"/>
+		<include name="com.sos.SOSJobSchedulerModel*.jar"/>
+		<include name="com.sos.VirtualFileSystem*.jar"/>
+		<include name="com.sos.util*.jar"/>
+	</fileset>
+  
+	<target name="all" 
+	        depends="showconfig, preparejars"
+	        description="deploy the necessary jar files for the JS kernel to the maven repository">
+	  
+    <foreach target="-mavenDeploy" param="fullname">
+      <path>
+        <fileset dir="${work.dir}" casesensitive="no" />
+      </path>
+    </foreach>
+	  <echo message="DONE !" />
+
+	</target>
+	
+	<target name="showconfig" description="show the configuration of the build">
+	  <echo message="repo.url=${repo.url}" />
+	  <echo message="repo.id=${repo.id}" />
+	  <echo message="jar.folder=${jar.folder}" />
+	  <echo message="jar.version=${jar.version}" />
+	  <echo message="jar.version.timestamp=${jar.version.timestamp}" />
+	</target>
+	
+	<target name="preparejars" description="get the jar files from the net drive">
+	  <delete dir="${work.dir}" />
+		<copy todir="${work.dir}">
+			<fileset refid="files.jar" />
+		  <mapper type="regexp" from="^(.*-[0-9]*)-[0-9]*\.jar$" to="\1.jar"/>
+		</copy>
+	</target>
+
+	<target name="-mavenDeploy" description="deploy a jar to maven repository">
+      <propertyregex property="filename"   input="${fullname}" regexp=".*(\\|/)(.*)$" select="\2" casesensitive="false" />	
+      <propertyregex property="packaging"  input="${filename}" regexp="^.*\.(.*)$" select="\1" casesensitive="false" />	
+      <propertyregex property="groupid"    input="${filename}" regexp="^(.*)\.[^\.]*-[0-9\.]*-[0-9]*\..*$" select="\1" casesensitive="false" />	
+      <propertyregex property="artifactid" input="${filename}" regexp="^(.*\.[^\.]*)-[0-9\.]*-[0-9]*\..*$" select="\1" casesensitive="false" />	
+      <echo message="filename: ${filename}" />
+      <echo message="groupid: ${groupid}" />
+      <echo message="artifactid: ${artifactid}" />
+      <echo message="packaging: ${packaging}" />
+      <echo message="version: ${jar.version}" />
+      <exec executable="mvn.bat" dir="${basedir}">
+  			<arg value="deploy:deploy-file" />
+  			<arg value="-Durl=${repo.url}" />
+  			<arg value="-DrepositoryId=${repo.id}" />
+  			<arg value="-Dfile=${fullname}" />
+  			<arg value="-DgroupId=${groupid}" />
+  			<arg value="-DartifactId=${artifactid}" />
+  			<arg value="-Dversion=${jar.version}" />
+  			<arg value="-Dpackaging=${packaging}" />
+  		</exec>
+	</target>
+
+</project>

@@ -107,16 +107,16 @@
         </dependency>
 
         <dependency>
-        	<groupId>${project.groupId}</groupId>
+        	<groupId>com.sos</groupId>
         	<artifactId>com.sos.SOSJobSchedulerModel</artifactId>
-        	<version>1.6.001</version>
+        	<version>${sos.jsobjects.version}</version>
         	<scope>compile</scope>
         </dependency>
     
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.sos</groupId>
             <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>1.6</version>
+            <version>${sos.jars.version}</version>
         </dependency>
 
         <dependency>

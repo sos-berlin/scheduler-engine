@@ -31,9 +31,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sos.scheduler.engine</groupId>
+            <groupId>com.sos</groupId>
             <artifactId>com.sos.VirtualFileSystem</artifactId>
-            <version>1.6</version>
+            <version>${sos.jars.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
