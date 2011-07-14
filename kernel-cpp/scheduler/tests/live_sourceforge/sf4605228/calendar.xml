@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<holidays>
+    <holiday date="2011-07-15"/>
+    <weekdays>
+        <day day="saturday sunday"/>
+    </weekdays>
+</holidays>

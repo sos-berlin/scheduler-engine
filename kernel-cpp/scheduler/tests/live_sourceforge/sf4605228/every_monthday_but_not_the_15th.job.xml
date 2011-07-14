@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job>
+    <script language="shell">
+        <![CDATA[
+echo hello world
+        ]]>
+    </script>
+    <run_time>
+        <monthdays>
+            <day day="1 2 3 4 5 6 7 8 9 10 11 12 13 14 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31">
+                <period single_start="13:00"/>
+            </day>
+        </monthdays>
+    </run_time>
+</job>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job>
+    <script language="shell">
+        <![CDATA[
+echo hello world
+        ]]>
+    </script>
+    <run_time>
+        <weekdays>
+            <day day="1 2 3 4 5 6">
+                <period single_start="13:00"/>
+            </day>
+        </weekdays>
+
+
+        <monthdays>
+            <weekday day="7"
+                     which="-1">
+                <period single_start="13:00"/>
+            </weekday>
+
+            <weekday day="7"
+                     which="-2">
+                <period single_start="13:00"
+                        when_holiday="ignore_holiday"/>
+            </weekday>
+
+            <weekday day="7"
+                     which="-3">
+                <period single_start="13:00"
+                        when_holiday="ignore_holiday"/>
+            </weekday>
+
+            <weekday day="7"
+                     which="-4">
+                <period single_start="13:00"
+                        when_holiday="ignore_holiday"/>
+            </weekday>
+        </monthdays>
+
+
+        <holidays>
+            <weekdays>
+                <day day="7"/>
+            </weekdays>
+        </holidays>
+    </run_time>
+</job>

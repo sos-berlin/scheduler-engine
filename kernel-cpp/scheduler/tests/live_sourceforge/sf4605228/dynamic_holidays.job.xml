@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job>
+    <script language="shell">
+        <![CDATA[
+echo hello world
+        ]]>
+    </script>
+    <run_time>
+        <period single_start="14:00"/>
+
+
+        <holidays>
+            <include live_file="/calendar.xml"/>
+        </holidays>
+    </run_time>
+</job>
