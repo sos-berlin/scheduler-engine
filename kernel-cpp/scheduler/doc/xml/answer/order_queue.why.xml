@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+<xml_element
+	name="order_queue.why"
+	title="Auftragswarteschlange einer Jobkette"
+	category="Antwort"
+	sub_directory="answer/"
+	base_dir="../../"
+	parent_page="../../xml_commands.xml"
+	author="ss"
+	date="16.07.2011-14:05:01"
+>
+	<xml_parent_elements>
+		<xml_parent_element name="job_chain.why"/>
+	</xml_parent_elements>
+
+  <xml_child_elements>
+		<xml_child_element name="order.why" />
+  </xml_child_elements>
+			
+</xml_element>
