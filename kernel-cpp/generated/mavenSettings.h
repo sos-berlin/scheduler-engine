@@ -1,6 +1,6 @@
 // mavenSettings.h
 
-/*  Die Variable MavenProject: com.sos.scheduler.engine:com.sos.scheduler.engine.kernel-cpp:1.3.12-beta-1a-SNAPSHOT @ C:\\scheduler\\scheduler.src.devel\\engine\\kernel-cpp\\pom.xml werden von Maven ersetzt, siehe pom.xml. 
+/*  Die Variable MavenProject: com.sos.scheduler.engine:com.sos.scheduler.engine.kernel-cpp:1.3.12-beta-1a-SNAPSHOT @ C:\\sos\\scheduler\\engine\\kernel-cpp\\pom.xml werden von Maven ersetzt, siehe pom.xml. 
     Die ersetzte mavenSettings.h steht dann in target/cpp/.
     Wenn auch VER_PRODUCTVERSION und VER_DATE gesetzt werden soll, m�ssen wir wohl ein Skript (oder ein Maven-PlugIn) schreiben.
     Das Skript k�nnte make/make-scheduler-phase sein, das die Ersetzungen mit sed oder dergleichen vornimmt.

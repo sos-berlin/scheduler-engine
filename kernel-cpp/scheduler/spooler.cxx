@@ -3711,9 +3711,10 @@ int object_server( int argc, char** argv )
         ::signal( SIGINT, SIG_IGN );            // Ctrl-C ignorieren
 #   endif
 
-//show_msg("object_server");
+    //show_msg("object_server");
     Object_server server;
-    return server.main( argc, argv );
+    int rc = server.main( argc, argv );
+    return rc;
 }
                    
 //-------------------------------------------------------------------------------------------------
@@ -3948,7 +3949,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         else
         if( is_object_server )
         {
-            ret = scheduler::object_server( argc, argv );
+            ret = scheduler::object_server( argc, argv );   // Ruft _exit()
         }
         else
         {
@@ -4053,8 +4054,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         ret = 1;
     }
 
-
-    if( !is_object_server )  Z_LOG2( "scheduler", "Executable will be terminated.\n" );
+    if (is_object_server) {
+        Z_LOG2("JS-709", Z_FUNCTION << " _exit()\n");
+        _exit(ret);  //JS-709: Visual Studio 2010, Windows 2003, Dienst unter nicht-SYSTEM-Konto: API-Prozess bleibt bei bloßem return oder exit() hängen.
+    } else {
+        Z_LOG2( "scheduler", "Executable will be terminated.\n" );
+    }
 
     return ret;
 }
