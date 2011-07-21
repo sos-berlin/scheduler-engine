@@ -16,9 +16,9 @@
     <description>
         <p>
         Dieses Kommando ermittelt mögliche Ursachen dafür, warum ein Job nicht anläuft. Da diese nicht nur auf den Job selbst zurück zu führen sind,
-        sondern evtl. auch auf Objekte, die mit dem Job in Zusammenhang stehen (Jobketten, Aufträge etc.), liefert diese Kommando i.d.R. eine Struktur
-        von XML Elementen, die auf den Job referenzieren. Allen Elementen ist gemeinsam, dass sie in einem oder mehreren <code>obstacle</code> Elementen
-        müden, die - jedes für sich - einen Grund angeben, warum der Job nicht anläuft.
+        sondern evtl. auch auf Objekte, die mit dem Job in Zusammenhang stehen (Jobketten, Aufträge etc.), liefert diese Kommando i.d.R. eine <scheduler_a href="answer/job.why.xml">Struktur</scheduler_a>
+        von XML Elementen, die auf den Job referenzieren. Allen Elementen ist gemeinsam, dass sie in einem oder mehreren <code><scheduler_a href="answer/obstacle.xml">obstacle</scheduler_a></code> Elementen
+        münden müssen, die - jedes für sich - einen Grund angeben, warum der Job nicht anläuft.
         </p>
     </description>
 
@@ -44,4 +44,5 @@
     <example>
         <pre>&lt;job.why job="mein_job" /></pre>
     </example>
+
 </xml_element>
