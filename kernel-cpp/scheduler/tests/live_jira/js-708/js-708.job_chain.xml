@@ -1,0 +1,10 @@
+<job_chain orders_recoverable="yes" visible="yes">
+    <job_chain_node state="start"
+                    job="error_job"
+                    next_state="SUCCESS"
+                    error_state="ERROR"
+                    on_error="setback"
+                    delay="3"/>
+    <job_chain_node state="SUCCESS"/>
+    <job_chain_node state="ERROR"/>
+</job_chain>

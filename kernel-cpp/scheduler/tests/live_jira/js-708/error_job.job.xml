@@ -1,0 +1,15 @@
+<job order="yes" stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+echo Job throws error
+exit 1
+        ]]>
+    </script>
+    <delay_order_after_setback setback_count="1"
+                               is_maximum="no"
+                               delay="05"/>
+    <delay_order_after_setback setback_count="4"
+                               is_maximum="yes"
+                               delay="0"/>
+    <run_time/>
+</job>
