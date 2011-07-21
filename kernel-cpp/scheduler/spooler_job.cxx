@@ -478,7 +478,7 @@ Order* Combined_job_nodes::fetch_and_occupy_order(Task* occupying_task, const Ti
 
 xml::Element_ptr Combined_job_nodes::why_dom_element(const xml::Document_ptr& doc, const Time& now)
 {
-    xml::Element_ptr result = doc.createElement("job_chain_nodes");
+    xml::Element_ptr result = doc.createElement("job_chain_nodes.why");
     Z_FOR_EACH(Job_node_set, _job_node_set, it) {
         Job_node* job_node = *it;
         result.appendChild(job_node->why_dom_element(doc, now));
@@ -1721,11 +1721,11 @@ void Job::Task_queue::append_calendar_dom_elements( const xml::Element_ptr& elem
 xml::Element_ptr Job::Task_queue::why_dom_element(const xml::Document_ptr& doc, const Time& now, bool in_period) {
     // Wie Job::get_task_from_queue()
 
-    xml::Element_ptr result = doc.createElement("task_queue");
+    xml::Element_ptr result = doc.createElement("task_queue.why");
     result.setAttribute("length", (int)_queue.size());
     Z_FOR_EACH_CONST(Queue, _queue, it) {
         Task* task = *it;
-        xml::Element_ptr task_element = result.append_new_element("task");
+        xml::Element_ptr task_element = result.append_new_element("task_queue_element.why");
         task_element.setAttribute("id", as_string(task->id()));
         bool at_reached = task->at() <= now; 
         if (at_reached) {
@@ -3588,7 +3588,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 //-----------------------------------------------------------------------------Job::why_dom_element
 
 xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
-    xml::Element_ptr result = doc.createElement("job");
+    xml::Element_ptr result = doc.createElement("job.why");
     Time now = Time::now();
     bool in_period = is_in_period(now);
     int not_ending_tasks_count = this->not_ending_tasks_count();
@@ -3606,15 +3606,15 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
         if (is_order_controlled())
             append_obstacle_element(result, "order_controlled", as_bool_string(is_order_controlled()));
     } else {
-        xml::Element_ptr e = result.append_new_element("if_order_is_ready");
+        xml::Element_ptr e = result.append_new_element("if_order_is_ready.why");
         //e.appendChild(order->dom_element(doc, Show_what()));
         if (!is_order_controlled())
             append_obstacle_element(result, "order_controlled", as_bool_string(is_order_controlled()));
         if (!_running_tasks.empty()) {
-            xml::Element_ptr tasks = e.append_new_element("tasks");
+            xml::Element_ptr tasks = e.append_new_element("tasks.why");
             Z_FOR_EACH(Task_list, _running_tasks, it) {
                 Task* task = *it;
-                xml::Element_ptr t = tasks.append_new_element("task");
+                xml::Element_ptr t = tasks.append_new_element("task.why");
                 if (task->state() != Task::s_running_waiting_for_order)  append_obstacle_element(t, "state", task->state_name());
                 if (Order* o = task->order())  append_obstacle_element(t, o->dom_element(doc, Show_what()));
             }
@@ -3685,7 +3685,7 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     }
 
     if (!_start_when_directory_changed_list.empty()) {  // cause_directory
-        xml::Element_ptr e = result.append_new_element("start_when_directory_changed");
+        xml::Element_ptr e = result.append_new_element("start_when_directory_changed.why");
         if (!_directory_changed && !_start_once_for_directory) {
             xml::Element_ptr o = append_obstacle_element(e, "directory_changed", as_bool_string(_directory_changed));
             o.setAttribute("start_once_for_directory", as_bool_string(_start_once_for_directory));

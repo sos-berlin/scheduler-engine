@@ -1304,7 +1304,7 @@ bool Node::is_ready_for_order_processing() const {
 //----------------------------------------------------------------Order_queue_node::why_dom_element
 
 xml::Element_ptr Order_queue_node::why_dom_element(const xml::Document_ptr& doc, const Time& now) const {
-    xml::Element_ptr result = doc.createElement("job_chain_node");
+    xml::Element_ptr result = doc.createElement("job_chain_node.why");
     result.setAttribute("order_state", _order_state.as_string());
     if(action() != Node::act_process)  append_obstacle_element(result, "action", action_name());
     result.appendChild(_job_chain->why_dom_element(doc));
@@ -2193,7 +2193,7 @@ bool Job_chain::is_ready_for_order_processing() const {
 //-----------------------------------------------------------------------Job_chain::why_dom_element
 
 xml::Element_ptr Job_chain::why_dom_element(const xml::Document_ptr& doc) const {
-    xml::Element_ptr result = doc.createElement("job_chain");
+    xml::Element_ptr result = doc.createElement("job_chain.why");
     result.setAttribute("path", path());
     if (is_to_be_removed())  append_obstacle_element(result, "to_be_removed", as_bool_string(true));
     if (replacement()  &&  replacement()->file_based_state() == File_based::s_initialized)

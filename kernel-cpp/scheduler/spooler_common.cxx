@@ -6,7 +6,7 @@
 namespace sos {
 namespace scheduler {
 
-const string reason_start_element_name = "start_reason";
+const string reason_start_element_name = "start_reason.why";
 const string obstacle_element_name = "obstacle";
 
 //--------------------------------------------------------------------variable_set_from_environment
