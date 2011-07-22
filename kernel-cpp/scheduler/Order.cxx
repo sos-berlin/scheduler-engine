@@ -2119,7 +2119,7 @@ void Order::set_job_chain_node( Node* node, bool is_error_state )
     if( node )
     {
         if( node->is_suspending_order() )  set_suspended();
-        if( node->delay()  &&  !at() )  set_at( Time::now() + node->delay() );
+        if( node->delay()  &&  !at() )  set_at_after_delay( Time::now() + node->delay() );
     }
 
     set_state2( node? node->order_state() : empty_variant, is_error_state );
@@ -2920,6 +2920,16 @@ void Order::set_at( const Time& time )
     if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
 
     set_setback( time );
+}
+
+//-------------------------------------------------------------------------Order::set_at_after_delay
+
+void Order::set_at_after_delay( const Time& time )
+{
+    assert_no_task( Z_FUNCTION );
+    if( _moved      )  z::throw_xc( "SCHEDULER-188", obj_name() );
+
+    set_setback( time, true );
 }
 
 //--------------------------------------------------------------------------------Order::next_time

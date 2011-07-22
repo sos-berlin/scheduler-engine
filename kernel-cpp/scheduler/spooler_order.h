@@ -232,6 +232,7 @@ struct Order : Com_order,
     bool                     is_setback                 ()                                          { return _setback_count > 0; }
     int                         setback_count           ()                                          { return _setback_count; }
     void                    set_at                      ( const Time& );
+    void                    set_at_after_delay          ( const Time& );
     Time                        at                      ()                                          { return _setback; }
     void                    set_replacement             ( Order* replaced_order );
     void                    set_replacement             ( bool );
