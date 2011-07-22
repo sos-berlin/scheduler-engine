@@ -214,10 +214,11 @@ struct Sos_static : Sos_static_0
     static Sos_static*             _sos_static;
 
     friend inline Sos_static*       sos_static_ptr();
-    friend inline Sos_static*       sos_static_ptr_static();
+    friend Sos_static*              sos_static_ptr_static();
 };
 
 //-------------------------------------------------------------------------------sos_static_ptr
+
 Sos_static* sos_static_ptr_static();
 
 inline Sos_static* sos_static_ptr()
