@@ -110,6 +110,7 @@ struct Sos_static_0
                                                         Sos_static_0();
                                                        ~Sos_static_0();
 
+    void                                                init0();                                                       
     void                                                close0      ();
 
     Fill_zero                                          _zero_;
@@ -207,19 +208,21 @@ struct Sos_static : Sos_static_0
     Sos_static_ptr<Sosprof_static>                     _sosprof;                   // sosprof.cxx (.ini-files)
     Sos_pointer                                        _reserve [ 35 ];
 
-    static void                 close_current_task()    { _sos_static.close(); }
+    static void                 close_current_task()    { if (_sos_static)  _sos_static->close(); }
 
   private:
-    static Sos_static          _sos_static;
+    static Sos_static*             _sos_static;
 
     friend inline Sos_static*       sos_static_ptr();
+    friend inline Sos_static*       sos_static_ptr_static();
 };
 
 //-------------------------------------------------------------------------------sos_static_ptr
+Sos_static* sos_static_ptr_static();
 
 inline Sos_static* sos_static_ptr()
 {
-    return &Sos_static::_sos_static;
+    return !Sos_static::_sos_static? sos_static_ptr_static() : Sos_static::_sos_static;
 }
 
 //-------------------------------------------------------------------------------Has_static_ptr

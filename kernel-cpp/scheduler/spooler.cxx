@@ -4055,12 +4055,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     }
 
     if (is_object_server) {
-        #ifdef Z_WINDOWS
-            //JS-709: Visual Studio 2010, Windows 2003, Dienst unter nicht-SYSTEM-Konto: API-Prozess bleibt bei bloﬂem return oder exit() h‰ngen.
-            log_stop();
-            _flushall();
-            _exit(ret);  
-        #endif
+        //#ifdef Z_WINDOWS
+        //    //JS-709: Visual Studio 2010, Windows 2003, Dienst unter nicht-SYSTEM-Konto: API-Prozess bleibt bei bloﬂem return oder exit() h‰ngen.
+        //    log_stop();
+        //    _flushall();
+        //    _exit(ret);  
+        //#endif
     } else {
         Z_LOG2( "scheduler", "Executable will be terminated.\n" );
     }

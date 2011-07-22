@@ -35,6 +35,7 @@ static char*        default_argv0   = "(unknown)";
 char**             _argv            = &default_argv0;
 
 z::Mutex            hostware_mutex  ( "hostware" ); // Allgmeine Semaphore für Hostole (und vielleicht andere, z.B. hostphp und C++-Hostware-Programme)
+z::Mutex            sosstat_mutex   ("Sos_stat");
 
 //-------------------------------------------------------------------------------------------static
 
@@ -56,7 +57,7 @@ const Hostware_version hostware_version ( VER_PRODUCTVERSION );
 
   //Sos_static::Mswin Sos_static::mswin;
 #else
-    Sos_static                   Sos_static::_sos_static;
+    Sos_static*                  Sos_static::_sos_static;
     //Sos_static* Sos_static::_sos_static_ptr;
     //Sos_ptr<Sos_static> sos_static_ptr2;
 /*
@@ -77,6 +78,20 @@ const Hostware_version hostware_version ( VER_PRODUCTVERSION );
 #endif
 
 DEFINE_SOS_STATIC_PTR( Sos_licence )
+
+//-----------------------------------------------------------------------sos_static_ptr_static
+
+Sos_static* sos_static_ptr_static() {
+    if (!Sos_static::_sos_static) {
+        Z_MUTEX(sosstat_mutex) {
+            if (!Sos_static::_sos_static) {
+                Sos_static::_sos_static = new Sos_static();
+                Sos_static::_sos_static->init0();
+            }
+        }
+    }
+    return Sos_static::_sos_static;
+}
 
 //---------------------------------------------------------------------notify_register_callback
 /*
@@ -169,6 +184,19 @@ Sos_static_0::Sos_static_0()
         _log_context._indent_tls_index = TlsAlloc();
 #   endif
 
+}
+
+//------------------------------------------------------------------Sos_static_0::~Sos_static_0
+
+Sos_static_0::~Sos_static_0()
+{
+    close0();
+}
+
+//-----------------------------------------------------------------------------Sos_static_0::init0
+
+void Sos_static_0::init0()
+{
     _log_context._version   = 1;
     _log_context._mutex     = &_log_lock._system_mutex; 
     _log_context._log_write = Log_ptr::log_write;
@@ -177,13 +205,6 @@ Sos_static_0::Sos_static_0()
     //z::Log_ptr::set_indent_tls_index( _log_context._indent_tls_index );
 
     //_log_ptr = (ostream*)log_create();
-}
-
-//------------------------------------------------------------------Sos_static_0::~Sos_static_0
-
-Sos_static_0::~Sos_static_0()
-{
-    close0();
 }
 
 //-----------------------------------------------------------------------------Sos_static_0::close0
