@@ -90,7 +90,7 @@ public class JobWhyTest {
 
     
     private static String jobchainXPath(String jobName) {
-        return jobchainNodeXPath(jobName) + "/job_chain[@path='/j']";
+        return jobchainNodeXPath(jobName) + "/job_chain.why[@path='/j']";
     }
 
 
