@@ -37,7 +37,7 @@ public class JobWhyTest {
     
     private static Element executeJobWhy(String jobPath) {
         String xml = schedulerTest.getScheduler().executeXml("<job.why job='" + jobPath + "'/>");
-        Element result = elementXPath(loadXml(xml), "/spooler/answer/job");
+        Element result = elementXPath(loadXml(xml), "/spooler/answer/job.why");
         logger.debug(jobPath + ": " + toXml(result));
         return result;
     }
@@ -54,7 +54,7 @@ public class JobWhyTest {
 
 
     @Test public void testJobMinTasks() {
-        checkXPathForJobsExactly("start_reason[@min_tasks='1']/obstacle[@in_period='false']", "minTasks");
+        checkXPathForJobsExactly("start_reason.why[@min_tasks='1']/obstacle[@in_period='false']", "minTasks");
     }
 
 
@@ -72,7 +72,7 @@ public class JobWhyTest {
 
     
     @Test public void testJobchainStopped() {
-        checkXPathForAllJobs("job_chain_nodes/job_chain_node/job_chain/obstacle[@state='stopped']");
+        checkXPathForAllJobs("job_chain_nodes.why/job_chain_node.why/job_chain.why/obstacle[@state='stopped']");
     }
 
 
@@ -95,6 +95,6 @@ public class JobWhyTest {
 
 
     private static String jobchainNodeXPath(String jobName) {
-        return "job_chain_nodes/job_chain_node[@order_state='state-" + jobName + "']";
+        return "job_chain_nodes.why/job_chain_node.why[@order_state='state-" + jobName + "']";
     }
 }
