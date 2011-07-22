@@ -87,6 +87,7 @@ Sos_static* sos_static_ptr_static() {
             if (!Sos_static::_sos_static) {
                 Sos_static::_sos_static = new Sos_static();
                 Sos_static::_sos_static->init0();
+                Sos_static::_sos_static->init();
             }
         }
     }
