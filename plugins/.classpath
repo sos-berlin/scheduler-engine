@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="J:/E/java/lib/javax.jms.jar"/>
+	<classpathentry kind="lib" path="J:/E/java/lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="C:/Programme/sos-berlin.com/jobscheduler_1.3.9/scheduler_139/lib/guava-r09.jar"/>
+	<classpathentry kind="lib" path="C:/Programme/sos-berlin.com/jobscheduler_1.3.9/scheduler_139/lib/com.sos.SOSJobSchedulerModel-1.6-1191-14739.jar"/>
+	<classpathentry kind="lib" path="J:/E/java/lib/com.sos.scheduler.engine.jar-1.3.11.jar"/>
+	<classpathentry kind="lib" path="J:/E/java/lib/slf4j-api-1.5.5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
