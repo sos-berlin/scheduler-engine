@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--title="Task eines Jobs"-->
+<xml_element
+	name="task.why"
+	title="Job tasks"
+	category="Antwort"
+	sub_directory="answer/"
+	base_dir="../../"
+	parent_page="../../xml_commands.xml"
+	author="ss"
+	date="16.07.2011-14:05:01"
+>
+	<xml_parent_elements>
+		<xml_parent_element name="tasks.why"/>
+	</xml_parent_elements>
+
+  <xml_child_elements>
+		<xml_child_element name="obstacle">
+      <description>
+          <p>
+            Only the <code>state</code> attribute is returned.
+        <!--Es wird nur das Attribut <code>state</code> geliefert-->
+          </p>
+      </description>
+		</xml_child_element>
+ 		<xml_child_element name="state" />
+  </xml_child_elements>
+			
+</xml_element>

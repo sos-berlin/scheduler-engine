@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--title="Der Job läuft aufgrund einer Änderung im Dateisystem an"-->
+<xml_element
+	name="start_when_directory_changed.why"
+	title="Jobs started because of a file system change"
+	category="Antwort"
+	sub_directory="answer/"
+	base_dir="../../"
+	parent_page="../../xml_commands.xml"
+	author="ss"
+	date="16.07.2011-14:05:01"
+>
+	<xml_parent_elements>
+		<xml_parent_element name="job.why"/>
+	</xml_parent_elements>
+
+  <description>
+      <p>
+        The job configuration contains the <code>&lt;start_when_directory_changed></code> element.
+    <!--Die Konfiguration des Jobs enthält das Element <code>&lt;start_when_directory_changed></code>.-->
+      </p>
+  </description>
+
+  <xml_child_elements>
+		<xml_child_element name="obstacle">
+      <description>
+          <p>
+            Only the <code>directory_changed</code> and <code>start_once_for_direcory</code> attributes are returned.
+        <!--Es werden nur die Attribute <code>directory_changed</code> und <code>start_once_for_direcory</code> geliefert-->
+          </p>
+      </description>
+		</xml_child_element>
+  </xml_child_elements>
+			
+</xml_element>

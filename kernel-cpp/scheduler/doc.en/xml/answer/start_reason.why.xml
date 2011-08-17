@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--title="Gründe, die den Start des Jobs nicht erlauben"-->
+<xml_element
+	name="start_reason.why"
+	title="Reasons for the prohibition of a job start "
+	category="Antwort"
+	sub_directory="answer/"
+	base_dir="../../"
+	parent_page="../../xml_commands.xml"
+	author="ss"
+	date="16.07.2011-14:05:01"
+>
+	<xml_parent_elements>
+		<xml_parent_element name="job.why"/>
+	</xml_parent_elements>
+	
+	<xml_attributes>
+		<xml_attribute name="next_single_start" type="time" title="The job start time (single_start)">
+<!--<xml_attribute name="next_single_start" type="time" title="Startzeit des Jobs (single_start)">-->
+      <description>
+          <p>
+              The  <code>&lt;obstacle></code> element only returns the <code>state</code> and  <code>max_tasks</code> attributes.
+          <!--In <code>&lt;obstacle></code> werden nur die Attribute <code>state</code> und  <code>max_tasks</code> geliefert.-->
+          </p>
+      </description>
+		</xml_attribute>
+		<xml_attribute name="once" type="boolean" title="The job starts once the Job Scheduler is started, if allowed by the runtime (period)">
+<!--<xml_attribute name="once" type="boolean" title="Job startet einmal nach Start des JobSchedulers, wenn die runtime (period) dies zulässt">-->
+      <description>
+          <p>
+              The <code>&lt;obstacle></code> element only returns the <code>in_period</code>, <code>max_tasks</code> and <code>state</code> attributes.
+          <!--In <code>&lt;obstacle></code> werden nur die Attribute <code>in_period</code>, <code>max_tasks</code> und <code>state</code> geliefert.-->
+          </p>
+      </description>
+		</xml_attribute>
+		<xml_attribute name="delay_until" type="hh:mm[:ss]" title="Delay the job start until the specififed time">
+<!--<xml_attribute name="delay_until" type="hh:mm[:ss]" title="Verzögerung des Jobstarts bis zur angegebenen Zeit">-->
+      <description>
+          <p>
+              The <code>&lt;obstacle></code> element only returns the <code>now</code> attribute.
+          <!--In <code>&lt;obstacle></code> wird nur das Attribute <code>now</code> geliefert.-->
+          </p>
+      </description>
+		</xml_attribute>
+		<xml_attribute name="next_start_time" type="hh:mm[:ss]" title="Next calculated job start time">
+<!--<xml_attribute name="next_start_time" type="hh:mm[:ss]" title="Nächste errechnete Startzeit des Jobs">-->
+      <description>
+          <p>
+              The <code>&lt;obstacle></code> element only returns the <code>now</code>, <code>in_period</code>, <code>max_tasks</code> and <code>state</code> elements.
+          <!--In <code>&lt;obstacle></code> werden nur die Attribute <code>now</code>, <code>in_period</code>, <code>max_tasks</code> und <code>state</code> geliefert.-->
+          </p>
+      </description>
+		</xml_attribute>
+		<xml_attribute name="min_tasks" type="number" title="Minimum number of tasks to be kept running">
+<!--<xml_attribute name="min_tasks" type="number" title="Mindeste Anzahl der stets laufenden Tasks">-->
+      <description>
+          <p>
+              The <code>&lt;obstacle></code> element only returns the <code>not_ending_tasks</code> and <code>in_period</code> attributes.
+          <!--In <code>&lt;obstacle></code> werden nur die Attribute <code>not_ending_tasks</code> und <code>in_period</code> geliefert.-->
+          </p>
+      </description>
+		</xml_attribute>
+	</xml_attributes>
+
+  <xml_child_elements>
+		<xml_child_element name="obstacle">
+      <description>
+          <p>
+              The attributes that are returned by the obstacle element depend on the <code>start_reason.why</code> attribute.
+          <!--Je nach Attribut von <code>start_reason.why</code> werden nur ausgewählte Attribute geliefert.-->
+          </p>
+      </description>
+		</xml_child_element>
+  </xml_child_elements>
+			
+</xml_element>

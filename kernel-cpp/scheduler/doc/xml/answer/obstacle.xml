@@ -57,7 +57,7 @@
       </description>
 		</xml_attribute>
 		
-		<xml_attribute name="waiting_for_process_try_again" type="boolean" title="Der job wwird erneut versuchen einen Prozess zu erhalten">
+		<xml_attribute name="waiting_for_process_try_again" type="boolean" title="Der job wird erneut versuchen einen Prozess zu erhalten">
       <description>
           <p>
           </p>

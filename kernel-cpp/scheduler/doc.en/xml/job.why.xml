@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: start_job.xml 13875 2010-06-10 09:35:10Z oh $-->
+
+<!--title="Mögliche Ursachen für die Verhinderung eines Jobstarts ermitteln" -->
+
+<xml_element 
+		name="job.why" 
+		title="Determining Possible Reasons for Jobs Failing to Start" 
+		category="Kommando"
+		base_dir="../" 
+		parent_page="../xml_commands.xml" 
+		author="$Author: ss $" 
+		date="$Date: 2011-07-15 08:55:21 +0200 (Fr, 15 Jul 2011) $">
+
+
+    <description>
+        <p>
+        This command determines possible reasons for a job not starting.
+				As these reasons may not only lie in the job itself but also in the objects that are related to the job (job chains, orders, etc.), this command generally returns an XML element <scheduler_a href="answer/job.why.xml">structure</scheduler_a>, referenced to the job. Common to all elements returned is that they have to end in one or more <code><scheduler_a href="answer/obstacle.xml">obstacle</scheduler_a></code> elements. Each of these obstacle elements will specifa a reason why the job has not started.
+    <!--Dieses Kommando ermittelt mögliche Ursachen dafür, warum ein Job nicht anläuft. Da diese nicht nur auf den Job selbst zurück zu führen sind,
+        sondern evtl. auch auf Objekte, die mit dem Job in Zusammenhang stehen (Jobketten, Aufträge etc.), liefert diese Kommando i.d.R. eine <scheduler_a href="answer/job.why.xml">Struktur</scheduler_a> von XML Elementen, die auf den Job referenzieren. Allen Elementen ist gemeinsam, dass sie in einem oder mehreren <code><scheduler_a href="answer/obstacle.xml">obstacle</scheduler_a></code> Elementen münden müssen, die - jedes für sich - einen Grund angeben, warum der Job nicht anläuft.-->
+        </p>
+    </description>
+
+
+    <xml_parent_elements>
+        <xml_parent_element name="commands"/>
+    </xml_parent_elements>
+
+    
+    <xml_attributes>
+        <xml_attribute name="job" type="job_name">
+            <description>
+                <p>
+                    The Job Name
+                <!--Der Jobname-->
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+    <xml_answer element="job.why"/>
+
+    <example>
+        <pre>&lt;job.why job=&quot;mein_job&quot; /&gt;</pre>
+    </example>
+
+</xml_element>
