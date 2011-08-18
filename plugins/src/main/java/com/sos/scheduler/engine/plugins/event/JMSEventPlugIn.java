@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
+import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
@@ -31,17 +32,16 @@ import com.sos.scheduler.model.events.JSEvent;
  * </p>
  * </div>
  */
-public class JMSEventPlugIn implements PlugIn, EventSubscriber {
+public class JMSEventPlugIn extends AbstractEventPlugin {
 	
 	private static Logger logger = Logger.getLogger(JMSEventPlugIn.class);
 
-	private final Scheduler scheduler;
 	private final Connector connector;
 
 	private SchedulerObjectFactory objFactory;
 
 	JMSEventPlugIn(Scheduler scheduler, Element plugInElement) {
-		this.scheduler = scheduler;
+		super(scheduler, plugInElement);
 		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
 		String persistenceDir = stringXPath(plugInElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
 		connector = Connector.newInstance(providerUrl, persistenceDir);
@@ -55,7 +55,7 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 
 	@Override
 	public void activate() {
-		scheduler.getEventSubsystem().subscribe(this);
+		super.activate();
 		connector.start();
 	}
 
@@ -64,13 +64,8 @@ public class JMSEventPlugIn implements PlugIn, EventSubscriber {
 		try {
 			connector.close();
 		} finally {
-			scheduler.getEventSubsystem().unsubscribe(this);
+			super.close();
 		}
-	}
-
-	@Override
-	public String getXmlState() {
-		return "";
 	}
 
 	/*

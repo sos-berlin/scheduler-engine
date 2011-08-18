@@ -17,7 +17,7 @@ import javax.jms.TopicSession;
 //import org.slf4j.LoggerFactory;
 
 
-class Connector implements Closeable {
+public class Connector implements Closeable {
 	
 	//TODO
 	// if the transport protocol "vm" is using allows clients to connect to each other inside the java VM.
@@ -77,7 +77,7 @@ class Connector implements Closeable {
     }
 
     
-    void start() {
+    public void start() {
 //        try {
 //            brokerService.start();
 //        } catch (Exception x) { throw new RuntimeException(x); }
@@ -99,7 +99,8 @@ class Connector implements Closeable {
     }
 
     
-    @Override public void close() {
+    @Override
+    public void close() {
         stop();
 //        brokerService.waitUntilStopped();
     }
@@ -111,17 +112,17 @@ class Connector implements Closeable {
     }
 
 
-    TopicConnection getTopicConnection() {
+    public TopicConnection getTopicConnection() {
         return connection;
     }
 
 
-    Topic getTopic() {
+    public Topic getTopic() {
         return topic;
     }
 
 
-    TextMessage newTextMessage() {
+    public TextMessage newTextMessage() {
         try {
             return session.createTextMessage();
         } catch (JMSException x) { throw new RuntimeException(x); }
@@ -134,14 +135,14 @@ class Connector implements Closeable {
     }
 
 
-    void publish(Message message) {
+    public void publish(Message message) {
         try {
             publisher.publish(message);
         } catch (JMSException x) { throw new RuntimeException(x); }
     }
 
 
-    static Connector newInstance(String providerUrl, String persistenceDirectory) {
+    public static Connector newInstance(String providerUrl, String persistenceDirectory) {
 
 //    	try {
 //    		if (providerUrl.startsWith("vm:"))
