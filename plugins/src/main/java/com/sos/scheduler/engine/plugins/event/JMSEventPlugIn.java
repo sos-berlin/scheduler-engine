@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
 import com.sos.scheduler.model.SchedulerObjectFactory;
