@@ -3,8 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__OrderResumedEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
@@ -14,7 +14,7 @@ struct OrderResumedEvent__class : ::zschimmer::javabridge::Class
     OrderResumedEvent__class(const string& class_name);
    ~OrderResumedEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method;
+    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderResumedEvent__class > class_factory;
 };
@@ -23,19 +23,19 @@ const ::zschimmer::javabridge::class_factory< OrderResumedEvent__class > OrderRe
 
 OrderResumedEvent__class::OrderResumedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;)V"){}
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;)V"){}
 
 OrderResumedEvent__class::~OrderResumedEvent__class() {}
 
 
 
-OrderResumedEvent OrderResumedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0) {
+OrderResumedEvent OrderResumedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0) {
     OrderResumedEvent result;
     result.java_object_allocate_();
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     OrderResumedEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method.call(result.get_jobject(), parameter_list);
+    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 

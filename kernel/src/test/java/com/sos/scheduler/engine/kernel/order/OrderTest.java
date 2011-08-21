@@ -10,7 +10,7 @@ public class OrderTest
 {
     private final Platform platform = PlatformMock.newInstance();
     private final OrderC orderC = new OrderCMock();
-    private final Order order = new Order(platform, orderC);
+    private final UnmodifiableOrder order = new Order(platform, orderC);
 
     @Test public void testDummy() {
         order.getId();

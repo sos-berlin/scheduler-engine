@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
 import com.sos.scheduler.engine.kernel.order.Order;
-import com.sos.scheduler.engine.kernel.order.OrderEvent;
+import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
@@ -19,7 +19,7 @@ import com.sos.scheduler.model.events.*;
 
 public class JMSEventAdapter {
 	
-	private static String eventName;
+	private static String eventName;	//FIXME Statische veränderliche Variable, das kann böse enden. Zschimmer 
 
     // @Deprecated // Nicht übersetzbar, Zschimmer 2011-06-07
 	public static JSEvent createEvent(final SchedulerObjectFactory objFactory, final Event event) throws SchedulerException {
@@ -27,9 +27,9 @@ public class JMSEventAdapter {
 		eventName = event.getClass().getName().replace(event.getClass().getPackage().getName() + ".", "");
 		boolean flgFound = false;
 		JSEvent ev = null;
-		if (event instanceof OrderEvent) {
+		if (event instanceof ModifiableOrderEvent) {
 
-			OrderEvent kernelEvent = (OrderEvent)event;
+			ModifiableOrderEvent kernelEvent = (ModifiableOrderEvent)event;
 
 //            throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + JMSEventAdapter.class.getClass());
 			if (event instanceof OrderTouchedEvent) {
@@ -69,14 +69,15 @@ public class JMSEventAdapter {
 				flgFound = true;
 			}
 		}
-			
-		if (event instanceof SchedulerCloseEvent) {
-			ev = objFactory.createEvent("EventSchedulerClosed");
-			EventSchedulerClosed oe = ev.getEventSchedulerClosed();
-			SchedulerCloseEvent closeEvent = (SchedulerCloseEvent)event;
-			oe.setScheduler( JMSSchedulerAdapter.createInstance(closeEvent.getObject()));
-			flgFound = true;
-		}
+
+//      FIXME Auskommentiert, weil SchedulerCloseEvent.getObject() nicht mehr zugänglich ist. Brauchen wir das denn hier?		
+//		if (event instanceof SchedulerCloseEvent) {
+//			ev = objFactory.createEvent("EventSchedulerClosed");
+//			EventSchedulerClosed oe = ev.getEventSchedulerClosed();
+//			SchedulerCloseEvent closeEvent = (SchedulerCloseEvent)event;
+//			//FIXME Brauchen wir das? Zschimmer oe.setScheduler( JMSSchedulerAdapter.createInstance(closeEvent.getObject()));
+//			flgFound = true;
+//		}
 			
 		if (event instanceof ErrorLogEvent) {
 			ev = objFactory.createEvent("EventLogError");
@@ -88,7 +89,7 @@ public class JMSEventAdapter {
 			
 		
 		if (!flgFound) {
-			throw new SchedulerException("the event " + eventName + " is not known in class " + JMSEventAdapter.class.getName() + " - change the constructor of the class.");
+			throw new SchedulerException("the event " + event.getClass().getName() + " is not known in class " + JMSEventAdapter.class.getName() + " - change the constructor of the class.");
 		}
 		
 		return ev;

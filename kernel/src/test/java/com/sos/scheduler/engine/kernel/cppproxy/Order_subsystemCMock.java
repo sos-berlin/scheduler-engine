@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy;
 
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
+import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyImpl;
 import com.sos.scheduler.engine.cplusplus.runtime.Sister;
 import java.util.ArrayList;
@@ -18,5 +19,5 @@ public class Order_subsystemCMock extends CppProxyImpl<Sister> implements Order_
 
     @Override public ArrayList<JobChain> java_file_baseds() { return new ArrayList<JobChain>(0); }
 
-    @Override public JobChain java_file_based_or_null(String p) { return null; }
+    @Override public UnmodifiableJobchain java_file_based_or_null(String p) { return null; }
 }

@@ -23,11 +23,11 @@ final class Order_subsystemCImpl
     private static native int finished_orders_count__native(long cppReference);
 
 
-    @Override public com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null(java.lang.String p0) {
+    @Override public com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain java_file_based_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
-            com.sos.scheduler.engine.kernel.order.jobchain.JobChain result = java_file_based_or_null__native(cppReference(), p0);
-            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.JobChain.class, result);
+            com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain result = java_file_based_or_null__native(cppReference(), p0);
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain.class, result);
             return result;
         }
         finally {
@@ -35,7 +35,7 @@ final class Order_subsystemCImpl
         }
     }
 
-    private static native com.sos.scheduler.engine.kernel.order.jobchain.JobChain java_file_based_or_null__native(long cppReference, java.lang.String p0);
+    private static native com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain java_file_based_or_null__native(long cppReference, java.lang.String p0);
 
 
     @Override public java.util.ArrayList java_file_baseds() {

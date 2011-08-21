@@ -24,7 +24,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderTouchedEvent extends OrderEvent {
+public class OrderTouchedEvent extends ModifiableOrderEvent {
     public OrderTouchedEvent(Order order) {
         super(order);
     }

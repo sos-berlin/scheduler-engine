@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
 
 
-@ForCpp public class VariableSet implements Sister {
+@ForCpp public class VariableSet implements Sister, UnmodifiableVariableSet {
     private final Variable_setC cppProxy;
 
 
@@ -14,22 +14,18 @@ import com.sos.scheduler.engine.kernel.cppproxy.Variable_setC;
         this.cppProxy = cppProxy;
     }
 
-
     @Override public void onCppProxyInvalidated() {
     }
 
-
-    public final String get(String name) {
+	public final String get(String name) {
         return cppProxy.get_string(name);
     }
 
-
-    public final String getStrictly(String name) {
+	public final String getStrictly(String name) {
         String result = get(name);
         if (result == null)  throw new SchedulerException("Missing parameter '" + name + "'");
         return result;
     }
-
 
     public final void put(String name, String value) { 
         cppProxy.set_var(name, value);

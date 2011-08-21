@@ -22,10 +22,10 @@ class ExampleScalaTest extends ScalaSchedulerTest {
         filter { case e: OrderEvent => e.getOrder.getId == "id.1" }
 
         @Override protected def runEventThread() {
-            expectEvent(eventTimeout) { case e: OrderTouchedEvent     => e.getOrder.getState == "state.1" }
+            expectEvent(eventTimeout) { case e: OrderTouchedEvent      => e.getOrder.getState == "state.1" }
             expectEvent(eventTimeout) { case e: OrderStateChangedEvent => e.getOrder.getState == "state.2" }
             expectEvent(eventTimeout) { case e: OrderStateChangedEvent => e.getOrder.getState == "state.end" }
-            expectEvent(eventTimeout) { case e: OrderFinishedEvent    => e.getOrder.getState == "state.end" }
+            expectEvent(eventTimeout) { case e: OrderFinishedEvent     => e.getOrder.getState == "state.end" }
         }
     }
 }

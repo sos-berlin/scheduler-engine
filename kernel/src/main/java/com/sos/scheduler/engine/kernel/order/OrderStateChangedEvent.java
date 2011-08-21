@@ -29,7 +29,7 @@ public class OrderStateChangedEvent extends OrderEvent {
 	private final OrderState previousState;
 
     
-    public OrderStateChangedEvent(Order order, OrderState previousState) {
+    public OrderStateChangedEvent(UnmodifiableOrder order, OrderState previousState) {
         super(order);
         this.previousState = previousState;
     }

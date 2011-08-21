@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
-import com.sos.scheduler.engine.kernel.order.OrderEvent;
+import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderState;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -48,8 +48,8 @@ public class EventPlugIn extends AbstractEventPlugin {
 	public void onEvent(Event e) throws Exception {
 
 		try {
-			if (e instanceof OrderEvent) {
-				OrderEvent orderEvent = (OrderEvent)e;
+			if (e instanceof ModifiableOrderEvent) {
+				ModifiableOrderEvent orderEvent = (ModifiableOrderEvent)e;
 				if (e instanceof OrderTouchedEvent) {
 					logger.info("OrderTouchedEvent");
 					orderEvent.getOrder().getParameters().put("myParam", "this is my Param");
@@ -61,7 +61,7 @@ public class EventPlugIn extends AbstractEventPlugin {
 
 	}
 	
-	private void setParamForState(OrderEvent orderEvent) {
+	private void setParamForState(ModifiableOrderEvent orderEvent) {
 		String currentState = orderEvent.getOrder().getState().getString();
 		// @TODO Die Frage ist, wie man über die Orderparameter iterieren kann, orderEvent.getOrder().getParameters()
 		// liefert zwar die Parameter der Order aber es ist nicht klar, wie man sie ausliest (es sei denn,

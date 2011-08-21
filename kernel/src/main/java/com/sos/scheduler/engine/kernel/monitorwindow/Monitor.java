@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.kernel.monitorwindow;
 
-import com.sos.scheduler.engine.kernel.Scheduler;
-import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
-import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
-import com.sos.scheduler.engine.kernel.order.jobchain.Node;
-import com.sos.scheduler.engine.kernel.order.Order;
-import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
-import com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+
+import com.sos.scheduler.engine.kernel.Scheduler;
+import com.sos.scheduler.engine.kernel.event.Event;
+import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.kernel.order.UnmodifiableOrder;
+import com.sos.scheduler.engine.kernel.order.jobchain.Node;
+import com.sos.scheduler.engine.kernel.order.jobchain.OrderQueueNode;
+import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 
 //TODO Test-Beispiel. Könnte über Annotation aktiviert werden, etwa @Monitor.
 
@@ -43,8 +44,8 @@ public class Monitor implements EventSubscriber {
 
 
     private void processOrderStateChangeEvent(OrderStateChangedEvent e) throws IOException {
-        Order order = e.getObject();
-        JobChain jobChain = order.jobChainOrNull();
+        UnmodifiableOrder order = e.getOrder();
+        UnmodifiableJobchain jobChain = order.unmodifiableJobchainOrNull();
         if (jobChain != null) {
             showJobChain(jobChain);
             output.flush();
@@ -53,11 +54,11 @@ public class Monitor implements EventSubscriber {
 
 
     private void showJobChains() {
-        for (JobChain jobChain: scheduler.getOrderSubsystem().jobChains())  showJobChain(jobChain);
+        for (UnmodifiableJobchain jobChain: scheduler.getOrderSubsystem().jobChains())  showJobChain(jobChain);
     }
 
 
-    private void showJobChain(JobChain jobChain) {
+    private void showJobChain(UnmodifiableJobchain jobChain) {
         try {
             output.write("***Monitor*** " + jobChain.getName() + ": " );
             for (Node node: jobChain.getNodes())  showNode(node);

@@ -8,12 +8,13 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderEvent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderState; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct UnmodifiableOrder; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -23,7 +24,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct OrderStateChangedEvent__class;
 
 struct OrderStateChangedEvent : ::zschimmer::javabridge::proxy_jobject< OrderStateChangedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
-    static OrderStateChangedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1);
+    static OrderStateChangedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1);
 
     OrderStateChangedEvent(jobject = NULL);
 

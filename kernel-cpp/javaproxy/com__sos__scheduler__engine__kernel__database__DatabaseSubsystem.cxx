@@ -3,7 +3,6 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__database__DatabaseSubsystem.h"
-#include "com__sos__scheduler__engine__kernel__VariableSet.h"
 #include "com__sos__scheduler__engine__kernel__cppproxy__DatabaseC.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
@@ -17,7 +16,6 @@ struct DatabaseSubsystem__class : ::zschimmer::javabridge::Class
 
     ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method;
     ::zschimmer::javabridge::Method const _close____method;
-    ::zschimmer::javabridge::Method const _getProperties____method;
     ::zschimmer::javabridge::Static_method const _idForDatabase__Ljava_lang_String_2__method;
 
     static const ::zschimmer::javabridge::class_factory< DatabaseSubsystem__class > class_factory;
@@ -29,7 +27,6 @@ DatabaseSubsystem__class::DatabaseSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,__constructor__Lcom_sos_scheduler_engine_kernel_cppproxy_DatabaseC_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/cppproxy/DatabaseC;)V")
     ,_close____method(this, "close", "()V")
-    ,_getProperties____method(this, "getProperties", "()Lcom/sos/scheduler/engine/kernel/VariableSet;")
     ,_idForDatabase__Ljava_lang_String_2__method(this, "idForDatabase", "(Ljava/lang/String;)Ljava/lang/String;"){}
 
 DatabaseSubsystem__class::~DatabaseSubsystem__class() {}
@@ -64,14 +61,6 @@ void DatabaseSubsystem::close() {
     ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
     DatabaseSubsystem__class* cls = _class.get();
     cls->_close____method.call(get_jobject(), parameter_list);
-}
-
-::javaproxy::com::sos::scheduler::engine::kernel::VariableSet DatabaseSubsystem::getProperties() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    DatabaseSubsystem__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet result;
-    result.steal_local_ref(cls->_getProperties____method.jobject_call(get_jobject(), parameter_list));
-    return result;
 }
 
 ::javaproxy::java::lang::String DatabaseSubsystem::idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0) {

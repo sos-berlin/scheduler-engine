@@ -3,9 +3,9 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__OrderStateChangedEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__Order.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderState.h"
+#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
@@ -15,7 +15,7 @@ struct OrderStateChangedEvent__class : ::zschimmer::javabridge::Class
     OrderStateChangedEvent__class(const string& class_name);
    ~OrderStateChangedEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method;
+    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method;
     ::zschimmer::javabridge::Method const _getPreviousState____method;
     ::zschimmer::javabridge::Method const _toString____method;
 
@@ -26,7 +26,7 @@ const ::zschimmer::javabridge::class_factory< OrderStateChangedEvent__class > Or
 
 OrderStateChangedEvent__class::OrderStateChangedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;Lcom/sos/scheduler/engine/kernel/order/OrderState;)V")
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;Lcom/sos/scheduler/engine/kernel/order/OrderState;)V")
     ,_getPreviousState____method(this, "getPreviousState", "()Lcom/sos/scheduler/engine/kernel/order/OrderState;")
     ,_toString____method(this, "toString", "()Ljava/lang/String;"){}
 
@@ -34,14 +34,14 @@ OrderStateChangedEvent__class::~OrderStateChangedEvent__class() {}
 
 
 
-OrderStateChangedEvent OrderStateChangedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1) {
+OrderStateChangedEvent OrderStateChangedEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderState >& p1) {
     OrderStateChangedEvent result;
     result.java_object_allocate_();
     ::zschimmer::javabridge::raw_parameter_list<2> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
     OrderStateChangedEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method.call(result.get_jobject(), parameter_list);
+    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2Lcom_sos_scheduler_engine_kernel_order_OrderState_2__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 

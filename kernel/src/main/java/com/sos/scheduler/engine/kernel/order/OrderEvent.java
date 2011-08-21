@@ -1,16 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
-import com.sos.scheduler.engine.kernel.event.ObjectEvent;
-
-
-public class OrderEvent extends ObjectEvent<Order> {
-    public OrderEvent(Order o) {
+abstract public class OrderEvent extends GenericOrderEvent<UnmodifiableOrder> {
+    public OrderEvent(UnmodifiableOrder o) {
         super(o);
-    }
-
-
-    /** Für JavaScript, das getObject() nicht sieht. */  //TODO Warum ist das so? 
-    public final Order getOrder() {
-        return getObject();
     }
 }

@@ -8,7 +8,6 @@
 #include "java__lang__Object.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { struct DatabaseC; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct VariableSet; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -47,7 +46,6 @@ struct DatabaseSubsystem : ::zschimmer::javabridge::proxy_jobject< DatabaseSubsy
   public:
 
     void close();
-    ::javaproxy::com::sos::scheduler::engine::kernel::VariableSet getProperties();
     static ::javaproxy::java::lang::String idForDatabase(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
 
     ::zschimmer::javabridge::Class* java_object_class_();

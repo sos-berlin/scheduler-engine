@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.order;
 
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain;
+import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 import com.sos.scheduler.engine.kernel.AbstractHasPlatform;
 import com.sos.scheduler.engine.kernel.Platform;
 import com.sos.scheduler.engine.kernel.Subsystem;
@@ -26,7 +27,7 @@ public class OrderSubsystem extends AbstractHasPlatform implements Subsystem
     }
 
     
-    public final JobChain jobChain(AbsolutePath path) {
+    public final UnmodifiableJobchain jobChain(AbsolutePath path) {
         return cppProxy.java_file_based_or_null(path.toString());
     }
 }

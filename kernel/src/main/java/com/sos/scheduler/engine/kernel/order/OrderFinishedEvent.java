@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  */
 @ForCpp
 public class OrderFinishedEvent extends OrderEvent {
-    public OrderFinishedEvent(Order order) {
+    public OrderFinishedEvent(UnmodifiableOrder order) {
         super(order);
     }
 }

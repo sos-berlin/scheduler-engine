@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.database;
 
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 import com.sos.scheduler.engine.kernel.Subsystem;
-import com.sos.scheduler.engine.kernel.VariableSet;
+import com.sos.scheduler.engine.kernel.UnmodifiableVariableSet;
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class DatabaseSubsystem implements Subsystem {
 
     private Map<String,String> entityManagerProperties() {
         Map<String,String> result = new HashMap<String,String>();
-        VariableSet p = getProperties();
+        UnmodifiableVariableSet p = getProperties();
         result.put("javax.persistence.jdbc.driver", p.getStrictly("jdbc.driverClass"));
         result.put("javax.persistence.jdbc.url", p.getStrictly("path"));
         result.put("javax.persistence.jdbc.user", p.getStrictly("user"));
@@ -69,7 +69,7 @@ public class DatabaseSubsystem implements Subsystem {
 
 
     /** Liefert auch "password" */
-    public final VariableSet getProperties() {
+    public final UnmodifiableVariableSet getProperties() {
         return cppProxy.properties().getSister();
     }
 

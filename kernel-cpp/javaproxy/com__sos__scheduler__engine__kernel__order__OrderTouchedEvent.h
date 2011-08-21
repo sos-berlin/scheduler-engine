@@ -8,11 +8,13 @@
 #include "com__sos__scheduler__engine__kernel__event__AbstractEvent.h"
 #include "com__sos__scheduler__engine__kernel__event__Event.h"
 #include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
 #include "java__lang__Object.h"
 
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct ModifiableOrderEvent; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct Order; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { struct OrderEvent; }}}}}}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
 
@@ -21,7 +23,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 
 struct OrderTouchedEvent__class;
 
-struct OrderTouchedEvent : ::zschimmer::javabridge::proxy_jobject< OrderTouchedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent {
+struct OrderTouchedEvent : ::zschimmer::javabridge::proxy_jobject< OrderTouchedEvent >, ::javaproxy::com::sos::scheduler::engine::kernel::order::ModifiableOrderEvent {
     static OrderTouchedEvent new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0);
 
     OrderTouchedEvent(jobject = NULL);
@@ -45,7 +47,7 @@ struct OrderTouchedEvent : ::zschimmer::javabridge::proxy_jobject< OrderTouchedE
   protected:
     void set_jobject(jobject jo) {
         ::zschimmer::javabridge::proxy_jobject< OrderTouchedEvent >::set_jobject(jo);
-        ::javaproxy::com::sos::scheduler::engine::kernel::order::OrderEvent::set_jobject(jo);
+        ::javaproxy::com::sos::scheduler::engine::kernel::order::ModifiableOrderEvent::set_jobject(jo);
     }
   public:
 

@@ -3,8 +3,8 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__order__OrderEvent.h"
-#include "com__sos__scheduler__engine__kernel__event__ObjectEvent.h"
-#include "com__sos__scheduler__engine__kernel__order__Order.h"
+#include "com__sos__scheduler__engine__kernel__order__GenericOrderEvent.h"
+#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
@@ -14,8 +14,7 @@ struct OrderEvent__class : ::zschimmer::javabridge::Class
     OrderEvent__class(const string& class_name);
    ~OrderEvent__class();
 
-    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method;
-    ::zschimmer::javabridge::Method const _getOrder____method;
+    ::zschimmer::javabridge::Method const __constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method;
 
     static const ::zschimmer::javabridge::class_factory< OrderEvent__class > class_factory;
 };
@@ -24,20 +23,19 @@ const ::zschimmer::javabridge::class_factory< OrderEvent__class > OrderEvent__cl
 
 OrderEvent__class::OrderEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/Order;)V")
-    ,_getOrder____method(this, "getOrder", "()Lcom/sos/scheduler/engine/kernel/order/Order;"){}
+    ,__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method(this, "<init>", "(Lcom/sos/scheduler/engine/kernel/order/UnmodifiableOrder;)V"){}
 
 OrderEvent__class::~OrderEvent__class() {}
 
 
 
-OrderEvent OrderEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::Order >& p0) {
+OrderEvent OrderEvent::new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::order::UnmodifiableOrder >& p0) {
     OrderEvent result;
     result.java_object_allocate_();
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     OrderEvent__class* cls = result._class.get();
-    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_Order_2__method.call(result.get_jobject(), parameter_list);
+    cls->__constructor__Lcom_sos_scheduler_engine_kernel_order_UnmodifiableOrder_2__method.call(result.get_jobject(), parameter_list);
     return result;
 }
 
@@ -54,14 +52,6 @@ OrderEvent::~OrderEvent() { assign_(NULL); }
 
 
 
-
-::javaproxy::com::sos::scheduler::engine::kernel::order::Order OrderEvent::getOrder() {
-    ::zschimmer::javabridge::raw_parameter_list<0> parameter_list;
-    OrderEvent__class* cls = _class.get();
-    ::javaproxy::com::sos::scheduler::engine::kernel::order::Order result;
-    result.steal_local_ref(cls->_getOrder____method.jobject_call(get_jobject(), parameter_list));
-    return result;
-}
 
 
 ::zschimmer::javabridge::Class* OrderEvent::java_object_class_() { return _class.get(); }

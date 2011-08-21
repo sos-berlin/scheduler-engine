@@ -8,6 +8,7 @@
 #include "com__sos__scheduler__engine__kernel__folder__FileBased.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderId.h"
 #include "com__sos__scheduler__engine__kernel__order__OrderState.h"
+#include "com__sos__scheduler__engine__kernel__order__UnmodifiableOrder.h"
 #include "java__lang__String.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { 
