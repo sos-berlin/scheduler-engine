@@ -312,8 +312,40 @@
                 <!--Braucht Maven 3: version>2.0-beta-2</version-->
                 <version>1.0-beta-2</version>
             </plugin>
-            
-            <plugin>
+
+			<plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>add-source</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+                <configuration>
+                    <jvmArgs>
+                        <!-- Vermeidet StackOverflowError auf manchen Linux-Rechnern: -->
+                        <jvmArg>-Xss1M</jvmArg>
+                    </jvmArgs>
+                    <args>
+                        <arg>-optimise</arg>
+                        <arg>-deprecation</arg>
+                    </args>
+                </configuration>
+			</plugin>
+			
+            <!--2011-08-20 plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
                 <executions>
@@ -327,7 +359,7 @@
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
                     <jvmArgs>
-                        <!-- Vermeidet StackOverflowError auf manchen Linux-Rechnern: -->
+                        <!- - Vermeidet StackOverflowError auf manchen Linux-Rechnern: - ->
                         <jvmArg>-Xss1M</jvmArg>
                     </jvmArgs>
                     <args>
@@ -336,7 +368,7 @@
                         <arg>-deprecation</arg>
                     </args>
                 </configuration>
-            </plugin>
+            </plugin-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -413,7 +445,7 @@
                 <plugin>
                     <groupId>org.scala-tools</groupId>
                     <artifactId>maven-scala-plugin</artifactId>
-                    <version>2.14.1</version>
+                    <version>2.15.2</version>
                  </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
@@ -442,6 +474,33 @@
                             <version>1.6.5</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <!-- Damit Eclipse mit Scala-Maven-Plugin klarkommt. -->
+                    <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>exec-maven-plugin</artifactId>
+                                        <versionRange>[1.1,)</versionRange>
+                                        <goals>
+                                            <goal>exec</goal>
+                                            <goal>java</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
