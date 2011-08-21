@@ -1,0 +1,6 @@
+.svn/
+.project
+.classpath
+.scala_dependencies
+.settings/
+/target/
