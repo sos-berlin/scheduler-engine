@@ -29,30 +29,14 @@
             </resource>
         </resources>
         <plugins>
-            <!--plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-executable-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <!- -<finalName>${project.groupId}.${project.artifactId}-complete</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>- ->
-                            <archive>
-                                <manifest>
-                                    <mainClass>${project.groupId}.cplusplus.generator.Main</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin-->
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 

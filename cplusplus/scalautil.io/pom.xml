@@ -11,6 +11,19 @@
     <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
