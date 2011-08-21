@@ -128,7 +128,7 @@ void Order::load_record( const Absolute_path& job_chain_path, const Record& reco
     _state_text = record.as_string( "state_text" );
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
-//	_suspended  = record.as_int   ( "suspended" ) != 0;   // JS-333
+//    _suspended  = record.as_int   ( "suspended" ) != 0;   // JS-333
 
     string initial_state = record.as_string( "initial_state" );
     if( initial_state != "" )
@@ -340,8 +340,8 @@ void Order::occupy_for_task( Task* task, const Time& now )
     _is_virgin = false;
     if( was_virgin )
     {
-		 if ( _job_chain )   // JS-682
-			  _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
+        if ( _job_chain )   // JS-682
+            _job_chain->check_max_orders();  // Keine Exception auslösen oder occupy_for_task() zurücknehmen (also _task=NULL setzen)
         if( _http_operation )  _http_operation->on_first_order_processing( task );
         order_subsystem()->count_started_orders();
         report_event( OrderTouchedEventJ::new_instance(java_sister()) );
@@ -976,9 +976,9 @@ void Order::close_log_and_write_history()
     _end_time = Time::now();
     _log->finish_log();
     
-	 if( _job_chain  &&  db()  &&  db()->opened() && _history_id ) 
+    if( _job_chain  &&  db()  &&  db()->opened() && _history_id ) 
     {
-		 for( Retry_nested_transaction ta ( db(), db()->transaction_or_null() ); ta.enter_loop(); ta++ ) try    // JS-461
+        for( Retry_nested_transaction ta ( db(), db()->transaction_or_null() ); ta.enter_loop(); ta++ ) try    // JS-461
         {
             if( _step_number )  db_update_order_step_history_record( &ta );
             db_update_order_history_record( &ta );    // Historie schreiben, aber Auftrag beibehalten
@@ -2208,9 +2208,8 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
         db_delete( update_and_release_occupation, outer_transaction );     // Schreibt auch die Historie (auch bei orders_recoverable="no")
 
-		// wird beim order remove aufgerufen und sollte evtl. ein eigenes event sein
-		fire_event_if_finished();
-
+        // wird beim order remove aufgerufen und sollte evtl. ein eigenes event sein
+        fire_event_if_finished();
     }
 
     assert( !_is_db_occupied );
@@ -2544,8 +2543,8 @@ void Order::fire_event_if_finished()
 {
     // Endzustand erreicht. 
     if( finished() ) {
-	    report_event( OrderFinishedEventJ::new_instance(java_sister()) );
-	}
+        report_event( OrderFinishedEventJ::new_instance(java_sister()) );
+    }
 }
 
 //--------------------------------------------------------------------------Order::fire_event_suspended
@@ -2553,8 +2552,8 @@ void Order::fire_event_if_finished()
 void Order::fire_event_suspended()
 {
     if( _suspended ) {
-	    report_event( OrderSuspendedEventJ::new_instance(java_sister()) );
-	}
+        report_event( OrderSuspendedEventJ::new_instance(java_sister()) );
+    }
 }
 
 //--------------------------------------------------------------------------Order::fire_event_resumed
@@ -2563,8 +2562,8 @@ void Order::fire_event_resumed()
 {
     // Endzustand erreicht. 
     if( !_suspended ) {
-	    report_event( OrderResumedEventJ::new_instance(java_sister()) );
-	}
+        report_event( OrderResumedEventJ::new_instance(java_sister()) );
+    }
 }
 
 //--------------------------------------------------------------------------Order::handle_end_state
@@ -2784,8 +2783,8 @@ void Order::postprocessing2( Job* last_job )
         }
         catch( exception& x )  { _log->error( x.what() ); }
     }
-	
-	fire_event_if_finished();
+    
+    fire_event_if_finished();
 
 
     if( _job_chain )  // 2008-03-07  &&  _is_in_database )
