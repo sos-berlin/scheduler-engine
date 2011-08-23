@@ -152,8 +152,8 @@ public class JS628 extends SchedulerTest {
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
                 EventOrderFinished ov = ev.getEventOrderFinished();
                 textMessage.acknowledge();
-                result = ov.getOrder().getState();
-                logger.info("order " + ov.getOrder().getId() + " ended with state " + ov.getOrder().getState() );
+                result = ov.getInfoOrder().getState();
+                logger.info("order " + ov.getInfoOrder().getId() + " ended with state " + ov.getInfoOrder().getState() );
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
