@@ -119,13 +119,13 @@ public class JmsOrderEventsTest extends SchedulerTest {
             	logger.info("subscribe " + ev.getName());
 // throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
                 if (ev.getEventOrderTouched() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
+                	logger.info(">>>>> order " + ev.getEventOrderTouched().getInfoOrder().getId() + " touched");
                 }
                 if (ev.getEventOrderStateChanged() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
+                	logger.info(">>>>> order " + ev.getEventOrderStateChanged().getInfoOrder().getId() + " goes to state " + ev.getEventOrderStateChanged().getInfoOrder().getState() + " (previous State: " + ev.getEventOrderStateChanged().getPreviousState() + ")");
                 }
                 if (ev.getEventOrderFinished() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderFinished().getOrder().getId() + " finished.");
+                	logger.info(">>>>> order " + ev.getEventOrderFinished().getInfoOrder().getId() + " finished.");
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.

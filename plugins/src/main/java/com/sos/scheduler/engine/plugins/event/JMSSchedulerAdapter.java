@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.event;
 
-import com.sos.scheduler.model.events.Scheduler;
+import com.sos.scheduler.model.events.InfoScheduler;
 
-public class JMSSchedulerAdapter extends Scheduler {
+public class JMSSchedulerAdapter extends InfoScheduler {
 	
 	private JMSSchedulerAdapter(com.sos.scheduler.engine.kernel.Scheduler kernelEvent) {
 		super();

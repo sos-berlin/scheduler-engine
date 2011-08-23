@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.event;
 
-import com.sos.scheduler.model.events.Log;
+import com.sos.scheduler.model.events.InfoLog;
 
-public class JMSMessageAdapter extends Log {
+public class JMSMessageAdapter extends InfoLog {
 	
 	private JMSMessageAdapter(com.sos.scheduler.engine.kernel.event.Message eventMessage) {
 		super();

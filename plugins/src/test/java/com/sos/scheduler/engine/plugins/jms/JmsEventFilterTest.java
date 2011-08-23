@@ -105,12 +105,12 @@ public class JmsEventFilterTest extends SchedulerTest {
             	logger.debug(xmlContent);
 //throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
                 if (ev.getEventOrderTouched() != null) {
-                	logger.info(">>>>> order " + ev.getEventOrderTouched().getOrder().getId() + " touched");
+                	logger.info(">>>>> order " + ev.getEventOrderTouched().getInfoOrder().getId() + " touched");
                 }
                 textMessage.acknowledge();
                 assertEquals(getTopicname(textMessage), "com.sos.scheduler.engine.Event" );  // Erstmal ist der Klassenname vorangestellt.
                 assertEquals(ev.getName(), "EventOrderTouched" );
-                result = ev.getEventOrderTouched().getOrder().getId();
+                result = ev.getEventOrderTouched().getInfoOrder().getId();
             }
             catch (JMSException x) { throw new RuntimeException(x); }
             finally {
