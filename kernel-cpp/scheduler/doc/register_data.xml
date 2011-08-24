@@ -4,8 +4,8 @@
 <!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENERIERT VON scheduler_keyword_to_xml.pl -->
 
 <register_data
-    author="$Author$"
-    date= "$Date$"
+    author="$Author: scheduler_keyword_to_xml.pl $"
+    date= "$Date: 2011/8/24 11:43:57 $"
 >
 <register_keyword keyword='?'>
     <register_keyword_display><code>-?=</code></register_keyword_display>
@@ -1087,6 +1087,7 @@
     <register_entry register_file='xml/answer/period.xml#attribute_job' register_title='&lt;period&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/process.xml#attribute_job' register_title='&lt;process&gt; (Antwort)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/waiting_jobs.xml#attribute_job' register_title='&lt;waiting_jobs&gt; (Antwort)'  register_keyword='job' type='definition'/>
+    <register_entry register_file='xml/job.why.xml#attribute_job' register_title='&lt;job.why&gt; (Kommando)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/job_chain_node.xml#attribute_job' register_title='&lt;job_chain_node&gt; (Konfiguration)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/kill_task.xml#attribute_job' register_title='&lt;kill_task&gt; (Kommando)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/modify_job.xml#attribute_job' register_title='&lt;modify_job&gt; (Kommando)'  register_keyword='job' type='definition'/>
@@ -1101,6 +1102,11 @@
 <register_keyword keyword='job-chain'>
     <register_keyword_display><code>-job-chain=</code></register_keyword_display>
     <register_entry register_file='command_line.xml#option_job-chain' register_title='Kommandozeilenoptionen'  register_keyword='job-chain' type='definition'/>
+</register_keyword>
+<register_keyword keyword='job.why'>
+    <register_keyword_display><code>&lt;job.why&gt;</code></register_keyword_display>
+    <register_entry register_file='xml.xml#use_element__job.why' register_title='Alle XML-Elemente'  register_keyword='job.why'/>
+    <register_entry register_file='xml/job.why.xml#' register_title='&lt;job.why&gt; (Kommando)'  register_keyword='job.why' type='definition'/>
 </register_keyword>
 <register_keyword keyword='job_chain'>
     <register_keyword_display><code>&lt;job_chain&gt;</code></register_keyword_display>

@@ -5,8 +5,12 @@
 
 <register_data
     author="$Author: scheduler_keyword_to_xml.pl $"
-    date= "$Date: 2011/6/2 19:32:39 $"
+    date= "$Date: 2011/8/24 11:43:59 $"
 >
+<register_keyword keyword=''>
+    <register_keyword_display><code>&lt;&gt;</code></register_keyword_display>
+    <register_entry register_file='xml/job.why.xml#' register_title='&lt;&gt;'  register_keyword='' type='definition'/>
+</register_keyword>
 <register_keyword keyword='?'>
     <register_keyword_display><code>-?=</code></register_keyword_display>
     <register_entry register_file='CHANGES.xml#use_option__?' register_title='Änderungsprotokoll'  register_keyword='?'/>
@@ -1167,6 +1171,7 @@
     <register_entry register_file='xml/answer/period.xml#attribute_job' register_title='&lt;period&gt; (Answer)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/process.xml#attribute_job' register_title='&lt;process&gt; (Answer)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/answer/waiting_jobs.xml#attribute_job' register_title='&lt;waiting_jobs&gt; (Answer)'  register_keyword='job' type='definition'/>
+    <register_entry register_file='xml/job.why.xml#attribute_job' register_title='&lt;&gt;'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/job_chain_node.xml#attribute_job' register_title='&lt;job_chain_node&gt; (Configuration)'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/kill_task.xml#attribute_job' register_title='&lt;kill_task&gt;'  register_keyword='job' type='definition'/>
     <register_entry register_file='xml/modify_job.xml#attribute_job' register_title='&lt;modify_job&gt;'  register_keyword='job' type='definition'/>
