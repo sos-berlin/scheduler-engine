@@ -99,6 +99,7 @@ extern const string             scheduler_character_encoding;
 extern const int                const_order_id_length_max;
 extern const string             variable_set_name_for_substitution;
 const int                       max_memory_file_size          = 10*1024*1024;   // Für Dateien, die komplett in den Speicher geladen werden
+extern const int                max_open_log_files;
 extern const double             delete_temporary_files_delay;
 extern const double             delete_temporary_files_retry;
 
@@ -611,6 +612,7 @@ struct Spooler : Object,
     string                     _log_filename;
     bool                       _log_to_stderr;              // Zusätzlich nach stdout schreiben
     Log_level                  _log_to_stderr_level;
+    ptr<log::cache::Request_cache> _log_file_cache;
     Cached_log_category        _scheduler_wait_log_category;
     File_path                  _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml

@@ -34,6 +34,8 @@ const int log_buffer_max = 100*1000;
 namespace sos {
 namespace scheduler {
 
+using namespace log;
+
 //-------------------------------------------------------------------------------Log_set_console_colors
 
 struct Log_set_console_colors_base
@@ -555,32 +557,6 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
     }
 }
 
-//-------------------------------------------------------Prefix_log::Open_and_close::Open_and_close
-
-Prefix_log::Open_and_close::Open_and_close( Prefix_log* log )
-:
-    _log(NULL)
-{
-    if( log->_open_and_close_every_line  &&  
-        log->is_active()  &&  
-        log->_file == -1  &&  
-       !log->_filename.empty() )
-    {
-        _log = log;
-        _log->open_file();
-    }
-}
-
-//------------------------------------------------------Prefix_log::Open_and_close::~Open_and_close
-    
-Prefix_log::Open_and_close::~Open_and_close()
-{
-    if( _log  &&  _log->_open_and_close_every_line )
-    {
-        _log->close_file();
-    }
-}
-
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
 Prefix_log::Prefix_log( int )
@@ -737,7 +713,7 @@ void Prefix_log::open()
 
             Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
 
-            open_file();
+            open_patiently_file();
 
             _instance_number++;
 
@@ -754,11 +730,7 @@ void Prefix_log::open()
                 }
             }
 
-            if( _open_and_close_every_line )  
-            {
-                close_file();
-                _append = true;
-            }
+            _spooler->_log_file_cache->cache(this);
         }
 
         _started = true;
@@ -769,10 +741,11 @@ void Prefix_log::open()
 
 void Prefix_log::close()
 {
-    if( _file != -1 )  
-    {
+    if (_started)  
         finish_log();
-    }
+    if (_spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
+        _spooler->_log_file_cache->remove(this);
+    close_file();
 
     _log = NULL;
 
@@ -790,16 +763,15 @@ void Prefix_log::close()
 
 void Prefix_log::finish_log()
 {
-    _is_finished = true;
+    if (!_is_finished) {
+        _is_finished = true;
 
-    if( _file != -1 )  
-    {
-        try {
-            log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
+        if (ptr<cache::Request> request = _spooler->_log_file_cache->request(this)) {
+            try {
+                log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
+            }
+            catch( const exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "()  ERROR " << x.what() << "\n" ); }
         }
-        catch( const exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "()  ERROR " << x.what() << "\n" ); }
-
-        close_file();
 
         if( !_new_filename.empty() )
         {
@@ -809,12 +781,12 @@ void Prefix_log::finish_log()
         }
 
         signal_events();
-    }                   
+    }
 }
 
-//----------------------------------------------------------------------------Prefix_log::open_file
+//------------------------------------------------------------------Prefix_log::open_patiently_file
 
-void Prefix_log::open_file()
+void Prefix_log::open_patiently_file()
 {
     assert( _file == -1 );
 
@@ -822,13 +794,53 @@ void Prefix_log::open_file()
     {
         while(1)
         {
-            _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+            open_file_without_error();
             if( _file != -1 )  break;
             
-            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "protocol file" );
+            if( !is_stop_errno( _spooler, errno ) )  check_open_errno();
             io_error( _spooler, _filename );
         }
     }
+}
+
+//----------------------------------------------------------------------Prefix_log::try_reopen_file
+
+void Prefix_log::try_reopen_file() {
+    if (is_active()  &&   _file == -1  &&   !_filename.empty()) {
+        try {
+            open_file();
+        } catch (exception& x) {
+            string o = _object? _object->obj_name() : "";
+            Message_string m ("SCHEDULER-477", o, x.what());
+            if (_log) _log->error(m);
+            else Z_LOG2("scheduler", "ERROR: " << m.as_string() << "\n");
+        }
+    }
+}
+
+//----------------------------------------------------------------------------Prefix_log::open_file
+
+void Prefix_log::open_file() {
+    assert(_file == -1);
+
+    if (_file == -1) {
+        open_file_without_error();
+        check_open_errno();
+    }
+}
+
+//--------------------------------------------------------------Prefix_log::open_file_without_error
+
+void Prefix_log::open_file_without_error() {
+    Z_DEBUG_ONLY(Z_LOG2("JS-611", Z_FUNCTION << " " << _filename << "\n"));
+    _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+}
+
+//---------------------------------------------------------------------Prefix_log::check_open_errno
+
+void Prefix_log::check_open_errno() {
+    if( _file == -1 )
+        throw_errno(errno, _filename.c_str(), "protocol file");
 }
 
 //---------------------------------------------------------------------------Prefix_log::close_file
@@ -837,6 +849,7 @@ void Prefix_log::close_file()
 {
     if( _file != -1 )
     {
+        Z_DEBUG_ONLY(Z_LOG2("JS-611", Z_FUNCTION << " " << _filename << "\n"));
         try
         {
             int ret = ::close( _file );
@@ -1090,8 +1103,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
         bool log_to_files = level >= log_level();
 
         {
-            Open_and_close open_and_close ( this );
-
+            ptr<cache::Request> request = _spooler->_log_file_cache->request(this);
             _log->log2( level, log_to_files, _task? _task->obj_name() : _prefix, line, this, _order_log );
         }
     }

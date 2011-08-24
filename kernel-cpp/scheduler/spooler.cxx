@@ -49,6 +49,7 @@ namespace scheduler {
 const char*                     default_factory_ini                 = "factory.ini";
 const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    scheduler_character_encoding        = xml::default_character_encoding; // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
+const int                       max_open_log_files                  = 50;               // Anzahl der offenzuhaltenden Log-Dateien. Wenn's mehr wird, wird die älteste geschlossen.
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -665,6 +666,7 @@ Spooler::Spooler(jobject java_main_context)
     _wait_handles(this),
     _log_level( log_info ),
     _log_to_stderr_level( log_unknown ),
+    _log_file_cache(log::cache::Request_cache::new_instance()),
     _db_log_level( log_none ),
     _scheduler_wait_log_category ( "scheduler.wait" ),
     _factory_ini( default_factory_ini ),

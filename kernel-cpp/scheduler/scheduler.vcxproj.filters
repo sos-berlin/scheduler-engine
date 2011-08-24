@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="Quellcodedateien">
@@ -240,7 +240,19 @@
     <ClCompile Include="..\kram\sosmain.cxx">
       <Filter>Quellcodedateien</Filter>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile><ClCompile Include="jni__sos__scheduler__Database.cxx"><Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter></ClCompile></ItemGroup>
+    <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="jni__sos__scheduler__Database.cxx">
+      <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="log_cache_Request.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+    <ClCompile Include="log_cache_Request_cache.cxx">
+      <Filter>Quellcodedateien</Filter>
+    </ClCompile>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="spooler_xslt_stylesheet.h">
       <Filter>Quellcodedateien</Filter>
@@ -402,6 +414,12 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="Java_thread_unlocker.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="log_cache_Request.h">
+      <Filter>Header-Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="log_cache_Request_cache.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
   </ItemGroup>

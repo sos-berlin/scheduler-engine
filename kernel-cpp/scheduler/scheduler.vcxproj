@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -221,6 +221,8 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="log_cache_Request.cxx" />
+    <ClCompile Include="log_cache_Request_cache.cxx" />
     <ClCompile Include="_precompiled_headers.cxx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -316,9 +318,13 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-  <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" /><ClCompile Include="jni__sos__scheduler__Database.cxx" /></ItemGroup>
+    <ClCompile Include="jni__sos__scheduler__com_objects__Com_variable_set.cxx" />
+    <ClCompile Include="jni__sos__scheduler__Database.cxx" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Java_thread_unlocker.h" />
+    <ClInclude Include="log_cache_Request.h" />
+    <ClInclude Include="log_cache_Request_cache.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />
     <ClInclude Include="cluster.h" />
     <ClInclude Include="database.h" />

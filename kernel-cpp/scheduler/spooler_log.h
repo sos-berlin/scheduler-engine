@@ -3,6 +3,9 @@
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
 
+#include "log_cache_Request.h"
+#include "log_cache_Request_cache.h"
+
 namespace sos {
 namespace scheduler {
 
@@ -54,16 +57,6 @@ struct Log
 
 struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 {
-    struct Open_and_close
-    {
-                                Open_and_close              ( Prefix_log* );
-                               ~Open_and_close              ();
-
-      private:
-        Prefix_log*            _log;
-    };
-
-
     Fill_zero _zero_;
 
 
@@ -75,14 +68,17 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     void                        open                        ();
     void                        close                       ();
     void                        finish_log                  ();
+    void                        close_file                  ();     // Nicht öffentlich
+    void                        try_reopen_file             ();     // Nicht öffentlich
     void                        remove_file                 ();
     bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        is_active                   () const                            { return _started && !_is_finished; }
-    //bool                        opened                      () const                            { return _file != -1; }
+   //bool                        opened                      () const                            { return _file != -1; }
+   bool                        file_is_opened              () const                            { return _file != -1; }
     //bool                        closed                      () const                            { return _closed; }
     bool                        is_finished                 () const                            { return _is_finished; }
     bool                        is_stderr                   () const                            { return _file == fileno(stderr); }
-    void                    set_open_and_close_every_line   ( bool b )                          { _open_and_close_every_line = b; }
+   void                    set_open_and_close_every_line   ( bool b )                          { _open_and_close_every_line = b; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -186,10 +182,10 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     bool                       _in_log;                     // log2() ist aktiv, Rekursion vermeiden!
 
   protected:
-    friend struct               Open_and_close;
-
+    void                        open_patiently_file         ();
+    void                        open_file_without_error     ();
     void                        open_file                   ();
-    void                        close_file                  ();
+    void                        check_open_errno            ();
     void                        write                       ( const char*, int );
   //void                        set_mail_header             ();
 
@@ -216,16 +212,16 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
   //int                        _counter [ log_fatal - log_debug9 + 1 ];
 
     string                     _title;
-    File_path                  _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
+    File_path                  _filename;                   // Name einer zus?tzlichen Log-Datei (für die Tasks)
     File_path                  _new_filename;               // nach close() umbenennen
-    bool                       _append;                     // Datei zum Fortschreiben öffnen
+    bool                       _append;                     // Datei zum Fortschreiben ?ffnen
     int                        _file;                       // File handle
     int                        _instance_number;
     int                        _err_no;
     bool                       _started;                    // open() gerufen
     bool                       _closed;
     bool                       _is_finished;
-    bool                       _open_and_close_every_line;
+   bool                       _open_and_close_every_line;
     bool                       _mail_defaults_set;
     bool                       _mail_on_warning;
     bool                       _mail_on_error;
