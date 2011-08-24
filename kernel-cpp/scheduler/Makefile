@@ -24,6 +24,8 @@ objects = \
  java_subsystem.o\
  include.o\
  lock.o\
+ log_cache_Request.o\
+ log_cache_Request_cache.o\
  path.o\
  schedule.o\
  scheduler_client.o\
