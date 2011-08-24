@@ -8,7 +8,7 @@ namespace log {
 namespace cache {
 
 struct Request_cache_impl : Request_cache {
-    private: typedef stdext::hash_map<Prefix_log*,ptr<Request>> Map;
+    private: typedef stdext::hash_map<Prefix_log*,ptr<Request> > Map;
 
     private: Fill_zero  _zero_;
     private: Map        _map;
