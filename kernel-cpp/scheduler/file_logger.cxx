@@ -26,8 +26,6 @@ struct File_logger_opener {
     }
 
     public: File* operator->() { return &_file; }
-
-    public: operator bool() { return _file.opened(); }
 };
 
 //-------------------------------------------------------------------------File_logger::File_logger
@@ -272,7 +270,8 @@ string File_logger::File_line_reader::read_lines()
 {
     string lines;
 
-    if (File_logger_opener file = _path) {
+    File_logger_opener file (_path); 
+    if (file->opened()) {
         if (file->length() > _read_length) {
             file->seek( _read_length );
 
@@ -307,7 +306,8 @@ string File_logger::File_line_reader::read_remainder()
 {
     string result;
 
-    if (File_logger_opener file = _path) {
+    File_logger_opener file (_path);
+    if (file->opened()) {
         file->seek( _read_length );
         result = file->read_string( max_line_length );
         _read_length += result.length();
