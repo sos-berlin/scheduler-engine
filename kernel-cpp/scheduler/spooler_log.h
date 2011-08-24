@@ -78,7 +78,6 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     //bool                        closed                      () const                            { return _closed; }
     bool                        is_finished                 () const                            { return _is_finished; }
     bool                        is_stderr                   () const                            { return _file == fileno(stderr); }
-   void                    set_open_and_close_every_line   ( bool b )                          { _open_and_close_every_line = b; }
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
