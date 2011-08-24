@@ -338,7 +338,7 @@ void Sos_static::init()
 
 void Sos_static::close()
 {
-    clear_environment_from_sos_ini();
+    //2011-08-24 Wegen Absturzes bei statischem Sos_static nicht: clear_environment_from_sos_ini();
 
     SOS_DELETE( _fle370 );
     SOS_DELETE( _hostapi );
