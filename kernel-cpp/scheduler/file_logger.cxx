@@ -17,7 +17,7 @@ const double                    read_interval_max           =  10.0;
 struct File_logger_opener {
     private: File _file;
 
-    public: File_logger_opener(const Path& path) {
+    public: File_logger_opener(const File_path& path) {
         try {
             _file.open(path, "rb");
         } catch (exception& x) {
