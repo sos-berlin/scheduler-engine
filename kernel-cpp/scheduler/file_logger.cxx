@@ -12,6 +12,24 @@ const int                       max_line_length             = 10000;
 const double                    read_interval_min           =   1.0;
 const double                    read_interval_max           =  10.0;
 
+//-------------------------------------------------------------------------------------------------
+
+struct File_logger_opener {
+    private: File _file;
+
+    public: File_logger_opener(const Path& path) {
+        try {
+            _file.open(path, "rb");
+        } catch (exception& x) {
+            Z_LOG2("scheduler", x.what() << "\n");
+        }
+    }
+
+    public: File* operator->() { return &_file; }
+
+    public: operator bool() { return _file.opened(); }
+};
+
 //-------------------------------------------------------------------------File_logger::File_logger
 
 File_logger::File_logger( Has_log* log )
@@ -235,16 +253,17 @@ bool File_logger::log_lines( const string& lines )
 File_logger::File_line_reader::File_line_reader( const File_path& path, const string& prefix )                                      
 : 
     _zero_(this+1),
+    _path(path),
     _prefix(prefix)
 {
-    _file.open( path, "rb" );
+    //_file.open( path, "rb" );
 }
 
 //-------------------------------------------------------------File_logger::File_line_reader::close
     
 void File_logger::File_line_reader::close()
 {
-    _file.close();
+    //_file.close();
 }
 
 //--------------------------------------------------------File_logger::File_line_reader::read_lines
@@ -253,29 +272,30 @@ string File_logger::File_line_reader::read_lines()
 {
     string lines;
 
-    if( _file.opened()  &&  _file.length() > _read_length )
-    {
-        _file.seek( _read_length );
+    if (File_logger_opener file = _path) {
+        if (file->length() > _read_length) {
+            file->seek( _read_length );
 
-        lines = _file.read_string( max_line_length );
+            lines = file->read_string( max_line_length );
 
-        size_t nl  = lines.rfind( '\n' );
-        size_t end;
+            size_t nl  = lines.rfind( '\n' );
+            size_t end;
 
-        if( nl == string::npos )    // Kein \n
-        {
-            if( lines.length() < max_line_length )  lines = "";    // Mehr Text als max_line_length wird umgebrochen
-            nl = lines.length();
-            end = nl;
+            if( nl == string::npos )    // Kein \n
+            {
+                if( lines.length() < max_line_length )  lines = "";    // Mehr Text als max_line_length wird umgebrochen
+                nl = lines.length();
+                end = nl;
+            }
+            else
+                end = nl + 1;
+
+            int before_end = nl;
+            if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
+
+            lines.erase( before_end );
+            _read_length += end;
         }
-        else
-            end = nl + 1;
-
-        int before_end = nl;
-        if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
-
-        lines.erase( before_end );
-        _read_length += end;
     }
 
     return lines;
@@ -287,10 +307,9 @@ string File_logger::File_line_reader::read_remainder()
 {
     string result;
 
-    if( _file.opened() )
-    {
-        _file.seek( _read_length );
-        result = _file.read_string( max_line_length );
+    if (File_logger_opener file = _path) {
+        file->seek( _read_length );
+        result = file->read_string( max_line_length );
         _read_length += result.length();
     }
 

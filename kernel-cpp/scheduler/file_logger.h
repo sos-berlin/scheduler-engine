@@ -21,7 +21,8 @@ struct File_logger : Async_operation
         string                  read_remainder              ();
 
         Fill_zero              _zero_;
-        File                   _file;
+        File_path              _path;
+        //File                   _file;
         size_t                 _read_length;
         string                 _prefix;
     };
