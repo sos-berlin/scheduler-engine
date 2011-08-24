@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: scheduler.xsd 14216 2011-04-20 10:31:15Z jz $ -->
+<!-- $Id: scheduler.xsd 14660 2011-06-23 12:04:10Z jz $ -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
     <!-- <xsd:key> nicht verwenden, libxslt kann das nicht: "Internal error: xmlSchemaAreValuesEqual, failed to compare the values." -->
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id: scheduler.xsd 14216 2011-04-20 10:31:15Z jz $
+            $Id: scheduler.xsd 14660 2011-06-23 12:04:10Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html
         </xsd:documentation>
@@ -95,6 +95,7 @@
                 <xsd:element ref="add_jobs"/>
                 <xsd:element ref="add_order"/>
                 <xsd:element name="check_folders" type="check_folders"/>
+                <xsd:element ref="job.why"/>
                 <xsd:element ref="kill_task"/>
                 <xsd:element ref="modify_job"/>
                 <xsd:element ref="modify_order"/>
@@ -183,6 +184,7 @@
             <xsd:element ref="modify_hot_folder"/>
             <xsd:element ref="modify_order"/>
             <xsd:element ref="modify_spooler"/>
+            <xsd:element ref="job.why"/>
             <xsd:element ref="job_chain.modify"/>
             <xsd:element ref="job_chain_node.modify"/>
             <xsd:element name="order" type="order"/>
@@ -982,6 +984,12 @@
                 </xsd:simpleType>
             </xsd:attribute>
             <xsd:attribute name="heart_beat_warn_timeout" type="xsd:positiveInteger"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="job.why">
+        <xsd:complexType>
+            <xsd:attribute name="job" type="Path" use="required"/>
         </xsd:complexType>
     </xsd:element>
     
