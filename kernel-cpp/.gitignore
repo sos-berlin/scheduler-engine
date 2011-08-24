@@ -12,6 +12,10 @@ Release/
 /scheduler-vs2010.opensdf
 /scheduler-vs2010.sdf
 /scheduler-vs2010.suo
+/scheduler/scheduler.exp
+/scheduler/scheduler.lib
+/scripting_engine/spidermonkey_h.h
+/scripting_engine/spidermonkey_i.c
 /spidermonkey-2010.opensdf
 /spidermonkey-2010.sdf
 /spidermonkey-2010.suo
@@ -20,3 +24,6 @@ Release/
 /spidermonkey-vs2010.suo
 /spidermonkey.ncb
 /spidermonkey.suo
+/scripting_engine/spidermonkey.aps
+/zschimmer/java_h.h
+/zschimmer/java_i.c
