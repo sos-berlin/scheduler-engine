@@ -774,11 +774,13 @@ void Prefix_log::finish_log()
     if (!_is_finished) {
         _is_finished = true;
 
-        if (ptr<cache::Request> request = _spooler->_log_file_cache->request(this)) {
-            try {
-                log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
+        if (_spooler && _spooler->_log_file_cache) {
+            if (ptr<cache::Request> request = _spooler->_log_file_cache->request(this)) {
+                try {
+                    log( log_info, message_string( "SCHEDULER-962", _filename ) );      // "Protokol ends in " 
+                }
+                catch( const exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "()  ERROR " << x.what() << "\n" ); }
             }
-            catch( const exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "()  ERROR " << x.what() << "\n" ); }
         }
 
         if( !_new_filename.empty() )
