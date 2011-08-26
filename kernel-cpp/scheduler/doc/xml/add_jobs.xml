@@ -2,15 +2,15 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: add_jobs.xml 12116 2006-06-06 18:03:24Z jz $-->
 
 <xml_element name     = "add_jobs"
              parent_page = "../xml_commands.xml"
              category = "Kommando"
              title    = "XML-Element &lt;add_jobs&gt;"
              base_dir = "../"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-06-06 20:03:24 +0200 (Tue, 06 Jun 2006) $">
 
 
     <description>

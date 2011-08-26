@@ -1,4 +1,4 @@
-// $Id$
+// $Id: dir.cxx 11394 2005-04-03 08:30:29Z jz $
 // dir.cxx                                     ©1997-2002 SOS GmbH Berlin
 //                                             Joacim Zschimmer
 

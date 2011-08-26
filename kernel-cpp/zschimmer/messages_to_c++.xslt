@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<!-- $Id$ -->
+<!-- $Id: messages_to_c++.xslt 12973 2007-09-09 11:10:05Z jz $ -->
 
 
 <stylesheet xmlns   = "http://www.w3.org/1999/XSL/Transform"

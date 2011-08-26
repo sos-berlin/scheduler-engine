@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_module_remote_server.h 14010 2010-09-13 08:05:23Z jz $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H

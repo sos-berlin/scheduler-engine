@@ -1,5 +1,5 @@
 // sosxml.cxx, Joacim Zschimmer
-// $Id$
+// $Id: sosxml.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #include "precomp.h"
 

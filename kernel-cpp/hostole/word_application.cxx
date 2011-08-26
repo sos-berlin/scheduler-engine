@@ -1,4 +1,4 @@
-// $Id$          Joacim Zschimmer
+// $Id: word_application.cxx 11394 2005-04-03 08:30:29Z jz $          Joacim Zschimmer
 
 #include "precomp.h"
 

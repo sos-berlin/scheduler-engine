@@ -1,4 +1,4 @@
-// $Id$
+// $Id: rtf_code.cxx 12360 2006-10-24 15:45:14Z jz $
 // Generiert von generate_rtf.js aus rtf.xml am Tue Oct 24 17:27:46 UTC+0200 2006
 
 

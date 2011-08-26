@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: mail.xml 12192 2006-08-16 06:36:52Z jz $-->
 
 <description
     title               = "eMail ohne Protokoll verschicken"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-08-16 08:36:52 +0200 (Wed, 16 Aug 2006) $"
 >
     <p>
         Mit nur zwei neuen Methoden kann die Klasse <scheduler_method class="Mail"/> für eigene Nachrichten verwendet werden.

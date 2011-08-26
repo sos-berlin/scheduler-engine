@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_job.cxx 15019 2011-08-24 16:47:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert

@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: directories.xml 12897 2007-07-05 09:32:54Z jz $-->
 
 <description
     title               = "Organisation der Scheduler-Objekte in einer Verzeichnisstruktur"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2007-07-05 11:32:54 +0200 (Thu, 05 Jul 2007) $"
     document_state      = "proposal"
 >
 

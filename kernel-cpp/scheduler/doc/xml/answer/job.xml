@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: job.xml 14037 2010-09-28 07:46:07Z rb $-->
 
 <xml_element name          = "job"
              title         = "Job"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: rb $"
+             date          = "$Date: 2010-09-28 09:46:07 +0200 (Tue, 28 Sep 2010) $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs"/>

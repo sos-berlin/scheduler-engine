@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: base64.cxx 13256 2008-01-02 23:07:53Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 // Grundlage ist der Code von Michael Collard, iinet.net.au
 // Siehe auch http://www.w3.org/Library/src/HTUU.c
 

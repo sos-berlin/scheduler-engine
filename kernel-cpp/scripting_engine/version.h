@@ -1,4 +1,4 @@
-// $Id$
+// $Id: version.h 14777 2011-07-08 09:56:19Z ss $
 
 #include "../generated/mavenSettings.h"
 

@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_log.cxx 15049 2011-08-26 09:08:36Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 #include "spooler_mail.h"

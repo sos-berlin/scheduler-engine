@@ -1,4 +1,4 @@
-// $Id$
+// $Id: string_list.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __ZSCHIMMER_STRING_LIST_
 #define __ZSCHIMMER_STRING_LIST_

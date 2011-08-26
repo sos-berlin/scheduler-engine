@@ -1,5 +1,5 @@
 // zschimmer.h                                      ©2000 Joacim Zschimmer
-// $Id$
+// $Id: system.h 14140 2010-11-25 20:47:07Z jz $
 
 #ifndef __ZSCHIMMER_SYSTEM_H
 #define __ZSCHIMMER_SYSTEM_H

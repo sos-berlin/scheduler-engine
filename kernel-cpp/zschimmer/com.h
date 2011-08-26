@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com.h 12977 2007-09-09 12:23:56Z jz $
 
 #ifndef __ZSCHIMMER_COM_H
 #define __ZSCHIMMER_COM_H

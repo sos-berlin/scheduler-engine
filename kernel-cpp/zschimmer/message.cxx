@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: message.cxx 14183 2011-01-18 17:43:56Z rb $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 
 #include "zschimmer.h"

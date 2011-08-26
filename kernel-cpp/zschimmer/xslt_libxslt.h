@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xslt_libxslt.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __ZSCHIMMER_XSLT_LIBXML2_H
 #define __ZSCHIMMER_XSLT_LIBXML2_H

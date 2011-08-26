@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com_base.cxx 11569 2005-07-01 10:48:25Z jz $
 
 #ifndef _WIN32
 

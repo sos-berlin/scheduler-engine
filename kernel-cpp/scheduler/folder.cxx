@@ -1,5 +1,5 @@
 //
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: folder.cxx 14329 2011-05-12 13:43:35Z ss $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 

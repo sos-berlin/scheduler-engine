@@ -3,7 +3,7 @@
  
 GNUMAKE=1
  
-# init.mak $Id$
+# init.mak $Id: init.mak.gnumake 11347 2005-03-24 10:14:54Z jz $
 # Einstellungen für alle Plattformen.
 # System-spezifisches Makefile wird eingelesen.
 

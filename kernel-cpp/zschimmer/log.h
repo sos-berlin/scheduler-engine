@@ -1,4 +1,4 @@
-// $Id$
+// $Id: log.h 13693 2008-10-02 14:15:45Z jz $
 
 #ifndef ZSCHIMMER_LOG_H
 #define ZSCHIMMER_LOG_H

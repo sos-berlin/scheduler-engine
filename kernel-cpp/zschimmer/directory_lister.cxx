@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: directory_lister.cxx 13238 2007-12-31 10:03:46Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include <stdio.h>
 #include <fcntl.h>

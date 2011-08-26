@@ -1,4 +1,4 @@
-// $Id$
+// $Id: cluster.h 13198 2007-12-06 14:13:38Z jz $
 
 #ifndef __SCHEDULER_CLUSTER_H
 #define __SCHEDULER_CLUSTER_H

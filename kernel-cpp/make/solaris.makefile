@@ -1,4 +1,4 @@
-# $Id$
+# $Id: solaris.makefile 13795 2009-06-23 11:13:12Z sos $
 # Einstellungen nur f\374r Linux
 
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sos_mail_java.h 13870 2010-06-03 15:29:33Z jz $
 
 #ifndef __SOS_MAIL_JAVA_H
 #define __SOS_MAIL_JAVA_H

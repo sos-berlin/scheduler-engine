@@ -5,7 +5,7 @@
  * of code.
  */
 
-// $Id$ 
+// $Id: engine.c 11347 2005-03-24 10:14:54Z jz $ 
 
 #pragma warning( disable:4018 )   // Konflikt zwischen signed und unsigned, J. Zschimmer
 

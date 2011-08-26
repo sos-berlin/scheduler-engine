@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
-<!--$Id$-->
+<!--$Id: file_order_sink.xml 12592 2007-01-30 00:54:20Z jz $-->
 
 <xml_element name     = "file_order_sink"
              title    = "Dateiauftragssenke"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-01-30 01:54:20 +0100 (Tue, 30 Jan 2007) $">
 
     <scheduler_keyword keyword="Dateiauftragssenke"/>
     <scheduler_keyword keyword="Auftragssenke"/>

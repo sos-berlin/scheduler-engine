@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_module.cxx 14536 2011-05-31 09:47:32Z ss $
 
 #include "spooler.h"
 #include "../file/anyfile.h"

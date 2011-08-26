@@ -1,4 +1,4 @@
-//$Id$
+//$Id: odbcbase.cxx 11394 2005-04-03 08:30:29Z jz $
 //#define MODULE_NAME "odbcbase"
 //#define COPYRIGHT   "©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"

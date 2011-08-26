@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: reference.h 13199 2007-12-06 14:15:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_REFERENCE_H
 #define __ZSCHIMMER_REFERENCE_H

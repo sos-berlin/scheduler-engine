@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: service_response.xml 11841 2006-01-30 11:39:23Z jz $-->
 
 <xml_element name     = "service_response"
              title    = "Web-Dienst-Antwort"
              category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-01-30 12:39:23 +0100 (Mon, 30 Jan 2006) $">
 
     <xml_child_elements>
         <xml_child_element name="content">

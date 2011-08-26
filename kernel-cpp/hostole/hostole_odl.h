@@ -1,3 +1,3 @@
-// $Id$
+// $Id: hostole_odl.h 11394 2005-04-03 08:30:29Z jz $
 
 #define SCRIPT_OBJECT_DISPID 0x7FB36D01

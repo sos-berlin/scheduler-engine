@@ -8,8 +8,8 @@
     include  = "spooler.h"
     base_dir = "../" 
     package  = "Scheduler"
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: jz $"
+    date     = "$Date: 2011-08-26 11:15:57 +0200 (Fri, 26 Aug 2011) $"
 >
     <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
     <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->

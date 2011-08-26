@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_module_internal.h 13328 2008-01-28 10:12:01Z jz $
 
 #ifndef __SPOOLER_MODULE_INTERNAL_H
 #define __SPOOLER_MODULE_INTERNAL_H

@@ -1,4 +1,4 @@
-// $Id$        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: zschimmer.h 14145 2010-12-02 12:11:47Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 // §1719
 

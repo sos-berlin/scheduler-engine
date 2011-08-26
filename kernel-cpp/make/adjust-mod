@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id$
+# $Id: adjust-mod 11348 2005-03-24 10:17:34Z jz $
 
 # Folgendes ist auszuführen mit Root-Rechten im e-Verzeichnis
 # chown -R sos *

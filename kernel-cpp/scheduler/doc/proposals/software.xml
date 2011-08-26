@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: software.xml 13743 2008-12-12 08:53:40Z jz $-->
 
 <description
     title               = "Scheduler 3.0: Erneuerung des Codes des komplexer werdenden Schedulers"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-12-12 09:53:40 +0100 (Fri, 12 Dec 2008) $"
     document_state      = "work_in_progress"
 >
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

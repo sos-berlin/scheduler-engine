@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_idl.h 13921 2010-07-01 13:04:12Z jz $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 

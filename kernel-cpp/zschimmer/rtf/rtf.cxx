@@ -1,5 +1,5 @@
 // rtf.cxx                                      © 2000 Joacim Zschimmer
-// $Id$
+// $Id: rtf.cxx 12891 2007-06-29 12:29:34Z jz $
 
 // §1677  
 
@@ -20,7 +20,7 @@ using namespace zschimmer::file;
 namespace zschimmer {
 namespace rtf {
 
-extern const char rtf_copyright[] = "\n$Id$ (C) 2001 Zschimmer GmbH\n";
+extern const char rtf_copyright[] = "\n$Id: rtf.cxx 12891 2007-06-29 12:29:34Z jz $ (C) 2001 Zschimmer GmbH\n";
 
 //-------------------------------------------------------------------------------------------static
 

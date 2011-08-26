@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: file_orders.xml 13320 2008-01-25 04:01:54Z aa $-->
 
 <description
     title               = "Verzeichnisüberwachung mit Dateiaufträgen"
     base_dir            = ""
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: aa $"
+    date                = "$Date: 2008-01-25 05:01:54 +0100 (Fri, 25 Jan 2008) $"
 >
     <scheduler_keyword keyword="Verzeichnis"/>
     <scheduler_keyword keyword="Datei"/>

@@ -1,4 +1,4 @@
-# gnu.mak $Id$
+# gnu.mak $Id: gnu.makefile 14247 2011-05-05 04:42:13Z jz $
 # Einstellungen nur für Gnu
 
 include $(PROD_DIR)/make/unix.makefile

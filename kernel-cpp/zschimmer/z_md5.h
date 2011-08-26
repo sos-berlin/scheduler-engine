@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: z_md5.h 13199 2007-12-06 14:15:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_Z_MD5_H
 #define __ZSCHIMMER_Z_MD5_H

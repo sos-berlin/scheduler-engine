@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler.odl 14003 2010-09-06 10:30:21Z jz $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 

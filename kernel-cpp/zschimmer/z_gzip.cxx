@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_gzip.cxx 13795 2009-06-23 11:13:12Z sos $
 
 #include "zschimmer.h"
 #include "z_gzip.h"

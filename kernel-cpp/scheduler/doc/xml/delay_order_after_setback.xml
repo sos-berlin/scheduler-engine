@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: delay_order_after_setback.xml 13953 2010-07-27 14:02:35Z ss $-->
 
 <xml_element name     = "delay_order_after_setback"
              title    = "Auftrag nach Rückstellung verzögern"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: ss $"
+             date     = "$Date: 2010-07-27 16:02:35 +0200 (Tue, 27 Jul 2010) $">
 
     <xml_parent_elements>
         <xml_parent_element name="job"/>

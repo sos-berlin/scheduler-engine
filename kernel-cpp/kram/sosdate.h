@@ -1,5 +1,5 @@
 // sosdate.h                                        (c) SOS GmbH Berlin
-// $Id$                                                     Joacim Zschimmer
+// $Id: sosdate.h 12100 2006-06-04 11:08:19Z jz $                                                     Joacim Zschimmer
 
 #ifndef __SOSDATE_H
 #define __SOSDATE_H

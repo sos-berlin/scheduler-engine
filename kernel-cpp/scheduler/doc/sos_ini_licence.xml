@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: sos_ini_licence.xml 13715 2008-10-21 21:20:44Z jz $-->
 
 <ini_section
     file     = "sos.ini"
     name     = "licence"
     title    = ""
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$">
+    author   = "$Author: jz $"
+    date     = "$Date: 2008-10-21 23:20:44 +0200 (Tue, 21 Oct 2008) $">
 
     <ini_entries>
         <ini_entry setting="key1" type="licence_key" title="Lizenzschlüssel">

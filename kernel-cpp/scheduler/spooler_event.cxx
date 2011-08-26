@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_event.cxx 14169 2011-01-07 09:44:24Z ss $
 
 
 #include "spooler.h"

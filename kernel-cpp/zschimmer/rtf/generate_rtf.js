@@ -1,11 +1,11 @@
-// $Id$  Joacim Zschimmer 2004
+// $Id: generate_rtf.js 11254 2005-01-17 11:19:47Z jz $  Joacim Zschimmer 2004
 
 var hw = new ActiveXObject( "hostware.global" );
 
 var rtf_code_h   = hw.open( "-out -binary rtf_code.h" );
 var rtf_code_cxx = hw.open( "-out -binary rtf_code.cxx" );
 
-var line = "// $Id$\n" + "// Generiert von generate_rtf.js aus rtf.xml am " + new Date() + "\n";
+var line = "// $Id: generate_rtf.js 11254 2005-01-17 11:19:47Z jz $\n" + "// Generiert von generate_rtf.js aus rtf.xml am " + new Date() + "\n";
 rtf_code_h.put_line( line );
 rtf_code_cxx.put_line( line );
 

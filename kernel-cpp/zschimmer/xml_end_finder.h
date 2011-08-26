@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml_end_finder.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __XML_END_FINDER_H
 #define __XML_END_FINDER_H

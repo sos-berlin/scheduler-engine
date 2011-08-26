@@ -1,4 +1,4 @@
-# $Id$
+# $Id: hp-ux.makefile 14247 2011-05-05 04:42:13Z jz $
 # Einstellungen nur fuer HP-UX
 
 

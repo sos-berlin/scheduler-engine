@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_Idispatch.cxx 12516 2007-01-16 10:56:47Z jz $
 
 #include "z_java.h"
 

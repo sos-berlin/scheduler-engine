@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_thread.h 13322 2008-01-27 15:27:19Z jz $
 
 #ifndef __ZSCHIMMER_WINDOWS_THREAD_H
 #define __ZSCHIMMER_WINDOWS_THREAD_H

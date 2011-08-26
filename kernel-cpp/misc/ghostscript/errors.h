@@ -16,7 +16,7 @@
   copies.
 */
 
-/*$Id$ */
+/*$Id: errors.h 11347 2005-03-24 10:14:54Z jz $ */
 /* Definition of error codes */
 
 #ifndef errors_INCLUDED

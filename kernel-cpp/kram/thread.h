@@ -1,4 +1,4 @@
-// $Id$
+// $Id: thread.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __SOS_THREAD_H
 #define __SOS_THREAD_H

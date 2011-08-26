@@ -1,5 +1,5 @@
 // rtf_doc.cxx                                  © 2000 Joacim Zschimmer
-// $Id$
+// $Id: rtf_doc.cxx 13691 2008-09-30 20:42:20Z jz $
 
 //#include "headers.h"
 
@@ -18,7 +18,7 @@ using namespace zschimmer::file;
 namespace zschimmer {
 namespace rtf {
 
-extern const char rtf_doc_copyright[] = "\n$Id$ (C) 2004  Zschimmer GmbH\n";
+extern const char rtf_doc_copyright[] = "\n$Id: rtf_doc.cxx 13691 2008-09-30 20:42:20Z jz $ (C) 2004  Zschimmer GmbH\n";
 
 
 //--------------------------------------------------------------------------------------error_codes

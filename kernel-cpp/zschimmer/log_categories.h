@@ -1,4 +1,4 @@
-// $Id$
+// $Id: log_categories.h 13725 2008-11-02 14:55:43Z jz $
 
 #ifndef ZSCHIMMER_LOG_CATEGORIES_H
 #define ZSCHIMMER_LOG_CATEGORIES_H

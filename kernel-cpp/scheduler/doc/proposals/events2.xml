@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: events2.xml 12157 2006-06-20 11:29:58Z jz $-->
 
 <events title    = "Ereignisse"
         base_dir = ""
         parent_page         = "index.xml"
-        author   = "$Author$"
-        date     = "$Date$">
+        author   = "$Author: jz $"
+        date     = "$Date: 2006-06-20 13:29:58 +0200 (Tue, 20 Jun 2006) $">
 
     <description>
         <scheduler_keyword keyword="Ereignisse"/>

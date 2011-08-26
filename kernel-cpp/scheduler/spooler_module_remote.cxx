@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_module_remote.cxx 14014 2010-09-15 08:48:29Z rb $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 

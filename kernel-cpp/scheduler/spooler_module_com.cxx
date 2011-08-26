@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_module_com.cxx 13442 2008-02-25 09:43:28Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 

@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: siegmund_und_sieglinde.xml 12937 2007-08-19 07:36:18Z jz $-->
 
 <description
     title               = "Aufträge trennen und zusammenführen"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2007-08-19 09:36:18 +0200 (Sun, 19 Aug 2007) $"
     document_state      = "proposal"
 >
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

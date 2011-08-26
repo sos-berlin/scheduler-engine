@@ -1,4 +1,4 @@
-rem $Id$
+rem $Id: bin-to-sos.bat 11347 2005-03-24 10:14:54Z jz $
 rem Kopiert bin\*.gz auf cvs.sos
 
 rem gzip -fN bin\*.map

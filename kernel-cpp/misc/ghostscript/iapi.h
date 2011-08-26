@@ -16,7 +16,7 @@
   copies.
 */
 
-/* $Id$ */
+/* $Id: iapi.h 11347 2005-03-24 10:14:54Z jz $ */
 
 /*
  * Public API for Ghostscript interpreter

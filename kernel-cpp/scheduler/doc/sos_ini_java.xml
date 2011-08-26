@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: sos_ini_java.xml 12814 2007-05-09 13:48:15Z jz $-->
 
 <ini_section
     file     = "sos.ini"
@@ -9,8 +9,8 @@
     weight   = "10"
     title    = ""
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$">
+    author   = "$Author: jz $"
+    date     = "$Date: 2007-05-09 15:48:15 +0200 (Wed, 09 May 2007) $">
 
     <ini_entries>
         <ini_entry name="vm" type="path" title="Dateipfad der Java virtual machine">

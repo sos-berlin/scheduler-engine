@@ -1,5 +1,5 @@
 // ole_parser.cxx
-// $Id$
+// $Id: ole_parser.cxx 11818 2005-12-15 10:02:25Z jz $
 
 #include "precomp.h"
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosstrg0.cxx 13579 2008-06-09 08:09:33Z jz $
 
 //#if defined __BORLANDC__
 //#  define CHECK_STACK_OVERFLOW

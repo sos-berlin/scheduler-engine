@@ -1,4 +1,4 @@
-// $Id$
+// $Id: test_hostole.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #include <stdlib.h>
 #include <string.h>

@@ -1,4 +1,4 @@
-# $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+# $Id: ass-to-cobol.pl 13582 2008-06-13 14:54:18Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 #
 # Macht aus einer Assembler-Datenbeschreibung eine Vorlage für eine Cobol-Datenbeschreibung
  

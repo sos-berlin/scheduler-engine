@@ -1,4 +1,4 @@
-// $Id$                                     ©1998 SOS Software Gmbh
+// $Id: winapifl.cxx 11394 2005-04-03 08:30:29Z jz $                                     ©1998 SOS Software Gmbh
 // Jörg Schwiemann
 
 

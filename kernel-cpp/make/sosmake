@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id$
+# $Id: sosmake 11348 2005-03-24 10:17:34Z jz $
 
 # sosmake erwartet, daﬂ es im lib-Verzeichnis gestartet wird
 ENTW_DIR=../../..

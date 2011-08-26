@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: microscheduling.xml 13664 2008-09-12 08:34:20Z jz $-->
 
 <description
     title               = "Erneuertes Mikro-Scheduling"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-09-12 10:34:20 +0200 (Fri, 12 Sep 2008) $"
     document_state      = "work_in_progress"
 >
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

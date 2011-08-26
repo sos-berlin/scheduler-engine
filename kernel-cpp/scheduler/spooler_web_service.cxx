@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_web_service.cxx 13981 2010-08-27 15:14:44Z ss $
 // Joacim Zschimmer
 
 #include "spooler.h"

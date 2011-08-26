@@ -1,4 +1,4 @@
-// $Id$
+// $Id: olechar.cxx 11940 2006-03-05 19:13:06Z jz $
 
 #include "system.h"
 #include "olechar.h"

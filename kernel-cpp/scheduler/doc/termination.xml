@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: termination.xml 11726 2005-09-25 18:33:33Z jz $-->
 
 <description
     title    = "Beendigung des Schedulers"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: jz $"
+    date     = "$Date: 2005-09-25 20:33:33 +0200 (Sun, 25 Sep 2005) $"
 >
 
     <h2>Ordentliches Beenden</h2>

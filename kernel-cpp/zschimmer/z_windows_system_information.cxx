@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_system_information.cxx 13199 2007-12-06 14:15:42Z jz $
 
 #include "zschimmer.h"
 #include "system_information.h"

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_mail.h 13751 2009-03-01 17:14:58Z jz $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H

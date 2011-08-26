@@ -1,4 +1,4 @@
-// $Id$
+// $Id: browser_dependencies.js 11662 2005-09-12 13:14:55Z jz $
 
 // Joacim Zschimmer
 //

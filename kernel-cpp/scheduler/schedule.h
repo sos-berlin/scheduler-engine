@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
+// $Id: schedule.h 14028 2010-09-22 15:41:41Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
 
 #ifndef __SCHEDULER_SCHEDULE_H
 #define __SCHEDULER_SCHEDULE_H

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_posix_thread.h 13322 2008-01-27 15:27:19Z jz $
 
 #ifndef ZSCHIMMER_Z_POSIX_THREAD_H
 #define ZSCHIMMER_Z_POSIX_THREAD_H

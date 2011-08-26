@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: separate-debug-info 14138 2010-11-25 16:05:46Z jz $
 
 executable="$1"
 cp $executable ../../bin/"scheduler.debug"

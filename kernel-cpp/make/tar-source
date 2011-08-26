@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: tar-source 13710 2008-10-20 08:30:03Z jz $
 
 # In misc/microsoft ist eine riesige Word-DLL. Die brauchen wir nur für Windows (und eigentlich nur die TLB).
 rsync_options='--exclude microsoft'

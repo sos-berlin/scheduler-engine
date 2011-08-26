@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: 100scheduler.xml 13661 2008-09-11 07:04:53Z jz $-->
 
 <description
     title               = "Überlegungen des Jahres 2005 - Scheduler auf hundert Rechnern"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-09-11 09:04:53 +0200 (Thu, 11 Sep 2008) $"
     document_state      = "work_in_progress"
 >
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

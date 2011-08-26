@@ -1,4 +1,4 @@
-// $Id$
+// $Id: stdfile.h 11394 2005-04-03 08:30:29Z jz $
 // 14. 3.92                                             (c) Joacim Zschimmer
 
 #ifndef __STDFILE_H

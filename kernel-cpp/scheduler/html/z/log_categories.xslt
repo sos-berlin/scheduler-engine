@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id$ -->
+<!-- $Id: log_categories.xslt 13732 2008-11-04 11:37:58Z jz $ -->
 
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform"
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"

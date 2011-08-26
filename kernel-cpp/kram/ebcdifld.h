@@ -1,5 +1,5 @@
 // ebcdifld.h                                              © 1995 SOS GmbH Berlin
-// $Id$
+// $Id: ebcdifld.h 11394 2005-04-03 08:30:29Z jz $
 
 /*
     7.11.99: [SIGN IS] LEADING|TRAILING [SEPARATE CHARACTER] eingebaut.  J. Zschimmer

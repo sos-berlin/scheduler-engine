@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: dispatch 11348 2005-03-24 10:17:34Z jz $
 
 # Zur parallelen Compilierung auf zwei Rechnern "loka" und "sunne". Wenn die Rechner nicht so heiﬂen, wird nur localhost verwendet
 

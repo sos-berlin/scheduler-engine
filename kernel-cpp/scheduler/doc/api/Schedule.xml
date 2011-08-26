@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: Schedule.xml 13634 2008-08-14 08:22:14Z jz $ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Schedule"
     object_name = "schedule"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-08-14 10:22:14 +0200 (Thu, 14 Aug 2008) $"
 >
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

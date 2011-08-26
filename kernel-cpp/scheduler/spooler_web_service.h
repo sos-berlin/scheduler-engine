@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_web_service.h 13540 2008-04-30 11:32:48Z jz $
 
 #ifndef __SPOOLER_WEB_SERVICE_H
 #define __SPOOLER_WEB_SERVICE_H

@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: bin-to-sos 11348 2005-03-24 10:17:34Z jz $
 # Kopiert ausgewählte Dateien von bin zur SOS
 
 

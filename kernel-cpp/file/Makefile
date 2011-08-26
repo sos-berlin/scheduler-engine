@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile 13312 2008-01-18 14:57:19Z jz $
 
 PROD_DIR = $(shell cd ../.. && pwd)
 

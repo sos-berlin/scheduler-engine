@@ -1,6 +1,6 @@
 REM Beschreibung:
 REM Batch zum Erzeugen der Factory-Komponenten Manager/Dialog/Spooler/FactoryOLE
-REM $Id$
+REM $Id: factmake.bat 11347 2005-03-24 10:14:54Z jz $
 
 s:\u\pushdir
 

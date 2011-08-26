@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile 12580 2007-01-28 18:08:05Z jz $
 
 # libxml2 habe ich modifiziert. Also nicht die libxml2.so verwenden! 
 

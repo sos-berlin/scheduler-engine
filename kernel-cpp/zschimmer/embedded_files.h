@@ -1,4 +1,4 @@
-// $Id$
+// $Id: embedded_files.h 14010 2010-09-13 08:05:23Z jz $
 
 #ifndef __ZSCHIMMER__INLINE_FILES_H
 #define __ZSCHIMMER__INLINE_FILES_H

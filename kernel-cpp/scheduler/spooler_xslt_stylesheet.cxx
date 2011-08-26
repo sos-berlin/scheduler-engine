@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_xslt_stylesheet.cxx 13691 2008-09-30 20:42:20Z jz $
 
 #include "spooler.h"
 

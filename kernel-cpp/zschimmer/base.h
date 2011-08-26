@@ -1,4 +1,4 @@
-// $Id$        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: base.h 13880 2010-06-10 15:47:25Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_BASE_H
 #define __ZSCHIMMER_BASE_H

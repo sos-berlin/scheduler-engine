@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_sql.cxx 13707 2008-10-17 10:41:41Z jz $
 
 #include "zschimmer.h"
 #include "z_sql.h"

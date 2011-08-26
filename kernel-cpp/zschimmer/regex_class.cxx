@@ -1,4 +1,4 @@
-// $Id$
+// $Id: regex_class.cxx 13682 2008-09-29 15:44:28Z jz $
 
 #include "zschimmer.h"
 #include "regex_class.h"

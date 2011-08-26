@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_event.cxx 13874 2010-06-10 08:53:25Z jz $
 
 #include "zschimmer.h"
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: subprocess.xml 12012 2006-04-04 06:06:21Z jz $-->
 
 <xml_element name          = "subprocess"
              title         = "Subprozess (abhängiger Prozess)"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-04-04 08:06:21 +0200 (Tue, 04 Apr 2006) $">
 
     <xml_parent_elements>
         <xml_parent_element name="subprocesses"/>

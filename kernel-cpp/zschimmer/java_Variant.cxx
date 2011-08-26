@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_Variant.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #include "z_java.h"
 

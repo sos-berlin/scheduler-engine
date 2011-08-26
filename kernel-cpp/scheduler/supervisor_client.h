@@ -1,4 +1,4 @@
-// $Id$
+// $Id: supervisor_client.h 13550 2008-05-06 09:42:05Z jz $
 
 namespace sos {
 namespace scheduler {

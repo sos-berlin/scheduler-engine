@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_mail.cxx 13199 2007-12-06 14:15:42Z jz $
 
 #include "zschimmer.h"
 #include "z_mail.h"

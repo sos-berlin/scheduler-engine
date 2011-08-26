@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: dynamic_configuration.xml 13634 2008-08-14 08:22:14Z jz $-->
 
 <description
     title               = "Konfiguration aus Hot Folders"
     base_dir            = ""
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-08-14 10:22:14 +0200 (Thu, 14 Aug 2008) $"
 >
     <p>
         Jobs, Job-Ketten, Daueraufträge, Prozessklassen und Sperren (im folgenden Objekte genannt)

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_xslt_stylesheet.h 13198 2007-12-06 14:13:38Z jz $
 
 #ifndef __SPOOLER_XSLT_STYLESHEET_H
 #define __SPOOLER_XSLT_STYLESHEET_H

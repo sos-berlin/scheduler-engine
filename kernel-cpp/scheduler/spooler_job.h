@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
+// $Id: spooler_job.h 14676 2011-06-25 20:58:20Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com 
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H

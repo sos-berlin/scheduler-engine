@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: index.xml 13743 2008-12-12 08:53:40Z jz $-->
 
 <description
     title               = "Vorschläge zur weiteren Entwicklung"
     base_dir            = "../"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2008-12-12 09:53:40 +0100 (Fri, 12 Dec 2008) $"
     document_state      = "proposal"
 >
 

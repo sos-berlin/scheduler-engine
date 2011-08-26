@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Idispatch.java 11797 2005-11-09 11:57:30Z jz $
 
 
 package sos.hostware;

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml_msxml.cxx 12891 2007-06-29 12:29:34Z jz $
 
 #include "zschimmer.h"
 

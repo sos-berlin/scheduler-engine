@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id: http.authentication.xml 12958 2007-08-27 09:27:39Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <xml_element name     = "http.authentication"
              title    = "HTTP-Authentifizierung"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-08-27 11:27:39 +0200 (Mon, 27 Aug 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="http_server"/>

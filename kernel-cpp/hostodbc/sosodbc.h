@@ -1,4 +1,4 @@
-//$Id$
+//$Id: sosodbc.h 13577 2008-06-07 10:03:02Z jz $
 // sosodbc.h           ©1996 SOS GmbH Berlin, Joacim Zschimmer
 // Übernommen von Gorta, s. gortafaq.txt
 

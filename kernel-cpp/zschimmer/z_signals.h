@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_signals.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __Z_SIGNALS_H__
 #define __Z_SIGNALS_H__

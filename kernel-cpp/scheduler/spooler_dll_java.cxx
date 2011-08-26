@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_dll_java.cxx 14880 2011-07-22 06:48:54Z jz $
 
 #include "spooler.h"
 #include "../zschimmer/java.h"

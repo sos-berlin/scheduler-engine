@@ -1,4 +1,4 @@
-$Id$
+$Id: zutun.txt 11247 2005-01-11 23:22:22Z jz $
 
 Perl für Unix beschreiben. libsosperl.so, perl 5.8, libperl.so threading.
 

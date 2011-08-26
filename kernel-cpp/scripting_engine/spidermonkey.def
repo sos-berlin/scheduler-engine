@@ -1,4 +1,4 @@
-; $Id: spidermonkey.def,v 1.2 2004/10/17 11:37:58 jz Exp $
+; $Id: spidermonkey.def 11097 2004-10-17 11:38:41Z jz $
 
 LIBRARY         spidermonkey
 

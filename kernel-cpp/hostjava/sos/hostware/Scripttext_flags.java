@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Scripttext_flags.java 11346 2005-03-24 10:00:11Z jz $
 
 package sos.hostware;
 

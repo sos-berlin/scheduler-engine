@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_sockets.cxx 14085 2010-10-13 18:18:48Z jz $
 
 #include "zschimmer.h"
 #include "log.h"

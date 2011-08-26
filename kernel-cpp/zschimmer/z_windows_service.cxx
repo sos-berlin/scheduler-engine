@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_service.cxx 13786 2009-04-28 08:03:45Z jz $
 
 /*
     ! pid jeder vmware-vmx.exe merken. Machine läuft nicht, wenn der Prozess beendet ist.

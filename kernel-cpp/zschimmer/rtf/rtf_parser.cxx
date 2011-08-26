@@ -1,5 +1,5 @@
 // rtf_parser.cxx                                   © 2000 Joacim Zschimmer
-// $Id$
+// $Id: rtf_parser.cxx 12234 2006-09-04 09:50:11Z jz $
 
 //#include "headers.h"
 #include "../zschimmer.h"

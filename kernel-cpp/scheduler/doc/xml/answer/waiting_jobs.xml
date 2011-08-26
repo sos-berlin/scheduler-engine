@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: waiting_jobs.xml 11726 2005-09-25 18:33:33Z jz $-->
 
 <xml_element name          = "waiting_jobs"
              title         = "Auf einen freien Prozess wartende Jobs"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-09-25 20:33:33 +0200 (Sun, 25 Sep 2005) $">
 
     <xml_parent_elements>
         <xml_parent_element name="process_class">

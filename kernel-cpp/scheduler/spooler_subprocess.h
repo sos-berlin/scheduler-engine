@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_subprocess.h 13198 2007-12-06 14:13:38Z jz $
 
 #ifndef __SPOOLER_SUBPROCESS_H
 #define __SPOOLER_SUBPROCESS_H

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: scheduler_sql_oracle.xml 13426 2008-02-21 22:41:44Z ap $-->
 
 <description
     title               = "Vom Scheduler verwendete SQL-Anweisungen für Oracle®"
     base_dir            = ""
     parent_page         = "scheduler_sql.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: ap $"
+    date                = "$Date: 2008-02-21 23:41:44 +0100 (Thu, 21 Feb 2008) $"
 >
 
     <scheduler_keyword keyword="Oracle"/>

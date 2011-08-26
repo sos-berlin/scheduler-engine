@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_posix_thread.cxx 13343 2008-01-29 15:56:01Z jz $
 
 #include "zschimmer.h"
 #include "z_posix.h"

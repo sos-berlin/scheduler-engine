@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostole.rc 11348 2005-03-24 10:17:34Z jz $
 
 #ifdef _DEBUG
 1                       TYPELIB MOVEABLE PURE   "debug\\hostole.tlb"

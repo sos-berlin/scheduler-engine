@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_posix_system_information.cxx 13355 2008-01-30 19:16:32Z jz $
 
 #include "zschimmer.h"
 #include "system_information.h"

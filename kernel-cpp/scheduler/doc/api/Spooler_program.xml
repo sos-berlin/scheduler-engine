@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: Spooler_program.xml 11850 2006-01-31 11:42:37Z jz $ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -7,8 +7,8 @@
 <api.class
     name        = "Spooler_program"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-01-31 12:42:37 +0100 (Tue, 31 Jan 2006) $"
 >
 
 <method name="Spooler_program">

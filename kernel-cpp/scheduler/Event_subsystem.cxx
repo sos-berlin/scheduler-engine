@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Event_subsystem.cxx 14167 2010-12-30 15:11:58Z jz $
 
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: Web_service_request.xml 12051 2006-04-22 20:07:17Z jz $ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -11,8 +11,8 @@
     name        = "Web_service_request"
     object_name = "web_service_request"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2006-04-22 22:07:17 +0200 (Sat, 22 Apr 2006) $"
 >
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

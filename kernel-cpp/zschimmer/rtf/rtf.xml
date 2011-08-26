@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id$  Joacim Zschimmer 2004 -->
+<!-- $Id: rtf.xml 12360 2006-10-24 15:45:14Z jz $  Joacim Zschimmer 2004 -->
 
 <!--
     generate_rtf.js macht hieraus C++-Code: rtf_code.h und rtf_code.cxx

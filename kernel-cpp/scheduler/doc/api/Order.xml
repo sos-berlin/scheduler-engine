@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: Order.xml 13789 2009-06-12 12:08:23Z jz $ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Order"
     object_name = "order"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2009-06-12 14:08:23 +0200 (Fri, 12 Jun 2009) $"
 >
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

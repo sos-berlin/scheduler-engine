@@ -1,4 +1,4 @@
-// $Id$                                (C)1996 SOS GmbH Berlin
+// $Id: spidermonkey_module.cxx 13509 2008-04-22 13:42:23Z jz $                                (C)1996 SOS GmbH Berlin
 // Joacim Zschimmer
 
 #include <zschimmer/zschimmer.h>

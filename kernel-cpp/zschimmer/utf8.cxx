@@ -1,4 +1,4 @@
-// $Id$
+// $Id: utf8.cxx 11953 2006-03-09 13:58:17Z jz $
 
 #include "zschimmer.h"
 #include "utf8.h"

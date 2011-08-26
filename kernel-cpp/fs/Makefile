@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile 12593 2007-01-30 01:00:28Z jz $
 
 PROD_DIR = $(shell cd ../.. && pwd)
 DEP_PRODUCTS = kram file rapid fs

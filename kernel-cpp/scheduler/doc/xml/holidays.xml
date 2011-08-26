@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: holidays.xml 13620 2008-08-01 08:06:35Z aa $-->
 
 <xml_element name     = "holidays"
              title    = "Feiertage"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: aa $"
+             date     = "$Date: 2008-08-01 10:06:35 +0200 (Fri, 01 Aug 2008) $">
 
     <xml_parent_elements>
 

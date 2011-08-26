@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_Variable.cxx 13912 2010-06-30 15:41:14Z ss $
 
 #include "hostjava_common.h"
 

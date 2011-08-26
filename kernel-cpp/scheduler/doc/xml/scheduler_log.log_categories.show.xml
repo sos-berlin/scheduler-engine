@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: scheduler_log.log_categories.show.xml 13687 2008-09-30 14:33:31Z jz $-->
 
 <xml_element name     = "scheduler_log.log_categories.show"
              title    = "Zeigt die Log-Kategorien fürs interne scheduler.log"
              category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-09-30 16:33:31 +0200 (Tue, 30 Sep 2008) $">
 
 
     <description>

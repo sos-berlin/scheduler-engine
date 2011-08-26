@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: pipe_collector.h 13199 2007-12-06 14:15:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_PIPE_COLLECTOR_
 #define __ZSCHIMMER_PIPE_COLLECTOR_

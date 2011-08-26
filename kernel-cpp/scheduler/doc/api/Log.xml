@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: Log.xml 13568 2008-05-26 08:04:35Z jz $ -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Log"
     object_name = "spooler_log"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2008-05-26 10:04:35 +0200 (Mon, 26 May 2008) $"
 >
 
 

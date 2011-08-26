@@ -1,5 +1,5 @@
 // zschimmer.h                                      ©2000 Joacim Zschimmer
-// $Id$
+// $Id: odbc.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __ZSCHIMMER_ODBC_H
 #define __ZSCHIMMER_ODBC_H

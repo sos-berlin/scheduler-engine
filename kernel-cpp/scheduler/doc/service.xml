@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: service.xml 13052 2007-09-30 16:47:01Z ap $-->
 
 <description
     title               = "Der Job Scheduler als Dienst"
     base_dir            = ""
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: ap $"
+    date                = "$Date: 2007-09-30 18:47:01 +0200 (Sun, 30 Sep 2007) $"
 >
 
 <scheduler_keyword keyword="Dienst"/>

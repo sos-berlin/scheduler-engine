@@ -1,5 +1,5 @@
 // zschimmer.h                                      ©2000 Joacim Zschimmer
-// $Id$
+// $Id: not_in_recursion.h 13691 2008-09-30 20:42:20Z jz $
 
 #ifndef __ZSCHIMMER_NOT_IN_RECURSION_H
 #define __ZSCHIMMER_NOT_IN_RECURSION_H

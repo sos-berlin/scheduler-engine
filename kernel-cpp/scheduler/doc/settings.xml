@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: settings.xml 14025 2010-09-21 14:51:40Z ss $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -15,8 +15,8 @@
 <settings
     base_dir    = ""
     title       = "Einstellungen"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: ss $"
+    date        = "$Date: 2010-09-21 16:51:40 +0200 (Tue, 21 Sep 2010) $"
 >
 
     <setting setting        = "scheduler_log"

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sossock.cxx 14130 2010-11-09 16:33:53Z ss $
 
 #include "precomp.h"
 #include "sysdep.h"

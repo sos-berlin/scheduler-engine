@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: order.xml 13098 2007-10-09 19:07:14Z aa $-->
 
 <description
     title               = "Aufträge und Job-Ketten"
     base_dir            = ""
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: aa $"
+    date                = "$Date: 2007-10-09 21:07:14 +0200 (Tue, 09 Oct 2007) $"
 >
 
 

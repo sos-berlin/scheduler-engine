@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostjava.h 13912 2010-06-30 15:41:14Z ss $
 
 #ifndef __HOSTJAVA_H
 #define __HOSTJAVA_H

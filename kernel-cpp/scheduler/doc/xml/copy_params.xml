@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: copy_params.xml 12392 2006-12-04 08:06:32Z jz $-->
 
 <xml_element name     = "copy_params"
              title    = "Parameter übernehmen"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-12-04 09:06:32 +0100 (Mon, 04 Dec 2006) $">
 
     <description>
         <p>

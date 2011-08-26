@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: subprocess.process_group.scheduler 13584 2008-06-22 08:21:39Z jz $ -->
 
 <spooler
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 

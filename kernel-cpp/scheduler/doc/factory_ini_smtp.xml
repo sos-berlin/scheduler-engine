@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: factory_ini_smtp.xml 14051 2010-09-29 11:22:59Z rb $-->
 
 <ini_section
     name     = "smtp"
@@ -9,8 +9,8 @@
     weight   = "20"
     title    = "Datei factory.ini, Abschnitt [smtp]"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$">
+    author   = "$Author: rb $"
+    date     = "$Date: 2010-09-29 13:22:59 +0200 (Wed, 29 Sep 2010) $">
 
     <ini_entries>
         <ini_entry name="mail.smtp.user" type="name" title="Name für Authentifizierung am SMTP-Server">

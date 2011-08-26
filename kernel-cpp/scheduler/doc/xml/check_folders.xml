@@ -2,15 +2,15 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: check_folders.xml 13152 2007-10-30 18:20:26Z ap $-->
 
 <xml_element name     = "check_folders"
              title    = "Konfigurationsverzeichnisse auf Änderung prüfen"
              category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: ap $"
+             date     = "$Date: 2007-10-30 19:20:26 +0100 (Tue, 30 Oct 2007) $">
 
 
     <description>

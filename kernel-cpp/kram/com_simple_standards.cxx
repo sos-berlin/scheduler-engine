@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com_simple_standards.cxx 11931 2006-03-04 10:56:32Z jz $
 
 #include "precomp.h"
 #include "sos.h"

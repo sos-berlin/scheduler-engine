@@ -1,4 +1,4 @@
-// $Id$
+// $Id: version.h 14774 2011-07-08 07:21:01Z ss $
 // Für Windows-Dateiinfo
 
 // #include "../target/cpp/mavenSettings.h"

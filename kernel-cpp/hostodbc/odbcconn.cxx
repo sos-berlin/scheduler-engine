@@ -1,4 +1,4 @@
-//$Id$
+//$Id: odbcconn.cxx 13577 2008-06-07 10:03:02Z jz $
 //#define MODULE_NAME "odbcconn"
 //#define COPYRIGHT   "©1996 SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"

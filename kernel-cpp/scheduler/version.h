@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: version.h 14777 2011-07-08 09:56:19Z ss $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "../generated/mavenSettings.h"
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_module_remote_server.cxx 14092 2010-10-19 12:16:52Z rb $
 /*
     Hier sind implementiert
 

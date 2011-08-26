@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_directory.cxx 12116 2006-06-06 18:03:24Z jz $
 
 #include "zschimmer.h"
 #include "z_directory.h"

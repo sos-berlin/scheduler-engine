@@ -1,4 +1,4 @@
-// $Id$
+// $Id: api-old.js 11692 2005-09-18 09:23:02Z jz $
 
 /// WIRD NICHT BENUTZT ///
 

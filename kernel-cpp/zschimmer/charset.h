@@ -1,4 +1,4 @@
-// $Id$
+// $Id: charset.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __Z_CHARACTER_ENCODING_H
 #define __Z_CHARACTER_ENCODING_H

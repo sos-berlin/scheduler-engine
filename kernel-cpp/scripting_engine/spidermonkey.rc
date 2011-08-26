@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spidermonkey.rc 14331 2011-05-12 21:07:48Z jz $
 
 #ifdef _DEBUG
 1                       TYPELIB MOVEABLE PURE   "debug\\scripting_engine_tlb.tlb"  // Bis Visual Studio 2008: "debug\\spidermonkey.tlb"

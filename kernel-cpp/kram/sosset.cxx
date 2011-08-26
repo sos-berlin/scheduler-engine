@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosset.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #if defined _MSC_VER
 #   pragma warning( disable:4018 )   // warning C4018: '>': Konflikt zwischen 'signed' und 'unsigned'

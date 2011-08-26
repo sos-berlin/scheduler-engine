@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: async_socket.h 14137 2010-11-25 15:10:51Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __Z_ASYNC_SOCKET_H
 #define __Z_ASYNC_SOCKET_H

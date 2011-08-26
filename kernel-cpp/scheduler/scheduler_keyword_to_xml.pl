@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id$
+# $Id: scheduler_keyword_to_xml.pl 12356 2006-10-12 08:37:34Z jz $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";

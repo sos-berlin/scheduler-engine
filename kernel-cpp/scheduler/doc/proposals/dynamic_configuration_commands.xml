@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: dynamic_configuration_commands.xml 12973 2007-09-09 11:10:05Z jz $-->
 
 <description
     title               = "Scheduler-Objekte unbeschränkt hinzufügen, austauschen und löschen"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2007-09-09 13:10:05 +0200 (Sun, 09 Sep 2007) $"
     document_state      = "proposal"
 >
     <p>

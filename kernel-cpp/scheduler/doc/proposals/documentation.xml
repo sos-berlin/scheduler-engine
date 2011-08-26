@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: documentation.xml 12335 2006-09-26 07:27:16Z jz $-->
 
 <description
     title               = "Dokumentation erweitern"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-09-26 09:27:16 +0200 (Tue, 26 Sep 2006) $"
 >
     <h2>Ausführlicher</h2>
     

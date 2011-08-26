@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_wait.h 14117 2010-10-29 10:56:12Z jz $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com_server.h 13404 2008-02-12 08:09:25Z jz $
 
 #ifndef __SOS_COM_SERVER
 #define __SOS_COM_SERVER

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: order_source_directory.xml 12312 2006-09-20 05:16:06Z jz $-->
 
 <description
     title               = "Verzeichnisüberwachung mit Aufträgen"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-09-20 07:16:06 +0200 (Wed, 20 Sep 2006) $"
 >
     
 

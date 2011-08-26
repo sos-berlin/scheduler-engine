@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostole_ptr.h 12688 2007-03-23 08:56:43Z jz $
 
 // Hostole für zschimmer.h, frei von sos.h, mit HRESULT-Prüfung und Exceptions
 

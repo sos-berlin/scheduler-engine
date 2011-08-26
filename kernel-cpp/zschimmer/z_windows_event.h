@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_event.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __ZSCHIMMER_WINDOWS_EVENT_H
 #define __ZSCHIMMER_WINDOWS_EVENT_H

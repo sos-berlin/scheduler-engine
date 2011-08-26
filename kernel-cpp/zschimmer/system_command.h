@@ -1,4 +1,4 @@
-// $Id$
+// $Id: system_command.h 11394 2005-04-03 08:30:29Z jz $
 // ©2000 Joacim Zschimmer
 
 #ifndef __SYSTEM_COMMAND_H

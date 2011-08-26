@@ -1,4 +1,4 @@
-// $Id$
+// $Id: async.cxx 14178 2011-01-18 15:10:17Z rb $
 
 #include "zschimmer.h"
 #include "async.h"

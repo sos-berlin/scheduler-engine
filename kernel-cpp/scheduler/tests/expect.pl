@@ -1,4 +1,4 @@
-# $Id$
+# $Id: expect.pl 13223 2007-12-21 13:03:10Z jz $
 
 sub expect
 {

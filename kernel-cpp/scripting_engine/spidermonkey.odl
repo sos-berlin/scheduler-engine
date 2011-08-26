@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spidermonkey.odl 14144 2010-11-29 11:06:22Z jz $
 
 #if (__midl >= 501)
     midl_pragma warning(disable: 2471)     // "error MIDL2471: Some attributes and/or data types in the idl and/or included/imported idl files can not be represented in the type library: size_is/max_is"

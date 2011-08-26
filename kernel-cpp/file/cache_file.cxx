@@ -1,4 +1,4 @@
-// $Id$
+// $Id: cache_file.cxx 11837 2006-01-25 08:19:41Z jz $
 
 // s.a. ältere cachefl.cxx, cachsqfl.cxx
 

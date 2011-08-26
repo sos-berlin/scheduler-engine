@@ -1,9 +1,9 @@
-# $Id$
+# $Id: standard.makefile 13795 2009-06-23 11:13:12Z sos $
  
 GNUMAKE=1
 #SYSTEM_LINUX=1
  
-# makefile.std $Id$
+# makefile.std $Id: standard.makefile 13795 2009-06-23 11:13:12Z sos $
 
 
 #------------------------------------------------------------SYSTEM feststellen

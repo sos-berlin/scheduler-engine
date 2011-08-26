@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: scheduler_script.xml 13119 2007-10-11 16:24:51Z aa $-->
 
 <xml_element name     = "scheduler_script"
              title    = "Job Scheduler Skript"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: aa $"
+             date     = "$Date: 2007-10-11 18:24:51 +0200 (Thu, 11 Oct 2007) $">
 
     <scheduler_keyword keyword="Job Scheduler Skript"/>
 

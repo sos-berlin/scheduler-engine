@@ -1,4 +1,4 @@
-// $Id$
+// $Id: regex_class.h 13315 2008-01-22 13:27:57Z jz $
 
 #ifndef __ZSCHIMMER_REGEX_CLASS_H
 #define __ZSCHIMMER_REGEX_CLASS_H

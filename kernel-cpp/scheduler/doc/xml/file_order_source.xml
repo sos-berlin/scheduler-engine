@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
-<!--$Id$-->
+<!--$Id: file_order_source.xml 12807 2007-05-07 11:44:36Z jz $-->
 
 <xml_element name     = "file_order_source"
              title    = "Dateiauftragsquelle"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-05-07 13:44:36 +0200 (Mon, 07 May 2007) $">
 
     <scheduler_keyword keyword="Dateiauftragsquelle"/>
     <scheduler_keyword keyword="Auftragsquelle"/>

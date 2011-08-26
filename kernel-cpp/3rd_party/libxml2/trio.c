@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id$
+ * $Id: trio.c 11514 2005-06-21 13:55:13Z jz $
  *
  * Copyright (C) 1998 Bjorn Reese and Daniel Stenberg.
  *
@@ -719,7 +719,7 @@ typedef struct _trio_userdef_t {
  *
  *************************************************************************/
 
-static TRIO_CONST char rcsid[] = "@(#)$Id$";
+static TRIO_CONST char rcsid[] = "@(#)$Id: trio.c 11514 2005-06-21 13:55:13Z jz $";
 
 /*
  * Need this to workaround a parser bug in HP C/iX compiler that fails

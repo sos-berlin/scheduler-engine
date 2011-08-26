@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: external_api.xml 12157 2006-06-20 11:29:58Z jz $-->
 
 <description
     head_title          = "Externes API"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-06-20 13:29:58 +0200 (Tue, 20 Jun 2006) $"
 >
     <h1>Externes API</h1>
 

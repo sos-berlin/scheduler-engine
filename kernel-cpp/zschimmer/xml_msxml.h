@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml_msxml.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __ZSCHIMMER_XML_MSXML_H
 #define __ZSCHIMMER_XML_MSXML_H

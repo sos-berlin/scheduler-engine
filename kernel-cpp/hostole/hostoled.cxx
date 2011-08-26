@@ -1,4 +1,4 @@
-// $Id$                                (C)1996 SOS GmbH Berlin
+// $Id: hostoled.cxx 13665 2008-09-22 12:21:50Z jz $                                (C)1996 SOS GmbH Berlin
 // Joacim Zschimmer
 
 /*

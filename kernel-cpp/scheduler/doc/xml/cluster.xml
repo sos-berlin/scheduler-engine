@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: cluster.xml 12647 2007-02-26 17:21:19Z jz $-->
 
 <xml_element name     = "cluster"
              title    = "Einstellungen für den Cluster-Betrieb"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-02-26 18:21:19 +0100 (Mon, 26 Feb 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="config"/>

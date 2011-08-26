@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Word_application.java 11792 2005-11-07 15:42:55Z jz $
 
 
 package sos.hostware;

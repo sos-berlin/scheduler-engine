@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_odl.cxx 12592 2007-01-30 00:54:20Z jz $
 #include "zschimmer.h"
 
 #ifdef Z_COM

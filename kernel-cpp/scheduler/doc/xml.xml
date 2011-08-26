@@ -2,14 +2,14 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
-<!--$Id$-->
+<!--$Id: xml.xml 14858 2011-07-19 13:06:30Z ss $-->
 
 
 <description
     title    = "Alle XML-Elemente"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: ss $"
+    date     = "$Date: 2011-07-19 15:06:30 +0200 (Tue, 19 Jul 2011) $"
 >
 
 <!--

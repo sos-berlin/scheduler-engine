@@ -1,4 +1,4 @@
-// $Id$
+// $Id: browser_dependencies.js 11759 2005-10-26 18:12:09Z jz $
 
 // Anpassungen für DOM und XSL-T
 

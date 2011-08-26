@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: single_java.xml 12173 2006-07-27 08:42:20Z jz $-->
 
 <description
     title               = "Nur eine Java Virtual Machine für alle Java-Tasks"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-07-27 10:42:20 +0200 (Thu, 27 Jul 2006) $"
 >
     <p>
         Der Scheduler hält einen Prozess für die Java-Tasks vor oder lässt die Java-Tasks im eigenen Prozess des Schedulers laufen.

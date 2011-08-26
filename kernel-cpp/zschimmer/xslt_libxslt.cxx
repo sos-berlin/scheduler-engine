@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xslt_libxslt.cxx 13691 2008-09-30 20:42:20Z jz $
 
 // Dokumentation von libxml2 in http://xmlsoft.org/html/libxml-lib.html
 

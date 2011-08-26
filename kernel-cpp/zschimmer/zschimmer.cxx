@@ -1,4 +1,4 @@
-// $Id$        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: zschimmer.cxx 14110 2010-10-27 12:58:32Z jz $        © 2000 Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 // §1693
 
@@ -132,7 +132,7 @@ static Message_code_text error_codes[] =
 
 const char                      Rotating_bar::chars[4] = {'|','/','-','\\'};
 const static size_t             max_insertion_length = 500;
-extern const char               zschimmer_copyright[] = "\n$Id$ (C) 1999-2006 Zschimmer GmbH, http://www.zschimmer.com, Joacim Zschimmer\n";
+extern const char               zschimmer_copyright[] = "\n$Id: zschimmer.cxx 14110 2010-10-27 12:58:32Z jz $ (C) 1999-2006 Zschimmer GmbH, http://www.zschimmer.com, Joacim Zschimmer\n";
 
 //---------------------------------------------------------------Zschimmer_static::Zschimmer_static
 

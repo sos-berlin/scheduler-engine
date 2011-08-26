@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_File.cxx 11797 2005-11-09 11:57:30Z jz $
 
 #include "hostjava_common.h"
 

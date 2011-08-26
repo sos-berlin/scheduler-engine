@@ -1,4 +1,4 @@
-// $Id$
+// $Id: utf8.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __ZSCHIMMER_UTF8
 #define __ZSCHIMMER_UTF8

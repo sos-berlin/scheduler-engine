@@ -1,4 +1,4 @@
-// $Id$
+// $Id: rectab.cxx 13579 2008-06-09 08:09:33Z jz $
 // #rev 3#
 
 //#define MODULE_NAME "rectab"

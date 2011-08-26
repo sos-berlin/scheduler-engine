@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_sockets.h 14085 2010-10-13 18:18:48Z jz $
 
 #ifndef __Z_SOCKETS_H
 #define __Z_SOCKETS_H

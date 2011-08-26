@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: subprocess.xml 12195 2006-08-18 11:36:00Z jz $-->
 
 <description
     title               = "Erweiterung der Klasse Subprozesse"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-08-18 13:36:00 +0200 (Fri, 18 Aug 2006) $"
 >
     <ul>
         <li>

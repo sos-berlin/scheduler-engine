@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spidermonkey_scripting_engine.h 13491 2008-04-16 10:16:11Z jz $
 
 #ifndef __SPIDERMONKEY_SCRIPTING_ENGINE_H
 #define __SPIDERMONKEY_SCRIPTING_ENGINE_H

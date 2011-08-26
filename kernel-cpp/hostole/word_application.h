@@ -1,4 +1,4 @@
-// $Id$
+// $Id: word_application.h 13579 2008-06-09 08:09:33Z jz $
 
 #ifndef __HOSTOLE_WORD_APPLICATION_H
 #define __HOSTOLE_WORD_APPLICATION_H

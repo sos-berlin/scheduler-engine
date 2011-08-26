@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: state.xml 13734 2008-11-07 14:05:44Z jz $-->
 
 <xml_element name          = "state"
              title         = "Allgemeiner Zustand des Schedulers"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2008-11-07 15:05:44 +0100 (Fri, 07 Nov 2008) $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer"/>

@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: file_logger.h 15047 2011-08-26 08:23:12Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_FILE_LOGGER_H
 #define __SCHEDULER_FILE_LOGGER_H

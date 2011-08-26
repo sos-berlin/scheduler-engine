@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml_dom.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __SOS_XML_DOM_H
 #define __SOS_XML_DOM_H

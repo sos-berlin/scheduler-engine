@@ -1,5 +1,5 @@
 // hostole.cxx                                  (C)1996-98 SOS GmbH Berlin
-// $Id$
+// $Id: hostole.cxx 13728 2008-11-03 14:53:57Z jz $
 // §1768
 
 #include "precomp.h"

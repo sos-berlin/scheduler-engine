@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: remote_schedulers.xml 11850 2006-01-31 11:42:37Z jz $-->
 
 <xml_element name          = "remote_schedulers"
              title         = "Registrierte Scheduler"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "state.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2006-01-31 12:42:37 +0100 (Tue, 31 Jan 2006) $">
 
     <xml_parent_elements>
         <xml_parent_element name="state"/>

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java.cxx 14145 2010-12-02 12:11:47Z jz $
 
 #include "zschimmer.h"
 #include "threads.h"

@@ -1,5 +1,5 @@
 // rtf_parser.h                                         ©2000 Joacim Zschimmer
-// $Id$
+// $Id: rtf_parser.h 12231 2006-09-01 06:37:30Z jz $
 
 #ifndef __RTF_PARSER_H
 #define __RTF_PARSER_H

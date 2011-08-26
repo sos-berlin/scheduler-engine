@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java_com.h 14174 2011-01-13 16:26:26Z ss $
 
 #ifndef __ZSCHIMMER_JAVA_COM_H
 #define __ZSCHIMMER_JAVA_COM_H

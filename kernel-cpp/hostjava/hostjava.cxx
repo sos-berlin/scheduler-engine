@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostjava.cxx 13912 2010-06-30 15:41:14Z ss $
 
 #include "hostjava_common.h"
 #include "../zschimmer/com.h"

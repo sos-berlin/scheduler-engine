@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: environment.xml 13132 2007-10-22 14:44:12Z jz $-->
 
 <xml_element name     = "environment"
              title    = "Umgebungsvariablen"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-10-22 16:44:12 +0200 (Mon, 22 Oct 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="job"/>

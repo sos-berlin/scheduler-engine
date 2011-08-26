@@ -1,4 +1,4 @@
-// $Id$
+// $Id: threads_base.h 13322 2008-01-27 15:27:19Z jz $
 
 #ifndef ZSCHIMMER_THREADS_BASE_H
 #define ZSCHIMMER_THREADS_BASE_H

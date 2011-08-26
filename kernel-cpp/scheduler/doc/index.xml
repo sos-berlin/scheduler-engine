@@ -20,15 +20,15 @@
 
 
 
-<!--$Id$-->
+<!--$Id: index.xml 13972 2010-08-24 12:48:06Z oh $-->
 
 <description
     head_title          = "Dokumentation"
     base_dir            = ""
     suppress_browse_bar = "yes"
   xxsuppress_logo       = "yes" 
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: oh $"
+    date                = "$Date: 2010-08-24 14:48:06 +0200 (Tue, 24 Aug 2010) $"
 >
 
     <scheduler_ignore>

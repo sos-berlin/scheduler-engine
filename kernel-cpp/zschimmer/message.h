@@ -1,5 +1,5 @@
 // zschimmer.h                                      ©2000 Joacim Zschimmer
-// $Id$
+// $Id: message.h 14183 2011-01-18 17:43:56Z rb $
 
 #ifndef __ZSCHIMMER_MESSAGE_H
 #define __ZSCHIMMER_MESSAGE_H

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id: Job_chain_node.xml 12741 2007-04-09 08:41:11Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <?xml-stylesheet href="api-default_language.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "Job_chain_node"
     object_name = "node"
     base_dir    = "../"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2007-04-09 10:41:11 +0200 (Mon, 09 Apr 2007) $"
 >
 
 

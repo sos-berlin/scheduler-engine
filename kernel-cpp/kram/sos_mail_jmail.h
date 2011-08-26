@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sos_mail_jmail.h 11529 2005-06-22 05:24:03Z jz $
 
 #ifndef __SOS_MAIL_JMAIL_H
 #define __SOS_MAIL_JMAIL_H

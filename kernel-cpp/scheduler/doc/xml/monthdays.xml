@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: monthdays.xml 12648 2007-02-27 09:30:13Z jz $-->
 
 <xml_element name     = "monthdays"
              title    = "Perioden für bestimmte Tage des Monats"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-02-27 10:30:13 +0100 (Tue, 27 Feb 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">

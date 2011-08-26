@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: async_io.h 13670 2008-09-26 15:09:47Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __ZSCHIMMER_ASYNC_IO_H
 #define __ZSCHIMMER_ASYNC_IO_H

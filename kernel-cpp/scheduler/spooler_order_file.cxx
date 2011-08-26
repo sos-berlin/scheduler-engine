@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_order_file.cxx 14125 2010-11-04 12:32:04Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 /*
     VERBESSERUNG:

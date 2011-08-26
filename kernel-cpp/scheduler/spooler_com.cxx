@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_com.cxx 14220 2011-04-29 14:12:18Z jz $
 /*
     Hier sind implementiert
 

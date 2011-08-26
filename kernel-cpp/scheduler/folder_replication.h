@@ -1,4 +1,4 @@
-// $Id$
+// $Id: folder_replication.h 13182 2007-11-29 11:38:34Z jz $
 
 #ifndef __SCHEDULER_FOLDER_H
 #define __SCHEDULER_FOLDER_H

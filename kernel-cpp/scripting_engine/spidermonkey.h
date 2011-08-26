@@ -1,4 +1,4 @@
-// $Id: spidermonkey.h,v 1.2 2004/12/05 16:14:26 jz Exp $
+// $Id: spidermonkey.h 11171 2004-12-05 16:14:26Z jz $
 
 #ifndef __SPIDERMONKEY_H
 #define __SPIDERMONKEY_H

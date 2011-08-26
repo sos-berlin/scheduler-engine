@@ -2,13 +2,13 @@
 <?xml-stylesheet href="variable_substitution.xsl" type="text/xsl"?>
 
 
-<!--$Id$-->
+<!--$Id: variable_substitution.xml 13694 2008-10-02 14:21:03Z jz $-->
 
 <variable_substitution
     title    = "Einstellungen, die den Abruf von Umgebungsvariablen mit ${…} erlauben"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: jz $"
+    date     = "$Date: 2008-10-02 16:21:03 +0200 (Thu, 02 Oct 2008) $"
 >
 
     <description>

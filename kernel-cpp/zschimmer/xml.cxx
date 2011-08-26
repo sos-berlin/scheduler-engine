@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml.cxx 13442 2008-02-25 09:43:28Z jz $
 
 #include "zschimmer.h"
 #include "xml.h"

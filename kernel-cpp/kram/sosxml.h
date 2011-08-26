@@ -1,5 +1,5 @@
 // sosxml.h, Joacim Zschimmer
-// $Id$
+// $Id: sosxml.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __SOSXML_H
 #define __SOSXML_H

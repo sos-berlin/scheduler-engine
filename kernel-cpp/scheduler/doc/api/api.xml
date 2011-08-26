@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
+<!-- $Id: api.xml 14199 2011-01-25 12:13:10Z ss $ -->
 
 <?xml-stylesheet href="api-javascript.xsl" type="text/xsl"?>
 
@@ -8,8 +8,8 @@
     name        = "api"
     base_dir    = "../"
     title       = "Programmschnittstelle (API)" 
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: ss $"
+    date        = "$Date: 2011-01-25 13:13:10 +0100 (Tue, 25 Jan 2011) $"
 >
 
     <title>

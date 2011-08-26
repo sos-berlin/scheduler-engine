@@ -1,4 +1,4 @@
-// $Id$
+// $Id: embedded_files.cxx 13839 2010-04-06 09:53:57Z ss $
 
 #include "zschimmer.h"
 #include "embedded_files.h"

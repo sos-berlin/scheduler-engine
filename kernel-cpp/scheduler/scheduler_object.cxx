@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: scheduler_object.cxx 14131 2010-11-09 20:22:22Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 
 #include "spooler.h"

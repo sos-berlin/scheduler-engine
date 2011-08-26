@@ -1,5 +1,5 @@
 // zschimmer.cxx                                    © 2000 Joacim Zschimmer
-// $Id$
+// $Id: argv.cxx 13199 2007-12-06 14:15:42Z jz $
 
 // §1693
 

@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: order.xml 13047 2007-09-27 16:27:00Z jz $-->
 
 <xml_element name     = "order"
              parent_page = "../konfiguration.xml"
              category = "Konfiguration"
              title    = "Auftrag, Dauerauftrag in einer Konfigurationsdatei"
              base_dir = "../"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2007-09-27 18:27:00 +0200 (Thu, 27 Sep 2007) $">
 
 
     <description>

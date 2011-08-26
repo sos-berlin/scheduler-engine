@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_time.h 14013 2010-09-14 07:21:33Z ss $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H

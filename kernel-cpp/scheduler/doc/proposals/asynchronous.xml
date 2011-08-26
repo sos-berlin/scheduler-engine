@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: asynchronous.xml 12608 2007-01-31 22:38:05Z jz $-->
 
 <description
     title               = "Verbesserung der asynchronen Ausführung im Scheduler"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2007-01-31 23:38:05 +0100 (Wed, 31 Jan 2007) $"
     document_state      = "work_in_progress"
 >
     <h3>Umgehen der Begrenzung auf 64 Events unter Windows</h3>

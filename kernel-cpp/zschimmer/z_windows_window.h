@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_window.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __ZSCHIMMER_WINDOWS_WINDOW_H
 #define __ZSCHIMMER_WINDOWS_WINDOW_H

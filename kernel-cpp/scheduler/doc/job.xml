@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: job.xml 13102 2007-10-10 18:13:31Z aa $-->
 
 <description
     title    = "Was ist ein Job?"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: aa $"
+    date     = "$Date: 2007-10-10 20:13:31 +0200 (Wed, 10 Oct 2007) $"
 >
     <scheduler_keyword keyword="Job"/>
 

@@ -1,4 +1,4 @@
-// $Id$          Joacim Zschimmer
+// $Id: variables.cxx 12634 2007-02-17 19:40:05Z jz $          Joacim Zschimmer
 
 // §1701 
 // §1727

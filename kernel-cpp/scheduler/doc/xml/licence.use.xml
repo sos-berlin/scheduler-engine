@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
+<!--$Id: licence.use.xml 13715 2008-10-21 21:20:44Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com -->
 
 <xml_element name     = "licence.use"
              parent_page = "../xml_commands.xml"
              category = "Kommando"
              title    = "Löscht eine Sperre"
              base_dir = "../"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-10-21 23:20:44 +0200 (Tue, 21 Oct 2008) $">
 
 
     <description>

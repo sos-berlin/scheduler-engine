@@ -1,4 +1,4 @@
-'$Id$
+'$Id: test_blob.vbs 11247 2005-01-11 23:22:22Z jz $
 '
 'Prüft den Zugriff auf Blobs mit der Hostware
 

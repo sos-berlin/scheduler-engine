@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: sos_ini_mail.xml 12294 2006-09-18 07:20:01Z jz $-->
 
 <ini_section
     file     = "sos.ini"
@@ -9,8 +9,8 @@
     weight   = "10"
     title    = ""
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$">
+    author   = "$Author: jz $"
+    date     = "$Date: 2006-09-18 09:20:01 +0200 (Mon, 18 Sep 2006) $">
 
     <ini_entries>
 

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com_remote.h 13454 2008-03-06 12:24:46Z jz $
 
 #ifndef __Z_COM_REMOTE_H
 #define __Z_COM_REMOTE_H

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_module_java_module.cxx 13855 2010-04-29 15:36:16Z jz $
 
 #include "spooler.h"
 #include "../file/stdfile.h"    // make_path

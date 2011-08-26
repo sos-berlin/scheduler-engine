@@ -1,4 +1,4 @@
-// $Id$
+// $Id: string_stream.h 13579 2008-06-09 08:09:33Z jz $
 
 #ifndef __ZSCHIMMER_STRING_STREAM_
 #define __ZSCHIMMER_STRING_STREAM_

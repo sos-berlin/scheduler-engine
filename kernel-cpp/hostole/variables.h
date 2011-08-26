@@ -1,4 +1,4 @@
-// $Id$
+// $Id: variables.h 12634 2007-02-17 19:40:05Z jz $
 
 #ifndef __HOSTOLE_VARIABLES_H
 #define __HOSTOLE_VARIABLES_H

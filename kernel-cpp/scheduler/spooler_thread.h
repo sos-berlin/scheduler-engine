@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_thread.h 14037 2010-09-28 07:46:07Z rb $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H

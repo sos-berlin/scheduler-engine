@@ -1,5 +1,5 @@
 // rtf.h                                                ©2000 Joacim Zschimmer
-// $Id$
+// $Id: rtf.h 12891 2007-06-29 12:29:34Z jz $
 
 #ifndef __RTF_H
 #define __RTF_H

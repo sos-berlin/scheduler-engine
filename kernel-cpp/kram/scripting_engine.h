@@ -1,4 +1,4 @@
-// $Id$
+// $Id: scripting_engine.h 11394 2005-04-03 08:30:29Z jz $
 
 /*
 #ifdef SYSTEM_WIN

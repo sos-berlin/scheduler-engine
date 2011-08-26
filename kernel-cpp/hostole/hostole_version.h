@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostole_version.h 11394 2005-04-03 08:30:29Z jz $
 
 #include "../kram/version.h"
 //#define VER_PRODUCTVERSION       1,4,4,0

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosfs.rc 11347 2005-03-24 10:14:54Z jz $
 
 #include "../kram/version.h"
 //#define VER_PRODUCTVERSION      1,4,0

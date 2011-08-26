@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostole_ptr.cxx 11928 2006-03-03 21:19:25Z jz $
 
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/com.h"

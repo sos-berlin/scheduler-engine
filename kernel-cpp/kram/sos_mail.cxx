@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sos_mail.cxx 14051 2010-09-29 11:22:59Z rb $
 
 
 #include "precomp.h"

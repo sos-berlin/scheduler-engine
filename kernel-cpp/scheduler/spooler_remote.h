@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_remote.h 13198 2007-12-06 14:13:38Z jz $
 
 namespace sos {
 namespace scheduler {

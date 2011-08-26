@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: replacement.xml 13017 2007-09-20 08:54:15Z jz $-->
 
 <xml_element name          = "replacement"
              title         = "Noch nicht vollzogender Austausch eines Objekts"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-09-20 10:54:15 +0200 (Thu, 20 Sep 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="process_class"/>

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spooler_com.h 14409 2011-05-19 16:54:23Z jz $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H

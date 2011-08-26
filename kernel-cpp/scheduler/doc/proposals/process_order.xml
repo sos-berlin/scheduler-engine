@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: process_order.xml 12214 2006-08-27 14:34:29Z jz $-->
 
 <description
     title               = "Auftragsgesteuerte &lt;process&gt;-Jobs"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-08-27 16:34:29 +0200 (Sun, 27 Aug 2006) $"
 >
     <p>
         Weil <scheduler_element name="process"/>-Jobs kein <scheduler_method class="Job_impl" method="spooler_process"/> kennen,

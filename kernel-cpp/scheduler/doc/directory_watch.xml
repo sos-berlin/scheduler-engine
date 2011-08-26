@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: directory_watch.xml 13161 2007-11-09 09:28:17Z jz $-->
 
 <description
     title       = "Verzeichnisüberwachung"
     base_dir    = ""
     parent_page = "job.xml"
-    author      = "$Author$"
-    date        = "$Date$"
+    author      = "$Author: jz $"
+    date        = "$Date: 2007-11-09 10:28:17 +0100 (Fri, 09 Nov 2007) $"
 >
 
     <p>

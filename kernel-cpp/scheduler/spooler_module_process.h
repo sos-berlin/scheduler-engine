@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_module_process.h 13807 2009-11-18 08:59:21Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SPOOLER_MODULE_PROCESS_H
 #define __SPOOLER_MODULE_PROCESS_H

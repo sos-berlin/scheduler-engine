@@ -1,4 +1,4 @@
-// $Id$
+// $Id: hostjava.rc 11347 2005-03-24 10:14:54Z jz $
 
 #include "hostjava_version.h"
 #include "../kram/sosvers.rc"

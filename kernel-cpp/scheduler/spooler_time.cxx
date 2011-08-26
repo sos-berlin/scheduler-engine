@@ -9,7 +9,7 @@
  * </div>
  */
 
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: spooler_time.cxx 13999 2010-09-02 10:53:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 /*
     Hier sind implementiert
 

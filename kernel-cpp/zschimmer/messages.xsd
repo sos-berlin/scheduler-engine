@@ -6,7 +6,7 @@
 
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id$
+            $Id: messages.xsd 12973 2007-09-09 11:10:05Z jz $
             Schema für Programm-Meldungen
         </xsd:documentation>
     </xsd:annotation>

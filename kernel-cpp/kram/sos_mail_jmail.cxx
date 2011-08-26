@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sos_mail_jmail.cxx 13154 2007-11-03 07:11:44Z jz $
 
 
 #include "precomp.h"

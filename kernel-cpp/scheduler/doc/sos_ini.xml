@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: sos_ini.xml 12889 2007-06-28 10:02:06Z ts $-->
 
 <ini file     = "sos.ini"
      title    = "Datei sos.ini"
      base_dir = ""
-     author   = "$Author$"
-     date     = "$Date$">
+     author   = "$Author: ts $"
+     date     = "$Date: 2007-06-28 12:02:06 +0200 (Thu, 28 Jun 2007) $">
 
     <ini_sections>
         <ini_section name="java"/>

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: olechar.h 11980 2006-03-20 14:49:29Z jz $
 
 #ifndef __ZSCHIMMER_OLECHAR
 #define __ZSCHIMMER_OLECHAR

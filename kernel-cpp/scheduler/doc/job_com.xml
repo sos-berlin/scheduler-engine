@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: job_com.xml 11726 2005-09-25 18:33:33Z jz $-->
 
 <description
     title    = "Spooler-Skripte als COM-Klassen implementieren"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: jz $"
+    date     = "$Date: 2005-09-25 20:33:33 +0200 (Sun, 25 Sep 2005) $"
 >
     <scheduler_keyword keyword="COM"/>
 

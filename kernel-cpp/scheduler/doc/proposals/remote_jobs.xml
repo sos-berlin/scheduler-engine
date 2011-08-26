@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: remote_jobs.xml 12386 2006-11-28 20:46:20Z jz $-->
 
 <description
     title               = "Auf entfernten Rechnern definierte Jobs ausführen"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-11-28 21:46:20 +0100 (Tue, 28 Nov 2006) $"
     document_state      = "work_in_progress"
 >
     <p>

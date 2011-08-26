@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: distributed_order_execution.xml 12387 2006-11-30 09:10:11Z jz $-->
 
 <description
     title               = "Verteilte Ausführung von Aufträgen mit Verteiltem Scheduler"
     base_dir            = "../"
     parent_page         = "index.xml"
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: jz $"
+    date                = "$Date: 2006-11-30 10:10:11 +0100 (Thu, 30 Nov 2006) $"
     document_state      = "proposal"
 >
     

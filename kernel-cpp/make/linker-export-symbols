@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: linker-export-symbols 13491 2008-04-16 10:16:11Z jz $
 
 # Erzeugt die Parameter für ld, um eine Reihe von Symbolen in einem shared object zu exportieren
 

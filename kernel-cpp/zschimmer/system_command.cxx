@@ -1,4 +1,4 @@
-// $Id$
+// $Id: system_command.cxx 13164 2007-11-14 18:00:23Z jz $
 // © 2004 Joacim Zschimmer
 
 #include "zschimmer.h"

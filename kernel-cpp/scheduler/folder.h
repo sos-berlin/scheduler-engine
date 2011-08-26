@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: folder.h 14167 2010-12-30 15:11:58Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_FOLDER_H
 #define __SCHEDULER_FOLDER_H

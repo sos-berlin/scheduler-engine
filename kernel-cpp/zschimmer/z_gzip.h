@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_gzip.h 13199 2007-12-06 14:15:42Z jz $
 
 #ifndef __ZSCHIMMER_Z_GZIP_H
 #define __ZSCHIMMER_Z_GZIP_H

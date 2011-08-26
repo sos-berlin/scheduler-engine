@@ -1,4 +1,4 @@
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: subsystem.h 13880 2010-06-10 15:47:25Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #ifndef __SCHEDULER_SUBSYSTEM_H
 #define __SCHEDULER_SUBSYSTEM_H

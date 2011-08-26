@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_sql.h 13707 2008-10-17 10:41:41Z jz $
 
 #ifndef __ZSCHIMMER_Z_SQL_H
 #define __ZSCHIMMER_Z_SQL_H

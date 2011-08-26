@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosfield.cxx 12880 2007-06-19 10:10:49Z jz $
 
 #if defined _MSC_VER
 #   pragma warning( disable:4018 )   // warning C4018: '>': Konflikt zwischen 'signed' und 'unsigned'

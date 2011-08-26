@@ -1,4 +1,4 @@
-// $Id$
+// $Id: main.cxx 13498 2008-04-17 08:34:06Z jz $
 
 #include "zschimmer/zschimmer.h"
 #include "zschimmer/log.h"

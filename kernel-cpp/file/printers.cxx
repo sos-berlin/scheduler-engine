@@ -1,6 +1,6 @@
 // printers.cxx                                ©1998 SOS GmbH Berlin
 //                                             Joacim Zschimmer
-// $Id$
+// $Id: printers.cxx 11394 2005-04-03 08:30:29Z jz $
 
 #include "precomp.h"
 #include "../kram/sysdep.h"

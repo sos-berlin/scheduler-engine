@@ -1,4 +1,4 @@
-// $Id$
+// $Id: popup_menu.js 11426 2005-04-20 06:53:16Z jz $
 
 // document.onmousemove wird gesetzt!
 

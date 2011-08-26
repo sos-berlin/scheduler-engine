@@ -1,4 +1,4 @@
-// $Id$
+// $Id: path.cxx 13670 2008-09-26 15:09:47Z jz $
 
 #include "spooler.h"
 

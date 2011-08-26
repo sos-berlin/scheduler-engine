@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_posix_directory.cxx 12090 2006-05-30 07:00:24Z jz $
 
 #include "zschimmer.h"
 #include <dirent.h>

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: xml_libxml2.h 14207 2011-03-31 11:26:18Z jz $
 
 #ifndef __ZSCHIMMER_XML_LIBXML2_H
 #define __ZSCHIMMER_XML_LIBXML2_H

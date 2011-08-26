@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: variable.xml 12341 2006-10-05 12:09:08Z jz $-->
 
 <xml_element name     = "variable"
              title    = "Eine Variable"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-10-05 14:09:08 +0200 (Thu, 05 Oct 2006) $">
 
     <xml_parent_elements>
         <xml_parent_element name="environment"/>

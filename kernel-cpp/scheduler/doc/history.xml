@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: history.xml 13093 2007-10-09 10:58:31Z aa $-->
 
 <description
     title               = "Historie"
     base_dir            = ""
-    author              = "$Author$"
-    date                = "$Date$"
+    author              = "$Author: aa $"
+    date                = "$Date: 2007-10-09 12:58:31 +0200 (Tue, 09 Oct 2007) $"
 >
 
 		<scheduler_keyword keyword="Historie"/>

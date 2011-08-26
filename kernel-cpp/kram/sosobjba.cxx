@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosobjba.cxx 13964 2010-08-18 11:12:52Z jz $
 
 #include "precomp.h"
 //#define COPYRIGHT   "© 1995 SOS GmbH Berlin"

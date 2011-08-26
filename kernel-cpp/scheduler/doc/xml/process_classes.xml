@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: process_classes.xml 13411 2008-02-12 13:30:08Z jz $-->
 
 <xml_element name     = "process_classes"
              title    = "Prozessklassen"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2008-02-12 14:30:08 +0100 (Tue, 12 Feb 2008) $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">

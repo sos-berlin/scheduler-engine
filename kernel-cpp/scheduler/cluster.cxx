@@ -1,5 +1,5 @@
 //
-// $Id$        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
+// $Id: cluster.cxx 14010 2010-09-13 08:05:23Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
 #include "../kram/msec.h"

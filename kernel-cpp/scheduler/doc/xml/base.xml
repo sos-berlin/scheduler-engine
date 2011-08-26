@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: base.xml 12086 2006-05-26 11:54:56Z jz $-->
 
 <xml_element name     = "base"
              title    = "Basiskonfiguration"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author$"
-             date     = "$Date$">
+             author   = "$Author: jz $"
+             date     = "$Date: 2006-05-26 13:54:56 +0200 (Fri, 26 May 2006) $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">

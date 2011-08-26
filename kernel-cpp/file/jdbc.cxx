@@ -1,4 +1,4 @@
-// $Id$
+// $Id: jdbc.cxx 14579 2011-06-08 09:34:04Z jz $
 // §968
 
 #include "precomp.h"

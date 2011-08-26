@@ -1,4 +1,4 @@
-// $Id$
+// $Id: loaded_module.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __ZSCHIMMER_LOADED_MODULE
 #define __ZSCHIMMER_LOADED_MODULE

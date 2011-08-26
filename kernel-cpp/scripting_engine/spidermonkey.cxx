@@ -1,4 +1,4 @@
-// $Id$
+// $Id: spidermonkey.cxx 14144 2010-11-29 11:06:22Z jz $
 
 // MSVC users on Windows: compile the JS Engine with linker flag /OPT:NOICF !!!
 // Here's why: http://www.mozilla.org/js/spidermonkey/release-notes/NOICF.html

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: file_based.xml 13078 2007-10-07 08:18:44Z jz $-->
 
 <xml_element name          = "file_based"
              title         = "Dem Objekt zugrundliegende Datei"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author$"
-             date          = "$Date$">
+             author        = "$Author: jz $"
+             date          = "$Date: 2007-10-07 10:18:44 +0200 (Sun, 07 Oct 2007) $">
 
     <xml_parent_elements>
         <xml_parent_element name="process_class"/>

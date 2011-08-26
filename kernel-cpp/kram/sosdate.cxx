@@ -1,6 +1,6 @@
 #include "precomp.h"
 
-// $Id$
+// $Id: sosdate.cxx 12551 2007-01-20 16:45:09Z jz $
 //#define MODULE_NAME "sosdate"
 //#define COPYRIGHT   "(c) SOS GmbH Berlin"
 //#define AUTHOR      "Joacim Zschimmer"

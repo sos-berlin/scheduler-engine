@@ -1,4 +1,4 @@
-// $Id$
+// $Id: sosscrpt.h 11570 2005-07-01 17:41:48Z jz $
 
 #ifndef __SOSSCRPT_H
 #define __SOSSCRPT_H

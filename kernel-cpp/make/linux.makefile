@@ -1,4 +1,4 @@
-# linux.mak $Id$
+# linux.mak $Id: linux.makefile 14247 2011-05-05 04:42:13Z jz $
 # Einstellungen nur für Linux
 
 include $(PROD_DIR)/make/gnu.makefile

@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id$-->
+<!--$Id: http.xml 13714 2008-10-21 14:16:05Z aa $-->
 
 <description
     title    = "HTTP Server und Web Services"
     base_dir = ""
-    author   = "$Author$"
-    date     = "$Date$"
+    author   = "$Author: aa $"
+    date     = "$Date: 2008-10-21 16:16:05 +0200 (Tue, 21 Oct 2008) $"
 >
 
     <scheduler_keyword keyword="HTTP Server"/>

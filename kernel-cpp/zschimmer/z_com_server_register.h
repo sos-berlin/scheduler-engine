@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_com_server_register.h 11394 2005-04-03 08:30:29Z jz $
 
 #ifndef __Z_COM_SERVER_REGISTER_H
 #define __Z_COM_SERVER_REGISTER_H

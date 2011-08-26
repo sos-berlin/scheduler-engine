@@ -1,4 +1,4 @@
-// $Id$
+// $Id: anyfile.cxx 12464 2006-12-26 10:48:38Z jz $
 
 #include "precomp.h"
 #include "../kram/sysdep.h"

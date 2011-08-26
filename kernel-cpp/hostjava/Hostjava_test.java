@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Hostjava_test.java 11394 2005-04-03 08:30:29Z jz $
 
 import java.math.BigDecimal;
 import java.io.*;

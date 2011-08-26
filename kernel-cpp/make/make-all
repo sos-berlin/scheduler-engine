@@ -1,5 +1,5 @@
 #! /bin/bash
-# $Id$
+# $Id: make-all 11351 2005-03-30 08:57:15Z jz $
 
 . make/make-all.include
 

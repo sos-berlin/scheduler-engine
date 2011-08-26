@@ -1,4 +1,4 @@
-// $Id$
+// $Id: log_categories.cxx 13802 2009-10-02 14:10:03Z jz $
 
 #include "zschimmer.h"
 #include "log_categories.h"

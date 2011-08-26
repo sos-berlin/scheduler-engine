@@ -1,4 +1,4 @@
-﻿// $Id$
+﻿// $Id: api.js 12096 2006-06-02 11:20:18Z jz $
 
 var all_classes_1_element = document.getElementById( 'all_classes_1' );
 var all_classes_2_element = document.getElementById( 'all_classes_2' );

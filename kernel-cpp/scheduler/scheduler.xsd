@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id$ -->
+<!-- $Id: scheduler.xsd 14660 2011-06-23 12:04:10Z jz $ -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
     <!-- <xsd:key> nicht verwenden, libxslt kann das nicht: "Internal error: xmlSchemaAreValuesEqual, failed to compare the values." -->
     <xsd:annotation>
         <xsd:documentation xml:lang="de">
-            $Id$
+            $Id: scheduler.xsd 14660 2011-06-23 12:04:10Z jz $
             Schema für die Scheduler-Konfiguration,
             s.a. http://www.zschimmer.com/sos/scheduler/konfiguration.html
         </xsd:documentation>

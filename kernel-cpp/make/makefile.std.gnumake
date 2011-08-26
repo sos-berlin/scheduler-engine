@@ -3,7 +3,7 @@
  
 GNUMAKE=1
  
-# makefile.std $Id$
+# makefile.std $Id: makefile.std.gnumake 11347 2005-03-24 10:14:54Z jz $
 
 SHELL:=sh
 ENTW_DIR:=../../..

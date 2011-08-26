@@ -1,4 +1,4 @@
-// $Id$
+// $Id: com_simple_standards.h 11894 2006-02-28 09:42:59Z jz $
 
 #ifndef __SOS_COM_SIMPLE_STANDARDS
 #define __SOS_COM_SIMPLE_STANDARDS

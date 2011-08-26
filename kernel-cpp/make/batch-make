@@ -1,5 +1,5 @@
 #! /bin/sh 
-# $Id$
+# $Id: batch-make 11348 2005-03-24 10:17:34Z jz $
 
 echo "date && \
       ( echo 'Batch Job (soscopy/sosfs) gestartet'|/usr/local/samba/bin/smbclient -M $LOGNAME ) ; \

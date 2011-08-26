@@ -1,4 +1,4 @@
-// $Id$
+// $Id: z_windows_directory.h 12116 2006-06-06 18:03:24Z jz $
 
 #ifndef __Z_WINDOWS_DIRECTORY_H
 #define __Z_WINDOWS_DIRECTORY_H

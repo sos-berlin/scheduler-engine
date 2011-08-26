@@ -1,4 +1,4 @@
-// $Id$
+// $Id: java.odl 11928 2006-03-03 21:19:25Z jz $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 

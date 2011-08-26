@@ -1,4 +1,4 @@
-// $Id$
+// $Id: file_path.cxx 13659 2008-09-11 06:35:58Z jz $
 
 #include "zschimmer.h"
 #include "file.h"
