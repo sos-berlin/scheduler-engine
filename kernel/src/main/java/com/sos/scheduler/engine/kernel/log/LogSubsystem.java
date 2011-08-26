@@ -15,7 +15,9 @@ public final class LogSubsystem implements Subsystem {
 
 
     public void close() {
-        Logger.getRootLogger().removeAppender(appender);
+    	Logger l = Logger.getRootLogger();
+    	if (l != null)
+    		Logger.getRootLogger().removeAppender(appender);
     }
 
 
