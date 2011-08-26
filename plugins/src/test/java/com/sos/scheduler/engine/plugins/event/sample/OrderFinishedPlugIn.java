@@ -33,19 +33,18 @@ import com.sos.scheduler.engine.plugins.event.Configuration;
  */
 
 /**
- * Die Basisklasse AbstractEventPlugin abonniert die Events des Schedulers beim Start und meldet sie
- * bei Beendigung des Schedulers ordnungsgemäß wieder ab. Außerdem implementiert sie das Interface 
- * EventSubscriber, welches die Methode onEvent (s.u.) erwartet.
+ * The base class AbstractEventPlugin subscribes and unsubscribes the events of the JobScheduler.
+ * Additionaly the interface EventSubscriber was implemented. It expects the method onEvent (see below).
  */
 public class OrderFinishedPlugIn extends AbstractEventPlugin {
 	
 	private static Logger logger = Logger.getLogger(OrderFinishedPlugIn.class);
 
     /**
-     * Der Konstruktor eines event plugin erhält immer die Instanz des Schedulers und ein DOM Element, welches
-     * die Konfiguration des plugin enthält.
-     * Zu Demonstartionszwecken werden einige Informationen der plugin Konfiguration gelesen. Dazu gibt es in der 
-     * Klasse com.sos.scheduler.engine.kernel.util.XmlUtils einige statische Hilfsmethoden wie stringXPath oder
+     * The constructor of an event plugin always gets the instance of the Scheduler and a DOM element containing
+     * the configuration of the plugin.
+     * For test purposes some of the informations of the plugin configuration was read. To do this the class
+     * com.sos.scheduler.engine.kernel.util.XmlUtils contains some static methods such as stringXPath or
      * elementXPath.
      */
 	OrderFinishedPlugIn(Scheduler scheduler, Element plugInElement) {
@@ -55,6 +54,9 @@ public class OrderFinishedPlugIn extends AbstractEventPlugin {
 		logger.info("plugin configuration: server=" + server + ":" + port);
 	}
 
+	/**
+	 * The method deploys the event fired by the Scheduler
+	 */
 	@Override
 	public void onEvent(Event e) throws Exception {
 
@@ -72,9 +74,9 @@ public class OrderFinishedPlugIn extends AbstractEventPlugin {
 	}
 	
     /**
-     * Wichtig !!
-     * Jedes Plugin muß eine statische Methode besitzen, die eine PlugInFactory liefert.
-     * Damit wird das plugin dem Scheduler bekannt gemacht.
+     * Important!!
+     * Any plugin has to define a static method to return a PlugInFactor object.
+     * This is the way to announce the plugin to the Scheduler.
      */
 	public static PlugInFactory factory() {
 		return new PlugInFactory() {

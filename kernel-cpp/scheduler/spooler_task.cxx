@@ -15,6 +15,11 @@
 #include "../kram/sleep.h"
 #include "../zschimmer/z_signals.h"
 
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepBeginEvent.h"
+#include "../javaproxy/com__sos__scheduler__engine__kernel__order__OrderStepEndEvent.h"
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepBeginEvent OrderStepBeginEventJ;
+typedef javaproxy::com::sos::scheduler::engine::kernel::order::OrderStepEndEvent OrderStepEndEventJ;
+
 #ifndef Z_WINDOWS
 #   include <signal.h>
 #   include <sys/signal.h>
@@ -2154,6 +2159,7 @@ bool Task::step__end()
 
         if( _order )  
         {
+            report_event( OrderStepEndEventJ::new_instance(_order->java_sister(),result));
             postprocess_order( _delay_until_locks_available? Order::post_keep_state :
                                result                      ? Order::post_success 
                                                            : Order::post_error        );
@@ -2886,6 +2892,7 @@ Async_operation* Job_module_task::do_step__start()
 {
     if( !_module_instance )  z::throw_xc( "SCHEDULER-199" );
 
+    if (_order) report_event( OrderStepBeginEventJ::new_instance(_order->java_sister()));
     return _module_instance->step__start();
 }
 
