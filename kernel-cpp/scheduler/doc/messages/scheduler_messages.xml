@@ -2907,15 +2907,7 @@
         
         <message code="SCHEDULER-477">
             <text xml:lang="en">
-                <title>Could not re-open log file for '<p1/>'. Following lines are not written to this file. <p2/></title>
-            </text>
-        </message>
-
-        <message code="SCHEDULER-477">
-            <text xml:lang="en">
-                <title>
-                    Could not re-open log file. Following lines are not written to this file. <p2/>
-                </title>
+                <title>Could not re-open log file. Following lines are not written to this file. <p2/></title>
             </text>
         </message>
 
