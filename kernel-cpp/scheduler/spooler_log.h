@@ -66,6 +66,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
 
     void                        init                        ( Scheduler_object*, const string& prefix = empty_string );
     void                        open                        ();
+    void                        open_dont_cache             ();
     void                        close                       ();
     void                        finish_log                  ();
     void                        close_file                  ();     // Nicht öffentlich
@@ -215,6 +216,7 @@ struct Prefix_log : Object, Has_log, javabridge::has_proxy<Prefix_log>
     File_path                  _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben ?ffnen
     int                        _file;                       // File handle
+    ptr<log::cache::Request>   _inhibit_caching_request;
     int                        _instance_number;
     int                        _err_no;
     bool                       _started;                    // open() gerufen

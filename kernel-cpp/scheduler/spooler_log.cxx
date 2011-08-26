@@ -692,6 +692,13 @@ void Prefix_log::set_new_filename( const string& filename )
     _new_filename = make_absolute_filename( _spooler->log_directory(), filename );
 }
 
+//----------------------------------------------------------------------Prefix_log::open_dont_cache
+
+void Prefix_log::open_dont_cache() {
+    open();
+    _inhibit_caching_request = _spooler->_log_file_cache->request(this);
+}
+
 //---------------------------------------------------------------------------------Prefix_log::open
 
 void Prefix_log::open()
@@ -741,6 +748,7 @@ void Prefix_log::open()
 
 void Prefix_log::close()
 {
+    _inhibit_caching_request = NULL;
     if (_started)  
         finish_log();
     if (_spooler->_log_file_cache)  // Bei Programmende kann der Cache weg sein.
@@ -810,8 +818,7 @@ void Prefix_log::try_reopen_file() {
         try {
             open_file();
         } catch (exception& x) {
-            string o = _object? _object->obj_name() : "";
-            Message_string m ("SCHEDULER-477", o, x.what());
+            Message_string m ("SCHEDULER-477", x.what());
             if (_log) _log->error(m);
             else Z_LOG2("scheduler", "ERROR: " << m.as_string() << "\n");
         }

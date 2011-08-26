@@ -2904,6 +2904,26 @@
                 <title>Limiting with max_orders is not possible with distributed orders</title>
             </text>
         </message-->
+        
+        <message code="SCHEDULER-477">
+            <text xml:lang="en">
+                <title>Could not re-open log file for '<p1/>'. Following lines are not written to this file. <p2/></title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-477">
+            <text xml:lang="en">
+                <title>
+                    Could not re-open log file. Following lines are not written to this file. <p2/>
+                </title>
+            </text>
+        </message>
+
+        <message code="SCHEDULER-478">
+            <text xml:lang="en">
+                <title>Could not re-open '<p1/>' log file. Following lines are lost. <p2/></title>
+            </text>
+        </message>
     </messages>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INFO-MELDUNGEN-->

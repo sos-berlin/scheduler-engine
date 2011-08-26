@@ -16,12 +16,15 @@ const double                    read_interval_max           =  10.0;
 
 struct File_logger_opener {
     private: File _file;
+    public: string _error_message;
 
-    public: File_logger_opener(const File_path& path) {
+    public: File_logger_opener(const File_path& path, const string& name) {
         try {
             _file.open(path, "rb");
         } catch (exception& x) {
-            Z_LOG2("scheduler", x.what() << "\n");
+            string m = message_string("SCHEDULER-478", name, x.what());
+            _error_message = "*** " + m + " ***";
+            Z_LOG2("scheduler", m << "\n");
         }
     }
 
@@ -50,12 +53,12 @@ File_logger::~File_logger()
 
 //----------------------------------------------------------------------------File_logger::add_file
 
-void File_logger::add_file( const File_path& path, const string& prefix )
+void File_logger::add_file( const File_path& path, const string& name )
 {
     if( path != "" )  
     {
-        Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << path << "\",\"" << prefix << "\")\n" );
-        _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, prefix ) ) );
+        Z_LOG2( "zschimmer", Z_FUNCTION << "(\"" << path << "\",\"" << name << "\")\n" );
+        _file_line_reader_list.push_back( Z_NEW( File_line_reader( path, name ) ) );
     }
 }
 
@@ -223,7 +226,7 @@ string File_logger::async_state_text_() const
         File_line_reader* file_line_reader = *it;
         //if( it != _file_line_reader_list.begin() )  
         result << ", ";
-        result << file_line_reader->_prefix << ": " << file_line_reader->_read_length << " bytes";
+        result << file_line_reader->_name << ": " << file_line_reader->_read_length << " bytes";
     }
 
     result << ")";
@@ -248,11 +251,11 @@ bool File_logger::log_lines( const string& lines )
 
 //--------------------------------------------------File_logger::File_line_reader::File_line_reader
 
-File_logger::File_line_reader::File_line_reader( const File_path& path, const string& prefix )                                      
+File_logger::File_line_reader::File_line_reader( const File_path& path, const string& name )                                      
 : 
     _zero_(this+1),
     _path(path),
-    _prefix(prefix)
+    _name(name)
 {
     //_file.open( path, "rb" );
 }
@@ -270,7 +273,7 @@ string File_logger::File_line_reader::read_lines()
 {
     string lines;
 
-    File_logger_opener file (_path); 
+    File_logger_opener file (_path, _name); 
     if (file->opened()) {
         if (file->length() > _read_length) {
             file->seek( _read_length );
@@ -295,6 +298,12 @@ string File_logger::File_line_reader::read_lines()
             lines.erase( before_end );
             _read_length += end;
         }
+        _last_error_message = "";
+    } else {
+        string m = file._error_message;
+        if (m != _last_error_message)
+            lines = m;
+        _last_error_message = "";
     }
 
     return lines;
@@ -306,11 +315,13 @@ string File_logger::File_line_reader::read_remainder()
 {
     string result;
 
-    File_logger_opener file (_path);
+    File_logger_opener file (_path, _name);
     if (file->opened()) {
         file->seek( _read_length );
         result = file->read_string( max_line_length );
         _read_length += result.length();
+    } else {
+        result = file._error_message;
     }
 
     return result;

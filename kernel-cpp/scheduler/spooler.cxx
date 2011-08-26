@@ -1710,7 +1710,7 @@ void Spooler::load()
     _security.clear();             
     load_arg();
     open_pid_file();
-    _log->open();
+    _log->open_dont_cache();
     fetch_hostname();
 
     read_xml_configuration();

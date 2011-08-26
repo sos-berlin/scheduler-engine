@@ -14,7 +14,7 @@ struct File_logger : Async_operation
 {
     struct File_line_reader : Object
     {
-                                File_line_reader            ( const File_path&, const string& prefix );
+                                File_line_reader            (const File_path&, const string& name);
 
         void                    close                       ();
         string                  read_lines                  ();
@@ -22,9 +22,9 @@ struct File_logger : Async_operation
 
         Fill_zero              _zero_;
         File_path              _path;
-        //File                   _file;
         size_t                 _read_length;
-        string                 _prefix;
+        string                 _name;
+        string                 _last_error_message;
     };
 
 
