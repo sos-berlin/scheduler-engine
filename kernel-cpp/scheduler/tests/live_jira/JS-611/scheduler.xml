@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+>
+    <config port="4444">
+        <security>
+            <allowed_host host="0.0.0.0" level="all"/>
+        </security>
+        <process_classes>
+            <process_class max_processes="10000"/>
+        </process_classes>
+        <commands>
+            <scheduler_log.log_categories.set category="JS-611"/>
+        </commands>
+    </config>
+</spooler>

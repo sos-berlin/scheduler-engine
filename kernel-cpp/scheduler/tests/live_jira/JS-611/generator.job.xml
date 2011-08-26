@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<job stop_on_error="no">
+    <script language="javascript">
+        <![CDATA[
+function spooler_process() {
+    for (var i = 1; i <= 75; i++) {
+        var order = spooler.create_order()
+        order.id = i + ""
+        spooler.job_chain("myChain").add_order(order)
+    }    
+    return false
+}
+        ]]>
+    </script>                                           
+    <run_time once="yes"/>
+</job>

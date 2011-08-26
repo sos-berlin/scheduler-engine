@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<job order="yes" tasks="1000">
+    <script language="javascript">
+        <![CDATA[
+function spooler_process() {
+    spooler_task.delay_spooler_process = 600
+    return true
+}
+        ]]>
+    </script>                                           
+    <run_time once="yes"/>
+</job>
