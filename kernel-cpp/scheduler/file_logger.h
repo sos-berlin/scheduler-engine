@@ -24,7 +24,7 @@ struct File_logger : Async_operation
         File_path              _path;
         size_t                 _read_length;
         string                 _name;
-        string                 _last_error_message;
+        bool                   _error;
     };
 
 

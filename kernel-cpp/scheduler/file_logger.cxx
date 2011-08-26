@@ -273,37 +273,36 @@ string File_logger::File_line_reader::read_lines()
 {
     string lines;
 
-    File_logger_opener file (_path, _name); 
-    if (file->opened()) {
-        if (file->length() > _read_length) {
-            file->seek( _read_length );
+    if (!_error) {  // Damit Fehler nicht wiederholt gemeldet wird
+        File_logger_opener file (_path, _name); 
+        if (file->opened()) {
+            if (file->length() > _read_length) {
+                file->seek( _read_length );
 
-            lines = file->read_string( max_line_length );
+                lines = file->read_string( max_line_length );
 
-            size_t nl  = lines.rfind( '\n' );
-            size_t end;
+                size_t nl  = lines.rfind( '\n' );
+                size_t end;
 
-            if( nl == string::npos )    // Kein \n
-            {
-                if( lines.length() < max_line_length )  lines = "";    // Mehr Text als max_line_length wird umgebrochen
-                nl = lines.length();
-                end = nl;
+                if( nl == string::npos )    // Kein \n
+                {
+                    if( lines.length() < max_line_length )  lines = "";    // Mehr Text als max_line_length wird umgebrochen
+                    nl = lines.length();
+                    end = nl;
+                }
+                else
+                    end = nl + 1;
+
+                int before_end = nl;
+                if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
+
+                lines.erase( before_end );
+                _read_length += end;
             }
-            else
-                end = nl + 1;
-
-            int before_end = nl;
-            if( before_end > 0  &&  lines[ before_end - 1 ] == '\r' )  --before_end;
-
-            lines.erase( before_end );
-            _read_length += end;
+        } else {
+            _error = true;
+            lines = file._error_message;
         }
-        _last_error_message = "";
-    } else {
-        string m = file._error_message;
-        if (m != _last_error_message)
-            lines = m;
-        _last_error_message = "";
     }
 
     return lines;
@@ -314,7 +313,7 @@ string File_logger::File_line_reader::read_lines()
 string File_logger::File_line_reader::read_remainder()
 {
     string result;
-
+    
     File_logger_opener file (_path, _name);
     if (file->opened()) {
         file->seek( _read_length );
