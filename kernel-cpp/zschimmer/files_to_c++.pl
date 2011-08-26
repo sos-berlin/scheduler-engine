@@ -148,7 +148,7 @@ foreach my $arg ( @ARGV )
         
             file_to_cxx( $filename, $name );
             
-            my $modified_time = stat( $filename )->mtime;
+            my $modified_time = 0; #stat( $filename )->mtime;
             $rest .= "    { \"$filename\", $name, sizeof $name - 1, $modified_time },\n"; 
         }
     }
