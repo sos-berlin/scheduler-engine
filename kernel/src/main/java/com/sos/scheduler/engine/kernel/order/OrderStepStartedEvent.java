@@ -4,10 +4,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 /**
- * \file OrderStepBeginEvent.java
+ * \file OrderStepStartedEvent.java
  * \brief This event is fired before the execution of an order step begins 
  *  
- * \class OrderStepBeginEvent
+ * \class OrderStepStartedEvent
  * \brief This event is fired before the execution of an order step begins 
  * 
  * \details
@@ -24,8 +24,8 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepBeginEvent extends ModifiableOrderEvent {
-    public OrderStepBeginEvent(Order order) {
+public class OrderStepStartedEvent extends ModifiableOrderEvent {
+    public OrderStepStartedEvent(Order order) {
         super(order);
     }
 }

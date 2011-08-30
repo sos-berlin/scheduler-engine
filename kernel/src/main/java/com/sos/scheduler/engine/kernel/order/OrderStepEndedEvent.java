@@ -4,10 +4,10 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
 
 
 /**
- * \file OrderStepEndEvent.java
+ * \file OrderStepEndedEvent.java
  * \brief This event is fired if a step of an order ended. 
  *  
- * \class OrderStepEndEvent
+ * \class OrderStepEndedEvent
  * \brief This event is fired if a step of an order ended. 
  * 
  * \details
@@ -24,12 +24,12 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
  * </div>
  */
 @ForCpp
-public class OrderStepEndEvent extends OrderEvent {
+public class OrderStepEndedEvent extends OrderEvent {
 	
 	private final boolean ok;
 
     
-    public OrderStepEndEvent(UnmodifiableOrder order, boolean ok) {
+    public OrderStepEndedEvent(UnmodifiableOrder order, boolean ok) {
         super(order);
         this.ok = ok;
     }

@@ -3588,6 +3588,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 
 xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
     xml::Element_ptr result = doc.createElement("job.why");
+    result.setAttribute("job",this->name());
     Time now = Time::now();
     bool in_period = is_in_period(now);
     int not_ending_tasks_count = this->not_ending_tasks_count();

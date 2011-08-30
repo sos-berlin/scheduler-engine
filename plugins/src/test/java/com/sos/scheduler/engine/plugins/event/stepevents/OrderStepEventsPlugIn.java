@@ -16,8 +16,8 @@ import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderState;
-import com.sos.scheduler.engine.kernel.order.OrderStepBeginEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStepEndEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -51,12 +51,12 @@ public class OrderStepEventsPlugIn extends AbstractEventPlugin {
 	public void onEvent(Event e) throws Exception {
 
 		try {
-			if (e instanceof OrderStepBeginEvent) {
-				OrderStepBeginEvent be = (OrderStepBeginEvent)e;
+			if (e instanceof OrderStepStartedEvent) {
+				OrderStepStartedEvent be = (OrderStepStartedEvent)e;
 				logger.info("order " + be.getOrder().getId() + ": step " + be.getOrder().getState().getString() + " begins");
 			}
-			if (e instanceof OrderStepEndEvent) {
-				OrderStepEndEvent ee = (OrderStepEndEvent)e;
+			if (e instanceof OrderStepEndedEvent) {
+				OrderStepEndedEvent ee = (OrderStepEndedEvent)e;
 				logger.info("order " + ee.getOrder().getId() + ": step " + ee.getOrder().getState().getString() + " ends with " + ee.getOk());
 			}
 		} catch(SchedulerException ev) {
