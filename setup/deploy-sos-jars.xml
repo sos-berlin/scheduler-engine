@@ -5,6 +5,8 @@ in the fileset files.jar.
 
 To specify the version to be deployed the property jar.version has to be set, e.g.
 ant -f deploy-sos-jars.xml -Djar.version=1.3.11.1189
+
+The jar to be deployed expected in J:\E\java\lib_release_jar (see property jar.folder)
 -->
 <project name="com.sos.scheduler.setup.deploy" basedir="." default="all">
 

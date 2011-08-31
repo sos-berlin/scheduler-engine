@@ -17,38 +17,38 @@ import static com.sos.scheduler.engine.kernel.test.OperatingSystem.*;
 import static org.apache.commons.io.FileUtils.copyURLToFile;
 import static java.util.Arrays.asList;
 
-
+/**
+ * \file Environment.java
+ * \brief Build the environment for the scheduler binary 
+ *  
+ * \class Environment
+ * \brief Build the environment for the scheduler binary 
+ * 
+ * \details
+ *
+ * \code
+  \endcode
+ *
+ * \version 1.0 - 31.08.2011 10:11:54
+ * <div class="sos_branding">
+ *   <p>(c) 2011 SOS GmbH - Berlin (<a style='color:silver' href='http://www.sos-berlin.com'>http://www.sos-berlin.com</a>)</p>
+ * </div>
+ */
 public final class Environment {
+
+	private static final Logger logger = Logger.getLogger(Environment.class);
     private static final String kernelCppDirName = "kernel-cpp";
-    private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
+    private static final String moduleBase = schedulerLibDir() + "/" + "scheduler";
+//    private static final String moduleBase = kernelCppDir() + "/"+ bin() + "/" + "scheduler";
     private static final OperatingSystem os = OperatingSystem.singleton;
     private static final File schedulerModuleFile = new File(os.makeModuleFilename(moduleBase)).getAbsoluteFile();
     private static final File schedulerExeFile = new File(os.makeExecutableFilename(moduleBase)).getAbsoluteFile();
     private static final List<String> defaultFiles = Arrays.asList("scheduler.xml", "factory.ini", "sos.ini");
-    private static final Logger logger = Logger.getLogger(Environment.class);
 
     private final Iterable<String> otherResourceNames;
     private final File directory;
     private final Object mainObject;
     private final File logDirectory;
-
-
-    private static File kernelCppDir() {
-        File dir = new File(".");
-        while (dir.exists()) {
-            File result = new File(dir, kernelCppDirName);
-            if (result.exists()) return result;
-            dir = new File(dir, "..");
-        }
-        throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
-    }
-
-    
-    private static String bin() {
-        return isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
-          : "bin";
-    }
-
 
     public Environment(Object mainObject, Iterable<String> otherResourceNames) {
         try {
@@ -62,6 +62,58 @@ public final class Environment {
         catch(IOException x) { throw new RuntimeException(x); }
     }
 
+    /**
+     * \brief Determine the library for the scheduler binary
+     * \detail
+     * For running the JobScheduler in a Java Environment it is neccessary to know where the binary of the 
+     * Scheduler kernel is stored. In a development landscape it is placed normally in the artifakt 'kernel-cpp' 
+     * in a subfolder called 'bind'. 
+     * Use the Scheduler in a single project, e.g. a test case, the scheduler binary has to place in a subfolder
+     * called 'lib'.
+     *
+     * @return String - the name of the library in which the scheduler binary has to put in
+     */
+    private static String schedulerLibDir() {
+        File result = new File("./lib");
+        if (result.exists()) {
+        	logger.debug("expecting scheduler binary in '" + result + "'.");
+        	return result + "";
+        }
+        logger.info("Subdirectory 'lib' not found.");
+
+        result = kernelCppDir();
+        if (result.exists()) {
+        	result = new File(result,bin());
+            if (result.exists()) {
+            	logger.debug("expecting scheduler binary in '" + result + "'.");
+            	return result + "";
+            }
+            logger.info("Subdirectory '" + result + "' not found.");
+        }
+        
+        String msg = "No location for the scheduler binary found.";
+        logger.error(msg);
+        throw new RuntimeException(msg);
+    }
+
+    private static File kernelCppDir() {
+    	File dir = new File(".");
+        while (dir.exists()) {
+            File result = new File(dir, kernelCppDirName);
+            if (result.exists()) return result;
+            dir = new File(dir, "..");
+        }
+        logger.info("No parent directory has a subdirectory '" + kernelCppDirName + "'");
+        return dir;
+//        throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
+    }
+
+    
+    private static String bin() {
+        return isWindows? "bind"  // Die scheduler.dll wird nur für die Debug-Variante erzeugt
+          : "bin";
+    }
+
 
     private void prepareConfigurationFiles() {
         loadSchedulerModule();
@@ -73,7 +125,7 @@ public final class Environment {
 
 
     private static void loadSchedulerModule() {
-        System.load(schedulerModuleFile.getPath());
+   		System.load(schedulerModuleFile.getPath());
     }
 
     
