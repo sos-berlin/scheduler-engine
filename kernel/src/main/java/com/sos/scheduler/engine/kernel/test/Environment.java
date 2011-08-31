@@ -83,13 +83,11 @@ public final class Environment {
 
         result = kernelCppDir();
         if (result.exists()) {
-        	result = new File(result,bin());
-            if (result.exists()) {
-            	logger.debug("expecting scheduler binary in '" + result + "'.");
-            	return result + "";
-            }
-            logger.info("Subdirectory '" + result + "' not found.");
+        	String resultString = result + "/" + bin();
+        	logger.debug("expecting scheduler binary in '" + resultString + "'.");
+        	return resultString;
         }
+        logger.info("Subdirectory '" + result + "' not found.");
         
         String msg = "No location for the scheduler binary found.";
         logger.error(msg);
