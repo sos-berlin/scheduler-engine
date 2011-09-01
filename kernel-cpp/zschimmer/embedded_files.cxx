@@ -43,8 +43,7 @@ const Embedded_file* Embedded_files::get_embedded_file( const string& filename )
 //--------------------------------------------------------------------------------get_embedded_file
     
 const Embedded_file* Embedded_files::get_embedded_file_or_null( const string& filename ) const
-{
-    
+{    
     for( const Embedded_file* f = _embedded_files; f->_filename; f++ )
     {
          if( f->_filename == filename )  return f;
@@ -71,18 +70,18 @@ string Embedded_files::string_from_embedded_file( const string& filename ) const
 */
 string Embedded_and_dynamic_files::string_from_embedded_file(const string &filename)
 {
-	int size = _dynamic_files->size();
+    int size = _dynamic_files->size();
     // for( Embedded_file* f = _dynamic_files; f->_filename; f++ )
-	for(int i = 0; i < size; ++i)
+    for(int i = 0; i < size; ++i)
     {
-		Dynamic_file* f = _dynamic_files->at(i);
-		if(f != NULL) 
-		{
-			if( f->_filename == filename )  return string(f->_content->c_str(),f->_length);
-		}
+        Dynamic_file* f = _dynamic_files->at(i);
+        if(f != NULL) 
+        {
+            if( f->_filename == filename )  return string(f->_content->c_str(),f->_length);
+        }
     }
 
-	return _embedded_files.string_from_embedded_file(filename);
+    return _embedded_files.string_from_embedded_file(filename);
 }
 
 
@@ -93,22 +92,20 @@ string Embedded_and_dynamic_files::string_from_embedded_file(const string &filen
 */
 void Embedded_and_dynamic_files::set_dynamic_file (string& filename, const string key )
 {
-	if(_dynamic_files == NULL)
-		_dynamic_files = new  vector<Dynamic_file*>;
-	Dynamic_file* dynamic_file = new Dynamic_file();
-	string* content = new string(file::string_from_file(filename));
-	dynamic_file->_content = content;
-	dynamic_file->_filename = key;
-	dynamic_file->_last_modified_time = time(NULL);
-//	string* start = content;
-//	while(*content++);
-//	int size = content - start;
-	dynamic_file->_length = content->size();
+    if(_dynamic_files == NULL)
+        _dynamic_files = new  vector<Dynamic_file*>;
+    Dynamic_file* dynamic_file = new Dynamic_file();
+    string* content = new string(file::string_from_file(filename));
+    dynamic_file->_content = content;
+    dynamic_file->_filename = key;
+    dynamic_file->_last_modified_time = time(NULL);
+//    string* start = content;
+//    while(*content++);
+//    int size = content - start;
+    dynamic_file->_length = content->size();
 
-	_dynamic_files->push_back(dynamic_file);
+    _dynamic_files->push_back(dynamic_file);
 }
-
-
 
 //-------------------------------------------------------------------------------------------------
 

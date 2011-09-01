@@ -38,8 +38,8 @@ namespace zschimmer {
     */
     struct Dynamic_file
     { 
-        string                _filename;
-        string*                _content;
+        string                     _filename;
+        string*                    _content;
         int                        _length; 
         time_t                     _last_modified_time;
     };
@@ -50,9 +50,9 @@ namespace zschimmer {
     */
     struct Embedded_and_dynamic_files // : public Embedded_files
     {
-        string                   string_from_embedded_file   ( const string& filename );
-        void                     set_dynamic_file             ( string& filename, const string key );
-        const Embedded_files         _embedded_files;
+        string                          string_from_embedded_file   ( const string& filename );
+        void                            set_dynamic_file            ( string& filename, const string key );
+        const Embedded_files           _embedded_files;
         std::vector<Dynamic_file*>*    _dynamic_files;
     };
 
