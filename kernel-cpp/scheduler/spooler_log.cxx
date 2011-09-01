@@ -783,6 +783,8 @@ void Prefix_log::finish_log()
             }
         }
 
+        close_file();
+
         if( !_new_filename.empty() )
         {
             log( log_info, message_string( "SCHEDULER-963", _new_filename ) );
