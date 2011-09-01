@@ -2595,7 +2595,7 @@ void Order::handle_end_state()
         State s             = _outer_job_chain_path != ""? _outer_job_chain_state : _state;
 
         if( ( has_base_file()  ||  next_start != Time::never  ||  _schedule_use->is_incomplete() )  &&   // <schedule> verlangt Wiederholung?
-            s != _initial_state )   
+           (s != _initial_state || _initial_state == _end_state) )   // JS-730  
         {
             _is_virgin = true;
             handle_end_state_repeat_order( next_start );
