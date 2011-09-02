@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
->
-    <run_time>
-        <at at="2029-12-31 00:00"/>
-    </run_time>
-</order>
