@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sos.scheduler.engine</groupId>
+        <artifactId>com.sos.scheduler.engine</artifactId>
+        <version>1.3.12-beta-1a-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
+
+    <name>${project.artifactId}</name>
+    <inceptionYear>2010</inceptionYear>
+    <description>Test des Schedulers (eigenes Projekt, getrennt vom Zusammenbau des Schedulers)</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+            </plugin>
+            <!--plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+            </plugin-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!--
+                    <systemProperties>
+                        <property>
+                            <!- - Siehe https://jira.jboss.org/browse/MODE-222 - ->
+                            <name>java.io.tmpdir</name>
+                            <value>${basedir}/target/temp</value>
+                        </property>
+                    </systemProperties>
+                    -->
+                    <!-- excluded contains test cases not executed in the test phase (e.g. for unresolved jira issues) -->  
+	                <excludes>
+                        <exclude>com/sos/scheduler/engine/kernelcpptest/excluded/**/*.java</exclude>
+	                </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <!-- Standard Wiederholen -->
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>${project.build.sourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+            <!--resource>  Funktioniert nicht mit m2eclipse-scala, 2011-08-21
+                <!- - Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. - ->
+                <directory>src/test/scala</directory>
+                <excludes>
+                    <exclude>**/*.scala</exclude>
+                </excludes>
+            </resource-->
+        </resources>
+        <testResources>
+            <testResource>
+                <!-- Standard wiederholen -->
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <!-- Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. -->
+                <directory>${project.build.testSourceDirectory}</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+            <!--testResource>  Funktioniert nicht mit m2eclipse-scala, 2011-08-21
+                <!- - Resourcen können neben dem Quellcode abgelegt werden. Der Quellcode selbst wird nicht als Resource übernommen. - ->
+                <directory>src/test/scala</directory>
+                <excludes>
+                    <exclude>**/*.scala</exclude>
+                </excludes>
+            </testResource-->
+        </testResources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel.cppproxy-generated</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.kernel-cpp</artifactId>
+            <version>${project.version}</version>
+            <classifier>${osArch}</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.plugins</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.SOSJobSchedulerModel</artifactId>
+            <version>${sos.jsobjects.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+    
+        <dependency>
+            <groupId>com.sos</groupId>
+            <artifactId>com.sos.VirtualFileSystem</artifactId>
+            <version>${sos.jars.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sos.scheduler.engine.cplusplus.scalautil.io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.sos.scheduler.engine</groupId>
+            <artifactId>com.sos.scheduler.engine.plugins</artifactId>
+            <version>1.3.12-beta-1a-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

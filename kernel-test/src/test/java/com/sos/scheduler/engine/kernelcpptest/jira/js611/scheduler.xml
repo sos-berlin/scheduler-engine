@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+	<config>
+		<jobs>
+			<job name="a" order="yes" tasks="10000" stop_on_error="no" idle_timeout="60">
+				<script language="javascript"><![CDATA[
+function spooler_process() {
+    spooler_log.info("Hej!")
+    spooler_task.delay_spooler_process = 1
+}        
+                ]]></script>
+				<run_time />
+			</job>
+		</jobs>
+
+		<job_chains>
+			<job_chain name="A" orders_recoverable="no">
+				<job_chain_node state="state1" job="a" next_state="success" error_state="error" />
+				<job_chain_node state="error"/>
+				<job_chain_node state="success"/>
+			</job_chain>
+		</job_chains>
+	</config>
+</spooler>

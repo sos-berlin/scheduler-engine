@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<spooler
+    xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation = "c:/sos/scheduler/engine/kernel-cpp/scheduler/scheduler.xsd"
+>
+    <config>
+        <jobs>
+            <job name="blockedSignal">
+                <script language="shell"><![CDATA[
+#! /bin/bash
+(sleep 10 && exit 1)&
+pid=$!
+(sleep 1 && kill -15 $pid)&
+wait $pid
+rc=$?
+expectedRc=$((128+15))  # Exitcode nach kill 15
+if [ $rc -eq $expectedRc ]; then :
+    exit 0
+ else
+    echo "ERROR rc=$rc"
+    exit 1 
+fi
+                ]]></script>
+                <run_time once="yes"/>
+                <commands on_exit_code="success">
+                    <!-- Solange wir TerminatedTaskEvent nicht haben -->
+                    <terminate/>
+                </commands>
+            </job>
+        </jobs>
+    </config>
+</spooler>

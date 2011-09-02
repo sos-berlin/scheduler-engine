@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+    <job_chain_node state="state-a" job="a"/>
+    <job_chain_node state="state-b" job="b"/>
+    <job_chain_node state="state-c" job="c"/>
+    <job_chain_node state="state-minTasks" job="minTasks"/>
+    <job_chain_node state="state-maxTasks" job="maxTasks"/>
+    <job_chain_node state="success"/>
+    <job_chain_node state="error"/>
+</job_chain>
