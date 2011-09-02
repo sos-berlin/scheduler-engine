@@ -74,7 +74,7 @@ public final class Environment {
      * @return String - the name of the library in which the scheduler binary has to put in
      */
     private static String schedulerLibDir() {
-        File result = new File("./lib");
+        File result = new File("./target/lib");
         if (result.exists()) {
         	logger.debug("expecting scheduler binary in '" + result + "'.");
         	return result + "";
