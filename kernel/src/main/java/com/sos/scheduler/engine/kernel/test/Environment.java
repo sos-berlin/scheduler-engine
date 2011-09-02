@@ -79,7 +79,7 @@ public final class Environment {
         	logger.debug("expecting scheduler binary in '" + result + "'.");
         	return result + "";
         }
-        logger.info("Subdirectory 'lib' not found.");
+        logger.debug("Subdirectory 'lib' not found.");
 
         result = kernelCppDir();
         if (result.exists()) {
@@ -87,9 +87,9 @@ public final class Environment {
         	logger.debug("expecting scheduler binary in '" + resultString + "'.");
         	return resultString;
         }
-        logger.info("Subdirectory '" + result + "' not found.");
+        logger.debug("Subdirectory '" + result + "' not found.");
         
-        String msg = "No location for the scheduler binary found.";
+        String msg = "No location for the scheduler binary found - no parent has subdirectory '" + kernelCppDirName + "' and subolder './target/lib' does not exist.";
         logger.error(msg);
         throw new RuntimeException(msg);
     }
@@ -101,7 +101,7 @@ public final class Environment {
             if (result.exists()) return result;
             dir = new File(dir, "..");
         }
-        logger.info("No parent directory has a subdirectory '" + kernelCppDirName + "'");
+        logger.debug("No parent directory has a subdirectory '" + kernelCppDirName + "'");
         return dir;
 //        throw new RuntimeException("No parent directory has a subdirectory '" + kernelCppDirName + "'");
     }

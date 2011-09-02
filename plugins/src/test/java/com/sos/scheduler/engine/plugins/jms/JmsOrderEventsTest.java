@@ -16,12 +16,10 @@ import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.JSHelper.Logging.Log4JHelper;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
@@ -36,7 +34,7 @@ public class JmsOrderEventsTest extends SchedulerTest {
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(20);
+    private static final Time schedulerTimeout = Time.of(15);
     private static Configuration conf;
 
     private static Logger logger;
@@ -54,8 +52,6 @@ public class JmsOrderEventsTest extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
 		logger = LoggerFactory.getLogger(Connector.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
@@ -83,7 +79,8 @@ public class JmsOrderEventsTest extends SchedulerTest {
     
     @Test public void test() throws Exception {
     	try {
-	        runScheduler(schedulerTimeout, "-e");
+	        runScheduler(schedulerTimeout, "-e -loglevel=warn");
+//	        runScheduler(schedulerTimeout, "-e");
 	        assertEvent("EventOrderTouched",2);
 	        assertEvent("EventOrderStateChanged",4);
 	        assertEvent("EventOrderFinished",2);
@@ -117,7 +114,6 @@ public class JmsOrderEventsTest extends SchedulerTest {
             	logger.debug("XML-Content=" + xmlContent);
                 Event ev = (Event)objFactory.unMarshall(xmlContent);		// get the event object
             	logger.info("subscribe " + ev.getName());
-// throw new IllegalStateException("Nicht übersetzbarer Code, Zschimmer 2011-06-07, " + getClass());
                 if (ev.getEventOrderTouched() != null) {
                 	logger.info(">>>>> order " + ev.getEventOrderTouched().getInfoOrder().getId() + " touched");
                 }

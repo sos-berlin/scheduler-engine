@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.plugins.jms;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -20,9 +19,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sos.JSHelper.Logging.Log4JHelper;
-import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
+import com.sos.scheduler.engine.kernel.util.Time;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.engine.plugins.event.Connector;
 import com.sos.scheduler.model.SchedulerObjectFactory;
@@ -35,7 +33,7 @@ public class JmsEventFilterTest extends SchedulerTest {
 	/* start this module with -Djms.providerUrl=tcp://localhost:61616 to test with an external JMS server */
     private static final String providerUrl = System.getProperty("jms.providerUrl", Configuration.vmProviderUrl);
 
-    private static final Time schedulerTimeout = Time.of(20);
+    private static final Time schedulerTimeout = Time.of(15);
     private static Configuration conf;
 
     private static Logger logger;
@@ -54,8 +52,6 @@ public class JmsEventFilterTest extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
 		logger = LoggerFactory.getLogger(Connector.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
@@ -83,7 +79,7 @@ public class JmsEventFilterTest extends SchedulerTest {
     @Test
     public void test() throws Exception {
     	try {
-	        runScheduler(schedulerTimeout, "-e");
+	        runScheduler(schedulerTimeout, "-e -log-level=warn");
 	        assertEquals("EventOrderTouched",2,resultQueue.size());
 		} finally {
 			topicSubscriber.close();

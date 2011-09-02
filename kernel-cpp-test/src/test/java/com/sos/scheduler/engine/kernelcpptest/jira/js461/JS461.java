@@ -76,8 +76,6 @@ public class JS461 extends SchedulerTest {
     
     @BeforeClass
     public static void setUpBeforeClass () throws Exception {
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
 		logger = LoggerFactory.getLogger(JS461.class);
 		conf = Configuration.newInstance(providerUrl);
 	}
@@ -116,7 +114,7 @@ public class JS461 extends SchedulerTest {
      */
     @Test 
     public void test() throws Exception {
-        runScheduler(schedulerTimeout, "-e");
+        runScheduler(schedulerTimeout, "-e -log-level=warn");
         assertEvent("EventOrderSuspended",1);										// one order has to end with 'success'
         assertEvent("EventOrderResumed",1);										// one order has to end with 'success'
         assertEvent("EventOrderFinished",1);										// one order has to end with 'success'

@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
-import com.sos.JSHelper.Logging.Log4JHelper;
 import com.sos.scheduler.engine.plugins.event.Configuration;
 import com.sos.scheduler.engine.plugins.event.Connector;
 
@@ -32,10 +31,6 @@ public class ConnectorTest {
     
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		
-		// this file contains appender for ActiveMQ logging
-		new Log4JHelper("src/test/resources/log4j.properties");
-		
 		logger = LoggerFactory.getLogger(Connector.class);
 		connector = Connector.newInstance(Configuration.vmProviderUrl, "c:/temp/amq");
 		connector.start();

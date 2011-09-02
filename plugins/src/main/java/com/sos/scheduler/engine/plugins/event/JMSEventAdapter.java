@@ -1,22 +1,28 @@
 package com.sos.scheduler.engine.plugins.event;
 
-import org.apache.log4j.pattern.LogEvent;
-
 import com.sos.scheduler.engine.kernel.SchedulerCloseEvent;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.Event;
 import com.sos.scheduler.engine.kernel.log.ErrorLogEvent;
-import com.sos.scheduler.engine.kernel.order.Order;
 import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderResumedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderStateChangedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderSuspendedEvent;
 import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-
 import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.*;
+import com.sos.scheduler.model.events.EventLogError;
+import com.sos.scheduler.model.events.EventOrderFinished;
+import com.sos.scheduler.model.events.EventOrderResumed;
+import com.sos.scheduler.model.events.EventOrderStateChanged;
+import com.sos.scheduler.model.events.EventOrderStepEnded;
+import com.sos.scheduler.model.events.EventOrderStepStarted;
+import com.sos.scheduler.model.events.EventOrderSuspended;
+import com.sos.scheduler.model.events.EventOrderTouched;
+import com.sos.scheduler.model.events.JSEvent;
 
 public class JMSEventAdapter {
 	
@@ -31,6 +37,13 @@ public class JMSEventAdapter {
 			if (event instanceof OrderTouchedEvent) {
 				ev = objFactory.createEvent("EventOrderTouched");
 				EventOrderTouched oe = ev.getEventOrderTouched();
+				oe.setInfoOrder( JMSOrderAdapter.createInstance(kernelEvent.getOrder()) );
+				flgFound = true;
+			}
+
+			if (event instanceof OrderStepStartedEvent) {
+				ev = objFactory.createEvent("EventOrderStepStarted");
+				EventOrderStepStarted oe = ev.getEventOrderStepStarted();
 				oe.setInfoOrder( JMSOrderAdapter.createInstance(kernelEvent.getOrder()) );
 				flgFound = true;
 			}
@@ -70,6 +83,14 @@ public class JMSEventAdapter {
 				oe.setInfoOrder( JMSOrderAdapter.createInstance(kernelEvent.getOrder()) );
 				flgFound = true;
 			}
+
+			if (event instanceof OrderStepEndedEvent) {
+				ev = objFactory.createEvent("EventOrderStepEnded");
+				EventOrderStepEnded oe = ev.getEventOrderStepEnded();
+				oe.setInfoOrder( JMSOrderAdapter.createInstance(kernelEvent.getOrder()) );
+				flgFound = true;
+			}
+
 		}
 		
 		if (event instanceof SchedulerCloseEvent) {

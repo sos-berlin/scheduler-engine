@@ -27,7 +27,7 @@ function spooler_process() {
                 <script language="javascript"><![CDATA[
 function spooler_process() {
     spooler_log.info("myParam=" + spooler_task.order.params.value("myParam"));
-    return true;
+    return false;
 }
                 ]]></script>
                 <run_time once="no"/>

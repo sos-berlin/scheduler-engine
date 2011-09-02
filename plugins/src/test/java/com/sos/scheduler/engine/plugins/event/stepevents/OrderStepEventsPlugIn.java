@@ -1,9 +1,5 @@
 package com.sos.scheduler.engine.plugins.event.stepevents;
 
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.stringXPath;
-
-import java.lang.reflect.Constructor;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -11,17 +7,10 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.SchedulerException;
 import com.sos.scheduler.engine.kernel.event.AbstractEventPlugin;
 import com.sos.scheduler.engine.kernel.event.Event;
-import com.sos.scheduler.engine.kernel.event.EventSubscriber;
+import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
+import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
-import com.sos.scheduler.engine.kernel.order.ModifiableOrderEvent;
-import com.sos.scheduler.engine.kernel.order.OrderState;
-import com.sos.scheduler.engine.kernel.order.OrderStepStartedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderStepEndedEvent;
-import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
-import com.sos.scheduler.engine.plugins.event.Configuration;
-import com.sos.scheduler.model.SchedulerObjectFactory;
-import com.sos.scheduler.model.events.JSEventBase;
 
 /**
  * \file JMSPlugIn.java \brief JS Plugin to connect the JMS

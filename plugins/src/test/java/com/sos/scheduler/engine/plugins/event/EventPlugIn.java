@@ -41,7 +41,9 @@ public class EventPlugIn extends AbstractEventPlugin {
 	EventPlugIn(Scheduler scheduler, Element plugInElement) {
 		super(scheduler, plugInElement);
 		String providerUrl = stringXPath(plugInElement,	"jms/connection/@providerUrl", Configuration.vmProviderUrl);
+		logger.debug("providerUrl=" + providerUrl);
 		String persistenceDir = stringXPath(plugInElement, "jms/connection/@persistenceDirectory", Configuration.persistenceDirectory);
+		logger.debug("persistenceDir=" + persistenceDir);
 	}
 
 	@Override

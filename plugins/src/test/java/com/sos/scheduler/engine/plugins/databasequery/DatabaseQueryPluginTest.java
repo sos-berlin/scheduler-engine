@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.databasequery;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 
 import org.junit.Ignore;
-import org.junit.Test;
+//import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 

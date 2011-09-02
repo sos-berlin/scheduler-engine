@@ -13,7 +13,6 @@ import com.sos.scheduler.engine.kernel.order.OrderEvent;
 import com.sos.scheduler.engine.kernel.order.OrderFinishedEvent;
 import com.sos.scheduler.engine.kernel.plugin.PlugIn;
 import com.sos.scheduler.engine.kernel.plugin.PlugInFactory;
-import com.sos.scheduler.engine.plugins.event.Configuration;
 
 /**
  * \file OrderFinishedPlugIn.java 
