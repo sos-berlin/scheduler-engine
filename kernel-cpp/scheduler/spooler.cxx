@@ -50,6 +50,7 @@ const char*                     default_factory_ini                 = "factory.i
 const string                    xml_schema_path                     = "scheduler.xsd";
 const string                    scheduler_character_encoding        = xml::default_character_encoding; // Eigentlich Windows-1252, aber das ist weniger bekannt und wir sollten die Zeichen 0xA0..0xBF nicht benutzen.
 const int                       max_open_log_files                  = 50;               // Anzahl der offenzuhaltenden Log-Dateien. Wenn's mehr wird, wird die älteste geschlossen.
+const int                       windows_maxstdio                    = 2048;             // Anzahl stdio-Handles für Windows
 const string                    new_suffix                          = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double                    renew_wait_interval                 = 0.25;
 const double                    renew_wait_time                     = 30;               // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -506,6 +507,18 @@ static void set_ctrl_c_handler( bool on )
         ::signal( SIGUSR1, on? ctrl_c_handler : SIG_DFL );      // Log erweitern oder zurücknehmen
 
 #   endif
+}
+
+//----------------------------------------------------------------------------------------setmaxstdio
+
+static void setmaxstdio() {
+    #ifdef Z_WINDOWS
+        Z_LOG2("scheduler", "_getmaxstdio()=" << _getmaxstdio() << "\n");
+        if (_getmaxstdio() < scheduler::windows_maxstdio) {
+            _setmaxstdio(scheduler::windows_maxstdio);
+            Z_LOG2("scheduler", "_setmaxstdio(" << scheduler::windows_maxstdio << "), _getmaxstdio()=" << _getmaxstdio() << "\n");
+        }
+    #endif
 }
 
 //----------------------------------------------------------------------------------------be_daemon
@@ -2038,7 +2051,7 @@ void Spooler::start()
 
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
-
+    setmaxstdio();
 
 #   ifdef Z_WINDOWS
         _print_time_every_second = log_directory() == "*stderr"  &&  isatty( fileno( stderr ) )
