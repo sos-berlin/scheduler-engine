@@ -3596,7 +3596,8 @@ xml::Element_ptr Job::why_dom_element(const xml::Document_ptr& doc) {
 
     // do_something():
 
-    if (_state <= s_loaded || _state == s_error) 
+    //if (_state <= s_loaded || _state == s_error) 
+    if (_state != s_pending && _state != s_running)
         append_obstacle_element(result, "state", state_name());
 
     result.appendChild(_combined_job_nodes->why_dom_element(doc, now));
