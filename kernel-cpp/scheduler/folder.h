@@ -239,8 +239,6 @@ struct File_based : Scheduler_object,
     bool                        initialize                  ();
     bool                        load                        ();
     bool                        activate                    ();
-    bool                        switch_file_based_state     ( State  );
-  //bool                        try_switch_wished_file_based_state();
     bool                        remove                      ( Remove_flag = rm_standard );
     void                        remove_base_file            ();
 

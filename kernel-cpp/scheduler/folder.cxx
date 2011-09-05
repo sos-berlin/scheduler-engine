@@ -1626,27 +1626,6 @@ void File_based::set_file_based_state( State state )
     }
 }
 
-//--------------------------------------------------------------File_based::switch_file_based_state
-
-bool File_based::switch_file_based_state( State state )
-{
-    bool result = false;
-
-    switch( state )
-    {
-        case s_undefined:        break;
-        case s_not_initialized:  break;
-        case s_initialized: result = initialize();  break;
-        case s_loaded:      result = load();        break;
-        case s_active:      result = activate();    break;
-      //case s_error:       result = true;  set_file_based_state( state );  break;
-        case s_closed:      result = true;  close(); break;
-        default:            assert(0);
-    }
-
-    return result;
-}
-
 //------------------------------------------------------------------File_based::on_requisite_loaded
 
 bool File_based::on_requisite_loaded( File_based* )
