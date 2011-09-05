@@ -2529,6 +2529,7 @@ void Dependencies::remove_requisite( Dependant* dependant, const string& missing
 
 void Dependencies::announce_requisite_loaded( File_based* found_missing )
 {
+    Z_LOG2("JS-644", Z_FUNCTION << " " << found_missing->obj_name() << "\n");
     assert( found_missing->subsystem() == _subsystem );
 
     Path_requestors_map::iterator it = _path_requestors_map.find( found_missing->normalized_path() );
@@ -2544,11 +2545,14 @@ void Dependencies::announce_requisite_loaded( File_based* found_missing )
         
             try
             {
+                Z_LOG2("JS-644", Z_FUNCTION << " " << dependant->obj_name() << "->on_requisite_loaded()\n");
                 dependant->on_requisite_loaded( found_missing );
             }
-            catch( exception& x )
-            {
-                dependant->log()->error( message_string( "SCHEDULER-459", found_missing->obj_name(), x.what() ) );
+            catch( exception& x ) {
+                string m = message_string("SCHEDULER-459", found_missing->obj_name(), x.what());
+                Z_LOG2("JS-644", "ERROR " << Z_FUNCTION << " " << m << "\n");
+                dependant->log()->error(m);
+                found_missing->log()->error(m);
             }
         }
     }

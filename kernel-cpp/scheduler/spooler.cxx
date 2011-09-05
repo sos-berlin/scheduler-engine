@@ -3741,6 +3741,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
     set_log_category_implicit( "scheduler.service"   , true );      // Windows-Dienstesteuerung
   //set_log_category_default ( "scheduler.file_order", true );
   //set_log_category_default ( "scheduler.cluster"   , true );      
+    set_log_category_default ( "JS-644"              , true );
 
 
 
