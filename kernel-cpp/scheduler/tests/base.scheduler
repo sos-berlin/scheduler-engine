@@ -3,8 +3,8 @@
     xmlns:xsi                     = "http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation = "..\scheduler.xsd"
 >
-  <!-- mail_xslt_stylesheet = "config/scheduler_mail.xsl" -->
-    <config 
+  <!--  -->
+    <config mail_xslt_stylesheet = "config/scheduler_mail.xsl"
         port="6360"
     >
 <!--        supervisor = "8of9.sos:4136" -->
