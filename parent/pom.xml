@@ -360,6 +360,7 @@
                     </systemProperties>
                 </configuration>
             </plugin-->
+            <!--
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>properties-maven-plugin</artifactId>
@@ -378,6 +379,7 @@
               </execution>
             </executions>
           </plugin>
+          -->
         </plugins>
         
         <pluginManagement>
