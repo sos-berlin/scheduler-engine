@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.sos.scheduler.engine</groupId>
         <artifactId>com.sos.scheduler.engine</artifactId>
-        <version>1.3.13-beta-1a-SNAPSHOT</version>
+        <version>1.3.12.1252</version>
     </parent>
 
     <artifactId>com.sos.scheduler.engine.kernel-cpp-test</artifactId>
@@ -180,7 +180,7 @@
         <dependency>
             <groupId>com.sos.scheduler.engine</groupId>
             <artifactId>com.sos.scheduler.engine.plugins</artifactId>
-            <version>1.3.13-beta-1a-SNAPSHOT</version>
+            <version>1.3.12.1252</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>
