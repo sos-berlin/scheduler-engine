@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+\brief Generating scheduler resource files
+
+\details
+This buildfile is for generating some resource files for the JS. 
+<li>C++ classes scheduler_embedded_files.cxx and scheduler_embedded_files_z.cxx</li>
+scheduler_embedded_files.cxx:   array representation of scheduler.xsd and log_categories.xml
+scheduler_embedded_files_z.cxx: image resources
+<li>register_data.xml with a lot of keywords collected from different xml documentation files</li>
+<li>copy scheduler.xsd to the xml documentation folders</li>
+
+\version 1.0
+\date 2011-09-22
+-->
+<project name="com.sos.scheduler.build" basedir="." default="all">
+
+	<property name="perl.script.embeddedfiles" value="../zschimmer/files_to_c++.pl" />
+	<property name="perl.script.keywordtoxml" value="../scheduler_keyword_to_xml.pl" />
+	<property name="scheduler.schema" value="scheduler.xsd" />
+	<property name="workdir" value="./scheduler" />
+
+	<target name="all"
+	        description="generierung von c++ sourcen"
+	        depends="embedded.files, keywords.to.register_data.de, keywords.to.register_data.en"
+	>
+		<echo>DONE!</echo>
+	</target>
+
+	<target name="embedded.files"
+	        description="generiert scheduler_embedded_files.cxx und scheduler_embedded_files_z.cxx"
+	>
+
+		<echo>generating cpp-classes scheduler_embedded_files...</echo>
+
+		<property name="output" value="${workdir}/spooler_embedded_files.cxx" />
+		<echo message="generating ${output} ..." />
+		<exec executable="bash" dir="${workdir}" output="${output}">
+			<arg value="-c" />
+			<arg value="&quot;" />
+			<arg value="perl" />
+			<arg value="${perl.script.embeddedfiles}" />
+			<arg value="-trim" />
+			<arg value="${scheduler.schema}" />
+			<arg value="doc.en/log_categories.xml" />
+			<arg value="&quot;" />
+		</exec>
+
+		<property name="output.z" value="${workdir}/spooler_embedded_files_z.cxx"
+		/>
+		<echo message="generating ${output.z} ..." />
+		<exec executable="bash" dir="${workdir}" output="${output.z}">
+			<arg value="-c" />
+			<arg value="&quot;" />
+			<arg value="perl" />
+			<arg value="${perl.script.embeddedfiles}" />
+			<arg value="-name=embedded_files_z" />
+			<arg value="-gzip" />
+			<arg value="html/favicon.ico" />
+			<arg value="html/z/*.html" />
+			<arg value="html/z/*.js" />
+			<arg value="html/z/*.xslt" />
+			<arg value="html/z/*.css" />
+			<arg value="html/z/*.gif" />
+			<arg value="html/z/*.jpg" />
+			<arg value="${scheduler.schema}" />
+			<arg value="&quot;" />
+		</exec>
+
+	</target>
+
+	<target name="keywords.to.register_data.de"
+	        description="generates register_data.xml (german version)"
+	>
+     <antcall target="keywords.to.register_data.xml">
+        <param name="target.dir" value="${workdir}/doc.en"/>
+     </antcall>
+  </target>
+
+	<target name="keywords.to.register_data.en"
+	        description="generates register_data.xml (english version)"
+	>
+     <antcall target="keywords.to.register_data.xml">
+        <param name="target.dir" value="${workdir}/doc"/>
+     </antcall>
+  </target>
+
+	<target name="keywords.to.register_data.xml"
+	        description="generiert register_data.xml"
+	>
+		<echo message="copy ${workdir}/scheduler.xsd ..." />
+		<copy file="${workdir}/scheduler.xsd" todir="${target.dir}/xml" />
+
+		<echo>generating register-data.xml ...</echo>
+
+		<exec executable="bash" dir="${target.dir}">
+			<arg value="-c" />
+			<arg value="&quot;" />
+			<arg value="perl" />
+			<arg value="${perl.script.keywordtoxml}" />
+			<arg value="*.xml" />
+			<arg value="xml/*.xml" />
+			<arg value="xml/answer/*.xml" />
+			<arg value="api/*.xml" />
+			<arg value="&quot;" />
+		</exec>
+
+	</target>
+
+</project>
