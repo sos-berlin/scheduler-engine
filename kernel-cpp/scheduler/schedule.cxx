@@ -369,6 +369,7 @@ void Schedule_use::set_dom( File_based* source_file_based, const xml::Element_pt
         _schedule_path = Absolute_path::build( source_file_based, element.getAttribute( "schedule" ) );       
         add_requisite( Requisite_path( spooler()->schedule_subsystem(), _schedule_path ) );
         set_schedule( _spooler->schedule_subsystem()->schedule_or_null( _schedule_path ) );     // Verweise auf benanntes <schedule>  // SOS1219 
+        if (!_schedule) log()->error( message_string("SCHEDULER-161", "schedule", _schedule_path) );
     }
     else
     {
