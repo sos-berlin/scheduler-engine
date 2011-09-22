@@ -677,6 +677,7 @@ xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& e
         result.appendChild_if( _spooler->schedule_subsystem()->dom_element( _answer, show_what ) );
         result.appendChild_if( _spooler->process_class_subsystem()->dom_element( _answer, show_what ) );;
         result.appendChild_if( _spooler->folder_subsystem()->dom_element( _answer, show_what ) );
+        result.appendChild_if( _spooler->lock_subsystem()->dom_element( _answer, show_what ) );
 
         return result;
     }
