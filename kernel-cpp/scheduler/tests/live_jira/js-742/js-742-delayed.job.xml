@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<job stop_on_error="no">
+    <script language="shell">
+        <![CDATA[
+exit 5
+        ]]>
+    </script>
+    <delay_after_error error_count="5"
+                       delay="5"/>
+    <delay_after_error error_count="10"
+                       delay="stop"/>
+    <run_time>
+        <period absolute_repeat="01:00"
+                begin="00:00"
+                end="24:00"/>
+    </run_time>
+</job>
