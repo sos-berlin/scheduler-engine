@@ -1732,7 +1732,7 @@ void Command_processor::execute_http( http::Operation* http_operation, Http_file
          if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );  // JS-486, hier keine Prüfung mehr
 
         if( path.find( ".." ) != string::npos )  z::throw_xc( "SCHEDULER-214", path );
-        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );
+//        if( path.find( ":" )  != string::npos )  z::throw_xc( "SCHEDULER-214", path );    // JS-748: timestamps in the command use the colon
 
         if( http_request->_http_cmd == "GET" )
         {
