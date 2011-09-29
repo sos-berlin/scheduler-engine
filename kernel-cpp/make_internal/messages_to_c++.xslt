@@ -92,7 +92,8 @@ Message_code_text </text><value-of select="@name"/><text>[] =
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~mode=text-->
     <!-- Alles kopieren, außer <scheduler_element> usw. -->
 
-    <template match="node()" mode="text">
+    <!-- <template match="node()" mode="text"> -->
+    <template match="element()" mode="text">
         <copy>
             <for-each select="@*">
                 <copy>

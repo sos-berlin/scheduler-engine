@@ -160,6 +160,7 @@
                     <tasks>
                         <ant antfile="prepare_build.xml" target="all">
                            <property name="settings.localRepository" value="${settings.localRepository}" />
+                           <property name="platform" value="${osArch}" />
                         </ant>
                     </tasks>
                 </configuration>
@@ -172,6 +173,18 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                 <dependency>
+                    <groupId>net.sf.saxon</groupId>
+                    <artifactId>saxon</artifactId>
+                    <version>8.7</version>
+                 </dependency>
+                 <dependency>
+                      <groupId>ant</groupId>
+                      <artifactId>ant-trax</artifactId>
+                      <version>1.6.5</version>
+                  </dependency>
+                </dependencies>
             </plugin>
 
         </plugins>

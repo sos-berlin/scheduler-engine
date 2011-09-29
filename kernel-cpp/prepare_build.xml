@@ -20,10 +20,12 @@ scheduler_embedded_files_z.cxx: image resources
 	<property name="script.root"        value="../make_internal" />
 	<property name="perl.embeddedfiles" value="${script.root}/files_to_c++.pl" />
 	<property name="perl.keywordtoxml"  value="${script.root}/scheduler_keyword_to_xml.pl" />
+	<property name="script.keywordtoxml"  value="${script.root}/scheduler_keyword_to_xml" />
 	<property name="perl.copy"          value="${script.root}/copy_file_if_changed.pl" />
 	<property name="xslt.messages"      value="${script.root}/messages_to_c++.xslt" />
 	
-  <propertyregex property="base" input="${basedir}" regexp="\\" replace="/" />	
+	<property name="base" value="${basedir}" />
+  <propertyregex property="base" override="true" global="true" input="${basedir}" regexp="\\" replace="/" />	
 	<property name="work.dir" value="${base}/scheduler" />
 	<property name="target.dir" value="${base}/target/generated" />
 
@@ -44,6 +46,7 @@ scheduler_embedded_files_z.cxx: image resources
 	<target name="prepare"
 	        description="prepare the build"
 	>
+	  <echo>base=${base}</echo>
 		<mkdir dir="${target.dir}" />
 	</target>
 
@@ -53,25 +56,18 @@ scheduler_embedded_files_z.cxx: image resources
 	>
 
 		<echo message="generating ${output.e} ..." />
-		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.e}">
-			<arg value="-c" />
-			<arg value="&quot;" />
-			<arg value="perl" />
+		<exec executable="perl" dir="${work.dir}" output="${target.dir}/${output.e}">
 			<arg value="${perl.embeddedfiles}" />
 			<arg value="-trim" />
 			<arg value="${scheduler.schema}" />
 			<arg value="doc.en/log_categories.xml" />
-			<arg value="&quot;" />
 		</exec>
 		
 		<!-- copy spooler_embedded_files.cxx to scheduler -->
 		<macro_copy sourcefile="${target.dir}/${output.e}" targetfile="${work.dir}/${output.e}" />
 
 		<echo message="generating ${output.z} ..." />
-		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.z}">
-			<arg value="-c" />
-			<arg value="&quot;" />
-			<arg value="perl" />
+		<exec executable="perl" dir="${work.dir}" output="${target.dir}/${output.z}">
 			<arg value="${perl.embeddedfiles}" />
 			<arg value="-name=embedded_files_z" />
 			<arg value="-gzip" />
@@ -83,7 +79,6 @@ scheduler_embedded_files_z.cxx: image resources
 			<arg value="html/z/*.gif" />
 			<arg value="html/z/*.jpg" />
 			<arg value="${scheduler.schema}" />
-			<arg value="&quot;" />
 		</exec>
 		
 		<!-- copy spooler_embedded_files_z.cxx to scheduler -->
@@ -96,17 +91,36 @@ scheduler_embedded_files_z.cxx: image resources
 	>
 		<echo>generating register-data.xml ...</echo>
 
-		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.r}">
+<!--
+    Diese Variante funktioniert unter Linux nicht, auch dann nicht, wenn perl direkt aufgerufen wird
+    und nicht über bash
+    Die Variante über ein eigenes Script ist derzeit die einzige, die unter Windows und Linux funktioniert.
+		<exec executable="bash" dir="${work.dir}/doc" output="${target.dir}/${output.r}">
 			<arg value="-c" />
 			<arg value="&quot;" />
 			<arg value="perl" />
-			<arg value="${perl.keywordtoxml}" />
-			<arg value="doc/*.xml" />
-			<arg value="doc/xml/*.xml" />
-			<arg value="doc/xml/answer/*.xml" />
-			<arg value="doc/api/*.xml" />
+			<arg value="../${perl.keywordtoxml}" />
+			<arg value="*.xml" />
+			<arg value="xml/*.xml" />
+			<arg value="xml/answer/*.xml" />
+			<arg value="api/*.xml" />
 			<arg value="&quot;" />
 		</exec>
+-->		
+    <if>
+     <equals arg1="${platform}" arg2="windows-x86" />
+     <then>
+    		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.r}">
+    			<arg value="-c" />
+    			<arg value="&quot;" />
+    			<arg value="${script.keywordtoxml}" />
+    			<arg value="&quot;" />
+    		</exec>
+     </then>
+     <else>
+    		<exec executable="${script.keywordtoxml}" dir="${work.dir}" output="${target.dir}/${output.r}" />
+     </else>
+    </if>
 		
 		<macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc/${output.r}" />
 		<macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc.en/${output.r}" />
@@ -121,12 +135,14 @@ scheduler_embedded_files_z.cxx: image resources
       <path>
         <fileset dir="./zschimmer" casesensitive="yes" includes="*.xml" />
       </path>
+      <param name="project" value="zschimmer" />
     </foreach>
     
     <foreach target="-messages.to.cpp.file" param="fullname">
       <path>
         <fileset dir="./scheduler" casesensitive="yes" includes="scheduler_messages.xml" />
       </path>
+      <param name="project" value="scheduler" />
     </foreach>
 
 	</target>
@@ -136,18 +152,26 @@ scheduler_embedded_files_z.cxx: image resources
 	>
   	<property name="targetext" value="cxx" />
     <propertyregex property="targetfile" input="${fullname}" regexp=".*(\\|/)([^\.]*)\.xml*$" select="\2" casesensitive="false" />	
-    <propertyregex property="fullname.norm" input="${fullname}" regexp="\\" replace="/" casesensitive="false" />	
+  	<property name="fullname.norm" value="${fullname}" />
+    <propertyregex property="fullname.norm" override="true" global="true" input="${fullname}" regexp="\\" replace="/" casesensitive="false" />	
 		<echo>generating ${targetfile}.${targetext} ...</echo>
 		<!-- <echo>fullname is ${fullname.norm}</echo> -->
-		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${targetfile}.${targetext}">
-			<arg value="-c" />
-			<arg value="&quot;" />
-			<arg value="xsltproc" />
+		<!--
+		<exec executable="xsltproc" dir="${work.dir}" output="${target.dir}/${targetfile}.${targetext}">
 			<arg value="${xslt.messages}" />
 			<arg value="${fullname.norm}" />
-			<arg value="&quot;" />
 		</exec>
-		
+		-->
+    <xslt
+      in="${fullname}"
+      out="${target.dir}/${targetfile}.${targetext}"
+      style="./make_internal/messages_to_c++.xslt"
+      force="true"
+    >
+       <classpath location="${settings.localRepository}/net/sf/saxon/saxon/8.7/saxon-8.7.jar" />
+    </xslt>
+
+		<macro_copy sourcefile="${target.dir}/${targetfile}.${targetext}" targetfile="${base}/${project}/${targetfile}.${targetext}" />
 		<macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc/messages/${targetfile}.xml" />
 		<macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc.en/messages/${targetfile}.xml" />
 
@@ -158,14 +182,10 @@ scheduler_embedded_files_z.cxx: image resources
 		<attribute name="targetfile" />
 		<sequential>
   		<!-- <echo message="copy @{sourcefile} to @{targetfile} ... " /> -->
-  		<exec executable="bash" dir="${work.dir}">
-  			<arg value="-c" />
-  			<arg value="&quot;" />
-  			<arg value="perl" />
+  		<exec executable="perl" dir="${work.dir}">
   			<arg value="${perl.copy}" />
   			<arg value="@{sourcefile}" />
   			<arg value="@{targetfile}" />
-  			<arg value="&quot;" />
   		</exec>
 		</sequential>
 	</macrodef>
