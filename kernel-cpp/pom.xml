@@ -101,6 +101,7 @@
                 </dependencies>
             </plugin>
 
+            <!-- generates a header file with information about the current version -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
@@ -152,6 +153,27 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <tasks>
+                        <ant antfile="prepare_build.xml" target="all">
+                           <property name="settings.localRepository" value="${settings.localRepository}" />
+                        </ant>
+                    </tasks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

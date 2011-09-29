@@ -397,8 +397,4 @@
       <Filter>Quellcodedateien</Filter>
     </Midl>
   </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="charset_messages.xml" />
-    <CustomBuild Include="com_remote_messages.xml" />
-  </ItemGroup>
 </Project>

@@ -234,6 +234,12 @@
                 <title>Separate process: Blocking invocation on asynchronous connection rejected. Object=<p1/>, dispid=<p2/></title>
             </text>
         </message>
+        
+        <message code="Z-REMOTE-130">
+            <text xml:lang="en">
+                <title>Connection from unexpected host <p1/></title>
+            </text>
+        </message>
     </messages>
     
 </messages>

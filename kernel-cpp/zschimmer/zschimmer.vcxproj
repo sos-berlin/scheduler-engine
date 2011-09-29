@@ -380,32 +380,6 @@
     <ClInclude Include="zschimmer.h" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="charset_messages.xml">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)charset_message.cxx;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)charset_message.cxx;%(Outputs)</Outputs>
-    </CustomBuild>
-    <CustomBuild Include="com_remote_messages.xml">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)com_remote_message.cxx;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)com_remote_message.cxx;%(Outputs)</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <Midl Include="java.odl">
       <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).tlb</TypeLibraryName>
       <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).tlb</TypeLibraryName>

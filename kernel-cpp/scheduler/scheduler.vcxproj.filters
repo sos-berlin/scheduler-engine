@@ -465,7 +465,4 @@
       <Filter>html</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="doc\messages\scheduler_messages.xml" />
-  </ItemGroup>
 </Project>

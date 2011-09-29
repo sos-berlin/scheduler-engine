@@ -13,47 +13,66 @@ scheduler_embedded_files_z.cxx: image resources
 \version 1.0
 \date 2011-09-22
 -->
-<project name="com.sos.scheduler.build" basedir="." default="all">
+<project name="com.sos.scheduler.build" basedir=".">
 
-	<property name="perl.script.embeddedfiles" value="../zschimmer/files_to_c++.pl" />
-	<property name="perl.script.keywordtoxml" value="../scheduler_keyword_to_xml.pl" />
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${env.USERPROFILE}/.m2/repository/ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar"/>
+	
+	<property name="script.root"        value="../make_internal" />
+	<property name="perl.embeddedfiles" value="${script.root}/files_to_c++.pl" />
+	<property name="perl.keywordtoxml"  value="${script.root}/scheduler_keyword_to_xml.pl" />
+	<property name="perl.copy"          value="${script.root}/copy_file_if_changed.pl" />
+	<property name="xslt.messages"      value="${script.root}/messages_to_c++.xslt" />
+	
+  <propertyregex property="base" input="${basedir}" regexp="\\" replace="/" />	
+	<property name="work.dir" value="${base}/scheduler" />
+	<property name="target.dir" value="${base}/target/generated" />
+
 	<property name="scheduler.schema" value="scheduler.xsd" />
-	<property name="workdir" value="./scheduler" />
+  <property name="output.e" value="spooler_embedded_files.cxx" />
+	<property name="output.z" value="spooler_embedded_files_z.cxx" />
+  <property name="output.r" value="register_data.xml"/>
 
 	<target name="all"
 	        description="generierung von c++ sourcen"
-	        depends="embedded.files, keywords.to.register_data.de, keywords.to.register_data.en"
+	        depends="prepare, embedded.files, keywords.to.register_data.xml, messages.to.cpp"
 	>
+		<copy verbose="true" file="${work.dir}/scheduler.xsd" todir="${work.dir}/doc" />
+		<copy verbose="true" file="${work.dir}/scheduler.xsd" todir="${work.dir}/doc.en" />
 		<echo>DONE!</echo>
 	</target>
 
+	<target name="prepare"
+	        description="prepare the build"
+	>
+		<mkdir dir="${target.dir}" />
+	</target>
+
 	<target name="embedded.files"
-	        description="generiert scheduler_embedded_files.cxx und scheduler_embedded_files_z.cxx"
+	        description="generates scheduler_embedded_files.cxx and scheduler_embedded_files_z.cxx"
+	        depends="prepare"
 	>
 
-		<echo>generating cpp-classes scheduler_embedded_files...</echo>
-
-		<property name="output" value="${workdir}/spooler_embedded_files.cxx" />
-		<echo message="generating ${output} ..." />
-		<exec executable="bash" dir="${workdir}" output="${output}">
+		<echo message="generating ${output.e} ..." />
+		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.e}">
 			<arg value="-c" />
 			<arg value="&quot;" />
 			<arg value="perl" />
-			<arg value="${perl.script.embeddedfiles}" />
+			<arg value="${perl.embeddedfiles}" />
 			<arg value="-trim" />
 			<arg value="${scheduler.schema}" />
 			<arg value="doc.en/log_categories.xml" />
 			<arg value="&quot;" />
 		</exec>
+		
+		<!-- copy spooler_embedded_files.cxx to scheduler -->
+		<macro_copy sourcefile="${target.dir}/${output.e}" targetfile="${work.dir}/${output.e}" />
 
-		<property name="output.z" value="${workdir}/spooler_embedded_files_z.cxx"
-		/>
 		<echo message="generating ${output.z} ..." />
-		<exec executable="bash" dir="${workdir}" output="${output.z}">
+		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.z}">
 			<arg value="-c" />
 			<arg value="&quot;" />
 			<arg value="perl" />
-			<arg value="${perl.script.embeddedfiles}" />
+			<arg value="${perl.embeddedfiles}" />
 			<arg value="-name=embedded_files_z" />
 			<arg value="-gzip" />
 			<arg value="html/favicon.ico" />
@@ -66,45 +85,89 @@ scheduler_embedded_files_z.cxx: image resources
 			<arg value="${scheduler.schema}" />
 			<arg value="&quot;" />
 		</exec>
+		
+		<!-- copy spooler_embedded_files_z.cxx to scheduler -->
+		<macro_copy sourcefile="${target.dir}/${output.z}" targetfile="${work.dir}/${output.z}" />
 
 	</target>
 
-	<target name="keywords.to.register_data.de"
-	        description="generates register_data.xml (german version)"
-	>
-     <antcall target="keywords.to.register_data.xml">
-        <param name="target.dir" value="${workdir}/doc.en"/>
-     </antcall>
-  </target>
-
-	<target name="keywords.to.register_data.en"
-	        description="generates register_data.xml (english version)"
-	>
-     <antcall target="keywords.to.register_data.xml">
-        <param name="target.dir" value="${workdir}/doc"/>
-     </antcall>
-  </target>
-
 	<target name="keywords.to.register_data.xml"
-	        description="generiert register_data.xml"
+	        description="generates register_data.xml"
 	>
-		<echo message="copy ${workdir}/scheduler.xsd ..." />
-		<copy file="${workdir}/scheduler.xsd" todir="${target.dir}/xml" />
-
 		<echo>generating register-data.xml ...</echo>
 
-		<exec executable="bash" dir="${target.dir}">
+		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${output.r}">
 			<arg value="-c" />
 			<arg value="&quot;" />
 			<arg value="perl" />
-			<arg value="${perl.script.keywordtoxml}" />
-			<arg value="*.xml" />
-			<arg value="xml/*.xml" />
-			<arg value="xml/answer/*.xml" />
-			<arg value="api/*.xml" />
+			<arg value="${perl.keywordtoxml}" />
+			<arg value="doc/*.xml" />
+			<arg value="doc/xml/*.xml" />
+			<arg value="doc/xml/answer/*.xml" />
+			<arg value="doc/api/*.xml" />
 			<arg value="&quot;" />
 		</exec>
+		
+		<macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc/${output.r}" />
+		<macro_copy sourcefile="${target.dir}/${output.r}" targetfile="${work.dir}/doc.en/${output.r}" />
 
 	</target>
+
+	<target name="messages.to.cpp"
+	        description="generates cpp classes for xml message files"
+	>
+
+    <foreach target="-messages.to.cpp.file" param="fullname">
+      <path>
+        <fileset dir="./zschimmer" casesensitive="yes" includes="*.xml" />
+      </path>
+    </foreach>
+    
+    <foreach target="-messages.to.cpp.file" param="fullname">
+      <path>
+        <fileset dir="./scheduler" casesensitive="yes" includes="scheduler_messages.xml" />
+      </path>
+    </foreach>
+
+	</target>
+
+	<target name="-messages.to.cpp.file"
+	        description="generates cpp classes for one xml message file"
+	>
+  	<property name="targetext" value="cxx" />
+    <propertyregex property="targetfile" input="${fullname}" regexp=".*(\\|/)([^\.]*)\.xml*$" select="\2" casesensitive="false" />	
+    <propertyregex property="fullname.norm" input="${fullname}" regexp="\\" replace="/" casesensitive="false" />	
+		<echo>generating ${targetfile}.${targetext} ...</echo>
+		<!-- <echo>fullname is ${fullname.norm}</echo> -->
+		<exec executable="bash" dir="${work.dir}" output="${target.dir}/${targetfile}.${targetext}">
+			<arg value="-c" />
+			<arg value="&quot;" />
+			<arg value="xsltproc" />
+			<arg value="${xslt.messages}" />
+			<arg value="${fullname.norm}" />
+			<arg value="&quot;" />
+		</exec>
+		
+		<macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc/messages/${targetfile}.xml" />
+		<macro_copy sourcefile="${fullname.norm}" targetfile="${work.dir}/doc.en/messages/${targetfile}.xml" />
+
+	</target>
+  
+	<macrodef name="macro_copy">
+		<attribute name="sourcefile" />
+		<attribute name="targetfile" />
+		<sequential>
+  		<!-- <echo message="copy @{sourcefile} to @{targetfile} ... " /> -->
+  		<exec executable="bash" dir="${work.dir}">
+  			<arg value="-c" />
+  			<arg value="&quot;" />
+  			<arg value="perl" />
+  			<arg value="${perl.copy}" />
+  			<arg value="@{sourcefile}" />
+  			<arg value="@{targetfile}" />
+  			<arg value="&quot;" />
+  		</exec>
+		</sequential>
+	</macrodef>
 
 </project>

@@ -8,7 +8,7 @@
     package  = "Separate processes"
     base_dir = "../" 
     author   = "$Author: jz $"
-    date     = "$Date: 2007-09-27 12:06:44 +0200 (Thu, 27 Sep 2007) $"
+    date     = "$Date: 2006-03-10 08:26:38 +0100 (Fr, 10 Mrz 2006) $"
 >
     <!--xmlns = "http://www.zschimmer.com/2006/program_messages"-->
     <!--xsi:schemaLocation = "http://www.zschimmer.com/2006/messages.xsd ../zschimmer/messages.xsd"-->
@@ -232,6 +232,12 @@
         <message code="Z-REMOTE-129">
             <text xml:lang="en">
                 <title>Separate process: Blocking invocation on asynchronous connection rejected. Object=<p1/>, dispid=<p2/></title>
+            </text>
+        </message>
+        
+        <message code="Z-REMOTE-130">
+            <text xml:lang="en">
+                <title>Connection from unexpected host <p1/></title>
             </text>
         </message>
     </messages>

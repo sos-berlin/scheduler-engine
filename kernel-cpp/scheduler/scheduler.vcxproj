@@ -49,6 +49,8 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</GenerateManifest>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</EmbedManifest>
+    <PreBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
@@ -60,22 +62,8 @@ perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico
 </Command>
     </PreBuildEvent>
     <CustomBuildStep>
-      <Command>cd $(ProjectDir)
-copy scheduler.xsd doc\xml\
-
-cd $(ProjectDir)\doc
-cd
-echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
-bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml"
-
-
-copy scheduler.xsd doc.en\xml\
-
-cd $(ProjectDir)\doc.en
-cd
-echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
-bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml"
-</Command>
+      <Command>
+      </Command>
       <Inputs>%(Inputs)</Inputs>
       <Outputs>%(Outputs)</Outputs>
     </CustomBuildStep>
@@ -136,30 +124,12 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>echo perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml --spooler_embedded_files.cxx
-perl ../zschimmer/files_to_c++.pl  -trim scheduler.xsd doc.en/log_categories.xml &gt;spooler_embedded_files.cxx
-
-echo ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd --spooler_embedded_files_z.cxx
-perl ../zschimmer/files_to_c++.pl  -name=embedded_files_z -gzip html/favicon.ico html/z/*.html html/z/*.js html/z/*.xslt html/z/*.css  html/z/*.gif  html/z/*.jpg scheduler.xsd &gt;spooler_embedded_files_z.cxx
-</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <CustomBuildStep>
-      <Command>cd $(ProjectDir)
-copy scheduler.xsd doc\xml\
-
-cd $(ProjectDir)\doc
-cd
-echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
-bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml"
-
-
-copy scheduler.xsd doc.en\xml\
-
-cd $(ProjectDir)\doc.en
-cd
-echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml
-bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml api/*.xml"
-</Command>
+      <Command>
+      </Command>
       <Inputs>%(Inputs)</Inputs>
       <Outputs>doc\register_data.xml;%(Outputs)</Outputs>
     </CustomBuildStep>
@@ -401,19 +371,6 @@ bash -c "perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml ap
     <None Include="html\jz\scheduler.xslt" />
     <None Include="html\jz\show_log.js" />
     <None Include="html\jz\translation_de.js" />
-    <CustomBuild Include="doc\messages\scheduler_messages.xml">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)message.cxx;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xsltproc ..\zschimmer\messages_to_c++.xslt %(FullPath) &gt;%(Filename).cxx
-</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\zschimmer\messages_to_c++.xslt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)message.cxx;%(Outputs)</Outputs>
-      <SubType>Designer</SubType>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rd_party\libxml2\libxml2.vcxproj">

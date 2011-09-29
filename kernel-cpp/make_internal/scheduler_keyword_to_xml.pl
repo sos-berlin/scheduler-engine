@@ -3,30 +3,23 @@
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
-my $output_filename = "register_data.xml";
-my $output_path     = "../../spooler/doc/$output_filename";
-
-
 my ( $year, $month, $mday, $hour, $min, $sec ) = (gmtime)[ 5, 4, 3, 2, 1, 0 ];  $year += 1900;  $month++;
 
-
-open( OUTPUT, ">$output_filename" )  or die "$output_filename: $!";
-
-print OUTPUT '<?xml version="1.0" encoding="utf-8"?>' ."\n";
-print OUTPUT '<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>' ."\n";
-print OUTPUT "\n";
-print OUTPUT "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENERIERT VON $script_name -->\n";
-print OUTPUT "\n";
-print OUTPUT "<register_data\n";
-print OUTPUT '    author="$' . "Author: $script_name " . '$"' . "\n";
-print OUTPUT '    date= "$' . 'Date: ' . "$year/$month/$mday $hour:$min:$sec" . ' $"' . "\n";
-print OUTPUT ">\n";
+print '<?xml version="1.0" encoding="utf-8"?>' ."\n";
+print '<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>' ."\n";
+print "\n";
+print "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENERIERT VON $script_name -->\n";
+print "\n";
+print "<register_data\n";
+print '    author="$' . "Author: $script_name " . '$"' . "\n";
+# print '    date= "$' . 'Date: ' . "$year/$month/$mday $hour:$min:$sec" . ' $"' . "\n";
+print ">\n";
 
 our %keyword_references = ();
 
 while( my $filename = shift )
 {
-    read_file( $filename )  unless $filename =~ /\/$output_filename$/;
+    read_file( $filename );
 }
 
 
@@ -36,23 +29,23 @@ foreach my $k ( @keys )
     $k =~ /^(.*)\t(.*)$/;
     my $keyword = $1;
     my $keyword_display = $2;
-    print OUTPUT "<register_keyword keyword='$keyword'>\n";
-    print OUTPUT "    <register_keyword_display>$keyword_display</register_keyword_display>\n"    if $keyword_display;
+    print "<register_keyword keyword='$keyword'>\n";
+    print "    <register_keyword_display>$keyword_display</register_keyword_display>\n"    if $keyword_display;
     
     my $last_xml_line = "";
     
     foreach my $xml_line ( sort @{$keyword_references{$k}} )
     {
-        print OUTPUT "    $xml_line"  unless $xml_line eq $last_xml_line;
+        print "    $xml_line"  unless $xml_line eq $last_xml_line;
         $last_xml_line = $xml_line;
     }
     
-    #print OUTPUT @{$keyword_references{$keyword}};
-    print OUTPUT "</register_keyword>\n";
+    #print @{$keyword_references{$keyword}};
+    print "</register_keyword>\n";
 }
 
 
-print OUTPUT "</register_data>\n";
+print "</register_data>\n";
 
 
 
