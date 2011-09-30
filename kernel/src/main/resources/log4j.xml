@@ -2,21 +2,29 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
-
-    <appender name="stderr" class="org.apache.log4j.ConsoleAppender">
-        <param name="Target" value="System.err"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
-        </layout>
-    </appender>
-
+	
+	<appender name="stderr" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.err"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+		</layout>
+	</appender>
+	
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+		</layout>
+	</appender>
+		
 	<!--
-	in general the debug level should be 'warn'. if you need 'debug' or 'info' level
+	in general the debug level should be 'warn'. if you need 'debug' or
+		'info' level
 	for special cases please use a special logger defined above.
 	-->
-    <root>
-        <priority value="warn"/>
-        <appender-ref ref="stderr"/>
-    </root>
-    
+	<root>
+		<priority value="warn"/>
+		<appender-ref ref="stderr"/>
+	</root>
+
 </log4j:configuration>

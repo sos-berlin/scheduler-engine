@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="c:/sos/scheduler/engine/kernel-cpp/prod/scheduler/scheduler.xsd">
+	<config>
+
+		<jobs>
+			<job name="single_start">
+				<script language="shell">
+        			<![CDATA[echo hello world]]>
+        		</script>
+				<run_time>
+					<period single_start="12:00"/>
+				</run_time>
+			</job>
+			<job name="single_start_monday">
+    			<script language="shell">
+        			<![CDATA[echo hello world]]>
+    			</script>
+		    	<run_time>
+        			<weekdays>
+            			<day day="1">
+                			<period single_start="15:00"/>
+                			<period single_start="18:00"/>
+                		</day>
+        			</weekdays>
+    			</run_time>
+			</job>
+			<job name="period_1">
+    			<script language="shell">
+        			<![CDATA[echo hello world]]>
+    			</script>
+    			<run_time>
+        			<period absolute_repeat="01:00" begin="10:00" end="18:00"/>
+			    </run_time>
+			</job>		
+			<job name="period_2">
+    			<script language="shell">
+        			<![CDATA[echo hello world]]>
+    			</script>
+    			<run_time>
+        			<period repeat="01:00" begin="10:00" end="18:00"/>
+			    </run_time>
+			</job>		
+		</jobs>
+
+		<!--
+		<job_chains>
+		</job_chains>
+
+		<commands>
+		</commands>
+		-->
+
+	</config>
+</spooler>
