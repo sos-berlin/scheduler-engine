@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.order.jobchain.UnmodifiableJobchain;
 @ForCpp public interface UnmodifiableOrder extends HasPlatform {
 	OrderId getId();
 	OrderState getState();
-	void getFilePath();
+	String getFilePath();
 	OrderState getEndState();
 	String getTitle();
 	UnmodifiableJobchain unmodifiableJobchainOrNull();

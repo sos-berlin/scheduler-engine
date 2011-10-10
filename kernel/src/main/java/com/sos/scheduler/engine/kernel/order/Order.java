@@ -38,8 +38,8 @@ public final class Order extends FileBased implements Sister, UnmodifiableOrder 
         cppProxy.set_end_state(s.getString());
     }
 
-	public void getFilePath() {
-        cppProxy.file_path();
+	public String getFilePath() {
+        return cppProxy.file_path();
     }
 
 	public OrderState getEndState() {
