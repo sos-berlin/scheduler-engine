@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.kernel.util;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -34,5 +36,19 @@ public final class Util {
         private WrappedThrowable(Throwable t) {
             super(t);
         }
+    }
+
+    public static boolean booleanOf(String s, boolean nullDefault, boolean emptyDefault) {
+        return s == null? nullDefault : booleanOf(s, emptyDefault);
+    }
+
+    public static boolean booleanOf(String s, boolean deflt) {
+        if (isNullOrEmpty(s))  return deflt;
+        else
+        if (s.equals("true")) return true;
+        else
+        if (s.equals("false")) return false;
+        else
+            throw new RuntimeException("Invalid boolean value: " + s);
     }
 }
