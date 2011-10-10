@@ -14,21 +14,17 @@ class Timer(timeout: Time) {
 }
 
 
-object Timer {
-    @deprecated("") def time[A](timeout: Time)(f: => A) = {
-        val start = System.currentTimeMillis
-        val result = f
-        new {
-            def whenTimedOut(f: Time => Unit) {
-                val now = System.currentTimeMillis
-                val elapsed = now - start
-                if (elapsed > timeout.getMillis)  f(Time.ofMillis(elapsed))
-                result
-            }
-        }
-    }
-}
-
-//                        Timer.time(conf.timeout) {
-//                            scheduler.callCppAndDoNothing()
-//                        } whenTimedOut { t => logger.warn("Scheduler response time was " + t) }
+//object Timer {
+//    @deprecated("") def time[A](timeout: Time)(f: => A) = {
+//        val start = System.currentTimeMillis
+//        val result = f
+//        new {
+//            def whenTimedOut(f: Time => Unit) {
+//                val now = System.currentTimeMillis
+//                val elapsed = now - start
+//                if (elapsed > timeout.getMillis)  f(Time.ofMillis(elapsed))
+//                result
+//            }
+//        }
+//    }
+//}
