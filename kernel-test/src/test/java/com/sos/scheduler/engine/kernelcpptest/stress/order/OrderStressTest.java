@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.kernel.order.OrderTouchedEvent;
 import com.sos.scheduler.engine.kernel.test.SchedulerTest;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class OrderStressTest extends SchedulerTest {
+public final class OrderStressTest extends SchedulerTest {
     // In Maven setzen mit -DargLine=-DOrderStressTest.limit=26 (Surefire plugin 2.6), 2010-11-28
     // Zum Beispiel: mvn test -Dtest=OrderStressTest -DargLine=-DOrderStressTest.limit=26
     private static final int testLimit = Integer.parseInt(System.getProperty("OrderStressTest.limit", "100"));
@@ -27,7 +27,7 @@ public class OrderStressTest extends SchedulerTest {
         private final int limit;
         private int touchedOrderCount = 0;
         
-        public MyEventSubscriber(int limit) { 
+        MyEventSubscriber(int limit) {
             this.limit = limit;
         }
 
