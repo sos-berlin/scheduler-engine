@@ -14,14 +14,14 @@ public class FilesTest {
     private final File dir = makeTemporaryDirectory();
 
     @After public void after() {
-        Files.removeDirectoryRecursivlyFollowingLinks(dir);
+        removeDirectoryRecursivlyFollowingLinks(dir);
     }
 
     @Test public void testDeleteFile() throws Exception {
         File a =new File(dir, "a");
         new FileOutputStream(a).close();
         assertTrue(a.exists());
-        Files.removeFile(a);
+        removeFile(a);
         assertFalse(a.exists());
     }
 
