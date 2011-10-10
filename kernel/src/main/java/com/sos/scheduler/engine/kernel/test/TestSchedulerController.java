@@ -15,6 +15,7 @@ import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
+import com.sos.scheduler.engine.kernel.util.Lazy;
 import com.sos.scheduler.engine.kernel.util.Time;
 
 public class TestSchedulerController implements SchedulerController {
@@ -24,7 +25,7 @@ public class TestSchedulerController implements SchedulerController {
     private final Environment env;
     private Scheduler scheduler = null;
 
-    public TestSchedulerController(Package pack, File testDirectory) {
+    public TestSchedulerController(Package pack, Lazy<File> testDirectory) {
         delegate = new SchedulerThreadController();
         env = new Environment(pack, testDirectory);
     }
@@ -48,6 +49,7 @@ public class TestSchedulerController implements SchedulerController {
     }
 
     public final void startScheduler(String... args) {
+        env.start();
         Iterable<String> allArgs = concat(env.standardArgs(), Arrays.asList(args));
         delegate.startScheduler(toArray(allArgs, String.class));
     }
@@ -102,10 +104,14 @@ public class TestSchedulerController implements SchedulerController {
         return delegate;
     }
 
-    public static TestSchedulerController of(Package pack, TemporaryFolder f) {
-        assert f.getRoot() != null : "TemporaryFolder.@Before has not been executed?";
-        String d = System.getProperty("test.scheduler.dir");
-        File dir = isNullOrEmpty(d)? f.getRoot() : new File(d);
-        return new TestSchedulerController(pack, dir);
+    public static TestSchedulerController of(Package pack, final TemporaryFolder temporaryFolder) {
+        Lazy<File> dirLazy = new Lazy<File>() {
+            public File compute() {
+                assert temporaryFolder.getRoot() != null : "TemporaryFolder.@Before has not been executed?";
+                String prop = System.getProperty("test.scheduler.dir");
+                return isNullOrEmpty(prop)? temporaryFolder.getRoot() : new File(prop);
+            }
+        };
+        return new TestSchedulerController(pack, dirLazy);
     }
 }

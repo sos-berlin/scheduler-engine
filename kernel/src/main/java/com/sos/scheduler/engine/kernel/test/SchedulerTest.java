@@ -20,7 +20,7 @@ public abstract class SchedulerTest {
         controller = TestSchedulerController.of(getClass().getPackage(), folder);
     }
 
-    @After public final void terminateAndCleanUp() throws Throwable {
+    @After public final void schedulerTestClose() throws Throwable {
         controller.terminateAndCleanUp();
     }
 

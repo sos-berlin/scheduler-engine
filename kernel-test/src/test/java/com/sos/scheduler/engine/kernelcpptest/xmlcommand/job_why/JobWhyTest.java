@@ -27,13 +27,16 @@ public class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);
 
     @ClassRule public static final TemporaryFolder folder = new TemporaryFolder();
-    private static TestSchedulerController testSchedulerController;
+    private static TestSchedulerController controller = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
     private static Map<String,Element> results = null;
     
     @BeforeClass public static void beforeClass() {
-        testSchedulerController = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
-        testSchedulerController.startScheduler();
+        controller.startScheduler();
         results = executeJobWhy();
+    }
+
+    @AfterClass public static void afterClass() throws Throwable {
+        controller.terminateAndCleanUp();
     }
 
     private static Map<String,Element> executeJobWhy() {
@@ -43,14 +46,10 @@ public class JobWhyTest {
     }
     
     private static Element executeJobWhy(String jobPath) {
-        String xml = testSchedulerController.scheduler().executeXml("<job.why job='" + jobPath + "'/>");
+        String xml = controller.scheduler().executeXml("<job.why job='" + jobPath + "'/>");
         Element result = elementXPath(loadXml(xml), "/spooler/answer/job.why");
         logger.debug(jobPath + ": " + toXml(result));
         return result;
-    }
-
-    @AfterClass public static void afterClass() throws Throwable {
-        testSchedulerController.terminateAndCleanUp();
     }
 
     @Test public void testJobStopped() {
