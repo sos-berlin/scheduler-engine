@@ -14,19 +14,18 @@ import org.junit.rules.TemporaryFolder;
 import com.sos.scheduler.engine.kernel.Scheduler;
 import com.sos.scheduler.engine.kernel.event.EventSubscriber;
 import com.sos.scheduler.engine.kernel.main.SchedulerController;
-import com.sos.scheduler.engine.kernel.main.SchedulerThread;
+import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class SchedulerTestDriver {
-    public static final Time shortTimeout = Time.of(10);
+public class SchedulerTestDriver implements SchedulerController {
     private static final Logger logger = Logger.getLogger(SchedulerTestDriver.class);
 
     private final SchedulerController controller;
-    private Scheduler scheduler = null;
     private final Environment env;
+    private Scheduler scheduler = null;
 
     public SchedulerTestDriver(Package pack, File testDirectory) {
-        controller = new SchedulerThread();
+        controller = new SchedulerThreadController();
         env = new Environment(pack, testDirectory);
     }
 
@@ -36,6 +35,10 @@ public class SchedulerTestDriver {
 
     public final void strictSubscribeEvents(EventSubscriber s) {
         controller.subscribeEvents(new StrictEventSubscriber(s));
+    }
+
+    @Override public void subscribeEvents(EventSubscriber s) {
+        controller.subscribeEvents(s);
     }
 
     public final void runScheduler(Time timeout, String... args) {
@@ -49,10 +52,6 @@ public class SchedulerTestDriver {
         controller.startScheduler(toArray(allArgs, String.class));
     }
 
-    public final void waitUntilSchedulerIsRunning() {
-        scheduler = controller.waitUntilSchedulerIsRunning();
-    }
-
     public final Scheduler scheduler() {
         if (scheduler == null)
             waitUntilSchedulerIsRunning();
@@ -60,8 +59,29 @@ public class SchedulerTestDriver {
         return scheduler;
     }
 
-    public final void waitForTermination(Time timeout) {
+    public final Scheduler waitUntilSchedulerIsRunning() {
+        scheduler = controller.waitUntilSchedulerIsRunning();
+        return scheduler;
+    }
+
+    @Override public void terminateScheduler() {
+        controller.terminateScheduler();
+    }
+
+    @Override public void terminateAfterException(Throwable x) {
+        controller.terminateAfterException(x);
+    }
+
+    @Override public void terminateAndWait() {
+        controller.terminateAndWait();
+    }
+
+    @Override public final void waitForTermination(Time timeout) {
         controller.waitForTermination(timeout);
+    }
+
+    @Override public int exitCode() {
+        return controller.exitCode();
     }
 
     @After public final void terminateAndCleanUp() throws Throwable {
@@ -88,23 +108,4 @@ public class SchedulerTestDriver {
         File dir = isNullOrEmpty(d)? f.getRoot() : new File(d);
         return new SchedulerTestDriver(pack, dir);
     }
-
-//    static interface Dir extends Closeable {
-//        File file();
-//    }
-//
-//    static class NamedDir implements Dir {
-//        private final File dir;
-//        NamedDir(File dir) { this.dir = dir; }
-//        @Override public File file() { return dir; }
-//        @Override public void close() {}
-//    }
-//
-//    static class TemporaryDir implements Dir {
-//        private final File dir = makeTemporaryDirectory();
-//        @Override public File file() { return dir; }
-//        @Override public void close() throws IOException {
-//            removeDirectoryRecursivlyFollowingLinks(dir);   // Wir haben keine Links
-//        }
-//    }
 }

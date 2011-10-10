@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.main.event;
 import com.sos.scheduler.engine.kernel.event.AbstractEvent;
 
 
-/** AbstractEvent von SchedulerThread oder EventThread.
+/** AbstractEvent von SchedulerThreadController oder EventThread.
  *
  * @author Zschimmer.sos
  */

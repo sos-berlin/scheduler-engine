@@ -28,7 +28,7 @@ javaproxy_objects=\
  com__sos__scheduler__engine__kernel__log__ErrorLogEvent.o\
  com__sos__scheduler__engine__kernel__log__LogEvent.o\
  com__sos__scheduler__engine__kernel__log__PrefixLog.o\
- com__sos__scheduler__engine__kernel__main__MainContext.o\
+ com__sos__scheduler__engine__kernel__main__SchedulerStateHandler.o\
  com__sos__scheduler__engine__kernel__order__GenericOrderEvent.o\
  com__sos__scheduler__engine__kernel__order__ModifiableOrderEvent.o\
  com__sos__scheduler__engine__kernel__order__Order.o\

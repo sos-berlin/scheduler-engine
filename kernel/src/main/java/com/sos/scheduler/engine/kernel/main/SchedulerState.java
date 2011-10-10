@@ -1,11 +1,19 @@
 package com.sos.scheduler.engine.kernel.main;
 
-
-
-public enum SchedulerState {
-    none,
+/** Die Zustände werden nacheinander, ohne Wiederholung, durchlaufen. */
+enum SchedulerState {
+    /** Scheduler startet und kann noch nicht benutzt werden. */
     starting,
-    running,
+
+    /** Scheduler ist gestartet, aber noch nicht aktiv. Scheduler kann teilweise benutzt werden. */
+    started,
+
+    /** Scheduler läuft. */
+    active,
+
+    /** Das Java_subsystem des C++-Scheduler ist geschlossen. */
     closed,
-    threadTerminated
+
+    /** C++-Scheduler hat sich beendet. Als nächstes beendet sich der Thread. */
+    terminated
 }

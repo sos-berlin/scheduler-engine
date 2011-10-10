@@ -1,60 +1,64 @@
 package com.sos.scheduler.engine.kernel;
 
-import com.sos.scheduler.engine.kernel.command.CommandHandler;
-import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
+import static com.google.common.base.Objects.firstNonNull;
+import static com.sos.scheduler.engine.kernel.util.XmlUtils.loadXml;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
+
+import javax.annotation.Nullable;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
+
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy;
+import com.sos.scheduler.engine.cplusplus.runtime.Sister;
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
+import com.sos.scheduler.engine.kernel.command.CommandHandler;
+import com.sos.scheduler.engine.kernel.command.CommandSubsystem;
+import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
+import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC;
-import com.sos.scheduler.engine.kernel.job.JobSubsystem;
+import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem;
 import com.sos.scheduler.engine.kernel.event.EventSubsystem;
+import com.sos.scheduler.engine.kernel.job.JobSubsystem;
 import com.sos.scheduler.engine.kernel.log.LogCategory;
 import com.sos.scheduler.engine.kernel.log.LogSubsystem;
 import com.sos.scheduler.engine.kernel.log.PrefixLog;
 import com.sos.scheduler.engine.kernel.log.SchedulerLog;
-import com.sos.scheduler.engine.kernel.main.MainContext;
+import com.sos.scheduler.engine.kernel.main.SchedulerStateHandler;
 import com.sos.scheduler.engine.kernel.monitorwindow.Monitor;
 import com.sos.scheduler.engine.kernel.order.OrderSubsystem;
 import com.sos.scheduler.engine.kernel.plugin.PlugInSubsystem;
-import com.sos.scheduler.engine.cplusplus.runtime.Sister;
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp;
-import com.sos.scheduler.engine.kernel.command.HasCommandHandlers;
-import com.sos.scheduler.engine.kernel.command.UnknownCommandException;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
-import static com.sos.scheduler.engine.kernel.util.XmlUtils.*;
-
 
 @ForCpp
 public final class Scheduler implements HasPlatform, Sister { // extends SchedulerObject
     private static final Logger logger = Logger.getLogger(Scheduler.class);
 
     private final SpoolerC cppProxy;
-    private final MainContext mainContext;
+    private final SchedulerStateHandler schedulerStateHandler;
     private final Platform platform;
     private final PrefixLog log;
-    private MavenProperties mavenProperties = new MavenProperties(getClass());
-    private LogSubsystem logSubsystem;
-    private DatabaseSubsystem databaseSubsystem;
-    private PlugInSubsystem plugInSubsystem;
-    private JobSubsystem jobSubsystem;
-    private OrderSubsystem orderSubsystem;
-    private EventSubsystem eventSubsystem;
-    private List<Subsystem> subsystems = new ArrayList<Subsystem>();
-    private CommandSubsystem commandSubsystem;
-    private Monitor monitor;
+    private final MavenProperties mavenProperties = new MavenProperties(getClass());
+    private LogSubsystem logSubsystem = null;
+    private DatabaseSubsystem databaseSubsystem = null;
+    private PlugInSubsystem plugInSubsystem = null;
+    private JobSubsystem jobSubsystem = null;
+    private OrderSubsystem orderSubsystem = null;
+    private EventSubsystem eventSubsystem = null;
+    private final List<Subsystem> subsystems = new ArrayList<Subsystem>();
+    private CommandSubsystem commandSubsystem = null;
     private boolean threadInitiallyLocked = false;
     
     
-    public Scheduler(SpoolerC spoolerC, MainContext mainContext) {
+    public Scheduler(SpoolerC spoolerC, @Nullable SchedulerStateHandler schedulerStateHandler) {
         this.cppProxy = spoolerC;
-        this.mainContext = mainContext;
+        this.schedulerStateHandler = firstNonNull(schedulerStateHandler, SchedulerStateHandler.empty);
         spoolerC.setSister(this);
         log = new PrefixLog(spoolerC.log());
         platform = new Platform(log);
 
-        if (mainContext == null) {  // Wenn wir ein mainContext haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
+        if (schedulerStateHandler == null) {  // Wenn wir ein schedulerStateHandler haben, ist der Scheduler über Java (CppScheduler.main) aufgerufen worden. Dort wird die Sperre gesetzt.
             threadLock();
             threadInitiallyLocked = true;
         }
@@ -79,10 +83,6 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
 
     public void onClose() {
         try {
-            if (monitor != null)  
-                try { monitor.close(); }
-                catch (Exception x) { log().error("monitor.close(): " + x); }
-
             if (eventSubsystem != null)
                 eventSubsystem.report(new SchedulerCloseEvent(this));
             
@@ -102,7 +102,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     public void onLoad(String configurationXml) {
         Element configElement = loadXml(configurationXml).getDocumentElement();
         addSubsystems(configElement);
-        if (mainContext != null)  mainContext.setScheduler(this);
+        schedulerStateHandler.onSchedulerStarted(this);
     }
 
 
@@ -143,7 +143,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
     public void onActivate() {
         logSubsystem.activate();
         plugInSubsystem.activate();
-        if (mainContext != null)  mainContext.onSchedulerActivated();
+        schedulerStateHandler.onSchedulerActivated();
     }
 
 
@@ -175,7 +175,7 @@ public final class Scheduler implements HasPlatform, Sister { // extends Schedul
         }
     }
 
-    public Object getMainContext() { return mainContext; }
+    public Object getSchedulerStateHandler() { return schedulerStateHandler; }
     public DatabaseSubsystem getDatabaseSubsystem() { return databaseSubsystem; }
     public EventSubsystem getEventSubsystem() { return eventSubsystem; }
     public JobSubsystem getJobSubsystem() { return jobSubsystem; }

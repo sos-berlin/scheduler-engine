@@ -12,7 +12,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace database { struct DatabaseSubsystem; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace event { struct EventSubsystem; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace log { struct PrefixLog; }}}}}}}
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace main { struct MainContext; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace main { struct SchedulerStateHandler; }}}}}}}
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { struct Platform; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
@@ -24,7 +24,7 @@ namespace javaproxy { namespace com { namespace sos { namespace scheduler { name
 struct Scheduler__class;
 
 struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javaproxy::java::lang::Object {
-    static Scheduler new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::main::MainContext >& p1);
+    static Scheduler new_instance(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::SpoolerC >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::kernel::main::SchedulerStateHandler >& p1);
 
     Scheduler(jobject = NULL);
 
@@ -59,9 +59,9 @@ struct Scheduler : ::zschimmer::javabridge::proxy_jobject< Scheduler >, ::javapr
     ::javaproxy::java::lang::String getHostname();
     ::javaproxy::java::lang::String getHostnameLong();
     ::javaproxy::java::lang::String getHttpUrl();
-    ::javaproxy::java::lang::Object getMainContext();
     ::javaproxy::com::sos::scheduler::engine::kernel::Platform getPlatform();
     ::javaproxy::java::lang::String getSchedulerId();
+    ::javaproxy::java::lang::Object getSchedulerStateHandler();
     jint getTcpPort();
     ::javaproxy::java::lang::String getVersion();
     ::javaproxy::java::lang::String javaExecuteXml(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0);
