@@ -44,10 +44,9 @@ final class TestSchedulerCppModule implements CppModule {
     private static String moduleDirectory() {
         File result = new File("./target/lib");
         if (result.exists()) {
-        	logger.debug("expecting scheduler binary in '" + result + "'.");
-        	return result + "";
+        	logger.debug("Subdirectory lib found, expecting Scheduler binary in '" + result + "'.");
+        	return result.toString();
         } else {
-            logger.debug("Subdirectory 'lib' not found.");
             result = kernelCppDir();
             if (result.exists()) {
                 String resultString = result + "/" + bin;
