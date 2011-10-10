@@ -16,27 +16,27 @@ public abstract class SchedulerTest {
     public static final Time shortTimeout = Time.of(10);
 
     @Rule public final TemporaryFolder folder = new TemporaryFolder();
-    private SchedulerTestDriver driver;
+    private TestSchedulerController testSchedulerController;
     protected SchedulerController schedulerController;
     protected Scheduler scheduler = null;
 
-    public SchedulerTest() {}
+    protected SchedulerTest() {}
 
-    @Before public final void schedulerTestBefore() {
-        driver = SchedulerTestDriver.of(getClass().getPackage(), folder);
-        schedulerController = driver.controller();
-    }
-
-    public SchedulerTest(Iterable<String> configFilenames) {
+    protected SchedulerTest(Iterable<String> configFilenames) {
         this();
     }
 
+    @Before public final void schedulerTestBefore() {
+        testSchedulerController = TestSchedulerController.of(getClass().getPackage(), folder);
+        schedulerController = testSchedulerController.controller();
+    }
+
     public final void strictSubscribeEvents() {
-        driver.strictSubscribeEvents();
+        testSchedulerController.strictSubscribeEvents();
     }
 
     public final void strictSubscribeEvents(EventSubscriber s) {
-        driver.strictSubscribeEvents(s);
+        testSchedulerController.strictSubscribeEvents(s);
     }
 
     public final void runScheduler(Time timeout, String... args) {
@@ -46,23 +46,23 @@ public abstract class SchedulerTest {
     }
 
     public final void startScheduler(String... args) {
-        driver.startScheduler(args);
+        testSchedulerController.startScheduler(args);
     }
 
     public final void waitUntilSchedulerIsRunning() {
-        driver.waitUntilSchedulerIsRunning();
+        testSchedulerController.waitUntilSchedulerIsRunning();
     }
 
     public final Scheduler getScheduler() {
-        return driver.scheduler();
+        return testSchedulerController.scheduler();
     }
 
     public final void waitForTermination(Time timeout) {
-        driver.waitForTermination(timeout);
+        testSchedulerController.waitForTermination(timeout);
     }
 
     @After public final void terminateAndCleanUp() throws Throwable {
-        driver.terminateAndCleanUp();
+        testSchedulerController.terminateAndCleanUp();
     }
 
     public final SchedulerController controller() {
@@ -70,6 +70,6 @@ public abstract class SchedulerTest {
     }
 
     public final File getDirectory() {
-        return driver.directory();
+        return testSchedulerController.directory();
     }
 }

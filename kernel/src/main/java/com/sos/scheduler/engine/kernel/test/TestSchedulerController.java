@@ -17,14 +17,14 @@ import com.sos.scheduler.engine.kernel.main.SchedulerController;
 import com.sos.scheduler.engine.kernel.main.SchedulerThreadController;
 import com.sos.scheduler.engine.kernel.util.Time;
 
-public class SchedulerTestDriver implements SchedulerController {
-    private static final Logger logger = Logger.getLogger(SchedulerTestDriver.class);
+public class TestSchedulerController implements SchedulerController {
+    private static final Logger logger = Logger.getLogger(TestSchedulerController.class);
 
     private final SchedulerController controller;
     private final Environment env;
     private Scheduler scheduler = null;
 
-    public SchedulerTestDriver(Package pack, File testDirectory) {
+    public TestSchedulerController(Package pack, File testDirectory) {
         controller = new SchedulerThreadController();
         env = new Environment(pack, testDirectory);
     }
@@ -89,7 +89,7 @@ public class SchedulerTestDriver implements SchedulerController {
             controller.terminateAndWait();
         }
         catch (Throwable x) {
-            logger.error(SchedulerTestDriver.class.getName() + " @After: " + x, x);
+            logger.error(TestSchedulerController.class.getName() + " @After: " + x, x);
             throw x;
         }
     }
@@ -102,10 +102,10 @@ public class SchedulerTestDriver implements SchedulerController {
         return controller;
     }
 
-    public static SchedulerTestDriver of(Package pack, TemporaryFolder f) {
+    public static TestSchedulerController of(Package pack, TemporaryFolder f) {
         assert f.getRoot() != null : "TemporaryFolder.@Before has not been executed?";
         String d = System.getProperty("test.scheduler.dir");
         File dir = isNullOrEmpty(d)? f.getRoot() : new File(d);
-        return new SchedulerTestDriver(pack, dir);
+        return new TestSchedulerController(pack, dir);
     }
 }

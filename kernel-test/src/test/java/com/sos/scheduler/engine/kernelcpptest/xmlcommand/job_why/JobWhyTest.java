@@ -21,18 +21,18 @@ import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.sos.scheduler.engine.kernel.test.SchedulerTestDriver;
+import com.sos.scheduler.engine.kernel.test.TestSchedulerController;
 
 public class JobWhyTest {
     private static final Logger logger = Logger.getLogger(JobWhyTest.class);
 
     @ClassRule public static final TemporaryFolder folder = new TemporaryFolder();
-    private static SchedulerTestDriver schedulerTestDriver;
+    private static TestSchedulerController testSchedulerController;
     private static Map<String,Element> results = null;
     
     @BeforeClass public static void beforeClass() {
-        schedulerTestDriver = SchedulerTestDriver.of(JobWhyTest.class.getPackage(), folder);
-        schedulerTestDriver.startScheduler();
+        testSchedulerController = TestSchedulerController.of(JobWhyTest.class.getPackage(), folder);
+        testSchedulerController.startScheduler();
         results = executeJobWhy();
     }
 
@@ -43,14 +43,14 @@ public class JobWhyTest {
     }
     
     private static Element executeJobWhy(String jobPath) {
-        String xml = schedulerTestDriver.scheduler().executeXml("<job.why job='" + jobPath + "'/>");
+        String xml = testSchedulerController.scheduler().executeXml("<job.why job='" + jobPath + "'/>");
         Element result = elementXPath(loadXml(xml), "/spooler/answer/job.why");
         logger.debug(jobPath + ": " + toXml(result));
         return result;
     }
 
     @AfterClass public static void afterClass() throws Throwable {
-        schedulerTestDriver.terminateAndCleanUp();
+        testSchedulerController.terminateAndCleanUp();
     }
 
     @Test public void testJobStopped() {
